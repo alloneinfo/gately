@@ -18,10 +18,8 @@
         <el-menu-item index="/ssl">
           <el-icon><Lock /></el-icon><span>SSL 证书</span>
         </el-menu-item>
-        <el-menu-item v-for="item in planned" :key="item.title" :index="item.title" disabled>
-          <el-icon><component :is="item.icon" /></el-icon>
-          <span>{{ item.title }}</span>
-          <el-tag size="small" type="info" class="soon">规划中</el-tag>
+        <el-menu-item index="/web">
+          <el-icon><Document /></el-icon><span>Web 服务</span>
         </el-menu-item>
         <el-menu-item index="/settings">
           <el-icon><Setting /></el-icon><span>设置</span>
@@ -55,10 +53,6 @@ const router = useRouter()
 const username = ref('')
 const dark = ref(localStorage.getItem('gately-dark') === '1')
 
-// 后续里程碑的模块先在菜单中占位，方便用户了解路线图
-const planned = [
-  { title: 'Web 服务', icon: Document },
-]
 
 function applyDark(v: string | number | boolean) {
   document.documentElement.classList.toggle('dark', Boolean(v))
@@ -107,9 +101,6 @@ onMounted(async () => {
 }
 .menu {
   border-right: none;
-}
-.soon {
-  margin-left: auto;
 }
 .header {
   display: flex;

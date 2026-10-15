@@ -25,3 +25,11 @@
 13. **账户邮箱**：Lucky 默认使用 `*@acme.lucky666.cn` 形式的邮箱，你的证书配置的是自己的邮箱，导入后沿用。
 14. **ZeroSSL 证书（gohome.ddns）**：沿用 Lucky 配置里的 EAB Key ID / HMAC。Gately 会用这组 EAB 注册新的 ACME 账户（Lucky 的账户私钥未迁移），一般可以直接续签；如果 ZeroSSL 拒绝重复绑定，需要在 ZeroSSL 后台生成新的 EAB。
 15. **证书私钥的存储位置**：与 Lucky 一样保存在配置文件 `ssl.json` 中（权限 0600）。如果你用 `one_key.sh` 把 Gately 配置同步进 git，私钥也会进入仓库，需要评估；可选方案是把证书内容拆到单独的文件并在备份时排除。
+
+## M5 Web 服务
+
+16. **Coraza WAF**：你的 27 个站点全部挂了 WAF 实例，Gately 暂未实现，迁移后这些站点不经过 WAF。已列入 M7 优先项（计划用 coraza v3 + OWASP CRS）。在 WAF 完成前切换到 Gately，等于暂时关闭了这层防护，请评估。
+17. **第三方登录（OAuth）**：download 站点在 Lucky 中允许 GitHub 等第三方账号登录，Gately 暂只支持站点用户（网页认证/基本认证）。你的默认站点只配置了第三方登录、没有站点用户，导入后被停用，需要添加用户后再启用。
+18. **HTTP/3、ECH、缓存、限速、按 UA 过滤、单 IP 并发限制、404 计数封禁** 等 Lucky 高级选项暂未实现；你的配置中均未启用（MaxContinuous404Count 仅 1 个站点为 1）。
+19. **全局 IP 黑白名单**：Lucky 站点的 SafeIPMode 引用全局 IP 过滤模块，Gately 目前是站点级 IP 列表。你的站点都是黑名单模式且全局黑名单为空，等价于不过滤。
+20. **网页认证与 Lucky 的差异**：Gately 的登录页由 Gately 自己渲染，会话 7 天，绑定域名；用户名密码沿用 Lucky 配置。Lucky 的网页认证与管理员登录体系打通，Gately 的站点用户与管理员账号是分开的。

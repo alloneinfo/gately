@@ -14,6 +14,7 @@ const router = createRouter({
         { path: 'ddns', name: 'ddns', component: () => import('./views/DDNS.vue'), meta: { title: '动态域名' } },
         { path: 'stun', name: 'stun', component: () => import('./views/STUN.vue'), meta: { title: 'STUN 穿透' } },
         { path: 'ssl', name: 'ssl', component: () => import('./views/SSL.vue'), meta: { title: 'SSL 证书' } },
+        { path: 'web', name: 'web', component: () => import('./views/Web.vue'), meta: { title: 'Web 服务' } },
         { path: 'portforward', name: 'portforward', component: () => import('./views/PortForward.vue'), meta: { title: '端口转发' } },
         { path: 'settings', name: 'settings', component: () => import('./views/Settings.vue'), meta: { title: '设置' } },
       ],

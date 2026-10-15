@@ -6,6 +6,8 @@ require golang.org/x/crypto v0.58.0
 
 require golang.org/x/sys v0.49.0
 
+require github.com/pires/go-proxyproto v0.15.0 // indirect
+
 require (
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
 	github.com/go-acme/lego/v4 v4.35.2

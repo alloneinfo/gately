@@ -50,7 +50,7 @@ docs/analysis/         Lucky 逆向分析结论
 | ✅ **M2 DDNS** | 取 IP（URL/网卡/命令）、IPv4/IPv6、阿里云/Cloudflare/DNSPod(腾讯云)/华为云/自定义回调、Webhook；导入 | 11 家服务商（阿里云签名经官方示例校验）；真实样本 2/2 任务、75 条记录导入通过 |
 | ✅ **M3 STUN 穿透** | STUN 获取公网映射、TCP 保活、UPnP/NAT-PMP、内置转发、Webhook 与脚本变量；导入 | 本地端到端测试 + 家庭网络真实穿透；真实样本 18/18 条导入通过 |
 | ✅ **M4 证书** | ACME（lego，DNS-01 复用 M2 Provider）、自动续期、导出到路径、变更脚本 | Pebble 端到端（通配符 + 续签）；真实样本 5/5 张导入且无需重签 |
-| **M5 Web 服务** | 反向代理、重定向、静态文件、按域名路由、自动 TLS、BasicAuth、IP 过滤；导入 | httptest 覆盖路由与鉴权 |
+| ✅ **M5 Web 服务** | 反向代理、重定向、静态文件、按域名路由、自动 TLS、BasicAuth、IP 过滤；导入 | 覆盖路由、4 种站点、认证、WebSocket、HTTPS、PROXY 协议收发；真实样本 27 个站点导入通过 |
 | M6 运维 | 网络唤醒、计划任务、IP 过滤、Web 终端、TOTP | — |
 | M7 生态 | frpc、cloudflared、Coraza WAF、WebDAV/FTP/DLNA、Docker 管理 | 按社区需求排期 |
 
