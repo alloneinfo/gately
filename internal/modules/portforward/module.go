@@ -3,14 +3,12 @@ package portforward
 
 import (
 	"context"
-	"crypto/rand"
-	"encoding/hex"
 	"fmt"
 	"net/http"
-	"slices"
 	"sync"
 
 	"github.com/wangwanjie/gately/internal/config"
+	"github.com/wangwanjie/gately/internal/crud"
 	"github.com/wangwanjie/gately/internal/httpx"
 	"github.com/wangwanjie/gately/internal/logbuf"
 	"github.com/wangwanjie/gately/internal/module"
@@ -130,16 +128,6 @@ func ruleLabel(r Rule) string {
 	return r.ListenPorts
 }
 
-func newKey() string {
-	b := make([]byte, 6)
-	_, _ = rand.Read(b)
-	return hex.EncodeToString(b)
-}
-
-func (m *Module) indexLocked(key string) int {
-	return slices.IndexFunc(m.cfg.Rules, func(r Rule) bool { return r.Key == key })
-}
-
 // RuleView 是带运行状态的规则，用于 API 输出。
 type RuleView struct {
 	Rule
@@ -149,172 +137,32 @@ type RuleView struct {
 	Stats   StatsSnapshot `json:"stats"`
 }
 
-func (m *Module) views() []RuleView {
-	out := make([]RuleView, 0, len(m.cfg.Rules))
-	for _, rule := range m.cfg.Rules {
-		v := RuleView{Rule: rule, Error: m.errors[rule.Key]}
-		if r, ok := m.runners[rule.Key]; ok {
-			v.Running = true
-			v.Stats = r.stats.snapshot()
-			v.Details = r.listenErrors
-		}
-		out = append(out, v)
+func (m *Module) viewLocked(rule Rule) RuleView {
+	v := RuleView{Rule: rule, Error: m.errors[rule.Key]}
+	if r, ok := m.runners[rule.Key]; ok {
+		v.Running = true
+		v.Stats = r.stats.snapshot()
+		v.Details = r.listenErrors
 	}
-	return out
+	return v
 }
 
 // Routes 实现 module.Module。
 func (m *Module) Routes(r module.Router) {
-	r.HandleFunc("GET /rules", m.handleList)
-	r.HandleFunc("POST /rules", m.handleCreate)
-	r.HandleFunc("PUT /rules/{key}", m.handleUpdate)
-	r.HandleFunc("DELETE /rules/{key}", m.handleDelete)
-	r.HandleFunc("PUT /rules/{key}/enable", m.handleEnable)
-	r.HandleFunc("PUT /order", m.handleOrder)
+	rules := &crud.Collection[Rule]{
+		Mu:       &m.mu,
+		Items:    &m.cfg.Rules,
+		Save:     m.saveLocked,
+		Key:      func(r *Rule) *string { return &r.Key },
+		Enabled:  func(r *Rule) *bool { return &r.Enable },
+		Validate: func(r *Rule) error { return r.Validate() },
+		View:     func(r *Rule) any { return m.viewLocked(*r) },
+		Changed:  m.restartLocked,
+		Removed:  m.stopRuleLocked,
+	}
+	rules.Register(r, "/rules")
 	r.HandleFunc("GET /settings", m.handleGetSettings)
 	r.HandleFunc("PUT /settings", m.handlePutSettings)
-}
-
-func (m *Module) handleList(w http.ResponseWriter, r *http.Request) {
-	m.mu.Lock()
-	defer m.mu.Unlock()
-	httpx.OK(w, m.views())
-}
-
-func (m *Module) handleCreate(w http.ResponseWriter, r *http.Request) {
-	var rule Rule
-	if err := httpx.ReadJSON(r, &rule); err != nil {
-		httpx.Error(w, http.StatusBadRequest, "%v", err)
-		return
-	}
-	if err := rule.Validate(); err != nil {
-		httpx.Error(w, http.StatusBadRequest, "%v", err)
-		return
-	}
-	m.mu.Lock()
-	defer m.mu.Unlock()
-	rule.Key = newKey()
-	m.cfg.Rules = append(m.cfg.Rules, rule)
-	if err := m.saveLocked(); err != nil {
-		m.cfg.Rules = m.cfg.Rules[:len(m.cfg.Rules)-1]
-		httpx.Error(w, http.StatusInternalServerError, "保存失败: %v", err)
-		return
-	}
-	m.restartLocked(rule.Key)
-	httpx.OK(w, rule)
-}
-
-func (m *Module) handleUpdate(w http.ResponseWriter, r *http.Request) {
-	var rule Rule
-	if err := httpx.ReadJSON(r, &rule); err != nil {
-		httpx.Error(w, http.StatusBadRequest, "%v", err)
-		return
-	}
-	if err := rule.Validate(); err != nil {
-		httpx.Error(w, http.StatusBadRequest, "%v", err)
-		return
-	}
-	key := r.PathValue("key")
-	m.mu.Lock()
-	defer m.mu.Unlock()
-	i := m.indexLocked(key)
-	if i < 0 {
-		httpx.Error(w, http.StatusNotFound, "规则不存在")
-		return
-	}
-	old := m.cfg.Rules[i]
-	rule.Key = key
-	m.cfg.Rules[i] = rule
-	if err := m.saveLocked(); err != nil {
-		m.cfg.Rules[i] = old
-		httpx.Error(w, http.StatusInternalServerError, "保存失败: %v", err)
-		return
-	}
-	m.restartLocked(key)
-	httpx.OK(w, rule)
-}
-
-func (m *Module) handleDelete(w http.ResponseWriter, r *http.Request) {
-	key := r.PathValue("key")
-	m.mu.Lock()
-	defer m.mu.Unlock()
-	i := m.indexLocked(key)
-	if i < 0 {
-		httpx.Error(w, http.StatusNotFound, "规则不存在")
-		return
-	}
-	old := slices.Clone(m.cfg.Rules)
-	m.cfg.Rules = slices.Delete(m.cfg.Rules, i, i+1)
-	if err := m.saveLocked(); err != nil {
-		m.cfg.Rules = old
-		httpx.Error(w, http.StatusInternalServerError, "保存失败: %v", err)
-		return
-	}
-	m.stopRuleLocked(key)
-	httpx.OK(w, map[string]bool{"ok": true})
-}
-
-type enableRequest struct {
-	Enable bool `json:"enable"`
-}
-
-func (m *Module) handleEnable(w http.ResponseWriter, r *http.Request) {
-	var req enableRequest
-	if err := httpx.ReadJSON(r, &req); err != nil {
-		httpx.Error(w, http.StatusBadRequest, "%v", err)
-		return
-	}
-	key := r.PathValue("key")
-	m.mu.Lock()
-	defer m.mu.Unlock()
-	i := m.indexLocked(key)
-	if i < 0 {
-		httpx.Error(w, http.StatusNotFound, "规则不存在")
-		return
-	}
-	m.cfg.Rules[i].Enable = req.Enable
-	if err := m.saveLocked(); err != nil {
-		m.cfg.Rules[i].Enable = !req.Enable
-		httpx.Error(w, http.StatusInternalServerError, "保存失败: %v", err)
-		return
-	}
-	m.restartLocked(key)
-	httpx.OK(w, map[string]bool{"ok": true})
-}
-
-type orderRequest struct {
-	Keys []string `json:"keys"`
-}
-
-func (m *Module) handleOrder(w http.ResponseWriter, r *http.Request) {
-	var req orderRequest
-	if err := httpx.ReadJSON(r, &req); err != nil {
-		httpx.Error(w, http.StatusBadRequest, "%v", err)
-		return
-	}
-	m.mu.Lock()
-	defer m.mu.Unlock()
-	if len(req.Keys) != len(m.cfg.Rules) {
-		httpx.Error(w, http.StatusBadRequest, "排序列表与规则数量不一致")
-		return
-	}
-	reordered := make([]Rule, 0, len(req.Keys))
-	for _, k := range req.Keys {
-		i := m.indexLocked(k)
-		if i < 0 {
-			httpx.Error(w, http.StatusBadRequest, "未知规则 %s", k)
-			return
-		}
-		reordered = append(reordered, m.cfg.Rules[i])
-	}
-	old := m.cfg.Rules
-	m.cfg.Rules = reordered
-	if err := m.saveLocked(); err != nil {
-		m.cfg.Rules = old
-		httpx.Error(w, http.StatusInternalServerError, "保存失败: %v", err)
-		return
-	}
-	httpx.OK(w, map[string]bool{"ok": true})
 }
 
 func (m *Module) handleGetSettings(w http.ResponseWriter, r *http.Request) {
@@ -363,7 +211,7 @@ func (m *Module) ImportRules(rules []Rule) (int, error) {
 		if err := rule.Validate(); err != nil {
 			continue
 		}
-		rule.Key = newKey()
+		rule.Key = crud.NewKey()
 		m.cfg.Rules = append(m.cfg.Rules, rule)
 		added++
 	}

@@ -11,6 +11,7 @@ const router = createRouter({
       redirect: '/overview',
       children: [
         { path: 'overview', name: 'overview', component: () => import('./views/Overview.vue'), meta: { title: '总览' } },
+        { path: 'ddns', name: 'ddns', component: () => import('./views/DDNS.vue'), meta: { title: '动态域名' } },
         { path: 'portforward', name: 'portforward', component: () => import('./views/PortForward.vue'), meta: { title: '端口转发' } },
         { path: 'settings', name: 'settings', component: () => import('./views/Settings.vue'), meta: { title: '设置' } },
       ],

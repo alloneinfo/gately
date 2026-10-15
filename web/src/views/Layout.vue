@@ -6,6 +6,9 @@
         <el-menu-item index="/overview">
           <el-icon><Odometer /></el-icon><span>总览</span>
         </el-menu-item>
+        <el-menu-item index="/ddns">
+          <el-icon><Link /></el-icon><span>动态域名</span>
+        </el-menu-item>
         <el-menu-item index="/portforward">
           <el-icon><Switch /></el-icon><span>端口转发</span>
         </el-menu-item>
@@ -48,7 +51,6 @@ const dark = ref(localStorage.getItem('gately-dark') === '1')
 
 // 后续里程碑的模块先在菜单中占位，方便用户了解路线图
 const planned = [
-  { title: '动态域名', icon: Link },
   { title: 'STUN 穿透', icon: Connection },
   { title: 'Web 服务', icon: Document },
   { title: 'SSL 证书', icon: Lock },
