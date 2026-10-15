@@ -10,7 +10,7 @@
 | B | **第三方登录**（第 17、26 条）：Lucky 的 GitHub/QQ/Google 登录经过 Lucky 官方中转服务器，迁移后需要你自己申请 GitHub OAuth App / Google OIDC 客户端。默认站点因此被停用。 | 申请 OAuth 应用并在 Web 服务全局设置中填写 |
 | C | **证书私钥会随配置进入 git**（第 15 条）：`ssl.json` 含私钥，`one_key.sh` 若同步 Gately 配置目录需要排除或加密。 | 决定备份策略 |
 | D | **未实现的 Lucky 功能**（第 4、28 条）：DNS 服务商 14 家、FRP、Cloudflared、FTP、DLNA、rclone、SFTP 等。你的配置中均未使用。 | 需要哪些请告知 |
-| E | **代码尚未推送**：仓库只在本地提交，未创建 GitHub 仓库，Docker 镜像也未发布。模块路径按 `github.com/wangwanjie/gately` 设定。 | 确认仓库名后推送并打 tag 触发发布 |
+| E | ✅ **已发布**：仓库 https://github.com/wangwanjie/gately ，v0.1.1 二进制与 ghcr.io/wangwanjie/gately 多架构镜像已发布（v0.1.0 的镜像构建失败，只有二进制）。 | — |
 | F | **真实账号联调**（第 3、12 条）：除阿里云签名外，其他 DNS 服务商只用模拟服务器验证。 | 用测试子域名实际跑一次 |
 
 ## M2 DDNS

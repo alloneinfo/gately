@@ -33,13 +33,13 @@ Lucky 功能强大，但闭源、二进制加壳，配置文件经过混淆，�
 
 ### Docker
 
+镜像支持 amd64、arm64、arm/v7：
+
 ```bash
-git clone https://github.com/wangwanjie/gately && cd gately
-docker build -t gately .
 docker run -d --name gately --network host \
   -v ./gately-data:/etc/gately \
   -v /var/run/docker.sock:/var/run/docker.sock \
-  gately
+  ghcr.io/wangwanjie/gately:latest
 docker logs gately 2>&1 | grep 初始密码
 ```
 
@@ -48,6 +48,8 @@ docker logs gately 2>&1 | grep 初始密码
 端口转发、STUN、Web 服务需要监听宿主机端口，推荐 `--network host`。不需要 Docker 管理时可去掉 `docker.sock` 挂载。
 
 ### 二进制
+
+从 [Releases](https://github.com/wangwanjie/gately/releases) 下载对应平台的压缩包（Linux amd64/arm64/arm/mips/mipsle/riscv64、macOS、Windows、FreeBSD），解压后运行：
 
 ```bash
 ./gately -c /etc/gately

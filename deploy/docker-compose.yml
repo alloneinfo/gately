@@ -1,8 +1,7 @@
 # Gately 部署示例。根据需要调整挂载目录。
 services:
   gately:
-    image: gately:latest
-    build: ..
+    image: ghcr.io/wangwanjie/gately:latest
     container_name: gately
     restart: unless-stopped
     # 端口转发、STUN 穿透、Web 服务都需要直接监听宿主机端口
