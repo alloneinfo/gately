@@ -36,7 +36,10 @@ func TestConvertLuckyRules(t *testing.T) {
 		t.Fatalf("字段映射错误: %+v", r)
 	}
 	joined := strings.Join(warnings, "\n")
-	for _, want := range []string{"TLS", "限速", "bad: 跳过"} {
+	if rules[0].Enable {
+		t.Fatal("导入的规则应默认停用")
+	}
+	for _, want := range []string{"TLS", "限速", "bad: 跳过", "默认停用"} {
 		if !strings.Contains(joined, want) {
 			t.Fatalf("缺少告警 %q:\n%s", want, joined)
 		}

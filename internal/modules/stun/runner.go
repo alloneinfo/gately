@@ -1,0 +1,417 @@
+package stun
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"net"
+	"net/netip"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"runtime"
+	"strconv"
+	"strings"
+	"sync"
+	"sync/atomic"
+	"time"
+
+	"github.com/wangwanjie/gately/internal/logbuf"
+	"github.com/wangwanjie/gately/internal/upnp"
+	"github.com/wangwanjie/gately/internal/webhook"
+)
+
+// 规则状态取值
+const (
+	StatusStopped    = "stopped"
+	StatusConnecting = "connecting"
+	StatusOK         = "ok"
+	StatusRetrying   = "retrying"
+	StatusFailed     = "failed"
+)
+
+// AddrChange 记录一次公网地址变化。
+type AddrChange struct {
+	Time time.Time `json:"time"`
+	Addr string    `json:"addr"`
+}
+
+// Stats 是转发统计。
+type Stats struct {
+	ActiveConns int64 `json:"activeConns"`
+	TotalConns  int64 `json:"totalConns"`
+	BytesIn     int64 `json:"bytesIn"`
+	BytesOut    int64 `json:"bytesOut"`
+}
+
+// RuleState 是规则运行状态。
+type RuleState struct {
+	Status     string       `json:"status"`
+	PublicAddr string       `json:"publicAddr,omitempty"`
+	LocalAddr  string       `json:"localAddr,omitempty"`
+	StunServer string       `json:"stunServer,omitempty"`
+	Since      time.Time    `json:"since,omitempty"`
+	Error      string       `json:"error,omitempty"`
+	Mapping    string       `json:"mapping,omitempty"`
+	History    []AddrChange `json:"history,omitempty"`
+	Stats      Stats        `json:"stats"`
+}
+
+type counters struct {
+	active, total, in, out atomic.Int64
+}
+
+// runner 管理一条规则的穿透会话，失败后按配置重试。
+type runner struct {
+	rule     Rule
+	settings Settings
+	log      *logbuf.Logger
+	cancel   context.CancelFunc
+	done     chan struct{}
+	stats    counters
+
+	mu    sync.Mutex
+	state RuleState
+	// port 为本次运行确定的本地端口，随机端口在重试间保持不变
+	port int
+	// lastPublished 用于判断地址是否变化
+	lastPublished string
+	// serverIdx 记住上次成功的 STUN 服务器，下次优先使用
+	serverIdx int
+}
+
+func newRunner(rule Rule, settings Settings, log *logbuf.Logger) *runner {
+	return &runner{rule: rule, settings: settings, log: log, port: rule.LocalPort, state: RuleState{Status: StatusStopped}}
+}
+
+func (r *runner) start(parent context.Context) {
+	ctx, cancel := context.WithCancel(parent)
+	r.cancel = cancel
+	r.done = make(chan struct{})
+	go r.loop(ctx)
+}
+
+func (r *runner) stop() {
+	if r.cancel != nil {
+		r.cancel()
+		<-r.done
+	}
+	r.setStatus(StatusStopped, "")
+}
+
+func (r *runner) snapshot() RuleState {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	s := r.state
+	s.History = append([]AddrChange{}, r.state.History...)
+	s.Stats = Stats{
+		ActiveConns: r.stats.active.Load(),
+		TotalConns:  r.stats.total.Load(),
+		BytesIn:     r.stats.in.Load(),
+		BytesOut:    r.stats.out.Load(),
+	}
+	return s
+}
+
+func (r *runner) setStatus(status, errMsg string) {
+	r.mu.Lock()
+	r.state.Status = status
+	r.state.Error = errMsg
+	if status != StatusOK {
+		r.state.PublicAddr = ""
+	}
+	r.mu.Unlock()
+}
+
+func (r *runner) loop(ctx context.Context) {
+	defer close(r.done)
+	for {
+		r.setStatus(StatusConnecting, "")
+		var err error
+		if r.rule.Protocol == ProtoUDP4 {
+			err = r.sessionUDP(ctx)
+		} else {
+			err = r.sessionTCP(ctx)
+		}
+		if ctx.Err() != nil {
+			return
+		}
+		msg := "穿透会话结束"
+		if err != nil {
+			msg = err.Error()
+		}
+		r.log.Errorf("%s", msg)
+		if !r.rule.AutoRetry {
+			r.setStatus(StatusFailed, msg)
+			return
+		}
+		r.setStatus(StatusRetrying, msg)
+		select {
+		case <-ctx.Done():
+			return
+		case <-time.After(time.Duration(r.rule.RetryInterval) * time.Millisecond):
+		}
+	}
+}
+
+func (r *runner) stunServers() []string {
+	if r.rule.UseGlobalServers || len(r.rule.StunServers) == 0 {
+		out := make([]string, len(r.settings.StunServers))
+		for i, s := range r.settings.StunServers {
+			out[i] = withDefaultPort(s, "3478")
+		}
+		return out
+	}
+	return r.rule.StunServers
+}
+
+func (r *runner) keepAliveServers() []string {
+	list := r.rule.KeepAliveServers
+	if len(list) == 0 {
+		list = r.settings.KeepAliveServers
+	}
+	out := make([]string, len(list))
+	for i, s := range list {
+		out[i] = withDefaultPort(s, "80")
+	}
+	return out
+}
+
+// orderedServers 从上次成功的服务器开始轮转。
+func (r *runner) orderedServers() []string {
+	list := r.stunServers()
+	if len(list) == 0 {
+		return nil
+	}
+	r.mu.Lock()
+	start := r.serverIdx % len(list)
+	r.mu.Unlock()
+	return append(append([]string{}, list[start:]...), list[:start]...)
+}
+
+func (r *runner) rememberServer(server string) {
+	for i, s := range r.stunServers() {
+		if s == server {
+			r.mu.Lock()
+			r.serverIdx = i
+			r.state.StunServer = server
+			r.mu.Unlock()
+			return
+		}
+	}
+}
+
+// publish 更新公网地址，地址变化（或配置为每次都通知）时触发 Webhook 与脚本。
+func (r *runner) publish(ctx context.Context, addr netip.AddrPort) {
+	s := addr.String()
+	r.mu.Lock()
+	changed := s != r.lastPublished
+	r.lastPublished = s
+	r.state.Status = StatusOK
+	r.state.Error = ""
+	r.state.PublicAddr = s
+	if changed {
+		r.state.Since = time.Now()
+		r.state.History = append(r.state.History, AddrChange{Time: time.Now(), Addr: s})
+		if len(r.state.History) > 20 {
+			r.state.History = r.state.History[len(r.state.History)-20:]
+		}
+	}
+	r.mu.Unlock()
+	if changed {
+		r.log.Infof("公网地址: %s", s)
+	}
+	if !changed && r.rule.WebhookOnlyOnChange {
+		return
+	}
+	vars := map[string]string{
+		"ruleName": r.rule.Name,
+		"time":     time.Now().Format("2006-01-02 15:04:05"),
+		"ip":       addr.Addr().String(),
+		"port":     strconv.Itoa(int(addr.Port())),
+		"ipAddr":   s,
+	}
+	hook := r.rule.Webhook
+	if r.rule.UseGlobalWebhook {
+		hook = r.settings.Webhook
+	}
+	// 通知在后台执行，不阻塞穿透会话
+	go func() {
+		if hook.Enable {
+			hctx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 60*time.Second)
+			defer cancel()
+			if _, err := webhook.Send(hctx, hook, vars); err != nil {
+				r.log.Errorf("Webhook 调用失败: %v", err)
+			} else {
+				r.log.Infof("Webhook 调用成功")
+			}
+		}
+		if r.rule.ScriptEnable {
+			r.runScript(vars)
+		}
+	}()
+}
+
+// scriptRunner 允许测试观察脚本执行。
+var scriptRunner = runScript
+
+// runScript 执行用户脚本，变量通过环境变量传入（兼容 Lucky 脚本中的 ${port} 写法），避免拼接导致的注入。
+func (r *runner) runScript(vars map[string]string) {
+	out, err := scriptRunner(r.rule.Script, vars)
+	text := strings.TrimSpace(string(out))
+	if len(text) > 2000 {
+		text = text[:2000] + "..."
+	}
+	if err != nil {
+		r.log.Errorf("脚本执行失败: %v %s", err, text)
+		return
+	}
+	if text != "" {
+		r.log.Infof("脚本输出: %s", text)
+	} else {
+		r.log.Infof("脚本执行完成")
+	}
+}
+
+func runScript(script string, vars map[string]string) ([]byte, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+	defer cancel()
+	var cmd *exec.Cmd
+	if runtime.GOOS == "windows" {
+		f, err := os.CreateTemp("", "gately-stun-*.bat")
+		if err != nil {
+			return nil, err
+		}
+		defer os.Remove(f.Name())
+		_, _ = f.WriteString(script)
+		f.Close()
+		cmd = exec.CommandContext(ctx, "cmd", "/C", filepath.Clean(f.Name()))
+	} else {
+		cmd = exec.CommandContext(ctx, "sh", "-c", script)
+	}
+	cmd.Env = os.Environ()
+	for k, v := range vars {
+		cmd.Env = append(cmd.Env, k+"="+v, "GATELY_"+strings.ToUpper(k)+"="+v)
+	}
+	return cmd.CombinedOutput()
+}
+
+// mapPort 在路由器上建立 UPnP / NAT-PMP 映射，返回清理函数。
+// 映射按租期定时续约，路由器重启后也能恢复。
+func (r *runner) mapPort(ctx context.Context, proto string, port int) func() {
+	if !r.rule.UPnP && !r.rule.NATPMP {
+		return func() {}
+	}
+	intPort := port
+	if r.rule.UPnPInternalPort > 0 {
+		intPort = r.rule.UPnPInternalPort
+	}
+	desc := "Gately STUN " + r.rule.Name
+	const lease = 3600
+	mctx, cancel := context.WithCancel(ctx)
+	var wg sync.WaitGroup
+	var client *upnp.Client
+
+	addUPnP := func() error {
+		if client == nil {
+			dctx, dcancel := context.WithTimeout(mctx, 6*time.Second)
+			defer dcancel()
+			var err error
+			if r.rule.UPnPControlURL != "" {
+				client = upnp.New(r.rule.UPnPControlURL, "")
+			} else {
+				client, err = upnp.Discover(dctx, r.rule.UPnPGateway)
+			}
+			if err != nil {
+				client = nil
+				return err
+			}
+		}
+		actx, acancel := context.WithTimeout(mctx, 8*time.Second)
+		defer acancel()
+		_, err := client.AddPortMapping(actx, proto, port, r.rule.UPnPLocalHost, intPort, desc, lease)
+		return err
+	}
+	addNATPMP := func() error {
+		gw := r.rule.NATPMPGateway
+		if gw == "" {
+			gw = r.rule.UPnPGateway
+		}
+		if gw == "" {
+			return errors.New("未填写 NAT-PMP 网关地址")
+		}
+		_, _, err := upnp.NATPMPMap(mctx, gw, proto, intPort, port, lease*time.Second)
+		return err
+	}
+	refresh := func(first bool) {
+		var msgs []string
+		if r.rule.UPnP {
+			if err := addUPnP(); err != nil {
+				msgs = append(msgs, "UPnP 失败: "+err.Error())
+				r.log.Warnf("UPnP 映射 %s %d 失败: %v", proto, port, err)
+			} else {
+				msgs = append(msgs, fmt.Sprintf("UPnP %s %d→%d", strings.ToUpper(proto), port, intPort))
+				if first {
+					r.log.Infof("UPnP 已映射 %s 外部端口 %d -> 内部端口 %d", strings.ToUpper(proto), port, intPort)
+				}
+			}
+		}
+		if r.rule.NATPMP {
+			if err := addNATPMP(); err != nil {
+				msgs = append(msgs, "NAT-PMP 失败: "+err.Error())
+				r.log.Warnf("NAT-PMP 映射失败: %v", err)
+			} else {
+				msgs = append(msgs, fmt.Sprintf("NAT-PMP %s %d", strings.ToUpper(proto), port))
+			}
+		}
+		r.mu.Lock()
+		r.state.Mapping = strings.Join(msgs, "；")
+		r.mu.Unlock()
+	}
+	refresh(true)
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		t := time.NewTicker(lease / 2 * time.Second)
+		defer t.Stop()
+		for {
+			select {
+			case <-mctx.Done():
+				return
+			case <-t.C:
+				refresh(false)
+			}
+		}
+	}()
+	return func() {
+		cancel()
+		wg.Wait()
+		// 会话结束时删除映射，使用独立超时避免阻塞
+		dctx, dcancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer dcancel()
+		if r.rule.UPnP && client != nil {
+			_ = client.DeletePortMapping(dctx, proto, port)
+		}
+		if r.rule.NATPMP {
+			gw := r.rule.NATPMPGateway
+			if gw == "" {
+				gw = r.rule.UPnPGateway
+			}
+			if gw != "" {
+				_, _, _ = upnp.NATPMPMap(dctx, gw, proto, intPort, 0, 0)
+			}
+		}
+		r.mu.Lock()
+		r.state.Mapping = ""
+		r.mu.Unlock()
+	}
+}
+
+// localTCPAddr 构造通道本地地址。
+func localTCPAddr(ip string, port int) *net.TCPAddr {
+	a := &net.TCPAddr{Port: port}
+	if ip != "" {
+		a.IP = net.ParseIP(ip)
+	}
+	return a
+}

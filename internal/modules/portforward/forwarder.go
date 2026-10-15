@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/wangwanjie/gately/internal/logbuf"
+	"github.com/wangwanjie/gately/internal/netpipe"
 )
 
 // Stats 是规则的运行统计，所有字段使用原子操作。
@@ -215,37 +216,9 @@ func (r *runner) handleTCP(ctx context.Context, client net.Conn, targetPort int)
 	defer target.Close()
 	r.log.Debugf("%s -> %s 已连接", client.RemoteAddr(), target.RemoteAddr())
 
-	// 规则停止时主动关闭两端，使 io.Copy 退出
-	stopWatch := context.AfterFunc(ctx, func() {
-		client.Close()
-		target.Close()
-	})
-	defer stopWatch()
-
-	done := make(chan struct{}, 2)
-	go func() {
-		n, _ := io.Copy(target, client)
-		r.stats.BytesIn.Add(n)
-		closeWrite(target)
-		done <- struct{}{}
-	}()
-	go func() {
-		n, _ := io.Copy(client, target)
-		r.stats.BytesOut.Add(n)
-		closeWrite(client)
-		done <- struct{}{}
-	}()
-	<-done
-	<-done
-}
-
-// closeWrite 半关闭写方向，让对端读到 EOF，同时保留另一方向的数据传输。
-func closeWrite(c net.Conn) {
-	if cw, ok := c.(interface{ CloseWrite() error }); ok {
-		_ = cw.CloseWrite()
-		return
-	}
-	_ = c.Close()
+	in, out := netpipe.Join(ctx, client, target)
+	r.stats.BytesIn.Add(in)
+	r.stats.BytesOut.Add(out)
 }
 
 // udpSession 是一个客户端地址对应的目标连接。

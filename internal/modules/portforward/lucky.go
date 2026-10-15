@@ -74,7 +74,12 @@ func convertLuckyRules(raw json.RawMessage) ([]Rule, []string, error) {
 			warnings = append(warnings, label+": 跳过，"+err.Error())
 			continue
 		}
+		// 导入后一律停用：避免与仍在运行的 Lucky 争用端口，或在测试机上意外开放端口
+		rule.Enable = false
 		out = append(out, rule)
+	}
+	if len(out) > 0 {
+		warnings = append(warnings, "导入的规则默认停用：请先停止 Lucky 中对应的规则，再在 Gately 中启用")
 	}
 	return out, warnings, nil
 }

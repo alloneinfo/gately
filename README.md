@@ -19,8 +19,8 @@ Lucky 功能强大，但闭源、二进制加壳，配置文件经过混淆，�
 | --- | --- |
 | 端口转发（TCP/UDP、IPv4/IPv6、端口段、多目标故障转移、连接数限制、流量统计） | ✅ |
 | 动态域名 DDNS（11 家服务商、URL/网卡/命令取 IP、IPv4/IPv6、Webhook） | ✅ |
-| 从 Lucky 导入（`.lkcf` 解密与字段映射） | ✅ 端口转发、DDNS |
-| STUN 内网穿透 | 规划中（M3） |
+| 从 Lucky 导入（`.lkcf` 解密与字段映射） | ✅ 端口转发、DDNS、STUN |
+| STUN 内网穿透（TCP/UDP、保活、UPnP/NAT-PMP、内置转发、Webhook 与脚本） | ✅ |
 | SSL 证书（ACME） | 规划中（M4） |
 | Web 服务 / 反向代理 | 规划中（M5） |
 

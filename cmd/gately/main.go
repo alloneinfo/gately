@@ -16,6 +16,7 @@ import (
 	"github.com/wangwanjie/gately/internal/module"
 	"github.com/wangwanjie/gately/internal/modules/ddns"
 	"github.com/wangwanjie/gately/internal/modules/portforward"
+	"github.com/wangwanjie/gately/internal/modules/stun"
 	"github.com/wangwanjie/gately/internal/version"
 	"github.com/wangwanjie/gately/web"
 )
@@ -44,6 +45,7 @@ func main() {
 		Modules: []module.Module{
 			portforward.New(),
 			ddns.New(),
+			stun.New(),
 		},
 	})
 	if err != nil {
