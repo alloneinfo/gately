@@ -1,0 +1,246 @@
+package docker
+
+import (
+	"context"
+	"encoding/binary"
+	"encoding/json"
+	"fmt"
+	"io"
+	"log"
+	"net"
+	"net/http"
+	"path/filepath"
+	"strings"
+	"sync"
+	"testing"
+
+	"github.com/wangwanjie/gately/internal/config"
+	"github.com/wangwanjie/gately/internal/logbuf"
+	"github.com/wangwanjie/gately/internal/module"
+)
+
+// fakeDocker 模拟 Docker Engine API 的一个最小子集。
+type fakeDocker struct {
+	mu         sync.Mutex
+	containers map[string]map[string]any // id -> inspect
+	images     map[string]string         // ref -> image id
+	pullTo     string                    // 拉取后镜像变为该 ID
+	failStart  string                    // 启动该 ID 时失败
+	calls      []string
+	created    map[string]any
+	next       int
+}
+
+func (f *fakeDocker) handler(w http.ResponseWriter, r *http.Request) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	p := strings.TrimPrefix(r.URL.Path, "/"+apiVersion)
+	f.calls = append(f.calls, r.Method+" "+p)
+	parts := strings.Split(strings.Trim(p, "/"), "/")
+	switch {
+	case p == "/_ping":
+		_, _ = w.Write([]byte("OK"))
+	case p == "/containers/json":
+		var list []map[string]any
+		for id, c := range f.containers {
+			cfg := c["Config"].(map[string]any)
+			list = append(list, map[string]any{"Id": id, "Names": []string{c["Name"].(string)}, "Image": cfg["Image"], "ImageID": c["Image"],
+				"State": "running", "Status": "Up", "Labels": map[string]string{"com.docker.compose.project": "web"},
+				"Ports": []map[string]any{{"PrivatePort": 80, "PublicPort": 8080, "Type": "tcp"}, {"PrivatePort": 80, "PublicPort": 8080, "Type": "tcp"}}})
+		}
+		_ = json.NewEncoder(w).Encode(list)
+	case len(parts) == 3 && parts[0] == "containers" && parts[2] == "json":
+		c, ok := f.containers[parts[1]]
+		if !ok {
+			w.WriteHeader(404)
+			_, _ = w.Write([]byte(`{"message":"no such container"}`))
+			return
+		}
+		_ = json.NewEncoder(w).Encode(c)
+	case len(parts) == 3 && parts[0] == "containers" && (parts[2] == "start" || parts[2] == "stop" || parts[2] == "restart"):
+		if parts[2] == "start" && parts[1] == f.failStart {
+			w.WriteHeader(500)
+			_, _ = w.Write([]byte(`{"message":"port is already allocated"}`))
+			return
+		}
+		w.WriteHeader(204)
+	case len(parts) == 3 && parts[2] == "logs":
+		// 多路复用格式：stdout 一帧、stderr 一帧
+		for i, s := range []string{"hello stdout\n", "oops stderr\n"} {
+			h := make([]byte, 8)
+			h[0] = byte(i + 1)
+			binary.BigEndian.PutUint32(h[4:], uint32(len(s)))
+			_, _ = w.Write(append(h, s...))
+		}
+	case p == "/images/create":
+		ref := r.URL.Query().Get("fromImage") + ":" + r.URL.Query().Get("tag")
+		_, _ = w.Write([]byte(`{"status":"Pulling"}` + "\n" + `{"status":"Done"}` + "\n"))
+		f.images[ref] = f.pullTo
+	case len(parts) >= 3 && parts[0] == "images" && parts[len(parts)-1] == "json":
+		ref := strings.Join(parts[1:len(parts)-1], "/")
+		if id, ok := f.images[ref]; ok {
+			_ = json.NewEncoder(w).Encode(map[string]string{"Id": id})
+			return
+		}
+		w.WriteHeader(404)
+	case len(parts) == 3 && parts[2] == "rename":
+		f.containers[parts[1]]["Name"] = "/" + r.URL.Query().Get("name")
+		w.WriteHeader(204)
+	case p == "/containers/create":
+		var body map[string]any
+		_ = json.NewDecoder(r.Body).Decode(&body)
+		f.next++
+		id := fmt.Sprintf("new%061d", f.next)
+		f.created = body
+		f.containers[id] = map[string]any{"Id": id, "Name": "/" + r.URL.Query().Get("name"), "Image": f.pullTo, "Config": body, "State": map[string]any{"Running": false}}
+		_ = json.NewEncoder(w).Encode(map[string]string{"Id": id})
+	case r.Method == http.MethodDelete && len(parts) == 2:
+		delete(f.containers, parts[1])
+		w.WriteHeader(204)
+	default:
+		w.WriteHeader(404)
+	}
+}
+
+func startFake(t *testing.T) (*fakeDocker, string) {
+	t.Helper()
+	oldID := "abc123def456" + strings.Repeat("0", 52)
+	f := &fakeDocker{
+		containers: map[string]map[string]any{oldID: {
+			"Id": oldID, "Name": "/nginx", "Image": "sha256:old",
+			"Config":          map[string]any{"Image": "nginx:1.27", "Hostname": oldID[:12], "Env": []string{"A=1"}, "Labels": map[string]string{"x": "y"}},
+			"HostConfig":      map[string]any{"Binds": []string{"/data:/data"}, "RestartPolicy": map[string]any{"Name": "always"}},
+			"NetworkSettings": map[string]any{"Networks": map[string]any{"web_default": map[string]any{"Aliases": []string{"nginx"}, "IPAMConfig": map[string]any{"IPv4Address": "172.20.0.5"}}}},
+			"State":           map[string]any{"Running": true},
+		}},
+		images: map[string]string{"nginx:1.27": "sha256:old"},
+		pullTo: "sha256:new",
+	}
+	sock := filepath.Join(t.TempDir(), "d.sock")
+	ln, err := net.Listen("unix", sock)
+	if err != nil {
+		t.Skip("当前环境不支持 unix socket:", err)
+	}
+	srv := &http.Server{Handler: http.HandlerFunc(f.handler)}
+	go srv.Serve(ln)
+	t.Cleanup(func() { srv.Close() })
+	return f, "unix://" + sock
+}
+
+func newModule(t *testing.T, host string) *Module {
+	st, _ := config.Open(t.TempDir())
+	m := New()
+	if err := m.Init(module.Env{Store: st, Logs: logbuf.New(50, log.New(io.Discard, "", 0))}); err != nil {
+		t.Fatal(err)
+	}
+	m.settings.Host = host
+	return m
+}
+
+func TestClientBasics(t *testing.T) {
+	_, host := startFake(t)
+	c, err := NewClient(host)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx := context.Background()
+	if err := c.Ping(ctx); err != nil {
+		t.Fatal(err)
+	}
+	list, err := c.Containers(ctx)
+	if err != nil || len(list) != 1 || list[0].Name() != "nginx" {
+		t.Fatalf("容器列表错误: %+v %v", list, err)
+	}
+	logs, err := c.Logs(ctx, list[0].ID, 10)
+	if err != nil || logs != "hello stdout\noops stderr\n" {
+		t.Fatalf("日志解析错误: %q %v", logs, err)
+	}
+	if err := c.Action(ctx, list[0].ID, "rm -rf"); err == nil {
+		t.Fatal("非法操作应报错")
+	}
+}
+
+func TestSplitRefAndDemux(t *testing.T) {
+	cases := map[string][2]string{
+		"nginx":                         {"nginx", "latest"},
+		"nginx:1.27":                    {"nginx", "1.27"},
+		"registry.local:5000/app":       {"registry.local:5000/app", "latest"},
+		"registry.local:5000/app:v2":    {"registry.local:5000/app", "v2"},
+		"ghcr.io/a/b@sha256:abcdef0123": {"ghcr.io/a/b@sha256:abcdef0123", ""},
+	}
+	for in, want := range cases {
+		n, tag := splitRef(in)
+		if n != want[0] || tag != want[1] {
+			t.Errorf("splitRef(%q)=%q,%q", in, n, tag)
+		}
+	}
+	if demux([]byte("plain tty output")) != "plain tty output" {
+		t.Error("非多路复用输出应原样返回")
+	}
+}
+
+func TestUpgradePreservesConfig(t *testing.T) {
+	f, host := startFake(t)
+	m := newModule(t, host)
+	c, _ := NewClient(host)
+	ctx := context.Background()
+	var oldID string
+	for id := range f.containers {
+		oldID = id
+	}
+	has, err := m.checkUpdate(ctx, c, oldID)
+	if err != nil || !has {
+		t.Fatalf("应检测到更新: %v %v", has, err)
+	}
+	newID, err := m.upgrade(ctx, c, oldID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	if _, ok := f.containers[oldID]; ok {
+		t.Fatal("旧容器应被删除")
+	}
+	nc := f.containers[newID]
+	if nc["Name"] != "/nginx" {
+		t.Fatalf("新容器应沿用原名: %v", nc["Name"])
+	}
+	b := f.created
+	if _, ok := b["Hostname"]; ok {
+		t.Fatal("由旧容器 ID 生成的主机名不应沿用")
+	}
+	hc := b["HostConfig"].(map[string]any)
+	if hc["Binds"].([]any)[0] != "/data:/data" || b["Image"] != "nginx:1.27" {
+		t.Fatalf("配置应完整保留: %+v", b)
+	}
+	ep := b["NetworkingConfig"].(map[string]any)["EndpointsConfig"].(map[string]any)["web_default"].(map[string]any)
+	if ep["Aliases"].([]any)[0] != "nginx" || ep["IPAMConfig"].(map[string]any)["IPv4Address"] != "172.20.0.5" {
+		t.Fatalf("网络别名与固定 IP 应保留: %+v", ep)
+	}
+}
+
+func TestUpgradeRollbackOnStartFailure(t *testing.T) {
+	f, host := startFake(t)
+	f.failStart = fmt.Sprintf("new%061d", 1)
+	m := newModule(t, host)
+	c, _ := NewClient(host)
+	var oldID string
+	for id := range f.containers {
+		oldID = id
+	}
+	if _, err := m.upgrade(context.Background(), c, oldID); err == nil || !strings.Contains(err.Error(), "port is already allocated") {
+		t.Fatalf("应返回启动失败原因: %v", err)
+	}
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	if f.containers[oldID]["Name"] != "/nginx" {
+		t.Fatalf("失败后旧容器应恢复原名: %v", f.containers[oldID]["Name"])
+	}
+	if len(f.containers) != 1 {
+		t.Fatalf("失败的新容器应被删除: %d", len(f.containers))
+	}
+	last := f.calls[len(f.calls)-1]
+	if last != "POST /containers/"+oldID+"/start" {
+		t.Fatalf("应重新启动旧容器，最后一次调用 %s", last)
+	}
+}

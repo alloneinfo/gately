@@ -16,6 +16,7 @@ import (
 	"github.com/wangwanjie/gately/internal/module"
 	"github.com/wangwanjie/gately/internal/modules/cron"
 	"github.com/wangwanjie/gately/internal/modules/ddns"
+	"github.com/wangwanjie/gately/internal/modules/docker"
 	"github.com/wangwanjie/gately/internal/modules/portforward"
 	"github.com/wangwanjie/gately/internal/modules/ssl"
 	"github.com/wangwanjie/gately/internal/modules/stun"
@@ -61,6 +62,7 @@ func main() {
 			wol.New(),
 			webterminal.New(),
 			cron.New(),
+			docker.New(),
 		},
 	})
 	if err != nil {

@@ -30,6 +30,9 @@
         <el-menu-item index="/terminal">
           <el-icon><Monitor /></el-icon><span>Web 终端</span>
         </el-menu-item>
+        <el-menu-item index="/docker">
+          <el-icon><Box /></el-icon><span>Docker 管理</span>
+        </el-menu-item>
         <el-menu-item index="/cron">
           <el-icon><Timer /></el-icon><span>计划任务</span>
         </el-menu-item>
@@ -57,7 +60,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Bell, Connection, Document, Link, Lock, Monitor, Odometer, Setting, Switch, Timer, Umbrella } from '@element-plus/icons-vue'
+import { Bell, Box, Connection, Document, Link, Lock, Monitor, Odometer, Setting, Switch, Timer, Umbrella } from '@element-plus/icons-vue'
 import { api } from '../api'
 
 const route = useRoute()
