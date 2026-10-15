@@ -1,0 +1,10 @@
+/bin/
+/dist/
+/data/
+web/node_modules/
+web/dist/*
+!web/dist/.gitkeep
+.DS_Store
+*.test
+coverage.out
+.claude/

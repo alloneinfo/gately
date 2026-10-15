@@ -1,0 +1,410 @@
+// Package app 负责组装配置、认证、模块与管理 HTTP 服务。
+package app
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"io"
+	"io/fs"
+	"log"
+	"mime/multipart"
+	"net/http"
+	"os"
+	"runtime"
+	"strconv"
+	"strings"
+	"time"
+
+	"github.com/wangwanjie/gately/internal/auth"
+	"github.com/wangwanjie/gately/internal/config"
+	"github.com/wangwanjie/gately/internal/httpx"
+	"github.com/wangwanjie/gately/internal/logbuf"
+	"github.com/wangwanjie/gately/internal/luckyimport"
+	"github.com/wangwanjie/gately/internal/module"
+	"github.com/wangwanjie/gately/internal/version"
+)
+
+// 基础配置与账号配置的文件名
+const (
+	settingsName = "gately"
+	accountName  = "account"
+)
+
+// DefaultListen 是管理界面默认监听地址，避开 Lucky 的 16601 以便迁移期间并存。
+const DefaultListen = ":16680"
+
+// Settings 是程序级基础配置。
+type Settings struct {
+	Listen string `json:"listen"`
+}
+
+// Options 是启动参数。
+type Options struct {
+	ConfigDir string
+	// Listen 非空时覆盖配置文件中的监听地址
+	Listen string
+	// Web 是嵌入的前端文件系统，可为 nil
+	Web fs.FS
+	// Modules 是要启用的功能模块
+	Modules []module.Module
+}
+
+type moduleEntry struct {
+	mod  module.Module
+	logs *logbuf.Buffer
+}
+
+// App 是一个运行中的 Gately 实例。
+type App struct {
+	opts      Options
+	store     *config.Store
+	settings  Settings
+	auth      *auth.Manager
+	sysLogs   *logbuf.Buffer
+	modules   []*moduleEntry
+	startTime time.Time
+	logger    *log.Logger
+}
+
+// New 加载配置并初始化所有模块，但不启动网络服务。
+func New(opts Options) (*App, error) {
+	store, err := config.Open(opts.ConfigDir)
+	if err != nil {
+		return nil, err
+	}
+	logger := log.New(os.Stderr, "", log.LstdFlags)
+	a := &App{
+		opts:      opts,
+		store:     store,
+		settings:  Settings{Listen: DefaultListen},
+		sysLogs:   logbuf.New(500, logger),
+		startTime: time.Now(),
+		logger:    logger,
+	}
+	if _, err := store.Load(settingsName, &a.settings); err != nil {
+		return nil, err
+	}
+	if opts.Listen != "" {
+		a.settings.Listen = opts.Listen
+	}
+
+	var acc auth.Account
+	if _, err := store.Load(accountName, &acc); err != nil {
+		return nil, err
+	}
+	a.auth = auth.NewManager(acc, func(acc auth.Account) error {
+		return store.Save(accountName, acc)
+	})
+	generated, err := a.auth.EnsureInitialized()
+	if err != nil {
+		return nil, fmt.Errorf("初始化管理员账号失败: %w", err)
+	}
+	if generated != "" {
+		// 初始密码只在首次启动时打印一次，登录后应立即修改
+		a.logger.Printf("==== 已创建管理员账号 admin，初始密码: %s ，请登录后立即修改 ====", generated)
+	}
+
+	seen := map[string]bool{}
+	for _, m := range opts.Modules {
+		if seen[m.ID()] || m.ID() == settingsName || m.ID() == accountName {
+			return nil, fmt.Errorf("模块 ID 冲突: %s", m.ID())
+		}
+		seen[m.ID()] = true
+		entry := &moduleEntry{mod: m, logs: logbuf.New(2000, logger)}
+		if err := m.Init(module.Env{Store: store, Logs: entry.logs}); err != nil {
+			return nil, fmt.Errorf("模块 %s 初始化失败: %w", m.ID(), err)
+		}
+		a.modules = append(a.modules, entry)
+	}
+	return a, nil
+}
+
+// Handler 返回完整的 HTTP 处理器（API + 前端）。
+func (a *App) Handler() http.Handler {
+	mux := http.NewServeMux()
+	protected := http.NewServeMux()
+
+	mux.HandleFunc("POST /api/login", a.handleLogin)
+	mux.HandleFunc("POST /api/logout", a.handleLogout)
+
+	protected.HandleFunc("GET /api/session", a.handleSession)
+	protected.HandleFunc("GET /api/status", a.handleStatus)
+	protected.HandleFunc("PUT /api/account", a.handleAccount)
+	protected.HandleFunc("GET /api/logs", a.logsHandler(a.sysLogs))
+	protected.HandleFunc("POST /api/import/lucky", a.handleLuckyImport)
+	for _, e := range a.modules {
+		prefix := "/api/" + e.mod.ID()
+		protected.HandleFunc("GET "+prefix+"/logs", a.logsHandler(e.logs))
+		protected.HandleFunc("DELETE "+prefix+"/logs", func(w http.ResponseWriter, r *http.Request) {
+			e.logs.Clear()
+			httpx.OK(w, map[string]bool{"ok": true})
+		})
+		e.mod.Routes(prefixRouter{mux: protected, prefix: prefix})
+	}
+	mux.Handle("/api/", a.auth.Require(protected))
+	mux.Handle("/", a.staticHandler())
+	return securityHeaders(mux)
+}
+
+// Run 启动所有模块和管理服务，阻塞直到 ctx 取消。
+func (a *App) Run(ctx context.Context) error {
+	for _, e := range a.modules {
+		if err := e.mod.Start(ctx); err != nil {
+			// 单个模块失败不影响其他模块，错误写入日志供界面查看
+			e.logs.Add(logbuf.LevelError, "", "模块启动失败: "+err.Error())
+		}
+	}
+	srv := &http.Server{
+		Addr:              a.settings.Listen,
+		Handler:           a.Handler(),
+		ReadHeaderTimeout: 10 * time.Second,
+	}
+	errCh := make(chan error, 1)
+	go func() {
+		a.sysLogs.Add(logbuf.LevelInfo, "", "管理界面监听 "+a.settings.Listen)
+		errCh <- srv.ListenAndServe()
+	}()
+
+	select {
+	case <-ctx.Done():
+	case err := <-errCh:
+		if !errors.Is(err, http.ErrServerClosed) {
+			a.stopModules()
+			return err
+		}
+	}
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	_ = srv.Shutdown(shutdownCtx)
+	a.stopModules()
+	return nil
+}
+
+func (a *App) stopModules() {
+	// 逆序停止，和启动顺序对称
+	for i := len(a.modules) - 1; i >= 0; i-- {
+		if err := a.modules[i].mod.Stop(); err != nil {
+			a.logger.Printf("停止模块 %s 失败: %v", a.modules[i].mod.ID(), err)
+		}
+	}
+}
+
+type loginRequest struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+func (a *App) handleLogin(w http.ResponseWriter, r *http.Request) {
+	var req loginRequest
+	if err := httpx.ReadJSON(r, &req); err != nil {
+		httpx.Error(w, http.StatusBadRequest, "%v", err)
+		return
+	}
+	ip := httpx.ClientIP(r)
+	token, exp, err := a.auth.Login(ip, req.Username, req.Password)
+	if err != nil {
+		a.sysLogs.Add(logbuf.LevelWarn, "auth", fmt.Sprintf("来自 %s 的登录失败: %v", ip, err))
+		status := http.StatusUnauthorized
+		if errors.Is(err, auth.ErrLocked) {
+			status = http.StatusTooManyRequests
+		}
+		httpx.Error(w, status, "%v", err)
+		return
+	}
+	a.sysLogs.Add(logbuf.LevelInfo, "auth", fmt.Sprintf("%s 从 %s 登录", req.Username, ip))
+	http.SetCookie(w, &http.Cookie{
+		Name:     auth.CookieName,
+		Value:    token,
+		Path:     "/",
+		Expires:  exp,
+		HttpOnly: true,
+		SameSite: http.SameSiteStrictMode,
+		Secure:   r.TLS != nil,
+	})
+	httpx.OK(w, map[string]any{"username": req.Username, "expires": exp})
+}
+
+func (a *App) handleLogout(w http.ResponseWriter, r *http.Request) {
+	http.SetCookie(w, &http.Cookie{Name: auth.CookieName, Value: "", Path: "/", MaxAge: -1, HttpOnly: true, SameSite: http.SameSiteStrictMode})
+	httpx.OK(w, map[string]bool{"ok": true})
+}
+
+func (a *App) handleSession(w http.ResponseWriter, r *http.Request) {
+	httpx.OK(w, map[string]string{"username": auth.UserFromContext(r.Context())})
+}
+
+type moduleInfo struct {
+	ID    string `json:"id"`
+	Title string `json:"title"`
+}
+
+func (a *App) handleStatus(w http.ResponseWriter, r *http.Request) {
+	mods := make([]moduleInfo, 0, len(a.modules))
+	for _, e := range a.modules {
+		mods = append(mods, moduleInfo{ID: e.mod.ID(), Title: e.mod.Title()})
+	}
+	var mem runtime.MemStats
+	runtime.ReadMemStats(&mem)
+	httpx.OK(w, map[string]any{
+		"version":    version.Version,
+		"commit":     version.Commit,
+		"buildDate":  version.BuildDate,
+		"goVersion":  runtime.Version(),
+		"os":         runtime.GOOS,
+		"arch":       runtime.GOARCH,
+		"startTime":  a.startTime,
+		"goroutines": runtime.NumGoroutine(),
+		"memAlloc":   mem.Alloc,
+		"modules":    mods,
+	})
+}
+
+type accountRequest struct {
+	OldPassword string `json:"oldPassword"`
+	Username    string `json:"username"`
+	NewPassword string `json:"newPassword"`
+}
+
+func (a *App) handleAccount(w http.ResponseWriter, r *http.Request) {
+	var req accountRequest
+	if err := httpx.ReadJSON(r, &req); err != nil {
+		httpx.Error(w, http.StatusBadRequest, "%v", err)
+		return
+	}
+	if err := a.auth.ChangeCredentials(req.OldPassword, req.Username, req.NewPassword); err != nil {
+		httpx.Error(w, http.StatusBadRequest, "%v", err)
+		return
+	}
+	a.sysLogs.Add(logbuf.LevelInfo, "auth", "管理员账号已修改，所有会话已失效")
+	httpx.OK(w, map[string]bool{"ok": true})
+}
+
+// handleLuckyImport 接收 multipart 上传的一个或多个 .lkcf 文件（字段名 files），
+// 分发给实现了 luckyimport.Importer 的模块。?dryRun=1 时只预览不写入。
+func (a *App) handleLuckyImport(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseMultipartForm(32 << 20); err != nil {
+		httpx.Error(w, http.StatusBadRequest, "读取上传文件失败: %v", err)
+		return
+	}
+	dryRun := r.URL.Query().Get("dryRun") == "1"
+	type fileResult struct {
+		File    string                `json:"file"`
+		Error   string                `json:"error,omitempty"`
+		Reports []*luckyimport.Report `json:"reports"`
+	}
+	results := []fileResult{}
+	for _, fh := range r.MultipartForm.File["files"] {
+		res := fileResult{File: fh.Filename, Reports: []*luckyimport.Report{}}
+		data, err := readUpload(fh)
+		if err == nil {
+			var doc luckyimport.Document
+			doc, err = luckyimport.Parse(data)
+			if err == nil {
+				for _, e := range a.modules {
+					imp, ok := e.mod.(luckyimport.Importer)
+					if !ok {
+						continue
+					}
+					rep, ierr := imp.ImportLucky(doc, dryRun)
+					if ierr != nil {
+						err = fmt.Errorf("%s: %w", e.mod.Title(), ierr)
+						break
+					}
+					if rep != nil {
+						res.Reports = append(res.Reports, rep)
+						if !dryRun {
+							e.logs.Add(logbuf.LevelInfo, "import", fmt.Sprintf("从 Lucky 导入 %d/%d 条", rep.Imported, rep.Found))
+						}
+					}
+				}
+			}
+		}
+		if err != nil {
+			res.Error = err.Error()
+		}
+		results = append(results, res)
+	}
+	httpx.OK(w, results)
+}
+
+func readUpload(fh *multipart.FileHeader) ([]byte, error) {
+	f, err := fh.Open()
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+	return io.ReadAll(io.LimitReader(f, 32<<20))
+}
+
+// logsHandler 支持 ?since=<seq> 增量拉取。
+func (a *App) logsHandler(buf *logbuf.Buffer) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var since uint64
+		if s := r.URL.Query().Get("since"); s != "" {
+			v, err := strconv.ParseUint(s, 10, 64)
+			if err != nil {
+				httpx.Error(w, http.StatusBadRequest, "since 参数无效")
+				return
+			}
+			since = v
+		}
+		httpx.OK(w, buf.Since(since))
+	}
+}
+
+// staticHandler 提供前端单页应用，未知路径回退到 index.html。
+func (a *App) staticHandler() http.Handler {
+	if a.opts.Web == nil {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			http.Error(w, "前端未构建：请在 web 目录执行 pnpm install && pnpm build 后重新编译", http.StatusNotFound)
+		})
+	}
+	files := http.FileServer(http.FS(a.opts.Web))
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		name := strings.TrimPrefix(r.URL.Path, "/")
+		if name != "" {
+			if _, err := fs.Stat(a.opts.Web, name); err == nil {
+				// 带哈希的构建产物可长期缓存
+				if strings.HasPrefix(name, "assets/") {
+					w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
+				}
+				files.ServeHTTP(w, r)
+				return
+			}
+		}
+		index, err := fs.ReadFile(a.opts.Web, "index.html")
+		if err != nil {
+			http.Error(w, "前端未构建：请在 web 目录执行 pnpm install && pnpm build 后重新编译", http.StatusNotFound)
+			return
+		}
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		w.Header().Set("Cache-Control", "no-cache")
+		_, _ = w.Write(index)
+	})
+}
+
+func securityHeaders(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		h := w.Header()
+		h.Set("X-Content-Type-Options", "nosniff")
+		h.Set("X-Frame-Options", "DENY")
+		h.Set("Referrer-Policy", "same-origin")
+		next.ServeHTTP(w, r)
+	})
+}
+
+// prefixRouter 把模块的相对路由挂到 /api/<ID> 前缀下。
+type prefixRouter struct {
+	mux    *http.ServeMux
+	prefix string
+}
+
+func (p prefixRouter) HandleFunc(pattern string, h http.HandlerFunc) {
+	method, path, found := strings.Cut(pattern, " ")
+	if !found {
+		p.mux.HandleFunc(p.prefix+pattern, h)
+		return
+	}
+	p.mux.HandleFunc(method+" "+p.prefix+path, h)
+}

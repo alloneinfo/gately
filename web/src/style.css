@@ -1,0 +1,37 @@
+:root {
+  --gately-accent: #0e7c66;
+  --el-color-primary: #0e7c66;
+  --el-color-primary-light-3: #4fa391;
+  --el-color-primary-light-5: #86beb2;
+  --el-color-primary-light-7: #b7d8d1;
+  --el-color-primary-light-8: #cfe5e0;
+  --el-color-primary-light-9: #e7f2ef;
+  --el-color-primary-dark-2: #0b6352;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+}
+
+html,
+body,
+#app {
+  margin: 0;
+  height: 100%;
+  background: var(--el-bg-color-page);
+  color: var(--el-text-color-primary);
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.page-header h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}

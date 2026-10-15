@@ -1,0 +1,342 @@
+package portforward
+
+import (
+	"bytes"
+	"context"
+	"io"
+	"log"
+	"net"
+	"strconv"
+	"testing"
+	"time"
+
+	"github.com/wangwanjie/gately/internal/logbuf"
+)
+
+func TestParsePorts(t *testing.T) {
+	cases := []struct {
+		spec string
+		want []int
+		ok   bool
+	}{
+		{"80", []int{80}, true},
+		{"80,443", []int{80, 443}, true},
+		{"8000-8002, 9000", []int{8000, 8001, 8002, 9000}, true},
+		{"0", nil, false},
+		{"65536", nil, false},
+		{"10-5", nil, false},
+		{"", nil, false},
+		{"1-2000", nil, false},
+	}
+	for _, c := range cases {
+		got, err := ParsePorts(c.spec)
+		if (err == nil) != c.ok {
+			t.Fatalf("%q: err=%v, want ok=%v", c.spec, err, c.ok)
+		}
+		if c.ok && !equalInts(got, c.want) {
+			t.Fatalf("%q: got %v want %v", c.spec, got, c.want)
+		}
+	}
+}
+
+func TestMapPorts(t *testing.T) {
+	pairs, err := MapPorts("8000-8002", "9000-9002")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if pairs[2] != (PortPair{8002, 9002}) {
+		t.Fatalf("一一映射错误: %v", pairs)
+	}
+	pairs, err = MapPorts("80,443", "8080")
+	if err != nil || pairs[1] != (PortPair{443, 8080}) {
+		t.Fatalf("单目标端口映射错误: %v %v", pairs, err)
+	}
+	pairs, err = MapPorts("22", "")
+	if err != nil || pairs[0] != (PortPair{22, 22}) {
+		t.Fatalf("空目标端口应与监听端口相同: %v %v", pairs, err)
+	}
+	if _, err := MapPorts("80,81,82", "90,91"); err == nil {
+		t.Fatal("数量不匹配应报错")
+	}
+}
+
+func equalInts(a, b []int) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
+}
+
+// freePort 获取一个当前空闲的端口。
+func freePort(t *testing.T, network string) int {
+	t.Helper()
+	if network == "udp" {
+		pc, err := net.ListenPacket("udp4", "127.0.0.1:0")
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer pc.Close()
+		return pc.LocalAddr().(*net.UDPAddr).Port
+	}
+	ln, err := net.Listen("tcp4", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer ln.Close()
+	return ln.Addr().(*net.TCPAddr).Port
+}
+
+func tcpEcho(t *testing.T) (int, func()) {
+	t.Helper()
+	ln, err := net.Listen("tcp4", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	go func() {
+		for {
+			c, err := ln.Accept()
+			if err != nil {
+				return
+			}
+			go func() {
+				defer c.Close()
+				_, _ = io.Copy(c, c)
+			}()
+		}
+	}()
+	return ln.Addr().(*net.TCPAddr).Port, func() { ln.Close() }
+}
+
+func udpEcho(t *testing.T) (int, func()) {
+	t.Helper()
+	pc, err := net.ListenPacket("udp4", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	go func() {
+		buf := make([]byte, 2048)
+		for {
+			n, addr, err := pc.ReadFrom(buf)
+			if err != nil {
+				return
+			}
+			_, _ = pc.WriteTo(buf[:n], addr)
+		}
+	}()
+	return pc.LocalAddr().(*net.UDPAddr).Port, func() { pc.Close() }
+}
+
+func testRunner(rule Rule) *runner {
+	s := defaultSettings()
+	s.DialTimeout = 1
+	return newRunner(rule, s, logbuf.New(100, log.New(io.Discard, "", 0)).Logger("test"))
+}
+
+func TestTCPForward(t *testing.T) {
+	echoPort, closeEcho := tcpEcho(t)
+	defer closeEcho()
+	listenPort := freePort(t, "tcp")
+
+	rule := Rule{
+		Protocols:       []string{"tcp4"},
+		ListenAddress:   "127.0.0.1",
+		ListenPorts:     strconv.Itoa(listenPort),
+		TargetAddresses: []string{"127.0.0.1"},
+		TargetPorts:     strconv.Itoa(echoPort),
+	}
+	if err := rule.Validate(); err != nil {
+		t.Fatal(err)
+	}
+	r := testRunner(rule)
+	if err := r.start(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	defer r.stop()
+
+	conn, err := net.Dial("tcp", net.JoinHostPort("127.0.0.1", strconv.Itoa(listenPort)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	msg := []byte("hello gately")
+	if _, err := conn.Write(msg); err != nil {
+		t.Fatal(err)
+	}
+	buf := make([]byte, len(msg))
+	_ = conn.SetReadDeadline(time.Now().Add(3 * time.Second))
+	if _, err := io.ReadFull(conn, buf); err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(buf, msg) {
+		t.Fatalf("回显不一致: %q", buf)
+	}
+	conn.Close()
+
+	// 等待统计落地
+	deadline := time.Now().Add(2 * time.Second)
+	for r.stats.ActiveConns.Load() != 0 && time.Now().Before(deadline) {
+		time.Sleep(20 * time.Millisecond)
+	}
+	s := r.stats.snapshot()
+	if s.TotalConns != 1 || s.BytesIn != int64(len(msg)) || s.BytesOut != int64(len(msg)) || s.ActiveConns != 0 {
+		t.Fatalf("统计错误: %+v", s)
+	}
+}
+
+func TestTCPFailoverToSecondTarget(t *testing.T) {
+	echoPort, closeEcho := tcpEcho(t)
+	defer closeEcho()
+	listenPort := freePort(t, "tcp")
+
+	// 第一个目标为不可路由的 TEST-NET 地址 192.0.2.1，拨号超时后应回退到第二个目标
+	rule := Rule{
+		Protocols:       []string{"tcp4"},
+		ListenAddress:   "127.0.0.1",
+		ListenPorts:     strconv.Itoa(listenPort),
+		TargetAddresses: []string{"127.0.0.1"},
+		TargetPorts:     strconv.Itoa(echoPort),
+	}
+	r := testRunner(rule)
+	// 直接替换目标列表，让轮询从不可达地址开始
+	r.picker.hosts = []string{"192.0.2.1", "127.0.0.1"}
+	r.settings.DialTimeout = 1
+	if err := r.start(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	defer r.stop()
+
+	conn, err := net.Dial("tcp", net.JoinHostPort("127.0.0.1", strconv.Itoa(listenPort)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer conn.Close()
+	_, _ = conn.Write([]byte("x"))
+	buf := make([]byte, 1)
+	_ = conn.SetReadDeadline(time.Now().Add(5 * time.Second))
+	if _, err := io.ReadFull(conn, buf); err != nil {
+		t.Fatalf("故障转移失败: %v", err)
+	}
+}
+
+func TestTCPMaxConnections(t *testing.T) {
+	echoPort, closeEcho := tcpEcho(t)
+	defer closeEcho()
+	listenPort := freePort(t, "tcp")
+	rule := Rule{
+		Protocols:       []string{"tcp4"},
+		ListenAddress:   "127.0.0.1",
+		ListenPorts:     strconv.Itoa(listenPort),
+		TargetAddresses: []string{"127.0.0.1"},
+		TargetPorts:     strconv.Itoa(echoPort),
+		MaxConnections:  1,
+	}
+	r := testRunner(rule)
+	if err := r.start(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	defer r.stop()
+	addr := net.JoinHostPort("127.0.0.1", strconv.Itoa(listenPort))
+
+	first, err := net.Dial("tcp", addr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer first.Close()
+	_, _ = first.Write([]byte("a"))
+	buf := make([]byte, 1)
+	_ = first.SetReadDeadline(time.Now().Add(3 * time.Second))
+	if _, err := io.ReadFull(first, buf); err != nil {
+		t.Fatal(err)
+	}
+
+	second, err := net.Dial("tcp", addr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer second.Close()
+	_ = second.SetReadDeadline(time.Now().Add(3 * time.Second))
+	if _, err := second.Read(buf); err == nil {
+		t.Fatal("超过连接上限的连接应被关闭")
+	}
+}
+
+func TestUDPForward(t *testing.T) {
+	echoPort, closeEcho := udpEcho(t)
+	defer closeEcho()
+	listenPort := freePort(t, "udp")
+	rule := Rule{
+		Protocols:         []string{"udp4"},
+		ListenAddress:     "127.0.0.1",
+		ListenPorts:       strconv.Itoa(listenPort),
+		TargetAddresses:   []string{"127.0.0.1"},
+		TargetPorts:       strconv.Itoa(echoPort),
+		UDPSessionTimeout: 1,
+	}
+	r := testRunner(rule)
+	if err := r.start(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	defer r.stop()
+
+	conn, err := net.Dial("udp", net.JoinHostPort("127.0.0.1", strconv.Itoa(listenPort)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer conn.Close()
+	for i := 0; i < 3; i++ {
+		msg := []byte("ping-" + strconv.Itoa(i))
+		if _, err := conn.Write(msg); err != nil {
+			t.Fatal(err)
+		}
+		buf := make([]byte, 64)
+		_ = conn.SetReadDeadline(time.Now().Add(3 * time.Second))
+		n, err := conn.Read(buf)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !bytes.Equal(buf[:n], msg) {
+			t.Fatalf("回显不一致: %q", buf[:n])
+		}
+	}
+	if got := r.stats.ActiveConns.Load(); got != 1 {
+		t.Fatalf("同一客户端应复用一个会话，实际 %d", got)
+	}
+	// 空闲超时后会话应被回收
+	deadline := time.Now().Add(4 * time.Second)
+	for r.stats.ActiveConns.Load() != 0 && time.Now().Before(deadline) {
+		time.Sleep(50 * time.Millisecond)
+	}
+	if got := r.stats.ActiveConns.Load(); got != 0 {
+		t.Fatalf("UDP 会话未按超时回收: %d", got)
+	}
+}
+
+func TestPartialListenFailure(t *testing.T) {
+	// 先占用一个端口，规则中包含该端口时其余端口仍应启动
+	busy, err := net.Listen("tcp4", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer busy.Close()
+	busyPort := busy.Addr().(*net.TCPAddr).Port
+	freeP := freePort(t, "tcp")
+	rule := Rule{
+		Protocols:       []string{"tcp4"},
+		ListenAddress:   "127.0.0.1",
+		ListenPorts:     strconv.Itoa(busyPort) + "," + strconv.Itoa(freeP),
+		TargetAddresses: []string{"127.0.0.1"},
+		TargetPorts:     "1",
+	}
+	r := testRunner(rule)
+	if err := r.start(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	defer r.stop()
+	if len(r.listenErrors) != 1 {
+		t.Fatalf("应记录 1 个监听失败，实际 %v", r.listenErrors)
+	}
+}
