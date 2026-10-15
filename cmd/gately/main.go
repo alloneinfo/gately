@@ -21,6 +21,7 @@ import (
 	"github.com/wangwanjie/gately/internal/modules/ssl"
 	"github.com/wangwanjie/gately/internal/modules/stun"
 	"github.com/wangwanjie/gately/internal/modules/waf"
+	"github.com/wangwanjie/gately/internal/modules/webdav"
 	"github.com/wangwanjie/gately/internal/modules/webservice"
 	"github.com/wangwanjie/gately/internal/modules/webterminal"
 	"github.com/wangwanjie/gately/internal/modules/wol"
@@ -63,6 +64,7 @@ func main() {
 			webterminal.New(),
 			cron.New(),
 			docker.New(),
+			webdav.New(certs),
 		},
 	})
 	if err != nil {
