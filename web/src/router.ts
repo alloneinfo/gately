@@ -18,6 +18,7 @@ const router = createRouter({
         { path: 'portforward', name: 'portforward', component: () => import('./views/PortForward.vue'), meta: { title: '端口转发' } },
         { path: 'wol', name: 'wol', component: () => import('./views/WOL.vue'), meta: { title: '网络唤醒' } },
         { path: 'terminal', name: 'terminal', component: () => import('./views/Terminal.vue'), meta: { title: 'Web 终端' } },
+        { path: 'cron', name: 'cron', component: () => import('./views/Cron.vue'), meta: { title: '计划任务' } },
         { path: 'settings', name: 'settings', component: () => import('./views/Settings.vue'), meta: { title: '设置' } },
       ],
     },

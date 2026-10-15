@@ -5,6 +5,7 @@ export class ApiError extends Error {
   constructor(
     message: string,
     public status: number,
+    public data?: Record<string, unknown>,
   ) {
     super(message)
   }
@@ -25,10 +26,10 @@ async function request<T>(method: string, url: string, body?: unknown): Promise<
     if (router.currentRoute.value.name !== 'login') {
       router.push({ name: 'login', query: { redirect: router.currentRoute.value.fullPath } })
     }
-    throw new ApiError(data?.error ?? '未登录', 401)
+    throw new ApiError(data?.error ?? '未登录', 401, data)
   }
   if (!resp.ok) {
-    throw new ApiError(data?.error ?? `请求失败 (${resp.status})`, resp.status)
+    throw new ApiError(data?.error ?? `请求失败 (${resp.status})`, resp.status, data)
   }
   return data as T
 }

@@ -14,6 +14,7 @@ import (
 
 	"github.com/wangwanjie/gately/internal/app"
 	"github.com/wangwanjie/gately/internal/module"
+	"github.com/wangwanjie/gately/internal/modules/cron"
 	"github.com/wangwanjie/gately/internal/modules/ddns"
 	"github.com/wangwanjie/gately/internal/modules/portforward"
 	"github.com/wangwanjie/gately/internal/modules/ssl"
@@ -56,6 +57,7 @@ func main() {
 			webservice.New(certs),
 			wol.New(),
 			webterminal.New(),
+			cron.New(),
 		},
 	})
 	if err != nil {

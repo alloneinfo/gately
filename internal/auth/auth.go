@@ -36,6 +36,8 @@ var (
 	ErrInvalidCredentials = errors.New("用户名或密码错误")
 	// ErrLocked 表示该 IP 因多次失败被临时锁定。
 	ErrLocked = errors.New("登录失败次数过多，请稍后再试")
+	// ErrTOTPRequired 表示需要输入两步验证码。
+	ErrTOTPRequired = errors.New("请输入两步验证码")
 )
 
 // Account 是持久化的管理员账号信息。
@@ -44,6 +46,8 @@ type Account struct {
 	PasswordHash  string `json:"passwordHash"`
 	SessionSecret string `json:"sessionSecret"`
 	TokenTTLHours int    `json:"tokenTTLHours"`
+	// TOTPSecret 非空表示已启用两步验证
+	TOTPSecret string `json:"totpSecret,omitempty"`
 }
 
 type failState struct {
@@ -105,8 +109,8 @@ func (m *Manager) Username() string {
 	return m.acc.Username
 }
 
-// Login 校验凭据并签发令牌。
-func (m *Manager) Login(ip, username, password string) (string, time.Time, error) {
+// Login 校验凭据并签发令牌。启用两步验证时 code 必填。
+func (m *Manager) Login(ip, username, password string, code ...string) (string, time.Time, error) {
 	if m.isLocked(ip) {
 		return "", time.Time{}, ErrLocked
 	}
@@ -120,6 +124,19 @@ func (m *Manager) Login(ip, username, password string) (string, time.Time, error
 	if !userOK || passErr != nil {
 		m.recordFailure(ip)
 		return "", time.Time{}, ErrInvalidCredentials
+	}
+	if acc.TOTPSecret != "" {
+		c := ""
+		if len(code) > 0 {
+			c = code[0]
+		}
+		if c == "" {
+			return "", time.Time{}, ErrTOTPRequired
+		}
+		if !ValidateTOTP(acc.TOTPSecret, c, m.now()) {
+			m.recordFailure(ip)
+			return "", time.Time{}, errors.New("两步验证码错误")
+		}
 	}
 	m.clearFailures(ip)
 	exp := m.now().Add(time.Duration(acc.TokenTTLHours) * time.Hour)
@@ -273,4 +290,27 @@ func randomString(n int) string {
 		panic(err)
 	}
 	return base64.RawURLEncoding.EncodeToString(b)[:n]
+}
+
+// TOTPEnabled 返回是否已启用两步验证。
+func (m *Manager) TOTPEnabled() bool {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	return m.acc.TOTPSecret != ""
+}
+
+// SetTOTP 启用或关闭两步验证。secret 为空表示关闭；需要提供当前密码。
+func (m *Manager) SetTOTP(password, secret string) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if bcrypt.CompareHashAndPassword([]byte(m.acc.PasswordHash), []byte(password)) != nil {
+		return errors.New("密码错误")
+	}
+	next := m.acc
+	next.TOTPSecret = secret
+	if err := m.save(next); err != nil {
+		return err
+	}
+	m.acc = next
+	return nil
 }

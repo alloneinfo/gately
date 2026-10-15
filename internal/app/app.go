@@ -14,6 +14,7 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/wangwanjie/gately/internal/auth"
@@ -65,6 +66,9 @@ type App struct {
 	modules   []*moduleEntry
 	startTime time.Time
 	logger    *log.Logger
+	// pendingTOTP 是生成后尚未确认的两步验证密钥
+	pendingMu   sync.Mutex
+	pendingTOTP string
 }
 
 // New 加载配置并初始化所有模块，但不启动网络服务。
@@ -131,6 +135,10 @@ func (a *App) Handler() http.Handler {
 	protected.HandleFunc("GET /api/session", a.handleSession)
 	protected.HandleFunc("GET /api/status", a.handleStatus)
 	protected.HandleFunc("PUT /api/account", a.handleAccount)
+	protected.HandleFunc("GET /api/account/totp", a.handleTOTPStatus)
+	protected.HandleFunc("POST /api/account/totp/setup", a.handleTOTPSetup)
+	protected.HandleFunc("POST /api/account/totp/enable", a.handleTOTPEnable)
+	protected.HandleFunc("POST /api/account/totp/disable", a.handleTOTPDisable)
 	protected.HandleFunc("GET /api/logs", a.logsHandler(a.sysLogs))
 	protected.HandleFunc("POST /api/import/lucky", a.handleLuckyImport)
 	for _, e := range a.modules {
@@ -193,6 +201,8 @@ func (a *App) stopModules() {
 type loginRequest struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
+	// Code 为两步验证码，未启用时忽略
+	Code string `json:"code"`
 }
 
 func (a *App) handleLogin(w http.ResponseWriter, r *http.Request) {
@@ -202,7 +212,12 @@ func (a *App) handleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	ip := httpx.ClientIP(r)
-	token, exp, err := a.auth.Login(ip, req.Username, req.Password)
+	token, exp, err := a.auth.Login(ip, req.Username, req.Password, req.Code)
+	if errors.Is(err, auth.ErrTOTPRequired) {
+		// 密码正确但缺少验证码，提示前端显示验证码输入框
+		httpx.WriteJSON(w, http.StatusUnauthorized, map[string]any{"error": err.Error(), "totpRequired": true})
+		return
+	}
 	if err != nil {
 		a.sysLogs.Add(logbuf.LevelWarn, "auth", fmt.Sprintf("来自 %s 的登录失败: %v", ip, err))
 		status := http.StatusUnauthorized
@@ -277,6 +292,66 @@ func (a *App) handleAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	a.sysLogs.Add(logbuf.LevelInfo, "auth", "管理员账号已修改，所有会话已失效")
+	httpx.OK(w, map[string]bool{"ok": true})
+}
+
+func (a *App) handleTOTPStatus(w http.ResponseWriter, r *http.Request) {
+	httpx.OK(w, map[string]bool{"enabled": a.auth.TOTPEnabled()})
+}
+
+// handleTOTPSetup 生成待确认的密钥，确认验证码后才真正启用。
+func (a *App) handleTOTPSetup(w http.ResponseWriter, r *http.Request) {
+	secret := auth.NewTOTPSecret()
+	a.pendingMu.Lock()
+	a.pendingTOTP = secret
+	a.pendingMu.Unlock()
+	httpx.OK(w, map[string]string{"secret": secret, "url": auth.TOTPURL(secret, a.auth.Username())})
+}
+
+type totpRequest struct {
+	Password string `json:"password"`
+	Code     string `json:"code"`
+}
+
+func (a *App) handleTOTPEnable(w http.ResponseWriter, r *http.Request) {
+	var req totpRequest
+	if err := httpx.ReadJSON(r, &req); err != nil {
+		httpx.Error(w, http.StatusBadRequest, "%v", err)
+		return
+	}
+	a.pendingMu.Lock()
+	secret := a.pendingTOTP
+	a.pendingMu.Unlock()
+	if secret == "" {
+		httpx.Error(w, http.StatusBadRequest, "请先生成密钥")
+		return
+	}
+	if !auth.ValidateTOTP(secret, req.Code, time.Now()) {
+		httpx.Error(w, http.StatusBadRequest, "验证码错误，请确认验证器时间同步")
+		return
+	}
+	if err := a.auth.SetTOTP(req.Password, secret); err != nil {
+		httpx.Error(w, http.StatusBadRequest, "%v", err)
+		return
+	}
+	a.pendingMu.Lock()
+	a.pendingTOTP = ""
+	a.pendingMu.Unlock()
+	a.sysLogs.Add(logbuf.LevelInfo, "auth", "已启用两步验证")
+	httpx.OK(w, map[string]bool{"ok": true})
+}
+
+func (a *App) handleTOTPDisable(w http.ResponseWriter, r *http.Request) {
+	var req totpRequest
+	if err := httpx.ReadJSON(r, &req); err != nil {
+		httpx.Error(w, http.StatusBadRequest, "%v", err)
+		return
+	}
+	if err := a.auth.SetTOTP(req.Password, ""); err != nil {
+		httpx.Error(w, http.StatusBadRequest, "%v", err)
+		return
+	}
+	a.sysLogs.Add(logbuf.LevelWarn, "auth", "已关闭两步验证")
 	httpx.OK(w, map[string]bool{"ok": true})
 }
 

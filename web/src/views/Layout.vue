@@ -27,6 +27,9 @@
         <el-menu-item index="/terminal">
           <el-icon><Monitor /></el-icon><span>Web 终端</span>
         </el-menu-item>
+        <el-menu-item index="/cron">
+          <el-icon><Timer /></el-icon><span>计划任务</span>
+        </el-menu-item>
         <el-menu-item index="/settings">
           <el-icon><Setting /></el-icon><span>设置</span>
         </el-menu-item>
@@ -51,7 +54,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Bell, Connection, Document, Link, Lock, Monitor, Odometer, Setting, Switch } from '@element-plus/icons-vue'
+import { Bell, Connection, Document, Link, Lock, Monitor, Odometer, Setting, Switch, Timer } from '@element-plus/icons-vue'
 import { api } from '../api'
 
 const route = useRoute()

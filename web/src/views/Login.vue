@@ -15,6 +15,9 @@
         <el-form-item label="密码">
           <el-input v-model="form.password" type="password" show-password autocomplete="current-password" />
         </el-form-item>
+        <el-form-item v-if="needCode" label="两步验证码">
+          <el-input v-model="form.code" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="验证器 App 中的 6 位数字" />
+        </el-form-item>
         <el-button type="primary" native-type="submit" :loading="loading" class="submit">登录</el-button>
       </el-form>
       <p class="hint">首次启动时初始密码会打印在程序日志中。</p>
@@ -26,12 +29,13 @@
 import { reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { api } from '../api'
+import { api, ApiError } from '../api'
 
 const router = useRouter()
 const route = useRoute()
-const form = reactive({ username: 'admin', password: '' })
+const form = reactive({ username: 'admin', password: '', code: '' })
 const loading = ref(false)
+const needCode = ref(false)
 
 async function submit() {
   loading.value = true
@@ -40,6 +44,13 @@ async function submit() {
     const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : '/overview'
     router.replace(redirect)
   } catch (e) {
+    // 密码正确但需要两步验证码时显示输入框
+    if (e instanceof ApiError && e.data?.totpRequired) {
+      needCode.value = true
+      if (!form.code) {
+        return
+      }
+    }
     ElMessage.error((e as Error).message)
   } finally {
     loading.value = false
