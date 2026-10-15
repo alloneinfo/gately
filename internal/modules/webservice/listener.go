@@ -6,6 +6,7 @@ import (
 	"errors"
 	"net"
 	"net/http"
+	"net/url"
 	"strconv"
 	"time"
 
@@ -26,6 +27,7 @@ var tlsVersions = map[string]uint16{
 // listenerRunner 运行一个监听器。
 type listenerRunner struct {
 	cfg     Listener
+	auth    *authenticator
 	log     *logbuf.Logger
 	srv     *http.Server
 	sites   []*siteHandler
@@ -57,6 +59,14 @@ func (l *listenerRunner) route(host string) *siteHandler {
 }
 
 func (l *listenerRunner) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	// 第三方登录回调只在配置的认证域名上处理，与站点路由无关
+	if r.URL.Path == oauthCallback && l.auth != nil {
+		env := l.auth.oauthEnv()
+		if u, err := url.Parse(env.callbackBase); err == nil && env.callbackBase != "" && hostOnly(u.Host) == hostOnly(r.Host) {
+			l.auth.handleOAuthCallback(w, r, env)
+			return
+		}
+	}
 	s := l.route(r.Host)
 	if s == nil {
 		http.NotFound(w, r)
@@ -66,7 +76,7 @@ func (l *listenerRunner) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func newListenerRunner(cfg Listener, log *logbuf.Logger, auth *authenticator, waf WAFProvider) (*listenerRunner, error) {
-	l := &listenerRunner{cfg: cfg, log: log}
+	l := &listenerRunner{cfg: cfg, log: log, auth: auth}
 	for _, s := range cfg.Sites {
 		if !s.Enable {
 			continue

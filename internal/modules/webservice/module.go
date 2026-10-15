@@ -7,7 +7,9 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"net/http"
+	"net/url"
 	"strconv"
+	"strings"
 	"sync"
 
 	"github.com/wangwanjie/gately/internal/config"
@@ -62,7 +64,17 @@ func (m *Module) Init(env module.Env) error {
 		}
 	}
 	m.auth = newAuthenticator(m.cfg.Settings.AuthSecret)
+	m.applyOAuthLocked()
 	return nil
+}
+
+// applyOAuthLocked 把第三方登录设置同步给认证器。
+func (m *Module) applyOAuthLocked() {
+	env := oauthEnv{providers: map[string]OAuthProvider{}, callbackBase: strings.TrimRight(m.cfg.Settings.OAuthCallbackBase, "/")}
+	for _, p := range m.cfg.Settings.OAuthProviders {
+		env.providers[p.Key] = p
+	}
+	m.auth.setOAuth(env)
 }
 
 // Start 实现 module.Module。
@@ -178,6 +190,10 @@ func (m *Module) Routes(r module.Router) {
 		defer m.mu.Unlock()
 		s := m.cfg.Settings
 		s.AuthSecret = ""
+		s.OAuthProviders = append([]OAuthProvider{}, s.OAuthProviders...)
+		for i := range s.OAuthProviders {
+			s.OAuthProviders[i].ClientSecret = crud.Mask(s.OAuthProviders[i].ClientSecret)
+		}
 		httpx.OK(w, s)
 	})
 	r.HandleFunc("PUT /settings", m.handlePutSettings)
@@ -197,6 +213,33 @@ func (m *Module) handlePutSettings(w http.ResponseWriter, r *http.Request) {
 	defer m.mu.Unlock()
 	old := m.cfg.Settings
 	s.AuthSecret = old.AuthSecret
+	// 保留被脱敏的 Client Secret
+	oldSecrets := map[string]string{}
+	for _, p := range old.OAuthProviders {
+		oldSecrets[p.Key] = p.ClientSecret
+	}
+	keys := map[string]bool{}
+	for i := range s.OAuthProviders {
+		p := &s.OAuthProviders[i]
+		p.Key = strings.ToLower(strings.TrimSpace(p.Key))
+		crud.KeepSecret(oldSecrets[p.Key], &p.ClientSecret)
+		if err := p.validate(); err != nil {
+			httpx.Error(w, http.StatusBadRequest, "%v", err)
+			return
+		}
+		if keys[p.Key] {
+			httpx.Error(w, http.StatusBadRequest, "第三方登录标识 %s 重复", p.Key)
+			return
+		}
+		keys[p.Key] = true
+	}
+	s.OAuthCallbackBase = strings.TrimSpace(s.OAuthCallbackBase)
+	if s.OAuthCallbackBase != "" {
+		if u, err := url.Parse(s.OAuthCallbackBase); err != nil || (u.Scheme != "http" && u.Scheme != "https") || u.Host == "" {
+			httpx.Error(w, http.StatusBadRequest, "回调地址需为完整的 http(s) 地址")
+			return
+		}
+	}
 	s.TrustedProxies = cleanList(s.TrustedProxies)
 	m.cfg.Settings = s
 	if err := m.saveLocked(); err != nil {
@@ -204,6 +247,7 @@ func (m *Module) handlePutSettings(w http.ResponseWriter, r *http.Request) {
 		httpx.Error(w, http.StatusInternalServerError, "保存失败: %v", err)
 		return
 	}
+	m.applyOAuthLocked()
 	for key := range m.runners {
 		m.stopLocked(key)
 	}
@@ -215,5 +259,8 @@ func (m *Module) handlePutSettings(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	s.AuthSecret = ""
+	for i := range s.OAuthProviders {
+		s.OAuthProviders[i].ClientSecret = crud.Mask(s.OAuthProviders[i].ClientSecret)
+	}
 	httpx.OK(w, s)
 }

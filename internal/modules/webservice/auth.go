@@ -30,6 +30,21 @@ type authenticator struct {
 	secret []byte
 	mu     sync.Mutex
 	fails  map[string]*failCount
+	// oauth 为第三方登录配置，设置变更时整体替换
+	oauthMu sync.RWMutex
+	oauth   oauthEnv
+}
+
+func (a *authenticator) setOAuth(env oauthEnv) {
+	a.oauthMu.Lock()
+	a.oauth = env
+	a.oauthMu.Unlock()
+}
+
+func (a *authenticator) oauthEnv() oauthEnv {
+	a.oauthMu.RLock()
+	defer a.oauthMu.RUnlock()
+	return a.oauth
 }
 
 type failCount struct {
@@ -131,6 +146,10 @@ func (a *authenticator) validCookie(r *http.Request, s Site) bool {
 			return true
 		}
 	}
+	// 第三方登录的会话用户为 提供方:标识，允许列表变化后立即失效
+	if provider, id, ok := strings.Cut(parts[0], ":"); ok {
+		return identityAllowed(s, provider, id)
+	}
 	return false
 }
 
@@ -144,6 +163,14 @@ func isBrowser(r *http.Request) bool {
 func (a *authenticator) check(w http.ResponseWriter, r *http.Request, s Site) bool {
 	ip := clientAddr(r).Addr().String()
 	if s.WebAuth {
+		switch r.URL.Path {
+		case oauthStart:
+			a.handleOAuthStart(w, r, s, a.oauthEnv())
+			return false
+		case oauthFinish:
+			a.handleOAuthFinish(w, r, s)
+			return false
+		}
 		if strings.HasPrefix(r.URL.Path, authPath) {
 			a.handleLogin(w, r, s, ip)
 			return false
@@ -157,7 +184,11 @@ func (a *authenticator) check(w http.ResponseWriter, r *http.Request, s Site) bo
 			return false
 		}
 	}
-	// 基本认证（网页认证对非浏览器的回退）
+	// 基本认证（网页认证对非浏览器的回退）；只配置了第三方身份时非浏览器无法登录
+	if len(s.Users) == 0 {
+		http.Error(w, "401 Unauthorized", http.StatusUnauthorized)
+		return false
+	}
 	if a.locked(ip) {
 		http.Error(w, "429 Too Many Requests", http.StatusTooManyRequests)
 		return false
@@ -183,14 +214,18 @@ h1{font-size:18px;margin:0 0 4px}p{margin:0 0 18px;color:#888;font-size:13px}
 input{width:100%;box-sizing:border-box;padding:10px;margin-bottom:12px;border:1px solid #ccd;border-radius:6px;font-size:14px}
 button{width:100%;padding:10px;border:0;border-radius:6px;background:#0e7c66;color:#fff;font-size:15px;cursor:pointer}
 .err{color:#d33;font-size:13px;margin-bottom:10px}
+.oauth{display:block;text-align:center;margin-top:10px;padding:9px;border:1px solid #ccd;border-radius:6px;color:#333;text-decoration:none;font-size:14px}
 </style></head><body>
 <form method="post" action="{{.Action}}">
 <h1>访问 {{.Host}}</h1><p>此站点需要登录</p>
 {{if .Error}}<div class="err">{{.Error}}</div>{{end}}
+{{if .HasPassword}}
 <input name="username" placeholder="用户名" autocomplete="username" required autofocus>
 <input name="password" type="password" placeholder="密码" autocomplete="current-password" required>
 <input type="hidden" name="next" value="{{.Next}}">
 <button type="submit">登录</button>
+{{end}}
+{{range .Providers}}<a class="oauth" href="{{$.StartURL}}?p={{.Key}}&next={{$.Next}}">使用 {{.Name}} 登录</a>{{end}}
 </form></body></html>`))
 
 // safeNext 只允许站内相对路径，防止开放重定向。
@@ -201,9 +236,38 @@ func safeNext(next string) string {
 	return next
 }
 
+// loginProvider 是登录页展示的第三方登录入口。
+type loginProvider struct{ Key, Name string }
+
+// siteProviders 返回站点允许、且已配置的第三方登录提供方。
+func (a *authenticator) siteProviders(s Site) []loginProvider {
+	env := a.oauthEnv()
+	if env.callbackBase == "" {
+		return nil
+	}
+	seen := map[string]bool{}
+	var out []loginProvider
+	for _, u := range s.OAuthUsers {
+		key, _, _ := strings.Cut(u, ":")
+		key = strings.ToLower(key)
+		if p, ok := env.providers[key]; ok && !seen[key] {
+			seen[key] = true
+			name := p.Name
+			if name == "" {
+				name = p.Key
+			}
+			out = append(out, loginProvider{Key: key, Name: name})
+		}
+	}
+	return out
+}
+
 func (a *authenticator) handleLogin(w http.ResponseWriter, r *http.Request, s Site, ip string) {
 	host := hostOnly(r.Host)
-	data := map[string]string{"Host": host, "Action": authPath + "/login", "Next": safeNext(r.URL.Query().Get("next"))}
+	data := map[string]any{
+		"Host": host, "Action": authPath + "/login", "Next": safeNext(r.URL.Query().Get("next")),
+		"HasPassword": len(s.Users) > 0, "Providers": a.siteProviders(s), "StartURL": oauthStart,
+	}
 	if r.URL.Path == authPath+"/logout" {
 		http.SetCookie(w, &http.Cookie{Name: cookieName(s.Key), Value: "", Path: "/", MaxAge: -1})
 		http.Redirect(w, r, authPath+"/login", http.StatusFound)
@@ -212,6 +276,7 @@ func (a *authenticator) handleLogin(w http.ResponseWriter, r *http.Request, s Si
 	if r.Method == http.MethodPost {
 		_ = r.ParseForm()
 		data["Next"] = safeNext(r.PostForm.Get("next"))
+		next, _ := data["Next"].(string)
 		switch {
 		case a.locked(ip):
 			data["Error"] = "失败次数过多，请稍后再试"
@@ -221,7 +286,7 @@ func (a *authenticator) handleLogin(w http.ResponseWriter, r *http.Request, s Si
 				Name: cookieName(s.Key), Value: a.sign(r.PostForm.Get("username"), host, exp.Unix()),
 				Path: "/", Expires: exp, HttpOnly: true, Secure: r.TLS != nil, SameSite: http.SameSiteLaxMode,
 			})
-			http.Redirect(w, r, data["Next"], http.StatusFound)
+			http.Redirect(w, r, next, http.StatusFound)
 			return
 		default:
 			a.fail(ip)
@@ -230,7 +295,7 @@ func (a *authenticator) handleLogin(w http.ResponseWriter, r *http.Request, s Si
 	}
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.Header().Set("Cache-Control", "no-store")
-	if data["Error"] != "" {
+	if _, failed := data["Error"]; failed {
 		w.WriteHeader(http.StatusUnauthorized)
 	}
 	_ = loginTmpl.Execute(w, data)

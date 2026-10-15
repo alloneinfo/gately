@@ -63,6 +63,8 @@ type Site struct {
 	BasicAuth bool     `json:"basicAuth"`
 	WebAuth   bool     `json:"webAuth"`
 	Users     []string `json:"users"`
+	// OAuthUsers 为允许通过第三方登录访问的身份，格式 提供方key:用户名（或邮箱），提供方key:* 表示该提供方任意用户
+	OAuthUsers []string `json:"oauthUsers"`
 
 	IPMode string   `json:"ipMode"`
 	IPList []string `json:"ipList"`
@@ -104,6 +106,10 @@ type Settings struct {
 	TrustedProxies []string `json:"trustedProxies"`
 	// AuthSecret 用于签名网页认证 Cookie，首次启动自动生成
 	AuthSecret string `json:"authSecret"`
+	// OAuthProviders 为自建的第三方登录配置
+	OAuthProviders []OAuthProvider `json:"oauthProviders"`
+	// OAuthCallbackBase 为接收第三方登录回调的站点地址（需由 Gately 的某个监听提供），例如 https://auth.example.com
+	OAuthCallbackBase string `json:"oauthCallbackBase"`
 }
 
 type fileConfig struct {
@@ -255,8 +261,17 @@ func (s *Site) validate(isDefault bool) error {
 		return fmt.Errorf("未知的站点类型 %q", s.Type)
 	}
 	s.Users = cleanList(s.Users)
-	if (s.BasicAuth || s.WebAuth) && len(s.Users) == 0 {
-		return errors.New("启用认证时至少添加一个用户")
+	s.OAuthUsers = cleanList(s.OAuthUsers)
+	if s.BasicAuth && len(s.Users) == 0 {
+		return errors.New("启用基本认证时至少添加一个用户")
+	}
+	if s.WebAuth && len(s.Users) == 0 && len(s.OAuthUsers) == 0 {
+		return errors.New("启用网页认证时至少添加一个用户或第三方登录身份")
+	}
+	for _, u := range s.OAuthUsers {
+		if p, id, ok := strings.Cut(u, ":"); !ok || p == "" || id == "" {
+			return fmt.Errorf("第三方身份格式应为 提供方:用户名，实际 %q", u)
+		}
 	}
 	for _, u := range s.Users {
 		if name, pass, ok := strings.Cut(u, ":"); !ok || name == "" || pass == "" {

@@ -183,6 +183,10 @@
             <el-form-item v-if="site.webAuth || site.basicAuth" label="用户">
               <el-input v-model="usersText" type="textarea" :rows="3" class="mono" placeholder="每行一个 用户名:密码（密码可为 bcrypt 哈希）" />
             </el-form-item>
+            <el-form-item v-if="site.webAuth" label="第三方登录">
+              <el-input v-model="oauthUsersText" type="textarea" :rows="2" class="mono" placeholder="每行一个允许的身份，如 github:octocat、google:me@gmail.com；github:* 表示任意 GitHub 账号" />
+              <div class="help block">提供方需先在「全局设置」中配置</div>
+            </el-form-item>
             <el-form-item label="IP 访问控制">
               <el-radio-group v-model="site.ipMode">
                 <el-radio-button value="">关闭</el-radio-button>
@@ -217,12 +221,34 @@
       </template>
     </el-dialog>
 
-    <el-dialog v-model="settingsVisible" title="Web 服务全局设置" width="520px">
+    <el-dialog v-model="settingsVisible" title="Web 服务全局设置" width="640px">
       <el-form v-if="settings" :model="settings" label-width="150px">
         <el-form-item label="启用模块"><el-switch v-model="settings.enable" /></el-form-item>
         <el-form-item label="可信 PROXY 来源">
           <el-input v-model="trustedText" type="textarea" :rows="4" class="mono" placeholder="每行一个 IP 或网段；留空表示不信任任何来源" />
         </el-form-item>
+        <el-divider content-position="left">第三方登录（网页认证使用）</el-divider>
+        <el-form-item label="回调地址">
+          <el-input v-if="settings" v-model="settings.oauthCallbackBase" placeholder="https://auth.example.com（需由 Gately 的某个监听提供）" />
+          <div class="help block">在 GitHub / Google 中登记的回调地址为：{{ (settings?.oauthCallbackBase || 'https://...').replace(/\/$/, '') }}/__gately_auth/oauth/callback</div>
+        </el-form-item>
+        <div v-for="(p, i) in settings?.oauthProviders ?? []" :key="i" class="provider">
+          <div class="provider-row">
+            <el-input v-model="p.key" placeholder="标识，如 github" style="width: 120px" />
+            <el-input v-model="p.name" placeholder="显示名" style="width: 120px" />
+            <el-select v-model="p.type" style="width: 120px">
+              <el-option label="GitHub" value="github" />
+              <el-option label="OIDC" value="oidc" />
+            </el-select>
+            <el-button link type="danger" @click="settings?.oauthProviders.splice(i, 1)">删除</el-button>
+          </div>
+          <div class="provider-row">
+            <el-input v-model="p.clientId" placeholder="Client ID" />
+            <el-input v-model="p.clientSecret" type="password" show-password placeholder="Client Secret" />
+          </div>
+          <el-input v-if="p.type === 'oidc'" v-model="p.issuer" placeholder="Issuer，如 https://accounts.google.com" />
+        </div>
+        <el-button size="small" @click="settings?.oauthProviders.push({ key: '', name: '', type: 'github', clientId: '', clientSecret: '', issuer: '' })">添加第三方登录</el-button>
       </el-form>
       <template #footer>
         <el-button @click="settingsVisible = false">取消</el-button>
@@ -261,6 +287,7 @@ interface Site {
   basicAuth: boolean
   webAuth: boolean
   users: string[] | null
+  oauthUsers: string[] | null
   ipMode: string
   ipList: string[] | null
   requestHeaders: string[] | null
@@ -312,7 +339,15 @@ const siteIsDefault = ref(false)
 let siteOwner: ListenerView | null = null
 let siteIndex = -1
 const settingsVisible = ref(false)
-const settings = ref<{ enable: boolean; trustedProxies: string[] | null }>()
+interface OAuthProvider {
+  key: string
+  name: string
+  type: string
+  clientId: string
+  clientSecret: string
+  issuer: string
+}
+const settings = ref<{ enable: boolean; trustedProxies: string[] | null; oauthCallbackBase: string; oauthProviders: OAuthProvider[] }>()
 let timer: number | undefined
 
 const lines = (v: string) => v.split('\n').map((s) => s.trim()).filter(Boolean)
@@ -321,6 +356,7 @@ const bind = (get: () => string[] | null | undefined, set: (v: string[]) => void
 const domainsText = bind(() => site.value.domains, (v) => (site.value.domains = v))
 const targetsText = bind(() => site.value.targets, (v) => (site.value.targets = v))
 const usersText = bind(() => site.value.users, (v) => (site.value.users = v))
+const oauthUsersText = bind(() => site.value.oauthUsers, (v) => (site.value.oauthUsers = v))
 const ipText = bind(() => site.value.ipList, (v) => (site.value.ipList = v))
 const reqHeadersText = bind(() => site.value.requestHeaders, (v) => (site.value.requestHeaders = v))
 const respHeadersText = bind(() => site.value.responseHeaders, (v) => (site.value.responseHeaders = v))
@@ -349,6 +385,7 @@ function emptySite(): Site {
     basicAuth: false,
     webAuth: false,
     users: [],
+    oauthUsers: [],
     ipMode: '',
     ipList: [],
     requestHeaders: [],
@@ -520,7 +557,8 @@ async function removeSite(lv: ListenerView, row: SiteRow) {
 }
 
 async function openSettings() {
-  settings.value = await api.get('/api/webservice/settings')
+  const s = await api.get<{ enable: boolean; trustedProxies: string[] | null; oauthCallbackBase: string; oauthProviders: OAuthProvider[] | null }>('/api/webservice/settings')
+  settings.value = { ...s, oauthProviders: s.oauthProviders ?? [] }
   settingsVisible.value = true
 }
 
@@ -577,6 +615,24 @@ onBeforeUnmount(() => window.clearInterval(timer))
 }
 .inline {
   margin-left: 16px;
+}
+.help.block {
+  display: block;
+  margin-left: 0;
+}
+.provider {
+  border: 1px solid var(--el-border-color-lighter);
+  border-radius: 6px;
+  padding: 8px;
+  margin-bottom: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.provider-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
 }
 .logs {
   margin-top: 16px;

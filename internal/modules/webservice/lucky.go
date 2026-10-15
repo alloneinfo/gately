@@ -219,9 +219,9 @@ func convertLuckyListeners(raw json.RawMessage) ([]Listener, []string, int, erro
 			msg := k
 			switch k {
 			case "第三方登录":
-				msg = "第三方登录（OAuth）暂不支持，已改为仅使用站点用户登录"
+				msg = "第三方登录原本经过 Lucky 官方中转服务器，迁移后需在全局设置中配置自己的 GitHub/OIDC 应用并填写允许的身份；在此之前仅能使用站点用户登录"
 			case "认证停用":
-				msg = "这些站点只配置了第三方登录、没有站点用户，为避免去掉认证后暴露，已停用（添加用户后再启用）"
+				msg = "这些站点只配置了 Lucky 中转的第三方登录、没有站点用户，为避免去掉认证后暴露，已停用（在全局设置中配置自己的 GitHub/OIDC 登录或添加用户后再启用）"
 			}
 			warns = append(warns, fmt.Sprintf("%s: %s：%s", label, msg, strings.Join(featureSites[k], "、")))
 		}
