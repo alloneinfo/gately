@@ -250,14 +250,19 @@ func (a *App) handleSession(w http.ResponseWriter, r *http.Request) {
 }
 
 type moduleInfo struct {
-	ID    string `json:"id"`
-	Title string `json:"title"`
+	ID      string               `json:"id"`
+	Title   string               `json:"title"`
+	Summary []module.SummaryItem `json:"summary,omitempty"`
 }
 
 func (a *App) handleStatus(w http.ResponseWriter, r *http.Request) {
 	mods := make([]moduleInfo, 0, len(a.modules))
 	for _, e := range a.modules {
-		mods = append(mods, moduleInfo{ID: e.mod.ID(), Title: e.mod.Title()})
+		info := moduleInfo{ID: e.mod.ID(), Title: e.mod.Title()}
+		if sm, ok := e.mod.(module.Summarizer); ok {
+			info.Summary = sm.Summary()
+		}
+		mods = append(mods, info)
 	}
 	var mem runtime.MemStats
 	runtime.ReadMemStats(&mem)

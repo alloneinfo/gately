@@ -39,3 +39,15 @@ type Module interface {
 	// Routes 注册管理接口
 	Routes(r Router)
 }
+
+// SummaryItem 是总览页展示的一项指标。Level 为 ok / warn / error / info，用于着色。
+type SummaryItem struct {
+	Label string `json:"label"`
+	Value string `json:"value"`
+	Level string `json:"level,omitempty"`
+}
+
+// Summarizer 由希望在总览页展示状态的模块实现。
+type Summarizer interface {
+	Summary() []SummaryItem
+}

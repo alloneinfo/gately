@@ -24,6 +24,15 @@
         </el-card>
       </el-col>
     </el-row>
+    <div class="modules">
+      <el-card v-for="m in summaryModules" :key="m.id" shadow="hover" class="module-card" @click="go(m.id)">
+        <div class="module-title">{{ m.title }}</div>
+        <div v-for="it in m.summary" :key="it.label" class="item">
+          <span class="label">{{ it.label }}</span>
+          <span :class="['value', it.level]">{{ it.value }}</span>
+        </div>
+      </el-card>
+    </div>
     <el-card shadow="never" header="系统日志" class="logs">
       <LogViewer url="/api/logs" />
     </el-card>
@@ -32,10 +41,19 @@
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { api, formatBytes, type Status } from '../api'
 import LogViewer from '../components/LogViewer.vue'
 
 const status = ref<Status>()
+const router = useRouter()
+// 模块 ID 与页面路由的对应关系
+const routes: Record<string, string> = { webservice: '/web' }
+const summaryModules = computed(() => (status.value?.modules ?? []).filter((m) => m.summary?.length))
+
+function go(id: string) {
+  router.push(routes[id] ?? '/' + id)
+}
 const now = ref(Date.now())
 let timer: number | undefined
 
@@ -54,7 +72,10 @@ const uptime = computed(() => {
 
 onMounted(async () => {
   status.value = await api.get<Status>('/api/status')
-  timer = window.setInterval(() => (now.value = Date.now()), 30000)
+  timer = window.setInterval(async () => {
+    now.value = Date.now()
+    status.value = await api.get<Status>('/api/status')
+  }, 10000)
 })
 onBeforeUnmount(() => window.clearInterval(timer))
 </script>
@@ -67,5 +88,36 @@ onBeforeUnmount(() => window.clearInterval(timer))
 }
 .logs {
   margin-top: 16px;
+}
+.modules {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 14px;
+  margin-top: 16px;
+}
+.module-card {
+  cursor: pointer;
+}
+.module-title {
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  line-height: 1.9;
+}
+.label {
+  color: var(--el-text-color-secondary);
+}
+.value.ok {
+  color: var(--el-color-success);
+}
+.value.warn {
+  color: var(--el-color-warning);
+}
+.value.error {
+  color: var(--el-color-danger);
 }
 </style>

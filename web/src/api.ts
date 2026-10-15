@@ -44,6 +44,7 @@ export const api = {
 export interface ModuleInfo {
   id: string
   title: string
+  summary?: { label: string; value: string; level?: string }[]
 }
 
 export interface Status {
