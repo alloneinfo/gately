@@ -25,6 +25,11 @@ type SiteStats struct {
 	Errors   atomic.Int64
 }
 
+// WAFProvider 提供按实例检查请求的中间件（由 WAF 模块实现）。
+type WAFProvider interface {
+	Middleware(key string, next http.Handler) http.Handler
+}
+
 // siteHandler 是一个站点编译后的处理器。
 type siteHandler struct {
 	site    Site
@@ -33,8 +38,10 @@ type siteHandler struct {
 	log     *logbuf.Logger
 	auth    *authenticator
 	handler http.Handler
-	targets []*url.URL
-	next    atomic.Uint64
+	// pipeline 为 WAF（可选）→ 跨域 → 认证 → 站点处理器
+	pipeline http.Handler
+	targets  []*url.URL
+	next     atomic.Uint64
 }
 
 type ctxKeyClientAddr struct{}
@@ -45,7 +52,7 @@ func clientAddr(r *http.Request) netip.AddrPort {
 	return netip.AddrPortFrom(ap.Addr().Unmap(), ap.Port())
 }
 
-func newSiteHandler(s Site, log *logbuf.Logger, auth *authenticator) (*siteHandler, error) {
+func newSiteHandler(s Site, log *logbuf.Logger, auth *authenticator, waf WAFProvider) (*siteHandler, error) {
 	h := &siteHandler{site: s, stats: &SiteStats{}, log: log, auth: auth}
 	var err error
 	if h.ipList, err = parsePrefixes(s.IPList); err != nil {
@@ -89,6 +96,11 @@ func newSiteHandler(s Site, log *logbuf.Logger, auth *authenticator) (*siteHandl
 			w.WriteHeader(s.StatusCode)
 			_, _ = w.Write([]byte(s.Text))
 		})
+	}
+	h.pipeline = http.HandlerFunc(h.serveInner)
+	// WAF 放在认证之前，登录页同样受保护
+	if s.WAF != "" && waf != nil {
+		h.pipeline = waf.Middleware(s.WAF, h.pipeline)
 	}
 	return h, nil
 }
@@ -229,6 +241,11 @@ func (h *siteHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.Error(rec, "403 Forbidden", http.StatusForbidden)
 		return
 	}
+	h.pipeline.ServeHTTP(rec, r)
+}
+
+// serveInner 处理跨域、认证并交给站点处理器。
+func (h *siteHandler) serveInner(rec http.ResponseWriter, r *http.Request) {
 	if h.site.CORS {
 		if origin := r.Header.Get("Origin"); origin != "" {
 			rec.Header().Set("Access-Control-Allow-Origin", origin)

@@ -31,6 +31,7 @@ import (
 	"github.com/wangwanjie/gately/internal/logbuf"
 	"github.com/wangwanjie/gately/internal/luckyimport"
 	"github.com/wangwanjie/gately/internal/module"
+	"github.com/wangwanjie/gately/internal/modules/waf"
 )
 
 func TestMatchAndRoute(t *testing.T) {
@@ -107,7 +108,7 @@ func startRunner(t *testing.T, l Listener, certs CertSource, trusted []string) (
 		t.Fatal(err)
 	}
 	logs := logbuf.New(200, log.New(io.Discard, "", 0))
-	r, err := newListenerRunner(l, logs.Logger("t"), newAuthenticator("secret"))
+	r, err := newListenerRunner(l, logs.Logger("t"), newAuthenticator("secret"), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -461,6 +462,9 @@ func TestConvertLucky(t *testing.T) {
 		t.Fatalf("按字符存储的用户列表应还原: %+v", b.Users)
 	}
 	joined := strings.Join(warns, "\n")
+	if a.WAF != "main" {
+		t.Fatalf("应保留 WAF 引用: %q", a.WAF)
+	}
 	for _, w := range []string{"HTTP/3", "fileServer", "WAF", "第三方登录", "默认停用"} {
 		if !strings.Contains(joined, w) {
 			t.Errorf("缺少告警 %q:\n%s", w, joined)
@@ -483,7 +487,7 @@ func TestImportRealSample(t *testing.T) {
 		t.Fatal(err)
 	}
 	st, _ := config.Open(t.TempDir())
-	m := New(nil)
+	m := New(nil, nil)
 	if err := m.Init(module.Env{Store: st, Logs: logbuf.New(10, log.New(io.Discard, "", 0))}); err != nil {
 		t.Fatal(err)
 	}
@@ -500,5 +504,49 @@ func TestImportRealSample(t *testing.T) {
 	}
 	if rep.Imported != rep.Found {
 		t.Fatal("有监听规则未能导入")
+	}
+}
+
+func TestWAFIntegration(t *testing.T) {
+	st, _ := config.Open(t.TempDir())
+	fw := waf.New()
+	if err := fw.Init(module.Env{Store: st, Logs: logbuf.New(50, log.New(io.Discard, "", 0))}); err != nil {
+		t.Fatal(err)
+	}
+	// 通过导入接口创建与 Lucky 相同 key 的实例
+	raw, _ := json.Marshal([]map[string]any{{"Key": "k1", "Name": "waf-main", "Enable": true, "InboundScoreThreshold": 6, "OutboundScoreThreshold": 4,
+		"CorazaWAFConfigList": []map[string]any{{"Enable": true, "Type": "OWASPCoreRuleset", "Param": "REQUEST-930-APPLICATION-ATTACK-LFI.conf"}}}})
+	if _, err := fw.ImportLucky(luckyimport.Document{"CorazaList": raw}, false); err != nil {
+		t.Fatal(err)
+	}
+	l := Listener{Sites: []Site{
+		{Enable: true, Domains: []string{"protected.test"}, Type: TypeText, Text: "ok", WAF: "k1"},
+		{Enable: true, Domains: []string{"stale.test"}, Type: TypeText, Text: "ok", WAF: "main"},
+	}}
+	ln, _ := net.Listen("tcp4", "127.0.0.1:0")
+	l.Port = ln.Addr().(*net.TCPAddr).Port
+	ln.Close()
+	l.ListenIP, l.Network = "127.0.0.1", "tcp4"
+	if err := l.Validate(); err != nil {
+		t.Fatal(err)
+	}
+	r, err := newListenerRunner(l, logbuf.New(50, log.New(io.Discard, "", 0)).Logger("t"), newAuthenticator("s"), fw)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := r.start(nil, nil); err != nil {
+		t.Fatal(err)
+	}
+	defer r.stop()
+	addr := fmt.Sprintf("127.0.0.1:%d", l.Port)
+	attack := "/?f=" + url.QueryEscape("../../../../etc/passwd")
+	if resp, _ := get(t, http.DefaultClient, addr, "protected.test", "/", nil); resp.StatusCode != 200 {
+		t.Fatalf("正常请求被拦截: %d", resp.StatusCode)
+	}
+	if resp, _ := get(t, http.DefaultClient, addr, "protected.test", attack, nil); resp.StatusCode != 403 {
+		t.Fatalf("WAF 应拦截路径穿越: %d", resp.StatusCode)
+	}
+	if resp, _ := get(t, http.DefaultClient, addr, "stale.test", attack, nil); resp.StatusCode != 200 {
+		t.Fatalf("引用不存在的实例时应放行（与 Lucky 一致）: %d", resp.StatusCode)
 	}
 }

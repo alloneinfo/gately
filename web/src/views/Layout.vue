@@ -21,6 +21,9 @@
         <el-menu-item index="/web">
           <el-icon><Document /></el-icon><span>Web 服务</span>
         </el-menu-item>
+        <el-menu-item index="/waf">
+          <el-icon><Umbrella /></el-icon><span>WAF 防火墙</span>
+        </el-menu-item>
         <el-menu-item index="/wol">
           <el-icon><Bell /></el-icon><span>网络唤醒</span>
         </el-menu-item>
@@ -54,7 +57,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Bell, Connection, Document, Link, Lock, Monitor, Odometer, Setting, Switch, Timer } from '@element-plus/icons-vue'
+import { Bell, Connection, Document, Link, Lock, Monitor, Odometer, Setting, Switch, Timer, Umbrella } from '@element-plus/icons-vue'
 import { api } from '../api'
 
 const route = useRoute()

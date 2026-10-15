@@ -65,20 +65,20 @@ func (l *listenerRunner) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.ServeHTTP(w, r)
 }
 
-func newListenerRunner(cfg Listener, log *logbuf.Logger, auth *authenticator) (*listenerRunner, error) {
+func newListenerRunner(cfg Listener, log *logbuf.Logger, auth *authenticator, waf WAFProvider) (*listenerRunner, error) {
 	l := &listenerRunner{cfg: cfg, log: log}
 	for _, s := range cfg.Sites {
 		if !s.Enable {
 			continue
 		}
-		h, err := newSiteHandler(s, log, auth)
+		h, err := newSiteHandler(s, log, auth, waf)
 		if err != nil {
 			return nil, err
 		}
 		l.sites = append(l.sites, h)
 	}
 	if cfg.Default.Enable {
-		h, err := newSiteHandler(cfg.Default, log, auth)
+		h, err := newSiteHandler(cfg.Default, log, auth, waf)
 		if err != nil {
 			return nil, err
 		}

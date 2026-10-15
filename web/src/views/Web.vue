@@ -61,6 +61,9 @@
             <el-tag v-if="row.site.ipMode" size="small" type="info" class="opt">{{ row.site.ipMode === 'whitelist' ? '白名单' : '黑名单' }}</el-tag>
             <el-tag v-if="row.site.sendProxyProtocol" size="small" type="info" class="opt">PROXY v2</el-tag>
             <el-tag v-if="row.site.insecureSkipVerify" size="small" type="info" class="opt">跳过证书校验</el-tag>
+            <el-tag v-if="row.site.waf" size="small" :type="wafInstances.some((w) => w.key === row.site.waf) ? 'danger' : 'info'" class="opt">
+              WAF{{ wafInstances.some((w) => w.key === row.site.waf) ? '' : '（实例不存在）' }}
+            </el-tag>
           </template>
         </el-table-column>
         <el-table-column label="请求" width="110">
@@ -190,6 +193,12 @@
             <el-form-item v-if="site.ipMode" label="IP / 网段">
               <el-input v-model="ipText" type="textarea" :rows="3" class="mono" placeholder="每行一个，如 192.168.1.0/24" />
             </el-form-item>
+            <el-form-item label="WAF 实例">
+              <el-select v-model="site.waf" clearable placeholder="不启用" style="width: 260px">
+                <el-option v-for="w in wafInstances" :key="w.key" :label="w.name" :value="w.key" />
+                <el-option v-if="site.waf && !wafInstances.some((w) => w.key === site.waf)" :label="`${site.waf}（实例不存在）`" :value="site.waf" />
+              </el-select>
+            </el-form-item>
             <el-form-item label="跨域 (CORS)"><el-switch v-model="site.cors" /></el-form-item>
           </el-tab-pane>
           <el-tab-pane label="请求头" name="headers">
@@ -258,6 +267,7 @@ interface Site {
   responseHeaders: string[] | null
   cors: boolean
   accessLog: boolean
+  waf: string
   remark: string
 }
 
@@ -290,6 +300,7 @@ interface SiteRow {
 }
 
 const listeners = ref<ListenerView[]>([])
+const wafInstances = ref<{ key: string; name: string }[]>([])
 const loading = ref(true)
 const saving = ref(false)
 const listenerVisible = ref(false)
@@ -344,6 +355,7 @@ function emptySite(): Site {
     responseHeaders: [],
     cors: false,
     accessLog: false,
+    waf: '',
     remark: '',
   }
 }
@@ -524,6 +536,7 @@ async function saveSettings() {
 }
 
 onMounted(async () => {
+  wafInstances.value = await api.get('/api/waf/instances')
   await load()
   timer = window.setInterval(load, 5000)
 })

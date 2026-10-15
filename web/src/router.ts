@@ -16,6 +16,7 @@ const router = createRouter({
         { path: 'ssl', name: 'ssl', component: () => import('./views/SSL.vue'), meta: { title: 'SSL 证书' } },
         { path: 'web', name: 'web', component: () => import('./views/Web.vue'), meta: { title: 'Web 服务' } },
         { path: 'portforward', name: 'portforward', component: () => import('./views/PortForward.vue'), meta: { title: '端口转发' } },
+        { path: 'waf', name: 'waf', component: () => import('./views/WAF.vue'), meta: { title: 'WAF 防火墙' } },
         { path: 'wol', name: 'wol', component: () => import('./views/WOL.vue'), meta: { title: '网络唤醒' } },
         { path: 'terminal', name: 'terminal', component: () => import('./views/Terminal.vue'), meta: { title: 'Web 终端' } },
         { path: 'cron', name: 'cron', component: () => import('./views/Cron.vue'), meta: { title: '计划任务' } },

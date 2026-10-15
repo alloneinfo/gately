@@ -19,6 +19,7 @@ import (
 	"github.com/wangwanjie/gately/internal/modules/portforward"
 	"github.com/wangwanjie/gately/internal/modules/ssl"
 	"github.com/wangwanjie/gately/internal/modules/stun"
+	"github.com/wangwanjie/gately/internal/modules/waf"
 	"github.com/wangwanjie/gately/internal/modules/webservice"
 	"github.com/wangwanjie/gately/internal/modules/webterminal"
 	"github.com/wangwanjie/gately/internal/modules/wol"
@@ -43,8 +44,9 @@ func main() {
 		return
 	}
 
-	// Web 服务使用证书模块按 SNI 提供 HTTPS 证书
+	// Web 服务使用证书模块按 SNI 提供 HTTPS 证书，并按站点引用 WAF 实例
 	certs := ssl.New()
+	firewall := waf.New()
 	a, err := app.New(app.Options{
 		ConfigDir: *configDir,
 		Listen:    *listen,
@@ -54,7 +56,8 @@ func main() {
 			ddns.New(),
 			stun.New(),
 			certs,
-			webservice.New(certs),
+			firewall,
+			webservice.New(certs, firewall),
 			wol.New(),
 			webterminal.New(),
 			cron.New(),

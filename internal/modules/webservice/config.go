@@ -72,7 +72,9 @@ type Site struct {
 	ResponseHeaders []string `json:"responseHeaders"`
 	CORS            bool     `json:"cors"`
 	AccessLog       bool     `json:"accessLog"`
-	Remark          string   `json:"remark"`
+	// WAF 为引用的 WAF 实例 key，留空不检查；实例不存在或停用时放行
+	WAF    string `json:"waf"`
+	Remark string `json:"remark"`
 }
 
 // Listener 是一个监听端口及其站点。

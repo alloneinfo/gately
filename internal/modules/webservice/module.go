@@ -28,14 +28,15 @@ type Module struct {
 	cfg     fileConfig
 	ctx     context.Context
 	certs   CertSource
+	waf     WAFProvider
 	auth    *authenticator
 	runners map[string]*listenerRunner
 	errors  map[string]string
 }
 
-// New 创建模块。certs 为证书来源，可为 nil（此时不能启用 HTTPS）。
-func New(certs CertSource) *Module {
-	return &Module{certs: certs, runners: map[string]*listenerRunner{}, errors: map[string]string{}}
+// New 创建模块。certs 为证书来源，可为 nil（此时不能启用 HTTPS）；waf 可为 nil（站点的 WAF 设置不生效）。
+func New(certs CertSource, waf WAFProvider) *Module {
+	return &Module{certs: certs, waf: waf, runners: map[string]*listenerRunner{}, errors: map[string]string{}}
 }
 
 // ID 实现 module.Module。
@@ -99,7 +100,7 @@ func (m *Module) startLocked(l Listener) {
 	if label == "" {
 		label = ":" + strconv.Itoa(l.Port)
 	}
-	r, err := newListenerRunner(l, m.logs.Logger(label), m.auth)
+	r, err := newListenerRunner(l, m.logs.Logger(label), m.auth, m.waf)
 	if err == nil {
 		err = r.start(m.certs, m.cfg.Settings.TrustedProxies)
 	}

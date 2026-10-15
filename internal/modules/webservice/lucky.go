@@ -109,6 +109,8 @@ func convertSite(ls luckySite) (Site, []string) {
 		ForwardedHeaders:   ls.AddRemoteIPToHeader || ls.AddProtoToHeader,
 		AccessLog:          ls.EnableAccessLog,
 		CORS:               ls.EnableCrossDomain,
+		// 保留 Lucky 的 WAF 实例 key，WAF 模块导入时沿用相同 key
+		WAF: ls.CorazaWAFInstance,
 	}
 	if v, ok := ls.OtherParams["ProxyProtocolV2"].(bool); ok {
 		s.SendProxyProtocol = v
@@ -141,9 +143,6 @@ func convertSite(ls luckySite) (Site, []string) {
 	}
 	if ls.SafeIPMode == "whitelist" {
 		notes = append(notes, "原规则使用全局 IP 白名单，迁移后未启用访问控制，请注意暴露面")
-	}
-	if ls.CorazaWAFInstance != "" {
-		notes = append(notes, "WAF")
 	}
 	if oauth, _ := ls.OtherParams["AllowAllThirdUsers"].(bool); oauth {
 		notes = append(notes, "第三方登录")
@@ -219,8 +218,6 @@ func convertLuckyListeners(raw json.RawMessage) ([]Listener, []string, int, erro
 		for _, k := range keys {
 			msg := k
 			switch k {
-			case "WAF":
-				msg = "Coraza WAF 暂不支持（规划中），以下站点迁移后不再经过 WAF"
 			case "第三方登录":
 				msg = "第三方登录（OAuth）暂不支持，已改为仅使用站点用户登录"
 			case "认证停用":
@@ -235,6 +232,7 @@ func convertLuckyListeners(raw json.RawMessage) ([]Listener, []string, int, erro
 		out = append(out, l)
 	}
 	if len(out) > 0 {
+		warns = append(warns, "站点引用的 WAF 实例需同时导入 lucky_coraza.lkcf；引用不存在的实例时不做检查（与 Lucky 行为一致）")
 		warns = append(warns, "导入的监听规则默认停用：请先停止 Lucky 中对应的规则，再在 Gately 中启用；HTTPS 站点需要先在证书模块中启用对应证书")
 	}
 	return out, warns, len(src), nil
