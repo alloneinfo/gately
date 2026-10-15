@@ -6,10 +6,6 @@ import (
 	"fmt"
 	"net"
 	"net/netip"
-	"os"
-	"os/exec"
-	"path/filepath"
-	"runtime"
 	"strconv"
 	"strings"
 	"sync"
@@ -17,6 +13,7 @@ import (
 	"time"
 
 	"github.com/wangwanjie/gately/internal/logbuf"
+	"github.com/wangwanjie/gately/internal/script"
 	"github.com/wangwanjie/gately/internal/upnp"
 	"github.com/wangwanjie/gately/internal/webhook"
 )
@@ -50,7 +47,7 @@ type RuleState struct {
 	PublicAddr string       `json:"publicAddr,omitempty"`
 	LocalAddr  string       `json:"localAddr,omitempty"`
 	StunServer string       `json:"stunServer,omitempty"`
-	Since      time.Time    `json:"since,omitempty"`
+	Since      time.Time    `json:"since,omitzero"`
 	Error      string       `json:"error,omitempty"`
 	Mapping    string       `json:"mapping,omitempty"`
 	History    []AddrChange `json:"history,omitempty"`
@@ -252,16 +249,10 @@ func (r *runner) publish(ctx context.Context, addr netip.AddrPort) {
 	}()
 }
 
-// scriptRunner 允许测试观察脚本执行。
-var scriptRunner = runScript
-
-// runScript 执行用户脚本，变量通过环境变量传入（兼容 Lucky 脚本中的 ${port} 写法），避免拼接导致的注入。
+// runScript 执行用户脚本，变量通过环境变量传入（兼容 Lucky 脚本中的 ${port} 写法）。
 func (r *runner) runScript(vars map[string]string) {
-	out, err := scriptRunner(r.rule.Script, vars)
-	text := strings.TrimSpace(string(out))
-	if len(text) > 2000 {
-		text = text[:2000] + "..."
-	}
+	out, err := script.Run(r.rule.Script, vars)
+	text := script.Summarize(out, 2000)
 	if err != nil {
 		r.log.Errorf("脚本执行失败: %v %s", err, text)
 		return
@@ -271,29 +262,6 @@ func (r *runner) runScript(vars map[string]string) {
 	} else {
 		r.log.Infof("脚本执行完成")
 	}
-}
-
-func runScript(script string, vars map[string]string) ([]byte, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
-	defer cancel()
-	var cmd *exec.Cmd
-	if runtime.GOOS == "windows" {
-		f, err := os.CreateTemp("", "gately-stun-*.bat")
-		if err != nil {
-			return nil, err
-		}
-		defer os.Remove(f.Name())
-		_, _ = f.WriteString(script)
-		f.Close()
-		cmd = exec.CommandContext(ctx, "cmd", "/C", filepath.Clean(f.Name()))
-	} else {
-		cmd = exec.CommandContext(ctx, "sh", "-c", script)
-	}
-	cmd.Env = os.Environ()
-	for k, v := range vars {
-		cmd.Env = append(cmd.Env, k+"="+v, "GATELY_"+strings.ToUpper(k)+"="+v)
-	}
-	return cmd.CombinedOutput()
 }
 
 // mapPort 在路由器上建立 UPnP / NAT-PMP 映射，返回清理函数。

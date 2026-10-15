@@ -371,23 +371,6 @@ func TestConvertLucky(t *testing.T) {
 	}
 }
 
-func TestSplitDomain(t *testing.T) {
-	cases := map[string][2]string{
-		"example.com":         {"@", "example.com"},
-		"a.b.example.com":     {"a.b", "example.com"},
-		"www.example.com.cn":  {"www", "example.com.cn"},
-		"example.com.cn":      {"@", "example.com.cn"},
-		"x:sub.example.co.uk": {"x", "sub.example.co.uk"},
-		"*.example.com":       {"*", "example.com"},
-	}
-	for in, want := range cases {
-		s, z := splitDomain(in)
-		if s != want[0] || z != want[1] {
-			t.Errorf("splitDomain(%q)=%q,%q want %v", in, s, z, want)
-		}
-	}
-}
-
 // TestImportRealSample 用真实 lucky_ddns.lkcf 做导入预演，仅在设置 GATELY_LUCKY_DDNS_SAMPLE 时运行。
 func TestImportRealSample(t *testing.T) {
 	path := os.Getenv("GATELY_LUCKY_DDNS_SAMPLE")

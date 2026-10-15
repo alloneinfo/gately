@@ -124,29 +124,6 @@ func str(m map[string]any, k string) string {
 	return ""
 }
 
-// splitDomain 把旧版 Lucky 的完整域名拆成主机记录与主域名。
-// 支持 "sub:example.com" 显式写法；否则取最后两段为主域名，常见多段后缀取最后三段。
-func splitDomain(full string) (sub, zone string) {
-	full = strings.Trim(strings.TrimSpace(full), ".")
-	if s, z, ok := strings.Cut(full, ":"); ok {
-		return s, z
-	}
-	labels := strings.Split(full, ".")
-	n := 2
-	if len(labels) >= 3 {
-		suffix := strings.Join(labels[len(labels)-2:], ".")
-		for _, ms := range []string{"com.cn", "net.cn", "org.cn", "gov.cn", "edu.cn", "co.uk", "co.jp", "com.au", "com.hk", "com.tw"} {
-			if suffix == ms {
-				n = 3
-			}
-		}
-	}
-	if len(labels) <= n {
-		return "@", full
-	}
-	return strings.Join(labels[:len(labels)-n], "."), strings.Join(labels[len(labels)-n:], ".")
-}
-
 // convertLuckyTasks 转换 Lucky DDNS 任务。
 func convertLuckyTasks(raw json.RawMessage) ([]Task, []string, int, error) {
 	var src []luckyTask
@@ -227,7 +204,7 @@ func convertLuckyTasks(raw json.RawMessage) ([]Task, []string, int, error) {
 				typ, val = "AAAA", VarIPv6
 			}
 			for _, full := range lt.Domains {
-				sub, zone := splitDomain(full)
+				sub, zone := dnsprovider.SplitFQDN(full)
 				t.Records = append(t.Records, Record{Enable: true, Zone: zone, Sub: sub, Type: typ, Value: val})
 			}
 		}

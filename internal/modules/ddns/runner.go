@@ -18,11 +18,11 @@ import (
 // RecordState 是一条记录的同步状态。
 type RecordState struct {
 	Value    string    `json:"value,omitempty"`
-	LastSync time.Time `json:"lastSync,omitempty"`
+	LastSync time.Time `json:"lastSync,omitzero"`
 	// LastAction 为 created/updated/unchanged
 	LastAction string    `json:"lastAction,omitempty"`
 	LastError  string    `json:"lastError,omitempty"`
-	LastCheck  time.Time `json:"lastCheck,omitempty"`
+	LastCheck  time.Time `json:"lastCheck,omitzero"`
 }
 
 // TaskState 是任务的运行状态。
@@ -30,11 +30,11 @@ type TaskState struct {
 	IPv4      string                 `json:"ipv4,omitempty"`
 	IPv6      string                 `json:"ipv6,omitempty"`
 	IPError   string                 `json:"ipError,omitempty"`
-	LastRun   time.Time              `json:"lastRun,omitempty"`
-	NextRun   time.Time              `json:"nextRun,omitempty"`
+	LastRun   time.Time              `json:"lastRun,omitzero"`
+	NextRun   time.Time              `json:"nextRun,omitzero"`
 	Running   bool                   `json:"running"`
 	Records   map[string]RecordState `json:"records"`
-	WebhookAt time.Time              `json:"webhookAt,omitempty"`
+	WebhookAt time.Time              `json:"webhookAt,omitzero"`
 	WebhookOK bool                   `json:"webhookOk"`
 }
 

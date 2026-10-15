@@ -84,6 +84,8 @@ type Meta struct {
 	SupportsLine bool `json:"supportsLine,omitempty"`
 	// DocURL 指向获取凭据的官方文档
 	DocURL string `json:"docUrl,omitempty"`
+	// SupportsACME 表示可用于证书申请的 DNS 验证（支持 TXT 记录增删）
+	SupportsACME bool `json:"supportsAcme,omitempty"`
 }
 
 // Factory 根据凭据创建 Provider。
@@ -95,6 +97,11 @@ type entry struct {
 }
 
 var registry = map[string]entry{}
+
+// Register 注册额外的服务商（扩展或测试使用）。名称重复时 panic。
+func Register(m Meta, f Factory) {
+	register(m, f)
+}
 
 // register 在各服务商文件的 init 中调用。
 func register(m Meta, f Factory) {
@@ -108,7 +115,9 @@ func register(m Meta, f Factory) {
 func List() []Meta {
 	out := make([]Meta, 0, len(registry))
 	for _, e := range registry {
-		out = append(out, e.meta)
+		m := e.meta
+		m.SupportsACME = SupportsTXT(m.Name)
+		out = append(out, m)
 	}
 	sort.Slice(out, func(i, j int) bool { return out[i].Name < out[j].Name })
 	return out

@@ -15,6 +15,9 @@
         <el-menu-item index="/portforward">
           <el-icon><Switch /></el-icon><span>端口转发</span>
         </el-menu-item>
+        <el-menu-item index="/ssl">
+          <el-icon><Lock /></el-icon><span>SSL 证书</span>
+        </el-menu-item>
         <el-menu-item v-for="item in planned" :key="item.title" :index="item.title" disabled>
           <el-icon><component :is="item.icon" /></el-icon>
           <span>{{ item.title }}</span>
@@ -55,7 +58,6 @@ const dark = ref(localStorage.getItem('gately-dark') === '1')
 // 后续里程碑的模块先在菜单中占位，方便用户了解路线图
 const planned = [
   { title: 'Web 服务', icon: Document },
-  { title: 'SSL 证书', icon: Lock },
 ]
 
 function applyDark(v: string | number | boolean) {

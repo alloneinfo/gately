@@ -1,0 +1,207 @@
+package ssl
+
+import (
+	"context"
+	"crypto"
+	"crypto/ecdsa"
+	"crypto/elliptic"
+	"crypto/rand"
+	"crypto/sha256"
+	"crypto/x509"
+	"encoding/hex"
+	"encoding/json"
+	"encoding/pem"
+	"errors"
+	"fmt"
+	"net/http"
+	"strings"
+	"time"
+
+	"github.com/go-acme/lego/v4/certcrypto"
+	"github.com/go-acme/lego/v4/certificate"
+	"github.com/go-acme/lego/v4/challenge/dns01"
+	"github.com/go-acme/lego/v4/lego"
+	"github.com/go-acme/lego/v4/registration"
+
+	"github.com/wangwanjie/gately/internal/dnsprovider"
+	"github.com/wangwanjie/gately/internal/logbuf"
+)
+
+// acmeUser 实现 lego 的 registration.User。
+type acmeUser struct {
+	email string
+	key   crypto.PrivateKey
+	reg   *registration.Resource
+}
+
+func (u *acmeUser) GetEmail() string                        { return u.email }
+func (u *acmeUser) GetRegistration() *registration.Resource { return u.reg }
+func (u *acmeUser) GetPrivateKey() crypto.PrivateKey        { return u.key }
+
+func accountKey(dirURL, email string) string {
+	h := sha256.Sum256([]byte(dirURL + "|" + strings.ToLower(email)))
+	return hex.EncodeToString(h[:8])
+}
+
+// dnsSolver 把 DNS-01 验证落到 Gately 的 DNS 服务商实现上。
+type dnsSolver struct {
+	txt     dnsprovider.TXTProvider
+	zone    string
+	timeout time.Duration
+	log     *logbuf.Logger
+}
+
+// locate 计算验证记录所在的主域名与主机记录。
+func (s *dnsSolver) locate(domain, keyAuth string) (zone, sub, value string, err error) {
+	info := dns01.GetChallengeInfo(domain, keyAuth)
+	fqdn := strings.TrimSuffix(info.EffectiveFQDN, ".")
+	if s.zone != "" {
+		sub, ok := dnsprovider.SubForZone(fqdn, s.zone)
+		if !ok {
+			return "", "", "", fmt.Errorf("验证记录 %s 不属于主域名 %s", fqdn, s.zone)
+		}
+		return s.zone, sub, info.Value, nil
+	}
+	sub, zone = dnsprovider.SplitFQDN(fqdn)
+	return zone, sub, info.Value, nil
+}
+
+func (s *dnsSolver) Present(domain, _, keyAuth string) error {
+	zone, sub, value, err := s.locate(domain, keyAuth)
+	if err != nil {
+		return err
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+	defer cancel()
+	s.log.Infof("添加验证记录 TXT %s.%s", sub, zone)
+	return s.txt.AddTXT(ctx, zone, sub, value)
+}
+
+func (s *dnsSolver) CleanUp(domain, _, keyAuth string) error {
+	zone, sub, value, err := s.locate(domain, keyAuth)
+	if err != nil {
+		return err
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+	defer cancel()
+	if err := s.txt.DeleteTXT(ctx, zone, sub, value); err != nil {
+		s.log.Warnf("清理验证记录失败（可手动删除 TXT %s.%s）: %v", sub, zone, err)
+	}
+	return nil
+}
+
+// Timeout 实现 challenge.ProviderTimeout：等待 TXT 生效的超时与轮询间隔。
+func (s *dnsSolver) Timeout() (time.Duration, time.Duration) {
+	return s.timeout, 5 * time.Second
+}
+
+// obtainResult 是签发结果。
+type obtainResult struct {
+	CertPEM, KeyPEM, IssuerPEM string
+	Account                    *Account
+}
+
+// acmeHTTPClient 允许测试注入信任测试 CA 的客户端。
+var acmeHTTPClient func() *http.Client
+
+// skipPropagationWait 是跳过生效检查时的固定等待时间。
+var skipPropagationWait = 20 * time.Second
+
+// obtain 使用 ACME 签发证书。acc 为已缓存账户，可为 nil；新注册的账户在结果中返回。
+func obtain(cfg ACMEConfig, acc *Account, log *logbuf.Logger) (*obtainResult, error) {
+	dirURL := cfg.directoryURL()
+	user := &acmeUser{email: cfg.Email}
+	res := &obtainResult{}
+	if acc != nil && acc.KeyPEM != "" && acc.Registration != "" {
+		key, err := certcrypto.ParsePEMPrivateKey([]byte(acc.KeyPEM))
+		if err == nil {
+			var reg registration.Resource
+			if json.Unmarshal([]byte(acc.Registration), &reg) == nil {
+				user.key, user.reg = key, &reg
+			}
+		}
+	}
+	if user.key == nil {
+		key, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+		if err != nil {
+			return nil, err
+		}
+		user.key = key
+	}
+
+	lc := lego.NewConfig(user)
+	lc.CADirURL = dirURL
+	lc.Certificate.KeyType = certcrypto.KeyType(cfg.KeyType)
+	lc.UserAgent = "Gately"
+	if acmeHTTPClient != nil {
+		lc.HTTPClient = acmeHTTPClient()
+	}
+	client, err := lego.NewClient(lc)
+	if err != nil {
+		return nil, fmt.Errorf("连接 ACME 服务失败: %w", err)
+	}
+
+	if user.reg == nil {
+		log.Infof("注册 ACME 账户 %s", cfg.Email)
+		var reg *registration.Resource
+		if cfg.EABKid != "" {
+			reg, err = client.Registration.RegisterWithExternalAccountBinding(registration.RegisterEABOptions{
+				TermsOfServiceAgreed: true, Kid: cfg.EABKid, HmacEncoded: cfg.EABHMAC,
+			})
+		} else {
+			reg, err = client.Registration.Register(registration.RegisterOptions{TermsOfServiceAgreed: true})
+		}
+		if err != nil {
+			return nil, fmt.Errorf("注册 ACME 账户失败: %w", err)
+		}
+		user.reg = reg
+		keyDER, err := x509.MarshalPKCS8PrivateKey(user.key)
+		if err != nil {
+			return nil, err
+		}
+		regJSON, _ := json.Marshal(reg)
+		res.Account = &Account{
+			Email:        cfg.Email,
+			DirectoryURL: dirURL,
+			KeyPEM:       string(pem.EncodeToMemory(&pem.Block{Type: "PRIVATE KEY", Bytes: keyDER})),
+			Registration: string(regJSON),
+		}
+	}
+
+	p, err := dnsprovider.New(cfg.Provider, cfg.Credentials, &http.Client{Timeout: 30 * time.Second})
+	if err != nil {
+		return nil, err
+	}
+	txt, err := dnsprovider.AsTXT(p)
+	if err != nil {
+		return nil, err
+	}
+	solver := &dnsSolver{txt: txt, zone: strings.Trim(cfg.Zone, "."), timeout: time.Duration(cfg.PropagationTimeout) * time.Second, log: log}
+	opts := []dns01.ChallengeOption{}
+	if len(cfg.Resolvers) > 0 {
+		opts = append(opts, dns01.AddRecursiveNameservers(dns01.ParseNameservers(cfg.Resolvers)))
+	}
+	if cfg.DisableAuthoritativeCheck {
+		opts = append(opts, dns01.DisableAuthoritativeNssPropagationRequirement())
+	}
+	if cfg.SkipPropagationCheck {
+		// 跳过本地检查，留出固定时间让 TXT 生效后再交给 CA 验证
+		opts = append(opts, dns01.PropagationWait(skipPropagationWait, true))
+	}
+	if err := client.Challenge.SetDNS01Provider(solver, opts...); err != nil {
+		return nil, err
+	}
+
+	log.Infof("申请证书 %s（CA: %s）", strings.Join(cfg.Domains, ", "), dirURL)
+	cert, err := client.Certificate.Obtain(certificate.ObtainRequest{Domains: cfg.Domains, Bundle: true})
+	if err != nil {
+		return nil, fmt.Errorf("签发失败: %w", err)
+	}
+	if len(cert.Certificate) == 0 || len(cert.PrivateKey) == 0 {
+		return nil, errors.New("CA 返回的证书为空")
+	}
+	res.CertPEM = string(cert.Certificate)
+	res.KeyPEM = string(cert.PrivateKey)
+	res.IssuerPEM = string(cert.IssuerCertificate)
+	return res, nil
+}
