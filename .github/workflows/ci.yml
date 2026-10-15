@@ -32,7 +32,7 @@ jobs:
         run: go test -race ./...
       - name: 交叉编译
         run: |
-          for target in linux/amd64 linux/arm64 linux/arm linux/mipsle windows/amd64 darwin/arm64; do
+          for target in linux/amd64 linux/arm64 linux/arm linux/mipsle linux/mips linux/riscv64 windows/amd64 darwin/arm64 freebsd/amd64; do
             GOOS=${target%/*} GOARCH=${target#*/} CGO_ENABLED=0 go build -o /dev/null ./cmd/gately
           done
       - name: ACME 端到端测试（Pebble）

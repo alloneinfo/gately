@@ -22,7 +22,8 @@ RUN CGO_ENABLED=0 go build -trimpath \
 FROM alpine:3.23
 RUN apk add --no-cache ca-certificates tzdata
 COPY --from=build /out/gately /usr/local/bin/gately
-ENV GATELY_CONFIG_DIR=/data
-VOLUME ["/data"]
+# 配置目录使用 /etc/gately，避免与迁移自 Lucky 的 /data/... 挂载路径冲突
+ENV GATELY_CONFIG_DIR=/etc/gately
+VOLUME ["/etc/gately"]
 EXPOSE 16680
 ENTRYPOINT ["/usr/local/bin/gately"]

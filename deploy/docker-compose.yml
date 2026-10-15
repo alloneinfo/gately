@@ -1,0 +1,19 @@
+# Gately 部署示例。根据需要调整挂载目录。
+services:
+  gately:
+    image: gately:latest
+    build: ..
+    container_name: gately
+    restart: unless-stopped
+    # 端口转发、STUN 穿透、Web 服务都需要直接监听宿主机端口
+    network_mode: host
+    volumes:
+      # 配置目录（明文 JSON，可纳入 git 备份；ssl.json 中含证书私钥）
+      - ./data:/etc/gately
+      # Docker 管理（不需要可删除）
+      - /var/run/docker.sock:/var/run/docker.sock
+      # 从 Lucky 迁移时，脚本与证书映射目录挂载到与 Lucky 相同的路径
+      # - ./custom:/etc/lucky/custom
+      # - ../nginx/config/ssl/lucky:/data/nginx/config/ssl/lucky
+    environment:
+      - TZ=Asia/Shanghai
