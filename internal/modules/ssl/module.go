@@ -237,6 +237,8 @@ func (m *Module) checkAll(force bool) {
 			}
 			if ok, reason := m.needsRenewal(c, now); ok {
 				m.logs.Logger(label(c)).Infof("需要签发：%s", reason)
+				// 排队时即标记，避免手动续签与定时检查重复签发同一证书
+				st.Obtaining = true
 				due = append(due, c.Key)
 			}
 		}
@@ -253,6 +255,7 @@ func (m *Module) triggerLocked(key string) {
 	if st.Obtaining || m.ctx == nil {
 		return
 	}
+	st.Obtaining = true
 	m.wg.Add(1)
 	go func() {
 		defer m.wg.Done()
@@ -260,18 +263,36 @@ func (m *Module) triggerLocked(key string) {
 	}()
 }
 
-// obtainNow 同步执行签发，结果写回配置。
+// obtainNow 同步执行签发，结果写回配置。调用方已把状态标记为 Obtaining。
 func (m *Module) obtainNow(key string) {
+	cancelQueued := func() {
+		m.mu.Lock()
+		if st, ok := m.states[key]; ok {
+			st.Obtaining = false
+		}
+		m.mu.Unlock()
+	}
 	select {
 	case m.obtainSem <- struct{}{}:
 	case <-m.done():
+		cancelQueued()
 		return
 	}
 	defer func() { <-m.obtainSem }()
+	// 等待期间模块可能已停止
+	select {
+	case <-m.done():
+		cancelQueued()
+		return
+	default:
+	}
 
 	m.mu.Lock()
 	c := m.findLocked(key)
 	if c == nil || c.Source != SourceACME {
+		if st, ok := m.states[key]; ok {
+			st.Obtaining = false
+		}
 		m.mu.Unlock()
 		return
 	}

@@ -41,6 +41,10 @@ const (
 	oauthStart    = authPath + "/oauth/start"
 	oauthCallback = authPath + "/oauth/callback"
 	oauthFinish   = authPath + "/oauth/finish"
+	// oauthNonceCookie 把登录流程绑定到发起登录的浏览器
+	oauthNonceCookie = "gately_oauth_nonce"
+	stateTTL         = 10 * time.Minute
+	ticketTTL        = 2 * time.Minute
 )
 
 // GitHub 端点，测试时可替换
@@ -165,10 +169,10 @@ func (p *OAuthProvider) exchange(ctx context.Context, code, redirect string) (st
 	}
 	defer resp.Body.Close()
 	var u struct {
-		Login         string `json:"login"`
-		Email         string `json:"email"`
-		EmailVerified *bool  `json:"email_verified"`
-		Sub           string `json:"sub"`
+		Login         string          `json:"login"`
+		Email         string          `json:"email"`
+		EmailVerified json.RawMessage `json:"email_verified"`
+		Sub           string          `json:"sub"`
 	}
 	if err := json.NewDecoder(io.LimitReader(resp.Body, 1<<20)).Decode(&u); err != nil {
 		return "", fmt.Errorf("解析用户信息失败: %w", err)
@@ -180,7 +184,9 @@ func (p *OAuthProvider) exchange(ctx context.Context, code, redirect string) (st
 		return u.Login, nil
 	}
 	// 未验证的邮箱不可信，退回使用 sub
-	if u.Email != "" && (u.EmailVerified == nil || *u.EmailVerified) {
+	// 部分提供方把 email_verified 编码为字符串，只有明确为 true 时才采用邮箱
+	verified := string(u.EmailVerified) == "true" || string(u.EmailVerified) == `"true"`
+	if u.Email != "" && verified {
 		return strings.ToLower(u.Email), nil
 	}
 	if u.Sub == "" {
@@ -233,7 +239,7 @@ func (a *authenticator) verifyBlob(kind, token string, out any) error {
 type oauthState struct {
 	Provider string `json:"p"`
 	Origin   string `json:"o"` // 原站点的 scheme://host
-	SiteKey  string `json:"s"`
+	Scope    string `json:"s"`
 	Next     string `json:"n"`
 	Nonce    string `json:"r"`
 }
@@ -242,8 +248,9 @@ type oauthState struct {
 type oauthTicket struct {
 	Identity string `json:"i"`
 	Host     string `json:"h"`
-	SiteKey  string `json:"s"`
+	Scope    string `json:"s"`
 	Next     string `json:"n"`
+	Nonce    string `json:"r"`
 }
 
 // oauthEnv 是处理第三方登录需要的全局配置。
@@ -293,20 +300,30 @@ func (a *authenticator) handleOAuthStart(w http.ResponseWriter, r *http.Request,
 		http.Error(w, "第三方登录未配置", http.StatusBadRequest)
 		return
 	}
-	state := a.signBlob("state", oauthState{Provider: pk, Origin: requestOrigin(r), SiteKey: s.Key, Next: safeNext(r.URL.Query().Get("next")), Nonce: randomNonce()}, 10*time.Minute)
+	nonce := randomNonce()
+	state := a.signBlob("state", oauthState{Provider: pk, Origin: requestOrigin(r), Scope: s.scope, Next: safeNext(r.URL.Query().Get("next")), Nonce: nonce}, stateTTL)
 	target, err := p.authorizeURL(r.Context(), env.callbackURL(), state)
 	if err != nil {
 		http.Error(w, "无法连接身份提供方: "+err.Error(), http.StatusBadGateway)
 		return
 	}
+	http.SetCookie(w, &http.Cookie{
+		Name: oauthNonceCookie, Value: nonce, Path: authPath, MaxAge: int(stateTTL / time.Second),
+		HttpOnly: true, Secure: r.TLS != nil, SameSite: http.SameSiteLaxMode,
+	})
 	http.Redirect(w, r, target, http.StatusFound)
 }
 
 // handleOAuthCallback 在认证域名上处理身份提供方的回调，然后带票据跳回原站点。
 func (a *authenticator) handleOAuthCallback(w http.ResponseWriter, r *http.Request, env oauthEnv) {
 	var st oauthState
-	if err := a.verifyBlob("state", r.URL.Query().Get("state"), &st); err != nil {
+	rawState := r.URL.Query().Get("state")
+	if err := a.verifyBlob("state", rawState, &st); err != nil {
 		http.Error(w, "登录状态无效: "+err.Error(), http.StatusBadRequest)
+		return
+	}
+	if !a.consumeOnce("state|"+rawState, stateTTL) {
+		http.Error(w, "登录状态已使用，请重新登录", http.StatusBadRequest)
 		return
 	}
 	p, ok := env.providers[st.Provider]
@@ -330,19 +347,31 @@ func (a *authenticator) handleOAuthCallback(w http.ResponseWriter, r *http.Reque
 		http.Error(w, "原站点地址无效", http.StatusBadRequest)
 		return
 	}
-	ticket := a.signBlob("ticket", oauthTicket{Identity: st.Provider + ":" + id, Host: hostOnly(u.Host), SiteKey: st.SiteKey, Next: st.Next}, 2*time.Minute)
+	ticket := a.signBlob("ticket", oauthTicket{Identity: st.Provider + ":" + id, Host: hostOnly(u.Host), Scope: st.Scope, Next: st.Next, Nonce: st.Nonce}, ticketTTL)
 	http.Redirect(w, r, st.Origin+oauthFinish+"?ticket="+url.QueryEscape(ticket), http.StatusFound)
 }
 
 // handleOAuthFinish 在原站点上校验票据与允许列表，建立会话。
 func (a *authenticator) handleOAuthFinish(w http.ResponseWriter, r *http.Request, s Site) {
 	var t oauthTicket
-	if err := a.verifyBlob("ticket", r.URL.Query().Get("ticket"), &t); err != nil {
+	raw := r.URL.Query().Get("ticket")
+	if err := a.verifyBlob("ticket", raw, &t); err != nil {
 		http.Error(w, "登录票据无效: "+err.Error(), http.StatusBadRequest)
 		return
 	}
-	if t.Host != hostOnly(r.Host) || t.SiteKey != s.Key {
+	if t.Host != hostOnly(r.Host) || t.Scope != s.scope {
 		http.Error(w, "登录票据与站点不匹配", http.StatusBadRequest)
+		return
+	}
+	// 票据必须由发起登录的同一浏览器使用，防止把他人的登录结果注入受害者浏览器
+	c, err := r.Cookie(oauthNonceCookie)
+	if err != nil || !hmac.Equal([]byte(c.Value), []byte(t.Nonce)) {
+		http.Error(w, "登录状态与当前浏览器不匹配，请重新登录", http.StatusBadRequest)
+		return
+	}
+	http.SetCookie(w, &http.Cookie{Name: oauthNonceCookie, Value: "", Path: authPath, MaxAge: -1})
+	if !a.consumeOnce("ticket|"+raw, ticketTTL) {
+		http.Error(w, "登录票据已使用", http.StatusBadRequest)
 		return
 	}
 	provider, identity, _ := strings.Cut(t.Identity, ":")
@@ -350,10 +379,6 @@ func (a *authenticator) handleOAuthFinish(w http.ResponseWriter, r *http.Request
 		http.Error(w, fmt.Sprintf("账号 %s 没有访问此站点的权限", t.Identity), http.StatusForbidden)
 		return
 	}
-	exp := time.Now().Add(sessionTTL)
-	http.SetCookie(w, &http.Cookie{
-		Name: cookieName(s.Key), Value: a.sign(t.Identity, hostOnly(r.Host), exp.Unix()),
-		Path: "/", Expires: exp, HttpOnly: true, Secure: r.TLS != nil, SameSite: http.SameSiteLaxMode,
-	})
+	a.issueSession(w, r, s, t.Identity)
 	http.Redirect(w, r, safeNext(t.Next), http.StatusFound)
 }

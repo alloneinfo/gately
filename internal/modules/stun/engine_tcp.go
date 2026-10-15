@@ -74,9 +74,12 @@ func (r *runner) sessionTCP(ctx context.Context) error {
 			defer wg.Done()
 			r.acceptLoop(sctx, ln)
 		}()
-		// 先关闭监听使 acceptLoop 退出，再等待
-		defer wg.Wait()
-		defer ln.Close()
+		// 先取消上下文结束已有转发、关闭监听使 acceptLoop 退出，再等待
+		defer func() {
+			cancel()
+			ln.Close()
+			wg.Wait()
+		}()
 	}
 
 	if !r.rule.DisableCheck {

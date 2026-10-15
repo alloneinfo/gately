@@ -28,6 +28,7 @@ type fakeDocker struct {
 	failStart  string                    // 启动该 ID 时失败
 	calls      []string
 	created    map[string]any
+	connected  []string
 	next       int
 }
 
@@ -94,6 +95,11 @@ func (f *fakeDocker) handler(w http.ResponseWriter, r *http.Request) {
 		f.created = body
 		f.containers[id] = map[string]any{"Id": id, "Name": "/" + r.URL.Query().Get("name"), "Image": f.pullTo, "Config": body, "State": map[string]any{"Running": false}}
 		_ = json.NewEncoder(w).Encode(map[string]string{"Id": id})
+	case len(parts) == 3 && parts[0] == "networks" && parts[2] == "connect":
+		var body map[string]any
+		_ = json.NewDecoder(r.Body).Decode(&body)
+		f.connected = append(f.connected, parts[1])
+		w.WriteHeader(200)
 	case r.Method == http.MethodDelete && len(parts) == 2:
 		delete(f.containers, parts[1])
 		w.WriteHeader(204)
@@ -108,10 +114,17 @@ func startFake(t *testing.T) (*fakeDocker, string) {
 	f := &fakeDocker{
 		containers: map[string]map[string]any{oldID: {
 			"Id": oldID, "Name": "/nginx", "Image": "sha256:old",
-			"Config":          map[string]any{"Image": "nginx:1.27", "Hostname": oldID[:12], "Env": []string{"A=1"}, "Labels": map[string]string{"x": "y"}},
-			"HostConfig":      map[string]any{"Binds": []string{"/data:/data"}, "RestartPolicy": map[string]any{"Name": "always"}},
-			"NetworkSettings": map[string]any{"Networks": map[string]any{"web_default": map[string]any{"Aliases": []string{"nginx"}, "IPAMConfig": map[string]any{"IPv4Address": "172.20.0.5"}}}},
-			"State":           map[string]any{"Running": true},
+			"Config":     map[string]any{"Image": "nginx:1.27", "Hostname": oldID[:12], "Env": []string{"A=1"}, "Labels": map[string]string{"x": "y"}},
+			"HostConfig": map[string]any{"Binds": []string{"/data:/data"}, "NetworkMode": "web_default", "RestartPolicy": map[string]any{"Name": "always"}},
+			"NetworkSettings": map[string]any{"Networks": map[string]any{
+				"web_default": map[string]any{"Aliases": []string{"nginx"}, "IPAMConfig": map[string]any{"IPv4Address": "172.20.0.5"}},
+				"backend":     map[string]any{"Aliases": []string{"api"}},
+			}},
+			"Mounts": []map[string]any{
+				{"Type": "bind", "Source": "/data", "Destination": "/data", "RW": true},
+				{"Type": "volume", "Name": "f00dcafe", "Destination": "/var/cache/nginx", "RW": true},
+			},
+			"State": map[string]any{"Running": true},
 		}},
 		images: map[string]string{"nginx:1.27": "sha256:old"},
 		pullTo: "sha256:new",
@@ -213,7 +226,14 @@ func TestUpgradePreservesConfig(t *testing.T) {
 	if hc["Binds"].([]any)[0] != "/data:/data" || b["Image"] != "nginx:1.27" {
 		t.Fatalf("配置应完整保留: %+v", b)
 	}
-	ep := b["NetworkingConfig"].(map[string]any)["EndpointsConfig"].(map[string]any)["web_default"].(map[string]any)
+	if binds := hc["Binds"].([]any); len(binds) != 2 || binds[1] != "f00dcafe:/var/cache/nginx" {
+		t.Fatalf("匿名卷应沿用: %v", binds)
+	}
+	eps := b["NetworkingConfig"].(map[string]any)["EndpointsConfig"].(map[string]any)
+	if len(eps) != 1 || len(f.connected) != 1 || f.connected[0] != "backend" {
+		t.Fatalf("创建时只带主网络，其余网络创建后连接: %v %v", eps, f.connected)
+	}
+	ep := eps["web_default"].(map[string]any)
 	if ep["Aliases"].([]any)[0] != "nginx" || ep["IPAMConfig"].(map[string]any)["IPv4Address"] != "172.20.0.5" {
 		t.Fatalf("网络别名与固定 IP 应保留: %+v", ep)
 	}

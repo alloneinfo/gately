@@ -271,11 +271,18 @@ func (r *runner) startUDP(ctx context.Context, network, addr string, targetPort 
 					r.log.Warnf("%s UDP 会话数达到上限 %d，丢弃 %s 的数据包", addr, r.settings.MaxUDPSessions, key)
 					continue
 				}
+				// 目标为域名时拨号需要解析，放到锁外，避免阻塞会话清理
+				mu.Unlock()
 				conn, err := r.dialTarget("udp", targetPort)
 				if err != nil {
-					mu.Unlock()
 					r.log.Warnf("%s 建立 UDP 会话失败: %v", key, err)
 					continue
+				}
+				mu.Lock()
+				if ctx.Err() != nil {
+					mu.Unlock()
+					conn.Close()
+					return
 				}
 				sess = &udpSession{conn: conn}
 				sess.lastActive.Store(time.Now().UnixNano())

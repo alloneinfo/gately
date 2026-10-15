@@ -3,10 +3,12 @@
 package waf
 
 import (
+	"bufio"
 	"context"
 	"errors"
 	"fmt"
 	"io/fs"
+	"net"
 	"net/http"
 	"path"
 	"strconv"
@@ -342,6 +344,17 @@ func (b *blockRecorder) Write(p []byte) (int, error) {
 
 // Unwrap 让 WebSocket 升级等能访问底层连接。
 func (b *blockRecorder) Unwrap() http.ResponseWriter { return b.ResponseWriter }
+
+// Flush 透传刷新。Coraza 用类型断言判断下游能力，必须显式实现，否则流式响应会被缓冲。
+func (b *blockRecorder) Flush() {
+	_ = http.NewResponseController(b.ResponseWriter).Flush()
+}
+
+// Hijack 透传连接劫持，使经过 WAF 的站点仍能升级 WebSocket。
+func (b *blockRecorder) Hijack() (net.Conn, *bufio.ReadWriter, error) {
+	b.wrote = true
+	return http.NewResponseController(b.ResponseWriter).Hijack()
+}
 
 // InstanceInfo 是供其他模块选择实例的简要信息。
 type InstanceInfo struct {

@@ -83,10 +83,12 @@ func newSiteHandler(s Site, log *logbuf.Logger, auth *authenticator, waf WAFProv
 		h.handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			// 关闭目录列表时，目录请求只允许存在 index.html
 			if !s.ListDir && strings.HasSuffix(r.URL.Path, "/") {
-				if _, err := http.Dir(s.Root).Open(r.URL.Path + "index.html"); err != nil {
+				f, err := http.Dir(s.Root).Open(r.URL.Path + "index.html")
+				if err != nil {
 					http.NotFound(w, r)
 					return
 				}
+				f.Close()
 			}
 			fs.ServeHTTP(w, r)
 		})
@@ -149,9 +151,14 @@ func (h *siteHandler) newProxy() http.Handler {
 				// SetURL 会改写 Host，这里恢复客户端请求的 Host
 				pr.Out.Host = pr.In.Host
 			}
+			// 客户端自带的 X-Real-IP 不可信，只在开启转发头时由 Gately 写入
+			pr.Out.Header.Del("X-Real-Ip")
 			if s.ForwardedHeaders {
 				pr.SetXForwarded()
+				pr.Out.Header.Set("X-Real-Ip", clientAddr(pr.In).Addr().String())
 			}
+			// 站点会话 Cookie 只用于 Gately 自身认证，不转发给后端
+			stripCookie(pr.Out, cookieName(s), oauthNonceCookie)
 			applyHeaders(pr.Out.Header, s.RequestHeaders)
 		},
 		ModifyResponse: func(resp *http.Response) error {
@@ -170,6 +177,34 @@ func (h *siteHandler) newProxy() http.Handler {
 		ctx := context.WithValue(r.Context(), ctxKeyClientAddr{}, clientAddr(r))
 		rp.ServeHTTP(w, r.WithContext(ctx))
 	})
+}
+
+// stripCookie 从请求中删除指定名称的 Cookie。
+func stripCookie(r *http.Request, names ...string) {
+	cookies := r.Cookies()
+	if len(cookies) == 0 {
+		return
+	}
+	var kept []string
+	for _, c := range cookies {
+		drop := false
+		for _, n := range names {
+			if c.Name == n {
+				drop = true
+				break
+			}
+		}
+		if !drop {
+			kept = append(kept, c.Name+"="+c.Value)
+		}
+	}
+	if len(kept) == len(cookies) {
+		return
+	}
+	r.Header.Del("Cookie")
+	if len(kept) > 0 {
+		r.Header.Set("Cookie", strings.Join(kept, "; "))
+	}
 }
 
 // applyHeaders 按 "Key: Value" 设置头，值为空时删除。
@@ -232,7 +267,12 @@ func (h *siteHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	defer func() {
 		if h.site.AccessLog {
-			h.log.Infof("%s %s %s%s %d %dms", client.Addr(), r.Method, r.Host, r.URL.RequestURI(), rec.status, time.Since(start).Milliseconds())
+			uri := r.URL.RequestURI()
+			// 认证路径的查询串含票据、授权码等敏感信息，不写入日志
+			if strings.HasPrefix(r.URL.Path, authPath) {
+				uri = r.URL.Path
+			}
+			h.log.Infof("%s %s %s%s %d %dms", client.Addr(), r.Method, r.Host, uri, rec.status, time.Since(start).Milliseconds())
 		}
 	}()
 
@@ -247,7 +287,7 @@ func (h *siteHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 // serveInner 处理跨域、认证并交给站点处理器。
 func (h *siteHandler) serveInner(rec http.ResponseWriter, r *http.Request) {
 	if h.site.CORS {
-		if origin := r.Header.Get("Origin"); origin != "" {
+		if origin := r.Header.Get("Origin"); origin != "" && h.corsAllowed(origin) {
 			rec.Header().Set("Access-Control-Allow-Origin", origin)
 			rec.Header().Set("Access-Control-Allow-Credentials", "true")
 			rec.Header().Set("Vary", "Origin")
@@ -265,6 +305,25 @@ func (h *siteHandler) serveInner(rec http.ResponseWriter, r *http.Request) {
 		return
 	}
 	h.handler.ServeHTTP(rec, r)
+}
+
+// corsAllowed 判断是否向该来源开放带凭据的跨域访问。
+// 站点开启认证时只允许站点自身域名作为来源，否则任意网页都能借用户的登录态读取内容。
+func (h *siteHandler) corsAllowed(origin string) bool {
+	if !h.site.BasicAuth && !h.site.WebAuth {
+		return true
+	}
+	u, err := url.Parse(origin)
+	if err != nil || u.Host == "" {
+		return false
+	}
+	host := hostOnly(u.Host)
+	for _, d := range h.site.Domains {
+		if d != "*" && matchDomain(d, host) > 0 {
+			return true
+		}
+	}
+	return false
 }
 
 // snapshot 返回统计快照。

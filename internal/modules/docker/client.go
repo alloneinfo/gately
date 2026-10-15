@@ -275,5 +275,13 @@ func (c *Client) Create(ctx context.Context, name string, body any) (string, err
 	return out.ID, err
 }
 
-// waitTimeout 是重建容器各步骤的超时。
-var waitTimeout = 5 * time.Minute
+// waitTimeout 是检查更新与拉取镜像的总超时（大镜像拉取较慢）。
+var waitTimeout = 30 * time.Minute
+
+// stepTimeout 是重建容器时单个操作的超时。
+var stepTimeout = 2 * time.Minute
+
+// ConnectNetwork 把容器连接到网络。
+func (c *Client) ConnectNetwork(ctx context.Context, network, id string, endpoint map[string]any) error {
+	return c.do(ctx, http.MethodPost, "/networks/"+url.PathEscape(network)+"/connect", map[string]any{"Container": id, "EndpointConfig": endpoint}, nil)
+}

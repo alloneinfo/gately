@@ -26,10 +26,12 @@ var tlsVersions = map[string]uint16{
 
 // listenerRunner 运行一个监听器。
 type listenerRunner struct {
-	cfg     Listener
-	auth    *authenticator
-	log     *logbuf.Logger
-	srv     *http.Server
+	cfg  Listener
+	auth *authenticator
+	log  *logbuf.Logger
+	srv  *http.Server
+	// cancel 结束所有请求上下文，用于关闭已升级（WebSocket）的连接
+	cancel  context.CancelFunc
 	sites   []*siteHandler
 	deflt   *siteHandler
 	startAt time.Time
@@ -81,6 +83,7 @@ func newListenerRunner(cfg Listener, log *logbuf.Logger, auth *authenticator, wa
 		if !s.Enable {
 			continue
 		}
+		s.scope = cfg.Key + "/" + s.Key
 		h, err := newSiteHandler(s, log, auth, waf)
 		if err != nil {
 			return nil, err
@@ -88,7 +91,9 @@ func newListenerRunner(cfg Listener, log *logbuf.Logger, auth *authenticator, wa
 		l.sites = append(l.sites, h)
 	}
 	if cfg.Default.Enable {
-		h, err := newSiteHandler(cfg.Default, log, auth, waf)
+		d := cfg.Default
+		d.scope = cfg.Key + "/" + d.Key
+		h, err := newSiteHandler(d, log, auth, waf)
 		if err != nil {
 			return nil, err
 		}
@@ -105,6 +110,10 @@ func (l *listenerRunner) start(certs CertSource, trusted []string) error {
 		return err
 	}
 	if l.cfg.AcceptProxyProtocol {
+		if len(trusted) == 0 {
+			ln.Close()
+			return errors.New("已开启接收 PROXY 协议，但未配置可信来源")
+		}
 		// 只有可信来源发来的 PROXY 头才会被采用，其他来源的头被忽略
 		policy, err := proxyproto.ConnLaxWhiteListPolicy(trusted)
 		if err != nil {
@@ -113,8 +122,11 @@ func (l *listenerRunner) start(certs CertSource, trusted []string) error {
 		}
 		ln = &proxyproto.Listener{Listener: ln, ConnPolicy: policy, ReadHeaderTimeout: 5 * time.Second}
 	}
+	baseCtx, cancel := context.WithCancel(context.Background())
+	l.cancel = cancel
 	l.srv = &http.Server{
 		Handler:           l,
+		BaseContext:       func(net.Listener) context.Context { return baseCtx },
 		ReadHeaderTimeout: 30 * time.Second,
 		IdleTimeout:       120 * time.Second,
 		ErrorLog:          nil,
@@ -154,4 +166,6 @@ func (l *listenerRunner) stop() {
 	if err := l.srv.Shutdown(ctx); err != nil {
 		_ = l.srv.Close()
 	}
+	// Shutdown 不管理已劫持的连接；取消请求上下文后反向代理会关闭升级后的连接
+	l.cancel()
 }

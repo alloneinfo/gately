@@ -4,12 +4,11 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"crypto/subtle"
-	"encoding/base64"
 	"encoding/hex"
 	"html/template"
 	"net/http"
+	"net/netip"
 	"net/url"
-	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -30,6 +29,8 @@ type authenticator struct {
 	secret []byte
 	mu     sync.Mutex
 	fails  map[string]*failCount
+	// used 记录已使用的一次性令牌（OAuth state 与票据）及其过期时间
+	used map[string]int64
 	// oauth 为第三方登录配置，设置变更时整体替换
 	oauthMu sync.RWMutex
 	oauth   oauthEnv
@@ -48,12 +49,13 @@ func (a *authenticator) oauthEnv() oauthEnv {
 }
 
 type failCount struct {
-	n     int
-	first time.Time
+	n        int
+	inflight int
+	first    time.Time
 }
 
 func newAuthenticator(secret string) *authenticator {
-	return &authenticator{secret: []byte(secret), fails: map[string]*failCount{}}
+	return &authenticator{secret: []byte(secret), fails: map[string]*failCount{}, used: map[string]int64{}}
 }
 
 // verifyUser 校验用户名密码，密码支持明文（兼容 Lucky）与 bcrypt 哈希。
@@ -76,78 +78,137 @@ func verifyUser(users []string, name, pass string) bool {
 	return false
 }
 
-func (a *authenticator) locked(ip string) bool {
+// limitKey 返回限流键：IPv6 按 /64 聚合，避免攻击者轮换同一网段内的地址绕过限制。
+func limitKey(ip string) string {
+	a, err := netip.ParseAddr(ip)
+	if err != nil {
+		return ip
+	}
+	a = a.Unmap()
+	if a.Is6() {
+		p, _ := a.Prefix(64)
+		return p.String()
+	}
+	return a.String()
+}
+
+// reserve 为一次密码校验占位；失败次数加上进行中的校验达到上限时拒绝，防止并发绕过。
+func (a *authenticator) reserve(key string) bool {
 	a.mu.Lock()
 	defer a.mu.Unlock()
-	f := a.fails[ip]
+	now := time.Now()
+	// 表过大时清理过期项，防止大量来源地址撑大内存
+	if len(a.fails) > 4096 {
+		for k, f := range a.fails {
+			if f.inflight == 0 && now.Sub(f.first) > failureReset {
+				delete(a.fails, k)
+			}
+		}
+	}
+	f := a.fails[key]
+	if f == nil || (f.inflight == 0 && now.Sub(f.first) > failureReset) {
+		f = &failCount{first: now}
+		a.fails[key] = f
+	}
+	if f.n+f.inflight >= maxFailures {
+		return false
+	}
+	f.inflight++
+	return true
+}
+
+// release 结束占位并记录结果；成功不清零计数，避免交替使用正确密码重置限流。
+func (a *authenticator) release(key string, ok bool) {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	f := a.fails[key]
 	if f == nil {
-		return false
+		return
 	}
-	if time.Since(f.first) > failureReset {
-		delete(a.fails, ip)
-		return false
+	f.inflight--
+	if !ok {
+		f.n++
 	}
-	return f.n >= maxFailures
 }
 
-func (a *authenticator) fail(ip string) {
+// consumeOnce 标记一次性令牌已使用，重复使用返回 false。
+func (a *authenticator) consumeOnce(token string, ttl time.Duration) bool {
 	a.mu.Lock()
 	defer a.mu.Unlock()
-	f := a.fails[ip]
-	if f == nil || time.Since(f.first) > failureReset {
-		f = &failCount{first: time.Now()}
-		a.fails[ip] = f
+	now := time.Now().Unix()
+	for k, exp := range a.used {
+		if exp < now {
+			delete(a.used, k)
+		}
 	}
-	f.n++
+	if _, seen := a.used[token]; seen {
+		return false
+	}
+	a.used[token] = now + int64(ttl/time.Second) + 1
+	return true
 }
 
-// cookieName 按站点区分 Cookie，避免同域名下不同站点共享登录态。
-func cookieName(siteKey string) string {
-	return "gately_site_" + siteKey
+// cookieName 按 监听器/站点 区分 Cookie，避免同域名下不同站点或端口共享登录态。
+func cookieName(s Site) string {
+	scope := s.scope
+	if scope == "" {
+		scope = s.Key
+	}
+	sum := sha256.Sum256([]byte(scope))
+	return "gately_site_" + hex.EncodeToString(sum[:6])
 }
 
-func (a *authenticator) sign(user, host string, exp int64) string {
-	payload := user + "|" + host + "|" + strconv.FormatInt(exp, 10)
-	m := hmac.New(sha256.New, a.secret)
-	m.Write([]byte(payload))
-	return base64.RawURLEncoding.EncodeToString([]byte(payload)) + "." + hex.EncodeToString(m.Sum(nil))
+// siteSession 是网页认证会话 Cookie 的内容。
+type siteSession struct {
+	User  string `json:"u"`
+	Host  string `json:"h"`
+	Scope string `json:"s"`
+	// Cred 为密码用户的凭据指纹，修改密码后旧会话失效
+	Cred string `json:"c,omitempty"`
 }
 
-// validCookie 校验会话 Cookie；用户被删除后会话立即失效。
+// credVersion 返回用户当前凭据的指纹（HMAC，Cookie 中不暴露密码哈希）。
+func (a *authenticator) credVersion(users []string, name string) string {
+	for _, u := range users {
+		if un, _, _ := strings.Cut(u, ":"); un == name {
+			m := hmac.New(sha256.New, a.secret)
+			m.Write([]byte("cred|" + u))
+			return hex.EncodeToString(m.Sum(nil)[:8])
+		}
+	}
+	return ""
+}
+
+// issueSession 写出站点会话 Cookie。
+func (a *authenticator) issueSession(w http.ResponseWriter, r *http.Request, s Site, user string) {
+	exp := time.Now().Add(sessionTTL)
+	sess := siteSession{User: user, Host: hostOnly(r.Host), Scope: s.scope, Cred: a.credVersion(s.Users, user)}
+	http.SetCookie(w, &http.Cookie{
+		Name: cookieName(s), Value: a.signBlob("session", sess, sessionTTL),
+		Path: "/", Expires: exp, HttpOnly: true, Secure: r.TLS != nil, SameSite: http.SameSiteLaxMode,
+	})
+}
+
+// validCookie 校验会话 Cookie；用户被删除或密码修改后会话立即失效。
 func (a *authenticator) validCookie(r *http.Request, s Site) bool {
-	c, err := r.Cookie(cookieName(s.Key))
+	c, err := r.Cookie(cookieName(s))
 	if err != nil {
 		return false
 	}
-	p, sig, ok := strings.Cut(c.Value, ".")
-	if !ok {
+	var sess siteSession
+	if err := a.verifyBlob("session", c.Value, &sess); err != nil {
 		return false
 	}
-	raw, err := base64.RawURLEncoding.DecodeString(p)
-	if err != nil {
-		return false
-	}
-	m := hmac.New(sha256.New, a.secret)
-	m.Write(raw)
-	want := hex.EncodeToString(m.Sum(nil))
-	if subtle.ConstantTimeCompare([]byte(sig), []byte(want)) != 1 {
-		return false
-	}
-	parts := strings.Split(string(raw), "|")
-	if len(parts) != 3 || parts[1] != hostOnly(r.Host) {
-		return false
-	}
-	exp, _ := strconv.ParseInt(parts[2], 10, 64)
-	if time.Now().Unix() > exp {
+	if sess.Host != hostOnly(r.Host) || sess.Scope != s.scope {
 		return false
 	}
 	for _, u := range s.Users {
-		if name, _, _ := strings.Cut(u, ":"); name == parts[0] {
-			return true
+		if name, _, _ := strings.Cut(u, ":"); name == sess.User {
+			return sess.Cred != "" && hmac.Equal([]byte(sess.Cred), []byte(a.credVersion(s.Users, sess.User)))
 		}
 	}
 	// 第三方登录的会话用户为 提供方:标识，允许列表变化后立即失效
-	if provider, id, ok := strings.Cut(parts[0], ":"); ok {
+	if provider, id, ok := strings.Cut(sess.User, ":"); ok && sess.Cred == "" {
 		return identityAllowed(s, provider, id)
 	}
 	return false
@@ -189,15 +250,17 @@ func (a *authenticator) check(w http.ResponseWriter, r *http.Request, s Site) bo
 		http.Error(w, "401 Unauthorized", http.StatusUnauthorized)
 		return false
 	}
-	if a.locked(ip) {
-		http.Error(w, "429 Too Many Requests", http.StatusTooManyRequests)
-		return false
-	}
 	if name, pass, ok := r.BasicAuth(); ok {
-		if verifyUser(s.Users, name, pass) {
+		key := limitKey(ip)
+		if !a.reserve(key) {
+			http.Error(w, "429 Too Many Requests", http.StatusTooManyRequests)
+			return false
+		}
+		valid := verifyUser(s.Users, name, pass)
+		a.release(key, valid)
+		if valid {
 			return true
 		}
-		a.fail(ip)
 	}
 	w.Header().Set("WWW-Authenticate", `Basic realm="Gately", charset="UTF-8"`)
 	http.Error(w, "401 Unauthorized", http.StatusUnauthorized)
@@ -230,7 +293,19 @@ button{width:100%;padding:10px;border:0;border-radius:6px;background:#0e7c66;col
 
 // safeNext 只允许站内相对路径，防止开放重定向。
 func safeNext(next string) string {
-	if next == "" || !strings.HasPrefix(next, "/") || strings.HasPrefix(next, "//") || strings.HasPrefix(next, authPath) {
+	if next == "" || next[0] != '/' || strings.ContainsRune(next, '\\') {
+		return "/"
+	}
+	if len(next) > 1 && next[1] == '/' {
+		return "/"
+	}
+	for _, c := range next {
+		if c < 0x20 || c == 0x7f {
+			return "/"
+		}
+	}
+	u, err := url.Parse(next)
+	if err != nil || u.Scheme != "" || u.Host != "" || u.User != nil || strings.HasPrefix(u.Path, authPath) {
 		return "/"
 	}
 	return next
@@ -269,7 +344,7 @@ func (a *authenticator) handleLogin(w http.ResponseWriter, r *http.Request, s Si
 		"HasPassword": len(s.Users) > 0, "Providers": a.siteProviders(s), "StartURL": oauthStart,
 	}
 	if r.URL.Path == authPath+"/logout" {
-		http.SetCookie(w, &http.Cookie{Name: cookieName(s.Key), Value: "", Path: "/", MaxAge: -1})
+		http.SetCookie(w, &http.Cookie{Name: cookieName(s), Value: "", Path: "/", MaxAge: -1})
 		http.Redirect(w, r, authPath+"/login", http.StatusFound)
 		return
 	}
@@ -277,19 +352,18 @@ func (a *authenticator) handleLogin(w http.ResponseWriter, r *http.Request, s Si
 		_ = r.ParseForm()
 		data["Next"] = safeNext(r.PostForm.Get("next"))
 		next, _ := data["Next"].(string)
-		switch {
-		case a.locked(ip):
+		key := limitKey(ip)
+		if !a.reserve(key) {
 			data["Error"] = "失败次数过多，请稍后再试"
-		case verifyUser(s.Users, r.PostForm.Get("username"), r.PostForm.Get("password")):
-			exp := time.Now().Add(sessionTTL)
-			http.SetCookie(w, &http.Cookie{
-				Name: cookieName(s.Key), Value: a.sign(r.PostForm.Get("username"), host, exp.Unix()),
-				Path: "/", Expires: exp, HttpOnly: true, Secure: r.TLS != nil, SameSite: http.SameSiteLaxMode,
-			})
-			http.Redirect(w, r, next, http.StatusFound)
-			return
-		default:
-			a.fail(ip)
+		} else {
+			user := r.PostForm.Get("username")
+			valid := len(s.Users) > 0 && verifyUser(s.Users, user, r.PostForm.Get("password"))
+			a.release(key, valid)
+			if valid {
+				a.issueSession(w, r, s, user)
+				http.Redirect(w, r, next, http.StatusFound)
+				return
+			}
 			data["Error"] = "用户名或密码错误"
 		}
 	}

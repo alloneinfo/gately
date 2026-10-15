@@ -31,10 +31,10 @@ func TestTOTPRFCVector(t *testing.T) {
 func TestLoginWithTOTP(t *testing.T) {
 	m, pass := newTestManager(t)
 	secret := NewTOTPSecret()
-	if err := m.SetTOTP("wrong", secret); err == nil {
+	if err := m.SetTOTP("wrong", "", secret); err == nil {
 		t.Fatal("密码错误时不应启用")
 	}
-	if err := m.SetTOTP(pass, secret); err != nil {
+	if err := m.SetTOTP(pass, "", secret); err != nil {
 		t.Fatal(err)
 	}
 	if _, _, err := m.Login("1.1.1.1", "admin", pass); !errors.Is(err, ErrTOTPRequired) {
@@ -44,10 +44,24 @@ func TestLoginWithTOTP(t *testing.T) {
 		t.Fatal("错误验证码应失败")
 	}
 	code, _ := totpCode(secret, time.Now().Unix()/totpPeriod)
-	if _, _, err := m.Login("1.1.1.1", "admin", pass, code); err != nil {
+	token, _, err := m.Login("1.1.1.1", "admin", pass, code)
+	if err != nil {
 		t.Fatal(err)
 	}
-	if err := m.SetTOTP(pass, ""); err != nil || m.TOTPEnabled() {
-		t.Fatal("关闭两步验证失败")
+	// 同一验证码不能重放
+	if _, _, err := m.Login("1.1.1.2", "admin", pass, code); err == nil {
+		t.Fatal("验证码不应能重复使用")
+	}
+	if err := m.SetTOTP(pass, "", ""); err == nil {
+		t.Fatal("关闭两步验证应要求验证码")
+	}
+	// 下一个时间窗口的验证码
+	m.now = func() time.Time { return time.Now().Add(totpPeriod * time.Second) }
+	next, _ := totpCode(secret, m.now().Unix()/totpPeriod)
+	if err := m.SetTOTP(pass, next, ""); err != nil || m.TOTPEnabled() {
+		t.Fatalf("关闭两步验证失败: %v", err)
+	}
+	if _, ok := m.Verify(token); ok {
+		t.Fatal("切换两步验证后旧令牌应失效")
 	}
 }

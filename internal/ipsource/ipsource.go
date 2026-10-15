@@ -14,6 +14,8 @@ import (
 	"runtime"
 	"strings"
 	"time"
+
+	"github.com/wangwanjie/gately/internal/script"
 )
 
 // 获取方式
@@ -293,6 +295,7 @@ func fromCommand(ctx context.Context, command string, fam Family) ([]netip.Addr,
 	} else {
 		cmd = exec.CommandContext(ctx, "sh", "-c", command)
 	}
+	script.Prepare(cmd)
 	out, err := cmd.Output()
 	if err != nil {
 		return nil, fmt.Errorf("执行命令失败: %w", err)

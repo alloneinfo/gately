@@ -85,9 +85,10 @@ func (m *Module) startLocked(t Task, delay time.Duration) {
 	}
 	var prev *TaskState
 	if old, ok := m.runners[t.Key]; ok {
+		// 先停止再取快照，确保拿到进行中那次同步的结果
+		old.stop()
 		s := old.snapshot()
 		prev = &s
-		old.stop()
 	}
 	label := t.Name
 	if label == "" {

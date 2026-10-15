@@ -13,6 +13,9 @@ import (
 // Timeout 是单次脚本执行的超时。
 var Timeout = 2 * time.Minute
 
+// waitDelay 是取消后等待输出管道关闭的时间
+const waitDelay = 3 * time.Second
+
 // Run 以 sh -c（Windows 为临时 .bat）执行脚本。每个变量同时以原名和 GATELY_ 大写前缀两种形式注入环境变量。
 func Run(content string, vars map[string]string) ([]byte, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), Timeout)
@@ -30,6 +33,7 @@ func Run(content string, vars map[string]string) ([]byte, error) {
 	} else {
 		cmd = exec.CommandContext(ctx, "sh", "-c", content)
 	}
+	Prepare(cmd)
 	cmd.Env = os.Environ()
 	for k, v := range vars {
 		cmd.Env = append(cmd.Env, k+"="+v, "GATELY_"+strings.ToUpper(k)+"="+v)

@@ -77,6 +77,9 @@ type Site struct {
 	// WAF 为引用的 WAF 实例 key，留空不检查；实例不存在或停用时放行
 	WAF    string `json:"waf"`
 	Remark string `json:"remark"`
+
+	// scope 为 监听器key/站点key，运行时用于隔离会话 Cookie，不持久化
+	scope string
 }
 
 // Listener 是一个监听端口及其站点。

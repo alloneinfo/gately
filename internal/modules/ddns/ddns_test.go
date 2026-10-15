@@ -304,6 +304,7 @@ func TestAPISecretMasking(t *testing.T) {
 	created.Name = "renamed"
 	body, _ = json.Marshal(created.Task)
 	req, _ := http.NewRequest("PUT", srv.URL+"/api/ddns/tasks/"+created.Key, strings.NewReader(string(body)))
+	req.Header.Set("Content-Type", "application/json")
 	resp, err = http.DefaultClient.Do(req)
 	if err != nil {
 		t.Fatal(err)

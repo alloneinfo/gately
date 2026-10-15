@@ -152,7 +152,7 @@ func (a *App) Handler() http.Handler {
 	}
 	mux.Handle("/api/", a.auth.Require(protected))
 	mux.Handle("/", a.staticHandler())
-	return securityHeaders(mux)
+	return securityHeaders(httpx.SameOrigin(mux))
 }
 
 // Run 启动所有模块和管理服务，阻塞直到 ctx 取消。
@@ -335,7 +335,7 @@ func (a *App) handleTOTPEnable(w http.ResponseWriter, r *http.Request) {
 		httpx.Error(w, http.StatusBadRequest, "验证码错误，请确认验证器时间同步")
 		return
 	}
-	if err := a.auth.SetTOTP(req.Password, secret); err != nil {
+	if err := a.auth.SetTOTP(req.Password, "", secret); err != nil {
 		httpx.Error(w, http.StatusBadRequest, "%v", err)
 		return
 	}
@@ -352,7 +352,7 @@ func (a *App) handleTOTPDisable(w http.ResponseWriter, r *http.Request) {
 		httpx.Error(w, http.StatusBadRequest, "%v", err)
 		return
 	}
-	if err := a.auth.SetTOTP(req.Password, ""); err != nil {
+	if err := a.auth.SetTOTP(req.Password, req.Code, ""); err != nil {
 		httpx.Error(w, http.StatusBadRequest, "%v", err)
 		return
 	}
@@ -363,6 +363,8 @@ func (a *App) handleTOTPDisable(w http.ResponseWriter, r *http.Request) {
 // handleLuckyImport 接收 multipart 上传的一个或多个 .lkcf 文件（字段名 files），
 // 分发给实现了 luckyimport.Importer 的模块。?dryRun=1 时只预览不写入。
 func (a *App) handleLuckyImport(w http.ResponseWriter, r *http.Request) {
+	// 限制总请求体与文件数量，防止超大上传占用内存与磁盘
+	r.Body = http.MaxBytesReader(w, r.Body, 64<<20)
 	if err := r.ParseMultipartForm(32 << 20); err != nil {
 		httpx.Error(w, http.StatusBadRequest, "读取上传文件失败: %v", err)
 		return
@@ -374,6 +376,10 @@ func (a *App) handleLuckyImport(w http.ResponseWriter, r *http.Request) {
 		Reports []*luckyimport.Report `json:"reports"`
 	}
 	results := []fileResult{}
+	if len(r.MultipartForm.File["files"]) > 64 {
+		httpx.Error(w, http.StatusBadRequest, "一次最多导入 64 个文件")
+		return
+	}
 	for _, fh := range r.MultipartForm.File["files"] {
 		res := fileResult{File: fh.Filename, Reports: []*luckyimport.Report{}}
 		data, err := readUpload(fh)

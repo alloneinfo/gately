@@ -14,6 +14,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"net/netip"
 	"strings"
 	"sync"
 	"time"
@@ -51,9 +52,30 @@ type Account struct {
 }
 
 type failState struct {
-	count       int
+	count int
+	// inflight 为正在校验中的请求数，校验前预占，防止并发请求绕过次数限制
+	inflight    int
 	first       time.Time
 	lockedUntil time.Time
+}
+
+// accountKey 用于账号设置类操作（修改密码、两步验证）的失败计数。
+const accountKey = "__account__"
+
+// bcryptSem 限制同时进行的 bcrypt 校验数量，避免未认证请求打满 CPU。
+var bcryptSem = make(chan struct{}, 4)
+
+// limitKey 返回限流键：IPv6 按 /64 聚合，避免攻击者在一个网段内轮换地址。
+func limitKey(ip string) string {
+	a, err := netip.ParseAddr(ip)
+	if err != nil {
+		return ip
+	}
+	a = a.Unmap()
+	if a.Is6() {
+		return netip.PrefixFrom(a, 64).Masked().String()
+	}
+	return a.String()
 }
 
 // Manager 管理账号校验和会话。
@@ -63,6 +85,8 @@ type Manager struct {
 	save  func(Account) error
 	fails map[string]*failState
 	now   func() time.Time
+	// lastTOTPStep 为最近一次使用的验证码时间步，防止验证码在有效期内被重放
+	lastTOTPStep int64
 }
 
 // NewManager 用已加载的账号创建管理器，save 用于持久化账号变更。
@@ -111,18 +135,21 @@ func (m *Manager) Username() string {
 
 // Login 校验凭据并签发令牌。启用两步验证时 code 必填。
 func (m *Manager) Login(ip, username, password string, code ...string) (string, time.Time, error) {
-	if m.isLocked(ip) {
+	key := limitKey(ip)
+	if !m.reserve(key) {
 		return "", time.Time{}, ErrLocked
 	}
+	ok := false
+	defer func() { m.release(key, ok) }()
+
 	m.mu.RLock()
 	acc := m.acc
 	m.mu.RUnlock()
 
 	userOK := subtle.ConstantTimeCompare([]byte(username), []byte(acc.Username)) == 1
 	// 无论用户名是否正确都执行一次 bcrypt，避免通过耗时判断用户名
-	passErr := bcrypt.CompareHashAndPassword([]byte(acc.PasswordHash), []byte(password))
+	passErr := checkPassword(acc.PasswordHash, password)
 	if !userOK || passErr != nil {
-		m.recordFailure(ip)
 		return "", time.Time{}, ErrInvalidCredentials
 	}
 	if acc.TOTPSecret != "" {
@@ -131,16 +158,39 @@ func (m *Manager) Login(ip, username, password string, code ...string) (string, 
 			c = code[0]
 		}
 		if c == "" {
+			// 密码正确但缺验证码，不计为失败
+			ok = true
 			return "", time.Time{}, ErrTOTPRequired
 		}
-		if !ValidateTOTP(acc.TOTPSecret, c, m.now()) {
-			m.recordFailure(ip)
+		if !m.consumeTOTP(acc.TOTPSecret, c) {
 			return "", time.Time{}, errors.New("两步验证码错误")
 		}
 	}
-	m.clearFailures(ip)
+	ok = true
 	exp := m.now().Add(time.Duration(acc.TokenTTLHours) * time.Hour)
 	return m.sign(acc, exp), exp, nil
+}
+
+// checkPassword 在全局并发上限内执行 bcrypt 比较。
+func checkPassword(hash, password string) error {
+	bcryptSem <- struct{}{}
+	defer func() { <-bcryptSem }()
+	return bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+}
+
+// consumeTOTP 校验验证码，每个时间步只能使用一次。
+func (m *Manager) consumeTOTP(secret, code string) bool {
+	step, ok := matchTOTP(secret, code, m.now())
+	if !ok {
+		return false
+	}
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if step <= m.lastTOTPStep {
+		return false
+	}
+	m.lastTOTPStep = step
+	return true
 }
 
 // ChangeCredentials 修改用户名和密码，需要提供旧密码；成功后旧令牌全部失效。
@@ -152,11 +202,11 @@ func (m *Manager) ChangeCredentials(oldPassword, newUsername, newPassword string
 	if len(newPassword) < 8 {
 		return errors.New("新密码至少 8 位")
 	}
+	if err := m.verifyAccountPassword(oldPassword); err != nil {
+		return err
+	}
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	if bcrypt.CompareHashAndPassword([]byte(m.acc.PasswordHash), []byte(oldPassword)) != nil {
-		return errors.New("原密码错误")
-	}
 	hash, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost)
 	if err != nil {
 		return err
@@ -248,21 +298,41 @@ func (m *Manager) Require(next http.Handler) http.Handler {
 	})
 }
 
-func (m *Manager) isLocked(ip string) bool {
-	m.mu.Lock()
-	defer m.mu.Unlock()
-	st := m.fails[ip]
-	return st != nil && m.now().Before(st.lockedUntil)
-}
-
-func (m *Manager) recordFailure(ip string) {
+// reserve 检查是否锁定并预占一次尝试；返回 false 表示应拒绝。
+func (m *Manager) reserve(key string) bool {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	now := m.now()
-	st := m.fails[ip]
-	if st == nil || now.Sub(st.first) > failWindow {
+	st := m.fails[key]
+	if st == nil || (now.Sub(st.first) > failWindow && st.inflight == 0) {
+		if st != nil && now.Before(st.lockedUntil) {
+			return false
+		}
 		st = &failState{first: now}
-		m.fails[ip] = st
+		m.fails[key] = st
+	}
+	if now.Before(st.lockedUntil) || st.count+st.inflight >= maxFailures {
+		return false
+	}
+	st.inflight++
+	return true
+}
+
+// release 结束一次尝试：成功时清除记录，失败时累计并在达到上限后锁定。
+func (m *Manager) release(key string, success bool) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	st := m.fails[key]
+	if st == nil {
+		return
+	}
+	st.inflight--
+	now := m.now()
+	if success {
+		if st.inflight == 0 {
+			delete(m.fails, key)
+		}
+		return
 	}
 	st.count++
 	if st.count >= maxFailures {
@@ -272,16 +342,26 @@ func (m *Manager) recordFailure(ip string) {
 	}
 	// 顺带清理过期记录，防止 map 无限增长
 	for k, v := range m.fails {
-		if now.Sub(v.first) > failWindow && now.After(v.lockedUntil) {
+		if v.inflight == 0 && now.Sub(v.first) > failWindow && now.After(v.lockedUntil) {
 			delete(m.fails, k)
 		}
 	}
 }
 
-func (m *Manager) clearFailures(ip string) {
-	m.mu.Lock()
-	delete(m.fails, ip)
-	m.mu.Unlock()
+// verifyAccountPassword 校验账号设置操作中的当前密码，失败次数与登录一样受限。
+func (m *Manager) verifyAccountPassword(password string) error {
+	if !m.reserve(accountKey) {
+		return ErrLocked
+	}
+	m.mu.RLock()
+	hash := m.acc.PasswordHash
+	m.mu.RUnlock()
+	err := checkPassword(hash, password)
+	m.release(accountKey, err == nil)
+	if err != nil {
+		return errors.New("原密码错误")
+	}
+	return nil
 }
 
 func randomString(n int) string {
@@ -299,15 +379,23 @@ func (m *Manager) TOTPEnabled() bool {
 	return m.acc.TOTPSecret != ""
 }
 
-// SetTOTP 启用或关闭两步验证。secret 为空表示关闭；需要提供当前密码。
-func (m *Manager) SetTOTP(password, secret string) error {
+// SetTOTP 启用或关闭两步验证。secret 为空表示关闭，关闭时还需提供当前验证码。
+// 成功后轮换会话密钥，使此前签发的令牌全部失效。
+func (m *Manager) SetTOTP(password, code, secret string) error {
+	if err := m.verifyAccountPassword(password); err != nil {
+		return err
+	}
+	m.mu.RLock()
+	current := m.acc.TOTPSecret
+	m.mu.RUnlock()
+	if secret == "" && current != "" && !m.consumeTOTP(current, code) {
+		return errors.New("两步验证码错误")
+	}
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	if bcrypt.CompareHashAndPassword([]byte(m.acc.PasswordHash), []byte(password)) != nil {
-		return errors.New("密码错误")
-	}
 	next := m.acc
 	next.TOTPSecret = secret
+	next.SessionSecret = randomString(32)
 	if err := m.save(next); err != nil {
 		return err
 	}

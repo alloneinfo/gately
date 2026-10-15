@@ -287,17 +287,18 @@ func (m *Module) handleWS(w http.ResponseWriter, r *http.Request) {
 		httpx.Error(w, http.StatusNotFound, "连接不存在")
 		return
 	}
-	if m.sessions.Load() >= int64(settings.MaxSessions) {
+	// 先占位再判断，避免并发请求同时通过检查
+	if m.sessions.Add(1) > int64(settings.MaxSessions) {
+		m.sessions.Add(-1)
 		httpx.Error(w, http.StatusTooManyRequests, "会话数已达上限 %d", settings.MaxSessions)
 		return
 	}
+	defer m.sessions.Add(-1)
 	ws, err := websocket.Accept(w, r, nil)
 	if err != nil {
 		return
 	}
 	ws.SetReadLimit(1 << 20)
-	m.sessions.Add(1)
-	defer m.sessions.Add(-1)
 	ctx, cancel := context.WithCancel(r.Context())
 	defer cancel()
 

@@ -278,7 +278,8 @@ func (r *runner) mapPort(ctx context.Context, proto string, port int) func() {
 	const lease = 3600
 	mctx, cancel := context.WithCancel(ctx)
 	var wg sync.WaitGroup
-	var client *upnp.Client
+	// client 为当前使用的网关；mapped 为最近一次映射成功的网关，结束时用它删除映射
+	var client, mapped *upnp.Client
 
 	addUPnP := func() error {
 		if client == nil {
@@ -298,7 +299,15 @@ func (r *runner) mapPort(ctx context.Context, proto string, port int) func() {
 		actx, acancel := context.WithTimeout(mctx, 8*time.Second)
 		defer acancel()
 		_, err := client.AddPortMapping(actx, proto, port, r.rule.UPnPLocalHost, intPort, desc, lease)
-		return err
+		if err != nil {
+			// 网关重启后控制地址可能变化，下次刷新时重新发现
+			if r.rule.UPnPControlURL == "" {
+				client = nil
+			}
+			return err
+		}
+		mapped = client
+		return nil
 	}
 	addNATPMP := func() error {
 		gw := r.rule.NATPMPGateway
@@ -357,8 +366,8 @@ func (r *runner) mapPort(ctx context.Context, proto string, port int) func() {
 		// 会话结束时删除映射，使用独立超时避免阻塞
 		dctx, dcancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer dcancel()
-		if r.rule.UPnP && client != nil {
-			_ = client.DeletePortMapping(dctx, proto, port)
+		if r.rule.UPnP && mapped != nil {
+			_ = mapped.DeletePortMapping(dctx, proto, port)
 		}
 		if r.rule.NATPMP {
 			gw := r.rule.NATPMPGateway

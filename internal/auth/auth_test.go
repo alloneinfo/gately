@@ -2,6 +2,9 @@ package auth
 
 import (
 	"errors"
+	"strconv"
+	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 )
@@ -71,5 +74,25 @@ func TestChangeCredentialsInvalidatesTokens(t *testing.T) {
 	}
 	if _, _, err := m.Login("1.1.1.1", "root", "new-password"); err != nil {
 		t.Fatal(err)
+	}
+}
+
+func TestConcurrentLoginLimited(t *testing.T) {
+	m, _ := newTestManager(t)
+	var wg sync.WaitGroup
+	var attempts atomic.Int64
+	for i := 0; i < 30; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			if _, _, err := m.Login("2001:db8::"+strconv.Itoa(i+1), "admin", "wrong"); errors.Is(err, ErrInvalidCredentials) {
+				attempts.Add(1)
+			}
+		}()
+	}
+	wg.Wait()
+	// 同一 /64 内的并发请求共享计数，实际校验次数不超过上限
+	if n := attempts.Load(); n > maxFailures {
+		t.Fatalf("并发绕过了限流：实际尝试 %d 次", n)
 	}
 }

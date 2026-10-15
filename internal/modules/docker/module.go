@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"sort"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -296,6 +297,7 @@ func (m *Module) handleUpgrade(w http.ResponseWriter, r *http.Request) {
 }
 
 // upgrade 拉取最新镜像并按原配置重建容器；新容器启动失败时恢复旧容器。
+// ctx 只约束检查与拉取阶段；停止旧容器之后的每一步使用独立超时，保证恢复流程不因调用方取消而中断。
 func (m *Module) upgrade(ctx context.Context, c *Client, id string) (string, error) {
 	info, err := c.Inspect(ctx, id)
 	if err != nil {
@@ -311,7 +313,7 @@ func (m *Module) upgrade(ctx context.Context, c *Client, id string) (string, err
 	if err := c.Pull(ctx, ref); err != nil {
 		return "", fmt.Errorf("拉取镜像失败: %w", err)
 	}
-	body, err := recreateBody(info)
+	body, extraNets, err := recreateBody(info)
 	if err != nil {
 		return "", err
 	}
@@ -320,37 +322,60 @@ func (m *Module) upgrade(ctx context.Context, c *Client, id string) (string, err
 	}
 	_ = json.Unmarshal(info["State"], &state)
 
+	// step 为单个容器操作提供独立超时
+	step := func(fn func(context.Context) error) error {
+		sctx, cancel := context.WithTimeout(context.Background(), stepTimeout)
+		defer cancel()
+		return fn(sctx)
+	}
 	backup := name + "_gately_old_" + time.Now().Format("20060102150405")
 	if state.Running {
-		if err := c.Action(ctx, id, "stop"); err != nil {
+		if err := step(func(c2 context.Context) error { return c.Action(c2, id, "stop") }); err != nil {
 			return "", fmt.Errorf("停止旧容器失败: %w", err)
 		}
 	}
-	if err := c.Rename(ctx, id, backup); err != nil {
+	if err := step(func(c2 context.Context) error { return c.Rename(c2, id, backup) }); err != nil {
 		if state.Running {
-			_ = c.Action(ctx, id, "start")
+			_ = step(func(c2 context.Context) error { return c.Action(c2, id, "start") })
 		}
 		return "", fmt.Errorf("重命名旧容器失败: %w", err)
 	}
 	restore := func(cause error) error {
 		log.Errorf("升级失败，恢复旧容器: %v", cause)
-		_ = c.Rename(ctx, id, name)
+		if err := step(func(c2 context.Context) error { return c.Rename(c2, id, name) }); err != nil {
+			log.Errorf("恢复旧容器名称失败，请手动处理 %s: %v", backup, err)
+		}
 		if state.Running {
-			_ = c.Action(ctx, id, "start")
+			if err := step(func(c2 context.Context) error { return c.Action(c2, id, "start") }); err != nil {
+				log.Errorf("重新启动旧容器失败: %v", err)
+			}
 		}
 		return cause
 	}
-	newID, err := c.Create(ctx, name, body)
-	if err != nil {
+	var newID string
+	if err := step(func(c2 context.Context) error {
+		var err error
+		newID, err = c.Create(c2, name, body)
+		return err
+	}); err != nil {
 		return "", restore(fmt.Errorf("创建新容器失败: %w", err))
 	}
-	if state.Running {
-		if err := c.Action(ctx, newID, "start"); err != nil {
-			_ = c.Remove(ctx, newID)
-			return "", restore(fmt.Errorf("启动新容器失败: %w", err))
+	discard := func(cause error) (string, error) {
+		_ = step(func(c2 context.Context) error { return c.Remove(c2, newID) })
+		return "", restore(cause)
+	}
+	// 旧版 Docker 创建时只接受一个网络，其余网络在创建后逐个连接
+	for _, n := range extraNets {
+		if err := step(func(c2 context.Context) error { return c.ConnectNetwork(c2, n.name, newID, n.endpoint) }); err != nil {
+			return discard(fmt.Errorf("连接网络 %s 失败: %w", n.name, err))
 		}
 	}
-	if err := c.Remove(ctx, id); err != nil {
+	if state.Running {
+		if err := step(func(c2 context.Context) error { return c.Action(c2, newID, "start") }); err != nil {
+			return discard(fmt.Errorf("启动新容器失败: %w", err))
+		}
+	}
+	if err := step(func(c2 context.Context) error { return c.Remove(c2, id) }); err != nil {
 		log.Warnf("删除旧容器 %s 失败，请手动清理: %v", backup, err)
 	}
 	log.Infof("升级完成，新容器 %s", shortID(newID))
@@ -364,11 +389,18 @@ func trimSlash(s string) string {
 	return s
 }
 
+// networkAttach 是创建后需要追加连接的网络。
+type networkAttach struct {
+	name     string
+	endpoint map[string]any
+}
+
 // recreateBody 用旧容器的配置构造创建请求：Config 与 HostConfig 原样保留，网络只保留别名与固定 IP 等用户配置。
-func recreateBody(info map[string]json.RawMessage) (map[string]any, error) {
+// 多网络容器只在创建请求中放主网络，其余网络通过返回值在创建后连接。
+func recreateBody(info map[string]json.RawMessage) (map[string]any, []networkAttach, error) {
 	var cfg map[string]any
 	if err := json.Unmarshal(info["Config"], &cfg); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	// 主机名默认取自容器 ID，沿用会导致新容器使用旧 ID 作为主机名
 	if host, _ := cfg["Hostname"].(string); host != "" {
@@ -380,8 +412,9 @@ func recreateBody(info map[string]json.RawMessage) (map[string]any, error) {
 	}
 	var hostCfg map[string]any
 	if err := json.Unmarshal(info["HostConfig"], &hostCfg); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
+	keepAnonymousVolumes(info, hostCfg)
 	var ns struct {
 		Networks map[string]struct {
 			Aliases    []string       `json:"Aliases"`
@@ -390,8 +423,24 @@ func recreateBody(info map[string]json.RawMessage) (map[string]any, error) {
 		} `json:"Networks"`
 	}
 	_ = json.Unmarshal(info["NetworkSettings"], &ns)
+	names := make([]string, 0, len(ns.Networks))
+	for n := range ns.Networks {
+		names = append(names, n)
+	}
+	sort.Strings(names)
+	// 主网络优先取 NetworkMode 指定的网络
+	if mode, _ := hostCfg["NetworkMode"].(string); mode != "" {
+		for i, n := range names {
+			if n == mode {
+				names[0], names[i] = names[i], names[0]
+				break
+			}
+		}
+	}
 	endpoints := map[string]any{}
-	for netName, n := range ns.Networks {
+	var extra []networkAttach
+	for i, netName := range names {
+		n := ns.Networks[netName]
 		ep := map[string]any{}
 		if len(n.Aliases) > 0 {
 			ep["Aliases"] = n.Aliases
@@ -402,10 +451,63 @@ func recreateBody(info map[string]json.RawMessage) (map[string]any, error) {
 		if len(n.Links) > 0 {
 			ep["Links"] = n.Links
 		}
-		endpoints[netName] = ep
+		if i == 0 {
+			endpoints[netName] = ep
+		} else {
+			extra = append(extra, networkAttach{name: netName, endpoint: ep})
+		}
 	}
 	body := cfg
 	body["HostConfig"] = hostCfg
 	body["NetworkingConfig"] = map[string]any{"EndpointsConfig": endpoints}
-	return body, nil
+	return body, extra, nil
+}
+
+// keepAnonymousVolumes 把镜像声明、未显式挂载的匿名卷加入 Binds，新容器沿用原数据卷，避免升级后数据“消失”。
+func keepAnonymousVolumes(info map[string]json.RawMessage, hostCfg map[string]any) {
+	var mounts []struct {
+		Type        string `json:"Type"`
+		Name        string `json:"Name"`
+		Destination string `json:"Destination"`
+		RW          bool   `json:"RW"`
+	}
+	_ = json.Unmarshal(info["Mounts"], &mounts)
+	covered := map[string]bool{}
+	var binds []any
+	if b, ok := hostCfg["Binds"].([]any); ok {
+		binds = b
+	}
+	for _, b := range binds {
+		if s, ok := b.(string); ok {
+			parts := strings.Split(s, ":")
+			if len(parts) >= 2 {
+				covered[parts[1]] = true
+			}
+		}
+	}
+	if ms, ok := hostCfg["Mounts"].([]any); ok {
+		for _, m := range ms {
+			if mm, ok := m.(map[string]any); ok {
+				if t, _ := mm["Target"].(string); t != "" {
+					covered[t] = true
+				}
+			}
+		}
+	}
+	added := false
+	for _, m := range mounts {
+		if m.Type != "volume" || m.Name == "" || covered[m.Destination] {
+			continue
+		}
+		bind := m.Name + ":" + m.Destination
+		if !m.RW {
+			bind += ":ro"
+		}
+		binds = append(binds, bind)
+		covered[m.Destination] = true
+		added = true
+	}
+	if added {
+		hostCfg["Binds"] = binds
+	}
 }

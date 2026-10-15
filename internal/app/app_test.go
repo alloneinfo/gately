@@ -11,6 +11,7 @@ import (
 	"net/http/cookiejar"
 	"net/http/httptest"
 	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/wangwanjie/gately/internal/auth"
@@ -167,4 +168,35 @@ func freeTCPPort(t *testing.T) int {
 	}
 	defer ln.Close()
 	return ln.Addr().(*net.TCPAddr).Port
+}
+
+func TestCrossOriginRejected(t *testing.T) {
+	srv, c := newTestServer(t)
+	req, _ := http.NewRequest("POST", srv.URL+"/api/login", strings.NewReader(`{"username":"a","password":"b"}`))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Origin", "http://evil.example:8080")
+	resp, err := c.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp.Body.Close()
+	if resp.StatusCode != http.StatusForbidden {
+		t.Fatalf("跨源请求应被拒绝: %d", resp.StatusCode)
+	}
+	// 简单请求（text/plain）不能绕过 JSON 要求
+	req, _ = http.NewRequest("POST", srv.URL+"/api/login", strings.NewReader(`{"username":"a","password":"b"}`))
+	req.Header.Set("Content-Type", "text/plain")
+	resp, _ = c.Do(req)
+	resp.Body.Close()
+	if resp.StatusCode != http.StatusBadRequest {
+		t.Fatalf("非 JSON 请求体应被拒绝: %d", resp.StatusCode)
+	}
+	// 同源请求放行
+	req, _ = http.NewRequest("POST", srv.URL+"/api/logout", nil)
+	req.Header.Set("Origin", srv.URL)
+	resp, _ = c.Do(req)
+	resp.Body.Close()
+	if resp.StatusCode != 200 {
+		t.Fatalf("同源请求应放行: %d", resp.StatusCode)
+	}
 }

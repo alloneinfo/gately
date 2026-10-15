@@ -63,6 +63,7 @@ func (r *runner) sessionUDP(ctx context.Context) error {
 	d.wg.Add(1)
 	go d.readLoop(sctx)
 	defer func() {
+		cancel()
 		pc.Close()
 		d.closeSessions()
 		d.wg.Wait()
@@ -228,6 +229,8 @@ func (d *udpDispatcher) forward(ctx context.Context, from net.Addr, pkt []byte) 
 	d.sessMu.Lock()
 	s := d.sessions[key]
 	if s == nil {
+		// 拨号（可能需要解析域名）放到锁外；只有读循环会新建会话，解锁期间不会出现重复会话
+		d.sessMu.Unlock()
 		var conn net.Conn
 		var err error
 		for _, host := range d.r.rule.TargetAddresses {
@@ -237,8 +240,13 @@ func (d *udpDispatcher) forward(ctx context.Context, from net.Addr, pkt []byte) 
 			}
 		}
 		if conn == nil {
-			d.sessMu.Unlock()
 			d.r.log.Warnf("%s 建立 UDP 会话失败: %v", key, err)
+			return
+		}
+		d.sessMu.Lock()
+		if ctx.Err() != nil {
+			d.sessMu.Unlock()
+			conn.Close()
 			return
 		}
 		s = &udpSession{conn: conn}

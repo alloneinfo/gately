@@ -426,3 +426,38 @@ func TestImportRealSample(t *testing.T) {
 		t.Fatal("有规则未能导入")
 	}
 }
+
+// 存在活动转发连接时停止规则不应卡住
+func TestTCPStopWithActiveConnection(t *testing.T) {
+	e := newTestEnv(t)
+	rule := Rule{
+		Name: "hold", Enable: true, Protocol: ProtoTCP4,
+		Bind: Bind{Mode: BindIP, IP: "127.0.0.1"}, UseGlobalServers: true,
+		TargetAddresses: []string{"127.0.0.1"}, TargetPort: e.tcpEcho.Addr().(*net.TCPAddr).Port,
+		HeartbeatInterval: 500, StunTimeout: 2000, RetryInterval: 500,
+	}
+	if err := rule.Validate(); err != nil {
+		t.Fatal(err)
+	}
+	_, lg := testLogger()
+	r := newRunner(rule, e.settings(), lg)
+	r.start(context.Background())
+	waitFor(t, "穿透成功", func() bool { return r.snapshot().Status == StatusOK })
+	c, err := net.Dial("tcp4", r.snapshot().PublicAddr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer c.Close()
+	_, _ = c.Write([]byte("x"))
+	waitFor(t, "连接建立", func() bool { return r.stats.active.Load() == 1 })
+	done := make(chan struct{})
+	go func() {
+		r.stop()
+		close(done)
+	}()
+	select {
+	case <-done:
+	case <-time.After(5 * time.Second):
+		t.Fatal("有活动连接时停止规则超时")
+	}
+}

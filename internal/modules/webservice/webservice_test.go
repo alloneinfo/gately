@@ -22,6 +22,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -548,5 +549,94 @@ func TestWAFIntegration(t *testing.T) {
 	}
 	if resp, _ := get(t, http.DefaultClient, addr, "stale.test", attack, nil); resp.StatusCode != 200 {
 		t.Fatalf("引用不存在的实例时应放行（与 Lucky 一致）: %d", resp.StatusCode)
+	}
+}
+
+func TestSafeNext(t *testing.T) {
+	cases := map[string]string{
+		"/dash?a=1":          "/dash?a=1",
+		"":                   "/",
+		"//evil.com":         "/",
+		"/\\evil.com":        "/",
+		"/\\/evil.com":       "/",
+		"https://evil.com":   "/",
+		"/ok\r\nSet-Cookie:": "/",
+		"/__gately_auth/x":   "/",
+		"evil.com":           "/",
+	}
+	for in, want := range cases {
+		if got := safeNext(in); got != want {
+			t.Errorf("safeNext(%q) = %q，期望 %q", in, got, want)
+		}
+	}
+}
+
+func TestSessionBinding(t *testing.T) {
+	a := newAuthenticator("secret")
+	s := Site{Key: "s1", Users: []string{"alice:pw1"}, scope: "l1/s1"}
+	req := httptest.NewRequest("GET", "http://app.test/", nil)
+	rec := httptest.NewRecorder()
+	a.issueSession(rec, req, s, "alice")
+	cookie := rec.Result().Cookies()[0]
+	withCookie := func() *http.Request {
+		r := httptest.NewRequest("GET", "http://app.test/", nil)
+		r.AddCookie(cookie)
+		return r
+	}
+	if !a.validCookie(withCookie(), s) {
+		t.Fatal("会话应有效")
+	}
+	// 其他监听器上同 key 的站点不能复用会话
+	other := s
+	other.scope = "l2/s1"
+	if cookieName(other) == cookieName(s) {
+		t.Fatal("不同监听器的站点 Cookie 名应不同")
+	}
+	r := withCookie()
+	r.AddCookie(&http.Cookie{Name: cookieName(other), Value: cookie.Value})
+	if a.validCookie(r, other) {
+		t.Fatal("会话不应跨监听器生效")
+	}
+	// 修改密码后旧会话失效
+	changed := s
+	changed.Users = []string{"alice:pw2"}
+	if a.validCookie(withCookie(), changed) {
+		t.Fatal("修改密码后旧会话应失效")
+	}
+}
+
+func TestSiteLimiterConcurrent(t *testing.T) {
+	a := newAuthenticator("secret")
+	var wg sync.WaitGroup
+	var granted atomic.Int64
+	for i := 0; i < 50; i++ {
+		wg.Add(1)
+		go func(i int) {
+			defer wg.Done()
+			key := limitKey(fmt.Sprintf("2001:db8::%x", i+1))
+			if a.reserve(key) {
+				granted.Add(1)
+				time.Sleep(10 * time.Millisecond)
+				a.release(key, false)
+			}
+		}(i)
+	}
+	wg.Wait()
+	if n := granted.Load(); n > maxFailures {
+		t.Fatalf("同一 /64 并发尝试 %d 次，超过上限", n)
+	}
+}
+
+func TestCORSWithAuthRestricted(t *testing.T) {
+	h := &siteHandler{site: Site{CORS: true, WebAuth: true, Domains: []string{"app.test", "*.app.test"}}}
+	if h.corsAllowed("https://evil.com") {
+		t.Fatal("开启认证时不应向任意来源开放跨域")
+	}
+	if !h.corsAllowed("https://api.app.test") {
+		t.Fatal("站点自身域名应允许")
+	}
+	h.site.WebAuth = false
+	if !h.corsAllowed("https://evil.com") {
+		t.Fatal("未开启认证时保持原行为")
 	}
 }

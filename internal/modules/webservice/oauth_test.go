@@ -7,6 +7,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"net/http/cookiejar"
 	"net/http/httptest"
 	"net/url"
 	"strings"
@@ -79,6 +80,8 @@ func TestOAuthFlow(t *testing.T) {
 	defer r.stop()
 	addr := fmt.Sprintf("127.0.0.1:%d", port)
 	c := noRedirect()
+	// 所有请求都发往 127.0.0.1，Cookie 罐可携带登录发起时写入的 nonce
+	c.Jar, _ = cookiejar.New(nil)
 
 	// 以指定 Host 访问绝对地址（把 Location 中的域名映射到本地监听）
 	follow := func(raw string) *http.Response {
@@ -92,7 +95,9 @@ func TestOAuthFlow(t *testing.T) {
 		resp.Body.Close()
 		return resp
 	}
-	login := func(provider, code string) *http.Response {
+	var lastTicket string
+	// authorize 完成登录页 → 身份提供方 → 回调，返回带票据的回跳地址
+	authorize := func(provider, code string) string {
 		_, body := get(t, c, addr, "app.test", authPath+"/login", nil)
 		if !strings.Contains(body, "使用 GitHub 登录") || !strings.Contains(body, "使用 Google 登录") {
 			t.Fatalf("登录页应显示第三方登录入口: %s", body)
@@ -107,7 +112,11 @@ func TestOAuthFlow(t *testing.T) {
 		if cb.StatusCode != 302 {
 			t.Fatalf("回调处理失败: %d", cb.StatusCode)
 		}
-		return follow(cb.Header.Get("Location"))
+		return cb.Header.Get("Location")
+	}
+	login := func(provider, code string) *http.Response {
+		lastTicket = authorize(provider, code)
+		return follow(lastTicket)
 	}
 
 	fin := login("gh", "alice")
@@ -122,6 +131,22 @@ func TestOAuthFlow(t *testing.T) {
 	resp.Body.Close()
 	if string(body) != "secret area" {
 		t.Fatalf("登录后应能访问: %d %q", resp.StatusCode, body)
+	}
+
+	// 票据只能使用一次
+	if again := follow(lastTicket); again.StatusCode != 400 {
+		t.Fatalf("重放票据应被拒绝: %d", again.StatusCode)
+	}
+	// 没有发起登录时写入的 nonce Cookie（例如票据被注入到其他浏览器）应被拒绝
+	saved := c.Jar
+	ticketURL := authorize("gh", "alice")
+	c.Jar, _ = cookiejar.New(nil)
+	if other := follow(ticketURL); other.StatusCode != 400 {
+		t.Fatalf("其他浏览器使用票据应被拒绝: %d", other.StatusCode)
+	}
+	c.Jar = saved
+	if fin := follow(ticketURL); fin.StatusCode != 302 {
+		t.Fatalf("发起登录的浏览器应能使用票据: %d", fin.StatusCode)
 	}
 
 	if fin := login("gh", "bob"); fin.StatusCode != 403 {
