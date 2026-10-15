@@ -19,6 +19,8 @@ import (
 	"github.com/wangwanjie/gately/internal/modules/ssl"
 	"github.com/wangwanjie/gately/internal/modules/stun"
 	"github.com/wangwanjie/gately/internal/modules/webservice"
+	"github.com/wangwanjie/gately/internal/modules/webterminal"
+	"github.com/wangwanjie/gately/internal/modules/wol"
 	"github.com/wangwanjie/gately/internal/version"
 	"github.com/wangwanjie/gately/web"
 )
@@ -52,6 +54,8 @@ func main() {
 			stun.New(),
 			certs,
 			webservice.New(certs),
+			wol.New(),
+			webterminal.New(),
 		},
 	})
 	if err != nil {
