@@ -1,79 +1,55 @@
 <template>
   <div>
-    <div class="page-header">
-      <h2>端口转发</h2>
-      <div>
-        <el-button @click="openSettings">全局设置</el-button>
-        <el-button type="primary" @click="openEditor()">添加规则</el-button>
-      </div>
+    <PageHeader title="端口转发" desc="把本机端口的 TCP / UDP 流量转发到内网或外部地址" :icon="ArrowLeftRight">
+      <el-button :icon="SlidersHorizontal" @click="openSettings">全局设置</el-button>
+      <el-button type="primary" :icon="Plus" @click="openEditor()">添加规则</el-button>
+    </PageHeader>
+
+    <ModuleBanner v-if="settings && !settings.enable" title="端口转发模块已停用" :loading="enabling" @enable="enableModule" />
+
+    <div v-loading="loading" class="card-list">
+      <el-empty v-if="!loading && !rules.length" description="暂无规则，可添加或在「设置 → 备份与迁移」中导入 Lucky 配置" />
+      <EntityCard v-for="r in rules" :key="r.key" :off="!r.enable || moduleOff">
+        <template #lead>
+          <el-switch :model-value="r.enable" @change="(v: string | number | boolean) => toggle(r, Boolean(v))" />
+        </template>
+        <template #title>
+          <span>{{ r.name || '未命名' }}</span>
+          <span class="tags">
+            <el-tag v-for="p in r.protocols" :key="p" size="small" effect="plain" class="mono">{{ p.toUpperCase() }}</el-tag>
+          </span>
+        </template>
+        <template v-if="r.remark" #sub>{{ r.remark }}</template>
+        <template #status>
+          <el-tooltip v-if="r.details?.length && r.enable" placement="top">
+            <template #content>
+              <div v-for="d in r.details" :key="d">{{ d }}</div>
+            </template>
+            <TriangleAlert :size="16" class="detail" />
+          </el-tooltip>
+          <StatusBadge v-bind="ruleStatus(r)" />
+        </template>
+        <Field label="监听" mono>{{ listenText(r) }}</Field>
+        <Field label="目标" mono>
+          <div v-for="t in r.targetAddresses" :key="t">{{ t }}:{{ r.targetPorts || r.listenPorts }}</div>
+        </Field>
+        <Field label="连接">{{ r.stats.activeConns }} 活动 · {{ r.stats.totalConns }} 累计</Field>
+        <Field label="流量">↑ {{ formatBytes(r.stats.bytesIn) }} · ↓ {{ formatBytes(r.stats.bytesOut) }}</Field>
+        <template #actions>
+          <el-button text size="small" :icon="Pencil" @click="openEditor(r)">编辑</el-button>
+          <el-popconfirm title="确定删除这条规则？" @confirm="remove(r)">
+            <template #reference>
+              <el-button text size="small" type="danger" :icon="Trash2">删除</el-button>
+            </template>
+          </el-popconfirm>
+        </template>
+      </EntityCard>
     </div>
 
-    <el-card shadow="never">
-      <el-table :data="rules" v-loading="loading" empty-text="暂无规则，可添加或在设置中导入 Lucky 配置">
-        <el-table-column label="启用" width="70">
-          <template #default="{ row }">
-            <el-switch :model-value="row.enable" size="small" @change="(v: string | number | boolean) => toggle(row, Boolean(v))" />
-          </template>
-        </el-table-column>
-        <el-table-column label="名称" min-width="120">
-          <template #default="{ row }">
-            <div>{{ row.name || '未命名' }}</div>
-            <div class="remark" v-if="row.remark">{{ row.remark }}</div>
-          </template>
-        </el-table-column>
-        <el-table-column label="协议" min-width="120">
-          <template #default="{ row }">
-            <el-tag v-for="p in row.protocols" :key="p" size="small" effect="plain" class="proto">{{ p }}</el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column label="监听" min-width="140">
-          <template #default="{ row }">
-            <span class="mono">{{ listenText(row) }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="目标" min-width="180">
-          <template #default="{ row }">
-            <div v-for="t in row.targetAddresses" :key="t" class="mono">{{ t }}:{{ row.targetPorts || row.listenPorts }}</div>
-          </template>
-        </el-table-column>
-        <el-table-column label="状态" min-width="160">
-          <template #default="{ row }">
-            <el-tag v-if="row.error" type="danger" size="small">{{ row.error }}</el-tag>
-            <el-tag v-else-if="row.running" type="success" size="small">运行中</el-tag>
-            <el-tag v-else type="info" size="small">已停止</el-tag>
-            <el-tooltip v-if="row.details?.length" placement="top">
-              <template #content>
-                <div v-for="d in row.details" :key="d">{{ d }}</div>
-              </template>
-              <el-icon class="detail"><Warning /></el-icon>
-            </el-tooltip>
-          </template>
-        </el-table-column>
-        <el-table-column label="连接 / 流量" min-width="170">
-          <template #default="{ row }">
-            <div>{{ row.stats.activeConns }} 活动 · {{ row.stats.totalConns }} 累计</div>
-            <div class="remark">↑ {{ formatBytes(row.stats.bytesIn) }} ↓ {{ formatBytes(row.stats.bytesOut) }}</div>
-          </template>
-        </el-table-column>
-        <el-table-column label="操作" width="130" fixed="right">
-          <template #default="{ row }">
-            <el-button link type="primary" @click="openEditor(row)">编辑</el-button>
-            <el-popconfirm title="确定删除这条规则？" @confirm="remove(row)">
-              <template #reference>
-                <el-button link type="danger">删除</el-button>
-              </template>
-            </el-popconfirm>
-          </template>
-        </el-table-column>
-      </el-table>
-    </el-card>
+    <LogCard url="/api/portforward/logs" clearable />
 
-    <el-card shadow="never" header="日志" class="logs">
-      <LogViewer url="/api/portforward/logs" clearable />
-    </el-card>
-
-    <el-dialog v-model="editorVisible" :title="editing.key ? '编辑规则' : '添加规则'" width="560px">
-      <el-form :model="editing" label-width="110px">
+    <el-dialog v-model="editorVisible" :title="editing.key ? '编辑规则' : '添加规则'" width="600px" :fullscreen="isMobile">
+      <el-form :model="editing" label-width="110px" :label-position="labelPosition">
         <el-form-item label="名称">
           <el-input v-model="editing.name" placeholder="例如：NAS SSH" />
         </el-form-item>
@@ -81,7 +57,7 @@
           <el-checkbox-group v-model="editing.protocols">
             <el-checkbox v-for="p in protocols" :key="p.value" :value="p.value">{{ p.label }}</el-checkbox>
           </el-checkbox-group>
-          <div class="help">tcp/udp 为 IPv4+IPv6 双栈；带 4/6 后缀表示仅该协议族</div>
+          <div class="form-help">tcp/udp 为 IPv4+IPv6 双栈；带 4/6 后缀表示仅该协议族</div>
         </el-form-item>
         <el-form-item label="监听地址">
           <el-input v-model="editing.listenAddress" placeholder="留空表示所有地址" />
@@ -97,11 +73,11 @@
         </el-form-item>
         <el-form-item label="最大连接数">
           <el-input-number v-model="editing.maxConnections" :min="0" :max="100000" />
-          <span class="help inline">0 使用全局默认值</span>
+          <span class="help">0 使用全局默认值</span>
         </el-form-item>
         <el-form-item label="UDP 超时(秒)">
           <el-input-number v-model="editing.udpSessionTimeout" :min="0" :max="3600" />
-          <span class="help inline">0 使用全局默认值</span>
+          <span class="help">0 使用全局默认值</span>
         </el-form-item>
         <el-form-item label="备注">
           <el-input v-model="editing.remark" />
@@ -116,13 +92,13 @@
       </template>
     </el-dialog>
 
-    <el-dialog v-model="settingsVisible" title="端口转发全局设置" width="480px">
-      <el-form v-if="settings" :model="settings" label-width="150px">
-        <el-form-item label="启用模块"><el-switch v-model="settings.enable" /></el-form-item>
-        <el-form-item label="默认最大连接数"><el-input-number v-model="settings.defaultMaxConnections" :min="1" /></el-form-item>
-        <el-form-item label="默认 UDP 超时(秒)"><el-input-number v-model="settings.defaultUDPSessionTimeout" :min="1" /></el-form-item>
-        <el-form-item label="UDP 会话上限"><el-input-number v-model="settings.maxUDPSessions" :min="1" /></el-form-item>
-        <el-form-item label="连接目标超时(秒)"><el-input-number v-model="settings.dialTimeout" :min="1" :max="60" /></el-form-item>
+    <el-dialog v-model="settingsVisible" title="端口转发全局设置" width="520px" :fullscreen="isMobile">
+      <el-form v-if="settingsForm" :model="settingsForm" label-width="150px" :label-position="labelPosition">
+        <el-form-item label="启用模块"><el-switch v-model="settingsForm.enable" /></el-form-item>
+        <el-form-item label="默认最大连接数"><el-input-number v-model="settingsForm.defaultMaxConnections" :min="1" /></el-form-item>
+        <el-form-item label="默认 UDP 超时(秒)"><el-input-number v-model="settingsForm.defaultUDPSessionTimeout" :min="1" /></el-form-item>
+        <el-form-item label="UDP 会话上限"><el-input-number v-model="settingsForm.maxUDPSessions" :min="1" /></el-form-item>
+        <el-form-item label="连接目标超时(秒)"><el-input-number v-model="settingsForm.dialTimeout" :min="1" :max="60" /></el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="settingsVisible = false">取消</el-button>
@@ -133,11 +109,17 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
-import { Warning } from '@element-plus/icons-vue'
+import { ArrowLeftRight, Pencil, Plus, SlidersHorizontal, Trash2, TriangleAlert } from 'lucide-vue-next'
 import { api, formatBytes } from '../api'
-import LogViewer from '../components/LogViewer.vue'
+import PageHeader from '../components/PageHeader.vue'
+import ModuleBanner from '../components/ModuleBanner.vue'
+import EntityCard from '../components/EntityCard.vue'
+import Field from '../components/Field.vue'
+import StatusBadge, { type StatusType } from '../components/StatusBadge.vue'
+import LogCard from '../components/LogCard.vue'
+import { useFormLayout } from '../composables/useIsMobile'
 
 interface Rule {
   key?: string
@@ -177,15 +159,20 @@ const protocols = [
   { value: 'udp6', label: 'UDP6' },
 ]
 
+const { isMobile, labelPosition } = useFormLayout()
 const rules = ref<RuleView[]>([])
-const loading = ref(false)
+const loading = ref(true)
 const editorVisible = ref(false)
 const saving = ref(false)
 const editing = ref<Rule>(emptyRule())
 const targetsText = ref('')
-const settingsVisible = ref(false)
 const settings = ref<Settings>()
+const settingsForm = ref<Settings>()
+const settingsVisible = ref(false)
+const enabling = ref(false)
 let timer: number | undefined
+
+const moduleOff = computed(() => settings.value?.enable === false)
 
 function emptyRule(): Rule {
   return {
@@ -207,13 +194,33 @@ function listenText(r: Rule) {
   return `${host}:${r.listenPorts}`
 }
 
-async function load(showLoading = false) {
-  loading.value = showLoading
+// ruleStatus 计算规则的展示状态：停用的规则只显示“已停用”，不显示为异常
+function ruleStatus(r: RuleView): { type: StatusType; text: string; title?: string } {
+  if (moduleOff.value) {
+    return { type: 'off', text: '模块已停用' }
+  }
+  if (!r.enable) {
+    return { type: 'off', text: '已停用' }
+  }
+  if (r.error) {
+    return { type: 'error', text: r.error, title: r.error }
+  }
+  if (r.running) {
+    return { type: 'running', text: '运行中' }
+  }
+  return { type: 'warn', text: '未运行' }
+}
+
+async function load() {
   try {
     rules.value = await api.get<RuleView[]>('/api/portforward/rules')
   } finally {
     loading.value = false
   }
+}
+
+async function loadSettings() {
+  settings.value = await api.get<Settings>('/api/portforward/settings')
 }
 
 function openEditor(row?: RuleView) {
@@ -269,23 +276,42 @@ async function remove(row: RuleView) {
 }
 
 async function openSettings() {
-  settings.value = await api.get<Settings>('/api/portforward/settings')
+  await loadSettings()
+  settingsForm.value = JSON.parse(JSON.stringify(settings.value))
   settingsVisible.value = true
 }
 
 async function saveSettings() {
   try {
-    await api.put('/api/portforward/settings', settings.value)
+    await api.put('/api/portforward/settings', settingsForm.value)
     settingsVisible.value = false
     ElMessage.success('已保存，规则已按新设置重启')
-    await load()
+    await Promise.all([loadSettings(), load()])
   } catch (e) {
     ElMessage.error((e as Error).message)
   }
 }
 
+// enableModule 在横幅中一键启用模块
+async function enableModule() {
+  if (!settings.value) {
+    return
+  }
+  enabling.value = true
+  try {
+    await api.put('/api/portforward/settings', { ...settings.value, enable: true })
+    ElMessage.success('端口转发模块已启用')
+    await Promise.all([loadSettings(), load()])
+  } catch (e) {
+    ElMessage.error((e as Error).message)
+  } finally {
+    enabling.value = false
+  }
+}
+
 onMounted(() => {
-  load(true)
+  load()
+  loadSettings()
   // 定时刷新连接数与流量
   timer = window.setInterval(load, 3000)
 })
@@ -293,27 +319,7 @@ onBeforeUnmount(() => window.clearInterval(timer))
 </script>
 
 <style scoped>
-.remark {
-  font-size: 12px;
-  color: var(--el-text-color-secondary);
-}
-.proto {
-  margin-right: 4px;
-}
 .detail {
-  margin-left: 6px;
   color: var(--el-color-warning);
-  vertical-align: middle;
-}
-.help {
-  font-size: 12px;
-  color: var(--el-text-color-secondary);
-  line-height: 1.5;
-}
-.help.inline {
-  margin-left: 10px;
-}
-.logs {
-  margin-top: 16px;
 }
 </style>

@@ -8,7 +8,7 @@
         <el-option label="仅错误" value="error" />
       </el-select>
       <el-checkbox v-model="follow" size="small">自动滚动</el-checkbox>
-      <el-button size="small" @click="clear" v-if="clearable">清空</el-button>
+      <el-button v-if="clearable" size="small" text :icon="Trash2" class="clear" @click="clear">清空</el-button>
     </div>
     <div ref="box" class="box mono">
       <div v-for="e in visible" :key="e.seq" :class="['line', e.level]">
@@ -24,6 +24,7 @@
 
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
+import { Trash2 } from 'lucide-vue-next'
 import { api, type LogEntry } from '../api'
 
 const props = defineProps<{ url: string; clearable?: boolean }>()
@@ -76,15 +77,20 @@ onBeforeUnmount(() => window.clearInterval(timer))
 <style scoped>
 .toolbar {
   display: flex;
-  gap: 12px;
+  flex-wrap: wrap;
+  gap: 8px 12px;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
+}
+.clear {
+  margin-left: auto;
 }
 .box {
-  height: 320px;
+  height: 300px;
   overflow: auto;
-  background: var(--el-fill-color-darker);
-  border-radius: 6px;
+  background: var(--el-fill-color-lighter);
+  border-radius: 8px;
+  border: 1px solid var(--g-border);
   padding: 8px 10px;
   font-size: 12px;
   line-height: 1.6;
@@ -117,5 +123,15 @@ onBeforeUnmount(() => window.clearInterval(timer))
 }
 .empty {
   color: var(--el-text-color-secondary);
+}
+@media (max-width: 767.98px) {
+  .box {
+    height: 240px;
+    font-size: 11px;
+  }
+  .time {
+    display: block;
+    margin-right: 0;
+  }
 }
 </style>

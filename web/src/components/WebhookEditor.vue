@@ -25,10 +25,12 @@
         <el-input-number v-model="model.timeout" :min="0" :max="120" />
         <el-checkbox v-model="model.insecureSkipVerify" class="skip">忽略证书错误</el-checkbox>
       </el-form-item>
-      <div class="vars">
-        可用变量（<span class="mono">{name}</span> 或兼容 Lucky 的 <span class="mono">#{name}</span>）：
-        <el-tag v-for="v in variables" :key="v" size="small" class="var mono">{{ '{' + v + '}' }}</el-tag>
-      </div>
+      <el-form-item label="可用变量">
+        <div class="vars">
+          <div class="vars-tip"><span class="mono">{name}</span> 或兼容 Lucky 的 <span class="mono">#{name}</span></div>
+          <el-tag v-for="v in variables" :key="v" size="small" type="info" class="var mono">{{ '{' + v + '}' }}</el-tag>
+        </div>
+      </el-form-item>
     </template>
   </div>
 </template>
@@ -67,9 +69,18 @@ const variables = computed(() => props.variables)
   margin-left: 16px;
 }
 .vars {
-  margin: 0 0 12px 120px;
   font-size: 12px;
   color: var(--el-text-color-secondary);
+  line-height: 1.6;
+}
+.vars-tip {
+  margin-bottom: 4px;
+}
+@media (max-width: 767.98px) {
+  .skip {
+    margin-left: 0;
+    width: 100%;
+  }
 }
 .var {
   margin: 2px 4px 2px 0;

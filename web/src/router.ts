@@ -10,7 +10,7 @@ const router = createRouter({
       component: () => import('./views/Layout.vue'),
       redirect: '/overview',
       children: [
-        { path: 'overview', name: 'overview', component: () => import('./views/Overview.vue'), meta: { title: '总览' } },
+        { path: 'overview', name: 'overview', component: () => import('./views/Overview.vue'), meta: { title: '概览' } },
         { path: 'ddns', name: 'ddns', component: () => import('./views/DDNS.vue'), meta: { title: '动态域名' } },
         { path: 'stun', name: 'stun', component: () => import('./views/STUN.vue'), meta: { title: 'STUN 穿透' } },
         { path: 'ssl', name: 'ssl', component: () => import('./views/SSL.vue'), meta: { title: 'SSL 证书' } },
@@ -19,7 +19,7 @@ const router = createRouter({
         { path: 'waf', name: 'waf', component: () => import('./views/WAF.vue'), meta: { title: 'WAF 防火墙' } },
         { path: 'wol', name: 'wol', component: () => import('./views/WOL.vue'), meta: { title: '网络唤醒' } },
         { path: 'terminal', name: 'terminal', component: () => import('./views/Terminal.vue'), meta: { title: 'Web 终端' } },
-        { path: 'docker', name: 'docker', component: () => import('./views/Docker.vue'), meta: { title: 'Docker 管理' } },
+        { path: 'docker', name: 'docker', component: () => import('./views/Docker.vue'), meta: { title: 'Docker' } },
         { path: 'webdav', name: 'webdav', component: () => import('./views/WebDAV.vue'), meta: { title: 'WebDAV' } },
         { path: 'cron', name: 'cron', component: () => import('./views/Cron.vue'), meta: { title: '计划任务' } },
         { path: 'settings', name: 'settings', component: () => import('./views/Settings.vue'), meta: { title: '设置' } },

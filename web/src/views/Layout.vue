@@ -1,89 +1,107 @@
 <template>
-  <el-container class="layout">
-    <el-aside width="210px" class="aside">
-      <div class="brand"><span class="logo">G</span>Gately</div>
-      <el-menu :default-active="route.path" router class="menu">
-        <el-menu-item index="/overview">
-          <el-icon><Odometer /></el-icon><span>总览</span>
-        </el-menu-item>
-        <el-menu-item index="/ddns">
-          <el-icon><Link /></el-icon><span>动态域名</span>
-        </el-menu-item>
-        <el-menu-item index="/stun">
-          <el-icon><Connection /></el-icon><span>STUN 穿透</span>
-        </el-menu-item>
-        <el-menu-item index="/portforward">
-          <el-icon><Switch /></el-icon><span>端口转发</span>
-        </el-menu-item>
-        <el-menu-item index="/ssl">
-          <el-icon><Lock /></el-icon><span>SSL 证书</span>
-        </el-menu-item>
-        <el-menu-item index="/web">
-          <el-icon><Document /></el-icon><span>Web 服务</span>
-        </el-menu-item>
-        <el-menu-item index="/waf">
-          <el-icon><Umbrella /></el-icon><span>WAF 防火墙</span>
-        </el-menu-item>
-        <el-menu-item index="/wol">
-          <el-icon><Bell /></el-icon><span>网络唤醒</span>
-        </el-menu-item>
-        <el-menu-item index="/terminal">
-          <el-icon><Monitor /></el-icon><span>Web 终端</span>
-        </el-menu-item>
-        <el-menu-item index="/docker">
-          <el-icon><Box /></el-icon><span>Docker 管理</span>
-        </el-menu-item>
-        <el-menu-item index="/webdav">
-          <el-icon><FolderOpened /></el-icon><span>WebDAV</span>
-        </el-menu-item>
-        <el-menu-item index="/cron">
-          <el-icon><Timer /></el-icon><span>计划任务</span>
-        </el-menu-item>
-        <el-menu-item index="/settings">
-          <el-icon><Setting /></el-icon><span>设置</span>
-        </el-menu-item>
-      </el-menu>
-    </el-aside>
-    <el-container>
-      <el-header class="header">
-        <span class="title">{{ route.meta.title }}</span>
-        <div class="actions">
-          <el-switch v-model="dark" inline-prompt active-text="暗" inactive-text="亮" @change="applyDark" />
-          <span class="user">{{ username }}</span>
-          <el-button link @click="logout">退出</el-button>
+  <div class="layout" :class="{ collapsed }">
+    <aside v-if="!isMobile" class="aside">
+      <SideNav :collapsed="collapsed" />
+      <button class="collapse-btn" :title="collapsed ? '展开侧栏' : '收起侧栏'" @click="toggleCollapse">
+        <PanelLeftOpen v-if="collapsed" :size="18" />
+        <PanelLeftClose v-else :size="18" />
+      </button>
+    </aside>
+    <el-drawer v-else v-model="drawer" direction="ltr" size="260px" :with-header="false" class="nav-drawer">
+      <SideNav @navigate="drawer = false" />
+    </el-drawer>
+
+    <div class="main">
+      <header class="header">
+        <div class="header-left">
+          <button v-if="isMobile" class="icon-btn" aria-label="打开菜单" @click="drawer = true">
+            <Menu :size="20" />
+          </button>
+          <template v-if="isMobile">
+            <AppLogo :size="26" />
+            <span class="header-title">Gately</span>
+          </template>
+          <template v-else>
+            <span v-if="group" class="crumb">{{ group }}</span>
+            <ChevronRight v-if="group" :size="14" class="crumb-sep" />
+            <span class="header-title">{{ route.meta.title }}</span>
+          </template>
         </div>
-      </el-header>
-      <el-main>
+        <div class="header-right">
+          <el-tooltip :content="isDark ? '切换到亮色' : '切换到暗色'" :show-after="300">
+            <button class="icon-btn" aria-label="切换主题" @click="toggle">
+              <Sun v-if="isDark" :size="18" />
+              <Moon v-else :size="18" />
+            </button>
+          </el-tooltip>
+          <el-dropdown trigger="click" @command="onCommand">
+            <button class="user-btn">
+              <span class="avatar">{{ (username || 'A').slice(0, 1).toUpperCase() }}</span>
+              <span v-if="!isMobile" class="user-name">{{ username }}</span>
+              <ChevronDown :size="14" class="muted" />
+            </button>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item command="password" :icon="KeyRound">修改密码</el-dropdown-item>
+                <el-dropdown-item command="settings" :icon="Settings">系统设置</el-dropdown-item>
+                <el-dropdown-item command="logout" :icon="LogOut" divided>退出登录</el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+        </div>
+      </header>
+      <main class="content">
         <router-view />
-      </el-main>
-    </el-container>
-  </el-container>
+      </main>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Bell, Box, Connection, Document, FolderOpened, Link, Lock, Monitor, Odometer, Setting, Switch, Timer, Umbrella } from '@element-plus/icons-vue'
+import { ChevronDown, ChevronRight, KeyRound, LogOut, Menu, Moon, PanelLeftClose, PanelLeftOpen, Settings, Sun } from 'lucide-vue-next'
 import { api } from '../api'
+import SideNav from '../components/SideNav.vue'
+import AppLogo from '../components/AppLogo.vue'
+import { groupByPath } from '../nav'
+import { useIsMobile } from '../composables/useIsMobile'
+import { useTheme } from '../composables/useTheme'
 
 const route = useRoute()
 const router = useRouter()
+const isMobile = useIsMobile()
+const { isDark, toggle } = useTheme()
 const username = ref('')
-const dark = ref(localStorage.getItem('gately-dark') === '1')
+const drawer = ref(false)
+const collapsed = ref(localStorage.getItem('gately-collapsed') === '1')
+const group = computed(() => groupByPath(route.path))
 
-
-function applyDark(v: string | number | boolean) {
-  document.documentElement.classList.toggle('dark', Boolean(v))
-  localStorage.setItem('gately-dark', v ? '1' : '0')
+function toggleCollapse() {
+  collapsed.value = !collapsed.value
+  localStorage.setItem('gately-collapsed', collapsed.value ? '1' : '0')
 }
 
-async function logout() {
-  await api.post('/api/logout').catch(() => undefined)
-  router.replace({ name: 'login' })
+// 切换页面时关闭移动端抽屉
+watch(
+  () => route.path,
+  () => {
+    drawer.value = false
+  },
+)
+
+async function onCommand(cmd: string) {
+  if (cmd === 'logout') {
+    await api.post('/api/logout').catch(() => undefined)
+    router.replace({ name: 'login' })
+  } else if (cmd === 'password') {
+    router.push({ path: '/settings', query: { tab: 'account' } })
+  } else if (cmd === 'settings') {
+    router.push('/settings')
+  }
 }
 
 onMounted(async () => {
-  applyDark(dark.value)
   const s = await api.get<{ username: string }>('/api/session')
   username.value = s.username
 })
@@ -91,51 +109,162 @@ onMounted(async () => {
 
 <style scoped>
 .layout {
-  height: 100%;
+  --aside-w: 228px;
+  display: flex;
+  min-height: 100%;
+}
+.layout.collapsed {
+  --aside-w: 68px;
 }
 .aside {
-  border-right: 1px solid var(--el-border-color-light);
-  background: var(--el-bg-color);
+  position: fixed;
+  inset: 0 auto 0 0;
+  width: var(--aside-w);
+  border-right: 1px solid var(--g-border);
+  background: var(--g-sidebar-bg);
+  transition: width 0.2s ease;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
 }
-.brand {
+.aside > :first-child {
+  flex: 1;
+  min-height: 0;
+}
+.collapse-btn {
+  height: 44px;
+  border: none;
+  border-top: 1px solid var(--g-border);
+  background: transparent;
+  color: var(--el-text-color-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.collapse-btn:hover {
+  color: var(--el-color-primary);
+}
+.main {
+  flex: 1;
+  min-width: 0;
+  margin-left: var(--aside-w);
+  transition: margin-left 0.2s ease;
+  display: flex;
+  flex-direction: column;
+}
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
   height: 56px;
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: space-between;
+  gap: 12px;
   padding: 0 20px;
-  font-weight: 700;
-  font-size: 18px;
+  border-bottom: 1px solid var(--g-border);
+  background: var(--g-header-bg);
+  backdrop-filter: saturate(180%) blur(10px);
+  -webkit-backdrop-filter: saturate(180%) blur(10px);
 }
-.logo {
+.header-left,
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.crumb {
+  font-size: 14px;
+  color: var(--el-text-color-secondary);
+  white-space: nowrap;
+}
+.crumb-sep {
+  color: var(--el-text-color-placeholder);
+  flex-shrink: 0;
+}
+.header-title {
+  font-weight: 600;
+  font-size: 15px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--el-text-color-regular);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.icon-btn:hover {
+  background: var(--el-fill-color-light);
+  color: var(--el-text-color-primary);
+}
+.user-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 8px 0 4px;
+  border-radius: 18px;
+  border: 1px solid var(--g-border);
+  background: var(--el-bg-color);
+  color: var(--el-text-color-primary);
+  cursor: pointer;
+  font-size: 13px;
+}
+.user-btn:hover {
+  border-color: var(--el-border-color);
+}
+.avatar {
   width: 28px;
   height: 28px;
-  border-radius: 7px;
-  background: var(--gately-accent);
+  border-radius: 50%;
+  background: var(--el-color-primary);
   color: #fff;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
-}
-.menu {
-  border-right: none;
-}
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-bottom: 1px solid var(--el-border-color-light);
-  background: var(--el-bg-color);
-}
-.title {
   font-weight: 600;
+  font-size: 13px;
 }
-.actions {
-  display: flex;
-  align-items: center;
-  gap: 14px;
+.user-name {
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
-.user {
-  color: var(--el-text-color-secondary);
+.content {
+  flex: 1;
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 20px 24px 32px;
+  min-width: 0;
+}
+@media (max-width: 767.98px) {
+  .main {
+    margin-left: 0;
+  }
+  .header {
+    padding: 0 8px 0 4px;
+    height: 52px;
+  }
+  .content {
+    padding: 14px 12px 24px;
+  }
+}
+</style>
+
+<style>
+.nav-drawer .el-drawer__body {
+  padding: 0;
 }
 </style>
