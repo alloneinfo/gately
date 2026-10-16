@@ -40,6 +40,10 @@ func startLocal(cfg LocalConfig, cols, rows int) (session, error) {
 	cmd := exec.Command(shell)
 	cmd.Dir = cfg.WorkDir
 	cmd.Env = append(os.Environ(), "TERM=xterm-256color")
+	// 连接配置中的附加环境变量放在最后，可覆盖默认值
+	for k, v := range cfg.Env {
+		cmd.Env = append(cmd.Env, k+"="+v)
+	}
 	f, err := pty.StartWithSize(cmd, &pty.Winsize{Cols: uint16(cols), Rows: uint16(rows)})
 	if err != nil {
 		return nil, err

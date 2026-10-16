@@ -1,0 +1,49 @@
+/* Web 终端相关对话框、抽屉的全局样式（对话框挂载在 body 下，无法使用组件作用域样式）。 */
+.term-dialog .el-form-item__content {
+  min-width: 0;
+}
+
+@media (max-width: 767.98px) {
+  /* 触控目标不小于 40px */
+  .term-dialog .el-button,
+  .el-message-box__btns .el-button,
+  .sheet .el-button {
+    min-height: 40px;
+  }
+  .term-dialog .el-input__wrapper,
+  .term-dialog .el-select__wrapper,
+  .el-message-box .el-input__wrapper {
+    min-height: 40px;
+  }
+  .term-dialog .el-radio-button__inner {
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+  }
+  .term-dialog .el-input-number {
+    min-width: 150px;
+  }
+  /* 输入控件字号不小于 16px，避免 iOS 聚焦时自动放大页面 */
+  .term-dialog input,
+  .term-dialog textarea,
+  .el-message-box input,
+  .el-message-box textarea {
+    font-size: 16px !important;
+  }
+  .term-dialog .el-dialog__headerbtn {
+    width: 48px;
+    height: 48px;
+  }
+  .term-dialog .el-dialog__footer {
+    padding-bottom: calc(12px + env(safe-area-inset-bottom));
+  }
+  .el-dropdown-menu__item {
+    min-height: 40px;
+  }
+  .sheet.el-drawer {
+    border-radius: 14px 14px 0 0;
+  }
+  .sheet .el-drawer__body {
+    padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+  }
+}

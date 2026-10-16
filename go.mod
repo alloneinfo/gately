@@ -9,8 +9,11 @@ require (
 	github.com/corazawaf/coraza-coreruleset/v4 v4.25.0
 	github.com/corazawaf/coraza/v3 v3.8.1
 	github.com/creack/pty v1.1.24
+	github.com/fclairamb/ftpserverlib v0.32.4
 	github.com/pires/go-proxyproto v0.15.0
+	github.com/pkg/sftp v1.13.11
 	github.com/robfig/cron/v3 v3.0.1
+	github.com/spf13/afero v1.15.0
 	golang.org/x/sys v0.49.0
 )
 
@@ -22,6 +25,7 @@ require (
 	github.com/gotnospirit/messageformat v0.0.0-20221001023931-dfe49f1eb092 // indirect
 	github.com/kaptinlin/go-i18n v0.1.4 // indirect
 	github.com/kaptinlin/jsonschema v0.4.6 // indirect
+	github.com/kr/fs v0.1.0 // indirect
 	github.com/magefile/mage v1.17.0 // indirect
 	github.com/petar-dambovaliev/aho-corasick v0.0.0-20250424160509-463d218d4745 // indirect
 	github.com/tidwall/gjson v1.18.0 // indirect
