@@ -240,3 +240,41 @@ func TestImportLucky(t *testing.T) {
 		t.Logf("真实样本 %d/%d", rep.Imported, rep.Found)
 	}
 }
+
+func TestConnectionTest(t *testing.T) {
+	keyPEM, pub := newKey(t)
+	addr, hostPub := startSSHServer(t, pub)
+	host, port, _ := net.SplitHostPort(addr)
+	m, srv := newModule(t)
+	c := Connection{Key: "c1", Name: "nas", SSH: SSHConfig{Host: host, Username: "root", AuthType: "key", PrivateKey: keyPEM}}
+	c.SSH.Port, _ = strconv.Atoi(port)
+	if err := c.Validate(); err != nil {
+		t.Fatal(err)
+	}
+	bad := c
+	bad.Key, bad.SSH.Port = "c2", 1
+	m.cfg.Connections = []Connection{c, bad}
+	post := func(key string) map[string]any {
+		resp, err := http.Post(srv.URL+"/api/webterminal/connections/"+key+"/test", "application/json", nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer resp.Body.Close()
+		var out map[string]any
+		_ = json.NewDecoder(resp.Body).Decode(&out)
+		return out
+	}
+	out := post("c1")
+	if out["ok"] != true || out["newHostKey"] != Fingerprint(hostPub) {
+		t.Fatalf("测试连接应成功并返回主机指纹: %v", out)
+	}
+	m.mu.Lock()
+	recorded := m.cfg.Connections[0].SSH.HostKey
+	m.mu.Unlock()
+	if recorded != "" {
+		t.Fatal("测试连接不应记录主机密钥")
+	}
+	if out := post("c2"); out["ok"] != false || out["error"] == "" {
+		t.Fatalf("不可达的主机应返回错误: %v", out)
+	}
+}

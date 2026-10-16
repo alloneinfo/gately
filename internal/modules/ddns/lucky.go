@@ -267,16 +267,31 @@ func (m *Module) ImportLucky(doc luckyimport.Document, opts luckyimport.Options)
 	if opts.DryRun {
 		return rep, nil
 	}
-	old := m.cfg.Tasks
+	old, oldSettings := m.cfg.Tasks, m.cfg.Settings
+	var lc struct{ Enable *bool }
+	if raw, ok := doc["DDNSConfigure"]; ok && opts.KeepEnabled {
+		_ = json.Unmarshal(raw, &lc)
+		if lc.Enable != nil {
+			m.cfg.Settings.Enable = *lc.Enable
+			if !*lc.Enable && rep.Imported > 0 {
+				rep.Warnings = append(rep.Warnings, "Lucky 中动态域名模块处于关闭状态，已同步关闭 Gately 的动态域名模块")
+			}
+		}
+	}
 	for _, t := range fresh {
 		t.Key = crud.NewKey()
 		m.cfg.Tasks = append(m.cfg.Tasks, t)
 	}
 	if err := m.saveLocked(); err != nil {
-		m.cfg.Tasks = old
+		m.cfg.Tasks, m.cfg.Settings = old, oldSettings
 		return nil, err
 	}
-	for _, t := range m.cfg.Tasks[len(old):] {
+	// 模块开关变化时重启全部任务，否则只启动新导入的任务
+	restart := m.cfg.Tasks[len(old):]
+	if oldSettings.Enable != m.cfg.Settings.Enable {
+		restart = m.cfg.Tasks
+	}
+	for _, t := range restart {
 		m.restartLocked(t.Key)
 	}
 	return rep, nil

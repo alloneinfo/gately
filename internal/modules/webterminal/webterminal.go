@@ -210,6 +210,7 @@ func (m *Module) Routes(r module.Router) {
 	}
 	conns.Register(r, "/connections")
 	r.HandleFunc("DELETE /connections/{key}/hostkey", m.handleResetHostKey)
+	r.HandleFunc("POST /connections/{key}/test", m.handleTest)
 	r.HandleFunc("GET /connections/{key}/ws", m.handleWS)
 	r.HandleFunc("GET /settings", func(w http.ResponseWriter, req *http.Request) {
 		m.mu.Lock()
@@ -403,13 +404,14 @@ var dialSSH = func(ctx context.Context, addr string, timeout time.Duration) (net
 	return d.DialContext(ctx, "tcp", addr)
 }
 
-func (m *Module) startSSH(ctx context.Context, c *Connection, cols, rows int, notice func(string)) (session, error) {
+// connectSSH 建立并认证 SSH 连接。newFingerprint 非空表示首次连接（尚未记录主机密钥）。
+func connectSSH(ctx context.Context, c *Connection) (client *ssh.Client, newFingerprint string, err error) {
 	s := c.SSH
 	var auth []ssh.AuthMethod
 	if s.AuthType == "key" {
 		signer, err := parseKey(s.PrivateKey, s.Passphrase)
 		if err != nil {
-			return nil, err
+			return nil, "", err
 		}
 		auth = append(auth, ssh.PublicKeys(signer))
 	} else {
@@ -421,7 +423,6 @@ func (m *Module) startSSH(ctx context.Context, c *Connection, cols, rows int, no
 			return ans, nil
 		}))
 	}
-	var newFingerprint string
 	cfg := &ssh.ClientConfig{
 		User:    s.Username,
 		Auth:    auth,
@@ -441,14 +442,21 @@ func (m *Module) startSSH(ctx context.Context, c *Connection, cols, rows int, no
 	addr := net.JoinHostPort(s.Host, strconv.Itoa(s.Port))
 	nc, err := dialSSH(ctx, addr, cfg.Timeout)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 	cc, chans, reqs, err := ssh.NewClientConn(nc, addr, cfg)
 	if err != nil {
 		nc.Close()
+		return nil, "", err
+	}
+	return ssh.NewClient(cc, chans, reqs), newFingerprint, nil
+}
+
+func (m *Module) startSSH(ctx context.Context, c *Connection, cols, rows int, notice func(string)) (session, error) {
+	client, newFingerprint, err := connectSSH(ctx, c)
+	if err != nil {
 		return nil, err
 	}
-	client := ssh.NewClient(cc, chans, reqs)
 	if newFingerprint != "" {
 		m.recordHostKey(c.Key, newFingerprint)
 		notice("首次连接，已信任主机密钥 " + newFingerprint)
@@ -476,7 +484,7 @@ func (m *Module) startSSH(ctx context.Context, c *Connection, cols, rows int, no
 		pw.Close()
 	}()
 	// 定期发送保活请求，避免空闲连接被中间设备断开
-	if ka := s.KeepAlive; ka > 0 {
+	if ka := c.SSH.KeepAlive; ka > 0 {
 		go func() {
 			t := time.NewTicker(time.Duration(ka) * time.Second)
 			defer t.Stop()
@@ -504,4 +512,36 @@ func (m *Module) recordHostKey(key, fp string) {
 			_ = m.saveLocked()
 		}
 	}
+}
+
+// handleTest 测试 SSH 连接：完成认证后立即断开，不记录主机密钥。
+func (m *Module) handleTest(w http.ResponseWriter, r *http.Request) {
+	m.mu.Lock()
+	var conn *Connection
+	for i := range m.cfg.Connections {
+		if m.cfg.Connections[i].Key == r.PathValue("key") {
+			c := m.cfg.Connections[i]
+			conn = &c
+		}
+	}
+	m.mu.Unlock()
+	if conn == nil {
+		httpx.Error(w, http.StatusNotFound, "连接不存在")
+		return
+	}
+	if conn.Type != TypeSSH {
+		httpx.Error(w, http.StatusBadRequest, "只能测试 SSH 连接")
+		return
+	}
+	ctx, cancel := context.WithTimeout(r.Context(), 20*time.Second)
+	defer cancel()
+	start := time.Now()
+	client, fp, err := connectSSH(ctx, conn)
+	if err != nil {
+		httpx.OK(w, map[string]any{"ok": false, "error": err.Error()})
+		return
+	}
+	version := string(client.ServerVersion())
+	client.Close()
+	httpx.OK(w, map[string]any{"ok": true, "serverVersion": version, "newHostKey": fp, "latencyMs": time.Since(start).Milliseconds()})
 }

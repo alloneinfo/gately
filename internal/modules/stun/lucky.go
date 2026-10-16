@@ -218,6 +218,12 @@ func (m *Module) ImportLucky(doc luckyimport.Document, opts luckyimport.Options)
 		m.cfg.Settings.Webhook = webhook.Config{Enable: true, URL: gc.WebhookURL, Method: gc.WebhookMethod, Headers: gc.WebhookHeaders,
 			Body: gc.WebhookRequestBody, SuccessContent: gc.WebhookSuccessContent, Timeout: gc.WebHookTimeout}
 	}
+	// 保留启用状态时一并迁移模块总开关（Lucky 中模块关闭时规则不会运行）
+	moduleOff := false
+	if _, ok := doc["StunConfigure"]; ok && opts.KeepEnabled {
+		m.cfg.Settings.Enable = gc.EnableModule
+		moduleOff = !gc.EnableModule
+	}
 	m.cfg.Settings.normalize()
 	for _, r := range rules {
 		r.Key = crud.NewKey()
@@ -227,8 +233,16 @@ func (m *Module) ImportLucky(doc luckyimport.Document, opts luckyimport.Options)
 		m.cfg.Rules, m.cfg.Settings = oldRules, oldSettings
 		return nil, err
 	}
-	for _, r := range m.cfg.Rules[len(oldRules):] {
+	// 模块开关变化时重启全部规则，否则只启动新导入的规则
+	restart := m.cfg.Rules[len(oldRules):]
+	if oldSettings.Enable != m.cfg.Settings.Enable {
+		restart = m.cfg.Rules
+	}
+	for _, r := range restart {
 		m.restartLocked(r.Key)
+	}
+	if moduleOff && rep.Imported > 0 {
+		rep.Warnings = append(rep.Warnings, "Lucky 中 STUN 模块处于关闭状态，已同步关闭 Gately 的 STUN 模块，规则不会运行")
 	}
 	return rep, nil
 }

@@ -75,6 +75,9 @@ func (r *runner) sessionUDP(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
+	pm := &publicMapping{r: r, proto: "udp"}
+	defer pm.close()
+	pm.update(sctx, pub)
 
 	if !r.rule.DisableCheck {
 		// UDP 回环（hairpin）在很多 NAT 上不受支持，检测失败只告警
@@ -105,6 +108,7 @@ func (r *runner) sessionUDP(ctx context.Context) error {
 			if np != pub {
 				r.log.Warnf("公网地址改变: %s -> %s", pub, np)
 				pub = np
+				pm.update(sctx, pub)
 				r.publish(ctx, pub)
 			}
 		}

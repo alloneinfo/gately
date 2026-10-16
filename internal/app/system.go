@@ -22,6 +22,7 @@ import (
 	"github.com/wangwanjie/gately/internal/httpx"
 	"github.com/wangwanjie/gately/internal/logbuf"
 	"github.com/wangwanjie/gately/internal/luckyimport"
+	"github.com/wangwanjie/gately/internal/resolver"
 	"github.com/wangwanjie/gately/internal/version"
 )
 
@@ -275,8 +276,27 @@ func (a *App) importLuckyBase(doc luckyimport.Document, opts luckyimport.Options
 			dns = append(dns, v)
 		}
 	}
-	if len(dns) > 0 {
-		s.DNSServers = dns
+	var (
+		badDNS []string
+		good   []string
+	)
+	seen := map[string]bool{}
+	for _, d := range dns {
+		if seen[d] {
+			continue
+		}
+		seen[d] = true
+		if _, err := resolver.Parse(d); err != nil {
+			badDNS = append(badDNS, d)
+			continue
+		}
+		good = append(good, d)
+	}
+	if len(good) > 0 {
+		s.DNSServers = good
+	}
+	if len(badDNS) > 0 {
+		rep.Warnings = append(rep.Warnings, "以下 DNS 服务器格式不支持，已忽略："+strings.Join(badDNS, "、"))
 	}
 	if lb.SetGCPercent && lb.GCPercent > 0 {
 		s.GCPercent = lb.GCPercent

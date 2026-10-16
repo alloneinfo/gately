@@ -66,6 +66,19 @@ type luckyListener struct {
 	TLSMinVersion int
 	DefaultProxy  luckySite
 	ProxyList     []luckySite
+	// CorazaWAFInstance 为监听规则的 WAF 实例；子规则填 "main" 表示沿用它
+	CorazaWAFInstance string
+}
+
+// luckyInheritWAF 是 Lucky 子规则中表示"沿用监听规则 WAF 实例"的取值。
+const luckyInheritWAF = "main"
+
+// resolveWAF 把子规则的 WAF 引用解析为实例 key。
+func resolveWAF(site, listener string) string {
+	if site == luckyInheritWAF {
+		return listener
+	}
+	return site
 }
 
 // luckyUsers 解析用户列表。Lucky 某些版本会把整段 "user:pass" 文本按字符存成数组，这里先还原再拆分。
@@ -112,7 +125,9 @@ func convertSite(ls luckySite) (Site, []string) {
 		// 保留 Lucky 的 WAF 实例 key，WAF 模块导入时沿用相同 key
 		WAF: ls.CorazaWAFInstance,
 	}
-	if v, ok := ls.OtherParams["ProxyProtocolV2"].(bool); ok {
+	// OtherParams.ProxyProtocolV2 只对 Lucky 的 SNI 分流类型生效，且新建站点默认即为 true；
+	// 反向代理站点不会向后端发送 PROXY 头，迁移时不能据此开启，否则不支持该协议的后端会返回 400
+	if v, ok := ls.OtherParams["ProxyProtocolV2"].(bool); ok && ls.WebServiceType == "SNIRouting" {
 		s.SendProxyProtocol = v
 	}
 	webAuth, _ := ls.OtherParams["WebAuth"].(bool)
@@ -181,6 +196,7 @@ func convertLuckyListeners(raw json.RawMessage) ([]Listener, []string, int, erro
 		featureSites := map[string][]string{}
 		for j, ls := range ll.ProxyList {
 			site, notes := convertSite(ls)
+			site.WAF = resolveWAF(site.WAF, ll.CorazaWAFInstance)
 			name := site.Name
 			if name == "" && len(site.Domains) > 0 {
 				name = site.Domains[0]
@@ -204,6 +220,7 @@ func convertLuckyListeners(raw json.RawMessage) ([]Listener, []string, int, erro
 		if def, notes := convertSite(ll.DefaultProxy); len(def.Targets) > 0 || def.Type != TypeProxy {
 			// 默认站点没有单独的启用开关，认证无法迁移时保持停用
 			def.Enable = !slices.Contains(notes, "认证停用")
+			def.WAF = resolveWAF(def.WAF, ll.CorazaWAFInstance)
 			def.Domains = nil
 			l.Default = def
 			for _, n := range notes {
@@ -232,7 +249,7 @@ func convertLuckyListeners(raw json.RawMessage) ([]Listener, []string, int, erro
 		out = append(out, l)
 	}
 	if len(out) > 0 {
-		warns = append(warns, "站点引用的 WAF 实例需同时导入 lucky_coraza.lkcf；引用不存在的实例时不做检查（与 Lucky 行为一致）")
+		warns = append(warns, "站点引用的 WAF 实例需同时导入 lucky_coraza.lkcf；子规则的 WAF 为 main 时已改为监听规则使用的实例（与 Lucky 行为一致）")
 	}
 	return out, warns, len(src), nil
 }

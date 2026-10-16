@@ -66,6 +66,9 @@ func (r *runner) sessionTCP(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
+	pm := &publicMapping{r: r, proto: "tcp"}
+	defer pm.close()
+	pm.update(sctx, pub)
 
 	var wg sync.WaitGroup
 	if ln != nil {
@@ -108,6 +111,7 @@ func (r *runner) sessionTCP(ctx context.Context) error {
 		if np != pub {
 			r.log.Warnf("公网地址改变: %s -> %s", pub, np)
 			pub = np
+			pm.update(sctx, pub)
 		}
 		r.publish(ctx, pub)
 		return nil

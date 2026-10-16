@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"net"
@@ -459,5 +460,50 @@ func TestTCPStopWithActiveConnection(t *testing.T) {
 	case <-done:
 	case <-time.After(5 * time.Second):
 		t.Fatal("有活动连接时停止规则超时")
+	}
+}
+
+// 路由器出站不保持端口时，应按 STUN 观察到的公网端口追加映射，结束时一并删除
+func TestUPnPMapsObservedPublicPort(t *testing.T) {
+	e := newTestEnv(t)
+	e.stun.SetMapAddr(func(a netip.AddrPort) netip.AddrPort { return netip.AddrPortFrom(a.Addr(), 45678) })
+	var mu sync.Mutex
+	var actions []string
+	igd := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		b, _ := io.ReadAll(r.Body)
+		mu.Lock()
+		actions = append(actions, r.Header.Get("SOAPAction")+" "+string(b))
+		mu.Unlock()
+		_, _ = w.Write([]byte(`<ok/>`))
+	}))
+	defer igd.Close()
+	rule := Rule{
+		Name: "nat", Protocol: ProtoTCP4, Bind: Bind{Mode: BindIP, IP: "127.0.0.1"}, UseGlobalServers: true,
+		TargetAddresses: []string{"127.0.0.1"}, TargetPort: e.tcpEcho.Addr().(*net.TCPAddr).Port,
+		HeartbeatInterval: 500, StunTimeout: 1000, RetryInterval: 500, AutoRetry: true, DisableCheck: true,
+		UPnP: true, UPnPControlURL: igd.URL + "/ctl", UPnPLocalHost: "192.168.1.8",
+	}
+	_ = rule.Validate()
+	_, lg := testLogger()
+	r := newRunner(rule, e.settings(), lg)
+	r.start(context.Background())
+	waitFor(t, "穿透成功", func() bool { return r.snapshot().Status == StatusOK })
+	local := r.port
+	r.stop()
+	mu.Lock()
+	defer mu.Unlock()
+	joined := strings.Join(actions, "\n")
+	want := "<NewExternalPort>45678</NewExternalPort>"
+	if !strings.Contains(joined, want) || !strings.Contains(joined, fmt.Sprintf("<NewInternalPort>%d</NewInternalPort>", local)) {
+		t.Fatalf("应按公网端口 45678 映射到通道端口 %d: %v", local, actions)
+	}
+	deletes := 0
+	for _, a := range actions {
+		if strings.Contains(a, "DeletePortMapping") {
+			deletes++
+		}
+	}
+	if deletes < 2 {
+		t.Fatalf("结束时应删除两条映射: %v", actions)
 	}
 }

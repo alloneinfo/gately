@@ -120,6 +120,26 @@ func (m *Module) ImportLucky(doc luckyimport.Document, opts luckyimport.Options)
 	if err != nil {
 		return nil, err
 	}
+	// 保留启用状态时一并迁移模块总开关
+	var lc struct{ Enable *bool }
+	if raw, ok := doc["PortForwardsConfigure"]; ok && opts.KeepEnabled {
+		_ = json.Unmarshal(raw, &lc)
+	}
+	if lc.Enable != nil {
+		m.mu.Lock()
+		if m.cfg.Settings.Enable != *lc.Enable {
+			m.cfg.Settings.Enable = *lc.Enable
+			if err := m.saveLocked(); err == nil {
+				for _, r := range m.cfg.Rules {
+					m.restartLocked(r.Key)
+				}
+			}
+			if !*lc.Enable {
+				rep.Warnings = append(rep.Warnings, "Lucky 中端口转发模块处于关闭状态，已同步关闭 Gately 的端口转发模块")
+			}
+		}
+		m.mu.Unlock()
+	}
 	rep.Imported = n
 	return rep, nil
 }

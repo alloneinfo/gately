@@ -1,14 +1,12 @@
 package app
 
 import (
-	"context"
 	"crypto/hmac"
 	"crypto/sha256"
 	"crypto/subtle"
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"math/rand/v2"
 	"net"
 	"net/http"
 	"net/netip"
@@ -21,6 +19,7 @@ import (
 	"github.com/wangwanjie/gately/internal/crud"
 	"github.com/wangwanjie/gately/internal/httpx"
 	"github.com/wangwanjie/gately/internal/logbuf"
+	"github.com/wangwanjie/gately/internal/resolver"
 )
 
 // Settings 是全局设置（settings.json）。字段对齐 Lucky 的基础设置中对 Gately 有意义的部分。
@@ -42,7 +41,8 @@ type Settings struct {
 	APIToken string `json:"apiToken"`
 	// TimeZone 为 IANA 时区名，例如 Asia/Shanghai；为空使用系统时区
 	TimeZone string `json:"timeZone"`
-	// DNSServers 为自定义 DNS 服务器，影响所有出站域名解析（DDNS、Webhook、ACME 等）
+	// DNSServers 为自定义 DNS 服务器，影响所有出站域名解析（DDNS、Webhook、ACME 等）；
+	// 支持 IP、IP:端口、doh@主机 与 https:// DoH 地址
 	DNSServers []string `json:"dnsServers"`
 	// LogLines 为每个模块保留的日志条数
 	LogLines int `json:"logLines"`
@@ -117,12 +117,8 @@ func (s *Settings) Validate() error {
 			return fmt.Errorf("时区 %q 无效", s.TimeZone)
 		}
 	}
-	for _, d := range s.DNSServers {
-		if _, err := netip.ParseAddr(d); err != nil {
-			if _, err := netip.ParseAddrPort(d); err != nil {
-				return fmt.Errorf("DNS 服务器 %q 应为 IP 或 IP:端口", d)
-			}
-		}
+	if err := resolver.Validate(s.DNSServers); err != nil {
+		return err
 	}
 	if s.LogLines > maxLogLines {
 		return fmt.Errorf("日志条数不能超过 %d", maxLogLines)
@@ -147,7 +143,9 @@ func (a *App) applyRuntime() {
 			time.Local = loc
 		}
 	}
-	setResolver(s.DNSServers)
+	if err := resolver.Install(s.DNSServers); err != nil {
+		a.sysLogs.Add(logbuf.LevelWarn, "settings", "部分 DNS 服务器无效: "+err.Error())
+	}
 	a.sysLogs.Resize(s.LogLines)
 	for _, e := range a.modules {
 		e.logs.Resize(s.LogLines)
@@ -159,39 +157,6 @@ func (a *App) applyRuntime() {
 	}
 	if s.MaxProcs > 0 {
 		runtime.GOMAXPROCS(s.MaxProcs)
-	}
-}
-
-// setResolver 让所有出站解析使用指定的 DNS 服务器；为空时恢复系统默认。
-func setResolver(servers []string) {
-	if len(servers) == 0 {
-		net.DefaultResolver = &net.Resolver{}
-		return
-	}
-	addrs := make([]string, 0, len(servers))
-	for _, s := range servers {
-		if ap, err := netip.ParseAddrPort(s); err == nil {
-			addrs = append(addrs, ap.String())
-		} else {
-			addrs = append(addrs, net.JoinHostPort(s, "53"))
-		}
-	}
-	d := &net.Dialer{Timeout: 5 * time.Second}
-	net.DefaultResolver = &net.Resolver{
-		PreferGo: true,
-		Dial: func(ctx context.Context, network, _ string) (net.Conn, error) {
-			// 随机选择起点，失败时依次尝试其他服务器
-			start := rand.IntN(len(addrs))
-			var lastErr error
-			for i := range addrs {
-				c, err := d.DialContext(ctx, network, addrs[(start+i)%len(addrs)])
-				if err == nil {
-					return c, nil
-				}
-				lastErr = err
-			}
-			return nil, lastErr
-		},
 	}
 }
 

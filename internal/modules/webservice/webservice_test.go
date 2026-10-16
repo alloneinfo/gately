@@ -433,7 +433,7 @@ func TestProxyProtocol(t *testing.T) {
 func TestConvertLucky(t *testing.T) {
 	chars := strings.Split("bob:pw,amy:x1", "")
 	raw, _ := json.Marshal([]map[string]any{{
-		"RuleName": "main", "Enable": true, "ListenPort": 4434, "Network": "tcp6", "EnableTLS": true, "TLSMinVersion": 1, "Http3": true,
+		"RuleName": "main", "Enable": true, "ListenPort": 4434, "Network": "tcp6", "EnableTLS": true, "TLSMinVersion": 1, "Http3": true, "CorazaWAFInstance": "wafkey",
 		"DefaultProxy": map[string]any{"Locations": []string{"http://192.168.1.8:8898"}, "WebServiceType": "reverseproxy"},
 		"ProxyList": []map[string]any{
 			{"Enable": true, "Domains": []string{"a.example.com"}, "Locations": []string{"https://192.168.1.9:5001"}, "WebServiceType": "reverseproxy",
@@ -456,15 +456,17 @@ func TestConvertLucky(t *testing.T) {
 		t.Fatalf("监听器映射错误: %+v", l)
 	}
 	a, b := l.Sites[0], l.Sites[1]
-	if !a.SendProxyProtocol || !a.InsecureSkipVerify || !a.DisableKeepAlives || !a.AccessLog {
+	// ProxyProtocolV2 只对 SNI 分流生效，反向代理站点不应向后端发送 PROXY 头（真实环境验证：后端会返回 400）
+	if a.SendProxyProtocol || !a.InsecureSkipVerify || !a.DisableKeepAlives || !a.AccessLog {
 		t.Fatalf("站点 a 映射错误: %+v", a)
 	}
 	if !b.WebAuth || len(b.Users) != 2 || b.Users[0] != "bob:pw" || b.Users[1] != "amy:x1" {
 		t.Fatalf("按字符存储的用户列表应还原: %+v", b.Users)
 	}
 	joined := strings.Join(warns, "\n")
-	if a.WAF != "main" {
-		t.Fatalf("应保留 WAF 引用: %q", a.WAF)
+	// 子规则 WAF 为 main 表示沿用监听规则的实例；未设置的子规则保持不检查
+	if a.WAF != "wafkey" || b.WAF != "" {
+		t.Fatalf("WAF 引用解析错误: %q %q", a.WAF, b.WAF)
 	}
 	for _, w := range []string{"HTTP/3", "fileServer", "WAF", "第三方登录"} {
 		if !strings.Contains(joined, w) {

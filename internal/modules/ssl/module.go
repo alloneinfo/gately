@@ -384,14 +384,22 @@ func (m *Module) reloadFileLocked(c *Cert) {
 func mappingFiles(c *Cert) map[string][]byte {
 	base := c.fileBase()
 	files := map[string][]byte{
-		base + ".crt": []byte(c.CertPEM),
-		base + ".pem": []byte(c.CertPEM),
-		base + ".key": []byte(c.KeyPEM),
+		base + ".crt": pemBytes(c.CertPEM),
+		base + ".pem": pemBytes(c.CertPEM),
+		base + ".key": pemBytes(c.KeyPEM),
 	}
 	if c.IssuerPEM != "" {
-		files[base+"_issuerCertificate.crt"] = []byte(c.IssuerPEM)
+		files[base+"_issuerCertificate.crt"] = pemBytes(c.IssuerPEM)
 	}
 	return files
+}
+
+// pemBytes 保证 PEM 内容以换行结尾（与 Lucky 写出的文件一致，部分程序拼接证书时依赖结尾换行）。
+func pemBytes(s string) []byte {
+	if s != "" && !strings.HasSuffix(s, "\n") {
+		s += "\n"
+	}
+	return []byte(s)
 }
 
 // applyMappingLocked 把证书写到映射目录，内容变化且 runScript 为 true 时执行脚本。

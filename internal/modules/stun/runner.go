@@ -264,13 +264,44 @@ func (r *runner) runScript(vars map[string]string) {
 	}
 }
 
-// mapPort 在路由器上建立 UPnP / NAT-PMP 映射，返回清理函数。
+// publicMapping 维护 STUN 观察到的公网端口 → 本机通道端口 的映射。
+// 部分路由器出站时不保持源端口（例如通道端口 37701 出站后变成 65453），
+// 仅映射通道端口无法让外部访问公网端口，需要按公网端口再建一条映射；公网端口变化时随之更新。
+type publicMapping struct {
+	r     *runner
+	proto string
+	port  int
+	unmap func()
+}
+
+func (p *publicMapping) update(ctx context.Context, pub netip.AddrPort) {
+	want := int(pub.Port())
+	if !p.r.rule.UPnP && !p.r.rule.NATPMP || want == p.r.port {
+		p.close()
+		return
+	}
+	if want == p.port {
+		return
+	}
+	p.close()
+	p.r.log.Infof("公网端口 %d 与通道端口 %d 不同，按公网端口追加映射", want, p.r.port)
+	p.port, p.unmap = want, p.r.mapPort(ctx, p.proto, want)
+}
+
+func (p *publicMapping) close() {
+	if p.unmap != nil {
+		p.unmap()
+	}
+	p.port, p.unmap = 0, nil
+}
+
+// mapPort 在路由器上建立 外部端口 port → 本机通道端口 的 UPnP / NAT-PMP 映射，返回清理函数。
 // 映射按租期定时续约，路由器重启后也能恢复。
 func (r *runner) mapPort(ctx context.Context, proto string, port int) func() {
 	if !r.rule.UPnP && !r.rule.NATPMP {
 		return func() {}
 	}
-	intPort := port
+	intPort := r.port
 	if r.rule.UPnPInternalPort > 0 {
 		intPort = r.rule.UPnPInternalPort
 	}
