@@ -1,406 +1,901 @@
 <template>
-  <div>
-    <div class="stats">
-      <div class="stat">
-        <div class="stat-icon"><Tag :size="18" /></div>
-        <div class="stat-text">
-          <div class="stat-label">版本</div>
-          <div class="stat-value" :title="status ? `${status.commit} · ${status.buildDate}` : ''">{{ status?.version ?? '-' }}</div>
-          <div class="stat-sub">{{ status ? `${status.os}/${status.arch} · ${status.goVersion}` : '' }}</div>
-        </div>
-      </div>
-      <div class="stat">
-        <div class="stat-icon"><Clock3 :size="18" /></div>
-        <div class="stat-text">
-          <div class="stat-label">已运行</div>
-          <div class="stat-value">{{ uptime || '-' }}</div>
-          <div class="stat-sub">{{ status ? '启动于 ' + new Date(status.startTime).toLocaleString() : '' }}</div>
-        </div>
-      </div>
-      <div class="stat">
-        <div class="stat-icon"><MemoryStick :size="18" /></div>
-        <div class="stat-text">
-          <div class="stat-label">内存占用</div>
-          <div class="stat-value">{{ status ? formatBytes(status.memAlloc) : '-' }}</div>
-          <div class="stat-sub">Go 堆内存</div>
-        </div>
-      </div>
-      <div class="stat">
-        <div class="stat-icon"><Activity :size="18" /></div>
-        <div class="stat-text">
-          <div class="stat-label">协程</div>
-          <div class="stat-value">{{ status?.goroutines ?? '-' }}</div>
-          <div class="stat-sub">goroutines</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="section-title">功能模块</div>
-    <div class="modules">
-      <router-link v-for="m in moduleCards" :key="m.id" :to="m.nav.path" class="module" :class="`lv-${m.level}`">
-        <div class="module-head">
-          <div class="module-icon"><component :is="m.nav.icon" :size="20" /></div>
-          <div class="module-titles">
-            <div class="module-title">{{ m.nav.title }}</div>
-            <div class="module-desc">{{ m.nav.desc }}</div>
+  <div class="overview">
+    <!-- ============ 主机信息 ============ -->
+    <section class="hero">
+      <div class="hero-main">
+        <div class="hero-icon"><Server :size="26" :stroke-width="1.8" /></div>
+        <div class="hero-text">
+          <div class="hero-name">
+            {{ host?.hostname || '-' }}
+            <span v-if="host?.inContainer" class="chip"><Container :size="12" />容器内运行</span>
           </div>
-          <ChevronRight :size="16" class="module-arrow" />
-        </div>
-        <div v-if="m.summary.length" class="module-items">
-          <div v-for="it in m.summary" :key="it.label" class="item">
-            <span class="item-label">{{ it.label }}</span>
-            <span :class="['item-value', it.level]">{{ it.value }}</span>
+          <div class="hero-sub">{{ platformLine }}</div>
+          <div class="hero-meta">
+            <span v-if="host?.bootTime"><Power :size="13" />系统已运行 {{ formatDuration(now / 1000 - host.bootTime) }}</span>
+            <span v-if="status"><Clock :size="13" />{{ status.timeZone }}</span>
+            <span v-if="host"><RefreshCw :size="13" />更新于 {{ new Date(host.sampledAt).toLocaleTimeString() }}</span>
           </div>
         </div>
-        <div v-else class="module-items empty">点击进入管理</div>
-      </router-link>
-    </div>
+      </div>
+      <div class="hero-side">
+        <div class="hero-kv">
+          <span class="k">Gately</span>
+          <span class="v mono" :title="status ? `${status.commit} · ${status.buildDate}` : ''">{{ status?.version ?? '-' }}</span>
+        </div>
+        <div class="hero-kv">
+          <span class="k">已运行</span>
+          <span class="v">{{ status ? formatDuration((now - new Date(status.startTime).getTime()) / 1000) : '-' }}</span>
+        </div>
+        <div class="hero-kv">
+          <span class="k">服务</span>
+          <StatusBadge :type="health.type" :text="health.text" />
+        </div>
+      </div>
+    </section>
 
-    <div class="bottom">
-      <div class="g-card promise">
+    <!-- ============ 资源仪表 ============ -->
+    <section class="gauges">
+      <div class="gauge-card">
+        <div class="gauge-head"><Cpu :size="15" />CPU</div>
+        <div class="gauge-body">
+          <RingGauge :value="host?.cpu.usage" />
+          <div class="gauge-info">
+            <div class="gi-main" :title="host?.cpu.model">{{ host?.cpu.model || '处理器' }}</div>
+            <div class="gi-row"><span>核心</span><b>{{ host?.cpu.cores ?? '-' }}</b></div>
+            <div class="gi-row"><span>负载</span><b class="mono">{{ loadText }}</b></div>
+          </div>
+        </div>
+        <Sparkline :series="[{ values: hist.cpu, color: 'var(--el-color-primary)' }]" :max="100" :capacity="HISTORY" :height="36" class="gauge-spark" />
+      </div>
+
+      <div class="gauge-card">
+        <div class="gauge-head"><MemoryStick :size="15" />内存</div>
+        <div class="gauge-body">
+          <RingGauge :value="memPercent" />
+          <div class="gauge-info">
+            <div class="gi-main">{{ mem ? `${formatBytes(mem.used)} / ${formatBytes(mem.total)}` : '-' }}</div>
+            <div class="gi-row"><span>可用</span><b>{{ mem ? formatBytes(mem.available) : '-' }}</b></div>
+            <div class="gi-row">
+              <span>交换</span><b>{{ mem && mem.swapTotal ? `${formatBytes(mem.swapUsed)} / ${formatBytes(mem.swapTotal)}` : '未启用' }}</b>
+            </div>
+          </div>
+        </div>
+        <Sparkline :series="[{ values: hist.mem, color: 'var(--g-chart-2)' }]" :max="100" :capacity="HISTORY" :height="36" class="gauge-spark" />
+      </div>
+
+      <div class="gauge-card">
+        <div class="gauge-head"><HardDrive :size="15" />磁盘</div>
+        <div class="gauge-body">
+          <RingGauge :value="diskPercent" />
+          <div class="gauge-info">
+            <div class="gi-main">{{ disk ? `${formatBytes(disk.used)} / ${formatBytes(disk.total)}` : '-' }}</div>
+            <div class="gi-row"><span>剩余</span><b>{{ disk ? formatBytes(disk.free) : '-' }}</b></div>
+            <div class="gi-row"><span>位置</span><b class="mono ellipsis" :title="disk?.path">{{ disk?.path ?? '-' }}</b></div>
+          </div>
+        </div>
+        <div class="disk-bar">
+          <div class="disk-fill" :class="diskLevel" :style="{ width: (diskPercent ?? 0) + '%' }" />
+        </div>
+        <div class="disk-note">统计配置目录所在分区</div>
+      </div>
+
+      <div class="gauge-card">
+        <div class="gauge-head"><Activity :size="15" />网络</div>
+        <div class="net-rates">
+          <div class="net-rate">
+            <span class="net-dot rx" /><ArrowDown :size="14" />
+            <div>
+              <div class="net-val">{{ formatRate(netTotal.rx) }}</div>
+              <div class="net-sub">累计 {{ formatBytes(netTotal.rxBytes) }}</div>
+            </div>
+          </div>
+          <div class="net-rate">
+            <span class="net-dot tx" /><ArrowUp :size="14" />
+            <div>
+              <div class="net-val">{{ formatRate(netTotal.tx) }}</div>
+              <div class="net-sub">累计 {{ formatBytes(netTotal.txBytes) }}</div>
+            </div>
+          </div>
+        </div>
+        <Sparkline
+          :series="[
+            { values: hist.rx, color: 'var(--el-color-primary)' },
+            { values: hist.tx, color: 'var(--g-chart-2)' },
+          ]"
+          :capacity="HISTORY"
+          :height="64"
+          class="gauge-spark"
+        />
+      </div>
+    </section>
+
+    <!-- ============ 网卡与服务状态 ============ -->
+    <section class="cols">
+      <div class="g-card">
         <div class="g-card-head">
-          <div class="g-card-title"><ShieldCheck :size="16" />透明度承诺</div>
+          <div class="g-card-title"><Network :size="16" />网络接口</div>
+          <span class="g-card-desc">{{ host ? `${host.interfaces.length} 个` : '' }}</span>
         </div>
-        <div class="g-card-body">
-          <ul>
-            <li><Check :size="14" />不连接任何项目方服务器，不上报设备信息</li>
-            <li><Check :size="14" />所有对外地址（公网 IP 查询、STUN 服务器）都可见、可改</li>
-            <li><Check :size="14" />配置为明文 JSON，可直接纳入 git 审计</li>
-            <li><Check :size="14" />源码 Apache-2.0 开源，欢迎审查与贡献</li>
-          </ul>
+        <div v-if="publicIPs.length" class="public-ips">
+          <div v-for="p in publicIPs" :key="p.label" class="public-ip">
+            <span class="pip-label"><Globe :size="13" />公网 {{ p.label }}</span>
+            <span class="mono copyable" title="点击复制" @click="copy(p.value)">{{ p.value }}</span>
+          </div>
+        </div>
+        <div class="ifaces">
+          <div v-for="i in host?.interfaces ?? []" :key="i.name" class="iface">
+            <div class="iface-head">
+              <span class="iface-name mono">{{ i.name }}</span>
+              <span v-if="i.mac" class="iface-mac mono">{{ i.mac }}</span>
+              <span class="iface-rate">
+                <span><ArrowDown :size="12" />{{ formatRate(i.rxRate) }}</span>
+                <span><ArrowUp :size="12" />{{ formatRate(i.txRate) }}</span>
+              </span>
+            </div>
+            <div class="iface-addrs">
+              <span v-for="a in i.ipv4" :key="a" class="addr v4 mono copyable" title="点击复制" @click="copy(a.split('/')[0])">{{ a }}</span>
+              <span v-for="a in visibleV6(i.ipv6)" :key="a" class="addr v6 mono copyable" title="点击复制" @click="copy(a.split('/')[0])">{{ a }}</span>
+              <el-tooltip v-if="i.ipv6.length > visibleV6(i.ipv6).length" placement="top" :show-after="200">
+                <template #content>
+                  <div v-for="a in i.ipv6" :key="a" class="mono">{{ a }}</div>
+                </template>
+                <span class="addr more">+{{ i.ipv6.length - visibleV6(i.ipv6).length }} 个 IPv6</span>
+              </el-tooltip>
+            </div>
+            <div class="iface-foot">
+              <span>MTU {{ i.mtu }}</span>
+              <span>接收 {{ formatBytes(i.rxBytes) }}</span>
+              <span>发送 {{ formatBytes(i.txBytes) }}</span>
+            </div>
+          </div>
+          <div v-if="host && !host.interfaces.length" class="empty">没有检测到可用的网络接口</div>
         </div>
       </div>
-      <LogCard url="/api/logs" title="系统日志" class="logs" />
-    </div>
+
+      <div class="g-card">
+        <div class="g-card-head">
+          <div class="g-card-title"><HeartPulse :size="16" />服务状态</div>
+        </div>
+        <div class="services">
+          <router-link v-for="s in services" :key="s.id" :to="s.path" class="service">
+            <span class="svc-dot" :class="s.level" />
+            <span class="svc-name">{{ s.title }}</span>
+            <span class="svc-items">
+              <span v-for="it in s.items" :key="it.label" class="svc-item">
+                <span class="svc-label">{{ it.label }}</span>
+                <span :class="['svc-value', it.level]">{{ it.value }}</span>
+              </span>
+            </span>
+          </router-link>
+          <div v-if="status && !services.length" class="empty">暂无启用的服务</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ Gately 进程 ============ -->
+    <section class="g-card proc">
+      <div class="g-card-head">
+        <div class="g-card-title"><Boxes :size="16" />Gately 进程</div>
+        <span class="g-card-desc">{{ status ? `${status.os}/${status.arch} · ${status.goVersion}` : '' }}</span>
+      </div>
+      <div class="proc-grid">
+        <div v-for="it in procItems" :key="it.label" class="proc-item" :class="{ wide: it.wide }">
+          <div class="proc-label">{{ it.label }}</div>
+          <div class="proc-value" :class="{ mono: it.mono }" :title="it.value">{{ it.value }}</div>
+        </div>
+      </div>
+    </section>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
-import { Activity, Check, ChevronRight, Clock3, MemoryStick, ShieldCheck, Tag } from 'lucide-vue-next'
-import { api, formatBytes, type Status } from '../api'
-import LogCard from '../components/LogCard.vue'
-import { navItems, type NavItem } from '../nav'
+import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
+import { ElMessage } from 'element-plus'
+import {
+  Activity,
+  ArrowDown,
+  ArrowUp,
+  Boxes,
+  Container,
+  Cpu,
+  Globe,
+  Clock,
+  HardDrive,
+  HeartPulse,
+  MemoryStick,
+  Network,
+  Power,
+  RefreshCw,
+  Server,
+} from 'lucide-vue-next'
+import { api, formatBytes, formatDuration, formatRate, type Status } from '../api'
+import RingGauge from '../components/RingGauge.vue'
+import Sparkline from '../components/Sparkline.vue'
+import StatusBadge, { type StatusType } from '../components/StatusBadge.vue'
+import { navByModule } from '../nav'
+
+// 轮询间隔与趋势图保留的采样点数（约 3 分钟）
+const INTERVAL = 3000
+const HISTORY = 60
 
 const status = ref<Status>()
 const now = ref(Date.now())
+const hist = reactive({ cpu: [] as number[], mem: [] as number[], rx: [] as number[], tx: [] as number[] })
 let timer: number | undefined
 
-// 按导航顺序展示模块卡片，并取摘要中最严重的等级作为卡片颜色
-const moduleCards = computed(() => {
-  const mods = status.value?.modules ?? []
-  const rank: Record<string, number> = { ok: 1, warn: 2, error: 3 }
-  const out: { id: string; nav: NavItem; summary: { label: string; value: string; level?: string }[]; level: string }[] = []
-  for (const nav of navItems) {
-    if (!nav.moduleId) {
+const host = computed(() => status.value?.host)
+const mem = computed(() => host.value?.memory)
+const disk = computed(() => host.value?.disk)
+const memPercent = computed(() => (mem.value ? (mem.value.used / mem.value.total) * 100 : undefined))
+const diskPercent = computed(() => (disk.value ? (disk.value.used / disk.value.total) * 100 : undefined))
+const diskLevel = computed(() => {
+  const v = diskPercent.value ?? 0
+  if (v >= 90) {
+    return 'danger'
+  }
+  return v >= 75 ? 'warning' : ''
+})
+
+const platformLine = computed(() => {
+  const h = host.value
+  if (!h) {
+    return ''
+  }
+  const parts = [h.platform, h.kernel ? `${h.os === 'linux' ? 'Linux' : h.os} ${h.kernel}` : h.os, h.arch]
+  return parts.filter(Boolean).join(' · ')
+})
+
+const loadText = computed(() => {
+  const l = host.value?.cpu.load
+  return l && l.length ? l.map((v) => v.toFixed(2)).join(' / ') : '-'
+})
+
+// 所有展示网卡的速率与累计流量之和
+const netTotal = computed(() => {
+  const t = { rx: undefined as number | undefined, tx: undefined as number | undefined, rxBytes: 0, txBytes: 0 }
+  for (const i of host.value?.interfaces ?? []) {
+    t.rxBytes += i.rxBytes
+    t.txBytes += i.txBytes
+    if (i.rxRate !== undefined) {
+      t.rx = (t.rx ?? 0) + i.rxRate
+    }
+    if (i.txRate !== undefined) {
+      t.tx = (t.tx ?? 0) + i.txRate
+    }
+  }
+  return t
+})
+
+// 公网地址取自动态域名模块最近一次获取到的 IP，不额外访问外部服务
+const publicIPs = computed(() => {
+  const ddns = status.value?.modules.find((m) => m.id === 'ddns')
+  return (ddns?.summary ?? []).filter((it) => it.label === 'IPv4' || it.label === 'IPv6')
+})
+
+// 每个有摘要的模块一行，状态取摘要中最严重的等级；公网 IP 已在网卡区域展示，这里略去
+const rank: Record<string, number> = { ok: 1, warn: 2, error: 3 }
+const services = computed(() => {
+  const out: { id: string; title: string; path: string; level: string; items: { label: string; value: string; level?: string }[] }[] = []
+  for (const m of status.value?.modules ?? []) {
+    const nav = navByModule(m.id)
+    const items = (m.summary ?? []).filter((it) => it.label !== 'IPv4' && it.label !== 'IPv6')
+    if (!nav || !items.length) {
       continue
     }
-    const m = mods.find((x) => x.id === nav.moduleId)
-    if (!m) {
-      continue
-    }
-    const summary = m.summary ?? []
-    let level = 'none'
-    for (const it of summary) {
+    let level = 'ok'
+    for (const it of items) {
       if (it.level && (rank[it.level] ?? 0) > (rank[level] ?? 0)) {
         level = it.level
       }
     }
-    out.push({ id: m.id, nav, summary, level })
+    out.push({ id: m.id, title: nav.title, path: nav.path, level, items })
   }
   return out
 })
 
-const uptime = computed(() => {
+const health = computed<{ type: StatusType; text: string }>(() => {
   if (!status.value) {
-    return ''
+    return { type: 'pending', text: '加载中' }
   }
-  let s = Math.max(0, Math.floor((now.value - new Date(status.value.startTime).getTime()) / 1000))
-  const d = Math.floor(s / 86400)
-  s %= 86400
-  const h = Math.floor(s / 3600)
-  s %= 3600
-  const m = Math.floor(s / 60)
-  if (d > 0) {
-    return `${d} 天 ${h} 小时`
+  const bad = services.value.filter((s) => s.level === 'error').length
+  const warn = services.value.filter((s) => s.level === 'warn').length
+  if (bad) {
+    return { type: 'error', text: `${bad} 项异常` }
   }
-  if (h > 0) {
-    return `${h} 小时 ${m} 分`
+  if (warn) {
+    return { type: 'warn', text: `${warn} 项需关注` }
   }
-  return `${m} 分钟`
+  return { type: 'ok', text: '全部正常' }
 })
+
+const procItems = computed(() => {
+  const s = status.value
+  const p = s?.host.process
+  if (!s || !p) {
+    return []
+  }
+  const items = [
+    { label: '版本', value: s.version, mono: true },
+    { label: '提交', value: s.commit ? s.commit.slice(0, 12) : '-', mono: true },
+    { label: '构建时间', value: formatTime(s.buildDate) },
+    { label: '启动时间', value: new Date(s.startTime).toLocaleString() },
+    { label: '进程 PID', value: String(p.pid), mono: true },
+    { label: '进程 CPU', value: p.cpu !== undefined ? p.cpu.toFixed(1) + '%' : '-' },
+    { label: '常驻内存', value: p.rss ? formatBytes(p.rss) : '-' },
+    { label: 'Go 堆 / 申请', value: `${formatBytes(p.heapAlloc)} / ${formatBytes(p.heapSys)}` },
+    { label: '协程', value: String(p.goroutines) },
+    { label: '系统线程', value: p.threads ? String(p.threads) : '-' },
+    { label: '文件句柄', value: p.fds ? String(p.fds) : '-' },
+    { label: 'GC 次数', value: String(p.numGC) },
+    { label: '配置目录', value: s.configDir, mono: true, wide: true },
+  ]
+  return items as { label: string; value: string; mono?: boolean; wide?: boolean }[]
+})
+
+// 构建时间可能是 unknown 等非日期字符串，无法解析时原样显示
+function formatTime(v: string) {
+  if (!v) {
+    return '-'
+  }
+  const d = new Date(v)
+  return isNaN(d.getTime()) ? v : d.toLocaleString()
+}
+
+function visibleV6(list: string[]) {
+  // 优先展示全局地址，链路本地地址收进“更多”
+  return list.filter((a) => !a.startsWith('fe80:')).slice(0, 2)
+}
+
+function push(arr: number[], v: number | undefined) {
+  if (v === undefined) {
+    return
+  }
+  arr.push(v)
+  if (arr.length > HISTORY) {
+    arr.shift()
+  }
+}
+
+async function copy(text: string) {
+  try {
+    await navigator.clipboard.writeText(text)
+    ElMessage.success('已复制')
+  } catch {
+    ElMessage.warning('复制失败，请手动选择')
+  }
+}
 
 async function load() {
   try {
     status.value = await api.get<Status>('/api/status')
     now.value = Date.now()
+    push(hist.cpu, host.value?.cpu.usage)
+    push(hist.mem, memPercent.value)
+    push(hist.rx, netTotal.value.rx)
+    push(hist.tx, netTotal.value.tx)
   } catch {
     // 下一轮重试
   }
 }
 
+// 页面不可见时暂停轮询，切回时立即刷新
+function onVisibility() {
+  if (document.hidden) {
+    window.clearInterval(timer)
+    timer = undefined
+  } else if (timer === undefined) {
+    load()
+    timer = window.setInterval(load, INTERVAL)
+  }
+}
+
 onMounted(() => {
   load()
-  timer = window.setInterval(load, 10000)
+  timer = window.setInterval(load, INTERVAL)
+  document.addEventListener('visibilitychange', onVisibility)
 })
-onBeforeUnmount(() => window.clearInterval(timer))
+onBeforeUnmount(() => {
+  window.clearInterval(timer)
+  document.removeEventListener('visibilitychange', onVisibility)
+})
 </script>
 
 <style scoped>
-.stats {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
-}
-.stat {
-  display: flex;
-  gap: 12px;
-  align-items: flex-start;
-  padding: 16px;
-  background: var(--el-bg-color);
-  border: 1px solid var(--g-border);
-  border-radius: var(--g-radius);
-  min-width: 0;
-}
-.stat-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 9px;
-  background: var(--el-color-primary-light-9);
-  color: var(--el-color-primary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-.stat-text {
-  min-width: 0;
-}
-.stat-label {
-  font-size: 12px;
-  color: var(--el-text-color-secondary);
-}
-.stat-value {
-  font-size: 18px;
-  font-weight: 600;
-  margin-top: 2px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.stat-sub {
-  font-size: 12px;
-  color: var(--el-text-color-placeholder);
-  margin-top: 2px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.section-title {
-  margin: 24px 0 12px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--el-text-color-secondary);
-}
-.modules {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 12px;
-}
-.module {
-  --lv: var(--el-color-primary);
-  --lv-bg: var(--el-color-primary-light-9);
+.overview {
   display: flex;
   flex-direction: column;
-  padding: 16px;
-  background: var(--el-bg-color);
-  border: 1px solid var(--g-border);
-  border-radius: var(--g-radius);
-  text-decoration: none;
-  color: inherit;
-  transition:
-    border-color 0.15s,
-    transform 0.15s;
-  position: relative;
-  overflow: hidden;
+  gap: 16px;
 }
-.module::before {
-  content: '';
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: 3px;
-  background: var(--lv);
-  opacity: 0;
+.overview > .g-card + .g-card {
+  margin-top: 0;
 }
-.module.lv-ok {
-  --lv: var(--el-color-success);
-  --lv-bg: var(--el-color-success-light-9);
-}
-.module.lv-warn {
-  --lv: var(--el-color-warning);
-  --lv-bg: var(--el-color-warning-light-9);
-}
-.module.lv-error {
-  --lv: var(--el-color-danger);
-  --lv-bg: var(--el-color-danger-light-9);
-}
-.module.lv-warn::before,
-.module.lv-error::before {
-  opacity: 1;
-}
-.module:hover {
-  border-color: var(--el-color-primary-light-5);
-}
-.module-head {
+
+/* ---------- 主机信息 ---------- */
+.hero {
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding: 22px 24px;
+  border-radius: 14px;
+  border: 1px solid var(--g-border);
+  background:
+    radial-gradient(120% 140% at 0% 0%, var(--el-color-primary-light-9) 0%, transparent 55%),
+    radial-gradient(80% 120% at 100% 100%, color-mix(in srgb, var(--g-chart-2) 10%, transparent) 0%, transparent 60%),
+    var(--el-bg-color);
 }
-.module-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
+.hero-main {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+.hero-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--lv);
-  background: var(--lv-bg);
+  color: #fff;
+  background: linear-gradient(135deg, var(--el-color-primary), var(--el-color-primary-dark-2));
+  box-shadow: 0 6px 16px -6px color-mix(in srgb, var(--el-color-primary) 60%, transparent);
   flex-shrink: 0;
 }
-.module-titles {
+.hero-text {
+  min-width: 0;
+}
+.hero-name {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.25;
+  word-break: break-all;
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 22px;
+  padding: 0 8px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 999px;
+  color: var(--el-color-primary);
+  background: var(--el-color-primary-light-9);
+}
+.hero-sub {
+  margin-top: 4px;
+  font-size: 13px;
+  color: var(--el-text-color-regular);
+}
+.hero-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--el-text-color-secondary);
+}
+.hero-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.hero-side {
+  display: flex;
+  gap: 28px;
+  flex-wrap: wrap;
+}
+.hero-kv {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.hero-kv .k {
+  font-size: 12px;
+  color: var(--el-text-color-secondary);
+}
+.hero-kv .v {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 22px;
+}
+
+/* ---------- 资源仪表 ---------- */
+.gauges {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+.gauge-card {
+  display: flex;
+  flex-direction: column;
+  padding: 16px 18px 0;
+  background: var(--el-bg-color);
+  border: 1px solid var(--g-border);
+  border-radius: var(--g-radius);
+  overflow: hidden;
+  min-width: 0;
+}
+.gauge-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--el-text-color-secondary);
+}
+.gauge-body {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 14px;
+}
+.gauge-info {
   flex: 1;
   min-width: 0;
-}
-.module-title {
-  font-weight: 600;
-  font-size: 15px;
-}
-.module-desc {
   font-size: 12px;
-  color: var(--el-text-color-secondary);
-  margin-top: 2px;
+}
+.gi-main {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 6px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.module-arrow {
-  color: var(--el-text-color-placeholder);
-  flex-shrink: 0;
-}
-.module-items {
-  margin-top: 14px;
-  padding-top: 10px;
-  border-top: 1px dashed var(--g-border);
-}
-.module-items.empty {
-  font-size: 12px;
-  color: var(--el-text-color-placeholder);
-}
-.item {
+.gi-row {
   display: flex;
   justify-content: space-between;
-  gap: 12px;
-  font-size: 13px;
+  gap: 8px;
   line-height: 1.9;
-}
-.item-label {
   color: var(--el-text-color-secondary);
-  flex-shrink: 0;
 }
-.item-value {
-  font-weight: 500;
-  text-align: right;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.gi-row span {
+  flex-shrink: 0;
   white-space: nowrap;
 }
-.item-value.ok {
-  color: var(--el-color-success);
+.gi-row b {
+  font-weight: 500;
+  color: var(--el-text-color-primary);
+  min-width: 0;
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-.item-value.warn {
-  color: var(--el-color-warning);
+.gauge-spark {
+  margin: auto -18px 0;
+  padding-top: 12px;
+  width: calc(100% + 36px);
 }
-.item-value.error {
-  color: var(--el-color-danger);
+.disk-bar {
+  height: 6px;
+  margin-top: 18px;
+  border-radius: 999px;
+  background: var(--el-fill-color);
+  overflow: hidden;
 }
-.bottom {
-  display: grid;
-  grid-template-columns: 320px minmax(0, 1fr);
-  gap: 12px;
-  margin-top: 24px;
-  align-items: start;
+.disk-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--el-color-primary);
+  transition: width 0.6s ease;
 }
-.bottom .logs {
-  margin-top: 0;
+.disk-fill.warning {
+  background: var(--el-color-warning);
 }
-.promise ul {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  font-size: 13px;
-  line-height: 1.6;
+.disk-fill.danger {
+  background: var(--el-color-danger);
+}
+.disk-note {
+  margin: 8px 0 16px;
+  font-size: 12px;
+  color: var(--el-text-color-placeholder);
+}
+.net-rates {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  margin-top: 14px;
 }
-.promise li {
+.net-rate {
   display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--el-text-color-secondary);
+}
+.net-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 2px;
+}
+.net-dot.rx {
+  background: var(--el-color-primary);
+}
+.net-dot.tx {
+  background: var(--g-chart-2);
+}
+.net-val {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--el-text-color-primary);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+.net-sub {
+  font-size: 12px;
+  color: var(--el-text-color-placeholder);
+}
+
+/* ---------- 网卡与服务 ---------- */
+.cols {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  gap: 16px;
+  align-items: start;
+}
+.public-ips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  padding: 12px 16px;
+  border-bottom: 1px dashed var(--g-border);
+  font-size: 13px;
+}
+.public-ip {
+  display: flex;
+  align-items: center;
   gap: 8px;
-  align-items: flex-start;
-  color: var(--el-text-color-regular);
+  min-width: 0;
+  word-break: break-all;
 }
-.promise li svg {
-  color: var(--el-color-success);
+.public-ip .copyable {
+  min-width: 0;
+  word-break: break-all;
+}
+.pip-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--el-text-color-secondary);
   flex-shrink: 0;
-  margin-top: 4px;
 }
-@media (max-width: 1100px) {
-  .stats {
+.ifaces {
+  padding: 4px 0;
+}
+.iface {
+  padding: 12px 16px;
+}
+.iface + .iface {
+  border-top: 1px solid var(--el-border-color-lighter);
+}
+.iface-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.iface-name {
+  font-weight: 600;
+  font-size: 14px;
+}
+.iface-mac {
+  font-size: 12px;
+  color: var(--el-text-color-placeholder);
+}
+.iface-rate {
+  margin-left: auto;
+  display: inline-flex;
+  gap: 12px;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--el-text-color-secondary);
+}
+.iface-rate span {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+.iface-addrs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+.addr {
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  line-height: 18px;
+  word-break: break-all;
+}
+.addr.v4 {
+  color: var(--el-color-primary);
+  background: var(--el-color-primary-light-9);
+}
+.addr.v6 {
+  color: var(--g-chart-2);
+  background: color-mix(in srgb, var(--g-chart-2) 10%, transparent);
+}
+.addr.more {
+  color: var(--el-text-color-secondary);
+  background: var(--el-fill-color-light);
+  cursor: default;
+}
+.addr.copyable:hover {
+  text-decoration: none;
+  filter: brightness(0.95);
+}
+.iface-foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--el-text-color-placeholder);
+}
+.services {
+  padding: 6px;
+}
+.service {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 8px;
+  color: inherit;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+.service:hover {
+  background: var(--el-fill-color-light);
+}
+.svc-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-top: 6px;
+  flex-shrink: 0;
+  background: var(--el-color-success);
+  box-shadow: 0 0 0 3px var(--el-color-success-light-9);
+}
+.svc-dot.warn {
+  background: var(--el-color-warning);
+  box-shadow: 0 0 0 3px var(--el-color-warning-light-9);
+}
+.svc-dot.error {
+  background: var(--el-color-danger);
+  box-shadow: 0 0 0 3px var(--el-color-danger-light-9);
+}
+.svc-name {
+  width: 76px;
+  flex-shrink: 0;
+  font-weight: 600;
+  font-size: 13px;
+  line-height: 20px;
+}
+.svc-items {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 14px;
+  font-size: 12px;
+  line-height: 20px;
+}
+.svc-item {
+  display: inline-flex;
+  gap: 4px;
+  min-width: 0;
+}
+.svc-label {
+  color: var(--el-text-color-secondary);
+}
+.svc-value {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.svc-value.ok {
+  color: var(--el-color-success);
+}
+.svc-value.warn {
+  color: var(--el-color-warning);
+}
+.svc-value.error {
+  color: var(--el-color-danger);
+}
+.empty {
+  padding: 24px 16px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--el-text-color-placeholder);
+}
+
+/* ---------- 进程信息 ---------- */
+.proc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  /* 抵消最后一列与最后一行多出的分隔线 */
+  margin: 0 -1px -1px 0;
+}
+.proc-item {
+  padding: 12px 16px;
+  min-width: 0;
+  box-shadow:
+    inset -1px 0 0 var(--el-border-color-lighter),
+    inset 0 -1px 0 var(--el-border-color-lighter);
+}
+.proc-item.wide {
+  grid-column: span 2;
+}
+.proc-label {
+  font-size: 12px;
+  color: var(--el-text-color-secondary);
+}
+.proc-value {
+  margin-top: 3px;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.proc {
+  overflow: hidden;
+}
+
+@media (max-width: 1280px) {
+  .gauges {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  .bottom {
+}
+@media (max-width: 1000px) {
+  .cols {
     grid-template-columns: 1fr;
   }
 }
 @media (max-width: 767.98px) {
-  .stats {
-    gap: 8px;
+  .overview {
+    gap: 12px;
   }
-  .stat {
-    padding: 12px;
-    gap: 10px;
+  .hero {
+    padding: 16px;
+    gap: 16px;
   }
-  .stat-icon {
-    width: 30px;
-    height: 30px;
+  .hero-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
   }
-  .stat-value {
-    font-size: 15px;
+  .hero-name {
+    font-size: 18px;
   }
-  .modules {
+  .hero-side {
+    width: 100%;
+    justify-content: space-between;
+    gap: 12px;
+    padding-top: 14px;
+    border-top: 1px dashed var(--g-border);
+  }
+  .gauges {
     grid-template-columns: 1fr;
-    gap: 8px;
+    gap: 12px;
   }
-  .module {
-    padding: 12px 14px;
+  .proc-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  .module-icon {
-    width: 34px;
-    height: 34px;
-  }
-  .module-items {
-    margin-top: 10px;
-    padding-top: 6px;
-  }
-  .module-items.empty {
-    display: none;
-  }
-  .item {
-    line-height: 1.75;
-  }
-  .section-title {
-    margin-top: 18px;
+  .svc-name {
+    width: 64px;
   }
 }
 </style>

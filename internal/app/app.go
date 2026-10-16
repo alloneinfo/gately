@@ -26,6 +26,7 @@ import (
 	"github.com/wangwanjie/gately/internal/logbuf"
 	"github.com/wangwanjie/gately/internal/luckyimport"
 	"github.com/wangwanjie/gately/internal/module"
+	"github.com/wangwanjie/gately/internal/sysstat"
 	"github.com/wangwanjie/gately/internal/version"
 )
 
@@ -72,7 +73,9 @@ type App struct {
 	sysLogs        *logbuf.Buffer
 	modules        []*moduleEntry
 	startTime      time.Time
-	logger         *log.Logger
+	// hostStats 采集概览页展示的主机信息，保存上一次采样用于计算使用率与速率
+	hostStats *sysstat.Collector
+	logger    *log.Logger
 	// pendingTOTP 是生成后尚未确认的两步验证密钥
 	pendingMu   sync.Mutex
 	pendingTOTP string
@@ -91,6 +94,7 @@ func New(opts Options) (*App, error) {
 		settings:  Settings{Listen: DefaultListen},
 		sysLogs:   logbuf.New(defaultLogLines, logger),
 		startTime: time.Now(),
+		hostStats: sysstat.New(opts.ConfigDir),
 		logger:    logger,
 		restartCh: make(chan struct{}, 1),
 	}
@@ -343,7 +347,25 @@ func (a *App) handleStatus(w http.ResponseWriter, r *http.Request) {
 		"goroutines": runtime.NumGoroutine(),
 		"memAlloc":   mem.Alloc,
 		"modules":    mods,
+		"timeZone":   zoneLabel(),
+		"configDir":  a.opts.ConfigDir,
+		"host":       a.hostStats.Snapshot(),
 	})
+}
+
+// zoneLabel 返回时区名称；未显式设置时区（显示为 Local）时改用缩写与 UTC 偏移，例如 CST UTC+08:00。
+func zoneLabel() string {
+	name, offset := time.Now().Zone()
+	sign := "+"
+	if offset < 0 {
+		sign = "-"
+		offset = -offset
+	}
+	utc := fmt.Sprintf("UTC%s%02d:%02d", sign, offset/3600, offset%3600/60)
+	if loc := time.Local.String(); loc != "Local" {
+		return loc + " (" + utc + ")"
+	}
+	return name + " " + utc
 }
 
 type accountRequest struct {

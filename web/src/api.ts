@@ -58,6 +58,48 @@ export interface Status {
   goroutines: number
   memAlloc: number
   modules: ModuleInfo[]
+  timeZone: string
+  configDir: string
+  host: HostStats
+}
+
+// HostStats 对应 /api/status 中的 host：主机与进程资源占用，不支持的字段缺省。
+export interface HostStats {
+  hostname: string
+  os: string
+  platform?: string
+  kernel?: string
+  arch: string
+  inContainer: boolean
+  bootTime?: number
+  cpu: { model?: string; cores: number; usage?: number; load?: number[] }
+  memory?: { total: number; used: number; available: number; swapTotal: number; swapUsed: number }
+  disk?: { path: string; total: number; used: number; free: number }
+  interfaces: NetInterface[]
+  process: {
+    pid: number
+    rss?: number
+    cpu?: number
+    threads?: number
+    fds?: number
+    goroutines: number
+    heapAlloc: number
+    heapSys: number
+    numGC: number
+  }
+  sampledAt: string
+}
+
+export interface NetInterface {
+  name: string
+  mac?: string
+  mtu: number
+  ipv4: string[]
+  ipv6: string[]
+  rxBytes: number
+  txBytes: number
+  rxRate?: number
+  txRate?: number
 }
 
 export interface LogEntry {
@@ -143,4 +185,29 @@ export function formatBytes(n: number): string {
     i++
   }
   return `${i === 0 ? v : v.toFixed(1)} ${units[i]}`
+}
+
+// formatRate 把字节/秒格式化为速率字符串。
+export function formatRate(n: number | undefined): string {
+  if (n === undefined) {
+    return '-'
+  }
+  return formatBytes(Math.round(n)) + '/s'
+}
+
+// formatDuration 把秒数格式化为“x 天 x 小时”这类简短时长。
+export function formatDuration(sec: number): string {
+  let s = Math.max(0, Math.floor(sec))
+  const d = Math.floor(s / 86400)
+  s %= 86400
+  const h = Math.floor(s / 3600)
+  s %= 3600
+  const m = Math.floor(s / 60)
+  if (d > 0) {
+    return `${d} 天 ${h} 小时`
+  }
+  if (h > 0) {
+    return `${h} 小时 ${m} 分`
+  }
+  return `${m} 分钟`
 }

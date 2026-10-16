@@ -6,9 +6,11 @@ import {
   Container,
   FolderSync,
   Globe,
+  Info,
   LayoutDashboard,
   Power,
   Radar,
+  ScrollText,
   Server,
   Settings,
   ShieldCheck,
@@ -64,7 +66,11 @@ export const navGroups: NavGroup[] = [
   },
   {
     title: '系统',
-    items: [{ path: '/settings', title: '设置', icon: Settings }],
+    items: [
+      { path: '/logs', title: '系统日志', icon: ScrollText },
+      { path: '/settings', title: '设置', icon: Settings },
+      { path: '/about', title: '关于', icon: Info },
+    ],
   },
 ]
 

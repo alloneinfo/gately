@@ -10,7 +10,7 @@
       <el-checkbox v-model="follow" size="small">自动滚动</el-checkbox>
       <el-button v-if="clearable" size="small" text :icon="Trash2" class="clear" @click="clear">清空</el-button>
     </div>
-    <div ref="box" class="box mono">
+    <div ref="box" class="box mono" :style="height ? { height } : undefined">
       <div v-for="e in visible" :key="e.seq" :class="['line', e.level]">
         <span class="time">{{ formatTime(e.time) }}</span>
         <span class="lvl">{{ e.level.toUpperCase() }}</span>
@@ -27,7 +27,8 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import { Trash2 } from 'lucide-vue-next'
 import { api, type LogEntry } from '../api'
 
-const props = defineProps<{ url: string; clearable?: boolean }>()
+// height 可覆盖默认高度，例如独立日志页填满可视区域
+const props = defineProps<{ url: string; clearable?: boolean; height?: string }>()
 
 const entries = ref<LogEntry[]>([])
 const level = ref('all')

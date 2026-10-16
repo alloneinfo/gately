@@ -241,6 +241,15 @@
             </el-form>
           </div>
         </div>
+        <div class="g-card">
+          <div class="g-card-head">
+            <div class="g-card-title"><RotateCw :size="16" />重启</div>
+          </div>
+          <div class="g-card-body restart-row">
+            <span class="muted">重启期间管理界面与所有转发、代理服务会短暂中断（通常数秒）。</span>
+            <el-button type="warning" plain :icon="RotateCw" @click="confirmRestart">重启 Gately</el-button>
+          </div>
+        </div>
         <SaveBar :dirty="dirty" :saving="saving" @save="saveSettings" @reset="resetSettings" />
       </el-tab-pane>
 
@@ -335,46 +344,6 @@
         </div>
       </el-tab-pane>
 
-      <!-- ============ 关于 ============ -->
-      <el-tab-pane name="about">
-        <template #label><span class="tab-label"><Info :size="15" />关于</span></template>
-        <div class="g-card about-hero">
-          <AppLogo :size="52" />
-          <div class="about-text">
-            <div class="about-name">Gately <span class="mono ver">{{ info?.version }}</span></div>
-            <div class="meta">开源、透明的家庭网络网关 · Apache-2.0</div>
-            <a href="https://github.com/wangwanjie/gately" target="_blank" rel="noopener" class="repo"><ExternalLink :size="13" />github.com/wangwanjie/gately</a>
-          </div>
-          <div class="about-ops">
-            <el-button :icon="RefreshCw" :loading="checking" @click="checkUpdate">检查更新</el-button>
-            <el-button type="warning" plain :icon="RotateCw" @click="confirmRestart">重启 Gately</el-button>
-          </div>
-        </div>
-        <el-alert v-if="update" :type="update.hasUpdate ? 'success' : 'info'" :closable="false" show-icon class="update">
-          <template #title>
-            <template v-if="update.hasUpdate">发现新版本 {{ update.latest }}（当前 {{ update.current }}）</template>
-            <template v-else>当前已是最新版本{{ update.latest ? `（最新发布 ${update.latest}）` : '' }}</template>
-          </template>
-          <template #default>
-            <div v-if="update.publishedAt && update.latest" class="meta">发布于 {{ new Date(update.publishedAt).toLocaleString() }}</div>
-            <pre v-if="update.hasUpdate && update.notes" class="notes">{{ update.notes }}</pre>
-            <a v-if="update.url" :href="update.url" target="_blank" rel="noopener">查看发布页</a>
-          </template>
-        </el-alert>
-        <div v-if="info" class="g-card">
-          <div class="g-card-head">
-            <div class="g-card-title"><Server :size="16" />系统信息</div>
-          </div>
-          <div class="g-card-body">
-            <div class="info-grid">
-              <div v-for="it in infoItems" :key="it.label" class="info-item">
-                <div class="info-label">{{ it.label }}</div>
-                <div class="info-value" :class="{ mono: it.mono }">{{ it.value }}</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </el-tab-pane>
     </el-tabs>
 
     <RestartOverlay ref="overlay" />
@@ -396,20 +365,16 @@ import {
   Download,
   DownloadCloud,
   Eraser,
-  ExternalLink,
   Eye,
   FileArchive,
   FileText,
   Gauge,
   Globe,
   Import,
-  Info,
   KeyRound,
   LockKeyhole,
   Network,
-  RefreshCw,
   RotateCw,
-  Server,
   Settings2,
   ShieldCheck,
   Smartphone,
@@ -417,10 +382,9 @@ import {
   UploadCloud,
   UserRound,
 } from 'lucide-vue-next'
-import { api, formatBytes, type ImportFileResult, type SystemInfo, type SystemSettings, type UpdateInfo } from '../api'
+import { api, type ImportFileResult, type SystemInfo, type SystemSettings } from '../api'
 import PageHeader from '../components/PageHeader.vue'
 import StatusBadge from '../components/StatusBadge.vue'
-import AppLogo from '../components/AppLogo.vue'
 import SaveBar from '../components/SaveBar.vue'
 import RestartOverlay from '../components/RestartOverlay.vue'
 import { useFormLayout } from '../composables/useIsMobile'
@@ -429,9 +393,14 @@ const route = useRoute()
 const router = useRouter()
 const { labelPosition } = useFormLayout()
 const mask = '********'
-const tabs = ['account', 'access', 'runtime', 'backup', 'about']
+const tabs = ['account', 'access', 'runtime', 'backup']
 const tab = ref(typeof route.query.tab === 'string' && tabs.includes(route.query.tab) ? route.query.tab : 'account')
 const overlay = ref<InstanceType<typeof RestartOverlay>>()
+
+// “关于”已独立成页，兼容旧链接
+if (route.query.tab === 'about') {
+  router.replace('/about')
+}
 
 // 标签页与地址栏同步，便于从用户菜单直接跳转
 watch(tab, (t) => {
@@ -764,49 +733,14 @@ async function confirmRestore() {
   }
 }
 
-// ---------- 关于 / 重启 ----------
+// ---------- 系统信息 / 重启 ----------
 const info = ref<SystemInfo>()
-const update = ref<UpdateInfo>()
-const checking = ref(false)
-
-const infoItems = computed(() => {
-  const i = info.value
-  if (!i) {
-    return []
-  }
-  return [
-    { label: '版本', value: i.version, mono: true },
-    { label: '提交', value: i.commit || '-', mono: true },
-    { label: '构建时间', value: i.buildDate || '-' },
-    { label: 'Go 版本', value: i.goVersion, mono: true },
-    { label: '平台', value: `${i.os}/${i.arch}${i.inDocker ? '（Docker）' : ''}` },
-    { label: '主机名', value: i.hostname },
-    { label: '进程 PID', value: String(i.pid) },
-    { label: '启动时间', value: new Date(i.startTime).toLocaleString() },
-    { label: '配置目录', value: i.configDir, mono: true },
-    { label: '时区', value: i.timeZone },
-    { label: 'CPU', value: `${i.maxProcs} / ${i.numCPU} 核` },
-    { label: '协程', value: String(i.goroutines) },
-    { label: '内存（堆 / 系统）', value: `${formatBytes(i.memAlloc)} / ${formatBytes(i.memSys)}` },
-  ]
-})
 
 async function loadInfo() {
   try {
     info.value = await api.get<SystemInfo>('/api/system/info')
   } catch {
-    // 忽略，关于页显示为空
-  }
-}
-
-async function checkUpdate() {
-  checking.value = true
-  try {
-    update.value = await api.get<UpdateInfo>('/api/system/update')
-  } catch (e) {
-    ElMessage.error((e as Error).message)
-  } finally {
-    checking.value = false
+    // 忽略，相关提示显示为“-”
   }
 }
 
@@ -1072,71 +1006,13 @@ div.warns {
 .file-btn input {
   display: none;
 }
-.about-hero {
+.restart-row {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 20px;
+  justify-content: space-between;
   flex-wrap: wrap;
-}
-.about-text {
-  flex: 1;
-  min-width: 200px;
-}
-.about-name {
-  font-size: 20px;
-  font-weight: 700;
-}
-.ver {
+  gap: 12px;
   font-size: 13px;
-  font-weight: 500;
-  padding: 2px 8px;
-  border-radius: 6px;
-  margin-left: 6px;
-  background: var(--el-color-primary-light-9);
-  color: var(--el-color-primary);
-  vertical-align: middle;
-}
-.repo {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  margin-top: 4px;
-  font-size: 13px;
-  text-decoration: none;
-}
-.about-ops {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-.about-ops .el-button + .el-button {
-  margin-left: 0;
-}
-.update {
-  margin-top: 16px;
-}
-.notes {
-  white-space: pre-wrap;
-  font-family: inherit;
-  font-size: 12px;
-  margin: 6px 0;
-  max-height: 200px;
-  overflow: auto;
-}
-.info-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 14px 24px;
-}
-.info-label {
-  font-size: 12px;
-  color: var(--el-text-color-secondary);
-}
-.info-value {
-  margin-top: 2px;
-  font-size: 13px;
-  word-break: break-all;
 }
 @media (max-width: 1000px) {
   .grid-2 {
@@ -1163,16 +1039,6 @@ div.warns {
   }
   .token-ops .el-button {
     flex: 1;
-  }
-  .about-ops {
-    width: 100%;
-  }
-  .about-ops .el-button {
-    flex: 1;
-  }
-  .info-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
   }
   .settings-tabs :deep(.el-tabs__item) {
     padding: 0 12px;
