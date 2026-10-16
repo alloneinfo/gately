@@ -61,7 +61,7 @@ type luckyTask struct {
 	HttpClientTimeout                         int
 }
 
-// Lucky 官方的 IP 查询服务器。迁移时移除以兑现"不连接项目方服务器"的承诺，详见 docs/PENDING-DECISIONS.md。
+// Lucky 官方的 IP 查询服务器。迁移时移除以兑现"不连接项目方服务器"的承诺。
 var luckyOfficialHosts = []string{"66666.host", "666666.host"}
 
 func isLuckyOfficial(u string) bool {

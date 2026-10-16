@@ -53,7 +53,7 @@ docs/analysis/         Lucky 逆向分析结论
 | ✅ **M5 Web 服务** | 反向代理、重定向、静态文件、按域名路由、自动 TLS、BasicAuth、IP 过滤；导入 | 覆盖路由、4 种站点、认证、WebSocket、HTTPS、PROXY 协议收发；真实样本 27 个站点导入通过 |
 | ✅ M6 运维 | 网络唤醒、Web 终端（SSH/本机 Shell）、计划任务、管理员两步验证 | WOL 3/3、终端连接 14/14 导入；TOTP 通过 RFC 6238 测试向量 |
 | ✅ M7 生态（部分） | Coraza WAF、GitHub/OIDC 第三方登录、Docker 管理、WebDAV | WAF 用真实攻击载荷测试；Docker 在真实环境只读验证 |
-| M8 待定 | frpc、cloudflared、FTP、DLNA、rclone、全局 IP 过滤、HTTP/3、SFTP 文件管理 | 视社区需求排期，见 PENDING-DECISIONS |
+| M8 待定 | frpc、cloudflared、FTP、DLNA、rclone、全局 IP 过滤、HTTP/3、SFTP 文件管理 | 视社区需求排期 |
 
 ## 与 Lucky 的差异（有意为之）
 

@@ -8,3 +8,6 @@ web/dist/*
 *.test
 coverage.out
 .claude/
+
+# 维护者本地笔记（不入库）
+.local/
