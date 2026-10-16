@@ -5,15 +5,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"net/http"
 	"sort"
-	"strconv"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/wangwanjie/gately/internal/config"
-	"github.com/wangwanjie/gately/internal/httpx"
 	"github.com/wangwanjie/gately/internal/logbuf"
 	"github.com/wangwanjie/gately/internal/module"
 )
@@ -25,6 +22,19 @@ const ID = "docker"
 type Settings struct {
 	// Host 为 Docker 地址，默认 unix:///var/run/docker.sock
 	Host string `json:"host"`
+	// Mirrors 是镜像加速地址（如 docker.m.daocloud.io），直接拉取失败时依次尝试
+	Mirrors []string `json:"mirrors"`
+	// Registries 是私有仓库认证信息，拉取与推送时通过 X-Registry-Auth 传给 Docker
+	Registries []Registry `json:"registries"`
+	// AutoCheckHours 大于 0 时按该间隔自动检查容器镜像更新
+	AutoCheckHours int `json:"autoCheckHours"`
+}
+
+// Registry 是一个镜像仓库的登录信息。
+type Registry struct {
+	Server   string `json:"server"`
+	Username string `json:"username"`
+	Password string `json:"password"`
 }
 
 // UpdateInfo 是镜像更新检查结果。
@@ -42,6 +52,14 @@ type Module struct {
 	settings Settings
 	updates  map[string]UpdateInfo // 容器 ID -> 检查结果
 	busy     map[string]bool
+
+	// 定时检查更新：parent 为 Start 传入的上下文，auto 为当前运行的检查协程
+	autoMu sync.Mutex
+	parent context.Context
+	auto   *autoRunner
+
+	composeMu    sync.Mutex
+	composeCache composeInfo
 }
 
 // New 创建模块。
@@ -62,11 +80,23 @@ func (m *Module) Init(env module.Env) error {
 	return err
 }
 
-// Start 实现 module.Module。
-func (m *Module) Start(context.Context) error { return nil }
+// Start 实现 module.Module：按设置启动定时检查更新。
+func (m *Module) Start(ctx context.Context) error {
+	m.autoMu.Lock()
+	m.parent = ctx
+	m.autoMu.Unlock()
+	m.restartAutoCheck()
+	return nil
+}
 
-// Stop 实现 module.Module。
-func (m *Module) Stop() error { return nil }
+// Stop 实现 module.Module：停止定时检查并等待其退出。
+func (m *Module) Stop() error {
+	m.autoMu.Lock()
+	m.parent = nil
+	m.autoMu.Unlock()
+	m.restartAutoCheck()
+	return nil
+}
 
 func (m *Module) client() (*Client, error) {
 	m.mu.Lock()
@@ -77,126 +107,31 @@ func (m *Module) client() (*Client, error) {
 
 // ContainerView 是界面展示的容器信息。
 type ContainerView struct {
-	ID      string            `json:"id"`
-	Name    string            `json:"name"`
-	Image   string            `json:"image"`
-	State   string            `json:"state"`
-	Status  string            `json:"status"`
-	Created int64             `json:"created"`
-	Ports   []string          `json:"ports"`
-	Project string            `json:"project,omitempty"`
-	Update  *UpdateInfo       `json:"update,omitempty"`
-	Busy    bool              `json:"busy"`
-	Labels  map[string]string `json:"-"`
+	ID       string            `json:"id"`
+	Name     string            `json:"name"`
+	Image    string            `json:"image"`
+	ImageID  string            `json:"imageId"`
+	State    string            `json:"state"`
+	Status   string            `json:"status"`
+	Created  int64             `json:"created"`
+	Started  string            `json:"started,omitempty"`
+	Ports    []string          `json:"ports"`
+	Networks []string          `json:"networks"`
+	Mounts   int               `json:"mounts"`
+	Project  string            `json:"project,omitempty"`
+	Update   *UpdateInfo       `json:"update,omitempty"`
+	Busy     bool              `json:"busy"`
+	Labels   map[string]string `json:"-"`
 }
 
 // Routes 实现 module.Module。
 func (m *Module) Routes(r module.Router) {
-	r.HandleFunc("GET /containers", m.handleList)
-	r.HandleFunc("POST /containers/{id}/{action}", m.handleAction)
-	r.HandleFunc("GET /containers/{id}/logs", m.handleLogs)
-	r.HandleFunc("POST /containers/{id}/check", m.handleCheck)
-	r.HandleFunc("POST /containers/{id}/upgrade", m.handleUpgrade)
-	r.HandleFunc("GET /settings", func(w http.ResponseWriter, req *http.Request) {
-		m.mu.Lock()
-		defer m.mu.Unlock()
-		httpx.OK(w, m.settings)
-	})
-	r.HandleFunc("PUT /settings", func(w http.ResponseWriter, req *http.Request) {
-		var s Settings
-		if err := httpx.ReadJSON(req, &s); err != nil {
-			httpx.Error(w, http.StatusBadRequest, "%v", err)
-			return
-		}
-		if _, err := NewClient(s.Host); err != nil {
-			httpx.Error(w, http.StatusBadRequest, "%v", err)
-			return
-		}
-		m.mu.Lock()
-		defer m.mu.Unlock()
-		if err := m.store.Save(ID, s); err != nil {
-			httpx.Error(w, http.StatusInternalServerError, "%v", err)
-			return
-		}
-		m.settings = s
-		httpx.OK(w, s)
-	})
-}
-
-func (m *Module) handleList(w http.ResponseWriter, r *http.Request) {
-	c, err := m.client()
-	if err != nil {
-		httpx.Error(w, http.StatusBadRequest, "%v", err)
-		return
-	}
-	list, err := c.Containers(r.Context())
-	if err != nil {
-		httpx.Error(w, http.StatusBadGateway, "无法连接 Docker：%v（容器部署时需挂载 /var/run/docker.sock）", err)
-		return
-	}
-	m.mu.Lock()
-	out := make([]ContainerView, 0, len(list))
-	for _, ct := range list {
-		v := ContainerView{ID: ct.ID, Name: ct.Name(), Image: ct.Image, State: ct.State, Status: ct.Status, Created: ct.Created,
-			Project: ct.Labels["com.docker.compose.project"], Busy: m.busy[ct.ID]}
-		if u, ok := m.updates[ct.ID]; ok {
-			u := u
-			v.Update = &u
-		}
-		seen := map[string]bool{}
-		for _, p := range ct.Ports {
-			s := strconv.Itoa(p.PrivatePort) + "/" + p.Type
-			if p.PublicPort > 0 {
-				s = strconv.Itoa(p.PublicPort) + "→" + s
-			}
-			if !seen[s] {
-				seen[s] = true
-				v.Ports = append(v.Ports, s)
-			}
-		}
-		out = append(out, v)
-	}
-	m.mu.Unlock()
-	sort.Slice(out, func(i, j int) bool {
-		if out[i].Project != out[j].Project {
-			return out[i].Project < out[j].Project
-		}
-		return out[i].Name < out[j].Name
-	})
-	httpx.OK(w, out)
-}
-
-func (m *Module) handleAction(w http.ResponseWriter, r *http.Request) {
-	c, err := m.client()
-	if err != nil {
-		httpx.Error(w, http.StatusBadRequest, "%v", err)
-		return
-	}
-	id, action := r.PathValue("id"), r.PathValue("action")
-	if err := c.Action(r.Context(), id, action); err != nil {
-		httpx.Error(w, http.StatusBadGateway, "%v", err)
-		return
-	}
-	m.logs.Add(logbuf.LevelInfo, "", fmt.Sprintf("容器 %s 执行 %s", shortID(id), action))
-	httpx.OK(w, map[string]bool{"ok": true})
-}
-
-func (m *Module) handleLogs(w http.ResponseWriter, r *http.Request) {
-	c, err := m.client()
-	if err != nil {
-		httpx.Error(w, http.StatusBadRequest, "%v", err)
-		return
-	}
-	tail, _ := strconv.Atoi(r.URL.Query().Get("tail"))
-	if tail <= 0 || tail > 5000 {
-		tail = 300
-	}
-	text, err := c.Logs(r.Context(), r.PathValue("id"), tail)
-	if err != nil {
-		httpx.Error(w, http.StatusBadGateway, "%v", err)
-		return
-	}
-	httpx.OK(w, map[string]string{"logs": text})
+	m.registerTaskRoutes(r.HandleFunc)
+	m.registerResourceRoutes(r.HandleFunc)
+	m.registerSystemRoutes(r.HandleFunc)
+	m.registerContainerRoutes(r.HandleFunc)
+	m.registerContainerFileRoutes(r.HandleFunc)
+	m.registerExecRoutes(r.HandleFunc)
 }
 
 func shortID(id string) string {
@@ -225,6 +160,11 @@ func containerImage(info map[string]json.RawMessage) (ref, imageID, name string,
 
 // checkUpdate 拉取最新镜像并与容器当前镜像比较。
 func (m *Module) checkUpdate(ctx context.Context, c *Client, id string) (bool, error) {
+	return m.checkUpdateMemo(ctx, c, id, nil)
+}
+
+// checkUpdateMemo 与 checkUpdate 相同，memo 记录本轮已拉取的镜像引用及其最新镜像 ID，批量检查时同一引用只拉取一次。
+func (m *Module) checkUpdateMemo(ctx context.Context, c *Client, id string, memo map[string]string) (bool, error) {
 	info, err := c.Inspect(ctx, id)
 	if err != nil {
 		return false, err
@@ -233,67 +173,20 @@ func (m *Module) checkUpdate(ctx context.Context, c *Client, id string) (bool, e
 	if err != nil {
 		return false, err
 	}
-	if err := c.Pull(ctx, ref); err != nil {
-		return false, fmt.Errorf("拉取 %s 失败: %w", ref, err)
-	}
-	latest, err := c.ImageID(ctx, ref)
-	if err != nil {
-		return false, err
+	latest, ok := memo[ref]
+	if !ok {
+		if err := m.pullImageWithMirrors(ctx, c, ref, nil); err != nil {
+			return false, fmt.Errorf("拉取 %s 失败: %w", ref, err)
+		}
+		latest, err = c.ImageID(ctx, ref)
+		if err != nil {
+			return false, err
+		}
+		if memo != nil {
+			memo[ref] = latest
+		}
 	}
 	return latest != "" && latest != cur, nil
-}
-
-func (m *Module) handleCheck(w http.ResponseWriter, r *http.Request) {
-	c, err := m.client()
-	if err != nil {
-		httpx.Error(w, http.StatusBadRequest, "%v", err)
-		return
-	}
-	id := r.PathValue("id")
-	ctx, cancel := context.WithTimeout(r.Context(), waitTimeout)
-	defer cancel()
-	has, err := m.checkUpdate(ctx, c, id)
-	info := UpdateInfo{Checked: time.Now(), HasUpdate: has}
-	if err != nil {
-		info.Error = err.Error()
-	}
-	m.mu.Lock()
-	m.updates[id] = info
-	m.mu.Unlock()
-	httpx.OK(w, info)
-}
-
-func (m *Module) handleUpgrade(w http.ResponseWriter, r *http.Request) {
-	c, err := m.client()
-	if err != nil {
-		httpx.Error(w, http.StatusBadRequest, "%v", err)
-		return
-	}
-	id := r.PathValue("id")
-	m.mu.Lock()
-	if m.busy[id] {
-		m.mu.Unlock()
-		httpx.Error(w, http.StatusConflict, "正在升级")
-		return
-	}
-	m.busy[id] = true
-	m.mu.Unlock()
-	defer func() {
-		m.mu.Lock()
-		delete(m.busy, id)
-		m.mu.Unlock()
-	}()
-	ctx, cancel := context.WithTimeout(context.Background(), waitTimeout)
-	defer cancel()
-	newID, err := m.upgrade(ctx, c, id)
-	if err != nil {
-		httpx.Error(w, http.StatusBadGateway, "%v", err)
-		return
-	}
-	m.mu.Lock()
-	delete(m.updates, id)
-	m.mu.Unlock()
-	httpx.OK(w, map[string]string{"id": newID})
 }
 
 // upgrade 拉取最新镜像并按原配置重建容器；新容器启动失败时恢复旧容器。
@@ -310,13 +203,19 @@ func (m *Module) upgrade(ctx context.Context, c *Client, id string) (string, err
 	name = trimSlash(name)
 	log := m.logs.Logger(name)
 	log.Infof("开始升级，拉取 %s", ref)
-	if err := c.Pull(ctx, ref); err != nil {
+	if err := m.pullImageWithMirrors(ctx, c, ref, func(line string) { log.Infof("%s", line) }); err != nil {
 		return "", fmt.Errorf("拉取镜像失败: %w", err)
 	}
 	body, extraNets, err := recreateBody(info)
 	if err != nil {
 		return "", err
 	}
+	return m.rebuild(c, id, info, name, name, body, extraNets, log)
+}
+
+// rebuild 用 body 重建容器：停止旧容器 -> 改名备份 -> 创建新容器 -> 连接其余网络 -> 启动，任一步失败都恢复旧容器。
+// 旧容器原本在运行才会启动新容器。停止旧容器之后的每一步使用独立超时，保证恢复流程不因调用方取消而中断。
+func (m *Module) rebuild(c *Client, id string, info map[string]json.RawMessage, name, newName string, body map[string]any, extraNets []networkAttach, log *logbuf.Logger) (string, error) {
 	var state struct {
 		Running bool `json:"Running"`
 	}
@@ -341,7 +240,7 @@ func (m *Module) upgrade(ctx context.Context, c *Client, id string) (string, err
 		return "", fmt.Errorf("重命名旧容器失败: %w", err)
 	}
 	restore := func(cause error) error {
-		log.Errorf("升级失败，恢复旧容器: %v", cause)
+		log.Errorf("重建失败，恢复旧容器: %v", cause)
 		if err := step(func(c2 context.Context) error { return c.Rename(c2, id, name) }); err != nil {
 			log.Errorf("恢复旧容器名称失败，请手动处理 %s: %v", backup, err)
 		}
@@ -355,7 +254,7 @@ func (m *Module) upgrade(ctx context.Context, c *Client, id string) (string, err
 	var newID string
 	if err := step(func(c2 context.Context) error {
 		var err error
-		newID, err = c.Create(c2, name, body)
+		newID, err = c.Create(c2, newName, body)
 		return err
 	}); err != nil {
 		return "", restore(fmt.Errorf("创建新容器失败: %w", err))
@@ -378,7 +277,7 @@ func (m *Module) upgrade(ctx context.Context, c *Client, id string) (string, err
 	if err := step(func(c2 context.Context) error { return c.Remove(c2, id) }); err != nil {
 		log.Warnf("删除旧容器 %s 失败，请手动清理: %v", backup, err)
 	}
-	log.Infof("升级完成，新容器 %s", shortID(newID))
+	log.Infof("重建完成，新容器 %s", shortID(newID))
 	return newID, nil
 }
 
@@ -510,4 +409,52 @@ func keepAnonymousVolumes(info map[string]json.RawMessage, hostCfg map[string]an
 	if added {
 		hostCfg["Binds"] = binds
 	}
+}
+
+// registryAuth 返回镜像引用对应仓库的 X-Registry-Auth 头值（base64url 编码的 JSON），没有配置时返回空字符串。
+func (m *Module) registryAuth(ref string) string {
+	host := registryHost(ref)
+	m.mu.Lock()
+	regs := append([]Registry{}, m.settings.Registries...)
+	m.mu.Unlock()
+	for _, r := range regs {
+		if normalizeRegistry(r.Server) != host {
+			continue
+		}
+		if r.Username == "" && r.Password == "" {
+			return ""
+		}
+		addr := r.Server
+		if host == "docker.io" {
+			addr = "https://index.docker.io/v1/"
+		}
+		return encodeAuth(addr, r.Username, r.Password)
+	}
+	return ""
+}
+
+// registryHost 返回镜像引用所属仓库的域名。首段含点、冒号或为 localhost 时视为域名，否则是 Docker Hub（docker.io）。
+func registryHost(ref string) string {
+	first, _, found := strings.Cut(ref, "/")
+	if !found {
+		return "docker.io"
+	}
+	if strings.ContainsAny(first, ".:") || first == "localhost" || first != strings.ToLower(first) {
+		return normalizeRegistry(first)
+	}
+	return "docker.io"
+}
+
+// normalizeRegistry 统一仓库地址写法：去掉协议与路径、转小写，并把 Docker Hub 的各种别名归一为 docker.io。
+func normalizeRegistry(server string) string {
+	s := strings.ToLower(strings.TrimSpace(server))
+	s = strings.TrimPrefix(strings.TrimPrefix(s, "https://"), "http://")
+	if i := strings.IndexByte(s, '/'); i >= 0 {
+		s = s[:i]
+	}
+	switch s {
+	case "", "docker.io", "index.docker.io", "registry-1.docker.io", "registry.hub.docker.com":
+		return "docker.io"
+	}
+	return s
 }

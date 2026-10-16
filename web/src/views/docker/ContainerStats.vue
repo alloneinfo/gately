@@ -1,0 +1,249 @@
+<template>
+  <div class="stats">
+    <div class="tiles">
+      <div class="tile">
+        <div class="t-label">CPU</div>
+        <div class="t-value">{{ cur ? cur.cpuPercent.toFixed(1) : '-' }}<small>%</small></div>
+        <Sparkline :series="[{ values: cpu, color: 'var(--el-color-primary)' }]" :height="40" :capacity="CAP" :max="cpuMax" />
+      </div>
+      <div class="tile">
+        <div class="t-label">内存</div>
+        <div class="t-value">{{ cur ? formatBytes(cur.memUsage) : '-' }}<small v-if="cur && cur.memLimit"> / {{ formatBytes(cur.memLimit) }}</small></div>
+        <Sparkline :series="[{ values: mem, color: 'var(--g-chart-2)' }]" :height="40" :capacity="CAP" :max="100" />
+        <div class="t-sub">{{ cur ? cur.memPercent.toFixed(1) : '-' }}%</div>
+      </div>
+      <div class="tile">
+        <div class="t-label">网络 接收 / 发送（速率）</div>
+        <div class="t-value sm">↓ {{ rate(rxRate) }}　↑ {{ rate(txRate) }}</div>
+        <Sparkline
+          :series="[
+            { values: rx, color: 'var(--el-color-primary)' },
+            { values: tx, color: 'var(--g-chart-2)' },
+          ]"
+          :height="40"
+          :capacity="CAP"
+        />
+        <div class="t-sub">累计 ↓ {{ cur ? formatBytes(cur.netRx) : '-' }}　↑ {{ cur ? formatBytes(cur.netTx) : '-' }}</div>
+      </div>
+      <div class="tile">
+        <div class="t-label">块 IO 读 / 写（速率）</div>
+        <div class="t-value sm">读 {{ rate(brRate) }}　写 {{ rate(bwRate) }}</div>
+        <Sparkline
+          :series="[
+            { values: br, color: 'var(--el-color-primary)' },
+            { values: bw, color: 'var(--g-chart-2)' },
+          ]"
+          :height="40"
+          :capacity="CAP"
+        />
+        <div class="t-sub">累计 读 {{ cur ? formatBytes(cur.blockRead) : '-' }}　写 {{ cur ? formatBytes(cur.blockWrite) : '-' }}　进程 {{ cur?.pids ?? '-' }}</div>
+      </div>
+    </div>
+
+    <div class="g-card proc">
+      <div class="g-card-head">
+        <div class="g-card-title"><Cpu :size="16" />进程</div>
+        <el-button size="small" :icon="RefreshCw" @click="loadProcs">刷新</el-button>
+      </div>
+      <div class="g-card-body">
+        <div v-if="!isMobile" class="tbl-wrap">
+          <table class="tbl mono">
+            <thead>
+              <tr><th v-for="t in procs.titles" :key="t">{{ t }}</th></tr>
+            </thead>
+            <tbody>
+              <tr v-for="(p, i) in procs.processes" :key="i"><td v-for="(c, j) in p" :key="j">{{ c }}</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div v-else class="pcards">
+          <div v-for="(p, i) in procs.processes" :key="i" class="pcard">
+            <div v-for="(c, j) in p" :key="j" class="pline">
+              <span class="pk">{{ procs.titles[j] }}</span><span class="pv mono">{{ c }}</span>
+            </div>
+          </div>
+        </div>
+        <el-empty v-if="!procs.processes.length" description="暂无进程信息" :image-size="50" />
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { ElMessage } from 'element-plus'
+import { Cpu, RefreshCw } from 'lucide-vue-next'
+import { api } from '../../api'
+import Sparkline from '../../components/Sparkline.vue'
+import { useIsMobile } from '../../composables/useIsMobile'
+import { formatBytes } from './format'
+import type { ContainerStats } from './types'
+
+const props = defineProps<{ containerId: string }>()
+const isMobile = useIsMobile()
+const CAP = 60
+
+const cur = ref<ContainerStats>()
+const cpu = ref<number[]>([])
+const mem = ref<number[]>([])
+const rx = ref<number[]>([])
+const tx = ref<number[]>([])
+const br = ref<number[]>([])
+const bw = ref<number[]>([])
+const rxRate = ref<number>()
+const txRate = ref<number>()
+const brRate = ref<number>()
+const bwRate = ref<number>()
+const procs = ref<{ titles: string[]; processes: string[][] }>({ titles: [], processes: [] })
+let prev: { at: number; s: ContainerStats } | undefined
+let timer: number | undefined
+let warned = false
+
+// 多核 CPU 占用可能超过 100%，纵轴上限随数据放大
+const cpuMax = computed(() => Math.max(100, ...cpu.value) * 1.1)
+
+function rate(v: number | undefined): string {
+  return v === undefined ? '-' : `${formatBytes(Math.round(v))}/s`
+}
+
+function push(arr: number[], v: number) {
+  arr.push(v)
+  if (arr.length > CAP) {
+    arr.shift()
+  }
+}
+
+async function sample() {
+  try {
+    const s = await api.get<ContainerStats>(`/api/docker/containers/${props.containerId}/stats`)
+    const now = Date.now()
+    cur.value = s
+    push(cpu.value, s.cpuPercent)
+    push(mem.value, s.memPercent)
+    if (prev) {
+      const dt = Math.max(0.5, (now - prev.at) / 1000)
+      const d = (a: number, b: number) => Math.max(0, a - b) / dt
+      rxRate.value = d(s.netRx, prev.s.netRx)
+      txRate.value = d(s.netTx, prev.s.netTx)
+      brRate.value = d(s.blockRead, prev.s.blockRead)
+      bwRate.value = d(s.blockWrite, prev.s.blockWrite)
+      push(rx.value, rxRate.value)
+      push(tx.value, txRate.value)
+      push(br.value, brRate.value)
+      push(bw.value, bwRate.value)
+    }
+    prev = { at: now, s }
+  } catch (e) {
+    if (!warned) {
+      warned = true
+      ElMessage.error((e as Error).message)
+    }
+  }
+}
+
+async function loadProcs() {
+  try {
+    const r = await api.get<{ titles: string[]; processes: string[][] }>(`/api/docker/containers/${props.containerId}/processes`)
+    procs.value = { titles: r.titles ?? [], processes: r.processes ?? [] }
+  } catch (e) {
+    ElMessage.error((e as Error).message)
+  }
+}
+
+onMounted(() => {
+  sample()
+  loadProcs()
+  timer = window.setInterval(sample, 2000)
+})
+onBeforeUnmount(() => window.clearInterval(timer))
+</script>
+
+<style scoped>
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.tile {
+  border: 1px solid var(--g-border);
+  border-radius: var(--g-radius);
+  padding: 12px 14px;
+  min-width: 0;
+}
+.t-label {
+  font-size: 12px;
+  color: var(--el-text-color-secondary);
+}
+.t-value {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 2px 0 6px;
+  font-variant-numeric: tabular-nums;
+  word-break: break-all;
+}
+.t-value.sm {
+  font-size: 15px;
+  line-height: 1.8;
+}
+.t-value small {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--el-text-color-secondary);
+}
+.t-sub {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--el-text-color-secondary);
+  word-break: break-all;
+}
+.tbl-wrap {
+  overflow-x: auto;
+}
+.tbl {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.tbl th,
+.tbl td {
+  text-align: left;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--g-border);
+  white-space: nowrap;
+}
+.tbl th {
+  color: var(--el-text-color-secondary);
+  font-weight: 500;
+}
+.pcards {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.pcard {
+  border: 1px solid var(--g-border);
+  border-radius: var(--g-radius-sm);
+  padding: 8px 10px;
+}
+.pline {
+  display: flex;
+  gap: 8px;
+  font-size: 12px;
+  line-height: 1.7;
+}
+.pk {
+  width: 64px;
+  flex-shrink: 0;
+  color: var(--el-text-color-secondary);
+}
+.pv {
+  min-width: 0;
+  word-break: break-all;
+}
+@media (max-width: 767.98px) {
+  .tiles {
+    grid-template-columns: 1fr;
+  }
+}
+</style>

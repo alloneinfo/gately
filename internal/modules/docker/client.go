@@ -26,6 +26,9 @@ const apiVersion = "v1.41"
 type Client struct {
 	hc   *http.Client
 	base string
+	// network 与 addr 记录底层拨号信息（unix 套接字路径或 tcp 地址），连接劫持（终端）需要直接拨号
+	network string
+	addr    string
 }
 
 // NewClient 按地址创建客户端：unix:///var/run/docker.sock 或 tcp://host:2375。
@@ -44,9 +47,9 @@ func NewClient(host string) (*Client, error) {
 			var d net.Dialer
 			return d.DialContext(ctx, "unix", path)
 		}}
-		return &Client{hc: &http.Client{Transport: tr}, base: "http://docker/" + apiVersion}, nil
+		return &Client{hc: &http.Client{Transport: tr}, base: "http://docker/" + apiVersion, network: "unix", addr: path}, nil
 	case "tcp", "http":
-		return &Client{hc: &http.Client{}, base: "http://" + u.Host + "/" + apiVersion}, nil
+		return &Client{hc: &http.Client{}, base: "http://" + u.Host + "/" + apiVersion, network: "tcp", addr: u.Host}, nil
 	}
 	return nil, fmt.Errorf("不支持的 Docker 地址 %q", host)
 }
@@ -121,6 +124,12 @@ type Container struct {
 		PublicPort  int    `json:"PublicPort"`
 		Type        string `json:"Type"`
 	} `json:"Ports"`
+	Mounts []struct {
+		Type string `json:"Type"`
+	} `json:"Mounts"`
+	NetworkSettings struct {
+		Networks map[string]json.RawMessage `json:"Networks"`
+	} `json:"NetworkSettings"`
 }
 
 // Name 返回不带斜杠的容器名。
@@ -138,10 +147,10 @@ func (c *Client) Containers(ctx context.Context) ([]Container, error) {
 	return out, err
 }
 
-// Action 执行 start/stop/restart。
+// Action 执行 start/stop/restart/pause/unpause/kill。
 func (c *Client) Action(ctx context.Context, id, action string) error {
 	switch action {
-	case "start", "stop", "restart":
+	case "start", "stop", "restart", "pause", "unpause", "kill":
 	default:
 		return fmt.Errorf("不支持的操作 %q", action)
 	}
@@ -150,7 +159,15 @@ func (c *Client) Action(ctx context.Context, id, action string) error {
 
 // Logs 返回容器最近的日志。非 TTY 容器的输出是带 8 字节头的多路复用流，这里解析为纯文本。
 func (c *Client) Logs(ctx context.Context, id string, tail int) (string, error) {
-	q := url.Values{"stdout": {"1"}, "stderr": {"1"}, "timestamps": {"1"}, "tail": {fmt.Sprint(tail)}}
+	return c.LogsWith(ctx, id, tail, true)
+}
+
+// LogsWith 与 Logs 相同，timestamps 控制是否带时间戳。
+func (c *Client) LogsWith(ctx context.Context, id string, tail int, timestamps bool) (string, error) {
+	q := url.Values{"stdout": {"1"}, "stderr": {"1"}, "tail": {fmt.Sprint(tail)}}
+	if timestamps {
+		q.Set("timestamps", "1")
+	}
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.base+"/containers/"+url.PathEscape(id)+"/logs?"+q.Encode(), nil)
 	if err != nil {
 		return "", err
@@ -263,7 +280,16 @@ func (c *Client) Rename(ctx context.Context, id, name string) error {
 
 // Remove 删除容器（保留数据卷）。
 func (c *Client) Remove(ctx context.Context, id string) error {
-	return c.do(ctx, http.MethodDelete, "/containers/"+url.PathEscape(id)+"?force=1", nil, nil)
+	return c.RemoveVolumes(ctx, id, false)
+}
+
+// RemoveVolumes 强制删除容器，volumes 为 true 时同时删除匿名卷。
+func (c *Client) RemoveVolumes(ctx context.Context, id string, volumes bool) error {
+	path := "/containers/" + url.PathEscape(id) + "?force=1"
+	if volumes {
+		path += "&v=1"
+	}
+	return c.do(ctx, http.MethodDelete, path, nil, nil)
 }
 
 // Create 创建容器，返回新容器 ID。
