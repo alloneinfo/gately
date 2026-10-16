@@ -82,6 +82,57 @@ export interface ImportFileResult {
   reports: ImportReport[]
 }
 
+// SystemSettings 对应 GET/PUT /api/system/settings。
+export interface SystemSettings {
+  listen: string
+  httpsListen: string
+  forceHTTPS: boolean
+  safePath: string
+  lanOnly: boolean
+  maxLoginFailures: number
+  lockMinutes: number
+  // 已设置时为 ********，空字符串表示未启用
+  apiToken: string
+  timeZone: string
+  dnsServers: string[] | null
+  logLines: number
+  gcPercent: number
+  maxProcs: number
+  sessionHours: number
+  restartRequired: boolean
+}
+
+// SystemInfo 对应 GET /api/system/info。
+export interface SystemInfo {
+  version: string
+  commit: string
+  buildDate: string
+  goVersion: string
+  os: string
+  arch: string
+  hostname: string
+  pid: number
+  startTime: string
+  configDir: string
+  goroutines: number
+  memSys: number
+  memAlloc: number
+  numCPU: number
+  maxProcs: number
+  timeZone: string
+  inDocker: boolean
+}
+
+// UpdateInfo 对应 GET /api/system/update。
+export interface UpdateInfo {
+  current: string
+  latest: string
+  url: string
+  notes: string
+  publishedAt: string
+  hasUpdate: boolean
+}
+
 // formatBytes 把字节数格式化为可读字符串。
 export function formatBytes(n: number): string {
   const units = ['B', 'KB', 'MB', 'GB', 'TB']

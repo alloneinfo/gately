@@ -1,63 +1,57 @@
 <template>
   <div>
-    <div class="page-header">
-      <h2>计划任务</h2>
-      <el-button type="primary" @click="openEditor()">添加任务</el-button>
-    </div>
-    <el-card shadow="never">
-      <el-table :data="tasks" empty-text="暂无任务">
-        <el-table-column label="启用" width="70">
-          <template #default="{ row }">
-            <el-switch :model-value="row.enable" size="small" @change="(v: string | number | boolean) => toggle(row, Boolean(v))" />
-          </template>
-        </el-table-column>
-        <el-table-column label="任务" min-width="160">
-          <template #default="{ row }">
-            <div>{{ row.name }}</div>
-            <el-tag size="small" effect="plain">{{ row.type === 'http' ? 'HTTP 请求' : '命令' }}</el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column label="计划" min-width="150">
-          <template #default="{ row }">
-            <div class="mono">{{ row.spec }}</div>
-            <div class="meta" v-if="row.nextRun">下次 {{ new Date(row.nextRun).toLocaleString() }}</div>
-          </template>
-        </el-table-column>
-        <el-table-column label="最近执行" min-width="220">
-          <template #default="{ row }">
-            <el-tag v-if="row.running" type="warning" size="small">执行中</el-tag>
-            <template v-else-if="last(row)">
-              <el-tag :type="last(row)!.ok ? 'success' : 'danger'" size="small">{{ last(row)!.ok ? '成功' : '失败' }}</el-tag>
-              <span class="meta"> {{ new Date(last(row)!.start).toLocaleString() }} · {{ last(row)!.durationMs }}ms</span>
-            </template>
-            <span v-else class="meta">尚未执行</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="操作" width="220">
-          <template #default="{ row }">
-            <el-button link type="primary" :disabled="row.running" @click="runNow(row)">立即执行</el-button>
-            <el-button link type="primary" @click="showHistory(row)">记录</el-button>
-            <el-button link type="primary" @click="openEditor(row)">编辑</el-button>
-            <el-popconfirm title="删除该任务？" @confirm="remove(row)">
-              <template #reference>
-                <el-button link type="danger">删除</el-button>
-              </template>
-            </el-popconfirm>
-          </template>
-        </el-table-column>
-      </el-table>
-    </el-card>
-    <el-card shadow="never" header="日志" class="logs">
-      <LogViewer url="/api/cron/logs" clearable />
-    </el-card>
+    <PageHeader title="计划任务" desc="按 cron 表达式定时执行命令或发送 HTTP 请求" :icon="CalendarClock">
+      <el-button type="primary" :icon="Plus" @click="openEditor()">添加任务</el-button>
+    </PageHeader>
 
-    <el-dialog v-model="editorVisible" :title="editing.key ? '编辑任务' : '添加任务'" width="680px">
-      <el-form :model="editing" label-width="110px">
+    <div class="card-list">
+      <el-empty v-if="!tasks.length" description="暂无任务" />
+      <EntityCard v-for="t in tasks" :key="t.key" :off="!t.enable">
+        <template #lead>
+          <el-switch :model-value="t.enable" @change="(v: string | number | boolean) => toggle(t, Boolean(v))" />
+        </template>
+        <template #title>
+          <span>{{ t.name }}</span>
+          <el-tag size="small" effect="plain">{{ t.type === 'http' ? 'HTTP 请求' : '命令' }}</el-tag>
+        </template>
+        <template v-if="t.remark" #sub>{{ t.remark }}</template>
+        <template #status>
+          <StatusBadge v-bind="taskStatus(t)" />
+        </template>
+        <Field label="计划" mono>{{ t.spec }}</Field>
+        <Field label="下次执行">{{ t.enable && t.nextRun ? new Date(t.nextRun).toLocaleString() : '-' }}</Field>
+        <Field label="最近执行">
+          <template v-if="last(t)">
+            <span :class="last(t)!.ok ? 'text-ok' : 'text-danger'">{{ last(t)!.ok ? '成功' : '失败' }}</span>
+            <span class="meta"> · {{ new Date(last(t)!.start).toLocaleString() }} · {{ last(t)!.durationMs }}ms</span>
+          </template>
+          <span v-else class="muted">尚未执行</span>
+        </Field>
+        <Field :label="t.type === 'http' ? '请求' : '命令'" mono>
+          <span class="ellipsis-2">{{ t.type === 'http' ? `${t.http.method} ${t.http.url}` : t.command }}</span>
+        </Field>
+        <template #actions>
+          <el-button text size="small" :icon="Play" :disabled="t.running" @click="runNow(t)">立即执行</el-button>
+          <el-button text size="small" :icon="History" @click="showHistory(t)">记录</el-button>
+          <el-button text size="small" :icon="Pencil" @click="openEditor(t)">编辑</el-button>
+          <el-popconfirm title="删除该任务？" @confirm="remove(t)">
+            <template #reference>
+              <el-button text size="small" type="danger" :icon="Trash2">删除</el-button>
+            </template>
+          </el-popconfirm>
+        </template>
+      </EntityCard>
+    </div>
+
+    <LogCard url="/api/cron/logs" clearable />
+
+    <el-dialog v-model="editorVisible" :title="editing.key ? '编辑任务' : '添加任务'" width="680px" :fullscreen="isMobile">
+      <el-form :model="editing" label-width="110px" :label-position="labelPosition">
         <el-form-item label="名称"><el-input v-model="editing.name" /></el-form-item>
         <el-form-item label="计划">
           <el-input v-model="editing.spec" class="mono" placeholder="分 时 日 月 周，例如 0 3 * * *；可加秒字段，或 @every 10m" @blur="preview" />
-          <div class="meta" v-if="nextRuns.length">接下来：{{ nextRuns.map((t) => new Date(t).toLocaleString()).join('；') }}</div>
-          <div class="err" v-if="specError">{{ specError }}</div>
+          <div v-if="nextRuns.length" class="form-help">接下来：{{ nextRuns.map((t) => new Date(t).toLocaleString()).join('；') }}</div>
+          <div v-if="specError" class="form-help text-danger">{{ specError }}</div>
         </el-form-item>
         <el-form-item label="类型">
           <el-radio-group v-model="editing.type">
@@ -78,13 +72,18 @@
       </template>
     </el-dialog>
 
-    <el-dialog v-model="historyVisible" title="执行记录" width="760px">
-      <el-timeline>
-        <el-timeline-item v-for="(r, i) in history" :key="i" :type="r.ok ? 'success' : 'danger'" :timestamp="new Date(r.start).toLocaleString() + ` · ${r.durationMs}ms` + (r.manual ? ' · 手动' : '')">
-          <pre class="output">{{ r.output || '(无输出)' }}</pre>
+    <el-dialog v-model="historyVisible" title="执行记录" width="760px" :fullscreen="isMobile">
+      <el-timeline v-if="history.length">
+        <el-timeline-item
+          v-for="(r, i) in history"
+          :key="i"
+          :type="r.ok ? 'success' : 'danger'"
+          :timestamp="new Date(r.start).toLocaleString() + ` · ${r.durationMs}ms` + (r.manual ? ' · 手动' : '')"
+        >
+          <pre class="output mono">{{ r.output || '(无输出)' }}</pre>
         </el-timeline-item>
       </el-timeline>
-      <el-empty v-if="!history.length" description="暂无记录" />
+      <el-empty v-else description="暂无记录" />
     </el-dialog>
   </div>
 </template>
@@ -92,9 +91,15 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
+import { CalendarClock, History, Pencil, Play, Plus, Trash2 } from 'lucide-vue-next'
 import { api } from '../api'
-import LogViewer from '../components/LogViewer.vue'
+import PageHeader from '../components/PageHeader.vue'
+import EntityCard from '../components/EntityCard.vue'
+import Field from '../components/Field.vue'
+import StatusBadge, { type StatusType } from '../components/StatusBadge.vue'
+import LogCard from '../components/LogCard.vue'
 import WebhookEditor, { type WebhookConfig } from '../components/WebhookEditor.vue'
+import { useFormLayout } from '../composables/useIsMobile'
 
 interface Run {
   start: string
@@ -119,9 +124,10 @@ interface TaskView extends Task {
   key: string
   running: boolean
   nextRun?: string
-  history: Run[]
+  history: Run[] | null
 }
 
+const { isMobile, labelPosition } = useFormLayout()
 const tasks = ref<TaskView[]>([])
 const editorVisible = ref(false)
 const editing = ref<Task>(empty())
@@ -144,7 +150,23 @@ function empty(): Task {
 }
 
 function last(t: TaskView) {
-  return t.history.length ? t.history[t.history.length - 1] : undefined
+  const h = t.history ?? []
+  return h.length ? h[h.length - 1] : undefined
+}
+
+// taskStatus 计算任务展示状态：停用的任务只显示“已停用”
+function taskStatus(t: TaskView): { type: StatusType; text: string } {
+  if (t.running) {
+    return { type: 'pending', text: '执行中' }
+  }
+  if (!t.enable) {
+    return { type: 'off', text: '已停用' }
+  }
+  const l = last(t)
+  if (l && !l.ok) {
+    return { type: 'error', text: '上次失败' }
+  }
+  return { type: 'running', text: '已排期' }
 }
 
 async function load() {
@@ -189,8 +211,12 @@ async function save() {
 }
 
 async function toggle(t: TaskView, enable: boolean) {
-  await api.put(`/api/cron/tasks/${t.key}/enable`, { enable })
-  await load()
+  try {
+    await api.put(`/api/cron/tasks/${t.key}/enable`, { enable })
+    await load()
+  } catch (e) {
+    ElMessage.error((e as Error).message)
+  }
 }
 
 async function runNow(t: TaskView) {
@@ -204,13 +230,17 @@ async function runNow(t: TaskView) {
 }
 
 function showHistory(t: TaskView) {
-  history.value = [...t.history].reverse()
+  history.value = [...(t.history ?? [])].reverse()
   historyVisible.value = true
 }
 
 async function remove(t: TaskView) {
-  await api.del(`/api/cron/tasks/${t.key}`)
-  await load()
+  try {
+    await api.del(`/api/cron/tasks/${t.key}`)
+    await load()
+  } catch (e) {
+    ElMessage.error((e as Error).message)
+  }
 }
 
 onMounted(() => {
@@ -221,13 +251,11 @@ onBeforeUnmount(() => window.clearInterval(timer))
 </script>
 
 <style scoped>
-.meta {
-  font-size: 12px;
-  color: var(--el-text-color-secondary);
-}
-.err {
-  font-size: 12px;
-  color: var(--el-color-danger);
+.ellipsis-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 .output {
   margin: 0;
@@ -236,8 +264,9 @@ onBeforeUnmount(() => window.clearInterval(timer))
   font-size: 12px;
   max-height: 200px;
   overflow: auto;
-}
-.logs {
-  margin-top: 16px;
+  background: var(--el-fill-color-lighter);
+  border: 1px solid var(--g-border);
+  border-radius: 6px;
+  padding: 8px 10px;
 }
 </style>

@@ -1,60 +1,62 @@
 <template>
   <div>
-    <div class="page-header">
-      <h2>WebDAV</h2>
-      <el-button type="primary" :loading="saving" @click="save">保存</el-button>
+    <PageHeader title="WebDAV" desc="把本机目录以 WebDAV 协议共享给电脑、手机与播放器" :icon="FolderSync">
+      <el-button type="primary" :icon="Save" :loading="saving" @click="save">保存</el-button>
+    </PageHeader>
+
+    <el-alert v-if="error && settings?.enable" type="error" :title="error" :closable="false" show-icon class="block-gap" />
+
+    <div v-if="settings" class="g-card">
+      <div class="g-card-head">
+        <div class="g-card-title"><Server :size="16" />服务</div>
+        <StatusBadge v-bind="svcStatus" />
+      </div>
+      <div class="g-card-body">
+        <el-form label-width="100px" :label-position="labelPosition" class="svc-form">
+          <el-form-item label="启用"><el-switch v-model="settings.enable" /></el-form-item>
+          <el-form-item label="监听地址"><el-input v-model="settings.listenIp" placeholder="留空表示所有地址" class="w-260" /></el-form-item>
+          <el-form-item label="端口"><el-input-number v-model="settings.port" :min="1" :max="65535" /></el-form-item>
+          <el-form-item label="HTTPS">
+            <el-switch v-model="settings.tls" />
+            <span class="help">证书按访问域名从「SSL 证书」中选择</span>
+          </el-form-item>
+        </el-form>
+      </div>
     </div>
-    <el-alert v-if="error" type="error" :title="error" :closable="false" class="block" />
-    <el-card v-if="settings" shadow="never" header="服务">
-      <el-form label-width="100px">
-        <el-form-item label="启用">
-          <el-switch v-model="settings.enable" />
-          <el-tag v-if="running" type="success" size="small" class="tag">运行中</el-tag>
-        </el-form-item>
-        <el-form-item label="监听地址"><el-input v-model="settings.listenIp" placeholder="留空表示所有地址" style="width: 260px" /></el-form-item>
-        <el-form-item label="端口"><el-input-number v-model="settings.port" :min="1" :max="65535" /></el-form-item>
-        <el-form-item label="HTTPS">
-          <el-switch v-model="settings.tls" />
-          <span class="help">证书按访问域名从「SSL 证书」中选择</span>
-        </el-form-item>
-      </el-form>
-    </el-card>
-    <el-card v-if="settings" shadow="never" class="block">
-      <template #header>
-        <div class="head">
-          <span>用户</span>
-          <el-button size="small" @click="settings.users.push({ name: '', password: '', root: '', readOnly: false })">添加用户</el-button>
+
+    <div v-if="settings" class="g-card">
+      <div class="g-card-head">
+        <div class="g-card-title"><Users :size="16" />用户 <span class="g-card-desc">每个用户可访问各自的目录</span></div>
+        <el-button size="small" :icon="UserPlus" @click="settings.users.push({ name: '', password: '', root: '', readOnly: false })">添加用户</el-button>
+      </div>
+      <div class="g-card-body">
+        <div v-if="settings.users.length" class="u-head">
+          <span>用户名</span><span>密码</span><span>目录</span><span>只读</span><span />
         </div>
-      </template>
-      <el-table :data="settings.users" empty-text="暂无用户">
-        <el-table-column label="用户名" min-width="140">
-          <template #default="{ row }"><el-input v-model="row.name" size="small" /></template>
-        </el-table-column>
-        <el-table-column label="密码" min-width="160">
-          <template #default="{ row }"><el-input v-model="row.password" type="password" show-password size="small" /></template>
-        </el-table-column>
-        <el-table-column label="目录" min-width="240">
-          <template #default="{ row }"><el-input v-model="row.root" size="small" placeholder="/data/share" /></template>
-        </el-table-column>
-        <el-table-column label="只读" width="80">
-          <template #default="{ row }"><el-switch v-model="row.readOnly" size="small" /></template>
-        </el-table-column>
-        <el-table-column width="70">
-          <template #default="{ $index }"><el-button link type="danger" @click="settings.users.splice($index, 1)">删除</el-button></template>
-        </el-table-column>
-      </el-table>
-    </el-card>
-    <el-card shadow="never" header="日志" class="block">
-      <LogViewer url="/api/webdav/logs" clearable />
-    </el-card>
+        <div v-for="(u, i) in settings.users" :key="i" class="u-row">
+          <div class="u-cell"><label class="u-label">用户名</label><el-input v-model="u.name" /></div>
+          <div class="u-cell"><label class="u-label">密码</label><el-input v-model="u.password" type="password" show-password /></div>
+          <div class="u-cell u-root"><label class="u-label">目录</label><el-input v-model="u.root" placeholder="/data/share" class="mono" /></div>
+          <div class="u-cell u-ro"><label class="u-label">只读</label><el-switch v-model="u.readOnly" /></div>
+          <div class="u-cell u-del"><el-button text type="danger" :icon="Trash2" aria-label="删除用户" @click="settings.users.splice(i, 1)" /></div>
+        </div>
+        <el-empty v-if="!settings.users.length" description="暂无用户" :image-size="60" />
+      </div>
+    </div>
+
+    <LogCard url="/api/webdav/logs" clearable />
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
+import { FolderSync, Save, Server, Trash2, UserPlus, Users } from 'lucide-vue-next'
 import { api } from '../api'
-import LogViewer from '../components/LogViewer.vue'
+import PageHeader from '../components/PageHeader.vue'
+import StatusBadge, { type StatusType } from '../components/StatusBadge.vue'
+import LogCard from '../components/LogCard.vue'
+import { useFormLayout } from '../composables/useIsMobile'
 
 interface User {
   name: string
@@ -70,14 +72,31 @@ interface Settings {
   users: User[]
 }
 
+const { labelPosition } = useFormLayout()
 const settings = ref<Settings>()
+// savedEnable 为已保存的启用状态，状态徽标以它为准
+const savedEnable = ref(false)
 const running = ref(false)
 const error = ref('')
 const saving = ref(false)
 
+const svcStatus = computed((): { type: StatusType; text: string; title?: string } => {
+  if (!savedEnable.value) {
+    return { type: 'off', text: '已停用' }
+  }
+  if (error.value) {
+    return { type: 'error', text: '启动失败', title: error.value }
+  }
+  if (running.value) {
+    return { type: 'running', text: '运行中' }
+  }
+  return { type: 'warn', text: '未运行' }
+})
+
 async function load() {
   const r = await api.get<{ settings: Settings & { users: User[] | null }; running: boolean; error: string }>('/api/webdav/settings')
   settings.value = { ...r.settings, users: r.settings.users ?? [] }
+  savedEnable.value = r.settings.enable
   running.value = r.running
   error.value = r.error
 }
@@ -101,20 +120,72 @@ onMounted(load)
 </script>
 
 <style scoped>
-.block {
-  margin-top: 16px;
+.block-gap {
+  margin-bottom: 16px;
 }
-.head {
-  display: flex;
-  justify-content: space-between;
+.svc-form {
+  max-width: 560px;
+}
+.svc-form .el-form-item:last-child {
+  margin-bottom: 0;
+}
+.w-260 {
+  width: 260px;
+}
+.u-head,
+.u-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 2fr) 60px 40px;
+  gap: 10px;
   align-items: center;
 }
-.tag {
-  margin-left: 10px;
-}
-.help {
-  margin-left: 10px;
+.u-head {
   font-size: 12px;
   color: var(--el-text-color-secondary);
+  padding-bottom: 6px;
+}
+.u-row {
+  padding: 8px 0;
+  border-top: 1px solid var(--g-border);
+}
+.u-label {
+  display: none;
+}
+@media (max-width: 767.98px) {
+  .w-260 {
+    width: 100%;
+  }
+  .u-head {
+    display: none;
+  }
+  .u-row {
+    grid-template-columns: 1fr 1fr;
+    padding: 12px;
+    margin-bottom: 10px;
+    border: 1px solid var(--g-border);
+    border-radius: 8px;
+    position: relative;
+  }
+  .u-label {
+    display: block;
+    font-size: 12px;
+    color: var(--el-text-color-secondary);
+    margin-bottom: 2px;
+  }
+  .u-root {
+    grid-column: 1 / -1;
+  }
+  .u-ro {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .u-ro .u-label {
+    margin: 0;
+  }
+  .u-del {
+    display: flex;
+    justify-content: flex-end;
+  }
 }
 </style>

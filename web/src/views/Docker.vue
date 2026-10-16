@@ -1,75 +1,73 @@
 <template>
   <div>
-    <div class="page-header">
-      <h2>Docker 管理</h2>
-      <div>
-        <el-input v-model="keyword" placeholder="搜索容器或镜像" clearable style="width: 220px; margin-right: 10px" />
-        <el-button @click="openSettings">设置</el-button>
-        <el-button @click="load">刷新</el-button>
-      </div>
-    </div>
-    <el-alert v-if="error" type="error" :title="error" :closable="false" class="err" />
-    <el-card shadow="never">
-      <el-table :data="filtered" v-loading="loading" empty-text="没有容器">
-        <el-table-column label="容器" min-width="180">
-          <template #default="{ row }">
-            <div>{{ row.name }}</div>
-            <div class="meta" v-if="row.project">项目 {{ row.project }}</div>
-          </template>
-        </el-table-column>
-        <el-table-column label="镜像" min-width="220">
-          <template #default="{ row }">
-            <span class="mono small">{{ row.image }}</span>
-            <div v-if="row.update">
-              <el-tag v-if="row.update.error" type="danger" size="small" :title="row.update.error">检查失败</el-tag>
-              <el-tag v-else-if="row.update.hasUpdate" type="warning" size="small">有新版本</el-tag>
-              <el-tag v-else type="success" size="small">已是最新</el-tag>
-            </div>
-          </template>
-        </el-table-column>
-        <el-table-column label="状态" min-width="160">
-          <template #default="{ row }">
-            <el-tag :type="row.state === 'running' ? 'success' : 'info'" size="small">{{ row.state }}</el-tag>
-            <div class="meta">{{ row.status }}</div>
-          </template>
-        </el-table-column>
-        <el-table-column label="端口" min-width="150">
-          <template #default="{ row }">
-            <div v-for="p in row.ports" :key="p" class="mono small">{{ p }}</div>
-          </template>
-        </el-table-column>
-        <el-table-column label="操作" width="300" fixed="right">
-          <template #default="{ row }">
-            <el-button v-if="row.state !== 'running'" link type="primary" @click="act(row, 'start')">启动</el-button>
-            <el-button v-else link type="primary" @click="act(row, 'restart')">重启</el-button>
-            <el-popconfirm v-if="row.state === 'running'" :title="`停止 ${row.name}？`" @confirm="act(row, 'stop')">
-              <template #reference>
-                <el-button link type="danger">停止</el-button>
-              </template>
-            </el-popconfirm>
-            <el-button link type="primary" @click="showLogs(row)">日志</el-button>
-            <el-button link type="primary" :loading="checking[row.id]" @click="check(row)">检查更新</el-button>
-            <el-button v-if="row.update?.hasUpdate" link type="warning" :loading="row.busy || upgrading[row.id]" @click="upgrade(row)">升级</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
-    </el-card>
-    <el-card shadow="never" header="操作日志" class="logs">
-      <LogViewer url="/api/docker/logs" clearable />
-    </el-card>
+    <PageHeader title="Docker" desc="管理本机容器，检查镜像更新并一键升级" :icon="Container">
+      <el-input v-model="keyword" placeholder="搜索容器或镜像" clearable :prefix-icon="Search" class="search" />
+      <el-button :icon="SlidersHorizontal" @click="openSettings">设置</el-button>
+      <el-button :icon="RefreshCw" :loading="loading" @click="load">刷新</el-button>
+    </PageHeader>
 
-    <el-dialog v-model="logsVisible" :title="`${logsName} 日志（最近 300 行）`" width="900px" top="5vh">
+    <el-alert v-if="error" type="error" title="无法连接 Docker" :closable="false" show-icon class="err">
+      <template #default>
+        <div class="err-detail mono">{{ error }}</div>
+        <div>请在「设置」中确认 Docker 地址；Gately 运行在容器中时需挂载 /var/run/docker.sock。</div>
+      </template>
+    </el-alert>
+
+    <div v-loading="loading && !containers.length" class="card-list">
+      <el-empty v-if="!loading && !error && !filtered.length" description="没有容器" />
+      <EntityCard v-for="c in filtered" :key="c.id" :off="c.state !== 'running'">
+        <template #lead>
+          <div class="ct-icon" :class="{ on: c.state === 'running' }"><Box :size="18" /></div>
+        </template>
+        <template #title>
+          <span>{{ c.name }}</span>
+          <el-tag v-if="c.project" size="small" type="info">{{ c.project }}</el-tag>
+        </template>
+        <template #sub>{{ c.status }}</template>
+        <template #status>
+          <StatusBadge v-bind="ctStatus(c)" />
+        </template>
+        <Field label="镜像" mono>
+          {{ c.image }}
+          <div v-if="c.update" class="upd">
+            <StatusBadge v-if="c.update.error" type="error" text="检查失败" :title="c.update.error" />
+            <StatusBadge v-else-if="c.update.hasUpdate" type="warn" text="有新版本" />
+            <StatusBadge v-else type="ok" text="已是最新" />
+          </div>
+        </Field>
+        <Field label="端口" mono>
+          <div v-for="p in c.ports ?? []" :key="p">{{ p }}</div>
+          <span v-if="!(c.ports ?? []).length" class="muted">-</span>
+        </Field>
+        <template #actions>
+          <el-button v-if="c.state !== 'running'" text size="small" type="primary" :icon="Play" @click="act(c, 'start')">启动</el-button>
+          <el-button v-else text size="small" :icon="RotateCw" @click="act(c, 'restart')">重启</el-button>
+          <el-popconfirm v-if="c.state === 'running'" :title="`停止 ${c.name}？`" @confirm="act(c, 'stop')">
+            <template #reference>
+              <el-button text size="small" type="danger" :icon="Square">停止</el-button>
+            </template>
+          </el-popconfirm>
+          <el-button text size="small" :icon="ScrollText" @click="showLogs(c)">日志</el-button>
+          <el-button text size="small" :icon="SearchCheck" :loading="checking[c.id]" @click="check(c)">检查更新</el-button>
+          <el-button v-if="c.update?.hasUpdate" text size="small" type="warning" :icon="ArrowUpCircle" :loading="c.busy || upgrading[c.id]" @click="upgrade(c)">升级</el-button>
+        </template>
+      </EntityCard>
+    </div>
+
+    <LogCard url="/api/docker/logs" title="操作日志" clearable />
+
+    <el-dialog v-model="logsVisible" :title="`${logsName} 日志（最近 300 行）`" width="900px" top="5vh" :fullscreen="isMobile">
       <pre class="container-logs mono">{{ logs }}</pre>
       <template #footer>
-        <el-button @click="refreshLogs">刷新</el-button>
+        <el-button :icon="RefreshCw" @click="refreshLogs">刷新</el-button>
       </template>
     </el-dialog>
 
-    <el-dialog v-model="settingsVisible" title="Docker 设置" width="480px">
-      <el-form label-width="90px">
+    <el-dialog v-model="settingsVisible" title="Docker 设置" width="500px" :fullscreen="isMobile">
+      <el-form label-width="90px" :label-position="labelPosition">
         <el-form-item label="地址">
           <el-input v-model="host" placeholder="unix:///var/run/docker.sock" />
-          <div class="meta">Gately 运行在容器中时需挂载 /var/run/docker.sock</div>
+          <div class="form-help">Gately 运行在容器中时需挂载 /var/run/docker.sock</div>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -83,8 +81,14 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { ArrowUpCircle, Box, Container, Play, RefreshCw, RotateCw, ScrollText, Search, SearchCheck, SlidersHorizontal, Square } from 'lucide-vue-next'
 import { api } from '../api'
-import LogViewer from '../components/LogViewer.vue'
+import PageHeader from '../components/PageHeader.vue'
+import EntityCard from '../components/EntityCard.vue'
+import Field from '../components/Field.vue'
+import StatusBadge, { type StatusType } from '../components/StatusBadge.vue'
+import LogCard from '../components/LogCard.vue'
+import { useFormLayout } from '../composables/useIsMobile'
 
 interface ContainerView {
   id: string
@@ -98,6 +102,7 @@ interface ContainerView {
   update?: { checked: string; hasUpdate: boolean; error?: string }
 }
 
+const { isMobile, labelPosition } = useFormLayout()
 const containers = ref<ContainerView[]>([])
 const loading = ref(false)
 const error = ref('')
@@ -115,6 +120,18 @@ const filtered = computed(() => {
   const k = keyword.value.trim().toLowerCase()
   return k ? containers.value.filter((c) => c.name.toLowerCase().includes(k) || c.image.toLowerCase().includes(k)) : containers.value
 })
+
+function ctStatus(c: ContainerView): { type: StatusType; text: string } {
+  const map: Record<string, { type: StatusType; text: string }> = {
+    running: { type: 'running', text: '运行中' },
+    exited: { type: 'off', text: '已停止' },
+    created: { type: 'off', text: '已创建' },
+    paused: { type: 'warn', text: '已暂停' },
+    restarting: { type: 'pending', text: '重启中' },
+    dead: { type: 'error', text: '异常' },
+  }
+  return map[c.state] ?? { type: 'info', text: c.state }
+}
 
 async function load() {
   loading.value = true
@@ -201,28 +218,53 @@ onMounted(load)
 </script>
 
 <style scoped>
-.meta {
-  font-size: 12px;
-  color: var(--el-text-color-secondary);
-}
-.small {
-  font-size: 12px;
+.search {
+  width: 220px;
 }
 .err {
-  margin-bottom: 14px;
+  margin-bottom: 16px;
+}
+.err-detail {
+  font-size: 12px;
+  word-break: break-all;
+  margin: 2px 0 4px;
+  opacity: 0.85;
+}
+.ct-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--el-fill-color-light);
+  color: var(--el-text-color-secondary);
+}
+.ct-icon.on {
+  background: var(--el-color-primary-light-9);
+  color: var(--el-color-primary);
+}
+.upd {
+  margin-top: 4px;
 }
 .container-logs {
   max-height: 65vh;
   overflow: auto;
-  background: var(--el-fill-color-darker);
+  background: var(--el-fill-color-lighter);
+  border: 1px solid var(--g-border);
   padding: 10px;
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 12px;
   white-space: pre-wrap;
   word-break: break-all;
   margin: 0;
 }
-.logs {
-  margin-top: 16px;
+@media (max-width: 767.98px) {
+  .search {
+    width: 100%;
+  }
+  .container-logs {
+    max-height: none;
+  }
 }
 </style>

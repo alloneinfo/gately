@@ -1,99 +1,91 @@
 <template>
   <div>
-    <div class="page-header">
-      <h2>Web 服务</h2>
-      <div>
-        <el-button @click="openSettings">全局设置</el-button>
-        <el-button type="primary" @click="openListener()">添加监听</el-button>
-      </div>
+    <PageHeader title="Web 服务" desc="按域名把请求反向代理、重定向或提供静态文件，可叠加认证与 WAF" :icon="Server">
+      <el-button :icon="SlidersHorizontal" @click="openSettings">全局设置</el-button>
+      <el-button type="primary" :icon="Plus" @click="openListener()">添加监听</el-button>
+    </PageHeader>
+
+    <ModuleBanner v-if="moduleOff" title="Web 服务模块已停用" desc="模块停用期间所有监听端口都会关闭；启用后各监听与站点按自身开关生效。" :loading="enabling" @enable="enableModule" />
+
+    <div v-loading="loading" class="card-list">
+      <el-empty v-if="!loading && !listeners.length" description="暂无监听，可添加或在「设置 → 备份与迁移」中导入 Lucky 配置" />
+      <EntityCard v-for="l in listeners" :key="l.key" :off="!l.enable || moduleOff">
+        <template #lead>
+          <el-switch :model-value="l.enable" @change="(v: string | number | boolean) => toggleListener(l, Boolean(v))" />
+        </template>
+        <template #title>
+          <span>{{ l.name || '未命名监听' }}</span>
+          <span class="tags">
+            <el-tag size="small" effect="plain" class="mono">{{ l.tls ? 'https' : 'http' }}://{{ l.listenIp || '*' }}:{{ l.port }}</el-tag>
+            <el-tag size="small" type="info">{{ networkText(l.network) }}</el-tag>
+            <el-tag v-if="l.acceptProxyProtocol" size="small" type="info">接收 PROXY</el-tag>
+          </span>
+        </template>
+        <template v-if="l.remark" #sub>{{ l.remark }}</template>
+        <template #status>
+          <StatusBadge v-bind="listenerStatus(l)" />
+        </template>
+        <template #extra>
+          <div class="sites">
+            <div v-for="row in siteRows(l)" :key="row.isDefault ? '__default' : row.index" class="site" :class="{ 'is-off': !row.site.enable }">
+              <div class="site-switch">
+                <el-switch :model-value="row.site.enable" size="small" @change="(v: string | number | boolean) => toggleSite(l, row, Boolean(v))" />
+              </div>
+              <div class="site-main">
+                <div v-if="row.isDefault" class="site-domains"><el-tag size="small" type="warning">默认站点</el-tag> <span class="meta">未匹配的域名</span></div>
+                <div v-else class="site-domains mono">{{ row.site.domains.join(', ') }}</div>
+                <div v-if="row.site.name" class="meta">{{ row.site.name }}</div>
+              </div>
+              <div class="site-target">
+                <el-tag size="small" effect="plain">{{ typeText(row.site.type) }}</el-tag>
+                <span class="mono target">{{ summary(row.site) }}</span>
+              </div>
+              <div class="site-opts">
+                <StatusBadge v-if="!row.site.enable" type="off" text="已停用" />
+                <el-tag v-if="row.site.webAuth" size="small" type="warning">网页认证</el-tag>
+                <el-tag v-else-if="row.site.basicAuth" size="small" type="warning">基本认证</el-tag>
+                <el-tag v-if="row.site.ipMode" size="small" type="info">{{ row.site.ipMode === 'whitelist' ? '白名单' : '黑名单' }}</el-tag>
+                <el-tag v-if="row.site.sendProxyProtocol" size="small" type="info">PROXY v2</el-tag>
+                <el-tag v-if="row.site.insecureSkipVerify" size="small" type="info">跳过证书校验</el-tag>
+                <el-tag v-if="row.site.waf" size="small" :type="wafInstances.some((w) => w.key === row.site.waf) ? 'danger' : 'info'">
+                  WAF{{ wafInstances.some((w) => w.key === row.site.waf) ? '' : '（实例不存在）' }}
+                </el-tag>
+              </div>
+              <div class="site-stats">
+                <template v-if="row.site.key && l.stats?.[row.site.key]">
+                  <span>{{ l.stats[row.site.key].requests }} 请求</span>
+                  <span v-if="l.stats[row.site.key].errors" class="text-danger"> · 错误 {{ l.stats[row.site.key].errors }}</span>
+                </template>
+                <span v-else class="muted">-</span>
+              </div>
+              <div class="site-actions">
+                <el-button text size="small" :icon="Pencil" @click="openSite(l, row)">编辑</el-button>
+                <el-popconfirm v-if="!row.isDefault" title="删除该站点？" @confirm="removeSite(l, row)">
+                  <template #reference>
+                    <el-button text size="small" type="danger" :icon="Trash2" aria-label="删除站点" />
+                  </template>
+                </el-popconfirm>
+              </div>
+            </div>
+            <div v-if="!siteRows(l).length" class="meta empty-sites">还没有站点</div>
+          </div>
+        </template>
+        <template #actions>
+          <el-button text size="small" type="primary" :icon="Plus" @click="openSite(l)">添加站点</el-button>
+          <el-button text size="small" :icon="Pencil" @click="openListener(l)">编辑监听</el-button>
+          <el-popconfirm title="确定删除该监听及其全部站点？" width="240" @confirm="removeListener(l)">
+            <template #reference>
+              <el-button text size="small" type="danger" :icon="Trash2">删除</el-button>
+            </template>
+          </el-popconfirm>
+        </template>
+      </EntityCard>
     </div>
 
-    <el-empty v-if="!loading && !listeners.length" description="暂无监听，可添加或在设置中导入 Lucky 配置" />
+    <LogCard url="/api/webservice/logs" clearable />
 
-    <el-card v-for="l in listeners" :key="l.key" shadow="never" class="listener">
-      <template #header>
-        <div class="head">
-          <div class="title">
-            <el-switch :model-value="l.enable" size="small" @change="(v: string | number | boolean) => toggleListener(l, Boolean(v))" />
-            <strong>{{ l.name || '未命名监听' }}</strong>
-            <el-tag size="small" effect="plain" class="mono">{{ l.tls ? 'https' : 'http' }}://{{ l.listenIp || '*' }}:{{ l.port }}</el-tag>
-            <el-tag size="small" type="info">{{ l.network }}</el-tag>
-            <el-tag v-if="l.acceptProxyProtocol" size="small" type="info">接收 PROXY</el-tag>
-            <el-tag v-if="l.error" type="danger" size="small" :title="l.error">{{ l.error }}</el-tag>
-            <el-tag v-else-if="l.running" type="success" size="small">运行中</el-tag>
-          </div>
-          <div>
-            <el-button size="small" type="primary" plain @click="openSite(l)">添加站点</el-button>
-            <el-button size="small" @click="openListener(l)">编辑监听</el-button>
-            <el-popconfirm title="确定删除该监听及其全部站点？" @confirm="removeListener(l)">
-              <template #reference>
-                <el-button size="small" type="danger" plain>删除</el-button>
-              </template>
-            </el-popconfirm>
-          </div>
-        </div>
-      </template>
-      <el-table :data="siteRows(l)" size="small">
-        <el-table-column label="启用" width="60">
-          <template #default="{ row }">
-            <el-switch :model-value="row.site.enable" size="small" @change="(v: string | number | boolean) => toggleSite(l, row, Boolean(v))" />
-          </template>
-        </el-table-column>
-        <el-table-column label="站点" min-width="200">
-          <template #default="{ row }">
-            <div v-if="row.isDefault"><el-tag size="small" type="warning">默认站点</el-tag> <span class="meta">未匹配的域名</span></div>
-            <template v-else>
-              <div class="mono">{{ row.site.domains.join(', ') }}</div>
-              <div class="meta" v-if="row.site.name">{{ row.site.name }}</div>
-            </template>
-          </template>
-        </el-table-column>
-        <el-table-column label="类型 / 目标" min-width="240">
-          <template #default="{ row }">
-            <el-tag size="small" effect="plain">{{ typeText(row.site.type) }}</el-tag>
-            <span class="mono target">{{ summary(row.site) }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="选项" min-width="180">
-          <template #default="{ row }">
-            <el-tag v-if="row.site.webAuth" size="small" type="warning" class="opt">网页认证</el-tag>
-            <el-tag v-else-if="row.site.basicAuth" size="small" type="warning" class="opt">基本认证</el-tag>
-            <el-tag v-if="row.site.ipMode" size="small" type="info" class="opt">{{ row.site.ipMode === 'whitelist' ? '白名单' : '黑名单' }}</el-tag>
-            <el-tag v-if="row.site.sendProxyProtocol" size="small" type="info" class="opt">PROXY v2</el-tag>
-            <el-tag v-if="row.site.insecureSkipVerify" size="small" type="info" class="opt">跳过证书校验</el-tag>
-            <el-tag v-if="row.site.waf" size="small" :type="wafInstances.some((w) => w.key === row.site.waf) ? 'danger' : 'info'" class="opt">
-              WAF{{ wafInstances.some((w) => w.key === row.site.waf) ? '' : '（实例不存在）' }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column label="请求" width="110">
-          <template #default="{ row }">
-            <template v-if="l.stats[row.site.key]">
-              <div>{{ l.stats[row.site.key].requests }}</div>
-              <div class="meta" v-if="l.stats[row.site.key].errors">错误 {{ l.stats[row.site.key].errors }}</div>
-            </template>
-            <span v-else class="meta">-</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="操作" width="110">
-          <template #default="{ row }">
-            <el-button link type="primary" @click="openSite(l, row)">编辑</el-button>
-            <el-popconfirm v-if="!row.isDefault" title="删除该站点？" @confirm="removeSite(l, row)">
-              <template #reference>
-                <el-button link type="danger">删除</el-button>
-              </template>
-            </el-popconfirm>
-          </template>
-        </el-table-column>
-      </el-table>
-    </el-card>
-
-    <el-card shadow="never" header="日志" class="logs">
-      <LogViewer url="/api/webservice/logs" clearable />
-    </el-card>
-
-    <el-dialog v-model="listenerVisible" :title="editingListener.key ? '编辑监听' : '添加监听'" width="560px">
-      <el-form :model="editingListener" label-width="130px">
+    <el-dialog v-model="listenerVisible" :title="editingListener.key ? '编辑监听' : '添加监听'" width="560px" :fullscreen="isMobile">
+      <el-form :model="editingListener" label-width="130px" :label-position="labelPosition">
         <el-form-item label="名称"><el-input v-model="editingListener.name" /></el-form-item>
         <el-form-item label="网络">
           <el-radio-group v-model="editingListener.network">
@@ -109,7 +101,7 @@
           <span class="help">证书按域名自动从「SSL 证书」中选择</span>
         </el-form-item>
         <el-form-item v-if="editingListener.tls" label="最低 TLS 版本">
-          <el-select v-model="editingListener.minTls" style="width: 120px">
+          <el-select v-model="editingListener.minTls" class="w-120">
             <el-option v-for="v in ['1.0', '1.1', '1.2', '1.3']" :key="v" :label="'TLS ' + v" :value="v" />
           </el-select>
         </el-form-item>
@@ -126,8 +118,8 @@
       </template>
     </el-dialog>
 
-    <el-dialog v-model="siteVisible" :title="siteIsDefault ? '默认站点' : site.key ? '编辑站点' : '添加站点'" width="760px" top="5vh">
-      <el-form :model="site" label-width="130px">
+    <el-dialog v-model="siteVisible" :title="siteIsDefault ? '默认站点' : site.key ? '编辑站点' : '添加站点'" width="760px" top="5vh" :fullscreen="isMobile">
+      <el-form :model="site" label-width="130px" :label-position="labelPosition">
         <el-tabs v-model="siteTab">
           <el-tab-pane label="基本" name="basic">
             <el-form-item v-if="!siteIsDefault" label="域名" required>
@@ -157,7 +149,7 @@
             <template v-if="site.type === 'redirect'">
               <el-form-item label="跳转到" required><el-input v-model="site.redirectTo" placeholder="https://example.com" /></el-form-item>
               <el-form-item label="状态码">
-                <el-select v-model="site.redirectCode" style="width: 120px">
+                <el-select v-model="site.redirectCode" class="w-120">
                   <el-option v-for="c in [301, 302, 307, 308]" :key="c" :label="c" :value="c" />
                 </el-select>
                 <el-checkbox v-model="site.keepPath" class="inline">保留路径与参数</el-checkbox>
@@ -185,7 +177,7 @@
             </el-form-item>
             <el-form-item v-if="site.webAuth" label="第三方登录">
               <el-input v-model="oauthUsersText" type="textarea" :rows="2" class="mono" placeholder="每行一个允许的身份，如 github:octocat、google:me@gmail.com；github:* 表示任意 GitHub 账号" />
-              <div class="help block">提供方需先在「全局设置」中配置</div>
+              <div class="form-help">提供方需先在「全局设置」中配置</div>
             </el-form-item>
             <el-form-item label="IP 访问控制">
               <el-radio-group v-model="site.ipMode">
@@ -198,7 +190,7 @@
               <el-input v-model="ipText" type="textarea" :rows="3" class="mono" placeholder="每行一个，如 192.168.1.0/24" />
             </el-form-item>
             <el-form-item label="WAF 实例">
-              <el-select v-model="site.waf" clearable placeholder="不启用" style="width: 260px">
+              <el-select v-model="site.waf" clearable placeholder="不启用" class="w-260">
                 <el-option v-for="w in wafInstances" :key="w.key" :label="w.name" :value="w.key" />
                 <el-option v-if="site.waf && !wafInstances.some((w) => w.key === site.waf)" :label="`${site.waf}（实例不存在）`" :value="site.waf" />
               </el-select>
@@ -221,8 +213,8 @@
       </template>
     </el-dialog>
 
-    <el-dialog v-model="settingsVisible" title="Web 服务全局设置" width="640px">
-      <el-form v-if="settings" :model="settings" label-width="150px">
+    <el-dialog v-model="settingsVisible" title="Web 服务全局设置" width="640px" :fullscreen="isMobile">
+      <el-form v-if="settings" :model="settings" label-width="150px" :label-position="labelPosition">
         <el-form-item label="启用模块"><el-switch v-model="settings.enable" /></el-form-item>
         <el-form-item label="可信 PROXY 来源">
           <el-input v-model="trustedText" type="textarea" :rows="4" class="mono" placeholder="每行一个 IP 或网段；留空表示不信任任何来源" />
@@ -230,17 +222,17 @@
         <el-divider content-position="left">第三方登录（网页认证使用）</el-divider>
         <el-form-item label="回调地址">
           <el-input v-if="settings" v-model="settings.oauthCallbackBase" placeholder="https://auth.example.com（需由 Gately 的某个监听提供）" />
-          <div class="help block">在 GitHub / Google 中登记的回调地址为：{{ (settings?.oauthCallbackBase || 'https://...').replace(/\/$/, '') }}/__gately_auth/oauth/callback</div>
+          <div class="form-help">在 GitHub / Google 中登记的回调地址为：{{ (settings?.oauthCallbackBase || 'https://...').replace(/\/$/, '') }}/__gately_auth/oauth/callback</div>
         </el-form-item>
         <div v-for="(p, i) in settings?.oauthProviders ?? []" :key="i" class="provider">
           <div class="provider-row">
-            <el-input v-model="p.key" placeholder="标识，如 github" style="width: 120px" />
-            <el-input v-model="p.name" placeholder="显示名" style="width: 120px" />
-            <el-select v-model="p.type" style="width: 120px">
+            <el-input v-model="p.key" placeholder="标识，如 github" class="w-120" />
+            <el-input v-model="p.name" placeholder="显示名" class="w-120" />
+            <el-select v-model="p.type" class="w-120">
               <el-option label="GitHub" value="github" />
               <el-option label="OIDC" value="oidc" />
             </el-select>
-            <el-button link type="danger" @click="settings?.oauthProviders.splice(i, 1)">删除</el-button>
+            <el-button text type="danger" :icon="Trash2" aria-label="删除" @click="settings?.oauthProviders.splice(i, 1)" />
           </div>
           <div class="provider-row">
             <el-input v-model="p.clientId" placeholder="Client ID" />
@@ -248,7 +240,7 @@
           </div>
           <el-input v-if="p.type === 'oidc'" v-model="p.issuer" placeholder="Issuer，如 https://accounts.google.com" />
         </div>
-        <el-button size="small" @click="settings?.oauthProviders.push({ key: '', name: '', type: 'github', clientId: '', clientSecret: '', issuer: '' })">添加第三方登录</el-button>
+        <el-button size="small" :icon="Plus" @click="settings?.oauthProviders.push({ key: '', name: '', type: 'github', clientId: '', clientSecret: '', issuer: '' })">添加第三方登录</el-button>
       </el-form>
       <template #footer>
         <el-button @click="settingsVisible = false">取消</el-button>
@@ -261,8 +253,14 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
+import { Pencil, Plus, Server, SlidersHorizontal, Trash2 } from 'lucide-vue-next'
 import { api } from '../api'
-import LogViewer from '../components/LogViewer.vue'
+import PageHeader from '../components/PageHeader.vue'
+import ModuleBanner from '../components/ModuleBanner.vue'
+import EntityCard from '../components/EntityCard.vue'
+import StatusBadge, { type StatusType } from '../components/StatusBadge.vue'
+import LogCard from '../components/LogCard.vue'
+import { useFormLayout } from '../composables/useIsMobile'
 
 interface Site {
   key?: string
@@ -339,6 +337,11 @@ const siteIsDefault = ref(false)
 let siteOwner: ListenerView | null = null
 let siteIndex = -1
 const settingsVisible = ref(false)
+const { isMobile, labelPosition } = useFormLayout()
+// moduleEnabled 为模块全局开关，undefined 表示尚未加载
+const moduleEnabled = ref<boolean>()
+const moduleOff = computed(() => moduleEnabled.value === false)
+const enabling = ref(false)
 interface OAuthProvider {
   key: string
   name: string
@@ -411,6 +414,27 @@ function emptyListener(): Listener {
     default: { ...emptySite(), enable: false },
     remark: '',
   }
+}
+
+function networkText(n: string) {
+  return ({ tcp: '双栈', tcp4: '仅 IPv4', tcp6: '仅 IPv6' } as Record<string, string>)[n] ?? n
+}
+
+// listenerStatus 计算监听展示状态：停用的监听只显示“已停用”
+function listenerStatus(l: ListenerView): { type: StatusType; text: string; title?: string } {
+  if (moduleOff.value) {
+    return { type: 'off', text: '模块已停用' }
+  }
+  if (!l.enable) {
+    return { type: 'off', text: '已停用' }
+  }
+  if (l.error) {
+    return { type: 'error', text: l.error, title: l.error }
+  }
+  if (l.running) {
+    return { type: 'running', text: '运行中' }
+  }
+  return { type: 'warn', text: '未运行' }
 }
 
 function typeText(t: string) {
@@ -491,8 +515,12 @@ async function toggleListener(l: ListenerView, enable: boolean) {
 }
 
 async function removeListener(l: ListenerView) {
-  await api.del(`/api/webservice/listeners/${l.key}`)
-  await load()
+  try {
+    await api.del(`/api/webservice/listeners/${l.key}`)
+    await load()
+  } catch (e) {
+    ElMessage.error((e as Error).message)
+  }
 }
 
 function openSite(l: ListenerView, row?: SiteRow) {
@@ -556,10 +584,30 @@ async function removeSite(lv: ListenerView, row: SiteRow) {
   }
 }
 
-async function openSettings() {
+async function fetchSettings() {
   const s = await api.get<{ enable: boolean; trustedProxies: string[] | null; oauthCallbackBase: string; oauthProviders: OAuthProvider[] | null }>('/api/webservice/settings')
-  settings.value = { ...s, oauthProviders: s.oauthProviders ?? [] }
+  moduleEnabled.value = s.enable
+  return { ...s, oauthProviders: s.oauthProviders ?? [] }
+}
+
+async function openSettings() {
+  settings.value = await fetchSettings()
   settingsVisible.value = true
+}
+
+// enableModule 在横幅中一键启用模块
+async function enableModule() {
+  enabling.value = true
+  try {
+    const s = await fetchSettings()
+    await api.put('/api/webservice/settings', { ...s, enable: true })
+    ElMessage.success('Web 服务模块已启用')
+    await Promise.all([fetchSettings(), load()])
+  } catch (e) {
+    ElMessage.error((e as Error).message)
+  } finally {
+    enabling.value = false
+  }
 }
 
 async function saveSettings() {
@@ -567,13 +615,14 @@ async function saveSettings() {
     await api.put('/api/webservice/settings', settings.value)
     settingsVisible.value = false
     ElMessage.success('已保存')
-    await load()
+    await Promise.all([fetchSettings(), load()])
   } catch (e) {
     ElMessage.error((e as Error).message)
   }
 }
 
 onMounted(async () => {
+  fetchSettings()
   wafInstances.value = await api.get('/api/waf/instances')
   await load()
   timer = window.setInterval(load, 5000)
@@ -582,59 +631,124 @@ onBeforeUnmount(() => window.clearInterval(timer))
 </script>
 
 <style scoped>
-.listener {
-  margin-bottom: 14px;
+.sites {
+  border: 1px solid var(--g-border);
+  border-radius: 8px;
+  overflow: hidden;
 }
-.head {
-  display: flex;
-  justify-content: space-between;
+.site {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1.5fr) minmax(0, 1.8fr) minmax(0, 1.3fr) 110px auto;
+  gap: 8px 14px;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 8px;
+  padding: 9px 8px 9px 12px;
+  font-size: 13px;
 }
-.title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.site + .site {
+  border-top: 1px solid var(--g-border);
 }
-.meta {
-  font-size: 12px;
-  color: var(--el-text-color-secondary);
+.site.is-off .site-main,
+.site.is-off .site-target,
+.site.is-off .site-stats {
+  opacity: 0.55;
+}
+.site-main,
+.site-target {
+  min-width: 0;
+}
+.site-domains {
+  word-break: break-all;
 }
 .target {
   margin-left: 6px;
   font-size: 12px;
+  word-break: break-all;
 }
-.opt {
-  margin: 2px 4px 2px 0;
+.site-opts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
 }
-.help {
-  margin-left: 10px;
+.site-stats {
   font-size: 12px;
-  color: var(--el-text-color-secondary);
+  white-space: nowrap;
+}
+.site-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+.site-actions :deep(.el-button + .el-button) {
+  margin-left: 0;
+}
+.empty-sites {
+  padding: 10px 12px;
 }
 .inline {
   margin-left: 16px;
 }
-.help.block {
-  display: block;
-  margin-left: 0;
+.w-120 {
+  width: 120px;
+}
+.w-260 {
+  width: 260px;
 }
 .provider {
-  border: 1px solid var(--el-border-color-lighter);
-  border-radius: 6px;
-  padding: 8px;
-  margin-bottom: 8px;
+  border: 1px solid var(--g-border);
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 10px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 .provider-row {
   display: flex;
-  gap: 6px;
+  gap: 8px;
   align-items: center;
 }
-.logs {
-  margin-top: 16px;
+.el-checkbox {
+  white-space: normal;
+  height: auto;
+  min-height: 32px;
+}
+@media (max-width: 767.98px) {
+  .site {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    padding: 10px;
+  }
+  .site-switch {
+    grid-row: 1;
+    grid-column: 1;
+  }
+  .site-main {
+    grid-row: 1;
+    grid-column: 2;
+  }
+  .site-actions {
+    grid-row: 1;
+    grid-column: 3;
+  }
+  .site-target,
+  .site-opts,
+  .site-stats {
+    grid-column: 2 / 4;
+  }
+  .site-opts:empty {
+    display: none;
+  }
+  .w-260 {
+    width: 100%;
+  }
+  .provider-row {
+    flex-wrap: wrap;
+  }
+  .provider-row .el-input,
+  .provider-row .el-select {
+    width: calc(50% - 4px) !important;
+    flex: 1 1 calc(50% - 4px);
+  }
+  .inline {
+    margin-left: 0;
+  }
 }
 </style>

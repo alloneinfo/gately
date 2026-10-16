@@ -1,38 +1,39 @@
 <template>
-  <div class="terminal-page">
-    <el-card shadow="never" class="side">
-      <template #header>
-        <div class="side-head">
-          <span>连接</span>
-          <div>
-            <el-button link @click="openSettings">设置</el-button>
-            <el-button link type="primary" @click="openEditor()">添加</el-button>
-          </div>
-        </div>
-      </template>
+  <div>
+    <PageHeader title="Web 终端" desc="在浏览器中连接 SSH 服务器或本机 Shell" :icon="SquareTerminal">
+      <el-button :icon="SlidersHorizontal" @click="openSettings">设置</el-button>
+      <el-button type="primary" :icon="Plus" @click="openEditor()">添加连接</el-button>
+    </PageHeader>
+    <div class="terminal-page" :class="{ 'has-tabs': tabs.length }">
+    <div class="g-card side">
+      <div class="g-card-head">
+        <div class="g-card-title"><Cable :size="16" />连接</div>
+        <span class="meta">{{ conns.length }} 个</span>
+      </div>
       <el-empty v-if="!conns.length" description="暂无连接" :image-size="60" />
       <div v-for="c in conns" :key="c.key" class="conn" @dblclick="connect(c)">
+        <div class="conn-icon"><component :is="c.type === 'local' ? TerminalIcon : Server" :size="16" /></div>
         <div class="conn-main">
           <div class="conn-name">{{ c.name }}</div>
           <div class="conn-addr mono">{{ c.type === 'local' ? '本机 Shell' : `${c.ssh.username}@${c.ssh.host}:${c.ssh.port}` }}</div>
         </div>
         <div class="conn-ops">
-          <el-button size="small" type="primary" plain @click="connect(c)">连接</el-button>
+          <el-button size="small" type="primary" plain :icon="Play" @click="connect(c)">连接</el-button>
           <el-dropdown trigger="click" @command="(cmd: string) => onCommand(c, cmd)">
-            <el-button size="small" link>更多</el-button>
+            <el-button size="small" text :icon="Ellipsis" aria-label="更多" />
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item command="edit">编辑</el-dropdown-item>
-                <el-dropdown-item v-if="c.type === 'ssh'" command="resetkey">重置主机密钥</el-dropdown-item>
-                <el-dropdown-item command="delete" divided>删除</el-dropdown-item>
+                <el-dropdown-item command="edit" :icon="Pencil">编辑</el-dropdown-item>
+                <el-dropdown-item v-if="c.type === 'ssh'" command="resetkey" :icon="KeyRound">重置主机密钥</el-dropdown-item>
+                <el-dropdown-item command="delete" :icon="Trash2" divided>删除</el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
         </div>
       </div>
-    </el-card>
+    </div>
 
-    <div class="main">
+    <div class="main g-card">
       <el-tabs v-if="tabs.length" v-model="active" type="card" closable class="tabs" @tab-remove="closeTab">
         <el-tab-pane v-for="t in tabs" :key="t.id" :name="t.id" :label="t.title">
           <div class="term-wrap">
@@ -40,11 +41,16 @@
           </div>
         </el-tab-pane>
       </el-tabs>
-      <el-empty v-else description="选择左侧连接开始会话（双击或点击连接）" class="placeholder" />
+      <div v-else class="placeholder">
+        <SquareTerminal :size="40" :stroke-width="1.5" />
+        <div>选择一个连接开始会话</div>
+        <div class="meta">点击「连接」或双击连接项</div>
+      </div>
+    </div>
     </div>
 
-    <el-dialog v-model="editorVisible" :title="editing.key ? '编辑连接' : '添加连接'" width="600px">
-      <el-form :model="editing" label-width="100px">
+    <el-dialog v-model="editorVisible" :title="editing.key ? '编辑连接' : '添加连接'" width="600px" :fullscreen="isMobile">
+      <el-form :model="editing" label-width="100px" :label-position="labelPosition">
         <el-form-item label="名称"><el-input v-model="editing.name" /></el-form-item>
         <el-form-item label="类型">
           <el-radio-group v-model="editing.type">
@@ -88,8 +94,8 @@
       </template>
     </el-dialog>
 
-    <el-dialog v-model="settingsVisible" title="Web 终端设置" width="480px">
-      <el-form v-if="settings" label-width="150px">
+    <el-dialog v-model="settingsVisible" title="Web 终端设置" width="500px" :fullscreen="isMobile">
+      <el-form v-if="settings" label-width="150px" :label-position="labelPosition">
         <el-form-item label="允许本机 Shell">
           <el-switch v-model="settings.allowLocalShell" />
         </el-form-item>
@@ -109,8 +115,11 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { Cable, Ellipsis, KeyRound, Pencil, Play, Plus, Server, SlidersHorizontal, SquareTerminal, Terminal as TerminalIcon, Trash2 } from 'lucide-vue-next'
 import { api } from '../api'
 import TermPane from '../components/TermPane.vue'
+import PageHeader from '../components/PageHeader.vue'
+import { useFormLayout } from '../composables/useIsMobile'
 
 interface Conn {
   key?: string
@@ -128,6 +137,7 @@ interface Tab {
   title: string
 }
 
+const { isMobile, labelPosition } = useFormLayout()
 const conns = ref<(Conn & { key: string })[]>([])
 const tabs = ref<Tab[]>([])
 const active = ref('')
@@ -194,7 +204,11 @@ async function onCommand(c: Conn & { key: string }, cmd: string) {
     ElMessage.success('已重置，下次连接时重新记录主机指纹')
     await load()
   } else if (cmd === 'delete') {
-    await ElMessageBox.confirm(`删除连接 ${c.name}？`, '确认', { type: 'warning' })
+    try {
+      await ElMessageBox.confirm(`删除连接 ${c.name}？`, '确认', { type: 'warning' })
+    } catch {
+      return
+    }
     await api.del(`/api/webterminal/connections/${c.key}`)
     await load()
   }
@@ -222,25 +236,42 @@ onMounted(load)
 <style scoped>
 .terminal-page {
   display: flex;
-  gap: 14px;
-  height: calc(100vh - 100px);
+  gap: 12px;
+  height: calc(100vh - 170px);
+  min-height: 420px;
 }
 .side {
-  width: 280px;
+  width: 300px;
   flex-shrink: 0;
   overflow: auto;
 }
-.side-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.g-card + .g-card {
+  margin-top: 0;
 }
 .conn {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 8px 4px;
-  border-bottom: 1px solid var(--el-border-color-lighter);
+  gap: 10px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--g-border);
+}
+.conn:hover {
+  background: var(--el-fill-color-lighter);
+}
+.conn-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--el-color-primary-light-9);
+  color: var(--el-color-primary);
+  flex-shrink: 0;
+}
+.conn-main {
+  flex: 1;
+  min-width: 0;
 }
 .conn-name {
   font-weight: 500;
@@ -249,10 +280,17 @@ onMounted(load)
 .small {
   font-size: 12px;
   color: var(--el-text-color-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.small {
+  white-space: normal;
+  word-break: break-all;
 }
 .conn-ops {
   display: flex;
-  gap: 4px;
+  gap: 2px;
   align-items: center;
 }
 .main {
@@ -260,25 +298,58 @@ onMounted(load)
   min-width: 0;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+  padding: 8px;
 }
 .tabs {
   flex: 1;
   display: flex;
   flex-direction: column;
+  min-height: 0;
+}
+.tabs :deep(.el-tabs__header) {
+  margin-bottom: 8px;
 }
 .tabs :deep(.el-tabs__content) {
   flex: 1;
+  min-height: 0;
 }
 .tabs :deep(.el-tab-pane) {
   height: 100%;
 }
 .term-wrap {
-  height: calc(100vh - 170px);
+  height: 100%;
+  border-radius: 8px;
+  overflow: hidden;
 }
 .placeholder {
-  margin-top: 120px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--el-text-color-secondary);
 }
 .warn {
   margin-bottom: 14px;
+}
+@media (max-width: 767.98px) {
+  .terminal-page {
+    flex-direction: column;
+    height: auto;
+    min-height: 0;
+  }
+  .side {
+    width: 100%;
+    max-height: none;
+  }
+  .main {
+    height: 260px;
+  }
+  .has-tabs .main {
+    height: calc(100vh - 140px);
+    min-height: 360px;
+  }
 }
 </style>

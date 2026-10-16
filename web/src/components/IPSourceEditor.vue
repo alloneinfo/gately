@@ -91,6 +91,7 @@ async function test() {
 }
 .result {
   margin-left: 12px;
+  word-break: break-all;
   font-size: 13px;
   color: var(--el-color-success);
 }
