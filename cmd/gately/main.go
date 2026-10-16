@@ -14,12 +14,15 @@ import (
 
 	"github.com/wangwanjie/gately/internal/app"
 	"github.com/wangwanjie/gately/internal/module"
+	"github.com/wangwanjie/gately/internal/modules/cloudflared"
 	"github.com/wangwanjie/gately/internal/modules/cron"
 	"github.com/wangwanjie/gately/internal/modules/ddns"
 	"github.com/wangwanjie/gately/internal/modules/docker"
+	"github.com/wangwanjie/gately/internal/modules/frp"
 	"github.com/wangwanjie/gately/internal/modules/portforward"
 	"github.com/wangwanjie/gately/internal/modules/ssl"
 	"github.com/wangwanjie/gately/internal/modules/stun"
+	"github.com/wangwanjie/gately/internal/modules/tailscale"
 	"github.com/wangwanjie/gately/internal/modules/waf"
 	"github.com/wangwanjie/gately/internal/modules/webdav"
 	"github.com/wangwanjie/gately/internal/modules/webservice"
@@ -58,6 +61,9 @@ func main() {
 			portforward.New(),
 			ddns.New(),
 			stun.New(),
+			tailscale.New(),
+			frp.New(),
+			cloudflared.New(),
 			certs,
 			firewall,
 			webservice.New(certs, firewall),

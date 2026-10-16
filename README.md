@@ -19,6 +19,9 @@ Lucky 功能强大，但闭源、二进制加壳，配置文件经过混淆，�
 | STUN 穿透 | TCP/UDP、保活、UPnP/NAT-PMP、内置转发、地址变化时触发 Webhook 与脚本 |
 | 端口转发 | TCP/UDP、IPv4/IPv6、端口段、多目标故障转移、连接数限制、流量统计 |
 | SSL 证书 | ACME DNS-01 自动签发与续期（通配符、EAB）、上传、读取文件、映射到目录并执行脚本 |
+| Tailscale | 托管 tailscaled（用户态网络，容器友好）或接入系统已有守护进程；认证密钥/登录链接、Headscale、子网路由、出口节点、节点列表与 SOCKS5 代理 |
+| frp | frpc 客户端（tcp/udp/http/https/stcp/xtcp 代理，增删即生效）与 frps 服务端（端口白名单、子域名、控制台） |
+| Cloudflare 隧道 | cloudflared 令牌隧道与 trycloudflare 临时隧道，多隧道、自动重启、公网地址展示 |
 | Web 服务 | 按域名反向代理/重定向/静态文件/固定文本；HTTPS；WebSocket；PROXY 协议收发；基本认证、网页认证、GitHub/Google/QQ/OIDC 登录；IP 黑白名单 |
 | WAF 防火墙 | Coraza + OWASP CRS v4，可按文件启用规则、自定义 SecLang、拦截/仅检测 |
 | Docker 管理 | 容器启停、日志、镜像更新检查与一键升级（失败自动回滚） |
@@ -56,6 +59,10 @@ docker logs gately 2>&1 | grep 初始密码
 ```
 
 参数：`-c` 配置目录（也可用环境变量 `GATELY_CONFIG_DIR`），`-listen` 覆盖管理界面监听地址，`-version` 输出版本。
+
+### Tailscale、frp、cloudflared
+
+这三个模块托管官方的外部程序（自动重启、日志汇总到界面），Gately 本体不内置它们，因此始终可以使用上游的最新版本。程序按以下顺序查找：模块设置中填写的路径、`PATH`、配置目录下的 `bin/` 子目录。Docker 部署时把二进制放进挂载的配置目录即可，例如 `./gately-data/bin/frpc`；Tailscale 需要同时提供 `tailscale` 与 `tailscaled`。配置文件中的令牌与密钥以 0600 权限保存，cloudflared 的令牌通过环境变量传递，不会出现在进程列表中。
 
 ### 从 Lucky 迁移
 

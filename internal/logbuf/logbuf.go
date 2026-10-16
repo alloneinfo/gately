@@ -99,6 +99,11 @@ func (b *Buffer) Logger(source string) *Logger {
 	return &Logger{buf: b, source: source}
 }
 
+// Log 以指定级别写入一条已格式化的日志，供托管外部进程的输出使用。
+func (l *Logger) Log(level, msg string) {
+	l.buf.Add(level, l.source, msg)
+}
+
 // Debugf 写入调试日志。
 func (l *Logger) Debugf(format string, args ...any) {
 	l.buf.Add(LevelDebug, l.source, fmt.Sprintf(format, args...))

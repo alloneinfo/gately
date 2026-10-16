@@ -3,11 +3,13 @@ import type { Component } from 'vue'
 import {
   ArrowLeftRight,
   CalendarClock,
+  Cloud,
   Container,
   FolderSync,
   Globe,
   Info,
   LayoutDashboard,
+  Network,
   Power,
   Radar,
   ScrollText,
@@ -16,6 +18,7 @@ import {
   ShieldCheck,
   ShieldHalf,
   SquareTerminal,
+  Waypoints,
 } from 'lucide-vue-next'
 
 export interface NavItem {
@@ -44,6 +47,14 @@ export const navGroups: NavGroup[] = [
       { path: '/portforward', title: '端口转发', icon: ArrowLeftRight, moduleId: 'portforward', desc: 'TCP / UDP 端口转发与负载均衡' },
       { path: '/ddns', title: '动态域名', icon: Globe, moduleId: 'ddns', desc: '公网 IP 变化时自动更新解析' },
       { path: '/stun', title: 'STUN 穿透', icon: Radar, moduleId: 'stun', desc: 'NAT1 网络下无公网 IP 穿透' },
+    ],
+  },
+  {
+    title: '组网与穿透',
+    items: [
+      { path: '/tailscale', title: 'Tailscale', icon: Network, moduleId: 'tailscale', desc: '加入 Tailscale / Headscale 组网' },
+      { path: '/frp', title: 'frp', icon: Waypoints, moduleId: 'frp', desc: 'frpc / frps 内网穿透' },
+      { path: '/cloudflared', title: 'Cloudflare 隧道', icon: Cloud, moduleId: 'cloudflared', desc: '无需公网 IP 发布内网服务' },
     ],
   },
   {
