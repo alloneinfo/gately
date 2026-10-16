@@ -2,7 +2,7 @@
 
 ## 目标
 
-做一个开源、可审计、社区驱动的 Lucky 替代品：覆盖家庭网络/NAS 用户最常用的 DDNS、STUN 穿透、端口转发、反向代理、证书管理，并能一键导入现有 Lucky 配置。
+做一个开源、可审计、社区驱动的 Lucky 替代品：覆盖家庭网络、NAS 与服务器用户最常用的 DDNS、STUN 穿透、端口转发、反向代理、证书管理，并能一键导入现有 Lucky 配置。
 
 设计原则：
 
@@ -52,7 +52,7 @@ docs/analysis/         Lucky 逆向分析结论
 | ✅ **M4 证书** | ACME（lego，DNS-01 复用 M2 Provider）、自动续期、导出到路径、变更脚本 | Pebble 端到端（通配符 + 续签）；真实样本 5/5 张导入且无需重签 |
 | ✅ **M5 Web 服务** | 反向代理、重定向、静态文件、按域名路由、自动 TLS、BasicAuth、IP 过滤；导入 | 覆盖路由、4 种站点、认证、WebSocket、HTTPS、PROXY 协议收发；真实样本 27 个站点导入通过 |
 | ✅ M6 运维 | 网络唤醒、Web 终端（SSH/本机 Shell）、计划任务、管理员两步验证 | WOL 3/3、终端连接 14/14 导入；TOTP 通过 RFC 6238 测试向量 |
-| ✅ M7 生态（部分） | Coraza WAF、GitHub/OIDC 第三方登录、Docker 管理、WebDAV | WAF 用真实攻击载荷测试；Docker 在真实环境只读验证 |
+| ✅ M7 生态（部分） | Coraza WAF、GitHub/Google/QQ/OIDC 第三方登录（站点认证与管理后台登录，可迁移 Lucky 身份表）、Docker 管理、WebDAV | WAF 用真实攻击载荷测试；Docker 在真实环境只读验证 |
 | M8 待定 | frpc、cloudflared、FTP、DLNA、rclone、全局 IP 过滤、HTTP/3、SFTP 文件管理 | 视社区需求排期 |
 
 ## 与 Lucky 的差异（有意为之）

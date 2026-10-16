@@ -444,7 +444,7 @@ func TestConvertLucky(t *testing.T) {
 			{"Enable": true, "Domains": []string{"c.example.com"}, "WebServiceType": "fileServer"},
 		},
 	}})
-	ls, warns, found, err := convertLuckyListeners(raw)
+	ls, warns, found, err := convertLuckyListeners(raw, luckyimport.Options{})
 	if err != nil {
 		t.Fatal(err)
 	}

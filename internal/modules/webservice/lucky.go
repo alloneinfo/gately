@@ -109,7 +109,7 @@ func luckyUsers(ls luckySite) []string {
 }
 
 // convertSite 把 Lucky 子规则转换为站点，返回不支持特性的说明。
-func convertSite(ls luckySite) (Site, []string) {
+func convertSite(ls luckySite, opts luckyimport.Options) (Site, []string) {
 	var notes []string
 	s := Site{
 		Name:               ls.Remark,
@@ -133,11 +133,27 @@ func convertSite(ls luckySite) (Site, []string) {
 	webAuth, _ := ls.OtherParams["WebAuth"].(bool)
 	s.WebAuth = webAuth
 	s.BasicAuth = ls.EnableBasicAuth
+	// 第三方登录：Lucky 中引用身份表里的 Key，按身份表解析为 提供方:标识
+	allThird, _ := ls.OtherParams["AllowAllThirdUsers"].(bool)
+	thirdKeys := stringList(ls.OtherParams["AllowThirdUserList"])
+	if webAuth && (allThird || len(thirdKeys) > 0) {
+		notes = append(notes, "第三方登录")
+		if opts.ResolveThirdParty != nil {
+			var missing int
+			s.OAuthUsers, missing = opts.ResolveThirdParty(thirdKeys, allThird)
+			if missing > 0 {
+				notes = append(notes, "第三方身份缺失")
+			}
+		} else {
+			notes = append(notes, "第三方身份缺失")
+		}
+	}
 	if s.WebAuth || s.BasicAuth {
 		s.Users = luckyUsers(ls)
-		// 只依赖第三方登录、没有站点用户时无法等价迁移；为避免去掉认证后暴露站点，停用该站点
-		if len(s.Users) == 0 {
+		// 没有站点用户、也没有可迁移的第三方身份时无法等价迁移；为避免去掉认证后暴露站点，停用该站点
+		if (s.BasicAuth && len(s.Users) == 0) || (s.WebAuth && len(s.Users) == 0 && len(s.OAuthUsers) == 0) {
 			s.WebAuth, s.BasicAuth, s.Enable = false, false, false
+			s.OAuthUsers = nil
 			notes = append(notes, "认证停用")
 		}
 	}
@@ -159,13 +175,10 @@ func convertSite(ls luckySite) (Site, []string) {
 	if ls.SafeIPMode == "whitelist" {
 		notes = append(notes, "原规则使用全局 IP 白名单，迁移后未启用访问控制，请注意暴露面")
 	}
-	if oauth, _ := ls.OtherParams["AllowAllThirdUsers"].(bool); oauth {
-		notes = append(notes, "第三方登录")
-	}
 	return s, notes
 }
 
-func convertLuckyListeners(raw json.RawMessage) ([]Listener, []string, int, error) {
+func convertLuckyListeners(raw json.RawMessage, opts luckyimport.Options) ([]Listener, []string, int, error) {
 	var src []luckyListener
 	if err := json.Unmarshal(raw, &src); err != nil {
 		return nil, nil, 0, err
@@ -195,7 +208,7 @@ func convertLuckyListeners(raw json.RawMessage) ([]Listener, []string, int, erro
 		// 汇总各站点的不支持特性，避免逐条重复告警
 		featureSites := map[string][]string{}
 		for j, ls := range ll.ProxyList {
-			site, notes := convertSite(ls)
+			site, notes := convertSite(ls, opts)
 			site.WAF = resolveWAF(site.WAF, ll.CorazaWAFInstance)
 			name := site.Name
 			if name == "" && len(site.Domains) > 0 {
@@ -217,7 +230,7 @@ func convertLuckyListeners(raw json.RawMessage) ([]Listener, []string, int, erro
 				l.Sites = append(l.Sites, site)
 			}
 		}
-		if def, notes := convertSite(ll.DefaultProxy); len(def.Targets) > 0 || def.Type != TypeProxy {
+		if def, notes := convertSite(ll.DefaultProxy, opts); len(def.Targets) > 0 || def.Type != TypeProxy {
 			// 默认站点没有单独的启用开关，认证无法迁移时保持停用
 			def.Enable = !slices.Contains(notes, "认证停用")
 			def.WAF = resolveWAF(def.WAF, ll.CorazaWAFInstance)
@@ -236,9 +249,11 @@ func convertLuckyListeners(raw json.RawMessage) ([]Listener, []string, int, erro
 			msg := k
 			switch k {
 			case "第三方登录":
-				msg = "第三方登录原本经过 Lucky 官方中转服务器，迁移后需在全局设置中配置自己的 GitHub/OIDC 应用并填写允许的身份；在此之前仅能使用站点用户登录"
+				msg = "第三方登录原本经过 Lucky 官方中转服务器，允许的身份已迁移；需在「Web 服务 → 全局设置」填写你自己的 OAuth 应用（登录方式标识用 github / google / qq）和回调地址后才能使用，在此之前仅能使用站点用户登录"
+			case "第三方身份缺失":
+				msg = "引用的第三方身份在身份表中找不到，请同时导入 lucky_thirdPartyAuthManager.lkcf（或先导入它再导入反向代理）"
 			case "认证停用":
-				msg = "这些站点只配置了 Lucky 中转的第三方登录、没有站点用户，为避免去掉认证后暴露，已停用（在全局设置中配置自己的 GitHub/OIDC 登录或添加用户后再启用）"
+				msg = "这些站点没有可迁移的认证方式（无站点用户，也没有可解析的第三方身份），为避免去掉认证后暴露，已停用（导入第三方身份表或添加用户后再启用）"
 			}
 			warns = append(warns, fmt.Sprintf("%s: %s：%s", label, msg, strings.Join(featureSites[k], "、")))
 		}
@@ -283,7 +298,7 @@ func (m *Module) ImportLucky(doc luckyimport.Document, opts luckyimport.Options)
 	if !ok {
 		return nil, nil
 	}
-	listeners, warns, found, err := convertLuckyListeners(raw)
+	listeners, warns, found, err := convertLuckyListeners(raw, opts)
 	if err != nil {
 		return nil, err
 	}
@@ -325,4 +340,16 @@ func (m *Module) ImportLucky(doc luckyimport.Document, opts luckyimport.Options)
 		m.restartLocked(l.Key)
 	}
 	return rep, nil
+}
+
+// stringList 把 JSON 解码出的任意值转换为字符串列表。
+func stringList(v any) []string {
+	arr, _ := v.([]any)
+	var out []string
+	for _, x := range arr {
+		if s, ok := x.(string); ok && s != "" {
+			out = append(out, s)
+		}
+	}
+	return out
 }

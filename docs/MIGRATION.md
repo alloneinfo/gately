@@ -74,7 +74,11 @@ Gately 镜像内置 `sh`、`bash` 与 `curl`，常见的通知脚本可以直接
 
 ## 6. 需要人工处理的项目
 
-- **第三方登录**：Lucky 的 GitHub/QQ/Google 登录经过 Lucky 官方中转服务器。Gately 需要你自己申请 OAuth 应用（GitHub OAuth App 或 Google OIDC），在「Web 服务 → 全局设置」中填写，并在站点上配置允许的身份。只配置了第三方登录的站点导入后保持停用。
+- **第三方登录**：Lucky 的 GitHub/QQ/Google 登录经过 Lucky 官方中转服务器，Gately 改为使用你自己申请的 OAuth 应用。导入时请同时选择 `lucky_thirdPartyAuthManager.lkcf`（身份表）、`lucky_reverseproxy.lkcf` 与 `lucky_base.lkcf`：
+  - 站点与管理后台引用的第三方身份会按身份表迁移为允许列表（GitHub 用数字 ID、Google 用 sub、QQ 用 openid，用户名与邮箱写在备注里）。
+  - 管理后台的登录方式在「设置 → 账号与安全 → 第三方登录」，站点的登录方式在「Web 服务 → 全局设置」；填写自己的 Client ID/Secret 与回调地址并启用后才生效，导入不会自动启用。登录方式标识使用 `github`、`google`、`qq`，才能与迁移来的身份对应。
+  - QQ 的 openid 对每个 QQ 互联应用不同：换成自己的应用后，首次登录会被拒绝并提示新的账号标识，把它加入允许列表即可。
+  - 只依赖第三方登录、且找不到可迁移身份的站点导入后保持停用。
 - **ZeroSSL 证书**：沿用 Lucky 中的 EAB 凭据注册新的 ACME 账户；若 ZeroSSL 拒绝，在 ZeroSSL 后台重新生成 EAB。
 - **Lucky 特有的功能**：FRP、Cloudflared、FTP、DLNA、rclone、存储管理、IP 库等暂未实现，导入时会跳过。
 - **Lucky 官方服务器**：Gately 不会连接 `66666.host`、`lucky666.cn` 等地址，迁移后公网 IP 查询使用第三方公共服务（可在 DDNS 任务中修改）。

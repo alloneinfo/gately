@@ -248,6 +248,11 @@ type luckyBase struct {
 	AdminWebListenPort          int
 	TwoFAEnable                 bool
 	EnableOpenToken             bool
+	// 第三方登录管理后台：身份以 Key 引用 lucky_thirdPartyAuthManager 中的身份表
+	EnableThirdAuthLogin    bool
+	AllowAllThirdAuthUsers  bool
+	ThirdAuthLoginUserList  any
+	ThirdAuthLoginSkipTwoFA bool
 }
 
 // importLuckyBase 迁移 Lucky 的基础设置。管理端口、安全入口、管理员账号与两步验证不迁移，避免导入后无法登录。
@@ -309,6 +314,7 @@ func (a *App) importLuckyBase(doc luckyimport.Document, opts luckyimport.Options
 		rep.Warnings = append(rep.Warnings, "设置无效，未导入: "+err.Error())
 		return rep
 	}
+	a.mergeLuckyThirdLogin(&s, lb, opts, rep)
 	var notes []string
 	if lb.AdminWebListenPort > 0 {
 		notes = append(notes, fmt.Sprintf("管理端口（Lucky 为 %d）", lb.AdminWebListenPort))

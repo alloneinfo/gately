@@ -176,7 +176,7 @@
               <el-input v-model="usersText" type="textarea" :rows="3" class="mono" placeholder="每行一个 用户名:密码（密码可为 bcrypt 哈希）" />
             </el-form-item>
             <el-form-item v-if="site.webAuth" label="第三方登录">
-              <el-input v-model="oauthUsersText" type="textarea" :rows="2" class="mono" placeholder="每行一个允许的身份，如 github:octocat、google:me@gmail.com；github:* 表示任意 GitHub 账号" />
+              <el-input v-model="oauthUsersText" type="textarea" :rows="2" class="mono" placeholder="每行一个允许的身份：提供方标识:账号，如 github:octocat、google:me@gmail.com、qq:openid；行尾可用 # 加备注；github:* 表示任意 GitHub 账号" />
               <div class="form-help">提供方需先在「全局设置」中配置</div>
             </el-form-item>
             <el-form-item label="IP 访问控制">
@@ -222,25 +222,9 @@
         <el-divider content-position="left">第三方登录（网页认证使用）</el-divider>
         <el-form-item label="回调地址">
           <el-input v-if="settings" v-model="settings.oauthCallbackBase" placeholder="https://auth.example.com（需由 Gately 的某个监听提供）" />
-          <div class="form-help">在 GitHub / Google 中登记的回调地址为：{{ (settings?.oauthCallbackBase || 'https://...').replace(/\/$/, '') }}/__gately_auth/oauth/callback</div>
+          <div class="form-help">在 GitHub / Google 中登记的回调地址为：{{ (settings?.oauthCallbackBase || 'https://...').replace(/\/$/, '') }}/__gately_auth/oauth/callback（GitHub、Google、QQ 均填此地址）</div>
         </el-form-item>
-        <div v-for="(p, i) in settings?.oauthProviders ?? []" :key="i" class="provider">
-          <div class="provider-row">
-            <el-input v-model="p.key" placeholder="标识，如 github" class="w-120" />
-            <el-input v-model="p.name" placeholder="显示名" class="w-120" />
-            <el-select v-model="p.type" class="w-120">
-              <el-option label="GitHub" value="github" />
-              <el-option label="OIDC" value="oidc" />
-            </el-select>
-            <el-button text type="danger" :icon="Trash2" aria-label="删除" @click="settings?.oauthProviders.splice(i, 1)" />
-          </div>
-          <div class="provider-row">
-            <el-input v-model="p.clientId" placeholder="Client ID" />
-            <el-input v-model="p.clientSecret" type="password" show-password placeholder="Client Secret" />
-          </div>
-          <el-input v-if="p.type === 'oidc'" v-model="p.issuer" placeholder="Issuer，如 https://accounts.google.com" />
-        </div>
-        <el-button size="small" :icon="Plus" @click="settings?.oauthProviders.push({ key: '', name: '', type: 'github', clientId: '', clientSecret: '', issuer: '' })">添加第三方登录</el-button>
+        <OAuthProviders v-if="settings" v-model="settings.oauthProviders" />
       </el-form>
       <template #footer>
         <el-button @click="settingsVisible = false">取消</el-button>
@@ -254,10 +238,11 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Pencil, Plus, Server, SlidersHorizontal, Trash2 } from 'lucide-vue-next'
-import { api } from '../api'
+import { api, type OAuthProvider } from '../api'
 import PageHeader from '../components/PageHeader.vue'
 import ModuleBanner from '../components/ModuleBanner.vue'
 import EntityCard from '../components/EntityCard.vue'
+import OAuthProviders from '../components/OAuthProviders.vue'
 import StatusBadge, { type StatusType } from '../components/StatusBadge.vue'
 import LogCard from '../components/LogCard.vue'
 import { useFormLayout } from '../composables/useIsMobile'
@@ -342,14 +327,6 @@ const { isMobile, labelPosition } = useFormLayout()
 const moduleEnabled = ref<boolean>()
 const moduleOff = computed(() => moduleEnabled.value === false)
 const enabling = ref(false)
-interface OAuthProvider {
-  key: string
-  name: string
-  type: string
-  clientId: string
-  clientSecret: string
-  issuer: string
-}
 const settings = ref<{ enable: boolean; trustedProxies: string[] | null; oauthCallbackBase: string; oauthProviders: OAuthProvider[] }>()
 let timer: number | undefined
 
@@ -692,20 +669,6 @@ onBeforeUnmount(() => window.clearInterval(timer))
 .w-260 {
   width: 260px;
 }
-.provider {
-  border: 1px solid var(--g-border);
-  border-radius: 8px;
-  padding: 10px;
-  margin-bottom: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.provider-row {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
 .el-checkbox {
   white-space: normal;
   height: auto;
@@ -738,14 +701,6 @@ onBeforeUnmount(() => window.clearInterval(timer))
   }
   .w-260 {
     width: 100%;
-  }
-  .provider-row {
-    flex-wrap: wrap;
-  }
-  .provider-row .el-input,
-  .provider-row .el-select {
-    width: calc(50% - 4px) !important;
-    flex: 1 1 calc(50% - 4px);
   }
   .inline {
     margin-left: 0;

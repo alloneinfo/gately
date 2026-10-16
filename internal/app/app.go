@@ -27,6 +27,7 @@ import (
 	"github.com/wangwanjie/gately/internal/luckyimport"
 	"github.com/wangwanjie/gately/internal/module"
 	"github.com/wangwanjie/gately/internal/sysstat"
+	"github.com/wangwanjie/gately/internal/thirdauth"
 	"github.com/wangwanjie/gately/internal/version"
 )
 
@@ -77,6 +78,7 @@ type App struct {
 	hostStats *sysstat.Collector
 	logger    *log.Logger
 	// pendingTOTP 是生成后尚未确认的两步验证密钥
+	loginUsed   usedStates
 	pendingMu   sync.Mutex
 	pendingTOTP string
 }
@@ -146,6 +148,9 @@ func (a *App) Handler() http.Handler {
 
 	mux.HandleFunc("POST /api/login", a.handleLogin)
 	mux.HandleFunc("POST /api/logout", a.handleLogout)
+	mux.HandleFunc("GET /api/login/providers", a.handleThirdProviders)
+	mux.HandleFunc("GET "+thirdauth.StartPath, a.handleThirdStart)
+	mux.HandleFunc("GET "+thirdauth.CallbackPath, a.handleThirdCallback)
 
 	protected.HandleFunc("GET /api/session", a.handleSession)
 	protected.HandleFunc("GET /api/status", a.handleStatus)
@@ -484,9 +489,39 @@ func (a *App) handleLuckyImport(w http.ResponseWriter, r *http.Request) {
 		}
 		entries = append(entries, luckyimport.Entry{Name: fh.Filename, Data: data})
 	}
+	// 先解析全部文件：第三方登录身份表需要排在最前，站点与基础设置才能按 Key 解析出允许的身份
+	type parsedEntry struct {
+		name string
+		doc  luckyimport.Document
+		err  error
+	}
+	var parsed []parsedEntry
 	for _, en := range entries {
-		res := fileResult{File: en.Name, Reports: []*luckyimport.Report{}}
 		doc, err := luckyimport.ParseAny(en.Data)
+		parsed = append(parsed, parsedEntry{name: en.Name, doc: doc, err: err})
+	}
+	ids, ierr := thirdauth.LoadLuckyIdentities(a.store)
+	if ierr != nil {
+		a.sysLogs.Add(logbuf.LevelWarn, "import", "读取已导入的第三方身份表失败: "+ierr.Error())
+	}
+	identityReports := map[int]*luckyimport.Report{}
+	for i, pe := range parsed {
+		if pe.err != nil {
+			continue
+		}
+		if rep := a.importLuckyIdentities(pe.doc, &ids, opts); rep != nil {
+			identityReports[i] = rep
+		}
+	}
+	if len(ids.List) > 0 {
+		opts.ResolveThirdParty = ids.Resolve
+	}
+	for i, pe := range parsed {
+		res := fileResult{File: pe.name, Reports: []*luckyimport.Report{}}
+		doc, err := pe.doc, pe.err
+		if rep, ok := identityReports[i]; ok {
+			res.Reports = append(res.Reports, rep)
+		}
 		if err == nil {
 			for _, e := range a.modules {
 				imp, ok := e.mod.(luckyimport.Importer)

@@ -9,7 +9,7 @@
           <AppLogo :size="40" />
           <span>Gately</span>
         </div>
-        <h1>开源、透明的<br />家庭网络网关</h1>
+        <h1>开源、透明的<br />网络网关工具集</h1>
         <ul>
           <li><ArrowLeftRight :size="16" />端口转发、STUN 穿透与动态域名</li>
           <li><Server :size="16" />反向代理、WAF 与证书自动续签</li>
@@ -22,7 +22,7 @@
           <AppLogo :size="44" />
           <div>
             <div class="mb-name">Gately</div>
-            <div class="mb-sub">开源的家庭网络网关工具集</div>
+            <div class="mb-sub">开源的网络网关工具集，家庭与服务器通用</div>
           </div>
         </div>
 
@@ -41,6 +41,10 @@
               <ArrowRight :size="16" class="submit-icon" />
             </el-button>
           </el-form>
+          <div v-if="providers.length" class="third">
+            <div class="third-title"><span>或使用第三方账号</span></div>
+            <a v-for="p in providers" :key="p.key" :href="p.url" class="third-btn">使用 {{ p.name }} 登录</a>
+          </div>
           <p class="hint"><Info :size="14" />首次启动时初始密码会打印在程序日志中。</p>
         </template>
 
@@ -70,7 +74,7 @@
 </template>
 
 <script setup lang="ts">
-import { nextTick, reactive, ref } from 'vue'
+import { nextTick, onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, type InputInstance } from 'element-plus'
 import { ArrowLeft, ArrowLeftRight, ArrowRight, Info, LockKeyhole, Server, ShieldCheck, UserRound } from 'lucide-vue-next'
@@ -84,6 +88,22 @@ const form = reactive({ username: 'admin', password: '', code: '' })
 const loading = ref(false)
 const needCode = ref(false)
 const codeInput = ref<InputInstance>()
+const providers = ref<{ key: string; name: string; type: string; url: string }[]>([])
+
+// 第三方登录失败时，后端带着原因跳回登录页
+if (typeof route.query.oauthError === 'string') {
+  ElMessage.error(route.query.oauthError)
+  router.replace({ path: '/login' })
+}
+
+onMounted(async () => {
+  try {
+    const r = await api.get<{ providers: typeof providers.value }>('/api/login/providers')
+    providers.value = r.providers ?? []
+  } catch {
+    // 登录方式获取失败不影响密码登录
+  }
+})
 
 async function submit() {
   loading.value = true
@@ -115,6 +135,40 @@ function back() {
 </script>
 
 <style scoped>
+.third {
+  margin-top: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.third-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--g-text-3, #909399);
+  font-size: 12px;
+}
+.third-title::before,
+.third-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--g-border);
+}
+.third-btn {
+  display: block;
+  text-align: center;
+  padding: 9px 12px;
+  border: 1px solid var(--g-border);
+  border-radius: 8px;
+  color: inherit;
+  text-decoration: none;
+  font-size: 14px;
+  transition: background 0.15s;
+}
+.third-btn:hover {
+  background: var(--g-hover, rgba(127, 127, 127, 0.1));
+}
 .login {
   min-height: 100%;
   display: flex;

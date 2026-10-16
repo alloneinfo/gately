@@ -223,7 +223,7 @@ func (m *Module) handlePutSettings(w http.ResponseWriter, r *http.Request) {
 		p := &s.OAuthProviders[i]
 		p.Key = strings.ToLower(strings.TrimSpace(p.Key))
 		crud.KeepSecret(oldSecrets[p.Key], &p.ClientSecret)
-		if err := p.validate(); err != nil {
+		if err := p.Validate(); err != nil {
 			httpx.Error(w, http.StatusBadRequest, "%v", err)
 			return
 		}

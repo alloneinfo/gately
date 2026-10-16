@@ -133,6 +133,9 @@ type Options struct {
 	// KeepEnabled 保留 Lucky 中的启用状态；为 false 时导入的条目一律停用，
 	// 避免与仍在运行的 Lucky 争用端口、或在测试机上把线上域名解析到错误地址
 	KeepEnabled bool
+	// ResolveThirdParty 把 Lucky 第三方登录身份的 Key 解析为 Gately 的允许列表项（提供方key:标识）；
+	// all 为真时返回全部启用的身份，missing 为身份表中找不到的 Key 数量。未导入身份表时为 nil
+	ResolveThirdParty func(keys []string, all bool) (entries []string, missing int)
 }
 
 // Importer 由支持从 Lucky 迁移的模块实现。

@@ -14,6 +14,7 @@ import (
 	"testing"
 
 	"github.com/wangwanjie/gately/internal/logbuf"
+	"github.com/wangwanjie/gately/internal/thirdauth"
 )
 
 // fakeIdP 模拟 GitHub 与 OIDC 身份提供方：授权码直接映射到用户。
@@ -48,9 +49,9 @@ func TestOAuthFlow(t *testing.T) {
 		"carol": {"email": "Carol@Example.com", "email_verified": true, "sub": "123"},
 		"eve":   {"email": "eve@example.com", "email_verified": false, "sub": "999"},
 	})
-	old := githubEndpoints
-	githubEndpoints.Authorize, githubEndpoints.Token, githubEndpoints.User = idp.URL+"/authorize", idp.URL+"/token", idp.URL+"/user"
-	defer func() { githubEndpoints = old }()
+	old := thirdauth.Endpoints
+	thirdauth.Endpoints.GitHub.Authorize, thirdauth.Endpoints.GitHub.Token, thirdauth.Endpoints.GitHub.User = idp.URL+"/authorize", idp.URL+"/token", idp.URL+"/user"
+	defer func() { thirdauth.Endpoints = old }()
 
 	ln, _ := net.Listen("tcp4", "127.0.0.1:0")
 	port := ln.Addr().(*net.TCPAddr).Port
@@ -65,8 +66,8 @@ func TestOAuthFlow(t *testing.T) {
 	auth := newAuthenticator("secret")
 	auth.setOAuth(oauthEnv{
 		providers: map[string]OAuthProvider{
-			"gh":     {Key: "gh", Name: "GitHub", Type: OAuthGitHub, ClientID: "id", ClientSecret: "sec"},
-			"google": {Key: "google", Name: "Google", Type: OAuthOIDC, ClientID: "id", ClientSecret: "sec", Issuer: idp.URL},
+			"gh":     {Key: "gh", Name: "GitHub", Type: thirdauth.TypeGitHub, ClientID: "id", ClientSecret: "sec"},
+			"google": {Key: "google", Name: "Google", Type: thirdauth.TypeOIDC, ClientID: "id", ClientSecret: "sec", Issuer: idp.URL},
 		},
 		callbackBase: fmt.Sprintf("http://auth.test:%d", port),
 	})

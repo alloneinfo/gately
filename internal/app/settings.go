@@ -20,6 +20,7 @@ import (
 	"github.com/wangwanjie/gately/internal/httpx"
 	"github.com/wangwanjie/gately/internal/logbuf"
 	"github.com/wangwanjie/gately/internal/resolver"
+	"github.com/wangwanjie/gately/internal/thirdauth"
 )
 
 // Settings 是全局设置（settings.json）。字段对齐 Lucky 的基础设置中对 Gately 有意义的部分。
@@ -49,6 +50,8 @@ type Settings struct {
 	// GCPercent / MaxProcs 为运行时调优参数，0 表示默认
 	GCPercent int `json:"gcPercent"`
 	MaxProcs  int `json:"maxProcs"`
+	// ThirdLogin 为管理界面的第三方登录（GitHub / Google / QQ / OIDC）
+	ThirdLogin thirdauth.LoginConfig `json:"thirdLogin"`
 }
 
 // 默认值
@@ -76,6 +79,7 @@ func (s *Settings) normalize() {
 		}
 	}
 	s.DNSServers = dns
+	s.ThirdLogin.Normalize()
 }
 
 // Validate 校验设置。
@@ -180,6 +184,7 @@ func (a *App) viewSettings() settingsView {
 	if s.APIToken != "" {
 		s.APIToken = crud.SecretMask
 	}
+	s.ThirdLogin = s.ThirdLogin.Masked()
 	return settingsView{Settings: s, SessionHours: a.auth.TokenTTLHours(), RestartRequired: a.restartPending.Load()}
 }
 
@@ -206,6 +211,12 @@ func (a *App) handlePutSettings(w http.ResponseWriter, r *http.Request) {
 	}
 	a.settingsMu.Lock()
 	old := a.settings
+	// 第三方登录的 Client Secret 在界面上是脱敏的，需要用已保存的值还原后再校验
+	if err := next.ThirdLogin.Validate(old.ThirdLogin); err != nil {
+		a.settingsMu.Unlock()
+		httpx.Error(w, http.StatusBadRequest, "%v", err)
+		return
+	}
 	if next.APIToken == crud.SecretMask {
 		next.APIToken = old.APIToken
 	}

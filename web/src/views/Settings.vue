@@ -107,6 +107,37 @@
 
         <div v-if="form" class="g-card">
           <div class="g-card-head">
+            <div class="g-card-title"><KeyRound :size="16" />第三方登录</div>
+            <StatusBadge :type="login.enable ? 'ok' : 'off'" :text="login.enable ? '已启用' : '未启用'" />
+          </div>
+          <div class="g-card-body">
+            <p class="desc">
+              用 GitHub、Google、QQ 或任意 OIDC 账号登录管理界面。使用你自己申请的 OAuth 应用，登录过程不经过任何中转服务器。
+            </p>
+            <el-form :model="login" label-width="140px" :label-position="labelPosition">
+              <el-form-item label="启用"><el-switch v-model="login.enable" /></el-form-item>
+              <el-form-item label="回调基础地址">
+                <el-input v-model="login.callbackBase" placeholder="https://gately.example.com（浏览器访问管理界面所用的地址，不带路径）" />
+                <div class="form-help">
+                  在各平台登记的回调地址为：<span class="mono">{{ (login.callbackBase || 'https://...').replace(/\/$/, '') }}/api/login/oauth/callback</span>。
+                  登录须从该地址打开管理界面后发起。
+                </div>
+              </el-form-item>
+              <el-form-item label="登录方式"><OAuthProviders v-model="login.providers" /></el-form-item>
+              <el-form-item label="允许的身份">
+                <el-input v-model="allowedText" type="textarea" :rows="4" class="mono" placeholder="每行一个：提供方标识:账号，如 github:15172899 或 google:me@gmail.com；行尾可用 # 加备注" />
+                <div class="form-help">只有列表中的账号可以登录。GitHub 推荐写数字 ID，QQ 首次登录被拒绝时页面会显示可复制的标识。</div>
+              </el-form-item>
+              <el-form-item label="跳过两步验证">
+                <el-switch v-model="login.skipTotp" />
+                <span class="help">已启用两步验证时，开启后第三方登录不再要求验证码；关闭则第三方登录被拒绝</span>
+              </el-form-item>
+            </el-form>
+          </div>
+        </div>
+
+        <div v-if="form" class="g-card">
+          <div class="g-card-head">
             <div class="g-card-title"><Code2 :size="16" />API 令牌</div>
             <StatusBadge :type="form.apiToken ? 'ok' : 'off'" :text="form.apiToken ? '已启用' : '未启用'" />
           </div>
@@ -384,6 +415,7 @@ import {
 } from 'lucide-vue-next'
 import { api, type ImportFileResult, type SystemInfo, type SystemSettings } from '../api'
 import PageHeader from '../components/PageHeader.vue'
+import OAuthProviders from '../components/OAuthProviders.vue'
 import StatusBadge from '../components/StatusBadge.vue'
 import SaveBar from '../components/SaveBar.vue'
 import RestartOverlay from '../components/RestartOverlay.vue'
@@ -414,8 +446,31 @@ const saving = ref(false)
 const dirty = computed(() => !!form.value && JSON.stringify(normalized(form.value)) !== savedJSON.value)
 
 function normalized(s: SystemSettings) {
-  return { ...s, dnsServers: s.dnsServers ?? [], restartRequired: false }
+  return { ...s, dnsServers: s.dnsServers ?? [], thirdLogin: normalizedLogin(s.thirdLogin), restartRequired: false }
 }
+
+// 后端的空列表会序列化为 null，统一成数组便于编辑与比较
+function normalizedLogin(t?: SystemSettings['thirdLogin']): SystemSettings['thirdLogin'] {
+  return {
+    enable: t?.enable ?? false,
+    callbackBase: t?.callbackBase ?? '',
+    providers: t?.providers ?? [],
+    allowed: t?.allowed ?? [],
+    skipTotp: t?.skipTotp ?? false,
+  }
+}
+
+// 第三方登录设置（模板中仅在表单加载后渲染）
+const login = computed(() => form.value?.thirdLogin ?? normalizedLogin())
+
+const allowedText = computed({
+  get: () => login.value.allowed.join('\n'),
+  set: (v: string) => {
+    if (form.value) {
+      form.value.thirdLogin.allowed = v.split('\n').map((s) => s.trim()).filter(Boolean)
+    }
+  },
+})
 
 const dnsServers = computed({
   get: () => form.value?.dnsServers ?? [],
@@ -435,7 +490,7 @@ const entryPath = computed(() => {
 })
 
 function applySettings(s: SystemSettings) {
-  form.value = { ...s, dnsServers: s.dnsServers ?? [] }
+  form.value = { ...s, dnsServers: s.dnsServers ?? [], thirdLogin: normalizedLogin(s.thirdLogin) }
   savedJSON.value = JSON.stringify(normalized(form.value))
 }
 

@@ -8,6 +8,8 @@ import (
 	"net/url"
 	"path/filepath"
 	"strings"
+
+	"github.com/wangwanjie/gately/internal/thirdauth"
 )
 
 // 站点类型
@@ -63,7 +65,7 @@ type Site struct {
 	BasicAuth bool     `json:"basicAuth"`
 	WebAuth   bool     `json:"webAuth"`
 	Users     []string `json:"users"`
-	// OAuthUsers 为允许通过第三方登录访问的身份，格式 提供方key:用户名（或邮箱），提供方key:* 表示该提供方任意用户
+	// OAuthUsers 为允许通过第三方登录访问的身份，格式 提供方key:标识（用户名、邮箱、稳定 ID 均可，行尾可用 " #" 加备注），提供方key:* 表示该提供方任意用户
 	OAuthUsers []string `json:"oauthUsers"`
 
 	IPMode string   `json:"ipMode"`
@@ -271,10 +273,8 @@ func (s *Site) validate(isDefault bool) error {
 	if s.WebAuth && len(s.Users) == 0 && len(s.OAuthUsers) == 0 {
 		return errors.New("启用网页认证时至少添加一个用户或第三方登录身份")
 	}
-	for _, u := range s.OAuthUsers {
-		if p, id, ok := strings.Cut(u, ":"); !ok || p == "" || id == "" {
-			return fmt.Errorf("第三方身份格式应为 提供方:用户名，实际 %q", u)
-		}
+	if err := thirdauth.ValidateEntries(s.OAuthUsers); err != nil {
+		return err
 	}
 	for _, u := range s.Users {
 		if name, pass, ok := strings.Cut(u, ":"); !ok || name == "" || pass == "" {

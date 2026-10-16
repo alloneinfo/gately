@@ -14,6 +14,8 @@ import (
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
+
+	"github.com/wangwanjie/gately/internal/thirdauth"
 )
 
 // 网页认证使用的保留路径与会话时长
@@ -165,6 +167,8 @@ type siteSession struct {
 	Scope string `json:"s"`
 	// Cred 为密码用户的凭据指纹，修改密码后旧会话失效
 	Cred string `json:"c,omitempty"`
+	// Aliases 为第三方登录身份的其他标识，校验允许列表时与 User 一起匹配
+	Aliases []string `json:"a,omitempty"`
 }
 
 // credVersion 返回用户当前凭据的指纹（HMAC，Cookie 中不暴露密码哈希）。
@@ -180,9 +184,9 @@ func (a *authenticator) credVersion(users []string, name string) string {
 }
 
 // issueSession 写出站点会话 Cookie。
-func (a *authenticator) issueSession(w http.ResponseWriter, r *http.Request, s Site, user string) {
+func (a *authenticator) issueSession(w http.ResponseWriter, r *http.Request, s Site, user string, aliases ...string) {
 	exp := time.Now().Add(sessionTTL)
-	sess := siteSession{User: user, Host: hostOnly(r.Host), Scope: s.scope, Cred: a.credVersion(s.Users, user)}
+	sess := siteSession{User: user, Host: hostOnly(r.Host), Scope: s.scope, Cred: a.credVersion(s.Users, user), Aliases: aliases}
 	http.SetCookie(w, &http.Cookie{
 		Name: cookieName(s), Value: a.signBlob("session", sess, sessionTTL),
 		Path: "/", Expires: exp, HttpOnly: true, Secure: r.TLS != nil, SameSite: http.SameSiteLaxMode,
@@ -209,7 +213,7 @@ func (a *authenticator) validCookie(r *http.Request, s Site) bool {
 	}
 	// 第三方登录的会话用户为 提供方:标识，允许列表变化后立即失效
 	if provider, id, ok := strings.Cut(sess.User, ":"); ok && sess.Cred == "" {
-		return identityAllowed(s, provider, id)
+		return identityAllowed(s, thirdauth.Identity{Provider: provider, Primary: id, Aliases: sess.Aliases})
 	}
 	return false
 }
@@ -320,19 +324,9 @@ func (a *authenticator) siteProviders(s Site) []loginProvider {
 	if env.callbackBase == "" {
 		return nil
 	}
-	seen := map[string]bool{}
 	var out []loginProvider
-	for _, u := range s.OAuthUsers {
-		key, _, _ := strings.Cut(u, ":")
-		key = strings.ToLower(key)
-		if p, ok := env.providers[key]; ok && !seen[key] {
-			seen[key] = true
-			name := p.Name
-			if name == "" {
-				name = p.Key
-			}
-			out = append(out, loginProvider{Key: key, Name: name})
-		}
+	for _, p := range thirdauth.Providers(s.OAuthUsers, env.providers) {
+		out = append(out, loginProvider{Key: p.Key, Name: p.DisplayName()})
 	}
 	return out
 }

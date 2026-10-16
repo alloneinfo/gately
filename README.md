@@ -1,6 +1,6 @@
 # Gately
 
-开源、可审计的家庭网络网关工具集，定位为 [Lucky](https://github.com/gdy666/lucky) 的开源替代。DDNS、STUN 穿透、端口转发、反向代理、证书、WAF 等常用能力集成在一个约 22 MB 的单文件中，并可一键导入 Lucky 配置。
+开源、可审计的网络网关工具集，家庭网络、NAS、云主机与各类服务器均可使用，定位为 [Lucky](https://github.com/gdy666/lucky) 的开源替代。DDNS、STUN 穿透、端口转发、反向代理、证书、WAF 等常用能力集成在一个约 22 MB 的单文件中，并可一键导入 Lucky 配置。
 
 ## 为什么做 Gately
 
@@ -19,7 +19,7 @@ Lucky 功能强大，但闭源、二进制加壳，配置文件经过混淆，�
 | STUN 穿透 | TCP/UDP、保活、UPnP/NAT-PMP、内置转发、地址变化时触发 Webhook 与脚本 |
 | 端口转发 | TCP/UDP、IPv4/IPv6、端口段、多目标故障转移、连接数限制、流量统计 |
 | SSL 证书 | ACME DNS-01 自动签发与续期（通配符、EAB）、上传、读取文件、映射到目录并执行脚本 |
-| Web 服务 | 按域名反向代理/重定向/静态文件/固定文本；HTTPS；WebSocket；PROXY 协议收发；基本认证、网页认证、GitHub/OIDC 登录；IP 黑白名单 |
+| Web 服务 | 按域名反向代理/重定向/静态文件/固定文本；HTTPS；WebSocket；PROXY 协议收发；基本认证、网页认证、GitHub/Google/QQ/OIDC 登录；IP 黑白名单 |
 | WAF 防火墙 | Coraza + OWASP CRS v4，可按文件启用规则、自定义 SecLang、拦截/仅检测 |
 | Docker 管理 | 容器启停、日志、镜像更新检查与一键升级（失败自动回滚） |
 | Web 终端 | SSH（主机密钥首次信任）、本机 Shell（默认关闭） |

@@ -125,6 +125,25 @@ export interface ImportFileResult {
 }
 
 // SystemSettings 对应 GET/PUT /api/system/settings。
+// OAuthProvider 是第三方登录方式（Web 服务站点与管理界面共用）。
+export interface OAuthProvider {
+  key: string
+  name: string
+  type: string
+  clientId: string
+  clientSecret: string
+  issuer: string
+}
+
+// ThirdLogin 是管理界面的第三方登录设置。
+export interface ThirdLogin {
+  enable: boolean
+  callbackBase: string
+  providers: OAuthProvider[]
+  allowed: string[]
+  skipTotp: boolean
+}
+
 export interface SystemSettings {
   listen: string
   httpsListen: string
@@ -140,6 +159,7 @@ export interface SystemSettings {
   logLines: number
   gcPercent: number
   maxProcs: number
+  thirdLogin: ThirdLogin
   sessionHours: number
   restartRequired: boolean
 }

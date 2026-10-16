@@ -129,7 +129,8 @@ func (l *listenerRunner) start(certs CertSource, trusted []string) error {
 		BaseContext:       func(net.Listener) context.Context { return baseCtx },
 		ReadHeaderTimeout: 30 * time.Second,
 		IdleTimeout:       120 * time.Second,
-		ErrorLog:          nil,
+		// net/http 内部错误（TLS 握手失败、缺少证书等）写入本监听器的运行日志
+		ErrorLog: l.log.ServerErrorLog(),
 	}
 	if l.cfg.TLS {
 		if certs == nil {

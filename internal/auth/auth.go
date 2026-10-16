@@ -213,6 +213,15 @@ func (m *Manager) Login(ip, username, password string, code ...string) (string, 
 	return m.sign(acc, exp), exp, nil
 }
 
+// Issue 为已通过其他方式（如第三方登录）验证的管理员直接签发会话令牌。
+func (m *Manager) Issue() (string, time.Time) {
+	m.mu.RLock()
+	acc := m.acc
+	m.mu.RUnlock()
+	exp := m.now().Add(time.Duration(acc.TokenTTLHours) * time.Hour)
+	return m.sign(acc, exp), exp
+}
+
 // checkPassword 在全局并发上限内执行 bcrypt 比较。
 func checkPassword(hash, password string) error {
 	bcryptSem <- struct{}{}
