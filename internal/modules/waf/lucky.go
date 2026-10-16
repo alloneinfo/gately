@@ -22,7 +22,7 @@ type luckyCoraza struct {
 }
 
 // ImportLucky 实现 luckyimport.Importer。沿用 Lucky 的实例 key，使 Web 服务站点的引用保持有效。
-func (m *Module) ImportLucky(doc luckyimport.Document, dryRun bool) (*luckyimport.Report, error) {
+func (m *Module) ImportLucky(doc luckyimport.Document, opts luckyimport.Options) (*luckyimport.Report, error) {
 	raw, ok := doc["CorazaList"]
 	if !ok {
 		return nil, nil
@@ -48,10 +48,6 @@ func (m *Module) ImportLucky(doc luckyimport.Document, dryRun bool) (*luckyimpor
 		}
 		out = append(out, in)
 	}
-	rep.Imported = len(out)
-	if dryRun {
-		return rep, nil
-	}
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	old := m.cfg.Instances
@@ -59,14 +55,20 @@ func (m *Module) ImportLucky(doc luckyimport.Document, dryRun bool) (*luckyimpor
 	for _, in := range m.cfg.Instances {
 		existing[in.Key] = true
 	}
+	var fresh []Instance
 	for _, in := range out {
 		if existing[in.Key] {
-			rep.Warnings = append(rep.Warnings, in.Name+": 已存在相同 key 的实例，跳过")
-			rep.Imported--
+			rep.Warnings = append(rep.Warnings, luckyimport.Skipped(in.Name))
 			continue
 		}
-		m.cfg.Instances = append(m.cfg.Instances, in)
+		// WAF 实例只在被站点引用时生效，保留原启用状态
+		fresh = append(fresh, in)
 	}
+	rep.Imported = len(fresh)
+	if opts.DryRun {
+		return rep, nil
+	}
+	m.cfg.Instances = append(m.cfg.Instances, fresh...)
 	if err := m.saveLocked(); err != nil {
 		m.cfg.Instances = old
 		return nil, err

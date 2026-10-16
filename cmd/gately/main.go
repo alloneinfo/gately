@@ -53,6 +53,7 @@ func main() {
 		ConfigDir: *configDir,
 		Listen:    *listen,
 		Web:       web.FS(),
+		Certs:     certs,
 		Modules: []module.Module{
 			portforward.New(),
 			ddns.New(),

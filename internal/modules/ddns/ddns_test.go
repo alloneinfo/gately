@@ -351,7 +351,7 @@ func TestConvertLucky(t *testing.T) {
 		t.Fatalf("found=%d imported=%d warns=%v", found, len(tasks), warns)
 	}
 	a := tasks[0]
-	if a.Enable || a.Interval != 36 || len(a.IPv4.URLs) != 1 || a.IPv4.URLs[0] != "https://4.ipw.cn" {
+	if !a.Enable || a.Interval != 36 || len(a.IPv4.URLs) != 1 || a.IPv4.URLs[0] != "https://4.ipw.cn" {
 		t.Fatalf("任务 1 映射错误: %+v", a)
 	}
 	if a.Records[0].Sub != "www" || a.Records[0].Value != VarIPv4 || !a.Webhook.Enable || a.Webhook.SuccessContent[0] != "ok" {
@@ -365,7 +365,7 @@ func TestConvertLucky(t *testing.T) {
 		t.Fatalf("网卡来源映射错误: %+v", b.IPv6)
 	}
 	joined := strings.Join(warns, "\n")
-	for _, want := range []string{"Lucky 官方服务器", "按序号", `"west"`, "默认停用"} {
+	for _, want := range []string{"Lucky 官方服务器", "按序号", `"west"`} {
 		if !strings.Contains(joined, want) {
 			t.Errorf("缺少告警 %q:\n%s", want, joined)
 		}
@@ -387,7 +387,7 @@ func TestImportRealSample(t *testing.T) {
 		t.Fatal(err)
 	}
 	m := newTestModule(t)
-	rep, err := m.ImportLucky(doc, true)
+	rep, err := m.ImportLucky(doc, luckyimport.Options{DryRun: true})
 	if err != nil {
 		t.Fatal(err)
 	}

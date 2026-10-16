@@ -452,7 +452,7 @@ func TestConvertLucky(t *testing.T) {
 		t.Fatalf("found=%d imported=%d %v", found, len(ls), warns)
 	}
 	l := ls[0]
-	if l.Enable || l.Network != "tcp6" || !l.TLS || l.MinTLS != "1.1" || len(l.Sites) != 2 || !l.Default.Enable || l.Default.Targets[0] != "http://192.168.1.8:8898" {
+	if !l.Enable || l.Network != "tcp6" || !l.TLS || l.MinTLS != "1.1" || len(l.Sites) != 2 || !l.Default.Enable || l.Default.Targets[0] != "http://192.168.1.8:8898" {
 		t.Fatalf("监听器映射错误: %+v", l)
 	}
 	a, b := l.Sites[0], l.Sites[1]
@@ -466,7 +466,7 @@ func TestConvertLucky(t *testing.T) {
 	if a.WAF != "main" {
 		t.Fatalf("应保留 WAF 引用: %q", a.WAF)
 	}
-	for _, w := range []string{"HTTP/3", "fileServer", "WAF", "第三方登录", "默认停用"} {
+	for _, w := range []string{"HTTP/3", "fileServer", "WAF", "第三方登录"} {
 		if !strings.Contains(joined, w) {
 			t.Errorf("缺少告警 %q:\n%s", w, joined)
 		}
@@ -492,7 +492,7 @@ func TestImportRealSample(t *testing.T) {
 	if err := m.Init(module.Env{Store: st, Logs: logbuf.New(10, log.New(io.Discard, "", 0))}); err != nil {
 		t.Fatal(err)
 	}
-	rep, err := m.ImportLucky(doc, false)
+	rep, err := m.ImportLucky(doc, luckyimport.Options{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -517,7 +517,7 @@ func TestWAFIntegration(t *testing.T) {
 	// 通过导入接口创建与 Lucky 相同 key 的实例
 	raw, _ := json.Marshal([]map[string]any{{"Key": "k1", "Name": "waf-main", "Enable": true, "InboundScoreThreshold": 6, "OutboundScoreThreshold": 4,
 		"CorazaWAFConfigList": []map[string]any{{"Enable": true, "Type": "OWASPCoreRuleset", "Param": "REQUEST-930-APPLICATION-ATTACK-LFI.conf"}}}})
-	if _, err := fw.ImportLucky(luckyimport.Document{"CorazaList": raw}, false); err != nil {
+	if _, err := fw.ImportLucky(luckyimport.Document{"CorazaList": raw}, luckyimport.Options{}); err != nil {
 		t.Fatal(err)
 	}
 	l := Listener{Sites: []Site{

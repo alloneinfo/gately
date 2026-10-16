@@ -7,12 +7,13 @@ import (
 )
 
 // ImportLucky 实现 luckyimport.Importer，迁移监听参数与用户（导入后保持停用）。
-func (m *Module) ImportLucky(doc luckyimport.Document, dryRun bool) (*luckyimport.Report, error) {
+func (m *Module) ImportLucky(doc luckyimport.Document, opts luckyimport.Options) (*luckyimport.Report, error) {
 	raw, ok := doc["WebDavConf"]
 	if !ok {
 		return nil, nil
 	}
 	var src struct {
+		Enable     bool
 		ListenIP   string
 		ListenPort int
 		TLSEnable  bool
@@ -26,7 +27,7 @@ func (m *Module) ImportLucky(doc luckyimport.Document, dryRun bool) (*luckyimpor
 	if err := json.Unmarshal(raw, &src); err != nil {
 		return nil, err
 	}
-	s := Settings{Enable: false, ListenIP: src.ListenIP, Port: src.ListenPort, TLS: src.TLSEnable}
+	s := Settings{Enable: src.Enable && opts.KeepEnabled, ListenIP: src.ListenIP, Port: src.ListenPort, TLS: src.TLSEnable}
 	for _, u := range src.Users {
 		s.Users = append(s.Users, User{Name: u.UserName, Password: u.Password, Root: u.Path, ReadOnly: u.ReadOnly})
 	}
@@ -36,8 +37,10 @@ func (m *Module) ImportLucky(doc luckyimport.Document, dryRun bool) (*luckyimpor
 		return rep, nil
 	}
 	rep.Imported = 1
-	rep.Warnings = append(rep.Warnings, "WebDAV 设置已导入并保持停用")
-	if dryRun {
+	if !s.Enable {
+		rep.Warnings = append(rep.Warnings, "WebDAV 设置已导入并保持停用")
+	}
+	if opts.DryRun {
 		return rep, nil
 	}
 	m.mu.Lock()
@@ -46,5 +49,6 @@ func (m *Module) ImportLucky(doc luckyimport.Document, dryRun bool) (*luckyimpor
 		return nil, err
 	}
 	m.settings = s
+	m.restartLocked()
 	return rep, nil
 }

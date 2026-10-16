@@ -66,15 +66,19 @@ func (s *Store) Load(name string, v any) (bool, error) {
 
 // Save 将 v 以缩进 JSON 原子写入。
 func (s *Store) Save(name string, v any) error {
-	p, err := s.path(name)
-	if err != nil {
-		return err
-	}
 	data, err := json.MarshalIndent(v, "", "  ")
 	if err != nil {
 		return err
 	}
-	data = append(data, '\n')
+	return s.WriteRaw(name, append(data, '\n'))
+}
+
+// WriteRaw 原子写入已序列化的配置内容（用于从备份恢复）。
+func (s *Store) WriteRaw(name string, data []byte) error {
+	p, err := s.path(name)
+	if err != nil {
+		return err
+	}
 
 	s.mu.Lock()
 	defer s.mu.Unlock()

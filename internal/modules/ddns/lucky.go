@@ -227,18 +227,13 @@ func convertLuckyTasks(raw json.RawMessage) ([]Task, []string, int, error) {
 			warn("跳过，" + err.Error())
 			continue
 		}
-		// 导入后一律停用：避免在测试机上运行时把线上域名解析到错误的地址
-		t.Enable = false
 		out = append(out, t)
-	}
-	if len(out) > 0 {
-		warns = append(warns, "导入的任务默认停用，请确认 Gately 运行在目标设备上后再逐个启用")
 	}
 	return out, warns, len(src), nil
 }
 
 // ImportLucky 实现 luckyimport.Importer。
-func (m *Module) ImportLucky(doc luckyimport.Document, dryRun bool) (*luckyimport.Report, error) {
+func (m *Module) ImportLucky(doc luckyimport.Document, opts luckyimport.Options) (*luckyimport.Report, error) {
 	raw, ok := doc["DDNSTaskList"]
 	if !ok {
 		return nil, nil
@@ -247,14 +242,33 @@ func (m *Module) ImportLucky(doc luckyimport.Document, dryRun bool) (*luckyimpor
 	if err != nil {
 		return nil, err
 	}
-	rep := &luckyimport.Report{Module: ID, Title: m.Title(), Found: found, Imported: len(tasks), Warnings: warns}
-	if dryRun {
-		return rep, nil
-	}
+	rep := &luckyimport.Report{Module: ID, Title: m.Title(), Found: found, Warnings: warns}
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	old := m.cfg.Tasks
+	existing := map[string]bool{}
+	for _, t := range m.cfg.Tasks {
+		existing[t.Name] = true
+	}
+	var fresh []Task
 	for _, t := range tasks {
+		if existing[t.Name] {
+			rep.Warnings = append(rep.Warnings, luckyimport.Skipped(t.Name))
+			continue
+		}
+		if !opts.KeepEnabled {
+			t.Enable = false
+		}
+		fresh = append(fresh, t)
+	}
+	rep.Imported = len(fresh)
+	if !opts.KeepEnabled && rep.Imported > 0 {
+		rep.Warnings = append(rep.Warnings, "导入的任务默认停用，请确认 Gately 运行在目标设备上后再逐个启用")
+	}
+	if opts.DryRun {
+		return rep, nil
+	}
+	old := m.cfg.Tasks
+	for _, t := range fresh {
 		t.Key = crud.NewKey()
 		m.cfg.Tasks = append(m.cfg.Tasks, t)
 	}

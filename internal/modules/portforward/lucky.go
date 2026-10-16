@@ -74,18 +74,13 @@ func convertLuckyRules(raw json.RawMessage) ([]Rule, []string, error) {
 			warnings = append(warnings, label+": 跳过，"+err.Error())
 			continue
 		}
-		// 导入后一律停用：避免与仍在运行的 Lucky 争用端口，或在测试机上意外开放端口
-		rule.Enable = false
 		out = append(out, rule)
-	}
-	if len(out) > 0 {
-		warnings = append(warnings, "导入的规则默认停用：请先停止 Lucky 中对应的规则，再在 Gately 中启用")
 	}
 	return out, warnings, nil
 }
 
 // ImportLucky 实现 luckyimport.Importer。
-func (m *Module) ImportLucky(doc luckyimport.Document, dryRun bool) (*luckyimport.Report, error) {
+func (m *Module) ImportLucky(doc luckyimport.Document, opts luckyimport.Options) (*luckyimport.Report, error) {
 	raw, ok := doc["PortForwardsRuleList"]
 	if !ok {
 		return nil, nil
@@ -97,11 +92,31 @@ func (m *Module) ImportLucky(doc luckyimport.Document, dryRun bool) (*luckyimpor
 	var total []json.RawMessage
 	_ = json.Unmarshal(raw, &total)
 	rep := &luckyimport.Report{Module: ID, Title: m.Title(), Found: len(total), Warnings: warnings}
-	if dryRun {
-		rep.Imported = len(rules)
+	m.mu.Lock()
+	existing := map[string]bool{}
+	for _, r := range m.cfg.Rules {
+		existing[r.Name] = true
+	}
+	m.mu.Unlock()
+	var fresh []Rule
+	for _, r := range rules {
+		if existing[r.Name] {
+			rep.Warnings = append(rep.Warnings, luckyimport.Skipped(r.Name))
+			continue
+		}
+		if !opts.KeepEnabled {
+			r.Enable = false
+		}
+		fresh = append(fresh, r)
+	}
+	rep.Imported = len(fresh)
+	if !opts.KeepEnabled && rep.Imported > 0 {
+		rep.Warnings = append(rep.Warnings, "导入的规则默认停用：请先停止 Lucky 中对应的规则，再在 Gately 中启用")
+	}
+	if opts.DryRun {
 		return rep, nil
 	}
-	n, err := m.ImportRules(rules)
+	n, err := m.ImportRules(fresh)
 	if err != nil {
 		return nil, err
 	}

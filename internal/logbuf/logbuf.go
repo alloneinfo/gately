@@ -118,3 +118,21 @@ func (l *Logger) Warnf(format string, args ...any) {
 func (l *Logger) Errorf(format string, args ...any) {
 	l.buf.Add(LevelError, l.source, fmt.Sprintf(format, args...))
 }
+
+// Resize 修改缓冲容量，保留最新的日志。
+func (b *Buffer) Resize(size int) {
+	if size <= 0 {
+		return
+	}
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	if size == len(b.entries) {
+		return
+	}
+	keep := min(b.count, size)
+	next := make([]Entry, size)
+	for i := 0; i < keep; i++ {
+		next[i] = b.entries[(b.start+b.count-keep+i)%len(b.entries)]
+	}
+	b.entries, b.start, b.count = next, 0, keep
+}

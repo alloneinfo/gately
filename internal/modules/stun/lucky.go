@@ -108,7 +108,7 @@ func convertLuckyRules(raw json.RawMessage) ([]Rule, []string, int, error) {
 		}
 		r := Rule{
 			Name:                lr.Name,
-			Enable:              false,
+			Enable:              lr.Enable,
 			Protocol:            proto,
 			LocalPort:           lr.ListenPort,
 			UseGlobalServers:    lr.UseGlobalStunServerList,
@@ -166,14 +166,11 @@ func convertLuckyRules(raw json.RawMessage) ([]Rule, []string, int, error) {
 		warns = append(warns, fmt.Sprintf("%d 条规则的脚本引用了 Lucky 容器内路径 /etc/lucky/（%s），Docker 部署时请把脚本目录挂载到相同路径",
 			len(luckyPathRules), strings.Join(luckyPathRules, "、")))
 	}
-	if len(out) > 0 {
-		warns = append(warns, "导入的规则默认停用：请先停止 Lucky 的同名规则，再在 Gately 中启用，避免端口与 UPnP 映射冲突")
-	}
 	return out, warns, len(src), nil
 }
 
 // ImportLucky 实现 luckyimport.Importer。
-func (m *Module) ImportLucky(doc luckyimport.Document, dryRun bool) (*luckyimport.Report, error) {
+func (m *Module) ImportLucky(doc luckyimport.Document, opts luckyimport.Options) (*luckyimport.Report, error) {
 	raw, ok := doc["StunRuleList"]
 	if !ok {
 		return nil, nil
@@ -186,12 +183,32 @@ func (m *Module) ImportLucky(doc luckyimport.Document, dryRun bool) (*luckyimpor
 	if c, ok := doc["StunConfigure"]; ok {
 		_ = json.Unmarshal(c, &gc)
 	}
-	rep := &luckyimport.Report{Module: ID, Title: m.Title(), Found: found, Imported: len(rules), Warnings: warns}
-	if dryRun {
-		return rep, nil
-	}
+	rep := &luckyimport.Report{Module: ID, Title: m.Title(), Found: found, Warnings: warns}
 	m.mu.Lock()
 	defer m.mu.Unlock()
+	existing := map[string]bool{}
+	for _, r := range m.cfg.Rules {
+		existing[r.Name] = true
+	}
+	var fresh []Rule
+	for _, r := range rules {
+		if existing[r.Name] {
+			rep.Warnings = append(rep.Warnings, luckyimport.Skipped(r.Name))
+			continue
+		}
+		if !opts.KeepEnabled {
+			r.Enable = false
+		}
+		fresh = append(fresh, r)
+	}
+	rules = fresh
+	rep.Imported = len(rules)
+	if !opts.KeepEnabled && rep.Imported > 0 {
+		rep.Warnings = append(rep.Warnings, "导入的规则默认停用：请先停止 Lucky 的同名规则，再在 Gately 中启用，避免端口与 UPnP 映射冲突")
+	}
+	if opts.DryRun {
+		return rep, nil
+	}
 	oldRules, oldSettings := m.cfg.Rules, m.cfg.Settings
 	// 全局 STUN 服务器列表与全局 Webhook 一并迁移
 	if len(gc.GlobalStunServerList) > 0 {
@@ -209,6 +226,9 @@ func (m *Module) ImportLucky(doc luckyimport.Document, dryRun bool) (*luckyimpor
 	if err := m.saveLocked(); err != nil {
 		m.cfg.Rules, m.cfg.Settings = oldRules, oldSettings
 		return nil, err
+	}
+	for _, r := range m.cfg.Rules[len(oldRules):] {
+		m.restartLocked(r.Key)
 	}
 	return rep, nil
 }

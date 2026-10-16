@@ -3,18 +3,21 @@ package app
 
 import (
 	"context"
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"io"
 	"io/fs"
 	"log"
 	"mime/multipart"
+	"net"
 	"net/http"
 	"os"
 	"runtime"
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/wangwanjie/gately/internal/auth"
@@ -35,11 +38,6 @@ const (
 // DefaultListen 是管理界面默认监听地址，避开 Lucky 的 16601 以便迁移期间并存。
 const DefaultListen = ":16680"
 
-// Settings 是程序级基础配置。
-type Settings struct {
-	Listen string `json:"listen"`
-}
-
 // Options 是启动参数。
 type Options struct {
 	ConfigDir string
@@ -49,6 +47,8 @@ type Options struct {
 	Web fs.FS
 	// Modules 是要启用的功能模块
 	Modules []module.Module
+	// Certs 为管理界面 HTTPS 提供证书，可为 nil
+	Certs CertProvider
 }
 
 type moduleEntry struct {
@@ -58,14 +58,21 @@ type moduleEntry struct {
 
 // App 是一个运行中的 Gately 实例。
 type App struct {
-	opts      Options
-	store     *config.Store
-	settings  Settings
-	auth      *auth.Manager
-	sysLogs   *logbuf.Buffer
-	modules   []*moduleEntry
-	startTime time.Time
-	logger    *log.Logger
+	opts       Options
+	store      *config.Store
+	settingsMu sync.RWMutex
+	settings   Settings
+	// fileListen 为配置文件中的监听地址（命令行 -listen 覆盖时用于回写）
+	fileListen string
+	// restartPending 表示有设置需要重启后生效；httpsReady 表示 HTTPS 管理服务已启动
+	restartPending atomic.Bool
+	httpsReady     atomic.Bool
+	restartCh      chan struct{}
+	auth           *auth.Manager
+	sysLogs        *logbuf.Buffer
+	modules        []*moduleEntry
+	startTime      time.Time
+	logger         *log.Logger
 	// pendingTOTP 是生成后尚未确认的两步验证密钥
 	pendingMu   sync.Mutex
 	pendingTOTP string
@@ -82,13 +89,16 @@ func New(opts Options) (*App, error) {
 		opts:      opts,
 		store:     store,
 		settings:  Settings{Listen: DefaultListen},
-		sysLogs:   logbuf.New(500, logger),
+		sysLogs:   logbuf.New(defaultLogLines, logger),
 		startTime: time.Now(),
 		logger:    logger,
+		restartCh: make(chan struct{}, 1),
 	}
 	if _, err := store.Load(settingsName, &a.settings); err != nil {
 		return nil, err
 	}
+	a.settings.normalize()
+	a.fileListen = a.settings.Listen
 	if opts.Listen != "" {
 		a.settings.Listen = opts.Listen
 	}
@@ -115,12 +125,13 @@ func New(opts Options) (*App, error) {
 			return nil, fmt.Errorf("模块 ID 冲突: %s", m.ID())
 		}
 		seen[m.ID()] = true
-		entry := &moduleEntry{mod: m, logs: logbuf.New(2000, logger)}
+		entry := &moduleEntry{mod: m, logs: logbuf.New(defaultLogLines, logger)}
 		if err := m.Init(module.Env{Store: store, Logs: entry.logs}); err != nil {
 			return nil, fmt.Errorf("模块 %s 初始化失败: %w", m.ID(), err)
 		}
 		a.modules = append(a.modules, entry)
 	}
+	a.applyRuntime()
 	return a, nil
 }
 
@@ -141,6 +152,14 @@ func (a *App) Handler() http.Handler {
 	protected.HandleFunc("POST /api/account/totp/disable", a.handleTOTPDisable)
 	protected.HandleFunc("GET /api/logs", a.logsHandler(a.sysLogs))
 	protected.HandleFunc("POST /api/import/lucky", a.handleLuckyImport)
+	protected.HandleFunc("GET /api/system/settings", a.handleGetSettings)
+	protected.HandleFunc("PUT /api/system/settings", a.handlePutSettings)
+	protected.HandleFunc("POST /api/system/token", a.handleGenerateToken)
+	protected.HandleFunc("GET /api/system/info", a.handleSystemInfo)
+	protected.HandleFunc("GET /api/system/update", a.handleCheckUpdate)
+	protected.HandleFunc("GET /api/system/backup", a.handleBackup)
+	protected.HandleFunc("POST /api/system/restore", a.handleRestore)
+	protected.HandleFunc("POST /api/system/restart", a.handleRestart)
 	for _, e := range a.modules {
 		prefix := "/api/" + e.mod.ID()
 		protected.HandleFunc("GET "+prefix+"/logs", a.logsHandler(e.logs))
@@ -150,12 +169,12 @@ func (a *App) Handler() http.Handler {
 		})
 		e.mod.Routes(prefixRouter{mux: protected, prefix: prefix})
 	}
-	mux.Handle("/api/", a.auth.Require(protected))
+	mux.Handle("/api/", a.requireAuth(protected))
 	mux.Handle("/", a.staticHandler())
-	return securityHeaders(httpx.SameOrigin(mux))
+	return securityHeaders(a.accessControl(httpx.SameOrigin(mux)))
 }
 
-// Run 启动所有模块和管理服务，阻塞直到 ctx 取消。
+// Run 启动所有模块和管理服务，阻塞直到 ctx 取消。收到重启请求时停止全部服务后重新执行自身。
 func (a *App) Run(ctx context.Context) error {
 	for _, e := range a.modules {
 		if err := e.mod.Start(ctx); err != nil {
@@ -163,30 +182,72 @@ func (a *App) Run(ctx context.Context) error {
 			e.logs.Add(logbuf.LevelError, "", "模块启动失败: "+err.Error())
 		}
 	}
-	srv := &http.Server{
-		Addr:              a.settings.Listen,
-		Handler:           a.Handler(),
-		ReadHeaderTimeout: 10 * time.Second,
-	}
-	errCh := make(chan error, 1)
+	s := a.settingsSnapshot()
+	handler := a.Handler()
+	servers := []*http.Server{{Addr: s.Listen, Handler: handler, ReadHeaderTimeout: 10 * time.Second}}
+	errCh := make(chan error, 2)
 	go func() {
-		a.sysLogs.Add(logbuf.LevelInfo, "", "管理界面监听 "+a.settings.Listen)
-		errCh <- srv.ListenAndServe()
+		a.sysLogs.Add(logbuf.LevelInfo, "", "管理界面监听 "+s.Listen)
+		errCh <- servers[0].ListenAndServe()
 	}()
+	if s.HTTPSListen != "" && a.opts.Certs != nil {
+		tlsSrv := &http.Server{
+			Addr: s.HTTPSListen, Handler: handler, ReadHeaderTimeout: 10 * time.Second,
+			TLSConfig: &tls.Config{GetCertificate: a.opts.Certs.GetCertificate, MinVersion: tls.VersionTLS12},
+		}
+		servers = append(servers, tlsSrv)
+		ln, err := net.Listen("tcp", s.HTTPSListen)
+		if err != nil {
+			// HTTPS 失败不影响 HTTP 管理界面
+			a.sysLogs.Add(logbuf.LevelError, "", "HTTPS 管理界面监听失败: "+err.Error())
+		} else {
+			a.httpsReady.Store(true)
+			a.sysLogs.Add(logbuf.LevelInfo, "", "HTTPS 管理界面监听 "+s.HTTPSListen)
+			go func() {
+				if err := tlsSrv.ServeTLS(ln, "", ""); err != nil && !errors.Is(err, http.ErrServerClosed) {
+					a.sysLogs.Add(logbuf.LevelError, "", "HTTPS 管理界面退出: "+err.Error())
+				}
+			}()
+		}
+	}
 
+	restart := false
 	select {
 	case <-ctx.Done():
+	case <-a.restartCh:
+		restart = true
 	case err := <-errCh:
 		if !errors.Is(err, http.ErrServerClosed) {
+			for _, srv := range servers[1:] {
+				_ = srv.Close()
+			}
 			a.stopModules()
 			return err
 		}
 	}
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	_ = srv.Shutdown(shutdownCtx)
+	for _, srv := range servers {
+		_ = srv.Shutdown(shutdownCtx)
+	}
 	a.stopModules()
+	if restart {
+		a.logger.Printf("正在重启…")
+		execSelf()
+	}
 	return nil
+}
+
+// requireAuth 在会话校验之外接受 API 令牌。
+func (a *App) requireAuth(next http.Handler) http.Handler {
+	session := a.auth.Require(next)
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if a.apiTokenOK(r) {
+			next.ServeHTTP(w, r.WithContext(auth.WithUser(r.Context(), "api-token")))
+			return
+		}
+		session.ServeHTTP(w, r)
+	})
 }
 
 func (a *App) stopModules() {
@@ -360,8 +421,8 @@ func (a *App) handleTOTPDisable(w http.ResponseWriter, r *http.Request) {
 	httpx.OK(w, map[string]bool{"ok": true})
 }
 
-// handleLuckyImport 接收 multipart 上传的一个或多个 .lkcf 文件（字段名 files），
-// 分发给实现了 luckyimport.Importer 的模块。?dryRun=1 时只预览不写入。
+// handleLuckyImport 接收 multipart 上传的 .lkcf 文件或 Lucky 导出的整站配置 zip（字段名 files），
+// 分发给实现了 luckyimport.Importer 的模块。?dryRun=1 时只预览不写入，?enable=1 时保留 Lucky 中的启用状态。
 func (a *App) handleLuckyImport(w http.ResponseWriter, r *http.Request) {
 	// 限制总请求体与文件数量，防止超大上传占用内存与磁盘
 	r.Body = http.MaxBytesReader(w, r.Body, 64<<20)
@@ -369,7 +430,7 @@ func (a *App) handleLuckyImport(w http.ResponseWriter, r *http.Request) {
 		httpx.Error(w, http.StatusBadRequest, "读取上传文件失败: %v", err)
 		return
 	}
-	dryRun := r.URL.Query().Get("dryRun") == "1"
+	opts := luckyimport.Options{DryRun: r.URL.Query().Get("dryRun") == "1", KeepEnabled: r.URL.Query().Get("enable") == "1"}
 	type fileResult struct {
 		File    string                `json:"file"`
 		Error   string                `json:"error,omitempty"`
@@ -380,29 +441,46 @@ func (a *App) handleLuckyImport(w http.ResponseWriter, r *http.Request) {
 		httpx.Error(w, http.StatusBadRequest, "一次最多导入 64 个文件")
 		return
 	}
+	var entries []luckyimport.Entry
 	for _, fh := range r.MultipartForm.File["files"] {
-		res := fileResult{File: fh.Filename, Reports: []*luckyimport.Report{}}
 		data, err := readUpload(fh)
+		if err == nil && luckyimport.IsArchive(data) {
+			var sub []luckyimport.Entry
+			if sub, err = luckyimport.ExpandArchive(fh.Filename, data); err == nil {
+				entries = append(entries, sub...)
+				continue
+			}
+		}
+		if err != nil {
+			results = append(results, fileResult{File: fh.Filename, Error: err.Error(), Reports: []*luckyimport.Report{}})
+			continue
+		}
+		entries = append(entries, luckyimport.Entry{Name: fh.Filename, Data: data})
+	}
+	for _, en := range entries {
+		res := fileResult{File: en.Name, Reports: []*luckyimport.Report{}}
+		doc, err := luckyimport.ParseAny(en.Data)
 		if err == nil {
-			var doc luckyimport.Document
-			doc, err = luckyimport.Parse(data)
+			for _, e := range a.modules {
+				imp, ok := e.mod.(luckyimport.Importer)
+				if !ok {
+					continue
+				}
+				rep, ierr := imp.ImportLucky(doc, opts)
+				if ierr != nil {
+					err = fmt.Errorf("%s: %w", e.mod.Title(), ierr)
+					break
+				}
+				if rep != nil {
+					res.Reports = append(res.Reports, rep)
+					if !opts.DryRun {
+						e.logs.Add(logbuf.LevelInfo, "import", fmt.Sprintf("从 Lucky 导入 %d/%d 条", rep.Imported, rep.Found))
+					}
+				}
+			}
 			if err == nil {
-				for _, e := range a.modules {
-					imp, ok := e.mod.(luckyimport.Importer)
-					if !ok {
-						continue
-					}
-					rep, ierr := imp.ImportLucky(doc, dryRun)
-					if ierr != nil {
-						err = fmt.Errorf("%s: %w", e.mod.Title(), ierr)
-						break
-					}
-					if rep != nil {
-						res.Reports = append(res.Reports, rep)
-						if !dryRun {
-							e.logs.Add(logbuf.LevelInfo, "import", fmt.Sprintf("从 Lucky 导入 %d/%d 条", rep.Imported, rep.Found))
-						}
-					}
+				if rep := a.importLuckyBase(doc, opts); rep != nil {
+					res.Reports = append(res.Reports, rep)
 				}
 			}
 		}

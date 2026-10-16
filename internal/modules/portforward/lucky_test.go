@@ -36,10 +36,10 @@ func TestConvertLuckyRules(t *testing.T) {
 		t.Fatalf("字段映射错误: %+v", r)
 	}
 	joined := strings.Join(warnings, "\n")
-	if rules[0].Enable {
-		t.Fatal("导入的规则应默认停用")
+	if !rules[0].Enable || rules[1].Enable {
+		t.Fatal("转换时应保留 Lucky 中的启用状态")
 	}
-	for _, want := range []string{"TLS", "限速", "bad: 跳过", "默认停用"} {
+	for _, want := range []string{"TLS", "限速", "bad: 跳过"} {
 		if !strings.Contains(joined, want) {
 			t.Fatalf("缺少告警 %q:\n%s", want, joined)
 		}
@@ -69,7 +69,7 @@ func TestImportRealSample(t *testing.T) {
 	if err := m.Init(module.Env{Store: st, Logs: logbuf.New(10, log.New(io.Discard, "", 0))}); err != nil {
 		t.Fatal(err)
 	}
-	rep, err := m.ImportLucky(doc, true)
+	rep, err := m.ImportLucky(doc, luckyimport.Options{DryRun: true})
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -134,21 +134,16 @@ func convertLuckyCerts(raw json.RawMessage, settings Settings) ([]Cert, []string
 			warn("跳过，" + err.Error())
 			continue
 		}
-		// 已签发的证书原样保留，未到期前不会重新申请
-		c.Enable = false
 		out = append(out, c)
 	}
 	if len(mapped) > 0 {
 		warns = append(warns, fmt.Sprintf("%d 张证书映射到目录（%s），这些路径来自 Lucky 的运行环境，Docker 部署时请保持相同的挂载", len(mapped), strings.Join(mapped, "、")))
 	}
-	if len(out) > 0 {
-		warns = append(warns, "导入的证书默认停用：启用后会把证书写入映射目录并执行脚本，请确认路径后再启用")
-	}
 	return out, warns, len(src), nil
 }
 
 // ImportLucky 实现 luckyimport.Importer。
-func (m *Module) ImportLucky(doc luckyimport.Document, dryRun bool) (*luckyimport.Report, error) {
+func (m *Module) ImportLucky(doc luckyimport.Document, opts luckyimport.Options) (*luckyimport.Report, error) {
 	raw, ok := doc["SSLCertficateList"]
 	if !ok {
 		return nil, nil
@@ -160,14 +155,33 @@ func (m *Module) ImportLucky(doc luckyimport.Document, dryRun bool) (*luckyimpor
 	if err != nil {
 		return nil, err
 	}
-	rep := &luckyimport.Report{Module: ID, Title: m.Title(), Found: found, Imported: len(certs), Warnings: warns}
-	if dryRun {
-		return rep, nil
-	}
+	rep := &luckyimport.Report{Module: ID, Title: m.Title(), Found: found, Warnings: warns}
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	old := m.cfg.Certs
+	existing := map[string]bool{}
+	for i := range m.cfg.Certs {
+		existing[label(&m.cfg.Certs[i])] = true
+	}
+	var fresh []Cert
 	for _, c := range certs {
+		if name := label(&c); name != "" && existing[name] {
+			rep.Warnings = append(rep.Warnings, luckyimport.Skipped(name))
+			continue
+		}
+		if !opts.KeepEnabled {
+			c.Enable = false
+		}
+		fresh = append(fresh, c)
+	}
+	rep.Imported = len(fresh)
+	if !opts.KeepEnabled && rep.Imported > 0 {
+		rep.Warnings = append(rep.Warnings, "导入的证书默认停用：启用后会把证书写入映射目录并执行脚本，请确认路径后再启用")
+	}
+	if opts.DryRun {
+		return rep, nil
+	}
+	old := m.cfg.Certs
+	for _, c := range fresh {
 		c.Key = crud.NewKey()
 		m.cfg.Certs = append(m.cfg.Certs, c)
 	}
@@ -175,5 +189,7 @@ func (m *Module) ImportLucky(doc luckyimport.Document, dryRun bool) (*luckyimpor
 		m.cfg.Certs = old
 		return nil, err
 	}
+	// 已签发的证书原样使用：只刷新 TLS 证书表，不重新执行映射脚本，到期前也不会重新申请
+	m.rebuildTLSLocked()
 	return rep, nil
 }

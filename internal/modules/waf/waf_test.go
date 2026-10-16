@@ -140,7 +140,7 @@ func TestImportRealSample(t *testing.T) {
 		t.Fatal(err)
 	}
 	m := newModule(t)
-	rep, err := m.ImportLucky(doc, false)
+	rep, err := m.ImportLucky(doc, luckyimport.Options{})
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -1,0 +1,329 @@
+package app
+
+import (
+	"archive/zip"
+	"bytes"
+	"context"
+	"crypto/rand"
+	"crypto/tls"
+	"encoding/hex"
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
+	"os"
+	"path"
+	"path/filepath"
+	"runtime"
+	"strings"
+	"syscall"
+	"time"
+
+	"github.com/wangwanjie/gately/internal/httpx"
+	"github.com/wangwanjie/gately/internal/logbuf"
+	"github.com/wangwanjie/gately/internal/luckyimport"
+	"github.com/wangwanjie/gately/internal/version"
+)
+
+// CertProvider 由证书模块实现，用于管理界面的 HTTPS。
+type CertProvider interface {
+	GetCertificate(*tls.ClientHelloInfo) (*tls.Certificate, error)
+	HasCertificate(name string) bool
+}
+
+func randomHex(n int) string {
+	b := make([]byte, n)
+	if _, err := rand.Read(b); err != nil {
+		panic(err)
+	}
+	return hex.EncodeToString(b)
+}
+
+// ---- 备份与恢复 ----
+
+// handleBackup 把配置目录中的 JSON 配置打包为 zip 下载。备份包含密钥与证书私钥，请妥善保管。
+func (a *App) handleBackup(w http.ResponseWriter, r *http.Request) {
+	files, err := filepath.Glob(filepath.Join(a.opts.ConfigDir, "*.json"))
+	if err != nil {
+		httpx.Error(w, http.StatusInternalServerError, "%v", err)
+		return
+	}
+	var buf bytes.Buffer
+	zw := zip.NewWriter(&buf)
+	for _, f := range files {
+		data, err := os.ReadFile(f)
+		if err != nil {
+			httpx.Error(w, http.StatusInternalServerError, "读取 %s 失败: %v", filepath.Base(f), err)
+			return
+		}
+		fw, err := zw.CreateHeader(&zip.FileHeader{Name: filepath.Base(f), Method: zip.Deflate, Modified: time.Now()})
+		if err != nil {
+			httpx.Error(w, http.StatusInternalServerError, "%v", err)
+			return
+		}
+		_, _ = fw.Write(data)
+	}
+	if err := zw.Close(); err != nil {
+		httpx.Error(w, http.StatusInternalServerError, "%v", err)
+		return
+	}
+	name := "gately-backup-" + time.Now().Format("20060102-150405") + ".zip"
+	w.Header().Set("Content-Type", "application/zip")
+	w.Header().Set("Content-Disposition", `attachment; filename="`+name+`"`)
+	w.Header().Set("Cache-Control", "no-store")
+	_, _ = w.Write(buf.Bytes())
+	a.sysLogs.Add(logbuf.LevelInfo, "system", "已导出配置备份")
+}
+
+// handleRestore 用备份 zip 覆盖配置文件，随后重启生效。原配置先备份到 config/backup-时间 目录。
+func (a *App) handleRestore(w http.ResponseWriter, r *http.Request) {
+	r.Body = http.MaxBytesReader(w, r.Body, 64<<20)
+	if err := r.ParseMultipartForm(32 << 20); err != nil {
+		httpx.Error(w, http.StatusBadRequest, "读取上传文件失败: %v", err)
+		return
+	}
+	fhs := r.MultipartForm.File["file"]
+	if len(fhs) != 1 {
+		httpx.Error(w, http.StatusBadRequest, "请上传一个备份文件")
+		return
+	}
+	data, err := readUpload(fhs[0])
+	if err != nil {
+		httpx.Error(w, http.StatusBadRequest, "%v", err)
+		return
+	}
+	zr, err := zip.NewReader(bytes.NewReader(data), int64(len(data)))
+	if err != nil {
+		httpx.Error(w, http.StatusBadRequest, "不是有效的 zip 文件")
+		return
+	}
+	restored := map[string][]byte{}
+	for _, f := range zr.File {
+		name := path.Base(f.Name)
+		if f.FileInfo().IsDir() || !strings.HasSuffix(name, ".json") || strings.HasPrefix(name, ".") || name != f.Name {
+			continue
+		}
+		rc, err := f.Open()
+		if err != nil {
+			httpx.Error(w, http.StatusBadRequest, "%v", err)
+			return
+		}
+		b, err := io.ReadAll(io.LimitReader(rc, 32<<20))
+		rc.Close()
+		if err != nil || !json.Valid(b) {
+			httpx.Error(w, http.StatusBadRequest, "%s 不是有效的 JSON", name)
+			return
+		}
+		restored[name] = b
+	}
+	if _, ok := restored[accountName+".json"]; !ok {
+		httpx.Error(w, http.StatusBadRequest, "备份中缺少 %s.json，不像是 Gately 的配置备份", accountName)
+		return
+	}
+	dir := filepath.Join(a.opts.ConfigDir, "backup-"+time.Now().Format("20060102-150405"))
+	if err := os.MkdirAll(dir, 0o700); err != nil {
+		httpx.Error(w, http.StatusInternalServerError, "%v", err)
+		return
+	}
+	old, _ := filepath.Glob(filepath.Join(a.opts.ConfigDir, "*.json"))
+	for _, f := range old {
+		if b, err := os.ReadFile(f); err == nil {
+			_ = os.WriteFile(filepath.Join(dir, filepath.Base(f)), b, 0o600)
+		}
+	}
+	for name, b := range restored {
+		if err := a.store.WriteRaw(strings.TrimSuffix(name, ".json"), b); err != nil {
+			httpx.Error(w, http.StatusInternalServerError, "写入 %s 失败: %v", name, err)
+			return
+		}
+	}
+	a.sysLogs.Add(logbuf.LevelWarn, "system", fmt.Sprintf("已从备份恢复 %d 个配置文件，原配置保存在 %s", len(restored), dir))
+	httpx.OK(w, map[string]any{"restored": len(restored), "previous": dir})
+	a.scheduleRestart()
+}
+
+// ---- 重启 ----
+
+func (a *App) handleRestart(w http.ResponseWriter, r *http.Request) {
+	a.sysLogs.Add(logbuf.LevelWarn, "system", "收到重启请求")
+	httpx.OK(w, map[string]bool{"ok": true})
+	a.scheduleRestart()
+}
+
+// scheduleRestart 在响应写出后重启：先优雅停止模块，再以相同参数重新执行自身。
+func (a *App) scheduleRestart() {
+	go func() {
+		time.Sleep(500 * time.Millisecond)
+		select {
+		case a.restartCh <- struct{}{}:
+		default:
+		}
+	}()
+}
+
+// execSelf 用当前可执行文件替换进程；失败时退出，由 Docker / systemd 的重启策略拉起。
+func execSelf() {
+	exe, err := os.Executable()
+	if err == nil && runtime.GOOS != "windows" {
+		err = syscall.Exec(exe, os.Args, os.Environ())
+	}
+	fmt.Fprintf(os.Stderr, "重启失败，退出进程: %v\n", err)
+	os.Exit(3)
+}
+
+// ---- 系统信息与更新检查 ----
+
+func (a *App) handleSystemInfo(w http.ResponseWriter, r *http.Request) {
+	var ms runtime.MemStats
+	runtime.ReadMemStats(&ms)
+	host, _ := os.Hostname()
+	httpx.OK(w, map[string]any{
+		"version": version.Version, "commit": version.Commit, "buildDate": version.BuildDate,
+		"goVersion": runtime.Version(), "os": runtime.GOOS, "arch": runtime.GOARCH,
+		"hostname": host, "pid": os.Getpid(), "startTime": a.startTime, "configDir": a.opts.ConfigDir,
+		"goroutines": runtime.NumGoroutine(), "memSys": ms.Sys, "memAlloc": ms.Alloc,
+		"numCPU": runtime.NumCPU(), "maxProcs": runtime.GOMAXPROCS(0), "timeZone": time.Local.String(),
+		"inDocker": fileExists("/.dockerenv"),
+	})
+}
+
+func fileExists(p string) bool {
+	_, err := os.Stat(p)
+	return err == nil
+}
+
+// releaseAPI 是检查更新使用的地址，只在用户点击“检查更新”时访问。
+var releaseAPI = "https://api.github.com/repos/wangwanjie/gately/releases/latest"
+
+func (a *App) handleCheckUpdate(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := context.WithTimeout(r.Context(), 15*time.Second)
+	defer cancel()
+	req, _ := http.NewRequestWithContext(ctx, http.MethodGet, releaseAPI, nil)
+	req.Header.Set("Accept", "application/vnd.github+json")
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		httpx.Error(w, http.StatusBadGateway, "无法访问 GitHub: %v", err)
+		return
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		httpx.Error(w, http.StatusBadGateway, "GitHub 返回 %s", resp.Status)
+		return
+	}
+	var rel struct {
+		TagName     string    `json:"tag_name"`
+		HTMLURL     string    `json:"html_url"`
+		Body        string    `json:"body"`
+		PublishedAt time.Time `json:"published_at"`
+	}
+	if err := json.NewDecoder(io.LimitReader(resp.Body, 1<<20)).Decode(&rel); err != nil {
+		httpx.Error(w, http.StatusBadGateway, "解析版本信息失败: %v", err)
+		return
+	}
+	httpx.OK(w, map[string]any{
+		"current": version.Version, "latest": rel.TagName, "url": rel.HTMLURL, "notes": rel.Body,
+		"publishedAt": rel.PublishedAt, "hasUpdate": rel.TagName != "" && rel.TagName != version.Version && version.Version != "dev",
+	})
+}
+
+// ---- Lucky 基础设置导入 ----
+
+// luckyBase 是 Lucky 基础设置中可迁移的字段。
+type luckyBase struct {
+	AllowInternetaccess         *bool
+	TokenExpirationHour         int
+	MaxConsecutiveLoginFailures int
+	TimeZone                    string
+	CustomDNSList               string
+	CustomDNSA                  string
+	CustomDNSB                  string
+	LogMaxSize                  int
+	GCPercent                   int
+	SetGCPercent                bool
+	SafeURL                     string
+	AdminWebListenPort          int
+	TwoFAEnable                 bool
+	EnableOpenToken             bool
+}
+
+// importLuckyBase 迁移 Lucky 的基础设置。管理端口、安全入口、管理员账号与两步验证不迁移，避免导入后无法登录。
+func (a *App) importLuckyBase(doc luckyimport.Document, opts luckyimport.Options) *luckyimport.Report {
+	if _, ok := doc["AdminWebListenPort"]; !ok {
+		return nil
+	}
+	raw, _ := json.Marshal(doc)
+	var lb luckyBase
+	if err := json.Unmarshal(raw, &lb); err != nil {
+		return &luckyimport.Report{Module: "settings", Title: "全局设置", Found: 1, Warnings: []string{"解析失败: " + err.Error()}}
+	}
+	rep := &luckyimport.Report{Module: "settings", Title: "全局设置", Found: 1, Imported: 1}
+	s := a.settingsSnapshot()
+	if lb.AllowInternetaccess != nil {
+		s.LANOnly = !*lb.AllowInternetaccess
+	}
+	if lb.MaxConsecutiveLoginFailures > 0 && lb.MaxConsecutiveLoginFailures <= 100 {
+		s.MaxLoginFailures = lb.MaxConsecutiveLoginFailures
+	}
+	if lb.TimeZone != "" {
+		if _, err := time.LoadLocation(lb.TimeZone); err == nil {
+			s.TimeZone = lb.TimeZone
+		}
+	}
+	var dns []string
+	for _, v := range append(strings.FieldsFunc(lb.CustomDNSList, func(r rune) bool { return r == ',' || r == '\n' || r == ' ' || r == ';' }), lb.CustomDNSA, lb.CustomDNSB) {
+		if v = strings.TrimSpace(v); v != "" {
+			dns = append(dns, v)
+		}
+	}
+	if len(dns) > 0 {
+		s.DNSServers = dns
+	}
+	if lb.SetGCPercent && lb.GCPercent > 0 {
+		s.GCPercent = lb.GCPercent
+	}
+	if err := s.Validate(); err != nil {
+		rep.Imported = 0
+		rep.Warnings = append(rep.Warnings, "设置无效，未导入: "+err.Error())
+		return rep
+	}
+	var notes []string
+	if lb.AdminWebListenPort > 0 {
+		notes = append(notes, fmt.Sprintf("管理端口（Lucky 为 %d）", lb.AdminWebListenPort))
+	}
+	if lb.SafeURL != "" {
+		notes = append(notes, "安全入口")
+	}
+	notes = append(notes, "管理员账号")
+	if lb.TwoFAEnable {
+		notes = append(notes, "两步验证")
+	}
+	rep.Warnings = append(rep.Warnings, "以下设置需在 Gately 中手动配置："+strings.Join(notes, "、"))
+	if lb.EnableOpenToken {
+		rep.Warnings = append(rep.Warnings, "Lucky 的 OpenToken 未迁移，如需脚本调用请在设置中生成 API 令牌")
+	}
+	if lb.TokenExpirationHour > 0 && !opts.DryRun {
+		_ = a.auth.SetTokenTTL(lb.TokenExpirationHour)
+	}
+	if opts.DryRun {
+		return rep
+	}
+	a.settingsMu.Lock()
+	if a.opts.Listen != "" {
+		s.Listen = a.fileListen
+	}
+	err := a.store.Save(settingsName, s)
+	if a.opts.Listen != "" {
+		s.Listen = a.settings.Listen
+	}
+	if err == nil {
+		a.settings = s
+	}
+	a.settingsMu.Unlock()
+	if err != nil {
+		rep.Imported = 0
+		rep.Warnings = append(rep.Warnings, "保存失败: "+err.Error())
+		return rep
+	}
+	a.applyRuntime()
+	return rep
+}

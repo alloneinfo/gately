@@ -167,7 +167,7 @@ func convertLuckyListeners(raw json.RawMessage) ([]Listener, []string, int, erro
 		}
 		l := Listener{
 			Name:     ll.RuleName,
-			Enable:   false,
+			Enable:   ll.Enable,
 			Network:  ll.Network,
 			ListenIP: ll.ListenIP,
 			Port:     ll.ListenPort,
@@ -233,14 +233,13 @@ func convertLuckyListeners(raw json.RawMessage) ([]Listener, []string, int, erro
 	}
 	if len(out) > 0 {
 		warns = append(warns, "站点引用的 WAF 实例需同时导入 lucky_coraza.lkcf；引用不存在的实例时不做检查（与 Lucky 行为一致）")
-		warns = append(warns, "导入的监听规则默认停用：请先停止 Lucky 中对应的规则，再在 Gately 中启用；HTTPS 站点需要先在证书模块中启用对应证书")
 	}
 	return out, warns, len(src), nil
 }
 
 // ImportLucky 实现 luckyimport.Importer，同时识别 lucky_base 中的 PROXY 协议可信来源。
-func (m *Module) ImportLucky(doc luckyimport.Document, dryRun bool) (*luckyimport.Report, error) {
-	if raw, ok := doc["ProxyProtocolTrustedCIDRs"]; ok && !dryRun {
+func (m *Module) ImportLucky(doc luckyimport.Document, opts luckyimport.Options) (*luckyimport.Report, error) {
+	if raw, ok := doc["ProxyProtocolTrustedCIDRs"]; ok && !opts.DryRun {
 		var cidrs any
 		_ = json.Unmarshal(raw, &cidrs)
 		var list []string
@@ -271,20 +270,42 @@ func (m *Module) ImportLucky(doc luckyimport.Document, dryRun bool) (*luckyimpor
 	if err != nil {
 		return nil, err
 	}
-	rep := &luckyimport.Report{Module: ID, Title: m.Title(), Found: found, Imported: len(listeners), Warnings: warns}
-	if dryRun {
-		return rep, nil
-	}
+	rep := &luckyimport.Report{Module: ID, Title: m.Title(), Found: found, Warnings: warns}
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	old := m.cfg.Listeners
+	existing := map[string]bool{}
+	for _, l := range m.cfg.Listeners {
+		existing[l.Name] = true
+	}
+	var fresh []Listener
 	for _, l := range listeners {
+		if existing[l.Name] {
+			rep.Warnings = append(rep.Warnings, luckyimport.Skipped(l.Name))
+			continue
+		}
+		if !opts.KeepEnabled {
+			l.Enable = false
+		}
+		fresh = append(fresh, l)
+	}
+	rep.Imported = len(fresh)
+	if !opts.KeepEnabled && rep.Imported > 0 {
+		rep.Warnings = append(rep.Warnings, "导入的监听规则默认停用：请先停止 Lucky 中对应的规则，再在 Gately 中启用；HTTPS 站点需要先在证书模块中启用对应证书")
+	}
+	if opts.DryRun {
+		return rep, nil
+	}
+	old := m.cfg.Listeners
+	for _, l := range fresh {
 		l.Key = crud.NewKey()
 		m.cfg.Listeners = append(m.cfg.Listeners, l)
 	}
 	if err := m.saveLocked(); err != nil {
 		m.cfg.Listeners = old
 		return nil, err
+	}
+	for _, l := range m.cfg.Listeners[len(old):] {
+		m.restartLocked(l.Key)
 	}
 	return rep, nil
 }

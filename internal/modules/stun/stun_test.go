@@ -379,7 +379,7 @@ func TestConvertLucky(t *testing.T) {
 		t.Fatalf("found=%d imported=%d %v", found, len(rules), warns)
 	}
 	a := rules[0]
-	if a.Enable || !a.UPnP || a.UPnPGateway != "192.168.1.1" || a.HeartbeatInterval != 2300 || !a.ScriptEnable || a.UDPSessionTimeout != 30 ||
+	if !a.Enable || !a.UPnP || a.UPnPGateway != "192.168.1.1" || a.HeartbeatInterval != 2300 || !a.ScriptEnable || a.UDPSessionTimeout != 30 ||
 		a.KeepAliveServers[0] != "qq.com:80" || a.Bind.Mode != BindIP {
 		t.Fatalf("规则 1 映射错误: %+v", a)
 	}
@@ -388,7 +388,7 @@ func TestConvertLucky(t *testing.T) {
 		t.Fatalf("规则 2 映射错误: %+v", b)
 	}
 	joined := strings.Join(warns, "\n")
-	for _, w := range []string{"tcp6", "/etc/lucky/", "TLS", "默认停用"} {
+	for _, w := range []string{"tcp6", "/etc/lucky/", "TLS"} {
 		if !strings.Contains(joined, w) {
 			t.Errorf("缺少告警 %q:\n%s", w, joined)
 		}
@@ -414,7 +414,7 @@ func TestImportRealSample(t *testing.T) {
 	if err := m.Init(module.Env{Store: st, Logs: logbuf.New(10, log.New(io.Discard, "", 0))}); err != nil {
 		t.Fatal(err)
 	}
-	rep, err := m.ImportLucky(doc, false)
+	rep, err := m.ImportLucky(doc, luckyimport.Options{})
 	if err != nil {
 		t.Fatal(err)
 	}

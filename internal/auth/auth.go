@@ -25,7 +25,7 @@ import (
 // CookieName 是会话 Cookie 名称。
 const CookieName = "gately_token"
 
-// 登录限流参数：窗口期内连续失败达到上限后锁定该 IP。
+// 登录限流默认参数：窗口期内连续失败达到上限后锁定该 IP。上限与锁定时长可在设置中调整。
 const (
 	maxFailures  = 5
 	failWindow   = 15 * time.Minute
@@ -87,11 +87,53 @@ type Manager struct {
 	now   func() time.Time
 	// lastTOTPStep 为最近一次使用的验证码时间步，防止验证码在有效期内被重放
 	lastTOTPStep int64
+	// maxFail / lockDur 为当前生效的限流参数
+	maxFail int
+	lockDur time.Duration
+}
+
+// SetLimits 设置连续失败上限与锁定时长，非正数表示使用默认值。
+func (m *Manager) SetLimits(maxFail int, lock time.Duration) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if maxFail <= 0 {
+		maxFail = maxFailures
+	}
+	if lock <= 0 {
+		lock = lockDuration
+	}
+	m.maxFail, m.lockDur = maxFail, lock
+}
+
+// TokenTTLHours 返回会话有效期（小时）。
+func (m *Manager) TokenTTLHours() int {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	return m.acc.TokenTTLHours
+}
+
+// SetTokenTTL 修改会话有效期并持久化，已签发的会话不受影响。
+func (m *Manager) SetTokenTTL(hours int) error {
+	if hours < 1 || hours > 24*365 {
+		return errors.New("会话有效期应在 1 小时到 365 天之间")
+	}
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if m.acc.TokenTTLHours == hours {
+		return nil
+	}
+	acc := m.acc
+	acc.TokenTTLHours = hours
+	if err := m.save(acc); err != nil {
+		return err
+	}
+	m.acc = acc
+	return nil
 }
 
 // NewManager 用已加载的账号创建管理器，save 用于持久化账号变更。
 func NewManager(acc Account, save func(Account) error) *Manager {
-	return &Manager{acc: acc, save: save, fails: map[string]*failState{}, now: time.Now}
+	return &Manager{acc: acc, save: save, fails: map[string]*failState{}, now: time.Now, maxFail: maxFailures, lockDur: lockDuration}
 }
 
 // EnsureInitialized 在首次启动时创建 admin 账号与随机密码。
@@ -278,6 +320,18 @@ func TokenFromRequest(r *http.Request) string {
 
 type ctxKey struct{}
 
+// WithUser 把用户名写入上下文（API 令牌等其他认证方式使用）。
+func WithUser(ctx context.Context, user string) context.Context {
+	return context.WithValue(ctx, ctxKey{}, user)
+}
+
+// EntrySecret 返回用于签名安全入口 Cookie 的密钥。
+func (m *Manager) EntrySecret() string {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	return m.acc.SessionSecret
+}
+
 // UserFromContext 返回中间件写入的用户名。
 func UserFromContext(ctx context.Context) string {
 	u, _ := ctx.Value(ctxKey{}).(string)
@@ -311,7 +365,7 @@ func (m *Manager) reserve(key string) bool {
 		st = &failState{first: now}
 		m.fails[key] = st
 	}
-	if now.Before(st.lockedUntil) || st.count+st.inflight >= maxFailures {
+	if now.Before(st.lockedUntil) || st.count+st.inflight >= m.maxFail {
 		return false
 	}
 	st.inflight++
@@ -335,8 +389,8 @@ func (m *Manager) release(key string, success bool) {
 		return
 	}
 	st.count++
-	if st.count >= maxFailures {
-		st.lockedUntil = now.Add(lockDuration)
+	if st.count >= m.maxFail {
+		st.lockedUntil = now.Add(m.lockDur)
 		st.count = 0
 		st.first = now
 	}

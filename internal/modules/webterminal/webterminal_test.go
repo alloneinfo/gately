@@ -220,7 +220,7 @@ func TestImportLucky(t *testing.T) {
 		{"name": "old", "type": "telnet"},
 	})
 	m, _ := newModule(t)
-	rep, err := m.ImportLucky(luckyimport.Document{"connections": raw}, false)
+	rep, err := m.ImportLucky(luckyimport.Document{"connections": raw}, luckyimport.Options{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -233,7 +233,7 @@ func TestImportLucky(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		rep, err := m.ImportLucky(doc, true)
+		rep, err := m.ImportLucky(doc, luckyimport.Options{DryRun: true})
 		if err != nil || rep.Imported != rep.Found {
 			t.Fatalf("真实样本导入失败: %+v %v", rep, err)
 		}

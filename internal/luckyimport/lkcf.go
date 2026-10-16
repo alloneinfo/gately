@@ -105,6 +105,18 @@ func Parse(data []byte) (Document, error) {
 	return doc, nil
 }
 
+// ParseAny 解析 .lkcf，或已解密的明文 JSON（便于测试与手工修改后导入）。
+func ParseAny(data []byte) (Document, error) {
+	if trimmed := bytes.TrimSpace(data); len(trimmed) > 0 && trimmed[0] == '{' {
+		var doc Document
+		if err := json.Unmarshal(trimmed, &doc); err != nil {
+			return nil, err
+		}
+		return doc, nil
+	}
+	return Parse(data)
+}
+
 // Report 是单个模块的导入结果。
 type Report struct {
 	Module   string   `json:"module"`
@@ -114,9 +126,23 @@ type Report struct {
 	Warnings []string `json:"warnings,omitempty"`
 }
 
+// Options 控制导入行为。
+type Options struct {
+	// DryRun 只解析不写入
+	DryRun bool
+	// KeepEnabled 保留 Lucky 中的启用状态；为 false 时导入的条目一律停用，
+	// 避免与仍在运行的 Lucky 争用端口、或在测试机上把线上域名解析到错误地址
+	KeepEnabled bool
+}
+
 // Importer 由支持从 Lucky 迁移的模块实现。
 type Importer interface {
-	// ImportLucky 识别 doc 中属于本模块的字段并导入。
-	// 不包含本模块数据时返回 nil 报告。dryRun 为 true 时只解析不写入。
-	ImportLucky(doc Document, dryRun bool) (*Report, error)
+	// ImportLucky 识别 doc 中属于本模块的字段并导入。不包含本模块数据时返回 nil 报告。
+	// 已存在同名条目时跳过，重复导入不会产生重复数据。
+	ImportLucky(doc Document, opts Options) (*Report, error)
+}
+
+// Skipped 生成"已存在同名条目"的提示。
+func Skipped(name string) string {
+	return name + ": 已存在同名条目，跳过"
 }

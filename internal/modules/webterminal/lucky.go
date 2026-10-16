@@ -32,7 +32,7 @@ type luckyConn struct {
 }
 
 // ImportLucky 实现 luckyimport.Importer。
-func (m *Module) ImportLucky(doc luckyimport.Document, dryRun bool) (*luckyimport.Report, error) {
+func (m *Module) ImportLucky(doc luckyimport.Document, opts luckyimport.Options) (*luckyimport.Report, error) {
 	raw, ok := doc["connections"]
 	if !ok {
 		return nil, nil
@@ -61,15 +61,28 @@ func (m *Module) ImportLucky(doc luckyimport.Document, dryRun bool) (*luckyimpor
 		}
 		out = append(out, c)
 	}
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	existing := map[string]bool{}
+	for _, c := range m.cfg.Connections {
+		existing[c.Name] = true
+	}
+	fresh := out[:0]
+	for _, c := range out {
+		if existing[c.Name] {
+			rep.Warnings = append(rep.Warnings, luckyimport.Skipped(c.Name))
+			continue
+		}
+		fresh = append(fresh, c)
+	}
+	out = fresh
 	rep.Imported = len(out)
 	if len(out) > 0 {
 		rep.Warnings = append(rep.Warnings, "主机密钥将在首次连接时记录（首次信任），请在首次连接时核对指纹")
 	}
-	if dryRun {
+	if opts.DryRun {
 		return rep, nil
 	}
-	m.mu.Lock()
-	defer m.mu.Unlock()
 	old := m.cfg.Connections
 	for _, c := range out {
 		c.Key = crud.NewKey()

@@ -20,7 +20,7 @@ type luckyDevice struct {
 }
 
 // ImportLucky 实现 luckyimport.Importer。
-func (m *Module) ImportLucky(doc luckyimport.Document, dryRun bool) (*luckyimport.Report, error) {
+func (m *Module) ImportLucky(doc luckyimport.Document, opts luckyimport.Options) (*luckyimport.Report, error) {
 	raw, ok := doc["WOLDeviceList"]
 	if !ok {
 		return nil, nil
@@ -42,14 +42,26 @@ func (m *Module) ImportLucky(doc luckyimport.Document, dryRun bool) (*luckyimpor
 		}
 		devices = append(devices, d)
 	}
-	rep.Imported = len(devices)
-	if dryRun {
-		return rep, nil
-	}
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	old := m.cfg.Devices
+	existing := map[string]bool{}
+	for _, d := range m.cfg.Devices {
+		existing[d.Name] = true
+	}
+	var fresh []Device
 	for _, d := range devices {
+		if existing[d.Name] {
+			rep.Warnings = append(rep.Warnings, luckyimport.Skipped(d.Name))
+			continue
+		}
+		fresh = append(fresh, d)
+	}
+	rep.Imported = len(fresh)
+	if opts.DryRun {
+		return rep, nil
+	}
+	old := m.cfg.Devices
+	for _, d := range fresh {
 		d.Key = crud.NewKey()
 		m.cfg.Devices = append(m.cfg.Devices, d)
 	}

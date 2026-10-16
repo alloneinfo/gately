@@ -265,7 +265,7 @@ func TestConvertLucky(t *testing.T) {
 		t.Fatalf("found=%d imported=%d %v", found, len(certs), warns)
 	}
 	got := certs[0]
-	if got.Enable || got.ACME.CA != "zerossl" || got.ACME.EABKid != "kid" || got.ACME.KeyType != "2048" || got.ACME.PropagationTimeout != 600 ||
+	if !got.Enable || got.ACME.CA != "zerossl" || got.ACME.EABKid != "kid" || got.ACME.KeyType != "2048" || got.ACME.PropagationTimeout != 600 ||
 		!got.ACME.SkipPropagationCheck || got.CertPEM != c || got.KeyPEM != k || !got.Mapping.Enable {
 		t.Fatalf("映射错误: %+v", got)
 	}
@@ -275,7 +275,7 @@ func TestConvertLucky(t *testing.T) {
 		t.Fatalf("导入的有效证书不应触发重签: %s", reason)
 	}
 	joined := strings.Join(warns, "\n")
-	for _, w := range []string{"bad: 跳过", "/data/nginx/ssl/ddns", "默认停用"} {
+	for _, w := range []string{"bad: 跳过", "/data/nginx/ssl/ddns"} {
 		if !strings.Contains(joined, w) {
 			t.Errorf("缺少告警 %q:\n%s", w, joined)
 		}
@@ -297,7 +297,7 @@ func TestImportRealSample(t *testing.T) {
 		t.Fatal(err)
 	}
 	m := newTestModule(t)
-	rep, err := m.ImportLucky(doc, false)
+	rep, err := m.ImportLucky(doc, luckyimport.Options{})
 	if err != nil {
 		t.Fatal(err)
 	}
