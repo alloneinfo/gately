@@ -28,12 +28,7 @@
           </template>
         </div>
         <div class="header-right">
-          <el-tooltip :content="isDark ? '切换到亮色' : '切换到暗色'" :show-after="300">
-            <button class="icon-btn" aria-label="切换主题" @click="toggle">
-              <Sun v-if="isDark" :size="18" />
-              <Moon v-else :size="18" />
-            </button>
-          </el-tooltip>
+          <ThemePicker />
           <el-dropdown trigger="click" @command="onCommand">
             <button class="user-btn">
               <span class="avatar">{{ (username || 'A').slice(0, 1).toUpperCase() }}</span>
@@ -60,18 +55,17 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ChevronDown, ChevronRight, KeyRound, LogOut, Menu, Moon, PanelLeftClose, PanelLeftOpen, Settings, Sun } from 'lucide-vue-next'
+import { ChevronDown, ChevronRight, KeyRound, LogOut, Menu, PanelLeftClose, PanelLeftOpen, Settings } from 'lucide-vue-next'
 import { api } from '../api'
 import SideNav from '../components/SideNav.vue'
 import AppLogo from '../components/AppLogo.vue'
+import ThemePicker from '../components/ThemePicker.vue'
 import { groupByPath } from '../nav'
 import { useIsMobile } from '../composables/useIsMobile'
-import { useTheme } from '../composables/useTheme'
 
 const route = useRoute()
 const router = useRouter()
 const isMobile = useIsMobile()
-const { isDark, toggle } = useTheme()
 const username = ref('')
 const drawer = ref(false)
 const collapsed = ref(localStorage.getItem('gately-collapsed') === '1')

@@ -36,7 +36,7 @@ defineEmits<{ save: []; reset: [] }>()
 }
 .save-bar.dirty {
   border-color: var(--el-color-primary-light-5);
-  box-shadow: 0 8px 24px -12px rgba(14, 124, 102, 0.45);
+  box-shadow: 0 8px 24px -12px color-mix(in srgb, var(--el-color-primary) 45%, transparent);
 }
 .sb-text {
   display: flex;

@@ -7,6 +7,8 @@
   --g-sidebar-bg: #ffffff;
   --g-header-bg: rgba(255, 255, 255, 0.85);
   --g-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif;
+  /* 图表第二配色：与品牌绿搭配的靛蓝，用于发送流量、内存等 */
+  --g-chart-2: #6366f1;
   --g-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
 
   --el-color-primary: #0e7c66;
@@ -33,6 +35,7 @@ html.dark {
   --g-border: #2a2e33;
   --g-sidebar-bg: #16181b;
   --g-header-bg: rgba(22, 24, 27, 0.85);
+  --g-chart-2: #818cf8;
 
   --el-color-primary: #1fa386;
   --el-color-primary-light-3: #1c7864;
@@ -286,4 +289,34 @@ a {
   .el-popconfirm {
     max-width: calc(100vw - 32px);
   }
+}
+
+/* ---------- 换肤：个别主题的专属风格 ---------- */
+body,
+.g-card,
+.aside {
+  transition: background-color 0.25s ease, border-color 0.25s ease;
+}
+
+/* 朋克：霓虹描边、等宽标题、锐角 */
+html[data-theme='punk'] .g-card {
+  border-color: color-mix(in srgb, var(--el-color-primary) 35%, var(--g-border));
+  box-shadow: 0 0 18px -10px var(--el-color-primary);
+}
+html[data-theme='punk'] .g-card-title,
+html[data-theme='punk'] .brand-name,
+html[data-theme='punk'] .header-title {
+  font-family: var(--g-mono);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+html[data-theme='punk'] .el-button--primary {
+  box-shadow: 0 0 14px -4px var(--el-color-primary);
+}
+html[data-theme='punk'] .nav-item.active {
+  box-shadow: inset 2px 0 0 var(--el-color-primary);
+}
+html[data-theme='punk'] ::selection {
+  background: var(--el-color-primary);
+  color: #fff;
 }

@@ -1,9 +1,8 @@
 <template>
   <div class="login">
-    <button class="theme-btn" :aria-label="isDark ? '切换到亮色' : '切换到暗色'" @click="toggle">
-      <Sun v-if="isDark" :size="18" />
-      <Moon v-else :size="18" />
-    </button>
+    <div class="theme-btn">
+      <ThemePicker />
+    </div>
     <div class="panel">
       <section class="hero">
         <div class="hero-brand">
@@ -74,14 +73,13 @@
 import { nextTick, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, type InputInstance } from 'element-plus'
-import { ArrowLeft, ArrowLeftRight, ArrowRight, Info, LockKeyhole, Moon, Server, ShieldCheck, Sun, UserRound } from 'lucide-vue-next'
+import { ArrowLeft, ArrowLeftRight, ArrowRight, Info, LockKeyhole, Server, ShieldCheck, UserRound } from 'lucide-vue-next'
 import { api, ApiError } from '../api'
 import AppLogo from '../components/AppLogo.vue'
-import { useTheme } from '../composables/useTheme'
+import ThemePicker from '../components/ThemePicker.vue'
 
 const router = useRouter()
 const route = useRoute()
-const { isDark, toggle } = useTheme()
 const form = reactive({ username: 'admin', password: '', code: '' })
 const loading = ref(false)
 const needCode = ref(false)
@@ -133,16 +131,7 @@ function back() {
   position: absolute;
   top: 16px;
   right: 16px;
-  width: 38px;
-  height: 38px;
-  border-radius: 10px;
-  border: 1px solid var(--g-border);
-  background: var(--el-bg-color);
-  color: var(--el-text-color-regular);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
+  z-index: 1;
 }
 .panel {
   width: 100%;
@@ -153,14 +142,14 @@ function back() {
   border: 1px solid var(--g-border);
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 20px 50px -20px rgba(15, 40, 35, 0.25);
+  box-shadow: 0 20px 50px -20px color-mix(in srgb, var(--g-hero-3) 45%, transparent);
 }
 .hero {
   padding: 40px;
-  color: #eafaf5;
+  color: #f2fbf8;
   background:
-    radial-gradient(circle at 85% 15%, rgba(159, 243, 220, 0.25), transparent 40%),
-    linear-gradient(150deg, #0f8a71 0%, #0b5f4f 60%, #083f35 100%);
+    radial-gradient(circle at 85% 15%, color-mix(in srgb, var(--g-logo-dot) 28%, transparent), transparent 40%),
+    linear-gradient(150deg, var(--g-hero-1) 0%, var(--g-hero-2) 60%, var(--g-hero-3) 100%);
   display: flex;
   flex-direction: column;
 }
