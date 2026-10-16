@@ -1,0 +1,21 @@
+/* 品牌色与管理界面默认主题（翠绿）保持一致 */
+:root {
+  --vp-c-brand-1: #0e7c66;
+  --vp-c-brand-2: #12967d;
+  --vp-c-brand-3: #18a888;
+  --vp-c-brand-soft: rgba(14, 124, 102, 0.12);
+  --vp-font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif;
+}
+
+.dark {
+  --vp-c-brand-1: #3ed1ae;
+  --vp-c-brand-2: #26b896;
+  --vp-c-brand-3: #18a888;
+  --vp-c-brand-soft: rgba(62, 209, 174, 0.16);
+}
+
+/* 表头与表内链接不折行，避免「文档」「查看」这类短文字被竖排拆成两行 */
+.vp-doc th,
+.vp-doc td a {
+  white-space: nowrap;
+}

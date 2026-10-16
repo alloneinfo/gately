@@ -1,0 +1,18 @@
+{
+  "name": "gately-website",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "sync": "node scripts/sync-docs.mjs",
+    "dev": "pnpm sync && vitepress dev",
+    "build": "pnpm sync && vitepress build",
+    "preview": "vitepress preview",
+    "deploy:site": "bash scripts/deploy.sh"
+  },
+  "devDependencies": {
+    "lucide-vue-next": "^1.0.0",
+    "vitepress": "^1.6.4",
+    "vue": "^3.5.44"
+  }
+}

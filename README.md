@@ -29,7 +29,7 @@ Lucky 功能强大，但闭源、二进制加壳，配置文件经过混淆，�
 | 网络唤醒 | 魔术包广播、在线探测 |
 | WebDAV | 多用户、独立目录、只读 |
 | 计划任务 | cron 表达式，命令或 HTTP 请求，执行记录 |
-| 安全与设置 | 两步验证（TOTP）、登录失败限流、安全入口、仅内网访问、管理界面 HTTPS、API 令牌、自定义 DNS（支持 DoH）、时区、配置备份与恢复 |
+| 安全与设置 | 两步验证（TOTP）、登录失败限流、安全入口、仅内网访问、管理界面 HTTPS、多 API 令牌（按模块读写授权）、自定义 DNS（支持 DoH）、时区、配置备份与恢复 |
 | 迁移 | 导入 Lucky 的 `.lkcf` 或整站配置 zip：端口转发、DDNS、STUN、证书、反向代理、WAF、网络唤醒、Web 终端、WebDAV、基础设置 |
 
 ## 快速开始
@@ -59,6 +59,18 @@ docker logs gately 2>&1 | grep 初始密码
 ```
 
 参数：`-c` 配置目录（也可用环境变量 `GATELY_CONFIG_DIR`），`-listen` 覆盖管理界面监听地址，`-version` 输出版本。
+
+### API 调用
+
+在管理后台“API 令牌”页创建令牌（可建多个，按模块分别授予只读或读写，可设过期时间，创建后明文只显示一次），脚本即可批量调用管理接口：
+
+```bash
+curl -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns/tasks
+```
+
+账号、两步验证、令牌管理以及备份、恢复、重启、系统设置接口只能使用登录会话。全部接口、所需权限与数据结构见管理后台“API 文档”页，也可以用 `make api-docs` 导出到 [docs/api](docs/api)（`openapi.json` 与 `API.md`），官网 https://gately.cn 发布时直接引用。
+
+从旧版升级时，原来的全局 API 令牌会自动变成一条“遗留令牌”（值不变，拥有全部模块权限），建议在 API 令牌页收紧权限或换成新令牌。
 
 ### Tailscale、frp、cloudflared
 
@@ -90,6 +102,8 @@ make lint     # gofmt、go vet、前端类型检查
 | 用真实 Lucky 配置验证导入 | `GATELY_LUCKY_SAMPLE` 等，见各模块 `TestImportRealSample` |
 
 目录结构与技术选型见 [docs/ROADMAP.md](docs/ROADMAP.md)。
+
+官网（[gately.cn](https://gately.cn)）源码在 `website/`，基于 VitePress：`cd website && pnpm install && pnpm dev`；`pnpm deploy:site` 构建并同步到服务器。
 
 ## 贡献约定
 
