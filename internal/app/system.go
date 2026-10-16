@@ -162,6 +162,9 @@ func (a *App) scheduleRestart() {
 	}()
 }
 
+// restartProcess 执行重启，测试中可替换。
+var restartProcess = execSelf
+
 // execSelf 用当前可执行文件替换进程；失败时退出，由 Docker / systemd 的重启策略拉起。
 func execSelf() {
 	exe, err := os.Executable()

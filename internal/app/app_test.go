@@ -3,6 +3,7 @@ package app
 import (
 	"archive/zip"
 	"bytes"
+	"context"
 	"encoding/json"
 	"io"
 	"log"
@@ -19,6 +20,7 @@ import (
 	"github.com/wangwanjie/gately/internal/auth"
 	"github.com/wangwanjie/gately/internal/module"
 	"github.com/wangwanjie/gately/internal/modules/portforward"
+	"github.com/wangwanjie/gately/internal/modules/ssl"
 )
 
 // newTestServer 启动带端口转发模块的测试实例，并以已知密码登录。
@@ -407,4 +409,28 @@ func TestIsPrivate(t *testing.T) {
 			t.Errorf("isPrivate(%s) != %v", ip, want)
 		}
 	}
+}
+
+// 重启时应先停止全部模块（含有后台协程的证书模块），再重新执行进程
+func TestRunRestartStopsModules(t *testing.T) {
+	called := make(chan struct{})
+	old := restartProcess
+	restartProcess = func() { close(called) }
+	defer func() { restartProcess = old }()
+	certs := ssl.New()
+	a, err := New(Options{ConfigDir: t.TempDir(), Listen: "127.0.0.1:" + strconv.Itoa(freeTCPPort(t)), Modules: []module.Module{certs, portforward.New()}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	a.logger = log.New(io.Discard, "", 0)
+	done := make(chan error, 1)
+	go func() { done <- a.Run(context.Background()) }()
+	time.Sleep(300 * time.Millisecond)
+	a.scheduleRestart()
+	select {
+	case <-called:
+	case <-time.After(15 * time.Second):
+		t.Fatal("重启卡住：模块未能停止")
+	}
+	<-done
 }

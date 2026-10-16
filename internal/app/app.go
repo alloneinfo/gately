@@ -175,7 +175,10 @@ func (a *App) Handler() http.Handler {
 }
 
 // Run 启动所有模块和管理服务，阻塞直到 ctx 取消。收到重启请求时停止全部服务后重新执行自身。
-func (a *App) Run(ctx context.Context) error {
+func (a *App) Run(parent context.Context) error {
+	// 模块使用独立的可取消上下文：重启时先取消，确保后台协程退出后 Stop 不会一直等待
+	ctx, cancelModules := context.WithCancel(parent)
+	defer cancelModules()
 	for _, e := range a.modules {
 		if err := e.mod.Start(ctx); err != nil {
 			// 单个模块失败不影响其他模块，错误写入日志供界面查看
@@ -221,6 +224,7 @@ func (a *App) Run(ctx context.Context) error {
 			for _, srv := range servers[1:] {
 				_ = srv.Close()
 			}
+			cancelModules()
 			a.stopModules()
 			return err
 		}
@@ -230,10 +234,11 @@ func (a *App) Run(ctx context.Context) error {
 	for _, srv := range servers {
 		_ = srv.Shutdown(shutdownCtx)
 	}
+	cancelModules()
 	a.stopModules()
 	if restart {
 		a.logger.Printf("正在重启…")
-		execSelf()
+		restartProcess()
 	}
 	return nil
 }
