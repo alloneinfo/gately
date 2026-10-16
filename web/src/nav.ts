@@ -6,6 +6,7 @@ import {
   Cloud,
   Container,
   FolderSync,
+  HardDrive,
   Globe,
   Info,
   LayoutDashboard,
@@ -66,12 +67,19 @@ export const navGroups: NavGroup[] = [
     ],
   },
   {
+    title: '网络存储',
+    items: [
+      { path: '/storage', title: '存储管理', icon: HardDrive, moduleId: 'storage', desc: '挂载本地目录或远程 WebDAV，在线管理文件' },
+      { path: '/webdav', title: 'WebDAV', icon: FolderSync, moduleId: 'webdav', desc: 'WebDAV 文件共享服务' },
+      { path: '/ftp', title: 'FTP 服务', icon: Server, moduleId: 'ftp', desc: 'FTP / FTPS 文件共享服务' },
+    ],
+  },
+  {
     title: '工具',
     items: [
       { path: '/wol', title: '网络唤醒', icon: Power, moduleId: 'wol', desc: '远程唤醒局域网设备' },
       { path: '/terminal', title: 'Web 终端', icon: SquareTerminal, moduleId: 'webterminal', desc: '浏览器中的 SSH 与本机 Shell' },
       { path: '/docker', title: 'Docker', icon: Container, moduleId: 'docker', desc: '容器管理与镜像更新' },
-      { path: '/webdav', title: 'WebDAV', icon: FolderSync, moduleId: 'webdav', desc: '文件共享服务' },
       { path: '/cron', title: '计划任务', icon: CalendarClock, moduleId: 'cron', desc: '定时执行命令或 HTTP 请求' },
     ],
   },

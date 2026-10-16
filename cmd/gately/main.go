@@ -19,8 +19,10 @@ import (
 	"github.com/wangwanjie/gately/internal/modules/ddns"
 	"github.com/wangwanjie/gately/internal/modules/docker"
 	"github.com/wangwanjie/gately/internal/modules/frp"
+	"github.com/wangwanjie/gately/internal/modules/ftp"
 	"github.com/wangwanjie/gately/internal/modules/portforward"
 	"github.com/wangwanjie/gately/internal/modules/ssl"
+	"github.com/wangwanjie/gately/internal/modules/storage"
 	"github.com/wangwanjie/gately/internal/modules/stun"
 	"github.com/wangwanjie/gately/internal/modules/tailscale"
 	"github.com/wangwanjie/gately/internal/modules/waf"
@@ -72,6 +74,8 @@ func main() {
 			cron.New(),
 			docker.New(),
 			webdav.New(certs),
+			ftp.New(certs),
+			storage.New(),
 		},
 	})
 	if err != nil {
