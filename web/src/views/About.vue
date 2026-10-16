@@ -5,7 +5,7 @@
       <div class="hero-glow" />
       <AppLogo :size="76" class="hero-logo" />
       <h1>Gately</h1>
-      <p class="tagline">开源、可审计的家庭网络网关</p>
+      <p class="tagline">开源、可审计的网络网关，家庭与服务器通用</p>
       <p class="intro">
         DDNS、STUN 穿透、端口转发、反向代理、SSL 证书、WAF 等常用能力集成在一个单文件中，可一键导入 Lucky 配置。每一行代码都公开，每一个对外地址都可见。
       </p>

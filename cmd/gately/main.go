@@ -1,4 +1,4 @@
-// Gately 是开源的家庭网络网关工具集：端口转发、DDNS、STUN 穿透、反向代理与证书管理。
+// Gately 是开源的网络网关工具集，适用于家庭网络、NAS 与各类服务器：端口转发、DDNS、STUN 穿透、反向代理与证书管理。
 package main
 
 import (

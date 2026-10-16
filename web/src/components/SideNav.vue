@@ -5,7 +5,7 @@
       <AppLogo :size="30" />
       <div v-if="!collapsed" class="brand-text">
         <div class="brand-name">Gately</div>
-        <div class="brand-sub">家庭网络网关</div>
+        <div class="brand-sub">网络网关工具集</div>
       </div>
     </div>
     <div class="groups">
