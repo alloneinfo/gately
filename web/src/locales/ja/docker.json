@@ -70,7 +70,8 @@
       "taskPull": "{name} のイメージを取得",
       "deleteConfirm": "プロジェクト {name} を down し、その Compose ディレクトリを削除します。元に戻せません。",
       "downDone": "down しました",
-      "noLogs": "(ログなし)"
+      "noLogs": "(ログなし)",
+      "selfHint": "このプロジェクトには Gately 自身が動作しているコンテナが含まれるため停止できません"
     }
   },
   "container": {
@@ -89,7 +90,8 @@
       "rename": "名前の変更",
       "commit": "イメージとしてコミット",
       "checkUpdate": "更新を確認",
-      "upgrade": "アップグレード"
+      "upgrade": "アップグレード",
+      "selfHint": "Gately 自身が動作しているコンテナのため停止できません"
     },
     "detail": {
       "overview": "概要",

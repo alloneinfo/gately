@@ -70,7 +70,8 @@
       "taskPull": "拉取镜像 {name}",
       "deleteConfirm": "将 down 项目 {name} 并删除其 Compose 目录，无法恢复。",
       "downDone": "已 down",
-      "noLogs": "(无日志)"
+      "noLogs": "(无日志)",
+      "selfHint": "该项目包含 Gately 自身所在的容器，无法停止"
     }
   },
   "container": {
@@ -89,7 +90,8 @@
       "rename": "重命名",
       "commit": "提交为镜像",
       "checkUpdate": "检查更新",
-      "upgrade": "升级"
+      "upgrade": "升级",
+      "selfHint": "这是 Gately 自身所在的容器，无法停止"
     },
     "detail": {
       "overview": "概览",

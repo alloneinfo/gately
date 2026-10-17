@@ -70,7 +70,8 @@
       "taskPull": "Descargar imágenes {name}",
       "deleteConfirm": "Esto ejecuta down en el proyecto {name} y elimina su directorio Compose. No se puede deshacer.",
       "downDone": "Down completado",
-      "noLogs": "(Sin registros)"
+      "noLogs": "(Sin registros)",
+      "selfHint": "Este proyecto contiene el contenedor donde se ejecuta Gately y no se puede detener"
     }
   },
   "container": {
@@ -89,7 +90,8 @@
       "rename": "Renombrar",
       "commit": "Guardar como imagen",
       "checkUpdate": "Buscar actualizaciones",
-      "upgrade": "Actualizar"
+      "upgrade": "Actualizar",
+      "selfHint": "Este es el contenedor donde se ejecuta Gately y no se puede detener"
     },
     "detail": {
       "overview": "Resumen",

@@ -70,7 +70,8 @@
       "taskPull": "Pull images {name}",
       "deleteConfirm": "This runs down on project {name} and deletes its Compose directory. This cannot be undone.",
       "downDone": "Down completed",
-      "noLogs": "(No logs)"
+      "noLogs": "(No logs)",
+      "selfHint": "This project contains the container running Gately and cannot be stopped"
     }
   },
   "container": {
@@ -89,7 +90,8 @@
       "rename": "Rename",
       "commit": "Commit as image",
       "checkUpdate": "Check for updates",
-      "upgrade": "Upgrade"
+      "upgrade": "Upgrade",
+      "selfHint": "This is the container running Gately and cannot be stopped"
     },
     "detail": {
       "overview": "Overview",

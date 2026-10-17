@@ -136,6 +136,7 @@ type ContainerView struct {
 	Project  string            `json:"project,omitempty"`
 	Update   *UpdateInfo       `json:"update,omitempty"`
 	Busy     bool              `json:"busy"`
+	Self     bool              `json:"self,omitempty"`
 	Labels   map[string]string `json:"-"`
 }
 

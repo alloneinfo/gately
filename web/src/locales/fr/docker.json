@@ -70,7 +70,8 @@
       "taskPull": "Télécharger les images {name}",
       "deleteConfirm": "Cette action exécute down sur le projet {name} et supprime son dossier Compose. Elle est irréversible.",
       "downDone": "down terminé",
-      "noLogs": "(Aucun journal)"
+      "noLogs": "(Aucun journal)",
+      "selfHint": "Ce projet contient le conteneur qui exécute Gately et ne peut pas être arrêté"
     }
   },
   "container": {
@@ -89,7 +90,8 @@
       "rename": "Renommer",
       "commit": "Valider en image",
       "checkUpdate": "Rechercher les mises à jour",
-      "upgrade": "Mettre à niveau"
+      "upgrade": "Mettre à niveau",
+      "selfHint": "Ce conteneur exécute Gately et ne peut pas être arrêté"
     },
     "detail": {
       "overview": "Vue d'ensemble",

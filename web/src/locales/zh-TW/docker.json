@@ -70,7 +70,8 @@
       "taskPull": "拉取映像檔 {name}",
       "deleteConfirm": "將 down 專案 {name} 並刪除其 Compose 目錄，無法復原。",
       "downDone": "已 down",
-      "noLogs": "(無日誌)"
+      "noLogs": "(無日誌)",
+      "selfHint": "該專案包含 Gately 自身所在的容器，無法停止"
     }
   },
   "container": {
@@ -89,7 +90,8 @@
       "rename": "重新命名",
       "commit": "提交為映像檔",
       "checkUpdate": "檢查更新",
-      "upgrade": "升級"
+      "upgrade": "升級",
+      "selfHint": "這是 Gately 自身所在的容器，無法停止"
     },
     "detail": {
       "overview": "概覽",

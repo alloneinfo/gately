@@ -98,7 +98,7 @@ func (m *Module) handleList(w http.ResponseWriter, r *http.Request) {
 	out := make([]ContainerView, 0, len(list))
 	for _, ct := range list {
 		v := ContainerView{ID: ct.ID, Name: ct.Name(), Image: ct.Image, ImageID: ct.ImageID, State: ct.State, Status: ct.Status, Created: ct.Created,
-			Project: ct.Labels["com.docker.compose.project"], Busy: m.busy[ct.ID], Ports: []string{}, Networks: []string{}, Mounts: len(ct.Mounts)}
+			Project: ct.Labels["com.docker.compose.project"], Busy: m.busy[ct.ID], Self: isSelfContainer(ct.ID), Ports: []string{}, Networks: []string{}, Mounts: len(ct.Mounts)}
 		if u, ok := m.updates[ct.ID]; ok {
 			u := u
 			v.Update = &u
@@ -189,6 +189,11 @@ func (m *Module) handleAction(w http.ResponseWriter, r *http.Request) {
 		httpx.Error(w, http.StatusBadRequest, "不支持的操作 %q", action)
 		return
 	}
+	// 停止、强杀、暂停自身会让 Gately 无法再被访问，直接拒绝
+	if isSelfContainer(id) && (action == "stop" || action == "kill" || action == "pause") {
+		httpx.Error(w, http.StatusBadRequest, "不能对 Gately 自身所在的容器执行 %s", action)
+		return
+	}
 	if err := c.Action(r.Context(), id, action); err != nil {
 		writeCtrErr(w, err)
 		return
@@ -226,6 +231,10 @@ func (m *Module) handleDelete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	id := r.PathValue("id")
+	if isSelfContainer(id) {
+		httpx.Error(w, http.StatusBadRequest, "不能删除 Gately 自身所在的容器")
+		return
+	}
 	vols := r.URL.Query().Get("volumes") == "1"
 	ctx, cancel := context.WithTimeout(r.Context(), stepTimeout)
 	defer cancel()

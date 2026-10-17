@@ -16,6 +16,7 @@ export interface ContainerView {
   ports: string[] | null
   project?: string
   busy: boolean
+  self?: boolean
   networks?: string[]
   mounts?: number
   started?: string
@@ -178,6 +179,7 @@ export interface ComposeProject {
   running: number
   services: ComposeService[]
   managed: boolean
+  self?: boolean
 }
 
 export interface ImageView {

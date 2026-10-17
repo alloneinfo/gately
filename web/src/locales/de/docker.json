@@ -70,7 +70,8 @@
       "taskPull": "Images {name} abrufen",
       "deleteConfirm": "Dadurch wird für das Projekt {name} down ausgeführt und sein Compose-Verzeichnis gelöscht. Das ist nicht rückgängig zu machen.",
       "downDone": "Down abgeschlossen",
-      "noLogs": "(Keine Protokolle)"
+      "noLogs": "(Keine Protokolle)",
+      "selfHint": "Dieses Projekt enthält den Container, in dem Gately läuft, und kann nicht gestoppt werden"
     }
   },
   "container": {
@@ -89,7 +90,8 @@
       "rename": "Umbenennen",
       "commit": "Als Image committen",
       "checkUpdate": "Nach Updates suchen",
-      "upgrade": "Aktualisieren"
+      "upgrade": "Aktualisieren",
+      "selfHint": "Dies ist der Container, in dem Gately läuft, und kann nicht gestoppt werden"
     },
     "detail": {
       "overview": "Übersicht",

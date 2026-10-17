@@ -38,7 +38,7 @@
         </Field>
         <template #actions>
           <el-button v-if="p.status !== 'running'" text type="primary" :icon="Play" class="btn" :loading="busy[p.name]" @click="simple(p, 'start')">{{ t('common.start') }}</el-button>
-          <el-button v-if="p.status !== 'stopped'" text type="danger" :icon="Square" class="btn" :loading="busy[p.name]" @click="stop(p)">{{ t('common.stop') }}</el-button>
+          <el-button v-if="p.status !== 'stopped'" text type="danger" :icon="Square" class="btn" :loading="busy[p.name]" :disabled="p.self" :title="p.self ? t('docker.compose.tab.selfHint') : ''" @click="stop(p)">{{ t('common.stop') }}</el-button>
           <el-button text :icon="RotateCw" class="btn" :loading="busy[p.name]" @click="simple(p, 'restart')">{{ t('common.restart') }}</el-button>
           <el-button text :icon="ScrollText" class="btn" @click="showLogs(p)">{{ t('docker.compose.tab.logs') }}</el-button>
           <el-dropdown trigger="click" @command="(c: string) => onCommand(p, c)">
@@ -48,8 +48,8 @@
                 <el-dropdown-item command="up" :icon="Rocket">{{ t('docker.compose.tab.up') }}</el-dropdown-item>
                 <el-dropdown-item command="pull" :icon="CloudDownload">{{ t('docker.compose.tab.pull') }}</el-dropdown-item>
                 <el-dropdown-item command="edit" :icon="FilePen">{{ t('docker.compose.tab.editFile') }}</el-dropdown-item>
-                <el-dropdown-item command="down" :icon="ArrowDownToLine" divided>{{ t('docker.compose.tab.down') }}</el-dropdown-item>
-                <el-dropdown-item v-if="p.managed" command="delete" :icon="Trash2">{{ t('docker.compose.tab.deleteProject') }}</el-dropdown-item>
+                <el-dropdown-item v-if="!p.self" command="down" :icon="ArrowDownToLine" divided>{{ t('docker.compose.tab.down') }}</el-dropdown-item>
+                <el-dropdown-item v-if="p.managed && !p.self" command="delete" :icon="Trash2">{{ t('docker.compose.tab.deleteProject') }}</el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>

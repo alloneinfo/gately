@@ -70,7 +70,8 @@
       "taskPull": "Baixar imagens {name}",
       "deleteConfirm": "Isso executa down no projeto {name} e exclui o diretório do Compose. Não é possível desfazer.",
       "downDone": "Down concluído",
-      "noLogs": "(Sem logs)"
+      "noLogs": "(Sem logs)",
+      "selfHint": "Este projeto contém o contêiner em que o Gately está rodando e não pode ser parado"
     }
   },
   "container": {
@@ -89,7 +90,8 @@
       "rename": "Renomear",
       "commit": "Commit como imagem",
       "checkUpdate": "Verificar atualizações",
-      "upgrade": "Atualizar"
+      "upgrade": "Atualizar",
+      "selfHint": "Este é o contêiner em que o Gately está rodando e não pode ser parado"
     },
     "detail": {
       "overview": "Visão geral",

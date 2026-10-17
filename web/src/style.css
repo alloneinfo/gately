@@ -215,7 +215,8 @@ a {
   overflow-y: auto;
 }
 .el-message-box {
-  max-width: calc(100vw - 32px);
+  /* 保留 Element 默认的 420px 宽度上限，仅在窄屏下收缩 */
+  max-width: min(var(--el-messagebox-width, 420px), calc(100vw - 32px));
 }
 .el-tag {
   --el-tag-border-radius: 6px;

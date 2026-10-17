@@ -58,6 +58,7 @@ type ComposeProjectView struct {
 	Running     int              `json:"running"`
 	Services    []ComposeService `json:"services"`
 	Managed     bool             `json:"managed"`
+	Self        bool             `json:"self,omitempty"`
 }
 
 // composeStatus 按运行数量给出项目状态。
@@ -148,6 +149,9 @@ func aggregateComposeProjects(cts []resContainer) []ComposeProjectView {
 			}
 			if ct.State == "running" {
 				v.Running++
+			}
+			if isSelfContainer(ct.ID) {
+				v.Self = true
 			}
 			v.Services = append(v.Services, ComposeService{Name: ct.Labels[labelService], State: ct.State, ContainerID: ct.ID, Image: ct.Image, Ports: portStrings(ct)})
 		}
@@ -575,6 +579,15 @@ func (m *Module) handleComposeAction(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		writeProjectErr(w, err)
 		return
+	}
+	// 项目包含 Gately 自身时，停止、暂停、down 会让 Gately 无法再被访问，直接拒绝
+	if action == "stop" || action == "pause" || action == "down" {
+		for _, ct := range p.Containers {
+			if isSelfContainer(ct.ID) {
+				httpx.Error(w, http.StatusBadRequest, "项目 %s 包含 Gately 自身所在的容器，不能执行 %s", name, action)
+				return
+			}
+		}
 	}
 	if len(p.Containers) == 0 {
 		httpx.Error(w, http.StatusBadRequest, "项目还没有容器，请先执行 up")
