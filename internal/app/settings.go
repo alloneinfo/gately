@@ -3,7 +3,6 @@ package app
 import (
 	"crypto/hmac"
 	"crypto/sha256"
-	"crypto/subtle"
 	"encoding/hex"
 	"errors"
 	"fmt"
@@ -16,7 +15,6 @@ import (
 	"time"
 
 	"github.com/wangwanjie/gately/internal/auth"
-	"github.com/wangwanjie/gately/internal/crud"
 	"github.com/wangwanjie/gately/internal/httpx"
 	"github.com/wangwanjie/gately/internal/logbuf"
 	"github.com/wangwanjie/gately/internal/resolver"
@@ -38,8 +36,9 @@ type Settings struct {
 	// MaxLoginFailures / LockMinutes 为登录限流参数
 	MaxLoginFailures int `json:"maxLoginFailures"`
 	LockMinutes      int `json:"lockMinutes"`
-	// APIToken 非空时允许脚本以 Authorization: Bearer <token> 调用管理 API
-	APIToken string `json:"apiToken"`
+	// LegacyAPIToken 是旧版的单个全局 API 令牌，仅用于启动时迁移为"遗留令牌"，迁移后清空。
+	// 现在的令牌由 apitoken 包管理，保存在 tokens.json。
+	LegacyAPIToken string `json:"apiToken,omitempty"`
 	// TimeZone 为 IANA 时区名，例如 Asia/Shanghai；为空使用系统时区
 	TimeZone string `json:"timeZone"`
 	// DNSServers 为自定义 DNS 服务器，影响所有出站域名解析（DDNS、Webhook、ACME 等）；
@@ -113,9 +112,6 @@ func (s *Settings) Validate() error {
 	if s.LockMinutes < 0 || s.LockMinutes > 7*24*60 {
 		return errors.New("锁定时长应在 1 分钟到 7 天之间")
 	}
-	if s.APIToken != "" && s.APIToken != crud.SecretMask && len(s.APIToken) < 16 {
-		return errors.New("API 令牌至少 16 个字符")
-	}
 	if s.TimeZone != "" {
 		if _, err := time.LoadLocation(s.TimeZone); err != nil {
 			return fmt.Errorf("时区 %q 无效", s.TimeZone)
@@ -170,7 +166,7 @@ func (a *App) settingsSnapshot() Settings {
 	return a.settings
 }
 
-// settingsView 是返回给前端的设置，API 令牌脱敏。
+// settingsView 是返回给前端的设置。
 type settingsView struct {
 	Settings
 	// SessionHours 为登录会话有效期，保存在账号中
@@ -181,9 +177,7 @@ type settingsView struct {
 
 func (a *App) viewSettings() settingsView {
 	s := a.settingsSnapshot()
-	if s.APIToken != "" {
-		s.APIToken = crud.SecretMask
-	}
+	s.LegacyAPIToken = ""
 	s.ThirdLogin = s.ThirdLogin.Masked()
 	return settingsView{Settings: s, SessionHours: a.auth.TokenTTLHours(), RestartRequired: a.restartPending.Load()}
 }
@@ -217,9 +211,8 @@ func (a *App) handlePutSettings(w http.ResponseWriter, r *http.Request) {
 		httpx.Error(w, http.StatusBadRequest, "%v", err)
 		return
 	}
-	if next.APIToken == crud.SecretMask {
-		next.APIToken = old.APIToken
-	}
+	// 令牌不再通过全局设置管理，忽略客户端提交的旧字段
+	next.LegacyAPIToken = old.LegacyAPIToken
 	// 命令行 -listen 覆盖时不改写配置文件中的地址
 	if a.opts.Listen != "" {
 		next.Listen = a.fileListen
@@ -241,11 +234,6 @@ func (a *App) handlePutSettings(w http.ResponseWriter, r *http.Request) {
 	a.applyRuntime()
 	a.sysLogs.Add(logbuf.LevelInfo, "settings", "全局设置已更新")
 	httpx.OK(w, a.viewSettings())
-}
-
-// handleGenerateToken 生成一个新的随机 API 令牌（不保存，由前端填入后提交）。
-func (a *App) handleGenerateToken(w http.ResponseWriter, r *http.Request) {
-	httpx.OK(w, map[string]string{"token": randomHex(24)})
 }
 
 // ---- 访问控制中间件 ----
@@ -270,19 +258,6 @@ func isPrivate(ip string) bool {
 		return true
 	}
 	return netip.MustParsePrefix("100.64.0.0/10").Contains(a)
-}
-
-// apiTokenOK 判断请求是否携带有效的 API 令牌。
-func (a *App) apiTokenOK(r *http.Request) bool {
-	tok := a.settingsSnapshot().APIToken
-	if tok == "" {
-		return false
-	}
-	h := r.Header.Get("Authorization")
-	if !strings.HasPrefix(h, "Bearer ") {
-		return false
-	}
-	return subtle.ConstantTimeCompare([]byte(strings.TrimPrefix(h, "Bearer ")), []byte(tok)) == 1
 }
 
 // accessControl 依次执行：内网限制、强制 HTTPS、安全入口。
@@ -311,7 +286,7 @@ func (a *App) accessControl(next http.Handler) http.Handler {
 			}
 			c, err := r.Cookie(entryCookie)
 			passed := err == nil && hmac.Equal([]byte(c.Value), []byte(a.entryValue(s.SafePath)))
-			if !passed && !a.apiTokenOK(r) {
+			if !passed && !a.tokenPeek(r) {
 				// 已登录的会话（例如修改安全入口之前登录）仍可访问
 				if _, ok := a.auth.Verify(auth.TokenFromRequest(r)); !ok {
 					http.NotFound(w, r)

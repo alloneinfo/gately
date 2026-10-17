@@ -77,6 +77,15 @@ func (c *Collection[T]) Register(r module.Router, path string) {
 	r.HandleFunc("DELETE "+path+"/{key}", c.remove)
 	r.HandleFunc("PUT "+path+"/{key}/enable", c.enable)
 	r.HandleFunc("PUT "+path+"-order", c.order)
+
+	// 登记接口文档：列表返回条目数组，新增与修改的请求体为条目本身
+	var item T
+	module.DocOf(r, "GET "+path, module.Doc{Summary: "列表", Resp: []T{}})
+	module.DocOf(r, "POST "+path, module.Doc{Summary: "新增", Req: &item, Resp: &item})
+	module.DocOf(r, "PUT "+path+"/{key}", module.Doc{Summary: "修改", Req: &item, Resp: &item})
+	module.DocOf(r, "DELETE "+path+"/{key}", module.Doc{Summary: "删除"})
+	module.DocOf(r, "PUT "+path+"/{key}/enable", module.Doc{Summary: "启用或停用", Req: &enableRequest{}})
+	module.DocOf(r, "PUT "+path+"-order", module.Doc{Summary: "调整排序", Req: &orderRequest{}})
 }
 
 func (c *Collection[T]) list(w http.ResponseWriter, r *http.Request) {

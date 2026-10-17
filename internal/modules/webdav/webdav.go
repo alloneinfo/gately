@@ -179,7 +179,8 @@ func (m *Module) restartLocked() {
 		m.logs.Add(logbuf.LevelError, "", "监听失败: "+err.Error())
 		return
 	}
-	m.srv = &http.Server{Handler: http.HandlerFunc(m.serve), ReadHeaderTimeout: 30 * time.Second}
+	// ErrorLog 把 TLS 握手失败等错误写入模块运行日志
+	m.srv = &http.Server{Handler: http.HandlerFunc(m.serve), ReadHeaderTimeout: 30 * time.Second, ErrorLog: m.logs.Logger("").ServerErrorLog()}
 	if m.settings.TLS {
 		if m.certs == nil {
 			ln.Close()

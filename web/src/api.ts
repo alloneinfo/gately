@@ -153,8 +153,6 @@ export interface SystemSettings {
   lanOnly: boolean
   maxLoginFailures: number
   lockMinutes: number
-  // 已设置时为 ********，空字符串表示未启用
-  apiToken: string
   timeZone: string
   dnsServers: string[] | null
   logLines: number
@@ -231,4 +229,47 @@ export function formatDuration(sec: number): string {
     return `${h} 小时 ${m} 分`
   }
   return `${m} 分钟`
+}
+
+// TokenView 对应 GET /api/tokens 的一项（不含明文）。
+export interface TokenView {
+  id: string
+  name: string
+  // 令牌明文的前缀提示，便于识别
+  hint: string
+  scopes: string[]
+  // 升级前的单令牌（拥有全部权限）
+  legacy: boolean
+  disabled: boolean
+  expired: boolean
+  createdAt: string
+  expiresAt: string | null
+  lastUsedAt: string | null
+  lastUsedIP: string
+}
+
+// ScopeDomain 对应 GET /api/tokens/scopes 的一项：一个权限域。
+export interface ScopeDomain {
+  id: string
+  title: string
+  // 系统内置域（状态、日志、导入），其余为功能模块
+  builtin: boolean
+  // 仅有写权限
+  writeOnly?: boolean
+  // 仅有读权限
+  readOnly?: boolean
+}
+
+// TokenInput 是创建/编辑令牌的请求体。
+export interface TokenInput {
+  name: string
+  scopes: string[]
+  expiresAt: string | null
+  disabled?: boolean
+}
+
+// TokenSecret 是创建/重新生成令牌的响应，secret 明文只返回这一次。
+export interface TokenSecret {
+  token: TokenView
+  secret: string
 }

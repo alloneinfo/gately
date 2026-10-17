@@ -51,3 +51,23 @@ type SummaryItem struct {
 type Summarizer interface {
 	Summary() []SummaryItem
 }
+
+// Doc 描述一个接口的文档信息，Req / Resp 为示例值（通常是结构体指针或切片），用于生成数据结构说明。
+type Doc struct {
+	Summary string
+	Req     any
+	Resp    any
+}
+
+// DocRouter 由支持接口文档的 Router 实现。模块可通过类型断言为接口补充文档信息，
+// pattern 与 HandleFunc 的写法一致（相对模块前缀）。
+type DocRouter interface {
+	Doc(pattern string, d Doc)
+}
+
+// DocOf 在 Router 支持文档时登记接口文档，否则忽略。
+func DocOf(r Router, pattern string, d Doc) {
+	if dr, ok := r.(DocRouter); ok {
+		dr.Doc(pattern, d)
+	}
+}

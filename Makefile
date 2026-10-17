@@ -5,7 +5,7 @@ LDFLAGS := -s -w \
 	-X github.com/wangwanjie/gately/internal/version.Commit=$(COMMIT) \
 	-X github.com/wangwanjie/gately/internal/version.BuildDate=$(shell date -u +%Y-%m-%dT%H:%M:%SZ)
 
-.PHONY: all web build test lint run clean docker
+.PHONY: all web build test lint run clean docker api-docs
 
 all: web build
 
@@ -17,6 +17,10 @@ build:
 
 test:
 	go test -race ./...
+
+# 导出 API 文档（openapi.json 与 API.md），供官网 https://gately.cn 发布
+api-docs:
+	go run ./cmd/gately -api-docs docs/api
 
 lint:
 	gofmt -l . | (! grep .)
