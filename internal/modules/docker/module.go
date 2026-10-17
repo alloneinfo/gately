@@ -62,6 +62,9 @@ type Module struct {
 
 	composeMu    sync.Mutex
 	composeCache composeInfo
+
+	// 总览页摘要缓存
+	summary summaryCache
 }
 
 // New 创建模块。

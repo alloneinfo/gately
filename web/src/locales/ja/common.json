@@ -52,5 +52,7 @@
   "durationDaysHours": "{d} 日 {h} 時間",
   "durationHoursMinutes": "{h} 時間 {m} 分",
   "durationMinutes": "{m} 分",
-  "aiTranslated": "このインターフェースは AI で翻訳されており、不正確な表現が含まれる場合があります。GitHub で改善にご協力ください。"
+  "aiTranslated": "このインターフェースは AI で翻訳されており、不正確な表現が含まれる場合があります。GitHub で改善にご協力ください。",
+  "viewCard": "カード表示",
+  "viewCompact": "コンパクト表示"
 }

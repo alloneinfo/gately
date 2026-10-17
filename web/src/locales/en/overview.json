@@ -47,5 +47,7 @@
     "fds": "File descriptors",
     "gcCount": "GC count",
     "configDir": "Config directory"
-  }
+  },
+  "peakAvg": "Peak / avg",
+  "peakRate": "Peak ↓{rx} ↑{tx}"
 }

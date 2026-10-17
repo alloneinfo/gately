@@ -1,6 +1,7 @@
 <template>
   <div>
     <PageHeader :title="t('ssl.title')" :desc="t('ssl.desc')" :icon="ShieldCheck">
+      <CompactToggle v-model="compact" />
       <el-button :icon="SlidersHorizontal" @click="openSettings">{{ t('ssl.settingsTitle') }}</el-button>
       <el-button type="primary" :icon="Plus" @click="openEditor()">{{ t('ssl.addCert') }}</el-button>
     </PageHeader>
@@ -14,9 +15,9 @@
       @enable="enableRenew"
     />
 
-    <div v-loading="loading" class="card-list">
+    <div v-loading="loading" class="card-list" :class="{ 'is-compact': compact }">
       <el-empty v-if="!loading && !certs.length" :description="t('ssl.empty')" />
-      <EntityCard v-for="c in certs" :key="c.key" :off="!c.enable">
+      <EntityCard v-for="c in certs" :key="c.key" :off="!c.enable" :compact="compact">
         <template #lead>
           <el-switch :model-value="c.enable" @change="(v: string | number | boolean) => toggle(c, Boolean(v))" />
         </template>
@@ -183,7 +184,9 @@ import { Download, Pencil, Plus, RotateCw, ShieldCheck, SlidersHorizontal, Trash
 import { api } from '../api'
 import PageHeader from '../components/PageHeader.vue'
 import ModuleBanner from '../components/ModuleBanner.vue'
+import CompactToggle from '../components/CompactToggle.vue'
 import EntityCard from '../components/EntityCard.vue'
+import { useCompactView } from '../composables/useCompactView'
 import Field from '../components/Field.vue'
 import StatusBadge, { type StatusType } from '../components/StatusBadge.vue'
 import LogCard from '../components/LogCard.vue'
@@ -236,6 +239,7 @@ interface CertView extends Cert {
 const certs = ref<CertView[]>([])
 const providers = ref<ProviderMeta[]>([])
 const loading = ref(true)
+const compact = useCompactView('ssl')
 const editorVisible = ref(false)
 const saving = ref(false)
 const editing = ref<Cert>(emptyCert())

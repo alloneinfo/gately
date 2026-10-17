@@ -1,12 +1,13 @@
 <template>
   <div>
     <PageHeader :title="t('cron.title')" :desc="t('cron.desc')" :icon="CalendarClock">
+      <CompactToggle v-model="compact" />
       <el-button type="primary" :icon="Plus" @click="openEditor()">{{ t('cron.addTask') }}</el-button>
     </PageHeader>
 
-    <div class="card-list">
+    <div class="card-list" :class="{ 'is-compact': compact }">
       <el-empty v-if="!tasks.length" :description="t('cron.empty')" />
-      <EntityCard v-for="tk in tasks" :key="tk.key" :off="!tk.enable">
+      <EntityCard :compact="compact" v-for="tk in tasks" :key="tk.key" :off="!tk.enable">
         <template #lead>
           <el-switch :model-value="tk.enable" @change="(v: string | number | boolean) => toggle(tk, Boolean(v))" />
         </template>
@@ -95,7 +96,9 @@ import { ElMessage } from 'element-plus'
 import { CalendarClock, History, Pencil, Play, Plus, Trash2 } from 'lucide-vue-next'
 import { api } from '../api'
 import PageHeader from '../components/PageHeader.vue'
+import CompactToggle from '../components/CompactToggle.vue'
 import EntityCard from '../components/EntityCard.vue'
+import { useCompactView } from '../composables/useCompactView'
 import Field from '../components/Field.vue'
 import StatusBadge, { type StatusType } from '../components/StatusBadge.vue'
 import LogCard from '../components/LogCard.vue'
@@ -129,6 +132,7 @@ interface TaskView extends Task {
 }
 
 const { t } = useI18n()
+const compact = useCompactView('cron')
 const { isMobile, labelPosition } = useFormLayout()
 const tasks = ref<TaskView[]>([])
 const editorVisible = ref(false)

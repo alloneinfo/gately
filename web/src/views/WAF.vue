@@ -1,12 +1,13 @@
 <template>
   <div>
     <PageHeader :title="t('waf.title')" :desc="t('waf.desc')" :icon="ShieldHalf">
+      <CompactToggle v-model="compact" />
       <el-button type="primary" :icon="Plus" @click="openEditor()">{{ t('waf.addInstance') }}</el-button>
     </PageHeader>
 
-    <div class="card-list">
+    <div class="card-list" :class="{ 'is-compact': compact }">
       <el-empty v-if="!instances.length" :description="t('waf.empty')" />
-      <EntityCard v-for="w in instances" :key="w.key" :off="!w.enable">
+      <EntityCard :compact="compact" v-for="w in instances" :key="w.key" :off="!w.enable">
         <template #lead>
           <el-switch :model-value="w.enable" @change="(v: string | number | boolean) => toggle(w, Boolean(v))" />
         </template>
@@ -105,7 +106,9 @@ import { ElMessage } from 'element-plus'
 import { Pencil, Plus, ShieldHalf, Trash2 } from 'lucide-vue-next'
 import { api } from '../api'
 import PageHeader from '../components/PageHeader.vue'
+import CompactToggle from '../components/CompactToggle.vue'
 import EntityCard from '../components/EntityCard.vue'
+import { useCompactView } from '../composables/useCompactView'
 import Field from '../components/Field.vue'
 import StatusBadge, { type StatusType } from '../components/StatusBadge.vue'
 import LogCard from '../components/LogCard.vue'
@@ -138,6 +141,7 @@ interface InstanceView extends Instance {
 }
 
 const { t } = useI18n()
+const compact = useCompactView('waf')
 const { isMobile, labelPosition } = useFormLayout()
 const instances = ref<InstanceView[]>([])
 const crsFiles = ref<string[]>([])

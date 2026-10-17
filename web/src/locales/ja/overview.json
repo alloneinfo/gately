@@ -47,5 +47,7 @@
     "fds": "ファイルディスクリプター",
     "gcCount": "GC 回数",
     "configDir": "設定ディレクトリ"
-  }
+  },
+  "peakAvg": "ピーク / 平均",
+  "peakRate": "ピーク ↓{rx} ↑{tx}"
 }

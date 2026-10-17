@@ -8,6 +8,7 @@
         <el-radio-button value="stopped">{{ t('common.stopped') }}</el-radio-button>
       </el-radio-group>
       <el-checkbox v-model="grouped">{{ t('docker.container.list.groupByProject') }}</el-checkbox>
+      <CompactToggle v-model="compact" />
       <div class="t-ops">
         <el-button type="primary" :icon="Plus" @click="openForm()">{{ t('docker.container.list.newContainer') }}</el-button>
         <el-button :icon="SearchCheck" :loading="checkingAll" @click="checkAll">{{ t('docker.container.list.checkAll') }}</el-button>
@@ -24,8 +25,8 @@
           <span class="g-name">{{ g.name }}</span>
           <span class="g-count">{{ t('docker.container.list.groupCount', { total: g.items.length, running: g.items.filter((c) => c.state === 'running').length }) }}</span>
         </button>
-        <div v-show="!grouped || !collapsed[g.key]" class="card-list">
-          <ContainerCard v-for="c in g.items" :key="c.id" :c="c" :selected="selectedIds.has(c.id)" :hide-project="grouped" @command="onCommand" @select="onSelect" />
+        <div v-show="!grouped || !collapsed[g.key]" class="card-list" :class="{ 'is-compact': compact }">
+          <ContainerCard v-for="c in g.items" :key="c.id" :c="c" :selected="selectedIds.has(c.id)" :hide-project="grouped" :compact="compact" @command="onCommand" @select="onSelect" />
         </div>
       </div>
     </div>
@@ -66,6 +67,8 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { ArrowUpCircle, ChevronRight, Plus, RefreshCw, Search, SearchCheck } from 'lucide-vue-next'
 import { api } from '../../api'
 import { useFormLayout } from '../../composables/useIsMobile'
+import CompactToggle from '../../components/CompactToggle.vue'
+import { useCompactView } from '../../composables/useCompactView'
 import ContainerCard from './ContainerCard.vue'
 import ContainerDetail from './ContainerDetail.vue'
 import ContainerForm from './ContainerForm.vue'
@@ -81,6 +84,7 @@ const loading = ref(false)
 const keyword = ref('')
 const stateFilter = ref('all')
 const grouped = ref(true)
+const compact = useCompactView('docker.containers')
 const collapsed = reactive<Record<string, boolean>>({})
 const selectedIds = ref(new Set<string>())
 const checkingAll = ref(false)

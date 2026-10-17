@@ -52,5 +52,7 @@
   "durationDaysHours": "{d} 天 {h} 小时",
   "durationHoursMinutes": "{h} 小时 {m} 分",
   "durationMinutes": "{m} 分钟",
-  "aiTranslated": "界面由 AI 翻译，可能存在不准确之处。欢迎在 GitHub 上帮助改进。"
+  "aiTranslated": "界面由 AI 翻译，可能存在不准确之处。欢迎在 GitHub 上帮助改进。",
+  "viewCard": "卡片视图",
+  "viewCompact": "紧凑视图"
 }

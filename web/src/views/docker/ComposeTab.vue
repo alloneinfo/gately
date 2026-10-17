@@ -2,6 +2,7 @@
   <div>
     <div class="toolbar">
       <el-input v-model="keyword" :placeholder="t('docker.compose.tab.search')" clearable :prefix-icon="Search" class="t-search" />
+      <CompactToggle v-model="compact" />
       <div class="t-ops">
         <el-button type="primary" :icon="Plus" @click="newProject">{{ t('docker.compose.tab.newProject') }}</el-button>
         <el-button :icon="RefreshCw" :loading="loading" @click="load">{{ t('common.refresh') }}</el-button>
@@ -11,9 +12,9 @@
       {{ t('docker.compose.tab.noCliDesc') }}
     </el-alert>
 
-    <div v-loading="loading && !projects.length" class="card-list">
+    <div v-loading="loading && !projects.length" class="card-list" :class="{ 'is-compact': compact }">
       <el-empty v-if="!loading && !filtered.length" :description="t('docker.compose.tab.empty')" />
-      <EntityCard v-for="p in filtered" :key="p.name" :off="p.status === 'stopped'">
+      <EntityCard :compact="compact" v-for="p in filtered" :key="p.name" :off="p.status === 'stopped'">
         <template #lead>
           <div class="ico" :class="{ on: p.status !== 'stopped' }"><Layers :size="18" /></div>
         </template>
@@ -84,7 +85,9 @@ import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ArrowDownToLine, CloudDownload, Ellipsis, FilePen, Layers, Play, Plus, RefreshCw, Rocket, RotateCw, ScrollText, Search, Square, Trash2 } from 'lucide-vue-next'
 import { api, ApiError } from '../../api'
+import CompactToggle from '../../components/CompactToggle.vue'
 import EntityCard from '../../components/EntityCard.vue'
+import { useCompactView } from '../../composables/useCompactView'
 import Field from '../../components/Field.vue'
 import StatusBadge, { type StatusType } from '../../components/StatusBadge.vue'
 import { useIsMobile } from '../../composables/useIsMobile'
@@ -94,6 +97,7 @@ import { trackTask } from './tasks'
 import type { ComposeProject } from './types'
 
 const { t } = useI18n()
+const compact = useCompactView('docker.compose')
 
 const isMobile = useIsMobile()
 const info = dockerInfo

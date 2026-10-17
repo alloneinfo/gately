@@ -1,6 +1,6 @@
 <template>
   <!-- 列表项卡片：桌面与移动端共用一套模板，字段区按宽度自动换列 -->
-  <div class="entity" :class="{ 'is-off': off }">
+  <div class="entity" :class="{ 'is-off': off, 'is-compact': compact }">
     <div class="entity-head">
       <div v-if="$slots.lead" class="entity-lead"><slot name="lead" /></div>
       <div class="entity-titles">
@@ -19,8 +19,8 @@
 </template>
 
 <script setup lang="ts">
-// off 为 true 时整体置灰，表示该项已停用
-defineProps<{ off?: boolean }>()
+// off 为 true 时整体置灰，表示该项已停用；compact 为 true 时压缩成单行（仅桌面宽度生效）
+defineProps<{ off?: boolean; compact?: boolean }>()
 </script>
 
 <style scoped>
@@ -121,6 +121,94 @@ defineProps<{ off?: boolean }>()
 .is-off .entity-body,
 .is-off .entity-extra {
   opacity: 0.6;
+}
+/* 紧凑视图：标题、状态、字段、操作排成一行，字段不显示标签，超长内容省略 */
+@media (min-width: 768px) {
+  .is-compact {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    column-gap: 14px;
+    padding: 0 8px 0 14px;
+    min-height: 40px;
+  }
+  .is-compact .entity-head {
+    flex: 0 0 300px;
+    min-width: 0;
+    padding: 0;
+    gap: 10px;
+  }
+  .is-compact .entity-title {
+    flex-wrap: nowrap;
+    font-size: 14px;
+  }
+  .is-compact .entity-title :deep(> span:first-child) {
+    min-width: 4em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .is-compact .entity-title :deep(> *:not(:first-child)) {
+    flex-shrink: 0;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+  }
+  .is-compact .entity-sub {
+    display: none;
+  }
+  .is-compact .entity-body {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    gap: 14px;
+    padding: 0;
+  }
+  .is-compact .entity-body :deep(.field) {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .is-compact .entity-body :deep(.field.wide) {
+    flex: 2 1 0;
+  }
+  .is-compact .entity-body :deep(.field-label) {
+    display: none;
+  }
+  .is-compact .entity-body :deep(.field-value) {
+    font-size: 12px;
+    line-height: 1.4;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  /* 字段内的多行内容（端口、更新状态、次要说明）并入同一行 */
+  .is-compact .entity-body :deep(.field-value > div) {
+    display: inline;
+    margin: 0 0 0 6px;
+  }
+  .is-compact .entity-body :deep(.field-value > div:first-child) {
+    margin-left: 0;
+  }
+  .is-compact .entity-extra {
+    flex: 1 0 100%;
+    order: 9;
+    padding: 0 0 6px;
+  }
+  .is-compact .entity-head + .entity-extra {
+    padding-top: 0;
+  }
+  .is-compact .entity-foot {
+    flex: 0 0 auto;
+    padding: 0;
+    min-height: 0;
+    border-top: none;
+    flex-wrap: nowrap;
+  }
+  .is-compact .entity-head + .entity-foot {
+    margin-top: 0;
+  }
+  .is-compact .entity-meta {
+    display: none;
+  }
 }
 @media (max-width: 767.98px) {
   .entity-head {

@@ -1,6 +1,7 @@
 <template>
   <div>
     <PageHeader :title="t('ddns.title')" :desc="t('ddns.desc')" :icon="Globe">
+      <CompactToggle v-model="compact" />
       <div class="module-toggle">
         <span class="meta">{{ t('ddns.module') }}</span>
         <el-switch v-model="settings.enable" inline-prompt :active-text="t('ddns.switchOn')" :inactive-text="t('ddns.switchOff')" @change="saveSettings" />
@@ -10,9 +11,9 @@
 
     <ModuleBanner v-if="moduleOff" :title="t('ddns.moduleOffTitle')" :desc="t('ddns.moduleOffDesc')" :loading="enabling" @enable="enableModule" />
 
-    <div v-loading="loading" class="card-list">
+    <div v-loading="loading" class="card-list" :class="{ 'is-compact': compact }">
       <el-empty v-if="!loading && !tasks.length" :description="t('ddns.empty')" />
-      <EntityCard v-for="tk in tasks" :key="tk.key" :off="!tk.enable || moduleOff">
+      <EntityCard :compact="compact" v-for="tk in tasks" :key="tk.key" :off="!tk.enable || moduleOff">
         <template #lead>
           <el-switch :model-value="tk.enable" @change="(v: string | number | boolean) => toggle(tk, Boolean(v))" />
         </template>
@@ -164,7 +165,9 @@ import { Globe, Pencil, Plus, RefreshCw, Trash2, Zap } from 'lucide-vue-next'
 import { api } from '../api'
 import PageHeader from '../components/PageHeader.vue'
 import ModuleBanner from '../components/ModuleBanner.vue'
+import CompactToggle from '../components/CompactToggle.vue'
 import EntityCard from '../components/EntityCard.vue'
+import { useCompactView } from '../composables/useCompactView'
 import Field from '../components/Field.vue'
 import StatusBadge, { type StatusType } from '../components/StatusBadge.vue'
 import LogCard from '../components/LogCard.vue'
@@ -233,6 +236,7 @@ interface TaskView extends Task {
 type Badge = { type: StatusType; text: string; title?: string }
 
 const { t } = useI18n()
+const compact = useCompactView('ddns')
 const { isMobile, labelPosition } = useFormLayout()
 const tasks = ref<TaskView[]>([])
 const providers = ref<ProviderMeta[]>([])

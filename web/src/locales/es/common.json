@@ -52,5 +52,7 @@
   "durationDaysHours": "{d} d {h} h",
   "durationHoursMinutes": "{h} h {m} min",
   "durationMinutes": "{m} min",
-  "aiTranslated": "La interfaz se tradujo con IA y puede contener imprecisiones. Ayuda a mejorarla en GitHub."
+  "aiTranslated": "La interfaz se tradujo con IA y puede contener imprecisiones. Ayuda a mejorarla en GitHub.",
+  "viewCard": "Vista de tarjetas",
+  "viewCompact": "Vista compacta"
 }

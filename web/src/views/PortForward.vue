@@ -1,15 +1,16 @@
 <template>
   <div>
     <PageHeader :title="t('portForward.title')" :desc="t('portForward.desc')" :icon="ArrowLeftRight">
+      <CompactToggle v-model="compact" />
       <el-button :icon="SlidersHorizontal" @click="openSettings">{{ t('portForward.globalSettings') }}</el-button>
       <el-button type="primary" :icon="Plus" @click="openEditor()">{{ t('portForward.addRule') }}</el-button>
     </PageHeader>
 
     <ModuleBanner v-if="settings && !settings.enable" :title="t('portForward.moduleOffTitle')" :loading="enabling" @enable="enableModule" />
 
-    <div v-loading="loading" class="card-list">
+    <div v-loading="loading" class="card-list" :class="{ 'is-compact': compact }">
       <el-empty v-if="!loading && !rules.length" :description="t('portForward.empty')" />
-      <EntityCard v-for="r in rules" :key="r.key" :off="!r.enable || moduleOff">
+      <EntityCard :compact="compact" v-for="r in rules" :key="r.key" :off="!r.enable || moduleOff">
         <template #lead>
           <el-switch :model-value="r.enable" @change="(v: string | number | boolean) => toggle(r, Boolean(v))" />
         </template>
@@ -116,7 +117,9 @@ import { ArrowLeftRight, Pencil, Plus, SlidersHorizontal, Trash2, TriangleAlert 
 import { api, formatBytes } from '../api'
 import PageHeader from '../components/PageHeader.vue'
 import ModuleBanner from '../components/ModuleBanner.vue'
+import CompactToggle from '../components/CompactToggle.vue'
 import EntityCard from '../components/EntityCard.vue'
+import { useCompactView } from '../composables/useCompactView'
 import Field from '../components/Field.vue'
 import StatusBadge, { type StatusType } from '../components/StatusBadge.vue'
 import LogCard from '../components/LogCard.vue'
@@ -161,6 +164,7 @@ const protocols = [
 ]
 
 const { t } = useI18n()
+const compact = useCompactView('portforward')
 const { isMobile, labelPosition } = useFormLayout()
 const rules = ref<RuleView[]>([])
 const loading = ref(true)

@@ -1,5 +1,5 @@
 <template>
-  <EntityCard :off="c.state !== 'running'">
+  <EntityCard :off="c.state !== 'running'" :compact="compact">
     <template #lead>
       <el-checkbox :model-value="selected" class="sel" @update:model-value="(v: unknown) => emit('select', c.id, !!v)" />
     </template>
@@ -65,7 +65,7 @@ import type { ContainerView } from './types'
 
 const { t } = useI18n()
 
-defineProps<{ c: ContainerView; selected: boolean; hideProject?: boolean }>()
+defineProps<{ c: ContainerView; selected: boolean; hideProject?: boolean; compact?: boolean }>()
 const emit = defineEmits<{ command: [c: ContainerView, cmd: string]; select: [id: string, v: boolean] }>()
 </script>
 

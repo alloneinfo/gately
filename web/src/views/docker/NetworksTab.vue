@@ -2,6 +2,7 @@
   <div>
     <div class="toolbar">
       <el-input v-model="keyword" :placeholder="t('docker.network.search')" clearable :prefix-icon="Search" class="t-search" />
+      <CompactToggle v-model="compact" />
       <div class="t-ops">
         <el-button type="primary" :icon="Plus" @click="openCreate">{{ t('docker.network.create') }}</el-button>
         <el-button :icon="Eraser" @click="prune">{{ t('docker.network.pruneUnused') }}</el-button>
@@ -9,9 +10,9 @@
       </div>
     </div>
 
-    <div v-loading="loading && !networks.length" class="card-list">
+    <div v-loading="loading && !networks.length" class="card-list" :class="{ 'is-compact': compact }">
       <el-empty v-if="!loading && !filtered.length" :description="t('docker.network.empty')" />
-      <EntityCard v-for="n in filtered" :key="n.id">
+      <EntityCard :compact="compact" v-for="n in filtered" :key="n.id">
         <template #lead>
           <div class="ico"><Network :size="18" /></div>
         </template>
@@ -94,7 +95,9 @@ import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Eraser, Network, Plug, Plus, RefreshCw, Search, Trash2, Unplug } from 'lucide-vue-next'
 import { api } from '../../api'
+import CompactToggle from '../../components/CompactToggle.vue'
 import EntityCard from '../../components/EntityCard.vue'
+import { useCompactView } from '../../composables/useCompactView'
 import Field from '../../components/Field.vue'
 import StatusBadge from '../../components/StatusBadge.vue'
 import { useFormLayout } from '../../composables/useIsMobile'
@@ -103,6 +106,7 @@ import { reportError } from './state'
 import type { ContainerView, NetworkView } from './types'
 
 const { t } = useI18n()
+const compact = useCompactView('docker.networks')
 
 const { isMobile, labelPosition } = useFormLayout()
 const networks = ref<NetworkView[]>([])

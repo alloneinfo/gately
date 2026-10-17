@@ -2,6 +2,7 @@
   <div class="overview">
     <!-- ============ 主机信息 ============ -->
     <section class="hero">
+      <div class="hero-grid" aria-hidden="true" />
       <div class="hero-main">
         <div class="hero-icon"><Server :size="26" :stroke-width="1.8" /></div>
         <div class="hero-text">
@@ -13,7 +14,7 @@
           <div class="hero-meta">
             <span v-if="host?.bootTime"><Power :size="13" />{{ t('overview.systemUptime', { duration: formatDuration(now / 1000 - host.bootTime) }) }}</span>
             <span v-if="status"><Clock :size="13" />{{ status.timeZone }}</span>
-            <span v-if="host"><RefreshCw :size="13" />{{ t('overview.updatedAt', { time: new Date(host.sampledAt).toLocaleTimeString() }) }}</span>
+            <span v-if="host"><span class="live-dot" /><RefreshCw :size="13" />{{ t('overview.updatedAt', { time: new Date(host.sampledAt).toLocaleTimeString() }) }}</span>
           </div>
         </div>
       </div>
@@ -43,6 +44,7 @@
             <div class="gi-main" :title="host?.cpu.model">{{ host?.cpu.model || t('overview.processor') }}</div>
             <div class="gi-row"><span>{{ t('overview.cores') }}</span><b>{{ host?.cpu.cores ?? '-' }}</b></div>
             <div class="gi-row"><span>{{ t('overview.load') }}</span><b class="mono">{{ loadText }}</b></div>
+            <div class="gi-row"><span>{{ t('overview.peakAvg') }}</span><b>{{ peakAvg(hist.cpu) }}</b></div>
           </div>
         </div>
         <Sparkline :series="[{ values: hist.cpu, color: 'var(--el-color-primary)' }]" :max="100" :capacity="HISTORY" :height="36" class="gauge-spark" />
@@ -58,6 +60,7 @@
             <div class="gi-row">
               <span>{{ t('overview.swap') }}</span><b>{{ mem && mem.swapTotal ? `${formatBytes(mem.swapUsed)} / ${formatBytes(mem.swapTotal)}` : t('overview.swapOff') }}</b>
             </div>
+            <div class="gi-row"><span>{{ t('overview.peakAvg') }}</span><b>{{ peakAvg(hist.mem) }}</b></div>
           </div>
         </div>
         <Sparkline :series="[{ values: hist.mem, color: 'var(--g-chart-2)' }]" :max="100" :capacity="HISTORY" :height="36" class="gauge-spark" />
@@ -97,13 +100,14 @@
             </div>
           </div>
         </div>
+        <div class="net-peak">{{ t('overview.peakRate', { rx: formatRate(Math.max(0, ...hist.rx)), tx: formatRate(Math.max(0, ...hist.tx)) }) }}</div>
         <Sparkline
           :series="[
             { values: hist.rx, color: 'var(--el-color-primary)' },
             { values: hist.tx, color: 'var(--g-chart-2)' },
           ]"
           :capacity="HISTORY"
-          :height="64"
+          :height="56"
           class="gauge-spark"
         />
       </div>
@@ -111,7 +115,8 @@
 
     <!-- ============ 网卡与服务状态 ============ -->
     <section class="cols">
-      <div class="g-card">
+      <div class="col">
+      <div class="g-card ifaces-card">
         <div class="g-card-head">
           <div class="g-card-title"><Network :size="16" />{{ t('overview.interfaces') }}</div>
           <span class="g-card-desc">{{ host ? t('overview.count', { count: host.interfaces.length }) : '' }}</span>
@@ -152,9 +157,24 @@
         </div>
       </div>
 
-      <div class="g-card">
+      <!-- ============ Gately 进程 ============ -->
+      <section class="g-card proc grow">
+        <div class="g-card-head">
+          <div class="g-card-title"><Boxes :size="16" />{{ t('overview.process') }}</div>
+          <span class="g-card-desc">{{ status ? `${status.os}/${status.arch} · ${status.goVersion}` : '' }}</span>
+        </div>
+        <div class="proc-grid">
+          <div v-for="it in procItems" :key="it.label" class="proc-item" :class="{ wide: it.wide }">
+            <div class="proc-label">{{ it.label }}</div>
+            <div class="proc-value" :class="{ mono: it.mono }" :title="it.value">{{ it.value }}</div>
+          </div>
+        </div>
+      </section>
+      </div>
+      <div class="g-card services-card">
         <div class="g-card-head">
           <div class="g-card-title"><HeartPulse :size="16" />{{ t('overview.serviceStatus') }}</div>
+          <StatusBadge :type="health.type" :text="health.text" />
         </div>
         <div class="services">
           <router-link v-for="s in services" :key="s.id" :to="s.path" class="service">
@@ -168,20 +188,6 @@
             </span>
           </router-link>
           <div v-if="status && !services.length" class="empty">{{ t('overview.noServices') }}</div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============ Gately 进程 ============ -->
-    <section class="g-card proc">
-      <div class="g-card-head">
-        <div class="g-card-title"><Boxes :size="16" />{{ t('overview.process') }}</div>
-        <span class="g-card-desc">{{ status ? `${status.os}/${status.arch} · ${status.goVersion}` : '' }}</span>
-      </div>
-      <div class="proc-grid">
-        <div v-for="it in procItems" :key="it.label" class="proc-item" :class="{ wide: it.wide }">
-          <div class="proc-label">{{ it.label }}</div>
-          <div class="proc-value" :class="{ mono: it.mono }" :title="it.value">{{ it.value }}</div>
         </div>
       </div>
     </section>
@@ -344,6 +350,15 @@ function formatTime(v: string) {
   return isNaN(d.getTime()) ? v : d.toLocaleString()
 }
 
+// 趋势序列的峰值与均值，没有采样时显示 -
+function peakAvg(arr: number[]) {
+  if (!arr.length) {
+    return '-'
+  }
+  const avg = arr.reduce((a, b) => a + b, 0) / arr.length
+  return `${Math.max(...arr).toFixed(0)}% / ${avg.toFixed(0)}%`
+}
+
 function visibleV6(list: string[]) {
   // 优先展示全局地址，链路本地地址收进“更多”
   return list.filter((a) => !a.startsWith('fe80:')).slice(0, 2)
@@ -415,6 +430,8 @@ onBeforeUnmount(() => {
 
 /* ---------- 主机信息 ---------- */
 .hero {
+  position: relative;
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -427,6 +444,38 @@ onBeforeUnmount(() => {
     radial-gradient(120% 140% at 0% 0%, var(--el-color-primary-light-9) 0%, transparent 55%),
     radial-gradient(80% 120% at 100% 100%, color-mix(in srgb, var(--g-chart-2) 10%, transparent) 0%, transparent 60%),
     var(--el-bg-color);
+}
+/* 科技感网格底纹，向右下渐隐 */
+.hero-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(var(--g-border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--g-border) 1px, transparent 1px);
+  background-size: 28px 28px;
+  opacity: 0.55;
+  -webkit-mask-image: radial-gradient(70% 120% at 100% 0%, #000 0%, transparent 70%);
+  mask-image: radial-gradient(70% 120% at 100% 0%, #000 0%, transparent 70%);
+}
+.hero-main,
+.hero-side {
+  position: relative;
+}
+.live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--el-color-success);
+  animation: g-pulse 2s ease-out infinite;
+}
+@keyframes g-pulse {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--el-color-success) 55%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 7px transparent;
+  }
 }
 .hero-main {
   display: flex;
@@ -516,6 +565,7 @@ onBeforeUnmount(() => {
   gap: 16px;
 }
 .gauge-card {
+  position: relative;
   display: flex;
   flex-direction: column;
   padding: 16px 18px 0;
@@ -524,6 +574,23 @@ onBeforeUnmount(() => {
   border-radius: var(--g-radius);
   overflow: hidden;
   min-width: 0;
+}
+/* 卡片顶部渐变高光线 */
+.gauge-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--el-color-primary), var(--g-chart-2), transparent);
+  opacity: 0.75;
+}
+.net-peak {
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--el-text-color-placeholder);
+  font-variant-numeric: tabular-nums;
 }
 .gauge-head {
   display: flex;
@@ -642,7 +709,24 @@ onBeforeUnmount(() => {
   display: grid;
   grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
   gap: 16px;
-  align-items: start;
+  align-items: stretch;
+}
+/* 左列：网卡 + 进程信息，右列：服务状态；两列等高，空白由卡片内部均分填充 */
+.col {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+.col > .g-card + .g-card {
+  margin-top: 0;
+}
+.grow {
+  flex: 1;
+}
+.services-card {
+  display: flex;
+  flex-direction: column;
 }
 .public-ips {
   display: flex;
@@ -745,11 +829,15 @@ onBeforeUnmount(() => {
   color: var(--el-text-color-placeholder);
 }
 .services {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
   padding: 6px;
 }
 .service {
+  flex: 1;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 10px;
   padding: 10px;
   border-radius: 8px;
@@ -764,10 +852,23 @@ onBeforeUnmount(() => {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  margin-top: 6px;
   flex-shrink: 0;
   background: var(--el-color-success);
   box-shadow: 0 0 0 3px var(--el-color-success-light-9);
+}
+.svc-dot.error {
+  animation: g-blink 1.2s ease-in-out infinite;
+}
+@keyframes g-blink {
+  50% {
+    opacity: 0.35;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .live-dot,
+  .svc-dot.error {
+    animation: none;
+  }
 }
 .svc-dot.warn {
   background: var(--el-color-warning);
@@ -825,7 +926,13 @@ onBeforeUnmount(() => {
 }
 
 /* ---------- 进程信息 ---------- */
+.proc.grow {
+  display: flex;
+  flex-direction: column;
+}
 .proc-grid {
+  flex: 1;
+  grid-auto-rows: 1fr;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
   /* 抵消最后一列与最后一行多出的分隔线 */

@@ -2,6 +2,7 @@
   <div>
     <div class="toolbar">
       <el-input v-model="keyword" :placeholder="t('docker.image.list.search')" clearable :prefix-icon="Search" class="t-search" />
+      <CompactToggle v-model="compact" />
       <div class="t-ops">
         <el-button type="primary" :icon="CloudDownload" @click="pullVisible = true">{{ t('docker.image.list.pull') }}</el-button>
         <el-button :icon="Hammer" @click="buildVisible = true">{{ t('docker.image.list.build') }}</el-button>
@@ -13,9 +14,9 @@
     </div>
     <el-progress v-if="importing" :percentage="importPercent" :stroke-width="10" class="gap" />
 
-    <div v-loading="loading && !images.length" class="card-list">
+    <div v-loading="loading && !images.length" class="card-list" :class="{ 'is-compact': compact }">
       <el-empty v-if="!loading && !filtered.length" :description="t('docker.image.list.empty')" />
-      <EntityCard v-for="img in filtered" :key="img.id" :off="img.containers === 0 && img.dangling">
+      <EntityCard :compact="compact" v-for="img in filtered" :key="img.id" :off="img.containers === 0 && img.dangling">
         <template #lead>
           <div class="ico"><Disc3 :size="18" /></div>
         </template>
@@ -102,7 +103,9 @@ import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { CloudDownload, CloudUpload, Disc3, Download, Ellipsis, Eraser, Hammer, Info, PackageOpen, RefreshCw, Search, Tag, Trash2 } from 'lucide-vue-next'
 import { api } from '../../api'
+import CompactToggle from '../../components/CompactToggle.vue'
 import EntityCard from '../../components/EntityCard.vue'
+import { useCompactView } from '../../composables/useCompactView'
 import Field from '../../components/Field.vue'
 import StatusBadge from '../../components/StatusBadge.vue'
 import { useFormLayout } from '../../composables/useIsMobile'
@@ -115,6 +118,7 @@ import { trackTask } from './tasks'
 import type { ImageView } from './types'
 
 const { t } = useI18n()
+const compact = useCompactView('docker.images')
 
 const { isMobile, labelPosition } = useFormLayout()
 const images = ref<ImageView[]>([])

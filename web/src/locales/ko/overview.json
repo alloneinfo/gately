@@ -47,5 +47,7 @@
     "fds": "파일 핸들",
     "gcCount": "GC 횟수",
     "configDir": "설정 디렉터리"
-  }
+  },
+  "peakAvg": "최고 / 평균",
+  "peakRate": "최고 ↓{rx} ↑{tx}"
 }

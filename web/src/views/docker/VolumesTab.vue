@@ -2,6 +2,7 @@
   <div>
     <div class="toolbar">
       <el-input v-model="keyword" :placeholder="t('docker.volume.search')" clearable :prefix-icon="Search" class="t-search" />
+      <CompactToggle v-model="compact" />
       <div class="t-ops">
         <el-button type="primary" :icon="Plus" @click="openCreate">{{ t('docker.volume.create') }}</el-button>
         <el-button :icon="PackageOpen" @click="openImport()">{{ t('common.import') }}</el-button>
@@ -10,9 +11,9 @@
       </div>
     </div>
 
-    <div v-loading="loading && !volumes.length" class="card-list">
+    <div v-loading="loading && !volumes.length" class="card-list" :class="{ 'is-compact': compact }">
       <el-empty v-if="!loading && !filtered.length" :description="t('docker.volume.empty')" />
-      <EntityCard v-for="v in filtered" :key="v.name">
+      <EntityCard :compact="compact" v-for="v in filtered" :key="v.name">
         <template #lead>
           <div class="ico"><Database :size="18" /></div>
         </template>
@@ -88,7 +89,9 @@ import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Database, Download, Eraser, PackageOpen, Plus, RefreshCw, Search, Trash2, Upload } from 'lucide-vue-next'
 import { api } from '../../api'
+import CompactToggle from '../../components/CompactToggle.vue'
 import EntityCard from '../../components/EntityCard.vue'
+import { useCompactView } from '../../composables/useCompactView'
 import Field from '../../components/Field.vue'
 import StatusBadge from '../../components/StatusBadge.vue'
 import { useFormLayout } from '../../composables/useIsMobile'
@@ -97,6 +100,7 @@ import { reportError } from './state'
 import type { VolumeView } from './types'
 
 const { t } = useI18n()
+const compact = useCompactView('docker.volumes')
 
 const { isMobile, labelPosition } = useFormLayout()
 const volumes = ref<VolumeView[]>([])

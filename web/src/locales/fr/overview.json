@@ -47,5 +47,7 @@
     "fds": "Descripteurs de fichiers",
     "gcCount": "Nombre de GC",
     "configDir": "Répertoire de configuration"
-  }
+  },
+  "peakAvg": "Pic / moy.",
+  "peakRate": "Pic ↓{rx} ↑{tx}"
 }

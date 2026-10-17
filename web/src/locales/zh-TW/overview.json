@@ -47,5 +47,7 @@
     "fds": "檔案描述元",
     "gcCount": "GC 次數",
     "configDir": "設定目錄"
-  }
+  },
+  "peakAvg": "峰值 / 平均",
+  "peakRate": "峰值 ↓{rx} ↑{tx}"
 }

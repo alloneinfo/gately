@@ -47,5 +47,7 @@
     "fds": "文件句柄",
     "gcCount": "GC 次数",
     "configDir": "配置目录"
-  }
+  },
+  "peakAvg": "峰值 / 均值",
+  "peakRate": "峰值 ↓{rx} ↑{tx}"
 }

@@ -47,5 +47,7 @@
     "fds": "Descriptores de archivo",
     "gcCount": "Recuento de GC",
     "configDir": "Directorio de configuración"
-  }
+  },
+  "peakAvg": "Pico / media",
+  "peakRate": "Pico ↓{rx} ↑{tx}"
 }

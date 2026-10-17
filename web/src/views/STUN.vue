@@ -1,6 +1,7 @@
 <template>
   <div>
     <PageHeader :title="t('stun.title')" :desc="t('stun.desc')" :icon="Radar">
+      <CompactToggle v-model="compact" />
       <el-button :icon="SlidersHorizontal" @click="openSettings">{{ t('stun.globalSettings') }}</el-button>
       <el-button type="primary" :icon="Plus" @click="openEditor()">{{ t('stun.addRule') }}</el-button>
     </PageHeader>
@@ -11,9 +12,9 @@
       {{ t('stun.intro') }}
     </el-alert>
 
-    <div v-loading="loading" class="card-list">
+    <div v-loading="loading" class="card-list" :class="{ 'is-compact': compact }">
       <el-empty v-if="!loading && !rules.length" :description="t('stun.empty')" />
-      <EntityCard v-for="r in rules" :key="r.key" :off="!r.enable || moduleOff">
+      <EntityCard v-for="r in rules" :key="r.key" :off="!r.enable || moduleOff" :compact="compact">
         <template #lead>
           <el-switch :model-value="r.enable" @change="(v: string | number | boolean) => toggle(r, Boolean(v))" />
         </template>
@@ -205,7 +206,9 @@ import { Pencil, Plus, Radar, RotateCw, SlidersHorizontal, Trash2 } from 'lucide
 import { api, formatBytes } from '../api'
 import PageHeader from '../components/PageHeader.vue'
 import ModuleBanner from '../components/ModuleBanner.vue'
+import CompactToggle from '../components/CompactToggle.vue'
 import EntityCard from '../components/EntityCard.vue'
+import { useCompactView } from '../composables/useCompactView'
 import Field from '../components/Field.vue'
 import StatusBadge, { type StatusType } from '../components/StatusBadge.vue'
 import LogCard from '../components/LogCard.vue'
@@ -279,6 +282,7 @@ const enabling = ref(false)
 const rules = ref<RuleView[]>([])
 const interfaces = ref<NetInterface[]>([])
 const loading = ref(true)
+const compact = useCompactView('stun')
 const editorVisible = ref(false)
 const saving = ref(false)
 const tab = ref('basic')

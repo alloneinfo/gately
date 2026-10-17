@@ -47,5 +47,7 @@
     "fds": "Dateideskriptoren",
     "gcCount": "GC-Anzahl",
     "configDir": "Konfigurationsverzeichnis"
-  }
+  },
+  "peakAvg": "Spitze / Ø",
+  "peakRate": "Spitze ↓{rx} ↑{tx}"
 }
