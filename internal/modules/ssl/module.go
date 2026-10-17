@@ -8,6 +8,7 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
+	"github.com/wangwanjie/gately/internal/events"
 	stdlog "log"
 	"net/http"
 	"os"
@@ -45,6 +46,9 @@ type CertState struct {
 	LastAttempt time.Time `json:"lastAttempt,omitzero"`
 	NextRetry   time.Time `json:"nextRetry,omitzero"`
 	MappingNote string    `json:"mappingNote,omitempty"`
+
+	// lastExpiryWarn 是上次发出到期事件的时间，用于每天最多提醒一次
+	lastExpiryWarn time.Time
 }
 
 // Module 是证书模块。
@@ -230,11 +234,13 @@ func (m *Module) checkAll(force bool) {
 		switch c.Source {
 		case SourceFile:
 			m.reloadFileLocked(c)
+			m.warnExpiringLocked(c, now)
 		case SourceACME:
 			st := m.stateLocked(c.Key)
 			if st.Obtaining || (!force && now.Before(st.NextRetry)) {
 				continue
 			}
+			m.warnExpiringLocked(c, now)
 			if ok, reason := m.needsRenewal(c, now); ok {
 				m.logs.Logger(label(c)).Infof("需要签发：%s", reason)
 				// 排队时即标记，避免手动续签与定时检查重复签发同一证书
@@ -321,6 +327,13 @@ func (m *Module) obtainNow(key string) {
 		st.LastError = err.Error()
 		st.NextRetry = time.Now().Add(failureBackoff)
 		log.Errorf("%v", err)
+		events.Publish(events.Event{
+			Type:    events.SSLRenewFailed,
+			Source:  label(c),
+			Level:   events.LevelError,
+			Title:   "证书签发或续期失败：" + label(c),
+			Message: err.Error(),
+		})
 		if res != nil && res.Account != nil {
 			_ = m.saveLocked()
 		}
@@ -697,4 +710,34 @@ func (m *Module) handlePutSettings(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	httpx.OK(w, s)
+}
+
+// expiryWarnDays 是证书剩余天数低于该值时发出到期事件。
+const expiryWarnDays = 7
+
+// warnExpiringLocked 在证书即将到期时发布事件。同一证书每天最多一次，调用方需持有 m.mu。
+func (m *Module) warnExpiringLocked(c *Cert, now time.Time) {
+	if c.CertPEM == "" {
+		return
+	}
+	info, err := certInfo(c.CertPEM)
+	if err != nil {
+		return
+	}
+	days := int(info.NotAfter.Sub(now).Hours() / 24)
+	if days >= expiryWarnDays {
+		return
+	}
+	st := m.stateLocked(c.Key)
+	if !st.lastExpiryWarn.IsZero() && now.Sub(st.lastExpiryWarn) < 24*time.Hour {
+		return
+	}
+	st.lastExpiryWarn = now
+	events.Publish(events.Event{
+		Type:    events.SSLExpiring,
+		Source:  label(c),
+		Level:   events.LevelWarn,
+		Title:   "证书即将到期：" + label(c),
+		Message: fmt.Sprintf("剩余 %d 天（到期时间 %s）", days, info.NotAfter.Format("2006-01-02")),
+	})
 }

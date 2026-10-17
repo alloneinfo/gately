@@ -136,32 +136,18 @@
           </div>
         </div>
 
-        <div v-if="form" class="g-card">
+        <!-- 单令牌已升级为多令牌 + 权限控制，管理入口迁移到独立页面 -->
+        <div class="g-card">
           <div class="g-card-head">
             <div class="g-card-title"><Code2 :size="16" />API 令牌</div>
-            <StatusBadge :type="form.apiToken ? 'ok' : 'off'" :text="form.apiToken ? '已启用' : '未启用'" />
           </div>
           <div class="g-card-body">
-            <p class="desc">
-              设置后，脚本可以通过请求头 <span class="mono code">Authorization: Bearer &lt;令牌&gt;</span> 调用管理 API，无需登录。令牌等同于管理员权限，请妥善保管。
+            <p class="desc token-moved">
+              API 令牌已升级为多令牌与细粒度权限控制：可创建多个令牌，分别设置过期时间与各功能模块的只读 / 读写权限。
             </p>
-            <div class="token-row">
-              <el-input
-                v-model="form.apiToken"
-                :placeholder="'未设置（不允许令牌访问）'"
-                class="mono token-input"
-                :readonly="form.apiToken === mask"
-              />
-              <div class="token-ops">
-                <el-button :icon="Sparkles" @click="genToken">生成</el-button>
-                <el-button :icon="Copy" :disabled="!form.apiToken || form.apiToken === mask" @click="copy(form.apiToken)">复制</el-button>
-                <el-button :icon="Eraser" :disabled="!form.apiToken" @click="form.apiToken = ''">清空</el-button>
-              </div>
-            </div>
-            <div class="form-help">
-              <template v-if="form.apiToken === mask">已保存的令牌不会再次显示；如遗失请生成新令牌。</template>
-              <template v-else-if="form.apiToken">新令牌保存后生效，请先复制保存。</template>
-              <template v-else>保存后将停用令牌访问。</template>
+            <div class="token-links">
+              <router-link to="/api-tokens"><el-button type="primary" :icon="KeyRound">管理 API 令牌</el-button></router-link>
+              <router-link to="/api-docs"><el-button :icon="BookOpen">查看 API 文档</el-button></router-link>
             </div>
           </div>
         </div>
@@ -366,13 +352,16 @@
                 <label class="file-btn">
                   <FileArchive :size="14" />
                   <span>{{ restoreFile ? restoreFile.name : '选择备份文件' }}</span>
-                  <input type="file" accept=".zip" @change="onRestorePick" />
+                  <input type="file" accept=".zip,.enc" @change="onRestorePick" />
                 </label>
+                <el-input v-if="restoreFile?.name.endsWith('.enc')" v-model="restorePassword" show-password placeholder="备份口令" style="width: 160px" />
                 <el-button type="danger" :icon="ArchiveRestore" :disabled="!restoreFile" :loading="restoring" @click="confirmRestore">恢复</el-button>
               </div>
             </div>
           </div>
         </div>
+
+        <BackupSchedule />
       </el-tab-pane>
 
     </el-tabs>
@@ -383,10 +372,12 @@
 
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref, watch } from 'vue'
+import BackupSchedule from '../components/BackupSchedule.vue'
 import { useRoute, useRouter } from 'vue-router'
 import QRCode from 'qrcode'
 import { ElMessage, ElMessageBox, type UploadUserFile } from 'element-plus'
 import {
+  BookOpen,
   ArchiveRestore,
   CircleCheck,
   Code2,
@@ -395,7 +386,6 @@ import {
   DoorClosed,
   Download,
   DownloadCloud,
-  Eraser,
   Eye,
   FileArchive,
   FileText,
@@ -424,7 +414,6 @@ import { useFormLayout } from '../composables/useIsMobile'
 const route = useRoute()
 const router = useRouter()
 const { labelPosition } = useFormLayout()
-const mask = '********'
 const tabs = ['account', 'access', 'runtime', 'backup']
 const tab = ref(typeof route.query.tab === 'string' && tabs.includes(route.query.tab) ? route.query.tab : 'account')
 const overlay = ref<InstanceType<typeof RestartOverlay>>()
@@ -518,18 +507,6 @@ async function saveSettings() {
 function resetSettings() {
   if (savedJSON.value) {
     form.value = { ...JSON.parse(savedJSON.value), restartRequired: form.value?.restartRequired ?? false }
-  }
-}
-
-async function genToken() {
-  try {
-    const r = await api.post<{ token: string }>('/api/system/token')
-    if (form.value) {
-      form.value.apiToken = r.token
-    }
-    ElMessage.success('已生成新令牌，复制后点击保存生效')
-  } catch (e) {
-    ElMessage.error((e as Error).message)
   }
 }
 
@@ -715,6 +692,7 @@ async function confirmImport() {
 // ---------- 备份与恢复 ----------
 const downloading = ref(false)
 const restoreFile = ref<File>()
+const restorePassword = ref('')
 const restoring = ref(false)
 
 async function downloadBackup() {
@@ -776,6 +754,9 @@ async function confirmRestore() {
   }
   const fd = new FormData()
   fd.append('file', restoreFile.value, restoreFile.value.name)
+  if (restorePassword.value) {
+    fd.append('password', restorePassword.value)
+  }
   restoring.value = true
   try {
     const r = await api.post<{ restored: number; previous: string }>('/api/system/restore', fd)
@@ -916,21 +897,13 @@ onMounted(async () => {
   word-break: break-all;
   margin: 4px 0;
 }
-.token-row {
+.token-moved {
+  margin-bottom: 12px;
+}
+.token-links {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
-}
-.token-input {
-  flex: 1;
-  min-width: 240px;
-}
-.token-ops {
-  display: flex;
-  gap: 8px;
-}
-.token-ops .el-button + .el-button {
-  margin-left: 0;
 }
 .w-280 {
   width: 280px;
@@ -1084,16 +1057,6 @@ div.warns {
   .w-280,
   .w-480 {
     width: 100%;
-  }
-  .token-input {
-    min-width: 0;
-    flex-basis: 100%;
-  }
-  .token-ops {
-    width: 100%;
-  }
-  .token-ops .el-button {
-    flex: 1;
   }
   .settings-tabs :deep(.el-tabs__item) {
     padding: 0 12px;

@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"github.com/wangwanjie/gately/internal/backup"
 	"io"
 	"log"
 	"mime/multipart"
@@ -310,15 +311,23 @@ func TestSettingsSafePathAndToken(t *testing.T) {
 	var s settingsView
 	_ = json.Unmarshal(body, &s)
 	s.SafePath = "my-entry"
-	s.APIToken = "0123456789abcdef0123"
 	s.SessionHours = 24
 	if code, body := doJSON(t, c, "PUT", srv.URL+"/api/system/settings", s); code != 200 {
 		t.Fatalf("保存设置失败 %d %s", code, body)
 	}
 	_, body = doJSON(t, c, "GET", srv.URL+"/api/system/settings", nil)
 	_ = json.Unmarshal(body, &s)
-	if s.SafePath != "/my-entry" || s.APIToken != "********" || s.SessionHours != 24 {
-		t.Fatalf("设置未生效或令牌未脱敏: %s", body)
+	if s.SafePath != "/my-entry" || s.SessionHours != 24 {
+		t.Fatalf("设置未生效: %s", body)
+	}
+	// 通过令牌接口创建只读状态令牌
+	_, body = doJSON(t, c, "POST", srv.URL+"/api/tokens", map[string]any{"name": "测试", "scopes": []string{"status:read"}})
+	var created struct {
+		Secret string `json:"secret"`
+	}
+	_ = json.Unmarshal(body, &created)
+	if !strings.HasPrefix(created.Secret, "gtl_") {
+		t.Fatalf("创建令牌失败: %s", body)
 	}
 
 	// 新浏览器：未经过安全入口时首页与登录接口均返回 404
@@ -339,7 +348,7 @@ func TestSettingsSafePathAndToken(t *testing.T) {
 
 	// API 令牌可直接调用接口（不需要安全入口与会话）
 	req, _ := http.NewRequest("GET", srv.URL+"/api/system/info", nil)
-	req.Header.Set("Authorization", "Bearer 0123456789abcdef0123")
+	req.Header.Set("Authorization", "Bearer "+created.Secret)
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		t.Fatal(err)
@@ -433,4 +442,43 @@ func TestRunRestartStopsModules(t *testing.T) {
 		t.Fatal("重启卡住：模块未能停止")
 	}
 	<-done
+}
+
+// TestRestoreEncryptedBackup 验证加密备份缺口令返回 422，口令正确时可恢复。
+func TestRestoreEncryptedBackup(t *testing.T) {
+	a, srv, c := loginApp(t)
+	enc, err := backup.Encrypt(zipOf(t, map[string]string{"account.json": `{"user":"x"}`}), "pw")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if code, _ := uploadFiles(t, c, srv.URL+"/api/system/restore", "file", map[string][]byte{"b.zip.enc": enc}); code != 422 {
+		t.Fatalf("缺少口令应返回 422，实际 %d", code)
+	}
+	post := func(password string) int {
+		var buf bytes.Buffer
+		mw := multipart.NewWriter(&buf)
+		fw, _ := mw.CreateFormFile("file", "b.zip.enc")
+		_, _ = fw.Write(enc)
+		_ = mw.WriteField("password", password)
+		_ = mw.Close()
+		req, _ := http.NewRequest("POST", srv.URL+"/api/system/restore", &buf)
+		req.Header.Set("Content-Type", mw.FormDataContentType())
+		resp, err := c.Do(req)
+		if err != nil {
+			t.Fatal(err)
+		}
+		resp.Body.Close()
+		return resp.StatusCode
+	}
+	if code := post("bad"); code != 400 {
+		t.Fatalf("错误口令应返回 400，实际 %d", code)
+	}
+	if code := post("pw"); code != 200 {
+		t.Fatalf("正确口令应恢复成功，实际 %d", code)
+	}
+	select {
+	case <-a.restartCh:
+	case <-time.After(3 * time.Second):
+		t.Fatal("恢复后应请求重启")
+	}
 }

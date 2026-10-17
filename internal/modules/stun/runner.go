@@ -12,6 +12,7 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/wangwanjie/gately/internal/events"
 	"github.com/wangwanjie/gately/internal/logbuf"
 	"github.com/wangwanjie/gately/internal/script"
 	"github.com/wangwanjie/gately/internal/upnp"
@@ -217,6 +218,9 @@ func (r *runner) publish(ctx context.Context, addr netip.AddrPort) {
 	r.mu.Unlock()
 	if changed {
 		r.log.Infof("公网地址: %s", s)
+		events.Publish(events.Event{Type: events.STUNChanged, Source: r.rule.Name, Level: events.LevelInfo,
+			Title: "STUN 公网地址变化：" + r.rule.Name, Message: "当前公网地址 " + s,
+			Fields: map[string]string{"ipAddr": s, "ip": addr.Addr().String()}})
 	}
 	if !changed && r.rule.WebhookOnlyOnChange {
 		return

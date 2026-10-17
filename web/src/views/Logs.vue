@@ -1,8 +1,10 @@
 <template>
   <div>
-    <PageHeader title="系统日志" desc="Gately 运行日志与各模块日志集中查看，仅保存在内存中，重启后清空" :icon="ScrollText">
+    <PageHeader title="系统日志" desc="Gately 运行日志与各模块日志集中查看，仅保存在内存中，重启后清空" :icon="ScrollText" />
+    <!-- 来源较多，单独占一行并允许横向滚动，避免被页头的 flex 布局撑出页面 -->
+    <div class="sources-row">
       <el-segmented v-model="source" :options="sources" class="sources" />
-    </PageHeader>
+    </div>
     <div class="g-card">
       <div class="g-card-body">
         <!-- 切换来源时重建组件，重新从头拉取对应日志 -->
@@ -34,9 +36,14 @@ watch(source, (v) => router.replace({ query: v === 'system' ? {} : { source: v }
 </script>
 
 <style scoped>
-.sources {
+.sources-row {
   max-width: 100%;
   overflow-x: auto;
+  margin-bottom: 14px;
+  padding-bottom: 2px;
+}
+.sources {
+  width: max-content;
 }
 @media (max-width: 767.98px) {
   .g-card-body {

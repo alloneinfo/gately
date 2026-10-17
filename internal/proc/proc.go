@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"github.com/wangwanjie/gately/internal/events"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -192,6 +193,13 @@ func (s *Supervisor) loop(ctx context.Context, spec Spec, done chan struct{}) {
 			backoff = time.Second
 		}
 		s.log.Warnf("进程已退出（%s），%s 后重启", reason, backoff)
+		events.Publish(events.Event{
+			Type:    events.ProcessExited,
+			Source:  s.log.Source(),
+			Level:   events.LevelError,
+			Title:   s.log.Source() + " 进程异常退出",
+			Message: "退出原因：" + reason + "，将自动重启。",
+		})
 		select {
 		case <-ctx.Done():
 		case <-time.After(backoff):

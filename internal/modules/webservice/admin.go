@@ -1,0 +1,118 @@
+package webservice
+
+import (
+	"net/http"
+	"net/netip"
+	"os"
+	"path/filepath"
+	"strings"
+	"time"
+
+	"github.com/wangwanjie/gately/internal/geoip"
+	"github.com/wangwanjie/gately/internal/httpx"
+)
+
+type banRequest struct {
+	// Key 为 IP 地址；解除封禁时也可使用列表返回的键（IPv6 为 /64 网段）
+	Key string `json:"key"`
+	// Seconds 为手动封禁时长，0 表示 24 小时
+	Seconds int `json:"seconds"`
+}
+
+type geoipDownload struct {
+	URL string `json:"url"`
+}
+
+func (m *Module) handleListBans(w http.ResponseWriter, _ *http.Request) {
+	httpx.OK(w, m.auth.listBans())
+}
+
+func (m *Module) handleAddBan(w http.ResponseWriter, r *http.Request) {
+	var req banRequest
+	if err := httpx.ReadJSON(r, &req); err != nil {
+		httpx.Error(w, http.StatusBadRequest, "%v", err)
+		return
+	}
+	addr, err := netip.ParseAddr(strings.TrimSpace(req.Key))
+	if err != nil {
+		httpx.Error(w, http.StatusBadRequest, "IP 地址无效")
+		return
+	}
+	d := time.Duration(req.Seconds) * time.Second
+	if d <= 0 {
+		d = 24 * time.Hour
+	}
+	if d > maxBanDuration {
+		httpx.Error(w, http.StatusBadRequest, "封禁时长不能超过 30 天")
+		return
+	}
+	key := m.auth.ban(addr.Unmap().String(), d, "手动封禁", true)
+	httpx.OK(w, map[string]string{"key": key})
+}
+
+func (m *Module) handleRemoveBan(w http.ResponseWriter, r *http.Request) {
+	var req banRequest
+	if err := httpx.ReadJSON(r, &req); err != nil {
+		httpx.Error(w, http.StatusBadRequest, "%v", err)
+		return
+	}
+	m.auth.unban(strings.TrimSpace(req.Key))
+	httpx.OK(w, map[string]bool{"ok": true})
+}
+
+func (m *Module) geoipPath() string {
+	return filepath.Join(m.store.Dir(), "geoip", "country.mmdb")
+}
+
+func (m *Module) handleGeoIPInfo(w http.ResponseWriter, _ *http.Request) {
+	httpx.OK(w, geoip.Default.Info())
+}
+
+// installGeoIP 保存数据库并加载；写入前已校验为有效的 mmdb。
+func (m *Module) loadGeoIP(w http.ResponseWriter) {
+	if err := geoip.Default.Load(m.geoipPath()); err != nil {
+		httpx.Error(w, http.StatusBadRequest, "%v", err)
+		return
+	}
+	m.logs.Logger("GeoIP").Infof("已加载 GeoIP 数据库（%s）", geoip.Default.Info().Type)
+	httpx.OK(w, geoip.Default.Info())
+}
+
+func (m *Module) handleGeoIPUpload(w http.ResponseWriter, r *http.Request) {
+	r.Body = http.MaxBytesReader(w, r.Body, 129<<20)
+	f, _, err := r.FormFile("file")
+	if err != nil {
+		httpx.Error(w, http.StatusBadRequest, "请上传 .mmdb 文件")
+		return
+	}
+	defer f.Close()
+	if _, err := geoip.Save(m.geoipPath(), f); err != nil {
+		httpx.Error(w, http.StatusBadRequest, "%v", err)
+		return
+	}
+	m.loadGeoIP(w)
+}
+
+func (m *Module) handleGeoIPDownload(w http.ResponseWriter, r *http.Request) {
+	var req geoipDownload
+	if err := httpx.ReadJSON(r, &req); err != nil {
+		httpx.Error(w, http.StatusBadRequest, "%v", err)
+		return
+	}
+	u := strings.TrimSpace(req.URL)
+	if !strings.HasPrefix(u, "http://") && !strings.HasPrefix(u, "https://") {
+		httpx.Error(w, http.StatusBadRequest, "下载地址需以 http(s):// 开头")
+		return
+	}
+	if _, err := geoip.Download(u, m.geoipPath()); err != nil {
+		httpx.Error(w, http.StatusBadGateway, "%v", err)
+		return
+	}
+	m.loadGeoIP(w)
+}
+
+func (m *Module) handleGeoIPDelete(w http.ResponseWriter, _ *http.Request) {
+	geoip.Default.Close()
+	_ = os.Remove(m.geoipPath())
+	httpx.OK(w, geoip.Default.Info())
+}

@@ -1,7 +1,10 @@
 // 侧边栏导航与模块元信息：Layout 与总览页共用，保证图标与名称一致。
 import type { Component } from 'vue'
 import {
+  Activity,
   ArrowLeftRight,
+  BookOpen,
+  Bell,
   CalendarClock,
   Cloud,
   Container,
@@ -9,6 +12,7 @@ import {
   HardDrive,
   Globe,
   Info,
+  KeyRound,
   LayoutDashboard,
   Network,
   Power,
@@ -79,6 +83,7 @@ export const navGroups: NavGroup[] = [
     items: [
       { path: '/wol', title: '网络唤醒', icon: Power, moduleId: 'wol', desc: '远程唤醒局域网设备' },
       { path: '/terminal', title: 'Web 终端', icon: SquareTerminal, moduleId: 'webterminal', desc: '浏览器中的 SSH 与本机 Shell' },
+      { path: '/nettools', title: '网络诊断', icon: Activity, moduleId: 'nettools', desc: 'Ping、路由追踪、端口探测、DNS 与局域网扫描' },
       { path: '/docker', title: 'Docker', icon: Container, moduleId: 'docker', desc: '容器管理与镜像更新' },
       { path: '/cron', title: '计划任务', icon: CalendarClock, moduleId: 'cron', desc: '定时执行命令或 HTTP 请求' },
     ],
@@ -86,7 +91,10 @@ export const navGroups: NavGroup[] = [
   {
     title: '系统',
     items: [
+      { path: '/notify', title: '通知中心', icon: Bell, moduleId: 'notify', desc: '事件推送到 Telegram、邮件、企业微信等' },
       { path: '/logs', title: '系统日志', icon: ScrollText },
+      { path: '/api-tokens', title: 'API 令牌', icon: KeyRound },
+      { path: '/api-docs', title: 'API 文档', icon: BookOpen },
       { path: '/settings', title: '设置', icon: Settings },
       { path: '/about', title: '关于', icon: Info },
     ],

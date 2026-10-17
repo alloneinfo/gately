@@ -3,6 +3,7 @@ package ddns
 import (
 	"context"
 	"fmt"
+	"github.com/wangwanjie/gately/internal/events"
 	"net/http"
 	"net/netip"
 	"strings"
@@ -233,6 +234,14 @@ func (r *runner) syncOnce(ctx context.Context, force bool) {
 			failed = append(failed, fqdn)
 			r.setRecord(rec.Key, func(s *RecordState) { s.LastError = err.Error(); s.LastCheck = time.Now() })
 			r.log.Errorf("%s %s 同步失败: %v", rec.Type, fqdn, err)
+			events.Publish(events.Event{
+				Type:    events.DDNSFailed,
+				Source:  t.Name,
+				Level:   events.LevelError,
+				Title:   "动态域名更新失败：" + fqdn,
+				Message: fmt.Sprintf("%s 记录 %s 同步失败：%v", rec.Type, fqdn, err),
+				Fields:  map[string]string{"domain": fqdn, "error": err.Error()},
+			})
 			continue
 		}
 		now := time.Now()
@@ -245,9 +254,11 @@ func (r *runner) syncOnce(ctx context.Context, force bool) {
 		case dnsprovider.ActionCreated:
 			success = append(success, fqdn)
 			r.log.Infof("%s %s 已创建 -> %s", rec.Type, fqdn, value)
+			publishDDNSChanged(t.Name, fqdn, rec.Type, value, "已创建")
 		default:
 			success = append(success, fqdn)
 			r.log.Infof("%s %s 已更新 -> %s", rec.Type, fqdn, value)
+			publishDDNSChanged(t.Name, fqdn, rec.Type, value, "已更新")
 		}
 	}
 
@@ -306,4 +317,16 @@ func orDash(s string) string {
 		return "-"
 	}
 	return s
+}
+
+// publishDDNSChanged 通知解析记录已创建或更新。
+func publishDDNSChanged(task, fqdn, typ, value, action string) {
+	events.Publish(events.Event{
+		Type:    events.DDNSChanged,
+		Source:  task,
+		Level:   events.LevelInfo,
+		Title:   "动态域名" + action + "：" + fqdn,
+		Message: fmt.Sprintf("%s 记录 %s %s，当前值 %s", typ, fqdn, action, value),
+		Fields:  map[string]string{"domain": fqdn, "value": value},
+	})
 }

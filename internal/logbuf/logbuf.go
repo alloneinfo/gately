@@ -99,6 +99,11 @@ func (b *Buffer) Logger(source string) *Logger {
 	return &Logger{buf: b, source: source}
 }
 
+// Source 返回日志来源标签。
+func (l *Logger) Source() string {
+	return l.source
+}
+
 // Log 以指定级别写入一条已格式化的日志，供托管外部进程的输出使用。
 func (l *Logger) Log(level, msg string) {
 	l.buf.Add(level, l.source, msg)

@@ -1,24 +1,23 @@
 package app
 
 import (
-	"archive/zip"
-	"bytes"
 	"context"
 	"crypto/rand"
 	"crypto/tls"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
-	"path"
 	"path/filepath"
 	"runtime"
 	"strings"
 	"syscall"
 	"time"
 
+	"github.com/wangwanjie/gately/internal/backup"
 	"github.com/wangwanjie/gately/internal/httpx"
 	"github.com/wangwanjie/gately/internal/logbuf"
 	"github.com/wangwanjie/gately/internal/luckyimport"
@@ -44,39 +43,21 @@ func randomHex(n int) string {
 
 // handleBackup 把配置目录中的 JSON 配置打包为 zip 下载。备份包含密钥与证书私钥，请妥善保管。
 func (a *App) handleBackup(w http.ResponseWriter, r *http.Request) {
-	files, err := filepath.Glob(filepath.Join(a.opts.ConfigDir, "*.json"))
+	now := time.Now()
+	data, err := backup.Build(a.opts.ConfigDir, "", now)
 	if err != nil {
 		httpx.Error(w, http.StatusInternalServerError, "%v", err)
 		return
 	}
-	var buf bytes.Buffer
-	zw := zip.NewWriter(&buf)
-	for _, f := range files {
-		data, err := os.ReadFile(f)
-		if err != nil {
-			httpx.Error(w, http.StatusInternalServerError, "读取 %s 失败: %v", filepath.Base(f), err)
-			return
-		}
-		fw, err := zw.CreateHeader(&zip.FileHeader{Name: filepath.Base(f), Method: zip.Deflate, Modified: time.Now()})
-		if err != nil {
-			httpx.Error(w, http.StatusInternalServerError, "%v", err)
-			return
-		}
-		_, _ = fw.Write(data)
-	}
-	if err := zw.Close(); err != nil {
-		httpx.Error(w, http.StatusInternalServerError, "%v", err)
-		return
-	}
-	name := "gately-backup-" + time.Now().Format("20060102-150405") + ".zip"
 	w.Header().Set("Content-Type", "application/zip")
-	w.Header().Set("Content-Disposition", `attachment; filename="`+name+`"`)
+	w.Header().Set("Content-Disposition", `attachment; filename="`+backup.Name(now, false)+`"`)
 	w.Header().Set("Cache-Control", "no-store")
-	_, _ = w.Write(buf.Bytes())
+	_, _ = w.Write(data)
 	a.sysLogs.Add(logbuf.LevelInfo, "system", "已导出配置备份")
 }
 
 // handleRestore 用备份 zip 覆盖配置文件，随后重启生效。原配置先备份到 config/backup-时间 目录。
+// 加密备份（定时备份可设置口令）需同时提交表单字段 password。
 func (a *App) handleRestore(w http.ResponseWriter, r *http.Request) {
 	r.Body = http.MaxBytesReader(w, r.Body, 64<<20)
 	if err := r.ParseMultipartForm(32 << 20); err != nil {
@@ -93,29 +74,14 @@ func (a *App) handleRestore(w http.ResponseWriter, r *http.Request) {
 		httpx.Error(w, http.StatusBadRequest, "%v", err)
 		return
 	}
-	zr, err := zip.NewReader(bytes.NewReader(data), int64(len(data)))
+	restored, err := backup.Parse(data, r.FormValue("password"))
 	if err != nil {
-		httpx.Error(w, http.StatusBadRequest, "不是有效的 zip 文件")
+		status := http.StatusBadRequest
+		if errors.Is(err, backup.ErrPasswordRequired) {
+			status = http.StatusUnprocessableEntity
+		}
+		httpx.Error(w, status, "%v", err)
 		return
-	}
-	restored := map[string][]byte{}
-	for _, f := range zr.File {
-		name := path.Base(f.Name)
-		if f.FileInfo().IsDir() || !strings.HasSuffix(name, ".json") || strings.HasPrefix(name, ".") || name != f.Name {
-			continue
-		}
-		rc, err := f.Open()
-		if err != nil {
-			httpx.Error(w, http.StatusBadRequest, "%v", err)
-			return
-		}
-		b, err := io.ReadAll(io.LimitReader(rc, 32<<20))
-		rc.Close()
-		if err != nil || !json.Valid(b) {
-			httpx.Error(w, http.StatusBadRequest, "%s 不是有效的 JSON", name)
-			return
-		}
-		restored[name] = b
 	}
 	if _, ok := restored[accountName+".json"]; !ok {
 		httpx.Error(w, http.StatusBadRequest, "备份中缺少 %s.json，不像是 Gately 的配置备份", accountName)

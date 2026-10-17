@@ -9,36 +9,39 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"runtime"
 	"syscall"
 
 	"github.com/wangwanjie/gately/internal/app"
-	"github.com/wangwanjie/gately/internal/module"
-	"github.com/wangwanjie/gately/internal/modules/cloudflared"
-	"github.com/wangwanjie/gately/internal/modules/cron"
-	"github.com/wangwanjie/gately/internal/modules/ddns"
-	"github.com/wangwanjie/gately/internal/modules/docker"
-	"github.com/wangwanjie/gately/internal/modules/frp"
-	"github.com/wangwanjie/gately/internal/modules/ftp"
-	"github.com/wangwanjie/gately/internal/modules/portforward"
-	"github.com/wangwanjie/gately/internal/modules/ssl"
-	"github.com/wangwanjie/gately/internal/modules/storage"
-	"github.com/wangwanjie/gately/internal/modules/stun"
-	"github.com/wangwanjie/gately/internal/modules/tailscale"
-	"github.com/wangwanjie/gately/internal/modules/waf"
-	"github.com/wangwanjie/gately/internal/modules/webdav"
-	"github.com/wangwanjie/gately/internal/modules/webservice"
-	"github.com/wangwanjie/gately/internal/modules/webterminal"
-	"github.com/wangwanjie/gately/internal/modules/wol"
+	"github.com/wangwanjie/gately/internal/ctl"
+	"github.com/wangwanjie/gately/internal/modules/registry"
 	"github.com/wangwanjie/gately/internal/version"
 	"github.com/wangwanjie/gately/web"
 )
 
 func main() {
+	// 子命令：ctl 调用运行中的实例，mcp 提供 MCP 服务；其余参数走服务启动流程
+	if len(os.Args) > 1 {
+		switch os.Args[1] {
+		case "ctl":
+			os.Exit(ctl.RunCtl(os.Args[2:], os.Stdout, os.Stderr))
+		case "mcp":
+			os.Exit(ctl.RunMCP(os.Args[2:], os.Stdin, os.Stdout, os.Stderr))
+		}
+	}
 	configDir := flag.String("c", defaultConfigDir(), "配置目录")
 	listen := flag.String("listen", "", "管理界面监听地址，覆盖配置文件，例如 :16680")
 	showVersion := flag.Bool("version", false, "输出版本信息")
+	apiDocs := flag.String("api-docs", "", "把 API 文档（openapi.json 与 API.md）导出到指定目录后退出，用于官网发布")
 	flag.Parse()
+
+	if *apiDocs != "" {
+		if err := exportAPIDocs(*apiDocs); err != nil {
+			log.Fatalf("导出 API 文档失败: %v", err)
+		}
+		return
+	}
 
 	if *showVersion {
 		info, _ := json.Marshal(map[string]string{
@@ -52,31 +55,13 @@ func main() {
 	}
 
 	// Web 服务使用证书模块按 SNI 提供 HTTPS 证书，并按站点引用 WAF 实例
-	certs := ssl.New()
-	firewall := waf.New()
+	mods, certs := registry.New()
 	a, err := app.New(app.Options{
 		ConfigDir: *configDir,
 		Listen:    *listen,
 		Web:       web.FS(),
 		Certs:     certs,
-		Modules: []module.Module{
-			portforward.New(),
-			ddns.New(),
-			stun.New(),
-			tailscale.New(),
-			frp.New(),
-			cloudflared.New(),
-			certs,
-			firewall,
-			webservice.New(certs, firewall),
-			wol.New(),
-			webterminal.New(),
-			cron.New(),
-			docker.New(),
-			webdav.New(certs),
-			ftp.New(certs),
-			storage.New(),
-		},
+		Modules:   mods,
 	})
 	if err != nil {
 		log.Fatalf("启动失败: %v", err)
@@ -95,4 +80,29 @@ func defaultConfigDir() string {
 		return d
 	}
 	return "data"
+}
+
+// exportAPIDocs 在临时配置目录中构建应用（不监听端口），把 API 文档写到 dir。
+func exportAPIDocs(dir string) error {
+	tmp, err := os.MkdirTemp("", "gately-apidocs-")
+	if err != nil {
+		return err
+	}
+	defer os.RemoveAll(tmp)
+	mods, certs := registry.New()
+	a, err := app.New(app.Options{ConfigDir: tmp, Certs: certs, Modules: mods})
+	if err != nil {
+		return err
+	}
+	spec, md, err := a.APIDocs()
+	if err != nil {
+		return err
+	}
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		return err
+	}
+	if err := os.WriteFile(filepath.Join(dir, "openapi.json"), spec, 0o644); err != nil {
+		return err
+	}
+	return os.WriteFile(filepath.Join(dir, "API.md"), md, 0o644)
 }

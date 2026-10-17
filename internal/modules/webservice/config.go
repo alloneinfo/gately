@@ -71,6 +71,25 @@ type Site struct {
 	IPMode string   `json:"ipMode"`
 	IPList []string `json:"ipList"`
 
+	// CountryMode 为 ""（不限）、allow（仅允许列出的国家）、deny（拒绝列出的国家），需先在设置中导入 GeoIP 数据库
+	CountryMode string `json:"countryMode"`
+	// Countries 为两位 ISO 国家代码，如 CN、US
+	Countries []string `json:"countries"`
+	// AuthOptional 为 true 时，认证只作用于路径规则中标记为"必须认证"的路径，其余路径公开
+	AuthOptional bool `json:"authOptional"`
+	// Rules 为按路径前缀覆盖认证与 IP 访问控制的规则
+	Rules []PathRule `json:"rules"`
+	// ShareLinks 为临时分享链接，持令牌访客可绕过认证
+	ShareLinks []ShareLink `json:"shareLinks"`
+
+	// 反向代理增强：Targets 每项可附 weight=N、backup；LBPolicy 为 ""（轮询）、random、ip_hash、least_conn
+	LBPolicy  string      `json:"lbPolicy"`
+	Health    HealthCheck `json:"health"`
+	Compress  bool        `json:"compress"`
+	RateLimit RateLimit   `json:"rateLimit"`
+	Cache     CacheConfig `json:"cache"`
+	Rewrites  []Rewrite   `json:"rewrites"`
+
 	// RequestHeaders / ResponseHeaders 每项为 "Key: Value"，Value 为空表示删除该头
 	RequestHeaders  []string `json:"requestHeaders"`
 	ResponseHeaders []string `json:"responseHeaders"`
@@ -115,6 +134,8 @@ type Settings struct {
 	OAuthProviders []OAuthProvider `json:"oauthProviders"`
 	// OAuthCallbackBase 为接收第三方登录回调的站点地址（需由 Gately 的某个监听提供），例如 https://auth.example.com
 	OAuthCallbackBase string `json:"oauthCallbackBase"`
+	// AutoBanSeconds 为认证连续失败后自动封禁来源 IP 的秒数，0 表示不自动封禁
+	AutoBanSeconds int `json:"autoBanSeconds"`
 }
 
 type fileConfig struct {
@@ -231,9 +252,8 @@ func (s *Site) validate(isDefault bool) error {
 			return errors.New("请填写后端地址")
 		}
 		for _, t := range s.Targets {
-			u, err := url.Parse(t)
-			if err != nil || (u.Scheme != "http" && u.Scheme != "https") || u.Host == "" {
-				return fmt.Errorf("后端地址 %q 需为 http(s)://主机:端口", t)
+			if _, err := parseUpstream(t); err != nil {
+				return err
 			}
 		}
 	case TypeRedirect:
@@ -294,7 +314,10 @@ func (s *Site) validate(isDefault bool) error {
 			return fmt.Errorf("请求头格式应为 Key: Value，实际 %q", h)
 		}
 	}
-	return nil
+	if err := s.validateProxyExtras(); err != nil {
+		return err
+	}
+	return s.validateAccess()
 }
 
 // matchDomain 判断 host 是否匹配规则。返回匹配优先级：精确 3、通配 2、全部 1，不匹配 0。

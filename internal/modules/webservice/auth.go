@@ -36,6 +36,12 @@ type authenticator struct {
 	// oauth 为第三方登录配置，设置变更时整体替换
 	oauthMu sync.RWMutex
 	oauth   oauthEnv
+
+	// 封禁表与自动封禁时长；shareUses 记录分享链接已兑换次数（受 mu 保护）
+	banMu     sync.Mutex
+	bans      map[string]banEntry
+	autoBan   time.Duration
+	shareUses map[string]int
 }
 
 func (a *authenticator) setOAuth(env oauthEnv) {
@@ -57,7 +63,8 @@ type failCount struct {
 }
 
 func newAuthenticator(secret string) *authenticator {
-	return &authenticator{secret: []byte(secret), fails: map[string]*failCount{}, used: map[string]int64{}}
+	return &authenticator{secret: []byte(secret), fails: map[string]*failCount{}, used: map[string]int64{},
+		bans: map[string]banEntry{}, shareUses: map[string]int{}}
 }
 
 // verifyUser 校验用户名密码，密码支持明文（兼容 Lucky）与 bcrypt 哈希。
@@ -130,6 +137,10 @@ func (a *authenticator) release(key string, ok bool) {
 	f.inflight--
 	if !ok {
 		f.n++
+		// 恰好达到上限时触发一次自动封禁
+		if f.n == maxFailures {
+			a.autoBanFor(key)
+		}
 	}
 }
 

@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/wangwanjie/gately/internal/events"
 	"io/fs"
 	"net"
 	"net/http"
@@ -220,6 +221,7 @@ func compile(in Instance, onMatch func(types.MatchedRule)) (coraza.WAF, error) {
 type compiled struct {
 	waf     coraza.WAF
 	enabled bool
+	name    string
 	blocked atomic.Int64
 	matched atomic.Int64
 }
@@ -277,7 +279,7 @@ func (m *Module) buildLocked(key string) {
 		return
 	}
 	log := m.logs.Logger(inst.Name)
-	c := &compiled{enabled: inst.Enable}
+	c := &compiled{enabled: inst.Enable, name: inst.Name}
 	if old, ok := m.state.Load(key); ok {
 		c.blocked.Store(old.(*compiled).blocked.Load())
 		c.matched.Store(old.(*compiled).matched.Load())
@@ -318,6 +320,14 @@ func (m *Module) Middleware(key string, next http.Handler) http.Handler {
 		txhttp.WrapHandler(c.waf, next).ServeHTTP(rec, r)
 		if rec.blocked {
 			c.blocked.Add(1)
+			events.Publish(events.Event{
+				Type:    events.WAFBlocked,
+				Source:  c.name,
+				Level:   events.LevelWarn,
+				Title:   "WAF 拦截了请求",
+				Message: r.Method + " " + r.Host + r.URL.Path,
+				Fields:  map[string]string{"ip": r.RemoteAddr, "host": r.Host, "path": r.URL.Path},
+			})
 		}
 	})
 }

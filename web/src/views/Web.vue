@@ -46,6 +46,7 @@
                 <el-tag v-else-if="row.site.basicAuth" size="small" type="warning">基本认证</el-tag>
                 <el-tag v-if="row.site.ipMode" size="small" type="info">{{ row.site.ipMode === 'whitelist' ? '白名单' : '黑名单' }}</el-tag>
                 <el-tag v-if="row.site.sendProxyProtocol" size="small" type="info">PROXY v2</el-tag>
+                <el-tag v-if="downCount(l, row) > 0" size="small" type="danger">{{ downCount(l, row) }} 个后端不可用</el-tag>
                 <el-tag v-if="row.site.insecureSkipVerify" size="small" type="info">跳过证书校验</el-tag>
                 <el-tag v-if="row.site.waf" size="small" :type="wafInstances.some((w) => w.key === row.site.waf) ? 'danger' : 'info'">
                   WAF{{ wafInstances.some((w) => w.key === row.site.waf) ? '' : '（实例不存在）' }}
@@ -59,6 +60,7 @@
                 <span v-else class="muted">-</span>
               </div>
               <div class="site-actions">
+                <el-button v-if="l.running" text size="small" :icon="BarChart3" @click="openStats(l, row)">统计</el-button>
                 <el-button text size="small" :icon="Pencil" @click="openSite(l, row)">编辑</el-button>
                 <el-popconfirm v-if="!row.isDefault" title="删除该站点？" @confirm="removeSite(l, row)">
                   <template #reference>
@@ -83,6 +85,7 @@
     </div>
 
     <LogCard url="/api/webservice/logs" clearable />
+    <SiteStats ref="statsDialog" />
 
     <el-dialog v-model="listenerVisible" :title="editingListener.key ? '编辑监听' : '添加监听'" width="560px" :fullscreen="isMobile">
       <el-form :model="editingListener" label-width="130px" :label-position="labelPosition">
@@ -189,6 +192,7 @@
             <el-form-item v-if="site.ipMode" label="IP / 网段">
               <el-input v-model="ipText" type="textarea" :rows="3" class="mono" placeholder="每行一个，如 192.168.1.0/24" />
             </el-form-item>
+            <SiteAccess v-model:site="site" :tls="siteTls" :port="sitePort" />
             <el-form-item label="WAF 实例">
               <el-select v-model="site.waf" clearable placeholder="不启用" class="w-260">
                 <el-option v-for="w in wafInstances" :key="w.key" :label="w.name" :value="w.key" />
@@ -196,6 +200,9 @@
               </el-select>
             </el-form-item>
             <el-form-item label="跨域 (CORS)"><el-switch v-model="site.cors" /></el-form-item>
+          </el-tab-pane>
+          <el-tab-pane label="流量" name="traffic">
+            <SiteTraffic v-model:site="site" />
           </el-tab-pane>
           <el-tab-pane label="请求头" name="headers">
             <el-form-item label="请求头">
@@ -225,6 +232,7 @@
           <div class="form-help">在 GitHub / Google 中登记的回调地址为：{{ (settings?.oauthCallbackBase || 'https://...').replace(/\/$/, '') }}/__gately_auth/oauth/callback（GitHub、Google、QQ 均填此地址）</div>
         </el-form-item>
         <OAuthProviders v-if="settings" v-model="settings.oauthProviders" />
+        <AccessSettings v-if="settings" v-model:auto-ban-seconds="settings.autoBanSeconds" />
       </el-form>
       <template #footer>
         <el-button @click="settingsVisible = false">取消</el-button>
@@ -237,12 +245,16 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
-import { Pencil, Plus, Server, SlidersHorizontal, Trash2 } from 'lucide-vue-next'
+import { BarChart3, Pencil, Plus, Server, SlidersHorizontal, Trash2 } from 'lucide-vue-next'
 import { api, type OAuthProvider } from '../api'
 import PageHeader from '../components/PageHeader.vue'
 import ModuleBanner from '../components/ModuleBanner.vue'
 import EntityCard from '../components/EntityCard.vue'
 import OAuthProviders from '../components/OAuthProviders.vue'
+import AccessSettings from '../components/AccessSettings.vue'
+import SiteTraffic, { type Rewrite } from '../components/SiteTraffic.vue'
+import SiteStats from '../components/SiteStats.vue'
+import SiteAccess, { type PathRule, type ShareLink } from '../components/SiteAccess.vue'
 import StatusBadge, { type StatusType } from '../components/StatusBadge.vue'
 import LogCard from '../components/LogCard.vue'
 import { useFormLayout } from '../composables/useIsMobile'
@@ -279,6 +291,17 @@ interface Site {
   accessLog: boolean
   waf: string
   remark: string
+  authOptional: boolean
+  countryMode: string
+  countries: string[] | null
+  rules: PathRule[]
+  shareLinks: ShareLink[]
+  lbPolicy: string
+  health: { enable: boolean; mode: string; path: string; interval: number; timeout: number; fails: number; passes: number }
+  compress: boolean
+  rateLimit: { enable: boolean; rate: number; burst: number; maxConns: number }
+  cache: { enable: boolean; ttl: number; maxMb: number }
+  rewrites: Rewrite[]
 }
 
 interface Listener {
@@ -301,6 +324,7 @@ interface ListenerView extends Listener {
   running: boolean
   error?: string
   stats: Record<string, { requests: number; active: number; errors: number }>
+  upstreams?: Record<string, { url: string; healthy: boolean }[]>
 }
 
 interface SiteRow {
@@ -320,6 +344,9 @@ const siteTab = ref('basic')
 const site = ref<Site>(emptySite())
 const siteIsDefault = ref(false)
 let siteOwner: ListenerView | null = null
+// 分享链接地址需要所属监听器的协议与端口
+const siteTls = ref(false)
+const sitePort = ref(0)
 let siteIndex = -1
 const settingsVisible = ref(false)
 const { isMobile, labelPosition } = useFormLayout()
@@ -327,7 +354,7 @@ const { isMobile, labelPosition } = useFormLayout()
 const moduleEnabled = ref<boolean>()
 const moduleOff = computed(() => moduleEnabled.value === false)
 const enabling = ref(false)
-const settings = ref<{ enable: boolean; trustedProxies: string[] | null; oauthCallbackBase: string; oauthProviders: OAuthProvider[] }>()
+const settings = ref<{ enable: boolean; trustedProxies: string[] | null; oauthCallbackBase: string; oauthProviders: OAuthProvider[]; autoBanSeconds: number }>()
 let timer: number | undefined
 
 const lines = (v: string) => v.split('\n').map((s) => s.trim()).filter(Boolean)
@@ -374,6 +401,17 @@ function emptySite(): Site {
     accessLog: false,
     waf: '',
     remark: '',
+    authOptional: false,
+    countryMode: '',
+    countries: [],
+    rules: [],
+    shareLinks: [],
+    lbPolicy: '',
+    health: { enable: false, mode: 'http', path: '/', interval: 10, timeout: 3, fails: 3, passes: 2 },
+    compress: false,
+    rateLimit: { enable: false, rate: 10, burst: 20, maxConns: 0 },
+    cache: { enable: false, ttl: 0, maxMb: 64 },
+    rewrites: [],
   }
 }
 
@@ -500,11 +538,36 @@ async function removeListener(l: ListenerView) {
   }
 }
 
+const statsDialog = ref<InstanceType<typeof SiteStats>>()
+
+function openStats(l: ListenerView, row: SiteRow) {
+  statsDialog.value?.open(l.key ?? '', row.isDefault ? 'default' : (row.site.key ?? ''), row.site.name || row.site.domains?.[0] || '默认站点')
+}
+
+// downCount 统计站点中不可用的后端数量
+function downCount(l: ListenerView, row: SiteRow) {
+  const k = row.isDefault ? 'default' : (row.site.key ?? '')
+  return (l.upstreams?.[k] ?? []).filter((u) => !u.healthy).length
+}
+
 function openSite(l: ListenerView, row?: SiteRow) {
   siteOwner = l
+  siteTls.value = l.tls
+  sitePort.value = l.port
   siteIndex = row ? row.index : -1
   siteIsDefault.value = !!row?.isDefault
-  site.value = row ? JSON.parse(JSON.stringify(row.site)) : emptySite()
+  // 旧配置中新增字段为 null，合并默认值后保证数组可直接编辑
+  const draft: Site = row ? JSON.parse(JSON.stringify(row.site)) : emptySite()
+  draft.rules = draft.rules ?? []
+  draft.shareLinks = draft.shareLinks ?? []
+  draft.countries = draft.countries ?? []
+  draft.rewrites = draft.rewrites ?? []
+  // 旧配置没有这些对象，补全默认值后可直接编辑
+  const defaults = emptySite()
+  draft.health = { ...defaults.health, ...(draft.health ?? {}) }
+  draft.rateLimit = { ...defaults.rateLimit, ...(draft.rateLimit ?? {}) }
+  draft.cache = { ...defaults.cache, ...(draft.cache ?? {}) }
+  site.value = draft
   siteTab.value = 'basic'
   siteVisible.value = true
 }
@@ -562,7 +625,7 @@ async function removeSite(lv: ListenerView, row: SiteRow) {
 }
 
 async function fetchSettings() {
-  const s = await api.get<{ enable: boolean; trustedProxies: string[] | null; oauthCallbackBase: string; oauthProviders: OAuthProvider[] | null }>('/api/webservice/settings')
+  const s = await api.get<{ enable: boolean; trustedProxies: string[] | null; oauthCallbackBase: string; oauthProviders: OAuthProvider[] | null; autoBanSeconds: number }>('/api/webservice/settings')
   moduleEnabled.value = s.enable
   return { ...s, oauthProviders: s.oauthProviders ?? [] }
 }

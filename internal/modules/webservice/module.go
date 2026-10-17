@@ -8,12 +8,15 @@ import (
 	"encoding/hex"
 	"net/http"
 	"net/url"
+	"os"
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/wangwanjie/gately/internal/config"
 	"github.com/wangwanjie/gately/internal/crud"
+	"github.com/wangwanjie/gately/internal/geoip"
 	"github.com/wangwanjie/gately/internal/httpx"
 	"github.com/wangwanjie/gately/internal/logbuf"
 	"github.com/wangwanjie/gately/internal/module"
@@ -64,7 +67,14 @@ func (m *Module) Init(env module.Env) error {
 		}
 	}
 	m.auth = newAuthenticator(m.cfg.Settings.AuthSecret)
+	m.auth.setBanSeconds(m.cfg.Settings.AutoBanSeconds)
 	m.applyOAuthLocked()
+	// 已导入过 GeoIP 数据库时随模块加载，失败只记录日志
+	if _, err := os.Stat(m.geoipPath()); err == nil {
+		if err := geoip.Default.Load(m.geoipPath()); err != nil {
+			m.logs.Add(logbuf.LevelWarn, "", err.Error())
+		}
+	}
 	return nil
 }
 
@@ -155,6 +165,8 @@ type ListenerView struct {
 	Running bool                        `json:"running"`
 	Error   string                      `json:"error,omitempty"`
 	Stats   map[string]map[string]int64 `json:"stats"`
+	// Upstreams 为各站点的后端健康状态，键为站点 key
+	Upstreams map[string][]UpstreamStatus `json:"upstreams,omitempty"`
 }
 
 func (m *Module) viewLocked(l *Listener) any {
@@ -163,6 +175,12 @@ func (m *Module) viewLocked(l *Listener) any {
 		v.Running = true
 		for _, s := range r.sites {
 			v.Stats[s.site.Key] = s.stats.snapshot()
+			if st := s.upstreamStatus(); st != nil {
+				if v.Upstreams == nil {
+					v.Upstreams = map[string][]UpstreamStatus{}
+				}
+				v.Upstreams[s.site.Key] = st
+			}
 		}
 		if r.deflt != nil {
 			v.Stats["default"] = r.deflt.stats.snapshot()
@@ -197,6 +215,24 @@ func (m *Module) Routes(r module.Router) {
 		httpx.OK(w, s)
 	})
 	r.HandleFunc("PUT /settings", m.handlePutSettings)
+	r.HandleFunc("GET /stats", m.handleStats)
+	r.HandleFunc("GET /metrics", m.handleMetrics)
+	module.DocOf(r, "GET /stats", module.Doc{Summary: "站点分钟级统计（?listener=&site=&minutes=）", Resp: &SiteStatsView{}})
+	module.DocOf(r, "GET /metrics", module.Doc{Summary: "Prometheus 文本格式指标"})
+	r.HandleFunc("GET /bans", m.handleListBans)
+	r.HandleFunc("POST /bans", m.handleAddBan)
+	r.HandleFunc("DELETE /bans", m.handleRemoveBan)
+	r.HandleFunc("GET /geoip", m.handleGeoIPInfo)
+	r.HandleFunc("POST /geoip/upload", m.handleGeoIPUpload)
+	r.HandleFunc("POST /geoip/download", m.handleGeoIPDownload)
+	r.HandleFunc("DELETE /geoip", m.handleGeoIPDelete)
+	module.DocOf(r, "GET /bans", module.Doc{Summary: "当前被封禁的 IP", Resp: []BanInfo{}})
+	module.DocOf(r, "POST /bans", module.Doc{Summary: "手动封禁 IP", Req: &banRequest{}})
+	module.DocOf(r, "DELETE /bans", module.Doc{Summary: "解除封禁（body 为 {\"key\": 地址}）", Req: &banRequest{}})
+	module.DocOf(r, "GET /geoip", module.Doc{Summary: "GeoIP 数据库状态", Resp: &geoip.Info{}})
+	module.DocOf(r, "POST /geoip/upload", module.Doc{Summary: "上传 GeoIP 数据库（multipart 字段 file，.mmdb）"})
+	module.DocOf(r, "DELETE /geoip", module.Doc{Summary: "移除 GeoIP 数据库", Resp: &geoip.Info{}})
+	module.DocOf(r, "POST /geoip/download", module.Doc{Summary: "从地址下载 GeoIP 数据库（.mmdb）", Req: &geoipDownload{}})
 }
 
 func (m *Module) handlePutSettings(w http.ResponseWriter, r *http.Request) {
@@ -241,7 +277,12 @@ func (m *Module) handlePutSettings(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	s.TrustedProxies = cleanList(s.TrustedProxies)
+	if s.AutoBanSeconds < 0 || time.Duration(s.AutoBanSeconds)*time.Second > maxBanDuration {
+		httpx.Error(w, http.StatusBadRequest, "自动封禁时长需在 0 到 30 天之间")
+		return
+	}
 	m.cfg.Settings = s
+	m.auth.setBanSeconds(s.AutoBanSeconds)
 	if err := m.saveLocked(); err != nil {
 		m.cfg.Settings = old
 		httpx.Error(w, http.StatusInternalServerError, "保存失败: %v", err)

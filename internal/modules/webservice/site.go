@@ -16,6 +16,7 @@ import (
 
 	proxyproto "github.com/pires/go-proxyproto"
 
+	"github.com/wangwanjie/gately/internal/geoip"
 	"github.com/wangwanjie/gately/internal/logbuf"
 )
 
@@ -41,8 +42,14 @@ type siteHandler struct {
 	handler http.Handler
 	// pipeline 为 WAF（可选）→ 跨域 → 认证 → 站点处理器
 	pipeline http.Handler
-	targets  []*url.URL
-	next     atomic.Uint64
+	pool     *pool
+	limiter  *limiter
+	cache    *respCache
+	rewrites []compiledRewrite
+	metrics  *siteMetrics
+	// rules 为预编译的路径规则（最长前缀在前），countries 为国家过滤集合
+	rules     []compiledRule
+	countries map[string]bool
 }
 
 type ctxKeyClientAddr struct{}
@@ -54,21 +61,34 @@ func clientAddr(r *http.Request) netip.AddrPort {
 }
 
 func newSiteHandler(s Site, log *logbuf.Logger, auth *authenticator, waf WAFProvider) (*siteHandler, error) {
-	h := &siteHandler{site: s, stats: &SiteStats{}, log: log, auth: auth}
+	h := &siteHandler{site: s, stats: &SiteStats{}, log: log, auth: auth, metrics: newSiteMetrics()}
 	var err error
+	if h.rewrites, err = compileRewrites(s.Rewrites); err != nil {
+		return nil, err
+	}
+	if s.RateLimit.Enable {
+		h.limiter = newLimiter(s.RateLimit)
+	}
 	if h.ipList, err = parsePrefixes(s.IPList); err != nil {
 		return nil, err
 	}
+	if h.rules, err = compileRules(s.Rules); err != nil {
+		return nil, err
+	}
+	h.countries = map[string]bool{}
+	for _, c := range s.Countries {
+		h.countries[strings.ToUpper(c)] = true
+	}
 	switch s.Type {
 	case TypeProxy:
-		for _, t := range s.Targets {
-			u, err := url.Parse(t)
-			if err != nil {
-				return nil, err
-			}
-			h.targets = append(h.targets, u)
+		if h.pool, err = newPool(s, log); err != nil {
+			return nil, err
 		}
 		h.handler = h.newProxy()
+		if s.Cache.Enable {
+			h.cache = newRespCache(s.Cache)
+			h.handler = h.cache.wrap(h.handler)
+		}
 	case TypeRedirect:
 		h.handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			to := strings.TrimRight(s.RedirectTo, "/")
@@ -100,6 +120,9 @@ func newSiteHandler(s Site, log *logbuf.Logger, auth *authenticator, waf WAFProv
 			_, _ = w.Write([]byte(s.Text))
 		})
 	}
+	if s.Compress && s.Type != TypeRedirect {
+		h.handler = compressHandler(h.handler)
+	}
 	h.pipeline = http.HandlerFunc(h.serveInner)
 	// WAF 放在认证之前，登录页同样受保护
 	if s.WAF != "" && waf != nil {
@@ -108,10 +131,21 @@ func newSiteHandler(s Site, log *logbuf.Logger, auth *authenticator, waf WAFProv
 	return h, nil
 }
 
-// pickTarget 轮询选择后端。
-func (h *siteHandler) pickTarget() *url.URL {
-	n := h.next.Add(1) - 1
-	return h.targets[int(n%uint64(len(h.targets)))]
+type ctxKeyUpstream struct{}
+
+// upstreamStatus 返回后端状态，非代理站点为空。
+func (h *siteHandler) upstreamStatus() []UpstreamStatus {
+	if h.pool == nil {
+		return nil
+	}
+	return h.pool.status()
+}
+
+// startBackground 启动站点的后台任务（主动健康检查）。
+func (h *siteHandler) startBackground(ctx context.Context) {
+	if h.pool != nil {
+		h.pool.startChecks(ctx)
+	}
 }
 
 func (h *siteHandler) newProxy() http.Handler {
@@ -146,8 +180,8 @@ func (h *siteHandler) newProxy() http.Handler {
 	rp := &httputil.ReverseProxy{
 		Transport: tr,
 		Rewrite: func(pr *httputil.ProxyRequest) {
-			target := h.pickTarget()
-			pr.SetURL(target)
+			up, _ := pr.In.Context().Value(ctxKeyUpstream{}).(*upstream)
+			pr.SetURL(up.url)
 			if !s.UseTargetHost {
 				// SetURL 会改写 Host，这里恢复客户端请求的 Host
 				pr.Out.Host = pr.In.Host
@@ -164,10 +198,17 @@ func (h *siteHandler) newProxy() http.Handler {
 		},
 		ModifyResponse: func(resp *http.Response) error {
 			applyHeaders(resp.Header, s.ResponseHeaders)
+			if up, _ := resp.Request.Context().Value(ctxKeyUpstream{}).(*upstream); up != nil {
+				h.pool.ok(up)
+			}
 			return nil
 		},
 		ErrorHandler: func(w http.ResponseWriter, r *http.Request, err error) {
 			h.stats.Errors.Add(1)
+			// 客户端中途断开不是后端的错
+			if up, _ := r.Context().Value(ctxKeyUpstream{}).(*upstream); up != nil && r.Context().Err() == nil {
+				h.pool.fail(up, err)
+			}
 			h.log.Warnf("%s %s%s 后端错误: %v", r.Method, r.Host, r.URL.Path, err)
 			writeErrorPage(w, r, http.StatusBadGateway, "无法连接到后端服务", "站点的后端服务没有响应，可能未启动或网络不可达。请稍后重试。")
 		},
@@ -175,7 +216,12 @@ func (h *siteHandler) newProxy() http.Handler {
 		FlushInterval: -1,
 	}
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx := context.WithValue(r.Context(), ctxKeyClientAddr{}, clientAddr(r))
+		client := clientAddr(r)
+		up := h.pool.pick(client.Addr())
+		up.conns.Add(1)
+		defer up.conns.Add(-1)
+		ctx := context.WithValue(r.Context(), ctxKeyClientAddr{}, client)
+		ctx = context.WithValue(ctx, ctxKeyUpstream{}, up)
 		rp.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
@@ -225,18 +271,23 @@ func applyHeaders(h http.Header, list []string) {
 }
 
 // allowedIP 按访问控制模式判断客户端是否允许访问。
-func (h *siteHandler) allowedIP(a netip.Addr) bool {
-	if h.site.IPMode == IPModeOff {
+// 命中的路径规则设置了 IP 模式时，以规则的名单为准。
+func (h *siteHandler) allowedIP(a netip.Addr, rule *compiledRule) bool {
+	mode, list := h.site.IPMode, h.ipList
+	if rule != nil && rule.ipMode != IPModeOff {
+		mode, list = rule.ipMode, rule.ipList
+	}
+	if mode == IPModeOff {
 		return true
 	}
 	in := false
-	for _, p := range h.ipList {
+	for _, p := range list {
 		if p.Contains(a) {
 			in = true
 			break
 		}
 	}
-	if h.site.IPMode == IPModeWhitelist {
+	if mode == IPModeWhitelist {
 		return in
 	}
 	return !in
@@ -246,6 +297,13 @@ func (h *siteHandler) allowedIP(a netip.Addr) bool {
 type statusRecorder struct {
 	http.ResponseWriter
 	status int
+	bytes  int64
+}
+
+func (s *statusRecorder) Write(p []byte) (int, error) {
+	n, err := s.ResponseWriter.Write(p)
+	s.bytes += int64(n)
+	return n, err
 }
 
 func (s *statusRecorder) WriteHeader(code int) {
@@ -267,6 +325,7 @@ func (h *siteHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	rec := &statusRecorder{ResponseWriter: w, status: http.StatusOK}
 
 	defer func() {
+		h.metrics.record(client.Addr(), rec.status, rec.bytes, time.Now())
 		if h.site.AccessLog {
 			uri := r.URL.RequestURI()
 			// 认证路径的查询串含票据、授权码等敏感信息，不写入日志
@@ -277,10 +336,28 @@ func (h *siteHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	}()
 
-	if !h.allowedIP(client.Addr()) {
+	if h.auth.banned(client.Addr()) {
+		http.Error(rec, "403 Forbidden", http.StatusForbidden)
+		return
+	}
+	if !h.allowedIP(client.Addr(), h.matchRule(r.URL.Path)) {
 		h.log.Warnf("拒绝 %s 访问 %s（访问控制）", client.Addr(), r.Host)
 		http.Error(rec, "403 Forbidden", http.StatusForbidden)
 		return
+	}
+	if !h.countryAllowed(client.Addr()) {
+		h.log.Warnf("拒绝 %s 访问 %s（国家过滤：%s）", client.Addr(), r.Host, geoip.Default.Country(client.Addr()))
+		http.Error(rec, "403 Forbidden", http.StatusForbidden)
+		return
+	}
+	if h.limiter != nil {
+		release, retry, ok := h.limiter.acquire(limitKeyAddr(client.Addr()))
+		if !ok {
+			rec.Header().Set("Retry-After", retryAfterSeconds(retry))
+			http.Error(rec, "429 Too Many Requests", http.StatusTooManyRequests)
+			return
+		}
+		defer release()
 	}
 	h.pipeline.ServeHTTP(rec, r)
 }
@@ -302,7 +379,21 @@ func (h *siteHandler) serveInner(rec http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
-	if (h.site.BasicAuth || h.site.WebAuth) && !h.auth.check(rec, r, h.site) {
+	// 登录页等认证保留路径始终交给认证器处理，其余路径按规则决定是否需要认证
+	if h.site.WebAuth && strings.HasPrefix(r.URL.Path, authPath) {
+		h.auth.check(rec, r, h.site)
+		return
+	}
+	if h.needAuth(h.matchRule(r.URL.Path)) {
+		handled, allowed := h.tryShare(rec, r)
+		if handled {
+			return
+		}
+		if !allowed && !h.auth.check(rec, r, h.site) {
+			return
+		}
+	}
+	if len(h.rewrites) > 0 && h.applyRewrite(rec, r) {
 		return
 	}
 	h.handler.ServeHTTP(rec, r)

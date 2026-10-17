@@ -55,8 +55,10 @@ type Module struct {
 
 	// 定时检查更新：parent 为 Start 传入的上下文，auto 为当前运行的检查协程
 	autoMu sync.Mutex
-	parent context.Context
-	auto   *autoRunner
+	// stopWatch 结束容器事件订阅
+	stopWatch context.CancelFunc
+	parent    context.Context
+	auto      *autoRunner
 
 	composeMu    sync.Mutex
 	composeCache composeInfo
@@ -86,6 +88,12 @@ func (m *Module) Start(ctx context.Context) error {
 	m.parent = ctx
 	m.autoMu.Unlock()
 	m.restartAutoCheck()
+	// 容器异常退出事件订阅，供通知中心使用
+	wctx, cancel := context.WithCancel(ctx)
+	m.autoMu.Lock()
+	m.stopWatch = cancel
+	m.autoMu.Unlock()
+	go m.runEventWatch(wctx)
 	return nil
 }
 
@@ -93,6 +101,10 @@ func (m *Module) Start(ctx context.Context) error {
 func (m *Module) Stop() error {
 	m.autoMu.Lock()
 	m.parent = nil
+	if m.stopWatch != nil {
+		m.stopWatch()
+		m.stopWatch = nil
+	}
 	m.autoMu.Unlock()
 	m.restartAutoCheck()
 	return nil

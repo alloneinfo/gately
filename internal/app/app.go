@@ -20,8 +20,10 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/wangwanjie/gately/internal/apitoken"
 	"github.com/wangwanjie/gately/internal/auth"
 	"github.com/wangwanjie/gately/internal/config"
+	"github.com/wangwanjie/gately/internal/events"
 	"github.com/wangwanjie/gately/internal/httpx"
 	"github.com/wangwanjie/gately/internal/logbuf"
 	"github.com/wangwanjie/gately/internal/luckyimport"
@@ -71,9 +73,13 @@ type App struct {
 	httpsReady     atomic.Bool
 	restartCh      chan struct{}
 	auth           *auth.Manager
-	sysLogs        *logbuf.Buffer
-	modules        []*moduleEntry
-	startTime      time.Time
+	tokens         *apitoken.Manager
+	// routes 为最近一次构建处理器时登记的全部接口，用于生成 API 文档
+	routes    []routeInfo
+	routeDocs map[string]module.Doc
+	sysLogs   *logbuf.Buffer
+	modules   []*moduleEntry
+	startTime time.Time
 	// hostStats 采集概览页展示的主机信息，保存上一次采样用于计算使用率与速率
 	hostStats *sysstat.Collector
 	logger    *log.Logger
@@ -137,6 +143,9 @@ func New(opts Options) (*App, error) {
 		}
 		a.modules = append(a.modules, entry)
 	}
+	if err := a.initTokens(); err != nil {
+		return nil, err
+	}
 	a.applyRuntime()
 	return a, nil
 }
@@ -145,6 +154,7 @@ func New(opts Options) (*App, error) {
 func (a *App) Handler() http.Handler {
 	mux := http.NewServeMux()
 	protected := http.NewServeMux()
+	rec := &routeRecorder{mux: protected, docs: map[string]module.Doc{}}
 
 	mux.HandleFunc("POST /api/login", a.handleLogin)
 	mux.HandleFunc("POST /api/logout", a.handleLogout)
@@ -152,32 +162,40 @@ func (a *App) Handler() http.Handler {
 	mux.HandleFunc("GET "+thirdauth.StartPath, a.handleThirdStart)
 	mux.HandleFunc("GET "+thirdauth.CallbackPath, a.handleThirdCallback)
 
-	protected.HandleFunc("GET /api/session", a.handleSession)
-	protected.HandleFunc("GET /api/status", a.handleStatus)
-	protected.HandleFunc("PUT /api/account", a.handleAccount)
-	protected.HandleFunc("GET /api/account/totp", a.handleTOTPStatus)
-	protected.HandleFunc("POST /api/account/totp/setup", a.handleTOTPSetup)
-	protected.HandleFunc("POST /api/account/totp/enable", a.handleTOTPEnable)
-	protected.HandleFunc("POST /api/account/totp/disable", a.handleTOTPDisable)
-	protected.HandleFunc("GET /api/logs", a.logsHandler(a.sysLogs))
-	protected.HandleFunc("POST /api/import/lucky", a.handleLuckyImport)
-	protected.HandleFunc("GET /api/system/settings", a.handleGetSettings)
-	protected.HandleFunc("PUT /api/system/settings", a.handlePutSettings)
-	protected.HandleFunc("POST /api/system/token", a.handleGenerateToken)
-	protected.HandleFunc("GET /api/system/info", a.handleSystemInfo)
-	protected.HandleFunc("GET /api/system/update", a.handleCheckUpdate)
-	protected.HandleFunc("GET /api/system/backup", a.handleBackup)
-	protected.HandleFunc("POST /api/system/restore", a.handleRestore)
-	protected.HandleFunc("POST /api/system/restart", a.handleRestart)
+	rec.add("GET /api/session", a.handleSession, "")
+	rec.add("GET /api/status", a.handleStatus, "")
+	rec.add("PUT /api/account", a.handleAccount, "")
+	rec.add("GET /api/account/totp", a.handleTOTPStatus, "")
+	rec.add("POST /api/account/totp/setup", a.handleTOTPSetup, "")
+	rec.add("POST /api/account/totp/enable", a.handleTOTPEnable, "")
+	rec.add("POST /api/account/totp/disable", a.handleTOTPDisable, "")
+	rec.add("GET /api/logs", a.logsHandler(a.sysLogs), "")
+	rec.add("POST /api/import/lucky", a.handleLuckyImport, "")
+	rec.add("GET /api/system/settings", a.handleGetSettings, "")
+	rec.add("PUT /api/system/settings", a.handlePutSettings, "")
+	rec.add("GET /api/system/info", a.handleSystemInfo, "")
+	rec.add("GET /api/system/update", a.handleCheckUpdate, "")
+	rec.add("GET /api/system/backup", a.handleBackup, "")
+	rec.add("POST /api/system/restore", a.handleRestore, "")
+	rec.add("POST /api/system/restart", a.handleRestart, "")
 	for _, e := range a.modules {
 		prefix := "/api/" + e.mod.ID()
-		protected.HandleFunc("GET "+prefix+"/logs", a.logsHandler(e.logs))
-		protected.HandleFunc("DELETE "+prefix+"/logs", func(w http.ResponseWriter, r *http.Request) {
+		rec.add("GET "+prefix+"/logs", a.logsHandler(e.logs), e.mod.ID())
+		rec.add("DELETE "+prefix+"/logs", func(w http.ResponseWriter, r *http.Request) {
 			e.logs.Clear()
 			httpx.OK(w, map[string]bool{"ok": true})
-		})
-		e.mod.Routes(prefixRouter{mux: protected, prefix: prefix})
+		}, e.mod.ID())
+		e.mod.Routes(prefixRouter{rec: rec, prefix: prefix, module: e.mod.ID()})
 	}
+	rec.add("GET /api/tokens", a.handleTokenList, "")
+	rec.add("GET /api/tokens/scopes", a.handleTokenScopes, "")
+	rec.add("POST /api/tokens", a.handleTokenCreate, "")
+	rec.add("PUT /api/tokens/{id}", a.handleTokenUpdate, "")
+	rec.add("POST /api/tokens/{id}/regenerate", a.handleTokenRegenerate, "")
+	rec.add("DELETE /api/tokens/{id}", a.handleTokenDelete, "")
+	rec.add("GET /api/openapi.json", a.handleOpenAPI, "")
+	a.routes = rec.routes
+	a.routeDocs = rec.docs
 	mux.Handle("/api/", a.requireAuth(protected))
 	mux.Handle("/", a.staticHandler())
 	return securityHeaders(a.accessControl(httpx.SameOrigin(mux)))
@@ -245,23 +263,13 @@ func (a *App) Run(parent context.Context) error {
 	}
 	cancelModules()
 	a.stopModules()
+	// 把节流中的令牌最近使用信息写入磁盘
+	a.tokens.Flush()
 	if restart {
 		a.logger.Printf("正在重启…")
 		restartProcess()
 	}
 	return nil
-}
-
-// requireAuth 在会话校验之外接受 API 令牌。
-func (a *App) requireAuth(next http.Handler) http.Handler {
-	session := a.auth.Require(next)
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if a.apiTokenOK(r) {
-			next.ServeHTTP(w, r.WithContext(auth.WithUser(r.Context(), "api-token")))
-			return
-		}
-		session.ServeHTTP(w, r)
-	})
 }
 
 func (a *App) stopModules() {
@@ -295,6 +303,8 @@ func (a *App) handleLogin(w http.ResponseWriter, r *http.Request) {
 	}
 	if err != nil {
 		a.sysLogs.Add(logbuf.LevelWarn, "auth", fmt.Sprintf("来自 %s 的登录失败: %v", ip, err))
+		events.Publish(events.Event{Type: events.AuthFailed, Source: "管理后台", Level: events.LevelWarn,
+			Title: "管理后台登录失败", Message: fmt.Sprintf("来自 %s 的登录失败：%v", ip, err), Fields: map[string]string{"ip": ip}})
 		status := http.StatusUnauthorized
 		if errors.Is(err, auth.ErrLocked) {
 			status = http.StatusTooManyRequests
@@ -303,6 +313,8 @@ func (a *App) handleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	a.sysLogs.Add(logbuf.LevelInfo, "auth", fmt.Sprintf("%s 从 %s 登录", req.Username, ip))
+	events.Publish(events.Event{Type: events.LoginSuccessful, Source: "管理后台", Level: events.LevelInfo,
+		Title: "管理后台登录成功", Message: fmt.Sprintf("%s 从 %s 登录", req.Username, ip), Fields: map[string]string{"ip": ip, "user": req.Username}})
 	http.SetCookie(w, &http.Cookie{
 		Name:     auth.CookieName,
 		Value:    token,
@@ -620,17 +632,27 @@ func securityHeaders(next http.Handler) http.Handler {
 	})
 }
 
-// prefixRouter 把模块的相对路由挂到 /api/<ID> 前缀下。
+// prefixRouter 把模块的相对路由挂到 /api/<ID> 前缀下，并登记接口文档。
 type prefixRouter struct {
-	mux    *http.ServeMux
+	rec    *routeRecorder
 	prefix string
+	module string
 }
 
 func (p prefixRouter) HandleFunc(pattern string, h http.HandlerFunc) {
 	method, path, found := strings.Cut(pattern, " ")
 	if !found {
-		p.mux.HandleFunc(p.prefix+pattern, h)
+		p.rec.add(p.prefix+pattern, h, p.module)
 		return
 	}
-	p.mux.HandleFunc(method+" "+p.prefix+path, h)
+	p.rec.add(method+" "+p.prefix+path, h, p.module)
+}
+
+// Doc 实现 module.DocRouter，登记模块接口的文档信息。
+func (p prefixRouter) Doc(pattern string, d module.Doc) {
+	method, path, found := strings.Cut(pattern, " ")
+	if !found {
+		return
+	}
+	p.rec.docs[method+" "+p.prefix+path] = d
 }

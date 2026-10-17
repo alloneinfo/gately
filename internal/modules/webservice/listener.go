@@ -145,6 +145,12 @@ func (l *listenerRunner) start(certs CertSource, trusted []string) error {
 		ln = tls.NewListener(ln, l.srv.TLSConfig)
 	}
 	l.startAt = time.Now()
+	for _, s := range l.sites {
+		s.startBackground(baseCtx)
+	}
+	if l.deflt != nil {
+		l.deflt.startBackground(baseCtx)
+	}
 	go func() {
 		if err := l.srv.Serve(ln); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			l.log.Errorf("监听 %s 退出: %v", addr, err)
