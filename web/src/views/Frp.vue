@@ -1,6 +1,8 @@
 <template>
   <div>
-    <PageHeader title="frp 内网穿透" desc="用 frpc 把内网服务暴露到公网服务器，或在本机运行 frps 作为服务端" :icon="Waypoints" />
+    <PageHeader title="frp 内网穿透" desc="用 frpc 把内网服务暴露到公网服务器，或在本机运行 frps 作为服务端" :icon="Waypoints">
+      <el-button :icon="FileUp" @click="openImport">导入配置</el-button>
+    </PageHeader>
 
     <el-tabs v-model="tab">
       <el-tab-pane label="客户端 frpc" name="client">
@@ -108,6 +110,48 @@
 
     <LogCard url="/api/frp/logs" clearable />
 
+    <el-dialog v-model="importVisible" :title="tab === 'client' ? '导入 frpc 配置' : '导入 frps 配置'" width="640px" :fullscreen="isMobile">
+      <el-alert type="info" :closable="false" show-icon class="block-gap" title="支持旧版 frpc.ini / frps.ini（含 [common] 段）和 frp 0.52+ 的 toml。导入不会改变启用状态，确认无误后再手动启用。" />
+      <div class="import-file">
+        <el-button size="small" :icon="FileUp" @click="pickFile">选择文件</el-button>
+        <span class="help">或直接把配置内容粘贴到下方</span>
+        <input ref="fileInput" type="file" class="hidden-input" @change="onFile" />
+      </div>
+      <el-input v-model="importText" type="textarea" :rows="10" class="mono" placeholder="粘贴 frpc.ini / frpc.toml 的内容" @input="importPreview = undefined" />
+      <el-radio-group v-if="tab === 'client'" v-model="proxyMode" class="import-mode" @change="importPreview = undefined">
+        <el-radio value="append">追加（同名代理保持不变）</el-radio>
+        <el-radio value="replace">替换全部现有代理</el-radio>
+      </el-radio-group>
+      <div v-if="importPreview" class="import-preview">
+        <div class="preview-title">解析结果</div>
+        <div v-if="importPreview.client" class="preview-line mono">
+          {{ importPreview.client.serverAddr || '（未填写）' }}:{{ importPreview.client.serverPort }}
+          <template v-if="importPreview.client.protocol"> · {{ importPreview.client.protocol }}</template>
+          <template v-if="importPreview.client.token"> · 含令牌</template>
+        </div>
+        <div v-if="importPreview.server" class="preview-line mono">
+          bind {{ importPreview.server.bindPort }}
+          <template v-if="importPreview.server.vhostHttpPort"> · http {{ importPreview.server.vhostHttpPort }}</template>
+          <template v-if="importPreview.server.vhostHttpsPort"> · https {{ importPreview.server.vhostHttpsPort }}</template>
+          <template v-if="importPreview.server.subdomainHost"> · {{ importPreview.server.subdomainHost }}</template>
+          <template v-if="importPreview.server.dashboardPort"> · 控制台 {{ importPreview.server.dashboardAddr }}:{{ importPreview.server.dashboardPort }}</template>
+        </div>
+        <div v-if="tab === 'client'" class="preview-line">
+          共 {{ importPreview.proxies.length }} 个代理
+          <div class="tags">
+            <el-tag v-for="p in importPreview.proxies" :key="p.name" size="small" type="info">{{ p.name }} · {{ p.type }}</el-tag>
+          </div>
+        </div>
+        <el-alert v-for="w in importPreview.warnings" :key="w" type="warning" :title="w" :closable="false" show-icon class="preview-warn" />
+        <el-alert v-if="importPreview.applied" type="success" :closable="false" show-icon :title="importDoneText" class="preview-warn" />
+      </div>
+      <template #footer>
+        <el-button @click="importVisible = false">关闭</el-button>
+        <el-button :loading="importing" :disabled="!importText.trim()" @click="runImport(false)">解析预览</el-button>
+        <el-button type="primary" :loading="importing" :disabled="!importPreview || importPreview.applied" @click="runImport(true)">导入</el-button>
+      </template>
+    </el-dialog>
+
     <el-dialog v-model="editorVisible" :title="editing.key ? '编辑代理' : '添加代理'" width="540px" :fullscreen="isMobile">
       <el-form :model="editing" label-width="100px" :label-position="labelPosition">
         <el-form-item label="名称"><el-input v-model="editing.name" /></el-form-item>
@@ -147,7 +191,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
-import { ArrowRightLeft, Pencil, Plug, Plus, Save, Server, Trash2, Waypoints } from 'lucide-vue-next'
+import { ArrowRightLeft, FileUp, Pencil, Plug, Plus, Save, Server, Trash2, Waypoints } from 'lucide-vue-next'
 import { api } from '../api'
 import PageHeader from '../components/PageHeader.vue'
 import EntityCard from '../components/EntityCard.vue'
@@ -210,6 +254,23 @@ const savingServer = ref(false)
 const editorVisible = ref(false)
 const editing = ref<Proxy>(empty())
 let timer: number | undefined
+
+interface ImportResult {
+  applied: boolean
+  role: string
+  client?: ClientSettings
+  server?: ServerSettings
+  proxies: Proxy[]
+  warnings: string[]
+  added: number
+}
+const importVisible = ref(false)
+const importText = ref('')
+const proxyMode = ref('append')
+const importing = ref(false)
+const importPreview = ref<ImportResult>()
+const fileInput = ref<HTMLInputElement>()
+const importDoneText = computed(() => (tab.value === 'client' ? `已导入，新增 ${importPreview.value?.added ?? 0} 个代理` : '已导入服务端配置'))
 
 const domainsText = computed({
   get: () => (editing.value.customDomains ?? []).join(', '),
@@ -278,6 +339,48 @@ async function saveServer() {
   }
 }
 
+function openImport() {
+  importText.value = ''
+  importPreview.value = undefined
+  importVisible.value = true
+}
+
+function pickFile() {
+  fileInput.value?.click()
+}
+
+// onFile 读取所选配置文件并填入文本框
+async function onFile(e: Event) {
+  const input = e.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (file) {
+    importText.value = await file.text()
+    importPreview.value = undefined
+  }
+  input.value = ''
+}
+
+// runImport 先预览再导入；apply 为 true 时保存并刷新页面数据
+async function runImport(apply: boolean) {
+  importing.value = true
+  try {
+    importPreview.value = await api.post<ImportResult>('/api/frp/import', {
+      role: tab.value,
+      content: importText.value,
+      apply,
+      proxyMode: proxyMode.value,
+    })
+    if (apply) {
+      await load()
+    }
+  } catch (e) {
+    importPreview.value = undefined
+    ElMessage.error((e as Error).message)
+  } finally {
+    importing.value = false
+  }
+}
+
 function openEditor(p?: Proxy) {
   editing.value = p ? JSON.parse(JSON.stringify(p)) : empty()
   editorVisible.value = true
@@ -337,6 +440,37 @@ onBeforeUnmount(() => window.clearInterval(timer))
 }
 .svc-form .el-form-item:last-child {
   margin-bottom: 0;
+}
+.import-file {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.hidden-input {
+  display: none;
+}
+.import-mode {
+  margin-top: 10px;
+}
+.import-preview {
+  margin-top: 14px;
+}
+.preview-title {
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+.preview-line {
+  margin-bottom: 8px;
+}
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+.preview-warn {
+  margin-top: 6px;
 }
 .w-200 {
   width: 200px;

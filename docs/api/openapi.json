@@ -323,6 +323,81 @@
         },
         "type": "object"
       },
+      "frp.ClientSettings": {
+        "properties": {
+          "binPath": {
+            "type": "string"
+          },
+          "enable": {
+            "type": "boolean"
+          },
+          "protocol": {
+            "type": "string"
+          },
+          "serverAddr": {
+            "type": "string"
+          },
+          "serverPort": {
+            "type": "integer"
+          },
+          "token": {
+            "type": "string"
+          },
+          "user": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "frp.ImportRequest": {
+        "properties": {
+          "apply": {
+            "type": "boolean"
+          },
+          "content": {
+            "type": "string"
+          },
+          "proxyMode": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "frp.ImportResponse": {
+        "properties": {
+          "added": {
+            "type": "integer"
+          },
+          "applied": {
+            "type": "boolean"
+          },
+          "client": {
+            "$ref": "#/components/schemas/frp.ClientSettings"
+          },
+          "proxies": {
+            "items": {
+              "$ref": "#/components/schemas/frp.Proxy"
+            },
+            "type": "array"
+          },
+          "role": {
+            "type": "string"
+          },
+          "server": {
+            "$ref": "#/components/schemas/frp.ServerSettings"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
       "frp.Proxy": {
         "properties": {
           "customDomains": {
@@ -360,6 +435,47 @@
           },
           "type": {
             "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "frp.ServerSettings": {
+        "properties": {
+          "allowPorts": {
+            "type": "string"
+          },
+          "binPath": {
+            "type": "string"
+          },
+          "bindPort": {
+            "type": "integer"
+          },
+          "dashboardAddr": {
+            "type": "string"
+          },
+          "dashboardPort": {
+            "type": "integer"
+          },
+          "dashboardPwd": {
+            "type": "string"
+          },
+          "dashboardUser": {
+            "type": "string"
+          },
+          "enable": {
+            "type": "boolean"
+          },
+          "subdomainHost": {
+            "type": "string"
+          },
+          "token": {
+            "type": "string"
+          },
+          "vhostHttpPort": {
+            "type": "integer"
+          },
+          "vhostHttpsPort": {
+            "type": "integer"
           }
         },
         "type": "object"
@@ -8970,6 +9086,73 @@
           }
         ],
         "summary": "保存 frp 客户端配置",
+        "tags": [
+          "frp 内网穿透"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/frp/import": {
+      "post": {
+        "description": "所需权限：`frp:write`。",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/frp.ImportRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/frp.ImportResponse"
+                }
+              }
+            },
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "请求参数错误"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌无效、已过期或未登录"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌缺少所需权限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "导入已有的 frpc / frps 配置（支持旧版 ini 与新版 toml）；apply 为 false 时仅预览",
         "tags": [
           "frp 内网穿透"
         ],

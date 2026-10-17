@@ -124,7 +124,7 @@ func (m *Module) applyLocked() {
 			m.fail("创建状态目录失败: " + err.Error())
 			return
 		}
-		m.daemon.Start(proc.Spec{Path: daemon, Args: s.DaemonArgs(dir)})
+		m.daemon.Start(proc.Spec{Path: daemon, Args: s.DaemonArgs(dir), Env: s.DaemonEnvList()})
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	done := make(chan struct{})

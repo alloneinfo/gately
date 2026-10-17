@@ -205,6 +205,7 @@ func (m *Module) Routes(r module.Router) {
 		Removed:  func(string) { m.applyClientLocked() },
 	}
 	proxies.Register(r, "/proxies")
+	m.registerImport(r)
 
 	r.HandleFunc("GET /client", func(w http.ResponseWriter, req *http.Request) {
 		m.mu.Lock()

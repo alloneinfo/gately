@@ -98,8 +98,19 @@
               <el-input v-model="settings.socks5" placeholder="如 localhost:1055，留空不开启" class="mono" />
               <div class="form-help">用户态网络下，本机程序通过该代理访问 tailnet 内的设备</div>
             </el-form-item>
+            <el-form-item label="WireGuard 端口">
+              <el-input-number v-model="settings.port" :min="0" :max="65535" controls-position="right" />
+              <span class="help">0 表示自动选择；固定后可在防火墙放行该 UDP 端口以便直连</span>
+            </el-form-item>
             <el-form-item label="状态目录"><el-input v-model="settings.stateDir" :placeholder="defaultStateDir" class="mono" /></el-form-item>
             <el-form-item label="tailscaled 路径"><el-input v-model="settings.tailscaledPath" placeholder="留空自动查找" class="mono" /></el-form-item>
+            <el-form-item label="tailscaled 参数">
+              <el-input v-model="settings.daemonExtraArgs" placeholder="追加到 tailscaled 命令行，如 --verbose=1" class="mono" />
+            </el-form-item>
+            <el-form-item label="环境变量">
+              <el-input v-model="settings.daemonEnv" type="textarea" :rows="3" placeholder="每行一个 KEY=VALUE，如 TS_DEBUG_FIREWALL_MODE=nftables" class="mono" />
+              <div class="form-help">宿主机 iptables 为 nf_tables 后端时，需设置 TS_DEBUG_FIREWALL_MODE=nftables，否则子网转发规则会落到另一套表里</div>
+            </el-form-item>
           </template>
           <el-form-item v-else label="控制套接字">
             <el-input v-model="settings.socket" placeholder="留空使用系统默认，如 /var/run/tailscale/tailscaled.sock" class="mono" />
@@ -144,6 +155,9 @@ interface Settings {
   acceptRoutes: boolean
   acceptDns: boolean
   extraUpArgs: string
+  port: number
+  daemonExtraArgs: string
+  daemonEnv: string
 }
 interface Peer {
   name: string
@@ -185,6 +199,9 @@ const settings = reactive<Settings>({
   acceptRoutes: false,
   acceptDns: false,
   extraUpArgs: '',
+  port: 0,
+  daemonExtraArgs: '',
+  daemonEnv: '',
 })
 // loaded 表示配置已从后端读取，避免表单先以默认值闪现
 const loaded = ref(false)

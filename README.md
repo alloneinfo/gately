@@ -19,8 +19,8 @@ Lucky 功能强大，但闭源、二进制加壳，配置文件经过混淆，�
 | STUN 穿透 | TCP/UDP、保活、UPnP/NAT-PMP、内置转发、地址变化时触发 Webhook 与脚本 |
 | 端口转发 | TCP/UDP、IPv4/IPv6、端口段、多目标故障转移、连接数限制、流量统计 |
 | SSL 证书 | ACME DNS-01 自动签发与续期（通配符、EAB）、上传、读取文件、映射到目录并执行脚本 |
-| Tailscale | 托管 tailscaled（用户态网络，容器友好）或接入系统已有守护进程；认证密钥/登录链接、Headscale、子网路由、出口节点、节点列表与 SOCKS5 代理 |
-| frp | frpc 客户端（tcp/udp/http/https/stcp/xtcp 代理，增删即生效）与 frps 服务端（端口白名单、子域名、控制台） |
+| Tailscale | 托管 tailscaled（用户态网络，容器友好）或接入系统已有守护进程；认证密钥/登录链接、Headscale、子网路由、出口节点、节点列表与 SOCKS5 代理、固定端口、tailscaled 额外参数与环境变量 |
+| frp | frpc 客户端（tcp/udp/http/https/stcp/xtcp 代理，增删即生效）与 frps 服务端（端口白名单、子域名、控制台），可一键导入旧版 ini / 新版 toml 配置 |
 | Cloudflare 隧道 | cloudflared 令牌隧道与 trycloudflare 临时隧道，多隧道、自动重启、公网地址展示 |
 | Web 服务 | 按域名反向代理/重定向/静态文件/固定文本；HTTPS；WebSocket；PROXY 协议收发；基本认证、网页认证、GitHub/Google/QQ/OIDC 登录；IP 黑白名单 |
 | WAF 防火墙 | Coraza + OWASP CRS v4，可按文件启用规则、自定义 SecLang、拦截/仅检测 |

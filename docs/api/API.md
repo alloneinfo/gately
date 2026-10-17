@@ -130,6 +130,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/frp/proxies/{key}` | `frp:write` | 删除条目 |
 | PUT | `/api/frp/proxies/{key}/enable` | `frp:write` | 启用或停用条目 |
 | PUT | `/api/frp/proxies-order` | `frp:write` | 调整条目排序 |
+| POST | `/api/frp/import` | `frp:write` | 导入已有的 frpc / frps 配置（支持旧版 ini 与新版 toml）；apply 为 false 时仅预览 |
 | GET | `/api/frp/client` | `frp:read` | 读取 frp 客户端配置 |
 | PUT | `/api/frp/client` | `frp:write` | 保存 frp 客户端配置 |
 | GET | `/api/frp/server` | `frp:read` | 读取 frp 服务端配置 |
@@ -643,6 +644,39 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `name` | string |
 | `type` | string |
 
+### frp.ClientSettings
+
+| 字段 | 类型 |
+| --- | --- |
+| `binPath` | string |
+| `enable` | boolean |
+| `protocol` | string |
+| `serverAddr` | string |
+| `serverPort` | integer |
+| `token` | string |
+| `user` | string |
+
+### frp.ImportRequest
+
+| 字段 | 类型 |
+| --- | --- |
+| `apply` | boolean |
+| `content` | string |
+| `proxyMode` | string |
+| `role` | string |
+
+### frp.ImportResponse
+
+| 字段 | 类型 |
+| --- | --- |
+| `added` | integer |
+| `applied` | boolean |
+| `client` | `frp.ClientSettings` |
+| `proxies` | 数组 of `frp.Proxy` |
+| `role` | string |
+| `server` | `frp.ServerSettings` |
+| `warnings` | 数组 of string |
+
 ### frp.Proxy
 
 | 字段 | 类型 |
@@ -658,6 +692,23 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `secretKey` | string |
 | `subdomain` | string |
 | `type` | string |
+
+### frp.ServerSettings
+
+| 字段 | 类型 |
+| --- | --- |
+| `allowPorts` | string |
+| `binPath` | string |
+| `bindPort` | integer |
+| `dashboardAddr` | string |
+| `dashboardPort` | integer |
+| `dashboardPwd` | string |
+| `dashboardUser` | string |
+| `enable` | boolean |
+| `subdomainHost` | string |
+| `token` | string |
+| `vhostHttpPort` | integer |
+| `vhostHttpsPort` | integer |
 
 ### geoip.Info
 

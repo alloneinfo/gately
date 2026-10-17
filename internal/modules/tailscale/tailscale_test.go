@@ -83,3 +83,36 @@ func TestPeerViewAndStatusParse(t *testing.T) {
 }
 
 func jsonUnmarshal(s string, v any) error { return json.Unmarshal([]byte(s), v) }
+
+func TestDaemonPortArgsAndEnv(t *testing.T) {
+	s := DefaultSettings()
+	s.Userspace = false
+	s.Port = 41641
+	s.DaemonExtraArgs = "--no-logs-no-support  --verbose=1"
+	s.DaemonEnv = "# 宿主机 iptables 为 nf_tables 后端\nTS_DEBUG_FIREWALL_MODE=nftables\n\n  FOO = bar baz \n"
+	if err := s.Validate(); err != nil {
+		t.Fatal(err)
+	}
+	want := []string{"--statedir=/etc/gately/tailscale", "--socket=/etc/gately/tailscale/tailscaled.sock", "--port=41641", "--no-logs-no-support", "--verbose=1"}
+	if got := s.DaemonArgs("/etc/gately"); !slices.Equal(got, want) {
+		t.Errorf("tailscaled 参数错误: %v", got)
+	}
+	if got := s.DaemonEnvList(); !slices.Equal(got, []string{"TS_DEBUG_FIREWALL_MODE=nftables", "FOO=bar baz"}) {
+		t.Errorf("环境变量错误: %v", got)
+	}
+
+	// 默认不带 --port，也没有额外环境变量
+	def := DefaultSettings()
+	if got := def.DaemonArgs("/x"); slices.ContainsFunc(got, func(a string) bool { return strings.HasPrefix(a, "--port") }) {
+		t.Errorf("默认不应固定端口: %v", got)
+	}
+	if got := def.DaemonEnvList(); len(got) != 0 {
+		t.Errorf("默认不应有环境变量: %v", got)
+	}
+
+	for i, bad := range []Settings{{Port: 70000}, {Port: -1}, {DaemonEnv: "NOEQUALS"}, {DaemonEnv: "1BAD=x"}} {
+		if err := bad.Validate(); err == nil {
+			t.Errorf("用例 %d 应被拒绝: %+v", i, bad)
+		}
+	}
+}

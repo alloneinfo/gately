@@ -37,6 +37,12 @@ type Settings struct {
 	AcceptDNS         bool     `json:"acceptDns"`
 	// ExtraUpArgs 追加到 tailscale up 之后，以空白分隔
 	ExtraUpArgs string `json:"extraUpArgs"`
+	// Port 为 tailscaled 的 WireGuard UDP 监听端口，0 表示由 tailscaled 自行选择；固定后便于在防火墙放行直连
+	Port int `json:"port"`
+	// DaemonExtraArgs 追加到 tailscaled 命令行之后，以空白分隔
+	DaemonExtraArgs string `json:"daemonExtraArgs"`
+	// DaemonEnv 是传给 tailscaled 的环境变量，每行一个 KEY=VALUE，例如 TS_DEBUG_FIREWALL_MODE=nftables
+	DaemonEnv string `json:"daemonEnv"`
 }
 
 // DefaultSettings 是首次使用的默认配置：托管 tailscaled 并使用用户态网络。
@@ -45,6 +51,26 @@ func DefaultSettings() Settings {
 }
 
 var hostnameRe = regexp.MustCompile(`^[A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?$`)
+
+var envNameRe = regexp.MustCompile(`^[A-Za-z_][A-Za-z0-9_]*$`)
+
+// parseEnv 解析每行一个 KEY=VALUE 的环境变量文本，忽略空行与 # 开头的注释行。
+func parseEnv(text string) ([]string, error) {
+	var out []string
+	for i, line := range strings.Split(text, "\n") {
+		line = strings.TrimSpace(line)
+		if line == "" || strings.HasPrefix(line, "#") {
+			continue
+		}
+		name, value, ok := strings.Cut(line, "=")
+		name = strings.TrimSpace(name)
+		if !ok || !envNameRe.MatchString(name) {
+			return nil, fmt.Errorf("环境变量第 %d 行格式应为 KEY=VALUE", i+1)
+		}
+		out = append(out, name+"="+strings.TrimSpace(value))
+	}
+	return out, nil
+}
 
 // Validate 校验并规范化配置。
 func (s *Settings) Validate() error {
@@ -57,6 +83,14 @@ func (s *Settings) Validate() error {
 	s.Hostname = strings.TrimSpace(s.Hostname)
 	s.LoginServer = strings.TrimSpace(s.LoginServer)
 	s.ExtraUpArgs = strings.TrimSpace(s.ExtraUpArgs)
+	s.DaemonExtraArgs = strings.TrimSpace(s.DaemonExtraArgs)
+	s.DaemonEnv = strings.TrimSpace(s.DaemonEnv)
+	if s.Port < 0 || s.Port > 65535 {
+		return errors.New("WireGuard 端口需在 0-65535 之间")
+	}
+	if _, err := parseEnv(s.DaemonEnv); err != nil {
+		return err
+	}
 	if s.StateDir != "" && !filepath.IsAbs(s.StateDir) {
 		return errors.New("状态目录需为绝对路径")
 	}
@@ -117,7 +151,16 @@ func (s *Settings) DaemonArgs(configDir string) []string {
 	if s.Socks5 != "" {
 		args = append(args, "--socks5-server="+s.Socks5)
 	}
-	return args
+	if s.Port > 0 {
+		args = append(args, fmt.Sprintf("--port=%d", s.Port))
+	}
+	return append(args, strings.Fields(s.DaemonExtraArgs)...)
+}
+
+// DaemonEnvList 返回传给 tailscaled 的环境变量（KEY=VALUE 形式），格式错误的行已在 Validate 中拒绝。
+func (s *Settings) DaemonEnvList() []string {
+	env, _ := parseEnv(s.DaemonEnv)
+	return env
 }
 
 // CLIArgs 生成 tailscale 命令的全局参数。
