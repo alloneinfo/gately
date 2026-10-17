@@ -15,11 +15,11 @@
       </div>
     </template>
     <el-tabs v-model="tab" class="tabs">
-      <el-tab-pane label="概览" name="overview" />
-      <el-tab-pane label="日志" name="logs" />
-      <el-tab-pane label="终端" name="term" :disabled="!running" />
-      <el-tab-pane label="监控" name="stats" :disabled="!running" />
-      <el-tab-pane label="文件" name="files" />
+      <el-tab-pane :label="t('docker.container.detail.overview')" name="overview" />
+      <el-tab-pane :label="t('docker.container.detail.logs')" name="logs" />
+      <el-tab-pane :label="t('docker.container.detail.terminal')" name="term" :disabled="!running" />
+      <el-tab-pane :label="t('docker.container.detail.stats')" name="stats" :disabled="!running" />
+      <el-tab-pane :label="t('docker.container.detail.files')" name="files" />
     </el-tabs>
     <div v-if="container" class="pane">
       <ContainerOverview v-if="tab === 'overview'" :key="container.id + container.state" :container-id="container.id" />
@@ -33,6 +33,7 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import StatusBadge from '../../components/StatusBadge.vue'
 import { useIsMobile } from '../../composables/useIsMobile'
 import { containerBadge } from './format'
@@ -42,6 +43,8 @@ import ContainerTerm from './ContainerTerm.vue'
 import ContainerStats from './ContainerStats.vue'
 import ContainerFiles from './ContainerFiles.vue'
 import type { ContainerView } from './types'
+
+const { t } = useI18n()
 
 const props = defineProps<{ modelValue: boolean; container?: ContainerView; initialTab?: string }>()
 const emit = defineEmits<{ 'update:modelValue': [v: boolean] }>()

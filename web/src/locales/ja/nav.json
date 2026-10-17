@@ -1,0 +1,103 @@
+{
+  "login": "ログイン",
+  "groups": {
+    "network": "ネットワーク",
+    "tunnel": "ネットワーク接続と NAT 越え",
+    "web": "Web",
+    "storage": "ネットワークストレージ",
+    "tools": "ツール",
+    "system": "システム"
+  },
+  "items": {
+    "overview": {
+      "title": "概要"
+    },
+    "portforward": {
+      "title": "ポート転送",
+      "desc": "TCP / UDP のポート転送とロードバランシング"
+    },
+    "ddns": {
+      "title": "ダイナミック DNS",
+      "desc": "グローバル IP の変化時に DNS を自動更新"
+    },
+    "stun": {
+      "title": "STUN 穿孔",
+      "desc": "NAT1 環境でグローバル IP なしで外部公開"
+    },
+    "tailscale": {
+      "title": "Tailscale",
+      "desc": "Tailscale / Headscale のネットワークに参加"
+    },
+    "frp": {
+      "title": "frp",
+      "desc": "frpc / frps による社内サービスの外部公開"
+    },
+    "cloudflared": {
+      "title": "Cloudflare トンネル",
+      "desc": "グローバル IP なしで社内サービスを公開"
+    },
+    "web": {
+      "title": "Web サービス",
+      "desc": "リバースプロキシ、リダイレクト、静的サイト"
+    },
+    "waf": {
+      "title": "WAF ファイアウォール",
+      "desc": "OWASP CRS ベースのアプリケーションファイアウォール"
+    },
+    "ssl": {
+      "title": "SSL 証明書",
+      "desc": "ACME による自動取得と更新"
+    },
+    "storage": {
+      "title": "ストレージ管理",
+      "desc": "ローカルディレクトリやリモート WebDAV をマウントしてオンラインで管理"
+    },
+    "webdav": {
+      "title": "WebDAV",
+      "desc": "WebDAV ファイル共有サービス"
+    },
+    "ftp": {
+      "title": "FTP サービス",
+      "desc": "FTP / FTPS ファイル共有サービス"
+    },
+    "wol": {
+      "title": "Wake-on-LAN",
+      "desc": "LAN 内のデバイスをリモートで起動"
+    },
+    "terminal": {
+      "title": "Web ターミナル",
+      "desc": "ブラウザ上の SSH とローカルシェル"
+    },
+    "nettools": {
+      "title": "ネットワーク診断",
+      "desc": "Ping、トレースルート、ポート確認、DNS、LAN スキャン"
+    },
+    "docker": {
+      "title": "Docker",
+      "desc": "コンテナ管理とイメージ更新"
+    },
+    "cron": {
+      "title": "スケジュールタスク",
+      "desc": "コマンドや HTTP リクエストを定期実行"
+    },
+    "notify": {
+      "title": "通知センター",
+      "desc": "イベントを Telegram、メール、WeCom などへ送信"
+    },
+    "logs": {
+      "title": "システムログ"
+    },
+    "apiTokens": {
+      "title": "API トークン"
+    },
+    "apiDocs": {
+      "title": "API ドキュメント"
+    },
+    "settings": {
+      "title": "設定"
+    },
+    "about": {
+      "title": "バージョン情報"
+    }
+  }
+}

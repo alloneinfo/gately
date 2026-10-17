@@ -1,0 +1,45 @@
+{
+  "clipboard": {
+    "copyFailed": "Não foi possível copiar automaticamente. O texto está selecionado; pressione Ctrl/Cmd+C para copiar."
+  },
+  "themePicker": {
+    "switchTheme": "Trocar tema",
+    "title": "Cores do tema",
+    "followSystem": "Seguir o sistema (Esmeralda / Escuro)"
+  },
+  "moduleBanner": {
+    "defaultDesc": "Enquanto o módulo estiver desativado, nenhum dos itens abaixo será executado. Depois de ativá-lo, cada item segue o seu próprio interruptor.",
+    "enable": "Ativar módulo"
+  },
+  "saveBar": {
+    "dirty": "Você tem alterações não salvas",
+    "saved": "Todas as alterações foram salvas",
+    "undo": "Desfazer",
+    "save": "Salvar configurações"
+  },
+  "logCard": {
+    "title": "Logs de execução"
+  },
+  "logViewer": {
+    "levelAll": "Todos os níveis",
+    "levelInfo": "Info e acima",
+    "levelWarn": "Aviso e acima",
+    "levelError": "Somente erros",
+    "autoScroll": "Rolagem automática",
+    "empty": "Nenhum log ainda"
+  },
+  "scopeTags": {
+    "allWrite": "Acesso total",
+    "allRead": "Somente leitura (tudo)",
+    "write": "leitura e gravação",
+    "read": "somente leitura",
+    "none": "Sem permissões"
+  },
+  "restartOverlay": {
+    "resumeHint": "A página será atualizada automaticamente quando o serviço voltar. Mantenha esta página aberta.",
+    "waited": "Aguardando há {seconds} s",
+    "timeoutTitle": "Tempo esgotado",
+    "timeoutDesc": "O serviço não responde há muito tempo. Se você alterou a porta de administração ou o endereço de escuta, abra o novo endereço manualmente. Você também pode consultar os logs do programa para ver como está a inicialização.",
+    "reload": "Recarregar página"
+  }
+}

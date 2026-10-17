@@ -2,8 +2,8 @@
   <!-- 移动端的快捷命令底部面板：点击即发送 -->
   <el-drawer :model-value="modelValue" direction="btt" size="auto" :with-header="false" class="sheet" @update:model-value="(v: boolean) => $emit('update:modelValue', v)">
     <div class="sheet-head">
-      <span>快捷命令</span>
-      <el-button text :icon="Settings2" @click="$emit('manage')">管理</el-button>
+      <span>{{ t('terminal.sheet.title') }}</span>
+      <el-button text :icon="Settings2" @click="$emit('manage')">{{ t('terminal.sheet.manage') }}</el-button>
     </div>
     <div class="list">
       <button v-for="(s, i) in shortcuts" :key="i" class="item" @click="$emit('send', s)">
@@ -11,14 +11,17 @@
         <span class="cmd mono">{{ s.command }}</span>
         <CornerDownLeft v-if="s.sendEnter" :size="14" class="enter" />
       </button>
-      <el-empty v-if="!shortcuts.length" description="暂无快捷命令" :image-size="50" />
+      <el-empty v-if="!shortcuts.length" :description="t('terminal.sheet.empty')" :image-size="50" />
     </div>
   </el-drawer>
 </template>
 
 <script setup lang="ts">
 import { CornerDownLeft, Settings2 } from 'lucide-vue-next'
+import { useI18n } from 'vue-i18n'
 import type { Shortcut } from './types'
+
+const { t } = useI18n()
 
 defineProps<{ modelValue: boolean; shortcuts: Shortcut[] }>()
 defineEmits<{ 'update:modelValue': [v: boolean]; send: [s: Shortcut]; manage: [] }>()

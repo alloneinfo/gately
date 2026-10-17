@@ -1,32 +1,32 @@
 <template>
   <div>
     <div class="toolbar">
-      <el-input v-model="keyword" placeholder="搜索项目或服务" clearable :prefix-icon="Search" class="t-search" />
+      <el-input v-model="keyword" :placeholder="t('docker.compose.tab.search')" clearable :prefix-icon="Search" class="t-search" />
       <div class="t-ops">
-        <el-button type="primary" :icon="Plus" @click="newProject">新建项目</el-button>
-        <el-button :icon="RefreshCw" :loading="loading" @click="load">刷新</el-button>
+        <el-button type="primary" :icon="Plus" @click="newProject">{{ t('docker.compose.tab.newProject') }}</el-button>
+        <el-button :icon="RefreshCw" :loading="loading" @click="load">{{ t('common.refresh') }}</el-button>
       </div>
     </div>
-    <el-alert v-if="info && !info.composeCli" type="warning" :closable="false" show-icon class="gap" title="未检测到 docker compose 命令">
-      启动、停止、重启、down 可正常使用；up、拉取镜像与编辑 Compose 文件依赖 docker compose CLI，请在 Gately 所在环境安装 Docker Compose 插件。
+    <el-alert v-if="info && !info.composeCli" type="warning" :closable="false" show-icon class="gap" :title="t('docker.compose.tab.noCli')">
+      {{ t('docker.compose.tab.noCliDesc') }}
     </el-alert>
 
     <div v-loading="loading && !projects.length" class="card-list">
-      <el-empty v-if="!loading && !filtered.length" description="没有 Compose 项目" />
+      <el-empty v-if="!loading && !filtered.length" :description="t('docker.compose.tab.empty')" />
       <EntityCard v-for="p in filtered" :key="p.name" :off="p.status === 'stopped'">
         <template #lead>
           <div class="ico" :class="{ on: p.status !== 'stopped' }"><Layers :size="18" /></div>
         </template>
         <template #title>
           <span>{{ p.name }}</span>
-          <el-tag v-if="p.managed" size="small" type="success">Gately 管理</el-tag>
+          <el-tag v-if="p.managed" size="small" type="success">{{ t('docker.compose.tab.managed') }}</el-tag>
         </template>
         <template #sub>{{ p.workingDir || '-' }}</template>
         <template #status>
           <StatusBadge v-bind="projBadge(p)" />
         </template>
-        <Field label="容器" wide>{{ p.running }} / {{ p.total }} 运行中</Field>
-        <Field label="服务" wide>
+        <Field :label="t('docker.compose.tab.containers')" wide>{{ t('docker.compose.tab.runningCount', { running: p.running, total: p.total }) }}</Field>
+        <Field :label="t('docker.compose.tab.services')" wide>
           <div v-for="s in p.services" :key="s.name" class="svc">
             <span class="svc-dot" :class="s.state === 'running' ? 'on' : ''" />
             <b>{{ s.name }}</b>
@@ -36,19 +36,19 @@
           <span v-if="!p.services?.length" class="muted">-</span>
         </Field>
         <template #actions>
-          <el-button v-if="p.status !== 'running'" text type="primary" :icon="Play" class="btn" :loading="busy[p.name]" @click="simple(p, 'start')">启动</el-button>
-          <el-button v-if="p.status !== 'stopped'" text type="danger" :icon="Square" class="btn" :loading="busy[p.name]" @click="stop(p)">停止</el-button>
-          <el-button text :icon="RotateCw" class="btn" :loading="busy[p.name]" @click="simple(p, 'restart')">重启</el-button>
-          <el-button text :icon="ScrollText" class="btn" @click="showLogs(p)">日志</el-button>
+          <el-button v-if="p.status !== 'running'" text type="primary" :icon="Play" class="btn" :loading="busy[p.name]" @click="simple(p, 'start')">{{ t('common.start') }}</el-button>
+          <el-button v-if="p.status !== 'stopped'" text type="danger" :icon="Square" class="btn" :loading="busy[p.name]" @click="stop(p)">{{ t('common.stop') }}</el-button>
+          <el-button text :icon="RotateCw" class="btn" :loading="busy[p.name]" @click="simple(p, 'restart')">{{ t('common.restart') }}</el-button>
+          <el-button text :icon="ScrollText" class="btn" @click="showLogs(p)">{{ t('docker.compose.tab.logs') }}</el-button>
           <el-dropdown trigger="click" @command="(c: string) => onCommand(p, c)">
-            <el-button text :icon="Ellipsis" class="btn">更多</el-button>
+            <el-button text :icon="Ellipsis" class="btn">{{ t('common.more') }}</el-button>
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item command="up" :icon="Rocket">up（创建并启动）</el-dropdown-item>
-                <el-dropdown-item command="pull" :icon="CloudDownload">拉取镜像</el-dropdown-item>
-                <el-dropdown-item command="edit" :icon="FilePen">编辑 Compose 文件</el-dropdown-item>
-                <el-dropdown-item command="down" :icon="ArrowDownToLine" divided>down（删除容器）</el-dropdown-item>
-                <el-dropdown-item v-if="p.managed" command="delete" :icon="Trash2">删除项目</el-dropdown-item>
+                <el-dropdown-item command="up" :icon="Rocket">{{ t('docker.compose.tab.up') }}</el-dropdown-item>
+                <el-dropdown-item command="pull" :icon="CloudDownload">{{ t('docker.compose.tab.pull') }}</el-dropdown-item>
+                <el-dropdown-item command="edit" :icon="FilePen">{{ t('docker.compose.tab.editFile') }}</el-dropdown-item>
+                <el-dropdown-item command="down" :icon="ArrowDownToLine" divided>{{ t('docker.compose.tab.down') }}</el-dropdown-item>
+                <el-dropdown-item v-if="p.managed" command="delete" :icon="Trash2">{{ t('docker.compose.tab.deleteProject') }}</el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
@@ -58,18 +58,20 @@
 
     <ComposeEditor v-model="editorVisible" :project="editorProject" @done="load" />
 
-    <el-dialog v-model="logsVisible" :title="`${logsName} 汇总日志`" width="900px" :fullscreen="isMobile" top="5vh" append-to-body>
+    <el-dialog v-model="logsVisible" :title="t('docker.compose.tab.logsTitle', { name: logsName })" width="900px" :fullscreen="isMobile" top="5vh" append-to-body>
       <pre class="logs mono">{{ logs }}</pre>
       <template #footer>
-        <el-button :icon="RefreshCw" @click="refreshLogs">刷新</el-button>
+        <el-button :icon="RefreshCw" @click="refreshLogs">{{ t('common.refresh') }}</el-button>
       </template>
     </el-dialog>
 
-    <el-dialog v-model="downVisible" title="down 项目" width="440px" append-to-body>
-      <p class="dlg-text">将停止并删除项目 <b>{{ downTarget?.name }}</b> 的全部容器与网络，镜像和命名卷默认保留。</p>
-      <el-checkbox v-model="downVolumes">同时删除命名卷（数据将丢失）</el-checkbox>
+    <el-dialog v-model="downVisible" :title="t('docker.compose.tab.downTitle')" width="440px" append-to-body>
+      <i18n-t keypath="docker.compose.tab.downText" tag="p" class="dlg-text">
+        <template #name><b>{{ downTarget?.name }}</b></template>
+      </i18n-t>
+      <el-checkbox v-model="downVolumes">{{ t('docker.compose.tab.downVolumes') }}</el-checkbox>
       <template #footer>
-        <el-button @click="downVisible = false">取消</el-button>
+        <el-button @click="downVisible = false">{{ t('common.cancel') }}</el-button>
         <el-button type="danger" :loading="downBusy" @click="doDown">down</el-button>
       </template>
     </el-dialog>
@@ -78,6 +80,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ArrowDownToLine, CloudDownload, Ellipsis, FilePen, Layers, Play, Plus, RefreshCw, Rocket, RotateCw, ScrollText, Search, Square, Trash2 } from 'lucide-vue-next'
 import { api, ApiError } from '../../api'
@@ -89,6 +92,8 @@ import ComposeEditor from './ComposeEditor.vue'
 import { dockerInfo, reportError } from './state'
 import { trackTask } from './tasks'
 import type { ComposeProject } from './types'
+
+const { t } = useI18n()
 
 const isMobile = useIsMobile()
 const info = dockerInfo
@@ -113,18 +118,18 @@ const filtered = computed(() => {
 
 function projBadge(p: ComposeProject): { type: StatusType; text: string } {
   if (p.status === 'running') {
-    return { type: 'running', text: '运行中' }
+    return { type: 'running', text: t('common.running') }
   }
   if (p.status === 'partial') {
-    return { type: 'warn', text: '部分运行' }
+    return { type: 'warn', text: t('docker.compose.tab.partial') }
   }
-  return { type: 'off', text: '已停止' }
+  return { type: 'off', text: t('common.stopped') }
 }
 
 // 失败时对 501（缺少 compose CLI）给出友好提示
 function fail(e: unknown) {
   if (e instanceof ApiError && e.status === 501) {
-    ElMessageBox.alert(`${e.message}\n\n此功能依赖 docker compose CLI，请在 Gately 所在环境安装 Docker Compose 插件，并确认能访问 Compose 文件所在目录。`, '当前环境不支持', { type: 'warning' })
+    ElMessageBox.alert(t('docker.compose.tab.unsupportedMsg', { message: e.message }), t('docker.compose.tab.unsupported'), { type: 'warning' })
     return
   }
   ElMessage.error((e as Error).message)
@@ -132,7 +137,7 @@ function fail(e: unknown) {
 
 function needCli(): boolean {
   if (info.value && !info.value.composeCli) {
-    ElMessageBox.alert('此功能依赖 docker compose CLI，当前环境未检测到。请安装 Docker Compose 插件后重试。', '当前环境不支持', { type: 'warning' })
+    ElMessageBox.alert(t('docker.compose.tab.needCli'), t('docker.compose.tab.unsupported'), { type: 'warning' })
     return false
   }
   return true
@@ -156,7 +161,7 @@ async function simple(p: ComposeProject, action: string) {
   busy[p.name] = true
   try {
     await api.post(url(p, `/${action}`))
-    ElMessage.success('已执行')
+    ElMessage.success(t('docker.compose.tab.executed'))
     await load()
   } catch (e) {
     fail(e)
@@ -167,20 +172,20 @@ async function simple(p: ComposeProject, action: string) {
 
 async function stop(p: ComposeProject) {
   try {
-    await ElMessageBox.confirm(`停止项目 ${p.name} 的全部容器？`, '停止项目', { type: 'warning' })
+    await ElMessageBox.confirm(t('docker.compose.tab.stopConfirm', { name: p.name }), t('docker.compose.tab.stopTitle'), { type: 'warning' })
   } catch {
     return
   }
   await simple(p, 'stop')
 }
 
-async function runTask(p: ComposeProject, action: string, label: string) {
+async function runTask(p: ComposeProject, action: string, title: string) {
   if (!needCli()) {
     return
   }
   try {
     const r = await api.post<{ task: string }>(url(p, `/${action}`))
-    trackTask(r.task, `${label} ${p.name}`, () => load())
+    trackTask(r.task, title, () => load())
   } catch (e) {
     fail(e)
   }
@@ -188,9 +193,9 @@ async function runTask(p: ComposeProject, action: string, label: string) {
 
 async function onCommand(p: ComposeProject, cmd: string) {
   if (cmd === 'up') {
-    await runTask(p, 'up', 'up')
+    await runTask(p, 'up', `up ${p.name}`)
   } else if (cmd === 'pull') {
-    await runTask(p, 'pull', '拉取镜像')
+    await runTask(p, 'pull', t('docker.compose.tab.taskPull', { name: p.name }))
   } else if (cmd === 'edit') {
     if (needCli()) {
       editorProject.value = p.name
@@ -202,9 +207,9 @@ async function onCommand(p: ComposeProject, cmd: string) {
     downVisible.value = true
   } else if (cmd === 'delete') {
     try {
-      await ElMessageBox.confirm(`将 down 项目 ${p.name} 并删除其 Compose 目录，无法恢复。`, '删除项目', { type: 'warning' })
+      await ElMessageBox.confirm(t('docker.compose.tab.deleteConfirm', { name: p.name }), t('docker.compose.tab.deleteProject'), { type: 'warning' })
       await api.del(url(p))
-      ElMessage.success('已删除')
+      ElMessage.success(t('common.deleted'))
       await load()
     } catch (e) {
       if (e !== 'cancel' && e !== 'close') {
@@ -222,7 +227,7 @@ async function doDown() {
   try {
     await api.post(url(downTarget.value, `/down${downVolumes.value ? '?volumes=1' : ''}`))
     downVisible.value = false
-    ElMessage.success('已 down')
+    ElMessage.success(t('docker.compose.tab.downDone'))
     await load()
   } catch (e) {
     fail(e)
@@ -243,7 +248,7 @@ let logsProject: ComposeProject | undefined
 async function showLogs(p: ComposeProject) {
   logsProject = p
   logsName.value = p.name
-  logs.value = '加载中…'
+  logs.value = t('common.loading')
   logsVisible.value = true
   await refreshLogs()
 }
@@ -254,7 +259,7 @@ async function refreshLogs() {
   }
   try {
     const r = await api.get<{ logs: string }>(url(logsProject, '/logs?tail=300'))
-    logs.value = r.logs || '(无日志)'
+    logs.value = r.logs || t('docker.compose.tab.noLogs')
   } catch (e) {
     logs.value = (e as Error).message
   }

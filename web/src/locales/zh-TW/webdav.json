@@ -1,0 +1,11 @@
+{
+  "service": "服務",
+  "listenIpPlaceholder": "留空表示所有位址",
+  "listenIp": "監聽位址",
+  "port": "連接埠",
+  "statusOff": "已停用",
+  "statusError": "啟動失敗",
+  "statusNotRunning": "未執行",
+  "desc": "將本機目錄以 WebDAV 協定分享給電腦、手機與播放器",
+  "tlsHelp": "憑證依存取網域從「SSL 憑證」中選擇"
+}

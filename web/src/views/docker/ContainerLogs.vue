@@ -2,26 +2,29 @@
   <div class="logs">
     <div class="bar">
       <el-select v-model="tail" class="b-tail" @change="load">
-        <el-option v-for="n in [100, 300, 1000, 5000]" :key="n" :label="`最近 ${n} 行`" :value="n" />
+        <el-option v-for="n in [100, 300, 1000, 5000]" :key="n" :label="t('docker.container.logs.lastLines', { count: n })" :value="n" />
       </el-select>
-      <el-input v-model="keyword" placeholder="过滤" clearable :prefix-icon="Search" class="b-search" />
-      <el-checkbox v-model="timestamps" @change="load">时间戳</el-checkbox>
-      <el-checkbox v-model="auto">自动刷新</el-checkbox>
+      <el-input v-model="keyword" :placeholder="t('docker.container.logs.filter')" clearable :prefix-icon="Search" class="b-search" />
+      <el-checkbox v-model="timestamps" @change="load">{{ t('docker.container.logs.timestamps') }}</el-checkbox>
+      <el-checkbox v-model="auto">{{ t('docker.container.logs.autoRefresh') }}</el-checkbox>
       <div class="b-ops">
-        <el-button :icon="RefreshCw" :loading="loading" @click="load">刷新</el-button>
-        <el-button :icon="ArrowDownToLine" @click="toBottom">到底部</el-button>
-        <el-button :icon="Copy" @click="copy">复制</el-button>
+        <el-button :icon="RefreshCw" :loading="loading" @click="load">{{ t('common.refresh') }}</el-button>
+        <el-button :icon="ArrowDownToLine" @click="toBottom">{{ t('docker.container.logs.toBottom') }}</el-button>
+        <el-button :icon="Copy" @click="copy">{{ t('common.copy') }}</el-button>
       </div>
     </div>
-    <pre ref="box" class="box mono">{{ shown || '(无日志)' }}</pre>
+    <pre ref="box" class="box mono">{{ shown || t('docker.container.logs.noLogs') }}</pre>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { ArrowDownToLine, Copy, RefreshCw, Search } from 'lucide-vue-next'
 import { api } from '../../api'
+
+const { t } = useI18n()
 
 const props = defineProps<{ containerId: string }>()
 
@@ -72,9 +75,9 @@ function toBottom() {
 async function copy() {
   try {
     await navigator.clipboard.writeText(shown.value)
-    ElMessage.success('已复制')
+    ElMessage.success(t('common.copied'))
   } catch {
-    ElMessage.error('复制失败，请手动选择文本')
+    ElMessage.error(t('docker.container.logs.copyFailed'))
   }
 }
 

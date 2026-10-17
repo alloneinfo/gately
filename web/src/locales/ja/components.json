@@ -1,0 +1,45 @@
+{
+  "clipboard": {
+    "copyFailed": "自動でコピーできませんでした。テキストを選択したので Ctrl/Cmd+C でコピーしてください"
+  },
+  "themePicker": {
+    "switchTheme": "テーマを切り替え",
+    "title": "テーマカラー",
+    "followSystem": "システムに合わせる（エメラルド / ダーク）"
+  },
+  "moduleBanner": {
+    "defaultDesc": "モジュールが無効の間は、以下の項目はすべて動作しません。モジュールを有効にすると、各項目は個別のスイッチに従います。",
+    "enable": "モジュールを有効化"
+  },
+  "saveBar": {
+    "dirty": "未保存の変更があります",
+    "saved": "すべての変更を保存しました",
+    "undo": "元に戻す",
+    "save": "設定を保存"
+  },
+  "logCard": {
+    "title": "実行ログ"
+  },
+  "logViewer": {
+    "levelAll": "すべてのレベル",
+    "levelInfo": "情報以上",
+    "levelWarn": "警告以上",
+    "levelError": "エラーのみ",
+    "autoScroll": "自動スクロール",
+    "empty": "ログがありません"
+  },
+  "scopeTags": {
+    "allWrite": "すべて読み書き",
+    "allRead": "すべて読み取り専用",
+    "write": "読み書き",
+    "read": "読み取り専用",
+    "none": "権限なし"
+  },
+  "restartOverlay": {
+    "resumeHint": "サービスが復旧するとページは自動的に更新されます。このページを閉じないでください。",
+    "waited": "{seconds} 秒待機しました",
+    "timeoutTitle": "待機がタイムアウトしました",
+    "timeoutDesc": "サービスが長時間応答していません。管理ポートや待ち受けアドレスを変更した場合は、新しいアドレスに手動でアクセスしてください。プログラムのログで起動状況を確認することもできます。",
+    "reload": "ページを再読み込み"
+  }
+}

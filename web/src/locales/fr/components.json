@@ -1,0 +1,45 @@
+{
+  "clipboard": {
+    "copyFailed": "Copie automatique impossible. Le texte est sélectionné ; appuyez sur Ctrl/Cmd+C pour le copier."
+  },
+  "themePicker": {
+    "switchTheme": "Changer de thème",
+    "title": "Couleurs du thème",
+    "followSystem": "Suivre le système (Émeraude / Sombre)"
+  },
+  "moduleBanner": {
+    "defaultDesc": "Tant que le module est désactivé, aucun des éléments ci-dessous ne s'exécute. Une fois activé, chaque élément suit son propre interrupteur.",
+    "enable": "Activer le module"
+  },
+  "saveBar": {
+    "dirty": "Vous avez des modifications non enregistrées",
+    "saved": "Toutes les modifications sont enregistrées",
+    "undo": "Annuler",
+    "save": "Enregistrer les paramètres"
+  },
+  "logCard": {
+    "title": "Journaux d'exécution"
+  },
+  "logViewer": {
+    "levelAll": "Tous les niveaux",
+    "levelInfo": "Info et supérieur",
+    "levelWarn": "Avertissement et supérieur",
+    "levelError": "Erreurs uniquement",
+    "autoScroll": "Défilement automatique",
+    "empty": "Aucun journal"
+  },
+  "scopeTags": {
+    "allWrite": "Accès complet",
+    "allRead": "Lecture seule (tout)",
+    "write": "lecture/écriture",
+    "read": "lecture seule",
+    "none": "Aucune permission"
+  },
+  "restartOverlay": {
+    "resumeHint": "La page s'actualisera automatiquement dès que le service sera de retour. Gardez cette page ouverte.",
+    "waited": "Attente : {seconds} s",
+    "timeoutTitle": "Délai dépassé",
+    "timeoutDesc": "Le service ne répond plus depuis longtemps. Si vous avez modifié le port d'administration ou l'adresse d'écoute, ouvrez manuellement la nouvelle adresse. Vous pouvez aussi consulter les journaux du programme pour suivre le démarrage.",
+    "reload": "Recharger la page"
+  }
+}

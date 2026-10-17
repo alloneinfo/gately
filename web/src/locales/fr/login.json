@@ -1,0 +1,21 @@
+{
+  "heroLine1": "Open source et transparente,",
+  "heroLine2": "la boîte à outils de passerelle réseau",
+  "feature1": "Redirection de ports, traversée STUN et DNS dynamique",
+  "feature2": "Proxy inverse, WAF et renouvellement automatique des certificats",
+  "feature3": "Aucune connexion aux serveurs du projet ; configuration en texte brut, auditable",
+  "mobileSub": "Boîte à outils de passerelle réseau open source pour la maison et les serveurs",
+  "title": "Connexion à la console",
+  "subtitle": "Saisissez le nom d'utilisateur et le mot de passe de l'administrateur",
+  "username": "Nom d'utilisateur",
+  "password": "Mot de passe",
+  "submit": "Se connecter",
+  "thirdParty": "Ou utilisez un compte tiers",
+  "loginWith": "Se connecter avec {name}",
+  "initialPasswordHint": "Au premier lancement, le mot de passe initial est affiché dans le journal du programme.",
+  "totpTitle": "Authentification à deux facteurs",
+  "totpPrompt": "Ouvrez votre application d'authentification et saisissez le code à 6 chiffres de {user}",
+  "code": "Code de vérification",
+  "verify": "Vérifier et se connecter",
+  "backToAccount": "Retour pour changer de compte"
+}

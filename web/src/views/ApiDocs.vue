@@ -1,12 +1,12 @@
 <template>
   <div>
-    <PageHeader title="API 文档" desc="管理 API 的接口说明，可配合 API 令牌用于脚本与自动化" :icon="BookOpen">
-      <router-link to="/api-tokens"><el-button :icon="KeyRound">API 令牌</el-button></router-link>
-      <el-button :icon="Download" :disabled="!doc" @click="download">下载 openapi.json</el-button>
+    <PageHeader :title="t('apiDocs.title')" :desc="t('apiDocs.desc')" :icon="BookOpen">
+      <router-link to="/api-tokens"><el-button :icon="KeyRound">{{ t('apiDocs.tokens') }}</el-button></router-link>
+      <el-button :icon="Download" :disabled="!doc" @click="download">{{ t('apiDocs.downloadSpec') }}</el-button>
     </PageHeader>
 
     <el-alert v-if="error" type="error" :title="error" :closable="false" show-icon class="block-gap">
-      <el-button size="small" @click="load">重试</el-button>
+      <el-button size="small" @click="load">{{ t('apiDocs.retry') }}</el-button>
     </el-alert>
 
     <div v-loading="loading" class="docs-wrap">
@@ -19,13 +19,15 @@
             <div class="intro-row">
               <span class="intro-label">Base URL</span>
               <code class="mono code-pill" @click="selectNode($event.currentTarget as HTMLElement)">{{ origin }}</code>
-              <el-button size="small" text :icon="Copy" @click="copyText(origin)">复制</el-button>
+              <el-button size="small" text :icon="Copy" @click="copyText(origin)">{{ t('common.copy') }}</el-button>
             </div>
             <div class="intro-row">
-              <span class="intro-label">认证</span>
+              <span class="intro-label">{{ t('apiDocs.auth') }}</span>
               <span class="intro-text">
-                请求头携带 <code class="mono code-pill">Authorization: Bearer gtl_…</code>，令牌与权限在
-                <router-link to="/api-tokens">API 令牌</router-link> 页创建。
+                <i18n-t keypath="apiDocs.authDesc" tag="span">
+                  <template #header><code class="mono code-pill">Authorization: Bearer gtl_…</code></template>
+                  <template #link><router-link to="/api-tokens">{{ t('apiDocs.tokensPage') }}</router-link></template>
+                </i18n-t>
               </span>
             </div>
           </div>
@@ -33,28 +35,28 @@
 
         <!-- 移动端：顶部下拉导航 -->
         <div v-if="isMobile" class="m-nav">
-          <el-input v-model="keyword" :prefix-icon="Search" placeholder="搜索路径或摘要" clearable />
-          <el-select :model-value="activeTag" placeholder="跳转到分组" @change="goTag">
-            <el-option v-for="g in visibleGroups" :key="g.tag" :label="`${g.tag}（${g.ops.length}）`" :value="g.tag" />
+          <el-input v-model="keyword" :prefix-icon="Search" :placeholder="t('apiDocs.searchPlaceholder')" clearable />
+          <el-select :model-value="activeTag" :placeholder="t('apiDocs.jumpToGroup')" @change="goTag">
+            <el-option v-for="g in visibleGroups" :key="g.tag" :label="t('apiDocs.groupLabel', { tag: g.tag, count: g.ops.length })" :value="g.tag" />
           </el-select>
         </div>
 
         <div class="docs-body">
           <!-- 桌面端：左侧分组导航 -->
           <aside v-if="!isMobile" class="docs-nav">
-            <el-input v-model="keyword" :prefix-icon="Search" placeholder="搜索路径或摘要" clearable />
+            <el-input v-model="keyword" :prefix-icon="Search" :placeholder="t('apiDocs.searchPlaceholder')" clearable />
             <div class="nav-list">
               <button v-for="g in visibleGroups" :key="g.tag" type="button" class="nav-item" :class="{ active: activeTag === g.tag }" @click="goTag(g.tag)">
                 <span class="nav-text">{{ g.tag }}</span>
                 <span class="nav-count">{{ g.ops.length }}</span>
               </button>
-              <div v-if="!visibleGroups.length" class="nav-empty">无匹配接口</div>
+              <div v-if="!visibleGroups.length" class="nav-empty">{{ t('apiDocs.noMatch') }}</div>
             </div>
           </aside>
 
           <!-- 接口列表 -->
           <div class="docs-main">
-            <el-empty v-if="!visibleGroups.length" description="没有匹配的接口" :image-size="60" />
+            <el-empty v-if="!visibleGroups.length" :description="t('apiDocs.noMatchEmpty')" :image-size="60" />
             <section v-for="g in visibleGroups" :id="anchorId(g.tag)" :key="g.tag" class="tag-section">
               <h3 class="tag-title">{{ g.tag }}<span class="tag-count">{{ g.ops.length }}</span></h3>
               <div v-for="op in g.ops" :key="op.key" class="op" :class="{ open: isOpen(op) }">
@@ -63,8 +65,8 @@
                   <span class="op-path mono"><template v-for="(seg, i) in splitPath(op.path)" :key="i"><span v-if="seg.param" class="p-param">{{ seg.text }}</span><template v-else>{{ seg.text }}</template></template></span>
                   <span class="op-summary">{{ op.summary }}</span>
                   <span class="op-scope">
-                    <el-tag v-if="op.scope === '!denied'" size="small" type="warning" effect="light">仅登录会话</el-tag>
-                    <el-tag v-else-if="op.scope === ''" size="small" type="info" effect="plain">任意有效令牌</el-tag>
+                    <el-tag v-if="op.scope === '!denied'" size="small" type="warning" effect="light">{{ t('apiDocs.sessionOnly') }}</el-tag>
+                    <el-tag v-else-if="op.scope === ''" size="small" type="info" effect="plain">{{ t('apiDocs.anyToken') }}</el-tag>
                     <el-tag v-else size="small" type="primary" effect="light" class="mono">{{ op.scope }}</el-tag>
                   </span>
                   <ChevronDown :size="16" class="op-arrow" />
@@ -74,16 +76,16 @@
                   <div v-if="op.description" class="rich op-desc" v-html="renderText(op.description)" />
 
                   <div v-if="op.params.length" class="sub">
-                    <div class="sub-title">参数</div>
+                    <div class="sub-title">{{ t('apiDocs.params') }}</div>
                     <div class="tbl-wrap">
                       <table class="doc-table">
-                        <thead><tr><th>名称</th><th>位置</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+                        <thead><tr><th>{{ t('common.name') }}</th><th>{{ t('apiDocs.location') }}</th><th>{{ t('apiDocs.type') }}</th><th>{{ t('apiDocs.required') }}</th><th>{{ t('apiDocs.description') }}</th></tr></thead>
                         <tbody>
                           <tr v-for="p in op.params" :key="p.in + p.name">
                             <td class="mono">{{ p.name }}</td>
-                            <td>{{ p.in === 'path' ? '路径' : p.in === 'query' ? '查询' : p.in }}</td>
+                            <td>{{ p.in === 'path' ? t('apiDocs.inPath') : p.in === 'query' ? t('apiDocs.inQuery') : p.in }}</td>
                             <td class="mono">{{ typeLabel(p.schema) }}</td>
-                            <td>{{ p.required ? '是' : '否' }}</td>
+                            <td>{{ p.required ? t('common.yes') : t('common.no') }}</td>
                             <td>{{ p.description ?? '' }}</td>
                           </tr>
                         </tbody>
@@ -92,30 +94,30 @@
                   </div>
 
                   <div v-if="op.bodySchema" class="sub">
-                    <div class="sub-title">请求体 <span class="muted">application/json · {{ typeLabel(op.bodySchema) }}</span></div>
+                    <div class="sub-title">{{ t('apiDocs.requestBody') }} <span class="muted">application/json · {{ typeLabel(op.bodySchema) }}</span></div>
                     <div v-if="op.fields.length" class="tbl-wrap">
                       <table class="doc-table">
-                        <thead><tr><th>字段</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+                        <thead><tr><th>{{ t('apiDocs.field') }}</th><th>{{ t('apiDocs.type') }}</th><th>{{ t('apiDocs.required') }}</th><th>{{ t('apiDocs.description') }}</th></tr></thead>
                         <tbody>
                           <tr v-for="f in op.fields" :key="f.name">
                             <td class="mono"><span :style="{ paddingLeft: f.depth * 14 + 'px' }">{{ f.name }}</span></td>
                             <td class="mono">{{ f.type }}</td>
-                            <td>{{ f.required ? '是' : '' }}</td>
+                            <td>{{ f.required ? t('common.yes') : '' }}</td>
                             <td>{{ f.desc }}</td>
                           </tr>
                         </tbody>
                       </table>
                     </div>
-                    <div v-else class="muted note">JSON 对象，字段未在文档中列出。</div>
+                    <div v-else class="muted note">{{ t('apiDocs.bodyNoFields') }}</div>
                   </div>
 
                   <div class="sub">
                     <div class="sub-title">
-                      请求示例
-                      <el-button v-if="op.tokenAllowed" size="small" text :icon="Copy" @click="copyText(curlOf(op))">复制</el-button>
+                      {{ t('apiDocs.example') }}
+                      <el-button v-if="op.tokenAllowed" size="small" text :icon="Copy" @click="copyText(curlOf(op))">{{ t('common.copy') }}</el-button>
                     </div>
                     <pre v-if="op.tokenAllowed" class="curl mono">{{ curlOf(op) }}</pre>
-                    <el-alert v-else type="warning" :closable="false" show-icon title="仅登录会话可用，API 令牌无法调用此接口" />
+                    <el-alert v-else type="warning" :closable="false" show-icon :title="t('apiDocs.sessionOnlyWarn')" />
                   </div>
                 </div>
               </div>
@@ -130,6 +132,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
+import { useI18n } from 'vue-i18n'
 import { BookOpen, ChevronDown, Copy, Download, KeyRound, Search } from 'lucide-vue-next'
 import { api } from '../api'
 import PageHeader from '../components/PageHeader.vue'
@@ -198,6 +201,7 @@ interface Group {
   ops: Op[]
 }
 
+const { t } = useI18n()
 const isMobile = useIsMobile()
 const origin = window.location.origin
 const doc = ref<OpenAPIDoc>()
@@ -228,8 +232,8 @@ function renderText(s: string): string {
 function splitPath(p: string): { text: string; param: boolean }[] {
   return p
     .split(/(\{[^}]+\})/)
-    .filter((t) => t !== '')
-    .map((t) => ({ text: t, param: t.startsWith('{') && t.endsWith('}') }))
+    .filter((seg) => seg !== '')
+    .map((seg) => ({ text: seg, param: seg.startsWith('{') && seg.endsWith('}') }))
 }
 
 function anchorId(tag: string): string {
@@ -390,8 +394,8 @@ const groups = computed<Group[]>(() => {
   }
   const byTag = new Map<string, Op[]>()
   // tags 顺序即展示顺序
-  for (const t of d.tags ?? []) {
-    byTag.set(t.name, [])
+  for (const tg of d.tags ?? []) {
+    byTag.set(tg.name, [])
   }
   for (const path of Object.keys(d.paths ?? {}).sort()) {
     const item = d.paths[path]
@@ -400,7 +404,7 @@ const groups = computed<Group[]>(() => {
       .sort((a, b) => methodOrder.indexOf(a) - methodOrder.indexOf(b))
     for (const m of methods) {
       const o = item[m]
-      const tag = o.tags?.[0] ?? '其他'
+      const tag = o.tags?.[0] ?? t('apiDocs.other')
       const bodySchema = o.requestBody?.content?.['application/json']?.schema
       const op: Op = {
         key: `${m} ${path}`,

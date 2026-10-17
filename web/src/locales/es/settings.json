@@ -1,0 +1,194 @@
+{
+  "title": "Ajustes",
+  "desc": "Seguridad de la cuenta, control de acceso, parámetros de ejecución, copia de seguridad y migración, e información del sistema",
+  "currentPassword": "Contraseña actual",
+  "notEnabled": "No activado",
+  "restartBanner": {
+    "title": "Algunos ajustes requieren reiniciar para surtir efecto",
+    "desc": "Los cambios como la dirección de escucha se han guardado y surtirán efecto cuando Gately se reinicie.",
+    "action": "Reiniciar ahora"
+  },
+  "tabs": {
+    "account": "Cuenta y seguridad",
+    "access": "Control de acceso",
+    "runtime": "Red y ejecución",
+    "backup": "Copia de seguridad y migración"
+  },
+  "admin": {
+    "title": "Cuenta de administrador",
+    "username": "Usuario",
+    "newPassword": "Nueva contraseña",
+    "newPasswordPlaceholder": "Al menos 8 caracteres",
+    "confirmPassword": "Confirmar nueva contraseña",
+    "submit": "Cambiar credenciales",
+    "help": "Todas las sesiones iniciadas se invalidan tras el cambio; tendrás que iniciar sesión de nuevo.",
+    "mismatch": "Las nuevas contraseñas no coinciden",
+    "changed": "Cambiado. Inicia sesión de nuevo"
+  },
+  "totp": {
+    "title": "Autenticación de dos factores",
+    "enabledDesc": "Para iniciar sesión se necesita, además de la contraseña, un código de 6 dígitos de tu app de autenticación.",
+    "code": "Código de verificación",
+    "codePlaceholder": "Código de 6 dígitos de tu app de autenticación",
+    "disable": "Desactivar autenticación de dos factores",
+    "scanDesc": "Escanea el código QR con una app como Google Authenticator o Microsoft Authenticator y luego introduce el código mostrado para confirmar.",
+    "qrAlt": "Código QR",
+    "manualHint": "Introduce esta clave manualmente si no puedes escanear",
+    "copySecret": "Copiar clave",
+    "confirmEnable": "Confirmar y activar",
+    "introDesc": "Una vez activada, para iniciar sesión también se necesita un código de un solo uso de tu app de autenticación, lo que protege la consola incluso si se filtra tu contraseña.",
+    "start": "Empezar",
+    "enabledMsg": "Autenticación de dos factores activada",
+    "disabledMsg": "Autenticación de dos factores desactivada"
+  },
+  "loginProtect": {
+    "title": "Protección de inicio de sesión",
+    "sessionHours": "Duración de la sesión",
+    "sessionHoursHelp": "Horas; pasado este periodo hay que iniciar sesión de nuevo",
+    "maxFailures": "Máx. de fallos consecutivos",
+    "maxFailuresHelp": "Bloquea un origen tras esta cantidad de contraseñas incorrectas consecutivas; 0 usa el valor por defecto",
+    "lockMinutes": "Duración del bloqueo",
+    "lockMinutesHelp": "Minutos; 0 usa el valor por defecto"
+  },
+  "thirdLogin": {
+    "title": "Inicio de sesión de terceros",
+    "desc": "Inicia sesión en la consola con una cuenta de GitHub, Google, QQ o cualquier OIDC. Usa tus propias apps OAuth; el flujo de inicio de sesión nunca pasa por un servidor intermedio.",
+    "enable": "Activar",
+    "callbackBase": "URL base de callback",
+    "callbackBasePlaceholder": "https://gately.example.com (la dirección que usas en el navegador para abrir la consola, sin ruta)",
+    "callbackHelp": "La URL de callback que debes registrar en cada plataforma es {url}. El inicio de sesión debe comenzar tras abrir la consola desde esta dirección.",
+    "providers": "Proveedores de inicio de sesión",
+    "allowed": "Identidades permitidas",
+    "allowedPlaceholder": "Una por línea: proveedor:cuenta, p. ej. github:15172899 o google:me{'@'}gmail.com; añade una nota tras # al final de la línea",
+    "allowedHelp": "Solo las cuentas de esta lista pueden iniciar sesión. Para GitHub se recomienda un ID numérico. Cuando se rechaza por primera vez un inicio de sesión de QQ, la página muestra un identificador que puedes copiar.",
+    "skipTotp": "Omitir autenticación de dos factores",
+    "skipTotpHelp": "Si la autenticación de dos factores está activada, al activar esta opción el inicio de sesión de terceros deja de pedir código; al desactivarla se rechaza el inicio de sesión de terceros"
+  },
+  "apiToken": {
+    "title": "Tokens de API",
+    "desc": "Los tokens de API ahora admiten varios tokens con permisos detallados: crea varios tokens, cada uno con su propia caducidad y acceso de solo lectura o de lectura y escritura por módulo.",
+    "manage": "Gestionar tokens de API",
+    "docs": "Ver documentación de la API"
+  },
+  "listen": {
+    "title": "Listener de la consola",
+    "http": "Escucha HTTP",
+    "needRestart": "Requiere reinicio",
+    "httpHelp": "Formato: :puerto o IP:puerto",
+    "https": "Escucha HTTPS",
+    "httpsPlaceholder": "Déjalo vacío para desactivarlo, p. ej. :16643",
+    "httpsHelp": "El certificado se elige en \"Certificados SSL\" según el dominio de acceso",
+    "forceHttps": "Forzar HTTPS",
+    "forceHttpsHelp": "Redirige HTTP a HTTPS automáticamente (solo si el módulo de certificados tiene un certificado para el dominio)"
+  },
+  "restrict": {
+    "title": "Restricciones de acceso",
+    "safePath": "Entrada segura",
+    "safePathPlaceholder": "Déjalo vacío para desactivarlo, p. ej. /mi-entrada",
+    "random": "Generar aleatoriamente",
+    "safePathHelp": "Una vez definida, debes visitar {url} para abrir la consola; cualquier otra ruta devuelve 404, lo que evita que los escáneres encuentren la consola. Recuerda tu dirección de entrada.",
+    "urlPrefix": "http://IP:puerto",
+    "entryName": "entrada",
+    "lanOnly": "Acceso solo desde la red local",
+    "lanOnlyHelp": "Permite acceder a la consola solo desde direcciones de la red local (incluidas las de Tailscale 100.64.0.0/10)"
+  },
+  "network": {
+    "title": "Red",
+    "dnsServers": "Servidores DNS",
+    "dnsPlaceholder": "Déjalo vacío para usar el DNS del sistema; introduce una IP o IP:puerto",
+    "dnsHelp": "Afecta a toda la resolución de nombres saliente (DDNS, Webhook, ACME, etc.). Con varios servidores, se elige uno al azar con conmutación automática por error.",
+    "timeZone": "Zona horaria",
+    "timeZonePlaceholder": "Seguir el sistema",
+    "timeZoneHelp": "Zona horaria usada para registros, tareas programadas y más. Se acepta cualquier nombre de zona horaria IANA. Actualmente en vigor: {zone}",
+    "dns": {
+      "ali": "Alibaba",
+      "tencent": "Tencent",
+      "baidu": "Baidu",
+      "114": "114",
+      "cloudflare": "Cloudflare",
+      "google": "Google",
+      "quad9": "Quad9"
+    },
+    "zones": {
+      "china": "China",
+      "hongKong": "Hong Kong",
+      "taipei": "Taipéi",
+      "tokyo": "Tokio",
+      "seoul": "Seúl",
+      "singapore": "Singapur",
+      "london": "Londres",
+      "berlin": "Berlín",
+      "moscow": "Moscú",
+      "newYork": "Nueva York",
+      "chicago": "Chicago",
+      "losAngeles": "Los Ángeles",
+      "sydney": "Sídney",
+      "utc": "Tiempo universal coordinado"
+    }
+  },
+  "runtime": {
+    "title": "Parámetros de ejecución",
+    "logLines": "Líneas de registro conservadas",
+    "logLinesHelp": "Número de líneas de registro que cada módulo guarda en memoria",
+    "gcPercent": "Porcentaje de GC",
+    "gcPercentHelp": "0 significa el valor por defecto (100); reducirlo disminuye el uso de memoria pero aumenta la carga de CPU",
+    "maxProcs": "Máx. de núcleos de CPU",
+    "maxProcsHelp": "0 significa automático ({count} núcleos en este equipo)"
+  },
+  "restart": {
+    "title": "Reinicio",
+    "desc": "La consola y todos los servicios de reenvío y proxy se interrumpen brevemente durante el reinicio (normalmente unos segundos).",
+    "button": "Reiniciar Gately",
+    "confirm": "La consola y todos los servicios de reenvío y proxy se interrumpen brevemente durante el reinicio (normalmente unos segundos). ¿Reiniciar Gately?",
+    "confirmButton": "Reiniciar",
+    "progress": "Reiniciando Gately…"
+  },
+  "save": {
+    "saved": "Guardado y aplicado",
+    "savedNeedRestart": "Guardado. Algunos ajustes surtirán efecto tras reiniciar"
+  },
+  "import": {
+    "title": "Importar desde Lucky",
+    "desc": "Admite archivos {lkcf} (se permiten varios) del directorio de configuración de Lucky (por defecto en Docker {dir}) y copias de seguridad de todo el sitio exportadas desde la consola de Lucky ({zip}). Primero revisa la vista previa y luego importa tras confirmar. Las entradas importadas se añaden después de las existentes; las entradas con el mismo nombre se omiten.",
+    "drag": "Suelta los archivos aquí o {click}",
+    "dragClick": "haz clic para seleccionar",
+    "dragHint": "Archivos de configuración .lkcf o un .zip de copia de todo el sitio",
+    "keepEnableTitle": "Conservar el estado de activación de Lucky tras importar",
+    "keepEnableDesc": "Desactivado por defecto: todas las reglas importadas quedan desactivadas, para que las actives una a una tras revisarlas. Si se activa, las reglas activadas en Lucky {bold}. Si Lucky sigue en ejecución, pueden producirse conflictos de puertos o que ambos lados actualicen registros a la vez.",
+    "keepEnableBold": "empezarán a escuchar en los puertos y a actualizar registros DNS de inmediato",
+    "preview": "Vista previa",
+    "confirmImport": "Confirmar importación",
+    "previewDone": "Vista previa completada. Importa cuando todo parezca correcto",
+    "imported": "Importado",
+    "noModules": "No se encontraron módulos compatibles con Gately",
+    "noWarnings": "Sin advertencias",
+    "colModule": "Módulo",
+    "colFound": "Encontrados",
+    "colImportable": "Importables",
+    "colWarnings": "Advertencias",
+    "done": "Importación completada: {total} entradas",
+    "confirmKeep": "Se importarán {total} entradas con su estado de activación de Lucky: las reglas activadas surtirán efecto de inmediato. ¿Continuar?",
+    "confirmDisabled": "Se importarán {total} entradas, todas desactivadas tras la importación. ¿Continuar?",
+    "confirmButton": "Importar"
+  },
+  "backup": {
+    "title": "Copia de seguridad de la configuración de Gately",
+    "desc": "Descarga un archivo zip con la configuración completa (cuenta, reglas, certificados, etc.). La copia contiene hashes de contraseñas, secretos y claves privadas de certificados, así que guárdala en un lugar seguro.",
+    "download": "Descargar copia",
+    "downloadFailed": "Error al descargar ({status})"
+  },
+  "restore": {
+    "title": "Restaurar configuración",
+    "desc": "Usa un zip de copia de seguridad para {bold}. La configuración actual se guarda primero en una carpeta backup-marca de tiempo del directorio de configuración, y Gately se reinicia automáticamente tras la restauración.",
+    "descBold": "sobrescribir toda la configuración actual",
+    "pickFile": "Elegir archivo de copia",
+    "passwordPlaceholder": "Contraseña de la copia",
+    "button": "Restaurar",
+    "confirm": "Toda la configuración actual se sobrescribirá con \"{name}\" y Gately se reiniciará automáticamente. La configuración actual se copia primero al directorio de configuración. Escribe \"{word}\" para confirmar.",
+    "word": "restaurar",
+    "confirmButton": "Restaurar y reiniciar",
+    "inputHint": "Escribe \"{word}\"",
+    "success": "Se restauraron {count} archivos de configuración; la configuración anterior se guardó en {previous}",
+    "progress": "Aplicando la copia y reiniciando…"
+  }
+}

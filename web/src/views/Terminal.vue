@@ -1,16 +1,16 @@
 <template>
   <div class="terminal-root" :class="{ mobile: isMobile }">
-    <PageHeader v-if="!inWorkspace" title="Web 终端" desc="在浏览器中连接 SSH、Telnet 服务器或本机 Shell，会话可断线重连" :icon="SquareTerminal">
-      <el-button :icon="ListTree" @click="sessionsVisible = true">会话列表</el-button>
-      <el-button :icon="Zap" @click="shortcutVisible = true">快捷命令</el-button>
-      <el-button :icon="SlidersHorizontal" @click="settingsVisible = true">设置</el-button>
-      <el-button type="primary" :icon="Plus" @click="openEditor(null)">添加连接</el-button>
+    <PageHeader v-if="!inWorkspace" :title="t('terminal.page.title')" :desc="t('terminal.page.desc')" :icon="SquareTerminal">
+      <el-button :icon="ListTree" @click="sessionsVisible = true">{{ t('terminal.page.sessions') }}</el-button>
+      <el-button :icon="Zap" @click="shortcutVisible = true">{{ t('terminal.page.shortcuts') }}</el-button>
+      <el-button :icon="SlidersHorizontal" @click="settingsVisible = true">{{ t('terminal.page.settings') }}</el-button>
+      <el-button type="primary" :icon="Plus" @click="openEditor(null)">{{ t('terminal.page.addConn') }}</el-button>
     </PageHeader>
 
     <div class="terminal-page" v-show="!inWorkspace || !isMobile">
       <div class="side">
         <button v-if="isMobile && tabs.length" class="back-banner" @click="mobileView = 'term'">
-          <SquareTerminal :size="18" />返回终端（{{ tabs.length }} 个会话）<ChevronRight :size="16" />
+          <SquareTerminal :size="18" />{{ t('terminal.page.backToTerminal', { count: tabs.length }) }}<ChevronRight :size="16" />
         </button>
         <ConnectionList
           :conns="conns"
@@ -33,7 +33,7 @@
     >
       <template v-if="tabs.length">
         <div class="ws-head">
-          <el-button v-if="isMobile" class="back" text :icon="ArrowLeft" aria-label="返回连接列表" @click="mobileView = 'list'" />
+          <el-button v-if="isMobile" class="back" text :icon="ArrowLeft" :aria-label="t('terminal.page.backToList')" @click="mobileView = 'list'" />
           <TermTabs
             :tabs="tabs"
             :active="active"
@@ -76,30 +76,30 @@
 
         <div class="panes" :class="[splitMode && !isMobile ? 'split split-' + splitDir : 'single']">
           <div
-            v-for="t in tabs"
-            v-show="isShown(t)"
-            :key="t.id"
+            v-for="pt in tabs"
+            v-show="isShown(pt)"
+            :key="pt.id"
             class="cell"
-            :class="{ focus: splitMode && !isMobile && t.id === active }"
-            @pointerdown="active = t.id"
+            :class="{ focus: splitMode && !isMobile && pt.id === active }"
+            @pointerdown="active = pt.id"
           >
             <div v-if="splitMode && !isMobile" class="cell-head">
-              <span class="dot" :class="t.status" />
-              <span class="ellipsis">{{ t.title }}</span>
-              <el-button v-if="splitIds.length > 1" text size="small" :icon="X" aria-label="移出分屏" @click.stop="leaveSplit(t.id)" />
+              <span class="dot" :class="pt.status" />
+              <span class="ellipsis">{{ pt.title }}</span>
+              <el-button v-if="splitIds.length > 1" text size="small" :icon="X" :aria-label="t('terminal.page.leaveSplit')" @click.stop="leaveSplit(pt.id)" />
             </div>
             <div class="cell-body">
               <TermPane
-                :ref="(el) => setPane(t.id, el)"
-                :conn-key="t.connKey"
-                :session-id="t.sessionId"
+                :ref="(el) => setPane(pt.id, el)"
+                :conn-key="pt.connKey"
+                :session-id="pt.sessionId"
                 :font-size="fontSize"
                 :theme-name="themeName"
                 :heartbeat="settings?.heartbeatInterval ?? 30"
-                :ctrl="t.id === active && mods.ctrl"
-                :alt="t.id === active && mods.alt"
-                @session="(id: string) => onSession(t, id)"
-                @status="(s: PaneStatus) => (t.status = s)"
+                :ctrl="pt.id === active && mods.ctrl"
+                :alt="pt.id === active && mods.alt"
+                @session="(id: string) => onSession(pt, id)"
+                @status="(s: PaneStatus) => (pt.status = s)"
                 @update:ctrl="(v: boolean) => (mods.ctrl = v)"
                 @update:alt="(v: boolean) => (mods.alt = v)"
                 @zoom="setFont"
@@ -108,10 +108,10 @@
           </div>
 
           <div v-if="searchVisible" class="search-bar">
-            <el-input ref="searchInput" v-model="searchText" size="small" placeholder="搜索终端内容" clearable @input="doSearch(true)" @keyup.enter.exact="doSearch(true)" @keyup.shift.enter="doSearch(false)" @keyup.esc="closeSearch" />
-            <el-button class="sb" text :icon="ChevronUp" aria-label="上一个" @click="doSearch(false)" />
-            <el-button class="sb" text :icon="ChevronDown" aria-label="下一个" @click="doSearch(true)" />
-            <el-button class="sb" text :icon="X" aria-label="关闭搜索" @click="closeSearch" />
+            <el-input ref="searchInput" v-model="searchText" size="small" :placeholder="t('terminal.page.searchPlaceholder')" clearable @input="doSearch(true)" @keyup.enter.exact="doSearch(true)" @keyup.shift.enter="doSearch(false)" @keyup.esc="closeSearch" />
+            <el-button class="sb" text :icon="ChevronUp" :aria-label="t('terminal.page.prev')" @click="doSearch(false)" />
+            <el-button class="sb" text :icon="ChevronDown" :aria-label="t('terminal.page.next')" @click="doSearch(true)" />
+            <el-button class="sb" text :icon="X" :aria-label="t('terminal.page.closeSearch')" @click="closeSearch" />
           </div>
         </div>
 
@@ -129,8 +129,8 @@
       </template>
       <div v-else class="placeholder">
         <SquareTerminal :size="40" :stroke-width="1.5" />
-        <div>选择一个连接开始会话</div>
-        <div class="meta">点击「连接」或双击连接项；会话在服务端保留时，可从「会话列表」找回</div>
+        <div>{{ t('terminal.page.emptyTitle') }}</div>
+        <div class="meta">{{ t('terminal.page.emptyHint') }}</div>
       </div>
     </div>
 
@@ -154,6 +154,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { useI18n } from 'vue-i18n'
 import { ArrowLeft, ChevronDown, ChevronRight, ChevronUp, ListTree, Plus, SlidersHorizontal, SquareTerminal, X, Zap } from 'lucide-vue-next'
 import { api } from '../api'
 import PageHeader from '../components/PageHeader.vue'
@@ -184,6 +185,7 @@ const TABS_KEY = 'gately-term-tabs'
 // 桌面端分屏最多同时显示的窗格数
 const MAX_SPLIT = 4
 
+const { t } = useI18n()
 const isMobile = useIsMobile()
 const vv = useVisualViewport()
 const { fontSize, themeName, setFont, incFont, decFont } = useTermPrefs()
@@ -323,11 +325,11 @@ function addTab(info: { connKey: string; connName: string; type: string; session
 
 function connect(c: Conn) {
   if (!c.enable) {
-    ElMessage.warning('该连接已停用')
+    ElMessage.warning(t('terminal.msg.connDisabled'))
     return
   }
   if (c.type === 'local' && settings.value && !settings.value.allowLocalShell) {
-    ElMessage.warning('请先在「设置」中开启「允许本机 Shell」')
+    ElMessage.warning(t('terminal.msg.needLocalShell'))
     return
   }
   addTab({ connKey: c.key, connName: c.name, type: c.type })
@@ -373,39 +375,42 @@ function onSession(t: TermTab, id: string) {
 }
 
 async function onTabCommand(id: string, cmd: string) {
-  const t = tabs.value.find((x) => x.id === id)
-  if (!t) {
+  const tab = tabs.value.find((x) => x.id === id)
+  if (!tab) {
     return
   }
   try {
     if (cmd === 'rename') {
-      const { value } = await ElMessageBox.prompt('标签名称', '重命名', { inputValue: t.title, inputValidator: (v) => !!v.trim() || '名称不能为空' })
-      t.title = value.trim()
+      const { value } = await ElMessageBox.prompt(t('terminal.msg.renameLabel'), t('terminal.msg.renameTitle'), {
+        inputValue: tab.title,
+        inputValidator: (v) => !!v.trim() || t('terminal.msg.nameRequired'),
+      })
+      tab.title = value.trim()
     } else if (cmd === 'remark') {
-      if (!t.sessionId) {
-        ElMessage.warning('会话尚未建立，请稍后再试')
+      if (!tab.sessionId) {
+        ElMessage.warning(t('terminal.msg.sessionNotReady'))
         return
       }
-      const { value } = await ElMessageBox.prompt('会话备注（保存在服务端，便于在会话列表中识别）', '会话备注', { inputValue: t.remark })
-      await api.put(`/api/webterminal/sessions/${encodeURIComponent(t.sessionId)}/remark`, { remark: value ?? '' })
-      t.remark = value ?? ''
+      const { value } = await ElMessageBox.prompt(t('terminal.msg.remarkPrompt'), t('terminal.msg.remarkTitle'), { inputValue: tab.remark })
+      await api.put(`/api/webterminal/sessions/${encodeURIComponent(tab.sessionId)}/remark`, { remark: value ?? '' })
+      tab.remark = value ?? ''
     } else if (cmd === 'duplicate') {
-      onAddTab(t.connKey)
+      onAddTab(tab.connKey)
     } else if (cmd === 'join') {
       joinSplit(id)
     } else if (cmd === 'leave') {
       leaveSplit(id)
     } else if (cmd === 'reconnect') {
       const p = panes.get(id)
-      if (t.status === 'ended') {
+      if (tab.status === 'ended') {
         p?.restart()
       } else {
         p?.reconnect()
       }
     } else if (cmd === 'kill') {
-      await ElMessageBox.confirm(`结束会话「${t.title}」？会话中运行的程序会被终止。`, '确认', { type: 'warning' })
-      if (t.sessionId) {
-        await api.del(`/api/webterminal/sessions/${encodeURIComponent(t.sessionId)}`).catch(() => undefined)
+      await ElMessageBox.confirm(t('terminal.msg.killConfirm', { title: tab.title }), t('terminal.msg.confirmTitle'), { type: 'warning' })
+      if (tab.sessionId) {
+        await api.del(`/api/webterminal/sessions/${encodeURIComponent(tab.sessionId)}`).catch(() => undefined)
       }
       closeTab(id)
     }
@@ -455,7 +460,7 @@ function openQuick(c: Conn | null) {
 
 function openSftp(c: Conn) {
   if (c.type === 'telnet') {
-    ElMessage.warning('Telnet 连接不支持文件管理')
+    ElMessage.warning(t('terminal.msg.telnetNoSftp'))
     return
   }
   sftpConn.value = c
@@ -493,19 +498,19 @@ async function onAction(name: string) {
       break
     case 'copy': {
       let text = p?.getSelection() ?? ''
-      let tip = '已复制'
+      let tip = t('common.copied')
       if (!text) {
         text = p?.getScreenText() ?? ''
-        tip = '未选中内容，已复制当前屏幕文本'
+        tip = t('terminal.msg.copyScreen')
       }
       if (!text) {
-        ElMessage.info('没有可复制的内容')
+        ElMessage.info(t('terminal.msg.copyEmpty'))
         break
       }
       if (await copyText(text)) {
         ElMessage.success(tip)
       } else {
-        ElMessage.error('复制失败，请手动选择文字后使用浏览器复制')
+        ElMessage.error(t('terminal.msg.copyFailed'))
       }
       break
     }
@@ -555,7 +560,7 @@ async function pasteToTerminal() {
   if (text === null) {
     // 浏览器不允许读取剪贴板（非 HTTPS 或被拒绝）时，改为手动粘贴
     try {
-      const r = await ElMessageBox.prompt('浏览器未授权读取剪贴板，请在此粘贴要发送的内容', '粘贴', { inputType: 'textarea' })
+      const r = await ElMessageBox.prompt(t('terminal.msg.pasteManual'), t('terminal.msg.pasteTitle'), { inputType: 'textarea' })
       text = r.value
     } catch {
       return
@@ -570,7 +575,7 @@ async function pasteToTerminal() {
 function sendShortcut(s: Shortcut) {
   const p = activePane()
   if (!p) {
-    ElMessage.warning('请先打开一个终端会话')
+    ElMessage.warning(t('terminal.msg.openSessionFirst'))
     return
   }
   // 多行命令按回车分隔发送
@@ -593,7 +598,7 @@ function doSearch(forward: boolean) {
   }
   const found = forward ? p.findNext(searchText.value) : p.findPrev(searchText.value)
   if (!found) {
-    ElMessage.info('没有找到匹配内容')
+    ElMessage.info(t('terminal.msg.noMatch'))
   }
 }
 
@@ -616,7 +621,7 @@ function enterSplit(mode: SplitMode) {
     const first = ids.includes(active.value) ? [active.value] : []
     splitIds.value = [...first, ...ids.filter((x) => x !== active.value)].slice(0, MAX_SPLIT)
     if (splitIds.value.length < 2) {
-      ElMessage.info('再打开一个连接即可自动加入分屏，也可点击其他标签加入')
+      ElMessage.info(t('terminal.msg.splitHint'))
     }
   }
 }
@@ -634,7 +639,7 @@ function joinSplit(id: string) {
   if (splitIds.value.length < MAX_SPLIT) {
     splitIds.value.push(id)
   } else {
-    ElMessage.info(`分屏最多 ${MAX_SPLIT} 个窗格，已替换当前窗格`)
+    ElMessage.info(t('terminal.msg.splitMax', { max: MAX_SPLIT }))
     const i = splitIds.value.indexOf(active.value)
     splitIds.value.splice(i < 0 ? splitIds.value.length - 1 : i, 1, id)
   }

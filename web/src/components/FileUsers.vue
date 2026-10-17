@@ -1,48 +1,49 @@
 <template>
   <div class="g-card">
     <div class="g-card-head">
-      <div class="g-card-title"><Users :size="16" />用户 <span class="g-card-desc">每个用户可访问一个目录，或挂载多个目录</span></div>
-      <el-button size="small" :icon="UserPlus" @click="users.push({ name: '', password: '', root: '', readOnly: false })">添加用户</el-button>
+      <div class="g-card-title"><Users :size="16" />{{ t('fileUsers.title') }} <span class="g-card-desc">{{ t('fileUsers.desc') }}</span></div>
+      <el-button size="small" :icon="UserPlus" @click="users.push({ name: '', password: '', root: '', readOnly: false })">{{ t('fileUsers.addUser') }}</el-button>
     </div>
     <div class="g-card-body">
       <div v-if="users.length" class="u-head">
-        <span>用户名</span><span>密码</span><span>目录</span><span>只读</span><span />
+        <span>{{ t('fileUsers.username') }}</span><span>{{ t('fileUsers.password') }}</span><span>{{ t('fileUsers.directory') }}</span><span>{{ t('fileUsers.readOnly') }}</span><span />
       </div>
       <div v-for="(u, i) in users" :key="i" class="u-item">
         <div class="u-row">
-          <div class="u-cell"><label class="u-label">用户名</label><el-input v-model="u.name" /></div>
-          <div class="u-cell"><label class="u-label">密码</label><el-input v-model="u.password" type="password" show-password /></div>
+          <div class="u-cell"><label class="u-label">{{ t('fileUsers.username') }}</label><el-input v-model="u.name" /></div>
+          <div class="u-cell"><label class="u-label">{{ t('fileUsers.password') }}</label><el-input v-model="u.password" type="password" show-password /></div>
           <div class="u-cell u-root">
-            <label class="u-label">目录</label>
+            <label class="u-label">{{ t('fileUsers.directory') }}</label>
             <template v-if="!u.mounts?.length">
               <el-input v-model="u.root" placeholder="/data/share" class="mono" />
-              <el-button link type="primary" size="small" class="u-multi" @click="toMulti(u)">挂载多个目录</el-button>
+              <el-button link type="primary" size="small" class="u-multi" @click="toMulti(u)">{{ t('fileUsers.mountMultiple') }}</el-button>
             </template>
-            <span v-else class="u-summary">{{ u.mounts.length }} 个目录，登录后按名称列出</span>
+            <span v-else class="u-summary">{{ t('fileUsers.mountSummary', { count: u.mounts.length }) }}</span>
           </div>
           <div class="u-cell u-ro">
-            <label class="u-label">只读</label>
+            <label class="u-label">{{ t('fileUsers.readOnly') }}</label>
             <el-switch v-if="!u.mounts?.length" v-model="u.readOnly" />
-            <span v-else class="u-summary">按目录</span>
+            <span v-else class="u-summary">{{ t('fileUsers.perDirectory') }}</span>
           </div>
-          <div class="u-cell u-del"><el-button text type="danger" :icon="Trash2" aria-label="删除用户" @click="users.splice(i, 1)" /></div>
+          <div class="u-cell u-del"><el-button text type="danger" :icon="Trash2" :aria-label="t('fileUsers.deleteUser')" @click="users.splice(i, 1)" /></div>
         </div>
         <div v-if="u.mounts?.length" class="m-list">
           <div v-for="(mt, j) in u.mounts" :key="j" class="m-row">
-            <div class="u-cell"><label class="u-label">名称</label><el-input v-model="mt.name" placeholder="显示名称" /></div>
-            <div class="u-cell m-path"><label class="u-label">目录</label><el-input v-model="mt.path" placeholder="/data/share" class="mono" /></div>
-            <div class="u-cell u-ro"><label class="u-label">只读</label><el-switch v-model="mt.readOnly" /></div>
-            <div class="u-cell u-del"><el-button text type="danger" :icon="Trash2" aria-label="删除目录" @click="removeMount(u, j)" /></div>
+            <div class="u-cell"><label class="u-label">{{ t('common.name') }}</label><el-input v-model="mt.name" :placeholder="t('fileUsers.displayName')" /></div>
+            <div class="u-cell m-path"><label class="u-label">{{ t('fileUsers.directory') }}</label><el-input v-model="mt.path" placeholder="/data/share" class="mono" /></div>
+            <div class="u-cell u-ro"><label class="u-label">{{ t('fileUsers.readOnly') }}</label><el-switch v-model="mt.readOnly" /></div>
+            <div class="u-cell u-del"><el-button text type="danger" :icon="Trash2" :aria-label="t('fileUsers.deleteDirectory')" @click="removeMount(u, j)" /></div>
           </div>
-          <el-button link type="primary" size="small" :icon="FolderPlus" @click="u.mounts.push({ name: '', path: '', readOnly: false })">添加目录</el-button>
+          <el-button link type="primary" size="small" :icon="FolderPlus" @click="u.mounts.push({ name: '', path: '', readOnly: false })">{{ t('fileUsers.addDirectory') }}</el-button>
         </div>
       </div>
-      <el-empty v-if="!users.length" description="暂无用户" :image-size="60" />
+      <el-empty v-if="!users.length" :description="t('fileUsers.empty')" :image-size="60" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
 import { FolderPlus, Trash2, UserPlus, Users } from 'lucide-vue-next'
 
 export interface FileMount {
@@ -59,6 +60,7 @@ export interface FileUser {
   mounts?: FileMount[]
 }
 
+const { t } = useI18n()
 const users = defineModel<FileUser[]>({ required: true })
 
 // toMulti 把单目录用户转换为多目录：已填写的目录成为第一个挂载

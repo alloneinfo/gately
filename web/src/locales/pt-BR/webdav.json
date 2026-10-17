@@ -1,0 +1,11 @@
+{
+  "service": "Serviço",
+  "listenIp": "Endereço de escuta",
+  "listenIpPlaceholder": "Deixe em branco para escutar em todos os endereços",
+  "port": "Porta",
+  "statusOff": "Desativado",
+  "statusError": "Falha ao iniciar",
+  "statusNotRunning": "Não está em execução",
+  "desc": "Compartilhe diretórios locais via WebDAV com computadores, celulares e players de mídia",
+  "tlsHelp": "O certificado é escolhido em \"Certificados SSL\" de acordo com o domínio de acesso"
+}

@@ -1,0 +1,19 @@
+# Resumen de módulos
+
+Cada capacidad de Gately es un módulo independiente. Cada uno se puede activar, desactivar y configurar por separado, y guarda su configuración en un archivo JSON de texto plano.
+
+| Módulo | Capacidades | Documentación |
+| --- | --- | --- |
+| DNS dinámico | 11 proveedores DNS, IP obtenida por URL / interfaz de red / comando, IPv4 / IPv6, webhook | [Ver](/es/docs/modules/ddns) |
+| Traversal STUN | TCP / UDP, mantenimiento de la conexión, UPnP / NAT-PMP, reenvío integrado, webhooks y scripts al producirse cambios | [Ver](/es/docs/modules/stun) |
+| Reenvío de puertos | TCP / UDP, IPv4 / IPv6, rangos de puertos, conmutación por error entre varios destinos, límites de conexiones, estadísticas de tráfico | [Ver](/es/docs/modules/portforward) |
+| Certificados SSL | Emisión y renovación automáticas con ACME DNS-01, subida de certificados, exportación a un directorio con scripts | [Ver](/es/docs/modules/ssl) |
+| Servicios web | Proxy inverso, redirecciones, archivos estáticos, HTTPS, autenticación, control de acceso, balanceo de carga y comprobaciones de estado, caché y límite de peticiones, estadísticas de acceso | [Ver](/es/docs/modules/web) |
+| Cortafuegos WAF | Coraza + OWASP CRS v4 | [Ver](/es/docs/modules/waf) |
+| Tailscale / frp / cloudflared | Redes y traversal NAT con binarios oficiales gestionados | [Ver](/es/docs/modules/tunnels) |
+| Docker | Creación y edición de contenedores, registros y terminal, Compose, actualización de imágenes, redes y volúmenes | [Ver](/es/docs/modules/docker) |
+| Terminal web | SSH, Telnet, shell local, gestor de archivos SFTP, sesiones persistentes | [Ver](/es/docs/modules/terminal) |
+| Diagnóstico de red | Ping, traceroute, sondeo de puertos, consultas DNS, prueba de velocidad, escaneo de la red local | [Ver](/es/docs/modules/nettools) |
+| Centro de notificaciones | Envío de eventos por varios canales y reglas | [Ver](/es/docs/modules/notify) |
+| Copia de seguridad de la configuración | Copias cifradas, política de retención, copia programada y restauración | [Ver](/es/docs/modules/backup) |
+| Archivos y herramientas de operación | WebDAV, FTP, gestión de almacenamiento, Wake-on-LAN, tareas programadas | [Ver](/es/docs/modules/tools) |

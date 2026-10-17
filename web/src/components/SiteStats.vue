@@ -1,23 +1,23 @@
 <template>
-  <el-dialog v-model="visible" :title="`站点统计 · ${title}`" width="720px" :fullscreen="isMobile" append-to-body @closed="stop">
+  <el-dialog v-model="visible" :title="t('siteStats.title', { name: title })" width="720px" :fullscreen="isMobile" append-to-body @closed="stop">
     <div class="range">
       <el-radio-group v-model="minutes" size="small" @change="load">
-        <el-radio-button :value="60">1 小时</el-radio-button>
-        <el-radio-button :value="360">6 小时</el-radio-button>
-        <el-radio-button :value="1440">24 小时</el-radio-button>
+        <el-radio-button :value="60">{{ t('siteStats.hour1') }}</el-radio-button>
+        <el-radio-button :value="360">{{ t('siteStats.hour6') }}</el-radio-button>
+        <el-radio-button :value="1440">{{ t('siteStats.hour24') }}</el-radio-button>
       </el-radio-group>
-      <span class="meta">每分钟一个点，重启或修改该监听后重新计数</span>
+      <span class="meta">{{ t('siteStats.rangeHelp') }}</span>
     </div>
     <template v-if="data">
       <div class="kpis">
-        <div class="kpi"><div class="v">{{ total.toLocaleString() }}</div><div class="l">请求数</div></div>
-        <div class="kpi"><div class="v">{{ formatBytes(data.bytesOut) }}</div><div class="l">累计响应流量</div></div>
+        <div class="kpi"><div class="v">{{ total.toLocaleString() }}</div><div class="l">{{ t('siteStats.requests') }}</div></div>
+        <div class="kpi"><div class="v">{{ formatBytes(data.bytesOut) }}</div><div class="l">{{ t('siteStats.bytesOut') }}</div></div>
         <div class="kpi"><div class="v">{{ data.status['4xx'] }}</div><div class="l">4xx</div></div>
         <div class="kpi"><div class="v" :class="{ bad: data.status['5xx'] > 0 }">{{ data.status['5xx'] }}</div><div class="l">5xx</div></div>
       </div>
-      <div class="chart-title">请求数</div>
+      <div class="chart-title">{{ t('siteStats.requests') }}</div>
       <Sparkline :series="[{ values: data.series.map((p) => p.requests), color: 'var(--el-color-primary)' }]" :capacity="data.series.length" :height="70" />
-      <div class="chart-title">错误（4xx / 5xx）</div>
+      <div class="chart-title">{{ t('siteStats.errors') }}</div>
       <Sparkline
         :series="[
           { values: data.series.map((p) => p.s4xx), color: 'var(--el-color-warning)' },
@@ -26,22 +26,22 @@
         :capacity="data.series.length"
         :height="50"
       />
-      <div v-if="data.upstreams?.length" class="chart-title">后端</div>
+      <div v-if="data.upstreams?.length" class="chart-title">{{ t('siteStats.upstreams') }}</div>
       <div v-for="u in data.upstreams ?? []" :key="u.url" class="up">
-        <StatusBadge :type="u.healthy ? 'running' : 'error'" :text="u.healthy ? '健康' : '不可用'" />
+        <StatusBadge :type="u.healthy ? 'running' : 'error'" :text="u.healthy ? t('siteStats.healthy') : t('siteStats.unavailable')" />
         <span class="mono">{{ u.url }}</span>
-        <span class="meta">权重 {{ u.weight }}<template v-if="u.backup"> · 备用</template> · 连接 {{ u.conns }}</span>
+        <span class="meta">{{ t('siteStats.upstreamMeta', { weight: u.weight, conns: u.conns }) }}<template v-if="u.backup"> · {{ t('siteStats.backup') }}</template></span>
       </div>
       <div class="tops">
         <div>
-          <div class="chart-title">来源 IP Top 10</div>
-          <div v-for="t in data.topIps" :key="t.key" class="top"><span class="mono">{{ t.key }}</span><span>{{ t.count }}</span></div>
-          <div v-if="!data.topIps.length" class="meta">暂无数据</div>
+          <div class="chart-title">{{ t('siteStats.topIps') }}</div>
+          <div v-for="ip in data.topIps" :key="ip.key" class="top"><span class="mono">{{ ip.key }}</span><span>{{ ip.count }}</span></div>
+          <div v-if="!data.topIps.length" class="meta">{{ t('siteStats.noData') }}</div>
         </div>
         <div>
-          <div class="chart-title">国家 Top 10</div>
-          <div v-for="t in data.topCountries" :key="t.key" class="top"><span>{{ t.key }}</span><span>{{ t.count }}</span></div>
-          <div v-if="!data.topCountries.length" class="meta">暂无数据（需导入 GeoIP 数据库）</div>
+          <div class="chart-title">{{ t('siteStats.topCountries') }}</div>
+          <div v-for="c in data.topCountries" :key="c.key" class="top"><span>{{ c.key }}</span><span>{{ c.count }}</span></div>
+          <div v-if="!data.topCountries.length" class="meta">{{ t('siteStats.noDataGeo') }}</div>
         </div>
       </div>
     </template>
@@ -50,6 +50,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { api } from '../api'
 import Sparkline from './Sparkline.vue'
@@ -65,6 +66,7 @@ interface View {
   upstreams?: { url: string; weight: number; backup: boolean; healthy: boolean; conns: number }[]
 }
 
+const { t } = useI18n()
 const { isMobile } = useFormLayout()
 const visible = ref(false)
 const title = ref('')

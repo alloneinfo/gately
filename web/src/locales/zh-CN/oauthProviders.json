@@ -1,0 +1,15 @@
+{
+  "keyPlaceholder": "标识，如 github",
+  "namePlaceholder": "显示名",
+  "clientIdPlaceholder": "Client ID（QQ 为 APP ID）",
+  "clientSecretPlaceholder": "Client Secret（QQ 为 APP Key）",
+  "issuerPlaceholder": "Issuer，如 https://login.example.com",
+  "addProvider": "添加登录方式",
+  "oidc": "通用 OIDC",
+  "hints": {
+    "github": "在 GitHub → Settings → Developer settings → OAuth Apps 创建应用；身份可写登录名或数字 ID（数字 ID 不会因改名失效）。",
+    "google": "在 Google Cloud Console 创建 OAuth 客户端（Web 应用）；身份可写已验证的邮箱或 sub。",
+    "qq": "在 QQ 互联创建网站应用；openid 对每个应用不同，首次登录被拒绝时页面会提示账号标识，加入允许列表即可。",
+    "oidc": "任意支持 OIDC 发现文档的服务（Authentik、Keycloak、Casdoor 等）；身份可写已验证的邮箱或 sub。"
+  }
+}

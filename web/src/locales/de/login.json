@@ -1,0 +1,21 @@
+{
+  "heroLine1": "Quelloffen, transparent",
+  "heroLine2": "Toolkit für Netzwerk-Gateways",
+  "feature1": "Portweiterleitung, STUN-Traversal und dynamisches DNS",
+  "feature2": "Reverse-Proxy, WAF und automatische Zertifikatserneuerung",
+  "feature3": "Keine Verbindung zu Projektservern; Konfiguration im Klartext und prüfbar",
+  "mobileSub": "Quelloffenes Netzwerk-Gateway-Toolkit für Zuhause und Server",
+  "title": "An der Konsole anmelden",
+  "subtitle": "Administrator-Benutzername und Passwort eingeben",
+  "username": "Benutzername",
+  "password": "Passwort",
+  "submit": "Anmelden",
+  "thirdParty": "Oder ein Drittanbieter-Konto verwenden",
+  "loginWith": "Mit {name} anmelden",
+  "initialPasswordHint": "Beim ersten Start wird das Anfangspasswort im Programmprotokoll ausgegeben.",
+  "totpTitle": "Zwei-Faktor-Authentifizierung",
+  "totpPrompt": "Öffnen Sie Ihre Authenticator-App und geben Sie den 6-stelligen Code für {user} ein",
+  "code": "Bestätigungscode",
+  "verify": "Bestätigen und anmelden",
+  "backToAccount": "Zurück zur Kontoauswahl"
+}

@@ -1,0 +1,20 @@
+{
+  "autoBan": "Bannissement automatique",
+  "authFailBan": "Bannir après échec d'authentification",
+  "authFailBanHelp": "En minutes. Après 10 échecs d'authentification consécutifs, l'IP source est bannie ; 0 désactive le bannissement (limitation de débit uniquement, pendant 15 minutes)",
+  "banList": "Liste des bannissements",
+  "noBans": "Aucune IP n'est bannie actuellement",
+  "until": "Jusqu'au {time}",
+  "unban": "Débannir",
+  "manualBanIp": "IP à bannir manuellement",
+  "hours": "heures",
+  "ban": "Bannir",
+  "geoTitle": "Base GeoIP (filtrage par pays)",
+  "geoLoaded": "Chargée : {type}, construite le {buildTime}, {size} Mo",
+  "remove": "Retirer",
+  "geoNotImported": "Non importée. Prend en charge les bases pays ou ville au format .mmdb, comme MaxMind GeoLite2 et DB-IP",
+  "uploadMmdb": "Téléverser un .mmdb",
+  "mmdbUrlPlaceholder": "Ou saisissez l'URL de téléchargement d'un .mmdb",
+  "geoImported": "Base GeoIP importée",
+  "geoDownloaded": "Base GeoIP téléchargée et chargée"
+}

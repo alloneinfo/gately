@@ -1,0 +1,14 @@
+{
+  "enable": "Ativar Webhook",
+  "url": "URL da requisição",
+  "method": "Método da requisição",
+  "headers": "Cabeçalhos da requisição",
+  "headersPlaceholder": "Um por linha, no formato Chave: Valor",
+  "body": "Corpo da requisição",
+  "successMark": "Marcador de sucesso",
+  "successPlaceholder": "Um por linha; a requisição é bem-sucedida se a resposta contiver algum deles. Deixe em branco para verificar apenas o código de status 2xx",
+  "timeout": "Tempo limite (s)",
+  "ignoreCertError": "Ignorar erros de certificado",
+  "variables": "Variáveis disponíveis",
+  "varsTip": "{plain} ou, por compatibilidade com o Lucky, {lucky}"
+}

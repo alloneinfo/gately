@@ -1,0 +1,45 @@
+{
+  "clipboard": {
+    "copyFailed": "無法自動複製，已選取文字，請按 Ctrl/Cmd+C 複製"
+  },
+  "themePicker": {
+    "switchTheme": "切換主題",
+    "title": "主題配色",
+    "followSystem": "跟隨系統（翠綠 / 暗黑）"
+  },
+  "moduleBanner": {
+    "defaultDesc": "模組停用期間，下列項目全部不會執行；啟用模組後，各項目依自身開關生效。",
+    "enable": "啟用模組"
+  },
+  "saveBar": {
+    "dirty": "有未儲存的修改",
+    "saved": "所有修改已儲存",
+    "undo": "復原",
+    "save": "儲存設定"
+  },
+  "logCard": {
+    "title": "執行日誌"
+  },
+  "logViewer": {
+    "levelAll": "全部層級",
+    "levelInfo": "資訊及以上",
+    "levelWarn": "警告及以上",
+    "levelError": "僅錯誤",
+    "autoScroll": "自動捲動",
+    "empty": "暫無日誌"
+  },
+  "scopeTags": {
+    "allWrite": "全部讀寫",
+    "allRead": "全部唯讀",
+    "write": "讀寫",
+    "read": "唯讀",
+    "none": "無權限"
+  },
+  "restartOverlay": {
+    "resumeHint": "服務恢復後頁面會自動重新整理，請勿關閉此頁面。",
+    "waited": "已等待 {seconds} 秒",
+    "timeoutTitle": "等待逾時",
+    "timeoutDesc": "服務長時間未回應。如修改了管理連接埠或監聽位址，請手動存取新位址；也可以查看程式日誌確認啟動情況。",
+    "reload": "重新整理頁面"
+  }
+}

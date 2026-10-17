@@ -1,0 +1,45 @@
+{
+  "clipboard": {
+    "copyFailed": "No se puede copiar automáticamente. El texto está seleccionado; pulsa Ctrl/Cmd+C para copiarlo."
+  },
+  "themePicker": {
+    "switchTheme": "Cambiar tema",
+    "title": "Colores del tema",
+    "followSystem": "Seguir el sistema (Esmeralda / Oscuro)"
+  },
+  "moduleBanner": {
+    "defaultDesc": "Mientras el módulo esté desactivado, ninguno de los elementos siguientes se ejecutará. Al activarlo, cada elemento sigue su propio interruptor.",
+    "enable": "Activar módulo"
+  },
+  "saveBar": {
+    "dirty": "Tienes cambios sin guardar",
+    "saved": "Todos los cambios guardados",
+    "undo": "Deshacer",
+    "save": "Guardar ajustes"
+  },
+  "logCard": {
+    "title": "Registros de ejecución"
+  },
+  "logViewer": {
+    "levelAll": "Todos los niveles",
+    "levelInfo": "Info y superiores",
+    "levelWarn": "Advertencia y superiores",
+    "levelError": "Solo errores",
+    "autoScroll": "Desplazamiento automático",
+    "empty": "Aún no hay registros"
+  },
+  "scopeTags": {
+    "allWrite": "Acceso total",
+    "allRead": "Solo lectura (todo)",
+    "write": "lectura y escritura",
+    "read": "solo lectura",
+    "none": "Sin permisos"
+  },
+  "restartOverlay": {
+    "resumeHint": "La página se actualizará automáticamente cuando el servicio vuelva. Mantén esta página abierta.",
+    "waited": "Esperando {seconds} s",
+    "timeoutTitle": "Tiempo agotado",
+    "timeoutDesc": "El servicio lleva mucho tiempo sin responder. Si cambiaste el puerto de administración o la dirección de escucha, abre la nueva dirección manualmente. También puedes revisar los registros del programa para ver cómo va el arranque.",
+    "reload": "Recargar página"
+  }
+}

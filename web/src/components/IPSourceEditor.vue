@@ -1,35 +1,35 @@
 <template>
   <div>
-    <el-form-item :label="`获取 IPv${family}`">
+    <el-form-item :label="t('ipSourceEditor.fetchIp', { family })">
       <el-switch v-model="model.enable" />
     </el-form-item>
     <template v-if="model.enable">
-      <el-form-item label="获取方式">
+      <el-form-item :label="t('ipSourceEditor.method')">
         <el-radio-group v-model="model.type">
-          <el-radio-button value="url">查询接口</el-radio-button>
-          <el-radio-button value="netInterface">网卡</el-radio-button>
-          <el-radio-button value="command">命令</el-radio-button>
+          <el-radio-button value="url">{{ t('ipSourceEditor.typeUrl') }}</el-radio-button>
+          <el-radio-button value="netInterface">{{ t('ipSourceEditor.typeInterface') }}</el-radio-button>
+          <el-radio-button value="command">{{ t('ipSourceEditor.typeCommand') }}</el-radio-button>
         </el-radio-group>
       </el-form-item>
-      <el-form-item v-if="model.type === 'url'" label="查询地址">
-        <el-input v-model="urlsText" type="textarea" :rows="4" placeholder="每行一个，按顺序尝试" class="mono" />
+      <el-form-item v-if="model.type === 'url'" :label="t('ipSourceEditor.urls')">
+        <el-input v-model="urlsText" type="textarea" :rows="4" :placeholder="t('ipSourceEditor.urlsPlaceholder')" class="mono" />
       </el-form-item>
-      <el-form-item v-if="model.type === 'netInterface'" label="网卡">
-        <el-select v-model="model.interface" filterable allow-create style="width: 100%" placeholder="选择网卡">
+      <el-form-item v-if="model.type === 'netInterface'" :label="t('ipSourceEditor.interface')">
+        <el-select v-model="model.interface" filterable allow-create style="width: 100%" :placeholder="t('ipSourceEditor.interfacePlaceholder')">
           <el-option v-for="i in interfaces" :key="i.name" :label="i.name" :value="i.name">
             <span>{{ i.name }}</span>
             <span class="iface-addrs">{{ i.addrs.join('  ') }}</span>
           </el-option>
         </el-select>
       </el-form-item>
-      <el-form-item v-if="model.type === 'command'" label="命令">
-        <el-input v-model="model.command" placeholder="输出中包含 IP 即可，例如 curl -s https://4.ipw.cn" class="mono" />
+      <el-form-item v-if="model.type === 'command'" :label="t('ipSourceEditor.command')">
+        <el-input v-model="model.command" :placeholder="t('ipSourceEditor.commandPlaceholder')" class="mono" />
       </el-form-item>
-      <el-form-item label="筛选正则">
-        <el-input v-model="model.regex" placeholder="可选；留空自动选择第一个公网地址" class="mono" />
+      <el-form-item :label="t('ipSourceEditor.regex')">
+        <el-input v-model="model.regex" :placeholder="t('ipSourceEditor.regexPlaceholder')" class="mono" />
       </el-form-item>
       <el-form-item>
-        <el-button size="small" :loading="testing" @click="test">测试获取</el-button>
+        <el-button size="small" :loading="testing" @click="test">{{ t('ipSourceEditor.testFetch') }}</el-button>
         <span v-if="result" class="result" :class="{ err: resultError }">{{ result }}</span>
       </el-form-item>
     </template>
@@ -38,6 +38,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { api } from '../api'
 
 export interface IPSource {
@@ -54,6 +55,7 @@ export interface NetInterface {
   addrs: string[]
 }
 
+const { t } = useI18n()
 const props = defineProps<{ family: 4 | 6; interfaces: NetInterface[] }>()
 const model = defineModel<IPSource>({ required: true })
 const testing = ref(false)
@@ -71,7 +73,7 @@ async function test() {
   result.value = ''
   try {
     const r = await api.post<{ ip: string }>('/api/ddns/iptest', { source: model.value, family: props.family })
-    result.value = `获取成功：${r.ip}`
+    result.value = t('ipSourceEditor.fetchSuccess', { ip: r.ip })
     resultError.value = false
   } catch (e) {
     result.value = (e as Error).message

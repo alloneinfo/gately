@@ -1,0 +1,14 @@
+{
+  "enable": "Webhook を有効化",
+  "url": "リクエスト URL",
+  "method": "メソッド",
+  "headers": "ヘッダー",
+  "headersPlaceholder": "1 行に 1 つ、形式は Key: Value",
+  "body": "ボディ",
+  "successMark": "成功判定文字列",
+  "successPlaceholder": "1 行に 1 つ。レスポンスにいずれかが含まれれば成功。空欄の場合は 2xx ステータスのみ確認します",
+  "timeout": "タイムアウト(秒)",
+  "ignoreCertError": "証明書エラーを無視",
+  "variables": "利用可能な変数",
+  "varsTip": "{plain}、または Lucky 互換の {lucky}"
+}

@@ -1,0 +1,17 @@
+{
+  "title": "Users",
+  "desc": "Each user can access one directory, or mount several directories",
+  "addUser": "Add user",
+  "username": "Username",
+  "password": "Password",
+  "directory": "Directory",
+  "readOnly": "Read-only",
+  "mountMultiple": "Mount multiple directories",
+  "mountSummary": "{count} directories, listed by name after sign-in",
+  "perDirectory": "Per directory",
+  "deleteUser": "Delete user",
+  "deleteDirectory": "Delete directory",
+  "displayName": "Display name",
+  "addDirectory": "Add directory",
+  "empty": "No users yet"
+}

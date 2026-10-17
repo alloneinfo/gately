@@ -1,0 +1,17 @@
+{
+  "fetchIp": "Obtener IPv{family}",
+  "method": "Método",
+  "typeUrl": "URL de consulta",
+  "typeInterface": "Interfaz de red",
+  "typeCommand": "Comando",
+  "urls": "URL de consulta",
+  "urlsPlaceholder": "Una por línea, se prueban en orden",
+  "interface": "Interfaz de red",
+  "interfacePlaceholder": "Selecciona una interfaz de red",
+  "command": "Comando",
+  "commandPlaceholder": "La salida solo necesita contener una IP, p. ej. curl -s https://4.ipw.cn",
+  "regex": "Expresión regular de filtro",
+  "regexPlaceholder": "Opcional; déjalo vacío para tomar la primera dirección pública",
+  "testFetch": "Probar obtención",
+  "fetchSuccess": "Obtenida correctamente: {ip}"
+}

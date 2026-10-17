@@ -1,0 +1,137 @@
+# API 權杖與 OpenAPI
+
+Gately 管理介面使用的全部介面都可以透過 HTTP 呼叫。指令碼與自動化使用 API 權杖驗證，介面說明由程式依已登錄的路由自動產生。
+
+## API 權杖
+
+管理介面路徑：側邊欄「系統」分組 → 「API 權杖」。
+
+### 建立權杖
+
+點擊「新增權杖」，填寫：
+
+| 項目 | 說明 |
+| --- | --- |
+| 名稱 | 必填，最長 64 個字元，用於標識用途，如「監控指令碼」 |
+| 到期時間 | 可選「永不到期」、7 天、30 天、90 天、1 年或自訂日期；自訂時間必須晚於目前時間 |
+| 權限 | 必填，至少選擇一項。新增時預設不授予任何權限 |
+
+單一實例最多儲存 100 個權杖。
+
+建立成功後彈窗只顯示一次權杖明文，格式為 `gtl_` 加 48 位十六進位字元。磁碟上只儲存 SHA-256 雜湊，遺失後只能「重新產生」，舊值立即失效。清單中以 `gtl_xxxx…yyyy` 形式的提示辨認權杖，並顯示最近使用時間與來源 IP（寫入磁碟最多延遲一分鐘）。
+
+編輯權杖可以修改名稱、權限、到期時間和啟用開關，修改立即生效，權杖明文保持不變。已到期的權杖可以保留原到期時間並只修改其他欄位。
+
+### 驗證方式
+
+請求標頭攜帶 `Authorization: Bearer <權杖>`：
+
+```bash
+curl -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/status
+```
+
+請求本文使用 `Content-Type: application/json`，錯誤統一回傳 `{"error": "說明"}`。權杖被停用、已到期或不存在時，請求會繼續依登入工作階段驗證，最終回傳未登入錯誤。
+
+### 權限範圍
+
+權限格式為 `<權限域>:read` 或 `<權限域>:write`，寫入權限包含讀取權限。權限域是功能模組的 ID（如 `ddns`、`portforward`、`notify`、`backup`）加上三個內建域：
+
+| 權限域 | 名稱 | 可用權限 | 對應介面 |
+| --- | --- | --- | --- |
+| `status` | 系統狀態 | `status:read` | `/api/status`、`/api/system/info`、`/api/system/update` |
+| `logs` | 系統日誌 | `logs:read` | `/api/logs` |
+| `import` | Lucky 設定匯入 | `import:write` | `/api/import/lucky` |
+
+萬用寫法：
+
+| 寫法 | 含義 |
+| --- | --- |
+| `*:read` | 全部模組唯讀 |
+| `*:write` 或 `*` | 全部模組讀寫 |
+| `ddns:read` | 僅 DDNS 唯讀 |
+
+介面所需權限由路徑和方法決定：
+
+- 路徑 `/api/<模組>/...` 需要 `<模組>` 域的權限，GET 與 HEAD 要求 `read`，其餘方法要求 `write`。
+- 模組日誌 `GET /api/<模組>/logs` 屬於唯讀，清空日誌（DELETE）屬於寫入操作。
+- 下列 GET 介面會回傳敏感內容或建立互動通道，按 `write` 處理：路徑中含有 `ws`（WebSocket 終端機）、`exec`、`download`、`export`、`read`、`config`、`preview-archive` 段的介面，例如憑證下載、容器內執行命令與檔案讀取。
+- `GET /api/session` 與 `GET /api/openapi.json` 接受任意有效權杖。
+
+### 權杖禁止的操作
+
+以下介面只接受登入工作階段，權杖存取一律回傳 403：
+
+- 帳號與兩步驟驗證：`/api/account`
+- 權杖管理：`/api/tokens`
+- 系統設定、系統權杖、重新啟動：`/api/system/settings`、`/api/system/token`、`/api/system/restart`
+- 設定備份下載與還原：`/api/system/backup`、`/api/system/restore`
+- 本機備份檔案下載：`/api/backup/local`
+- Web 終端機安全設定：`/api/webterminal/security`
+- 登入與登出：`/api/login`、`/api/logout`
+
+權限不足的請求會回傳 `權杖缺少權限 <權限>`，並在系統日誌中記錄一則警告，包含權杖名稱、來源 IP 與被拒絕的介面。
+
+### 舊版權杖
+
+舊版本的單一全域權杖在升級時自動遷移為名為「舊版權杖（由舊版本遷移）」的權杖，權限為 `*`，清單中帶有「舊版」標記。建議建立依需求授權的新權杖後刪除它；對舊版權杖「重新產生」會同時去掉舊版標記。
+
+::: tip 建議
+為每個指令碼建立單獨的權杖，只勾選它需要的權限，並設定到期時間。權杖外洩時刪除或重新產生對應的那一個即可。
+:::
+
+## OpenAPI 與介面文件
+
+### 管理介面裡的文件頁
+
+側邊欄「系統」分組 → 「API 文件」。頁面顯示 Base URL、驗證說明，依功能分組列出全部介面，支援依路徑或摘要搜尋。展開一個介面可以看到所需權限、參數、請求本文欄位和可複製的 curl 範例。需要登入工作階段的介面標記為「僅登入工作階段」，不提供 curl 範例。
+
+### 取得 OpenAPI 文件
+
+實例執行時，`GET /api/openapi.json` 回傳 OpenAPI 3.0 文件，任意有效權杖或登入工作階段均可讀取：
+
+```bash
+curl -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/openapi.json -o openapi.json
+```
+
+文件使用 `bearerAuth` 安全方案，並為每個介面增加擴充欄位：
+
+| 擴充欄位 | 含義 |
+| --- | --- |
+| `x-required-scope` | 存取該介面所需的權杖權限 |
+| `x-token-allowed` | 權杖是否允許存取，`false` 表示僅登入工作階段 |
+| `x-scope-domains`（文件根） | 全部權限域清單 |
+
+[命令列與 MCP](/zh-TW/docs/guide/cli-mcp) 的介面清單讀取自這份文件。
+
+### 命令列匯出
+
+`-api-docs` 參數在臨時設定目錄中建置應用程式（不監聽連接埠、不影響現有設定），把文件寫入指定目錄後結束：
+
+```bash
+gately -api-docs ./api-docs
+```
+
+輸出兩個檔案：
+
+- `openapi.json`：OpenAPI 3.0 描述
+- `API.md`：Markdown 版介面文件，含快速開始、權限域表和依分組列出的介面表
+
+## 呼叫範例
+
+```bash
+# 檢視系統狀態（需要 status:read）
+curl -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/status
+
+# 列出全部 DDNS 工作（需要 ddns:read）
+curl -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns/tasks
+
+# 立即同步一個 DDNS 工作（需要 ddns:write，key 取自上一步回傳的清單）
+curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns/tasks/KEY/sync
+
+# 只拉取序號大於 10 的模組日誌（需要 ddns:read）
+curl -H "Authorization: Bearer gtl_xxxx" "http://localhost:16680/api/ddns/logs?since=10"
+```
+
+## 完整介面清單
+
+全部介面、參數與所需權限請見 [API 介面清單](/en/docs/reference/api-reference)。

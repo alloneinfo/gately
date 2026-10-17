@@ -2,13 +2,13 @@
   <div class="log-viewer">
     <div class="toolbar">
       <el-select v-model="level" size="small" style="width: 110px">
-        <el-option label="全部级别" value="all" />
-        <el-option label="信息及以上" value="info" />
-        <el-option label="警告及以上" value="warn" />
-        <el-option label="仅错误" value="error" />
+        <el-option :label="t('components.logViewer.levelAll')" value="all" />
+        <el-option :label="t('components.logViewer.levelInfo')" value="info" />
+        <el-option :label="t('components.logViewer.levelWarn')" value="warn" />
+        <el-option :label="t('components.logViewer.levelError')" value="error" />
       </el-select>
-      <el-checkbox v-model="follow" size="small">自动滚动</el-checkbox>
-      <el-button v-if="clearable" size="small" text :icon="Trash2" class="clear" @click="clear">清空</el-button>
+      <el-checkbox v-model="follow" size="small">{{ t('components.logViewer.autoScroll') }}</el-checkbox>
+      <el-button v-if="clearable" size="small" text :icon="Trash2" class="clear" @click="clear">{{ t('common.clear') }}</el-button>
     </div>
     <div ref="box" class="box mono" :style="height ? { height } : undefined">
       <div v-for="e in visible" :key="e.seq" :class="['line', e.level]">
@@ -17,15 +17,18 @@
         <span v-if="e.source" class="src">[{{ e.source }}]</span>
         <span>{{ e.message }}</span>
       </div>
-      <div v-if="!visible.length" class="empty">暂无日志</div>
+      <div v-if="!visible.length" class="empty">{{ t('components.logViewer.empty') }}</div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { Trash2 } from 'lucide-vue-next'
 import { api, type LogEntry } from '../api'
+
+const { t } = useI18n()
 
 // height 可覆盖默认高度，例如独立日志页填满可视区域
 const props = defineProps<{ url: string; clearable?: boolean; height?: string }>()

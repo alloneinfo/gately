@@ -3,68 +3,68 @@
     <el-alert v-if="error" type="error" :closable="false" show-icon :title="error" />
     <template v-if="d">
       <div class="g-card">
-        <div class="g-card-head"><div class="g-card-title"><Info :size="16" />基本信息</div></div>
+        <div class="g-card-head"><div class="g-card-title"><Info :size="16" />{{ t('docker.container.overview.basicInfo') }}</div></div>
         <div class="grid">
-          <Field label="状态"><StatusBadge v-bind="containerBadge(d.state)" /> <span class="muted">{{ d.status }}</span></Field>
-          <Field label="健康检查">{{ d.healthStatus || '-' }}</Field>
-          <Field label="重启次数">{{ d.restartCount }}</Field>
-          <Field label="退出码">{{ d.exitCode }}</Field>
-          <Field label="镜像" mono wide>{{ d.image }}</Field>
-          <Field label="镜像 ID" mono wide>{{ d.imageId }}</Field>
-          <Field label="创建时间">{{ formatTime(d.created) }}</Field>
-          <Field label="启动时间">{{ formatTime(d.started) }}</Field>
-          <Field label="启动命令" mono wide>{{ [d.path, ...(d.args ?? [])].filter(Boolean).join(' ') || '-' }}</Field>
+          <Field :label="t('common.status')"><StatusBadge v-bind="containerBadge(d.state)" /> <span class="muted">{{ d.status }}</span></Field>
+          <Field :label="t('docker.container.overview.health')">{{ d.healthStatus || '-' }}</Field>
+          <Field :label="t('docker.container.overview.restartCount')">{{ d.restartCount }}</Field>
+          <Field :label="t('docker.container.overview.exitCode')">{{ d.exitCode }}</Field>
+          <Field :label="t('docker.container.overview.image')" mono wide>{{ d.image }}</Field>
+          <Field :label="t('docker.container.overview.imageId')" mono wide>{{ d.imageId }}</Field>
+          <Field :label="t('docker.container.overview.created')">{{ formatTime(d.created) }}</Field>
+          <Field :label="t('docker.container.overview.started')">{{ formatTime(d.started) }}</Field>
+          <Field :label="t('docker.container.overview.startCommand')" mono wide>{{ [d.path, ...(d.args ?? [])].filter(Boolean).join(' ') || '-' }}</Field>
           <Field label="Entrypoint" mono>{{ d.entrypoint || '-' }}</Field>
-          <Field label="工作目录" mono>{{ d.workdir || '-' }}</Field>
-          <Field label="用户" mono>{{ d.user || '-' }}</Field>
-          <Field label="主机名" mono>{{ d.hostname || '-' }}</Field>
-          <Field label="重启策略">{{ d.restart || 'no' }}</Field>
-          <Field label="特权模式">{{ d.privileged ? '是' : '否' }}</Field>
+          <Field :label="t('docker.container.overview.workdir')" mono>{{ d.workdir || '-' }}</Field>
+          <Field :label="t('docker.container.overview.user')" mono>{{ d.user || '-' }}</Field>
+          <Field :label="t('docker.container.overview.hostname')" mono>{{ d.hostname || '-' }}</Field>
+          <Field :label="t('docker.container.overview.restartPolicy')">{{ d.restart || 'no' }}</Field>
+          <Field :label="t('docker.container.overview.privileged')">{{ d.privileged ? t('common.yes') : t('common.no') }}</Field>
           <Field v-if="d.composeProject" label="Compose">{{ d.composeProject }} / {{ d.composeService }}</Field>
-          <Field label="内存限制">{{ d.memoryMB ? d.memoryMB + ' MB' : '不限' }}</Field>
-          <Field label="CPU 限制">{{ d.cpus ? d.cpus + ' 核' : '不限' }}</Field>
+          <Field :label="t('docker.container.overview.memoryLimit')">{{ d.memoryMB ? d.memoryMB + ' MB' : t('docker.container.overview.unlimited') }}</Field>
+          <Field :label="t('docker.container.overview.cpuLimit')">{{ d.cpus ? t('docker.container.overview.cpuCores', { count: d.cpus }) : t('docker.container.overview.unlimited') }}</Field>
         </div>
       </div>
 
       <div class="g-card">
-        <div class="g-card-head"><div class="g-card-title"><Network :size="16" />端口与网络</div></div>
+        <div class="g-card-head"><div class="g-card-title"><Network :size="16" />{{ t('docker.container.overview.portsNetwork') }}</div></div>
         <div class="g-card-body">
           <div v-if="d.ports?.length" class="chips">
-            <el-tag v-for="(p, i) in d.ports" :key="i" type="info" class="mono">{{ p.hostIp ? p.hostIp + ':' : '' }}{{ p.host || '随机' }} → {{ p.container }}/{{ p.proto }}</el-tag>
+            <el-tag v-for="(p, i) in d.ports" :key="i" type="info" class="mono">{{ p.hostIp ? p.hostIp + ':' : '' }}{{ p.host || t('docker.container.overview.random') }} → {{ p.container }}/{{ p.proto }}</el-tag>
           </div>
-          <div v-else class="muted">无端口映射</div>
+          <div v-else class="muted">{{ t('docker.container.overview.noPorts') }}</div>
           <div v-for="n in d.networkDetails ?? []" :key="n.name" class="net">
             <div class="net-name">{{ n.name }}</div>
-            <div class="net-info mono">IP {{ n.ip || '-' }} · 网关 {{ n.gateway || '-' }} · MAC {{ n.mac || '-' }}<span v-if="n.aliases?.length"> · 别名 {{ n.aliases.join(', ') }}</span></div>
+            <div class="net-info mono">{{ t('docker.container.overview.netInfo', { ip: n.ip || '-', gateway: n.gateway || '-', mac: n.mac || '-' }) }}<span v-if="n.aliases?.length">{{ t('docker.container.overview.netAliases', { aliases: n.aliases.join(', ') }) }}</span></div>
           </div>
         </div>
       </div>
 
       <div class="g-card">
-        <div class="g-card-head"><div class="g-card-title"><HardDrive :size="16" />挂载 ({{ d.mounts?.length ?? 0 }})</div></div>
+        <div class="g-card-head"><div class="g-card-title"><HardDrive :size="16" />{{ t('docker.container.overview.mountsTitle', { count: d.mounts?.length ?? 0 }) }}</div></div>
         <div class="g-card-body">
           <div v-for="(m, i) in d.mounts ?? []" :key="i" class="mount">
             <el-tag size="small" :type="m.type === 'volume' ? 'success' : 'info'">{{ m.type }}</el-tag>
             <span class="mono path">{{ m.name || m.source }} → {{ m.destination }}</span>
-            <el-tag size="small" :type="m.rw ? 'warning' : 'info'">{{ m.rw ? '读写' : '只读' }}</el-tag>
+            <el-tag size="small" :type="m.rw ? 'warning' : 'info'">{{ m.rw ? t('docker.container.overview.readWrite') : t('docker.container.overview.readOnly') }}</el-tag>
           </div>
-          <div v-if="!d.mounts?.length" class="muted">无挂载</div>
+          <div v-if="!d.mounts?.length" class="muted">{{ t('docker.container.overview.noMounts') }}</div>
         </div>
       </div>
 
       <div class="g-card">
-        <div class="g-card-head"><div class="g-card-title"><Variable :size="16" />环境变量 ({{ envList.length }})</div></div>
+        <div class="g-card-head"><div class="g-card-title"><Variable :size="16" />{{ t('docker.container.overview.envTitle', { count: envList.length }) }}</div></div>
         <div class="g-card-body">
           <div v-for="(e, i) in envList" :key="i" class="kv mono"><b>{{ e.k }}</b><span>{{ e.v }}</span></div>
-          <div v-if="!envList.length" class="muted">无环境变量</div>
+          <div v-if="!envList.length" class="muted">{{ t('docker.container.overview.noEnv') }}</div>
         </div>
       </div>
 
       <div class="g-card">
-        <div class="g-card-head"><div class="g-card-title"><Tags :size="16" />标签 ({{ labelList.length }})</div></div>
+        <div class="g-card-head"><div class="g-card-title"><Tags :size="16" />{{ t('docker.container.overview.labelsTitle', { count: labelList.length }) }}</div></div>
         <div class="g-card-body">
           <div v-for="(e, i) in labelList" :key="i" class="kv mono"><b>{{ e.k }}</b><span>{{ e.v }}</span></div>
-          <div v-if="!labelList.length" class="muted">无标签</div>
+          <div v-if="!labelList.length" class="muted">{{ t('docker.container.overview.noLabels') }}</div>
         </div>
       </div>
     </template>
@@ -73,12 +73,15 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { HardDrive, Info, Network, Tags, Variable } from 'lucide-vue-next'
 import { api } from '../../api'
 import Field from '../../components/Field.vue'
 import StatusBadge from '../../components/StatusBadge.vue'
 import { containerBadge, formatTime } from './format'
 import type { ContainerDetail } from './types'
+
+const { t } = useI18n()
 
 type Detail = ContainerDetail & { env?: string[]; labels?: Record<string, string> }
 

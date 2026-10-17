@@ -10,7 +10,7 @@ Gately 是独立实现的开源项目，与 Lucky 项目方没有隶属关系。
 
 ## 初始密码在哪里？
 
-首次启动时输出在日志中，仅打印一次。Docker 部署执行 `docker logs gately 2>&1 | grep 初始密码`。
+首次启动时输出在日志中，仅打印一次。Docker 部署执行 `docker logs gately 2>&1 | grep -i "initial password"`。
 
 ## 忘记管理员密码怎么办？
 

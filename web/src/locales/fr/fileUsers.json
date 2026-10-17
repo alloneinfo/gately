@@ -1,0 +1,17 @@
+{
+  "title": "Utilisateurs",
+  "desc": "Chaque utilisateur peut accéder à un dossier ou monter plusieurs dossiers",
+  "addUser": "Ajouter un utilisateur",
+  "username": "Nom d'utilisateur",
+  "password": "Mot de passe",
+  "directory": "Dossier",
+  "readOnly": "Lecture seule",
+  "mountMultiple": "Monter plusieurs dossiers",
+  "mountSummary": "{count} dossiers, listés par nom après la connexion",
+  "perDirectory": "Par dossier",
+  "deleteUser": "Supprimer l'utilisateur",
+  "deleteDirectory": "Supprimer le dossier",
+  "displayName": "Nom affiché",
+  "addDirectory": "Ajouter un dossier",
+  "empty": "Aucun utilisateur"
+}

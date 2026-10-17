@@ -1,5 +1,6 @@
 // 剪贴板辅助：优先使用 Clipboard API，不可用时（如非 HTTPS）降级为选中文本 + execCommand。
 import { ElMessage } from 'element-plus'
+import { t } from '../i18n'
 
 // selectNode 选中节点内的文本，便于用户手动复制。
 export function selectNode(el?: HTMLElement | null) {
@@ -17,7 +18,7 @@ export function selectNode(el?: HTMLElement | null) {
 export async function copyText(text: string, el?: HTMLElement | null) {
   try {
     await navigator.clipboard.writeText(text)
-    ElMessage.success('已复制')
+    ElMessage.success(t('common.copied'))
     return
   } catch {
     // 剪贴板 API 被拒绝或不可用，继续走降级路径
@@ -47,8 +48,8 @@ export async function copyText(text: string, el?: HTMLElement | null) {
     ta.remove()
   }
   if (ok) {
-    ElMessage.success('已复制')
+    ElMessage.success(t('common.copied'))
   } else {
-    ElMessage.warning('无法自动复制，已选中文本，请按 Ctrl/Cmd+C 复制')
+    ElMessage.warning(t('components.clipboard.copyFailed'))
   }
 }

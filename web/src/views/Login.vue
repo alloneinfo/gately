@@ -1,6 +1,7 @@
 <template>
   <div class="login">
     <div class="theme-btn">
+      <LocaleSwitcher />
       <ThemePicker />
     </div>
     <div class="panel">
@@ -9,11 +10,11 @@
           <AppLogo :size="40" />
           <span>Gately</span>
         </div>
-        <h1>开源、透明的<br />网络网关工具集</h1>
+        <h1>{{ t('login.heroLine1') }}<br />{{ t('login.heroLine2') }}</h1>
         <ul>
-          <li><ArrowLeftRight :size="16" />端口转发、STUN 穿透与动态域名</li>
-          <li><Server :size="16" />反向代理、WAF 与证书自动续签</li>
-          <li><ShieldCheck :size="16" />不连接项目方服务器，配置明文可审计</li>
+          <li><ArrowLeftRight :size="16" />{{ t('login.feature1') }}</li>
+          <li><Server :size="16" />{{ t('login.feature2') }}</li>
+          <li><ShieldCheck :size="16" />{{ t('login.feature3') }}</li>
         </ul>
       </section>
 
@@ -22,38 +23,40 @@
           <AppLogo :size="44" />
           <div>
             <div class="mb-name">Gately</div>
-            <div class="mb-sub">开源的网络网关工具集，家庭与服务器通用</div>
+            <div class="mb-sub">{{ t('login.mobileSub') }}</div>
           </div>
         </div>
 
         <template v-if="!needCode">
-          <h2>登录管理界面</h2>
-          <p class="sub">请输入管理员账号与密码</p>
+          <h2>{{ t('login.title') }}</h2>
+          <p class="sub">{{ t('login.subtitle') }}</p>
           <el-form :model="form" label-position="top" size="large" @submit.prevent="submit">
-            <el-form-item label="用户名">
+            <el-form-item :label="t('login.username')">
               <el-input v-model="form.username" autocomplete="username" :prefix-icon="UserRound" />
             </el-form-item>
-            <el-form-item label="密码">
+            <el-form-item :label="t('login.password')">
               <el-input v-model="form.password" type="password" show-password autocomplete="current-password" :prefix-icon="LockKeyhole" />
             </el-form-item>
             <el-button type="primary" native-type="submit" :loading="loading" class="submit">
-              登录
+              {{ t('login.submit') }}
               <ArrowRight :size="16" class="submit-icon" />
             </el-button>
           </el-form>
           <div v-if="providers.length" class="third">
-            <div class="third-title"><span>或使用第三方账号</span></div>
-            <a v-for="p in providers" :key="p.key" :href="p.url" class="third-btn">使用 {{ p.name }} 登录</a>
+            <div class="third-title"><span>{{ t('login.thirdParty') }}</span></div>
+            <a v-for="p in providers" :key="p.key" :href="p.url" class="third-btn">{{ t('login.loginWith', { name: p.name }) }}</a>
           </div>
-          <p class="hint"><Info :size="14" />首次启动时初始密码会打印在程序日志中。</p>
+          <p class="hint"><Info :size="14" />{{ t('login.initialPasswordHint') }}</p>
         </template>
 
         <template v-else>
           <div class="step-icon"><ShieldCheck :size="24" /></div>
-          <h2>两步验证</h2>
-          <p class="sub">打开验证器 App，输入 <b>{{ form.username }}</b> 的 6 位动态验证码</p>
+          <h2>{{ t('login.totpTitle') }}</h2>
+          <i18n-t keypath="login.totpPrompt" tag="p" class="sub">
+            <template #user><b>{{ form.username }}</b></template>
+          </i18n-t>
           <el-form :model="form" label-position="top" size="large" @submit.prevent="submit">
-            <el-form-item label="验证码">
+            <el-form-item :label="t('login.code')">
               <el-input
                 ref="codeInput"
                 v-model="form.code"
@@ -64,8 +67,8 @@
                 class="code-input mono"
               />
             </el-form-item>
-            <el-button type="primary" native-type="submit" :loading="loading" class="submit" :disabled="form.code.length < 6">验证并登录</el-button>
-            <el-button class="back" text @click="back"><ArrowLeft :size="14" />返回修改账号</el-button>
+            <el-button type="primary" native-type="submit" :loading="loading" class="submit" :disabled="form.code.length < 6">{{ t('login.verify') }}</el-button>
+            <el-button class="back" text @click="back"><ArrowLeft :size="14" />{{ t('login.backToAccount') }}</el-button>
           </el-form>
         </template>
       </section>
@@ -76,12 +79,15 @@
 <script setup lang="ts">
 import { nextTick, onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { ElMessage, type InputInstance } from 'element-plus'
 import { ArrowLeft, ArrowLeftRight, ArrowRight, Info, LockKeyhole, Server, ShieldCheck, UserRound } from 'lucide-vue-next'
 import { api, ApiError } from '../api'
 import AppLogo from '../components/AppLogo.vue'
 import ThemePicker from '../components/ThemePicker.vue'
+import LocaleSwitcher from '../components/LocaleSwitcher.vue'
 
+const { t } = useI18n()
 const router = useRouter()
 const route = useRoute()
 const form = reactive({ username: 'admin', password: '', code: '' })
@@ -182,6 +188,8 @@ function back() {
   position: relative;
 }
 .theme-btn {
+  display: flex;
+  gap: 8px;
   position: absolute;
   top: 16px;
   right: 16px;

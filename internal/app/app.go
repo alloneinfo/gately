@@ -128,7 +128,8 @@ func New(opts Options) (*App, error) {
 	}
 	if generated != "" {
 		// 初始密码只在首次启动时打印一次，登录后应立即修改
-		a.logger.Printf("==== 已创建管理员账号 admin，初始密码: %s ，请登录后立即修改 ====", generated)
+		// 日志同时包含英文关键词 "initial password"，便于各语言用户统一用 grep -i "initial password" 检索
+		a.logger.Printf("==== 已创建管理员账号 admin / Admin account \"admin\" created, initial password: %s ，请登录后立即修改 / change it after your first login ====", generated)
 	}
 
 	seen := map[string]bool{}

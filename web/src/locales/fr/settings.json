@@ -1,0 +1,194 @@
+{
+  "title": "Paramètres",
+  "desc": "Sécurité du compte, contrôle d'accès, paramètres d'exécution, sauvegarde et migration, et informations système",
+  "currentPassword": "Mot de passe actuel",
+  "notEnabled": "Non activé",
+  "restartBanner": {
+    "title": "Certains paramètres nécessitent un redémarrage pour prendre effet",
+    "desc": "Les modifications telles que l'adresse d'écoute ont été enregistrées et prendront effet après le redémarrage de Gately.",
+    "action": "Redémarrer maintenant"
+  },
+  "tabs": {
+    "account": "Compte et sécurité",
+    "access": "Contrôle d'accès",
+    "runtime": "Réseau et exécution",
+    "backup": "Sauvegarde et migration"
+  },
+  "admin": {
+    "title": "Compte administrateur",
+    "username": "Nom d'utilisateur",
+    "newPassword": "Nouveau mot de passe",
+    "newPasswordPlaceholder": "8 caractères minimum",
+    "confirmPassword": "Confirmer le nouveau mot de passe",
+    "submit": "Modifier les identifiants",
+    "help": "Toutes les sessions connectées sont invalidées après la modification ; vous devrez vous reconnecter.",
+    "mismatch": "Les nouveaux mots de passe ne correspondent pas",
+    "changed": "Modifié. Veuillez vous reconnecter"
+  },
+  "totp": {
+    "title": "Authentification à deux facteurs",
+    "enabledDesc": "La connexion exige, en plus du mot de passe, un code à 6 chiffres de votre application d'authentification.",
+    "code": "Code de vérification",
+    "codePlaceholder": "Code à 6 chiffres de votre application d'authentification",
+    "disable": "Désactiver l'authentification à deux facteurs",
+    "scanDesc": "Scannez le code QR avec une application comme Google Authenticator ou Microsoft Authenticator, puis saisissez le code affiché pour confirmer.",
+    "qrAlt": "Code QR",
+    "manualHint": "Saisissez cette clé manuellement si vous ne pouvez pas scanner",
+    "copySecret": "Copier la clé",
+    "confirmEnable": "Confirmer et activer",
+    "introDesc": "Une fois activée, la connexion exige aussi un code à usage unique de votre application d'authentification, ce qui protège la console même en cas de fuite du mot de passe.",
+    "start": "Commencer",
+    "enabledMsg": "Authentification à deux facteurs activée",
+    "disabledMsg": "Authentification à deux facteurs désactivée"
+  },
+  "loginProtect": {
+    "title": "Protection de la connexion",
+    "sessionHours": "Durée de session",
+    "sessionHoursHelp": "En heures ; reconnexion requise après cette durée",
+    "maxFailures": "Échecs consécutifs max.",
+    "maxFailuresHelp": "Verrouille une source après ce nombre de mots de passe erronés consécutifs ; 0 utilise la valeur par défaut",
+    "lockMinutes": "Durée du verrouillage",
+    "lockMinutesHelp": "En minutes ; 0 utilise la valeur par défaut"
+  },
+  "thirdLogin": {
+    "title": "Connexion tierce",
+    "desc": "Connectez-vous à la console avec un compte GitHub, Google, QQ ou tout compte OIDC. Utilise vos propres applications OAuth ; le flux de connexion ne passe jamais par un serveur relais.",
+    "enable": "Activer",
+    "callbackBase": "URL de base de rappel",
+    "callbackBasePlaceholder": "https://gately.example.com (l'adresse que vous utilisez dans le navigateur pour ouvrir la console, sans chemin)",
+    "callbackHelp": "L'URL de rappel à enregistrer sur chaque plateforme est {url}. La connexion doit être lancée après avoir ouvert la console depuis cette adresse.",
+    "providers": "Fournisseurs de connexion",
+    "allowed": "Identités autorisées",
+    "allowedPlaceholder": "Une par ligne : fournisseur:compte, p. ex. github:15172899 ou google:me{'@'}gmail.com ; ajoutez une note après # en fin de ligne",
+    "allowedHelp": "Seuls les comptes de cette liste peuvent se connecter. Pour GitHub, un ID numérique est recommandé. Lorsqu'une connexion QQ est refusée la première fois, la page affiche un identifiant que vous pouvez copier.",
+    "skipTotp": "Ignorer l'authentification à deux facteurs",
+    "skipTotpHelp": "Lorsque l'authentification à deux facteurs est activée, l'activation de cette option évite que la connexion tierce demande un code ; sa désactivation refuse la connexion tierce"
+  },
+  "apiToken": {
+    "title": "Jetons d'API",
+    "desc": "Les jetons d'API prennent désormais en charge plusieurs jetons avec des permissions fines : créez plusieurs jetons, chacun avec sa propre expiration et un accès en lecture seule ou en lecture/écriture par module.",
+    "manage": "Gérer les jetons d'API",
+    "docs": "Voir la documentation de l'API"
+  },
+  "listen": {
+    "title": "Écouteur de la console",
+    "http": "Écoute HTTP",
+    "needRestart": "Redémarrage requis",
+    "httpHelp": "Format : :port ou IP:port",
+    "https": "Écoute HTTPS",
+    "httpsPlaceholder": "Laisser vide pour désactiver, p. ex. :16643",
+    "httpsHelp": "Le certificat est choisi selon le domaine d'accès dans « Certificats SSL »",
+    "forceHttps": "Forcer HTTPS",
+    "forceHttpsHelp": "Redirige automatiquement HTTP vers HTTPS (uniquement si le module de certificats possède un certificat pour le domaine)"
+  },
+  "restrict": {
+    "title": "Restrictions d'accès",
+    "safePath": "Entrée sécurisée",
+    "safePathPlaceholder": "Laisser vide pour désactiver, p. ex. /mon-entree",
+    "random": "Générer aléatoirement",
+    "safePathHelp": "Une fois définie, vous devez visiter {url} pour ouvrir la console ; tout autre chemin renvoie 404, ce qui empêche les scanners de trouver la console. Retenez l'adresse de votre entrée.",
+    "urlPrefix": "http://IP:port",
+    "entryName": "entree",
+    "lanOnly": "Accès réseau local uniquement",
+    "lanOnlyHelp": "Autorise uniquement les adresses du réseau local (y compris les adresses Tailscale 100.64.0.0/10) à accéder à la console"
+  },
+  "network": {
+    "title": "Réseau",
+    "dnsServers": "Serveurs DNS",
+    "dnsPlaceholder": "Laisser vide pour utiliser le DNS du système ; saisissez une IP ou IP:port",
+    "dnsHelp": "Affecte toute la résolution de noms sortante (DDNS, Webhook, ACME, etc.). Avec plusieurs serveurs, l'un est choisi au hasard avec basculement automatique.",
+    "timeZone": "Fuseau horaire",
+    "timeZonePlaceholder": "Suivre le système",
+    "timeZoneHelp": "Fuseau horaire utilisé pour les journaux, les tâches planifiées, etc. Tout nom de fuseau IANA est accepté. Actuellement en vigueur : {zone}",
+    "dns": {
+      "ali": "Alibaba",
+      "tencent": "Tencent",
+      "baidu": "Baidu",
+      "114": "114",
+      "cloudflare": "Cloudflare",
+      "google": "Google",
+      "quad9": "Quad9"
+    },
+    "zones": {
+      "china": "Chine",
+      "hongKong": "Hong Kong",
+      "taipei": "Taipei",
+      "tokyo": "Tokyo",
+      "seoul": "Séoul",
+      "singapore": "Singapour",
+      "london": "Londres",
+      "berlin": "Berlin",
+      "moscow": "Moscou",
+      "newYork": "New York",
+      "chicago": "Chicago",
+      "losAngeles": "Los Angeles",
+      "sydney": "Sydney",
+      "utc": "Temps universel coordonné"
+    }
+  },
+  "runtime": {
+    "title": "Paramètres d'exécution",
+    "logLines": "Lignes de journal conservées",
+    "logLinesHelp": "Nombre de lignes de journal que chaque module conserve en mémoire",
+    "gcPercent": "Pourcentage GC",
+    "gcPercentHelp": "0 correspond à la valeur par défaut (100) ; le réduire diminue l'usage mémoire mais augmente la charge CPU",
+    "maxProcs": "Nombre max. de cœurs CPU",
+    "maxProcsHelp": "0 signifie automatique ({count} cœurs sur cette machine)"
+  },
+  "restart": {
+    "title": "Redémarrage",
+    "desc": "La console et tous les services de redirection et de proxy sont brièvement interrompus pendant un redémarrage (généralement quelques secondes).",
+    "button": "Redémarrer Gately",
+    "confirm": "La console et tous les services de redirection et de proxy sont brièvement interrompus pendant un redémarrage (généralement quelques secondes). Redémarrer Gately ?",
+    "confirmButton": "Redémarrer",
+    "progress": "Redémarrage de Gately…"
+  },
+  "save": {
+    "saved": "Enregistré et appliqué",
+    "savedNeedRestart": "Enregistré. Certains paramètres prendront effet après un redémarrage"
+  },
+  "import": {
+    "title": "Importer depuis Lucky",
+    "desc": "Prend en charge les fichiers {lkcf} (plusieurs possibles) du répertoire de configuration de Lucky (par défaut avec Docker : {dir}) et les sauvegardes du site complet exportées depuis la console Lucky ({zip}). Prévisualisez d'abord, puis importez après confirmation. Les entrées importées sont ajoutées après les existantes ; celles qui portent le même nom sont ignorées.",
+    "drag": "Déposez les fichiers ici ou {click}",
+    "dragClick": "cliquez pour sélectionner",
+    "dragHint": "Fichiers de configuration .lkcf ou sauvegarde du site complet .zip",
+    "keepEnableTitle": "Conserver après l'import l'état d'activation de Lucky",
+    "keepEnableDesc": "Désactivé par défaut : toutes les règles importées sont désactivées, pour que vous puissiez les activer une à une après vérification. Si activé, les règles activées dans Lucky vont {bold}. Si Lucky tourne encore, des conflits de ports peuvent survenir ou les deux côtés peuvent mettre à jour les enregistrements en même temps.",
+    "keepEnableBold": "écouter les ports et mettre à jour les enregistrements DNS immédiatement",
+    "preview": "Prévisualiser",
+    "confirmImport": "Confirmer l'import",
+    "previewDone": "Aperçu terminé. Importez dès que tout vous convient",
+    "imported": "Importé",
+    "noModules": "Aucun module pris en charge par Gately n'a été trouvé",
+    "noWarnings": "Aucun avertissement",
+    "colModule": "Module",
+    "colFound": "Trouvés",
+    "colImportable": "Importables",
+    "colWarnings": "Avertissements",
+    "done": "Import terminé : {total} entrées",
+    "confirmKeep": "{total} entrées seront importées avec leur état d'activation de Lucky : les règles activées prennent effet immédiatement. Continuer ?",
+    "confirmDisabled": "{total} entrées seront importées, toutes désactivées après l'import. Continuer ?",
+    "confirmButton": "Importer"
+  },
+  "backup": {
+    "title": "Sauvegarder la configuration de Gately",
+    "desc": "Téléchargez un fichier zip contenant toute la configuration (compte, règles, certificats, etc.). La sauvegarde contient des hashs de mots de passe, des secrets et des clés privées de certificats ; conservez-la en lieu sûr.",
+    "download": "Télécharger la sauvegarde",
+    "downloadFailed": "Échec du téléchargement ({status})"
+  },
+  "restore": {
+    "title": "Restaurer la configuration",
+    "desc": "Utilisez un zip de sauvegarde pour {bold}. La configuration actuelle est d'abord enregistrée dans un dossier backup-horodatage du répertoire de configuration, et Gately redémarre automatiquement après la restauration.",
+    "descBold": "écraser toute la configuration actuelle",
+    "pickFile": "Choisir un fichier de sauvegarde",
+    "passwordPlaceholder": "Phrase secrète de la sauvegarde",
+    "button": "Restaurer",
+    "confirm": "Toute la configuration actuelle sera écrasée par « {name} » et Gately redémarrera automatiquement. La configuration actuelle est d'abord sauvegardée dans le répertoire de configuration. Saisissez « {word} » pour confirmer.",
+    "word": "restaurer",
+    "confirmButton": "Restaurer et redémarrer",
+    "inputHint": "Veuillez saisir « {word} »",
+    "success": "{count} fichiers de configuration restaurés ; la configuration précédente est enregistrée dans {previous}",
+    "progress": "Application de la sauvegarde et redémarrage…"
+  }
+}

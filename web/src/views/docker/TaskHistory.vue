@@ -1,32 +1,33 @@
 <template>
   <div class="g-card">
     <div class="g-card-head">
-      <div class="g-card-title"><ListChecks :size="16" />任务历史</div>
+      <div class="g-card-title"><ListChecks :size="16" />{{ t('docker.taskHistory.title') }}</div>
       <div class="ops">
-        <el-button size="small" :icon="RefreshCw" :loading="loading" @click="load">刷新</el-button>
-        <el-button size="small" :icon="Trash2" @click="clear">清除已结束</el-button>
+        <el-button size="small" :icon="RefreshCw" :loading="loading" @click="load">{{ t('common.refresh') }}</el-button>
+        <el-button size="small" :icon="Trash2" @click="clear">{{ t('docker.taskHistory.clearFinished') }}</el-button>
       </div>
     </div>
     <div class="g-card-body">
-      <div v-for="t in tasks" :key="t.id" class="t">
-        <div class="t-head" @click="toggle(t)">
-          <StatusBadge :type="badge(t).type" :text="badge(t).text" />
-          <span class="t-title">{{ t.title }}</span>
-          <span class="t-time muted">{{ formatTime(t.started) }}</span>
-          <ChevronRight :size="16" class="chev" :class="{ open: !!open[t.id] }" />
+      <div v-for="task in tasks" :key="task.id" class="t">
+        <div class="t-head" @click="toggle(task)">
+          <StatusBadge :type="badge(task).type" :text="badge(task).text" />
+          <span class="t-title">{{ task.title }}</span>
+          <span class="t-time muted">{{ formatTime(task.started) }}</span>
+          <ChevronRight :size="16" class="chev" :class="{ open: !!open[task.id] }" />
         </div>
-        <div v-if="open[t.id]" class="t-body">
-          <div v-if="t.error" class="t-err">{{ t.error }}</div>
-          <pre class="t-lines mono">{{ (detail[t.id]?.lines ?? []).join('\n') || '(无输出)' }}</pre>
+        <div v-if="open[task.id]" class="t-body">
+          <div v-if="task.error" class="t-err">{{ task.error }}</div>
+          <pre class="t-lines mono">{{ (detail[task.id]?.lines ?? []).join('\n') || t('docker.taskHistory.noOutput') }}</pre>
         </div>
       </div>
-      <el-empty v-if="!tasks.length" description="暂无任务" :image-size="50" />
+      <el-empty v-if="!tasks.length" :description="t('docker.taskHistory.empty')" :image-size="50" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { ChevronRight, ListChecks, RefreshCw, Trash2 } from 'lucide-vue-next'
 import { api } from '../../api'
@@ -34,16 +35,18 @@ import StatusBadge, { type StatusType } from '../../components/StatusBadge.vue'
 import { formatTime } from './format'
 import type { DockerTask } from './types'
 
+const { t } = useI18n()
+
 const tasks = ref<DockerTask[]>([])
 const loading = ref(false)
 const open = reactive<Record<string, boolean>>({})
 const detail = reactive<Record<string, DockerTask>>({})
 
-function badge(t: DockerTask): { type: StatusType; text: string } {
-  if (t.status === 'running') {
-    return { type: 'pending', text: '进行中' }
+function badge(task: DockerTask): { type: StatusType; text: string } {
+  if (task.status === 'running') {
+    return { type: 'pending', text: t('docker.taskHistory.running') }
   }
-  return t.status === 'done' ? { type: 'ok', text: '成功' } : { type: 'error', text: '失败' }
+  return task.status === 'done' ? { type: 'ok', text: t('docker.taskHistory.success') } : { type: 'error', text: t('docker.taskHistory.failed') }
 }
 
 async function load() {
@@ -57,11 +60,11 @@ async function load() {
   }
 }
 
-async function toggle(t: DockerTask) {
-  open[t.id] = !open[t.id]
-  if (open[t.id]) {
+async function toggle(task: DockerTask) {
+  open[task.id] = !open[task.id]
+  if (open[task.id]) {
     try {
-      detail[t.id] = await api.get<DockerTask>(`/api/docker/tasks/${t.id}`)
+      detail[task.id] = await api.get<DockerTask>(`/api/docker/tasks/${task.id}`)
     } catch (e) {
       ElMessage.error((e as Error).message)
     }

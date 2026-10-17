@@ -1,4 +1,5 @@
 // Web 终端前端共用的类型与数据规整函数，字段与 docs/webterminal-api.md 保持一致。
+import { t } from '../../i18n'
 
 export interface ProxyConf {
   enabled: boolean
@@ -192,7 +193,7 @@ export function normalizeConn(raw: Partial<Conn> | null | undefined): Conn {
 // connAddr 返回连接的简短地址描述，用于列表展示。
 export function connAddr(c: Conn): string {
   if (c.type === 'local') {
-    return c.local.shell ? `本机 ${c.local.shell}` : '本机 Shell'
+    return c.local.shell ? t('terminal.type.localShellAddr', { shell: c.local.shell }) : t('terminal.type.localShell')
   }
   if (c.type === 'telnet') {
     return `${c.telnet.username ? c.telnet.username + '@' : ''}${c.telnet.host}:${c.telnet.port}`
@@ -200,7 +201,14 @@ export function connAddr(c: Conn): string {
   return `${c.ssh.username}@${c.ssh.host}:${c.ssh.port}`
 }
 
-export const typeLabel: Record<string, string> = { ssh: 'SSH', telnet: 'Telnet', local: '本机' }
+// local 使用 getter，在读取时才翻译，切换语言后即时生效。
+export const typeLabel: Record<string, string> = {
+  ssh: 'SSH',
+  telnet: 'Telnet',
+  get local() {
+    return t('terminal.type.local')
+  },
+}
 
 // fmtTime 把后端的时间（ISO 字符串或 Unix 秒/毫秒）格式化为本地时间文本。
 export function fmtTime(v: string | number | undefined | null): string {

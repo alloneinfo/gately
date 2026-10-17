@@ -1,33 +1,38 @@
 <template>
   <div>
-    <el-form-item label="启用 Webhook">
+    <el-form-item :label="t('webhookEditor.enable')">
       <el-switch v-model="model.enable" />
     </el-form-item>
     <template v-if="model.enable">
-      <el-form-item label="请求地址">
+      <el-form-item :label="t('webhookEditor.url')">
         <el-input v-model="model.url" placeholder="https://example.com/notify?ip={ipAddr}" />
       </el-form-item>
-      <el-form-item label="请求方法">
+      <el-form-item :label="t('webhookEditor.method')">
         <el-select v-model="model.method" style="width: 120px">
           <el-option v-for="m in ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']" :key="m" :label="m" :value="m" />
         </el-select>
       </el-form-item>
-      <el-form-item label="请求头">
-        <el-input v-model="headersText" type="textarea" :rows="2" placeholder="每行一个，格式 Key: Value" />
+      <el-form-item :label="t('webhookEditor.headers')">
+        <el-input v-model="headersText" type="textarea" :rows="2" :placeholder="t('webhookEditor.headersPlaceholder')" />
       </el-form-item>
-      <el-form-item v-if="model.method !== 'GET'" label="请求体">
+      <el-form-item v-if="model.method !== 'GET'" :label="t('webhookEditor.body')">
         <el-input v-model="model.body" type="textarea" :rows="3" class="mono" />
       </el-form-item>
-      <el-form-item label="成功标识">
-        <el-input v-model="successText" type="textarea" :rows="2" placeholder="每行一个，响应包含任意一项即成功；留空只检查 2xx 状态码" />
+      <el-form-item :label="t('webhookEditor.successMark')">
+        <el-input v-model="successText" type="textarea" :rows="2" :placeholder="t('webhookEditor.successPlaceholder')" />
       </el-form-item>
-      <el-form-item label="超时(秒)">
+      <el-form-item :label="t('webhookEditor.timeout')">
         <el-input-number v-model="model.timeout" :min="0" :max="120" />
-        <el-checkbox v-model="model.insecureSkipVerify" class="skip">忽略证书错误</el-checkbox>
+        <el-checkbox v-model="model.insecureSkipVerify" class="skip">{{ t('webhookEditor.ignoreCertError') }}</el-checkbox>
       </el-form-item>
-      <el-form-item label="可用变量">
+      <el-form-item :label="t('webhookEditor.variables')">
         <div class="vars">
-          <div class="vars-tip"><span class="mono">{name}</span> 或兼容 Lucky 的 <span class="mono">#{name}</span></div>
+          <div class="vars-tip">
+            <i18n-t keypath="webhookEditor.varsTip" tag="span">
+              <template #plain><span class="mono">{name}</span></template>
+              <template #lucky><span class="mono">#{name}</span></template>
+            </i18n-t>
+          </div>
           <el-tag v-for="v in variables" :key="v" size="small" type="info" class="var mono">{{ '{' + v + '}' }}</el-tag>
         </div>
       </el-form-item>
@@ -37,6 +42,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 export interface WebhookConfig {
   enable: boolean
@@ -49,6 +55,7 @@ export interface WebhookConfig {
   insecureSkipVerify: boolean
 }
 
+const { t } = useI18n()
 const props = defineProps<{ variables: string[] }>()
 const model = defineModel<WebhookConfig>({ required: true })
 

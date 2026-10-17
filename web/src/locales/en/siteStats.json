@@ -1,0 +1,19 @@
+{
+  "title": "Site statistics · {name}",
+  "hour1": "1 hour",
+  "hour6": "6 hours",
+  "hour24": "24 hours",
+  "rangeHelp": "One point per minute; counting restarts after a restart or after this listener is modified",
+  "requests": "Requests",
+  "bytesOut": "Total response traffic",
+  "errors": "Errors (4xx / 5xx)",
+  "upstreams": "Backends",
+  "healthy": "Healthy",
+  "unavailable": "Unavailable",
+  "upstreamMeta": "Weight {weight} · Connections {conns}",
+  "backup": "Backup",
+  "topIps": "Top 10 source IPs",
+  "topCountries": "Top 10 countries",
+  "noData": "No data",
+  "noDataGeo": "No data (import a GeoIP database first)"
+}

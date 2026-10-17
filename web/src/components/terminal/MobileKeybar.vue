@@ -17,9 +17,9 @@
       <template v-else>{{ k.label }}</template>
     </button>
     <button class="kb wide" @pointerdown.prevent="$emit('shortcuts')" @mousedown.prevent>
-      <Zap :size="14" />快捷命令
+      <Zap :size="14" />{{ t('terminal.keybar.shortcuts') }}
     </button>
-    <button class="kb" aria-label="呼出键盘" @pointerdown.prevent="$emit('focus')" @mousedown.prevent>
+    <button class="kb" :aria-label="t('terminal.keybar.showKeyboard')" @pointerdown.prevent="$emit('focus')" @mousedown.prevent>
       <Keyboard :size="16" />
     </button>
   </div>
@@ -27,9 +27,12 @@
 
 <script setup lang="ts">
 import { onBeforeUnmount } from 'vue'
+import { useI18n } from 'vue-i18n'
 import type { Component } from 'vue'
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Keyboard, Zap } from 'lucide-vue-next'
 import type { KeyName } from './terminalKeys'
+
+const { t } = useI18n()
 
 defineProps<{ ctrl: boolean; alt: boolean }>()
 const emit = defineEmits<{

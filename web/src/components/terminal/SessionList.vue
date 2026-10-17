@@ -1,7 +1,7 @@
 <template>
   <el-dialog
     :model-value="modelValue"
-    title="会话列表"
+    :title="t('termConn.sessions.title')"
     width="760px"
     :fullscreen="isMobile"
     class="term-dialog"
@@ -10,32 +10,47 @@
     @closed="stopTimer"
   >
     <div class="top">
-      <span class="meta">服务端保留的终端会话，共 {{ list.length }} 个。刷新页面或断线后可在此附着回来。</span>
-      <el-button size="small" :icon="RefreshCw" :loading="loading" @click="load">刷新</el-button>
+      <span class="meta">{{ t('termConn.sessions.intro', { count: list.length }) }}</span>
+      <el-button size="small" :icon="RefreshCw" :loading="loading" @click="load">{{ t('common.refresh') }}</el-button>
     </div>
-    <el-empty v-if="!list.length && !loading" description="暂无会话" :image-size="60" />
+    <el-empty v-if="!list.length && !loading" :description="t('termConn.sessions.empty')" :image-size="60" />
     <div v-for="s in list" :key="s.id" class="item">
       <div class="info">
         <div class="line1">
           <span class="name ellipsis">{{ s.connName || s.connKey }}</span>
-          <el-tag size="small" effect="plain">{{ typeLabel[s.type] ?? s.type }}</el-tag>
-          <el-tag v-if="openIds.includes(s.id)" size="small" type="success">已打开</el-tag>
-          <el-tag v-else-if="s.attached > 0" size="small" type="warning">{{ s.attached }} 端附着</el-tag>
-          <el-tag v-else size="small" type="info">已脱离</el-tag>
+          <el-tag size="small" effect="plain">{{ typeName(s.type) }}</el-tag>
+          <el-tag v-if="openIds.includes(s.id)" size="small" type="success">{{ t('termConn.sessions.opened') }}</el-tag>
+          <el-tag v-else-if="s.attached > 0" size="small" type="warning">{{ t('termConn.sessions.attachedCount', { count: s.attached }) }}</el-tag>
+          <el-tag v-else size="small" type="info">{{ t('termConn.sessions.detached') }}</el-tag>
         </div>
-        <div v-if="s.remark" class="remark">备注：{{ s.remark }}</div>
+        <div v-if="s.remark" class="remark">{{ t('termConn.sessions.remark', { remark: s.remark }) }}</div>
         <div class="meta">
-          创建 {{ fmtTime(s.createdAt) }} · 最近活动 {{ fmtTime(s.lastActive) }} · {{ s.cols }}×{{ s.rows }} · 输出 {{ formatBytes(s.bytesOut) }} / 输入 {{ formatBytes(s.bytesIn) }}
+          {{
+            t('termConn.sessions.times', {
+              created: fmtTime(s.createdAt),
+              active: fmtTime(s.lastActive),
+              cols: s.cols,
+              rows: s.rows,
+              out: formatBytes(s.bytesOut),
+              in: formatBytes(s.bytesIn),
+            })
+          }}
         </div>
         <div v-if="stats[s.id]" class="stats meta">
-          已运行 {{ formatDuration(stats[s.id].durationSec) }} · 空闲 {{ formatDuration(stats[s.id].idleSec) }} · 当前附着 {{ stats[s.id].attached }} 端
+          {{
+            t('termConn.sessions.stats', {
+              duration: formatDuration(stats[s.id].durationSec),
+              idle: formatDuration(stats[s.id].idleSec),
+              count: stats[s.id].attached,
+            })
+          }}
         </div>
       </div>
       <div class="ops">
-        <el-button size="small" type="primary" plain :icon="Link2" @click="$emit('attach', s)">{{ openIds.includes(s.id) ? '切换' : '附着' }}</el-button>
-        <el-button size="small" :icon="StickyNote" @click="editRemark(s)">备注</el-button>
-        <el-button size="small" :icon="BarChart3" @click="showStats(s)">统计</el-button>
-        <el-button size="small" type="danger" plain :icon="Power" @click="kill(s)">结束</el-button>
+        <el-button size="small" type="primary" plain :icon="Link2" @click="$emit('attach', s)">{{ openIds.includes(s.id) ? t('termConn.sessions.switch') : t('termConn.sessions.attach') }}</el-button>
+        <el-button size="small" :icon="StickyNote" @click="editRemark(s)">{{ t('termConn.sessions.remarkBtn') }}</el-button>
+        <el-button size="small" :icon="BarChart3" @click="showStats(s)">{{ t('termConn.sessions.statsBtn') }}</el-button>
+        <el-button size="small" type="danger" plain :icon="Power" @click="kill(s)">{{ t('termConn.sessions.kill') }}</el-button>
       </div>
     </div>
   </el-dialog>
@@ -43,19 +58,26 @@
 
 <script setup lang="ts">
 import { onBeforeUnmount, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { BarChart3, Link2, Power, RefreshCw, StickyNote } from 'lucide-vue-next'
 import { api, formatBytes, formatDuration } from '../../api'
 import { useIsMobile } from '../../composables/useIsMobile'
-import { fmtTime, typeLabel, type SessionInfo, type SessionStats } from './types'
+import { fmtTime, type SessionInfo, type SessionStats } from './types'
 
 defineProps<{ modelValue: boolean; openIds: string[] }>()
 const emit = defineEmits<{ 'update:modelValue': [v: boolean]; attach: [s: SessionInfo]; killed: [id: string]; remark: [id: string, remark: string] }>()
 
+const { t } = useI18n()
 const isMobile = useIsMobile()
 const list = ref<SessionInfo[]>([])
 const stats = ref<Record<string, SessionStats>>({})
 const loading = ref(false)
+// 连接类型显示名；未知类型原样显示
+function typeName(type: string): string {
+  return ['ssh', 'telnet', 'local'].includes(type) ? t(`termConn.type.${type}`) : type
+}
+
 let timer: ReturnType<typeof setInterval> | undefined
 
 async function load() {
@@ -94,7 +116,7 @@ async function showStats(s: SessionInfo) {
 
 async function editRemark(s: SessionInfo) {
   try {
-    const { value } = await ElMessageBox.prompt('会话备注', '编辑备注', { inputValue: s.remark, inputPlaceholder: '例如：部署任务' })
+    const { value } = await ElMessageBox.prompt(t('termConn.sessions.remarkPrompt'), t('termConn.sessions.remarkTitle'), { inputValue: s.remark, inputPlaceholder: t('termConn.sessions.remarkPlaceholder') })
     await api.put(`/api/webterminal/sessions/${encodeURIComponent(s.id)}/remark`, { remark: value ?? '' })
     s.remark = value ?? ''
     emit('remark', s.id, s.remark)
@@ -107,7 +129,7 @@ async function editRemark(s: SessionInfo) {
 
 async function kill(s: SessionInfo) {
   try {
-    await ElMessageBox.confirm(`结束会话「${s.connName}」？会话中正在运行的程序会被终止。`, '确认', { type: 'warning' })
+    await ElMessageBox.confirm(t('termConn.sessions.killConfirm', { name: s.connName }), t('termConn.sessions.confirmTitle'), { type: 'warning' })
     await api.del(`/api/webterminal/sessions/${encodeURIComponent(s.id)}`)
     emit('killed', s.id)
     await load()

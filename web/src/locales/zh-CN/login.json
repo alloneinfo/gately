@@ -1,0 +1,21 @@
+{
+  "heroLine1": "开源、透明的",
+  "heroLine2": "网络网关工具集",
+  "feature1": "端口转发、STUN 穿透与动态域名",
+  "feature2": "反向代理、WAF 与证书自动续签",
+  "feature3": "不连接项目方服务器，配置明文可审计",
+  "mobileSub": "开源的网络网关工具集，家庭与服务器通用",
+  "title": "登录管理界面",
+  "subtitle": "请输入管理员账号与密码",
+  "username": "用户名",
+  "password": "密码",
+  "submit": "登录",
+  "thirdParty": "或使用第三方账号",
+  "loginWith": "使用 {name} 登录",
+  "initialPasswordHint": "首次启动时初始密码会打印在程序日志中。",
+  "totpTitle": "两步验证",
+  "totpPrompt": "打开验证器 App，输入 {user} 的 6 位动态验证码",
+  "code": "验证码",
+  "verify": "验证并登录",
+  "backToAccount": "返回修改账号"
+}

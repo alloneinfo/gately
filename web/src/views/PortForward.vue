@@ -1,20 +1,20 @@
 <template>
   <div>
-    <PageHeader title="端口转发" desc="把本机端口的 TCP / UDP 流量转发到内网或外部地址" :icon="ArrowLeftRight">
-      <el-button :icon="SlidersHorizontal" @click="openSettings">全局设置</el-button>
-      <el-button type="primary" :icon="Plus" @click="openEditor()">添加规则</el-button>
+    <PageHeader :title="t('portForward.title')" :desc="t('portForward.desc')" :icon="ArrowLeftRight">
+      <el-button :icon="SlidersHorizontal" @click="openSettings">{{ t('portForward.globalSettings') }}</el-button>
+      <el-button type="primary" :icon="Plus" @click="openEditor()">{{ t('portForward.addRule') }}</el-button>
     </PageHeader>
 
-    <ModuleBanner v-if="settings && !settings.enable" title="端口转发模块已停用" :loading="enabling" @enable="enableModule" />
+    <ModuleBanner v-if="settings && !settings.enable" :title="t('portForward.moduleOffTitle')" :loading="enabling" @enable="enableModule" />
 
     <div v-loading="loading" class="card-list">
-      <el-empty v-if="!loading && !rules.length" description="暂无规则，可添加或在「设置 → 备份与迁移」中导入 Lucky 配置" />
+      <el-empty v-if="!loading && !rules.length" :description="t('portForward.empty')" />
       <EntityCard v-for="r in rules" :key="r.key" :off="!r.enable || moduleOff">
         <template #lead>
           <el-switch :model-value="r.enable" @change="(v: string | number | boolean) => toggle(r, Boolean(v))" />
         </template>
         <template #title>
-          <span>{{ r.name || '未命名' }}</span>
+          <span>{{ r.name || t('portForward.unnamed') }}</span>
           <span class="tags">
             <el-tag v-for="p in r.protocols" :key="p" size="small" effect="plain" class="mono">{{ p.toUpperCase() }}</el-tag>
           </span>
@@ -29,17 +29,17 @@
           </el-tooltip>
           <StatusBadge v-bind="ruleStatus(r)" />
         </template>
-        <Field label="监听" mono>{{ listenText(r) }}</Field>
-        <Field label="目标" mono>
-          <div v-for="t in r.targetAddresses" :key="t">{{ t }}:{{ r.targetPorts || r.listenPorts }}</div>
+        <Field :label="t('portForward.listen')" mono>{{ listenText(r) }}</Field>
+        <Field :label="t('portForward.target')" mono>
+          <div v-for="addr in r.targetAddresses" :key="addr">{{ addr }}:{{ r.targetPorts || r.listenPorts }}</div>
         </Field>
-        <Field label="连接">{{ r.stats.activeConns }} 活动 · {{ r.stats.totalConns }} 累计</Field>
-        <Field label="流量">↑ {{ formatBytes(r.stats.bytesIn) }} · ↓ {{ formatBytes(r.stats.bytesOut) }}</Field>
+        <Field :label="t('portForward.connections')">{{ t('portForward.connectionsValue', { active: r.stats.activeConns, total: r.stats.totalConns }) }}</Field>
+        <Field :label="t('portForward.traffic')">↑ {{ formatBytes(r.stats.bytesIn) }} · ↓ {{ formatBytes(r.stats.bytesOut) }}</Field>
         <template #actions>
-          <el-button text size="small" :icon="Pencil" @click="openEditor(r)">编辑</el-button>
-          <el-popconfirm title="确定删除这条规则？" @confirm="remove(r)">
+          <el-button text size="small" :icon="Pencil" @click="openEditor(r)">{{ t('common.edit') }}</el-button>
+          <el-popconfirm :title="t('portForward.deleteConfirm')" @confirm="remove(r)">
             <template #reference>
-              <el-button text size="small" type="danger" :icon="Trash2">删除</el-button>
+              <el-button text size="small" type="danger" :icon="Trash2">{{ t('common.delete') }}</el-button>
             </template>
           </el-popconfirm>
         </template>
@@ -48,61 +48,61 @@
 
     <LogCard url="/api/portforward/logs" clearable />
 
-    <el-dialog v-model="editorVisible" :title="editing.key ? '编辑规则' : '添加规则'" width="600px" :fullscreen="isMobile">
+    <el-dialog v-model="editorVisible" :title="editing.key ? t('portForward.editRule') : t('portForward.addRule')" width="600px" :fullscreen="isMobile">
       <el-form :model="editing" label-width="110px" :label-position="labelPosition">
-        <el-form-item label="名称">
-          <el-input v-model="editing.name" placeholder="例如：NAS SSH" />
+        <el-form-item :label="t('common.name')">
+          <el-input v-model="editing.name" :placeholder="t('portForward.namePlaceholder')" />
         </el-form-item>
-        <el-form-item label="协议" required>
+        <el-form-item :label="t('portForward.protocol')" required>
           <el-checkbox-group v-model="editing.protocols">
             <el-checkbox v-for="p in protocols" :key="p.value" :value="p.value">{{ p.label }}</el-checkbox>
           </el-checkbox-group>
-          <div class="form-help">tcp/udp 为 IPv4+IPv6 双栈；带 4/6 后缀表示仅该协议族</div>
+          <div class="form-help">{{ t('portForward.protocolHelp') }}</div>
         </el-form-item>
-        <el-form-item label="监听地址">
-          <el-input v-model="editing.listenAddress" placeholder="留空表示所有地址" />
+        <el-form-item :label="t('portForward.listenAddress')">
+          <el-input v-model="editing.listenAddress" :placeholder="t('portForward.listenAddressPlaceholder')" />
         </el-form-item>
-        <el-form-item label="监听端口" required>
-          <el-input v-model="editing.listenPorts" placeholder="80 或 80,443 或 8000-8010" />
+        <el-form-item :label="t('portForward.listenPorts')" required>
+          <el-input v-model="editing.listenPorts" :placeholder="t('portForward.portsPlaceholder')" />
         </el-form-item>
-        <el-form-item label="目标地址" required>
-          <el-input v-model="targetsText" type="textarea" :rows="2" placeholder="每行一个，多个地址时轮询并自动故障转移" />
+        <el-form-item :label="t('portForward.targetAddress')" required>
+          <el-input v-model="targetsText" type="textarea" :rows="2" :placeholder="t('portForward.targetAddressPlaceholder')" />
         </el-form-item>
-        <el-form-item label="目标端口">
-          <el-input v-model="editing.targetPorts" placeholder="留空与监听端口相同；数量需一致或只填一个" />
+        <el-form-item :label="t('portForward.targetPorts')">
+          <el-input v-model="editing.targetPorts" :placeholder="t('portForward.targetPortsPlaceholder')" />
         </el-form-item>
-        <el-form-item label="最大连接数">
+        <el-form-item :label="t('portForward.maxConnections')">
           <el-input-number v-model="editing.maxConnections" :min="0" :max="100000" />
-          <span class="help">0 使用全局默认值</span>
+          <span class="help">{{ t('portForward.useGlobalDefault') }}</span>
         </el-form-item>
-        <el-form-item label="UDP 超时(秒)">
+        <el-form-item :label="t('portForward.udpTimeout')">
           <el-input-number v-model="editing.udpSessionTimeout" :min="0" :max="3600" />
-          <span class="help">0 使用全局默认值</span>
+          <span class="help">{{ t('portForward.useGlobalDefault') }}</span>
         </el-form-item>
-        <el-form-item label="备注">
+        <el-form-item :label="t('common.remark')">
           <el-input v-model="editing.remark" />
         </el-form-item>
-        <el-form-item label="启用">
+        <el-form-item :label="t('common.enable')">
           <el-switch v-model="editing.enable" />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="editorVisible = false">取消</el-button>
-        <el-button type="primary" :loading="saving" @click="save">保存</el-button>
+        <el-button @click="editorVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button type="primary" :loading="saving" @click="save">{{ t('common.save') }}</el-button>
       </template>
     </el-dialog>
 
-    <el-dialog v-model="settingsVisible" title="端口转发全局设置" width="520px" :fullscreen="isMobile">
+    <el-dialog v-model="settingsVisible" :title="t('portForward.settingsTitle')" width="520px" :fullscreen="isMobile">
       <el-form v-if="settingsForm" :model="settingsForm" label-width="150px" :label-position="labelPosition">
-        <el-form-item label="启用模块"><el-switch v-model="settingsForm.enable" /></el-form-item>
-        <el-form-item label="默认最大连接数"><el-input-number v-model="settingsForm.defaultMaxConnections" :min="1" /></el-form-item>
-        <el-form-item label="默认 UDP 超时(秒)"><el-input-number v-model="settingsForm.defaultUDPSessionTimeout" :min="1" /></el-form-item>
-        <el-form-item label="UDP 会话上限"><el-input-number v-model="settingsForm.maxUDPSessions" :min="1" /></el-form-item>
-        <el-form-item label="连接目标超时(秒)"><el-input-number v-model="settingsForm.dialTimeout" :min="1" :max="60" /></el-form-item>
+        <el-form-item :label="t('portForward.enableModule')"><el-switch v-model="settingsForm.enable" /></el-form-item>
+        <el-form-item :label="t('portForward.defaultMaxConnections')"><el-input-number v-model="settingsForm.defaultMaxConnections" :min="1" /></el-form-item>
+        <el-form-item :label="t('portForward.defaultUdpTimeout')"><el-input-number v-model="settingsForm.defaultUDPSessionTimeout" :min="1" /></el-form-item>
+        <el-form-item :label="t('portForward.maxUdpSessions')"><el-input-number v-model="settingsForm.maxUDPSessions" :min="1" /></el-form-item>
+        <el-form-item :label="t('portForward.dialTimeout')"><el-input-number v-model="settingsForm.dialTimeout" :min="1" :max="60" /></el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="settingsVisible = false">取消</el-button>
-        <el-button type="primary" @click="saveSettings">保存</el-button>
+        <el-button @click="settingsVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button type="primary" @click="saveSettings">{{ t('common.save') }}</el-button>
       </template>
     </el-dialog>
   </div>
@@ -110,6 +110,7 @@
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { ArrowLeftRight, Pencil, Plus, SlidersHorizontal, Trash2, TriangleAlert } from 'lucide-vue-next'
 import { api, formatBytes } from '../api'
@@ -159,6 +160,7 @@ const protocols = [
   { value: 'udp6', label: 'UDP6' },
 ]
 
+const { t } = useI18n()
 const { isMobile, labelPosition } = useFormLayout()
 const rules = ref<RuleView[]>([])
 const loading = ref(true)
@@ -197,18 +199,18 @@ function listenText(r: Rule) {
 // ruleStatus 计算规则的展示状态：停用的规则只显示“已停用”，不显示为异常
 function ruleStatus(r: RuleView): { type: StatusType; text: string; title?: string } {
   if (moduleOff.value) {
-    return { type: 'off', text: '模块已停用' }
+    return { type: 'off', text: t('portForward.moduleOff') }
   }
   if (!r.enable) {
-    return { type: 'off', text: '已停用' }
+    return { type: 'off', text: t('portForward.statusOff') }
   }
   if (r.error) {
     return { type: 'error', text: r.error, title: r.error }
   }
   if (r.running) {
-    return { type: 'running', text: '运行中' }
+    return { type: 'running', text: t('common.running') }
   }
-  return { type: 'warn', text: '未运行' }
+  return { type: 'warn', text: t('portForward.statusNotRunning') }
 }
 
 async function load() {
@@ -248,7 +250,7 @@ async function save() {
       await api.post('/api/portforward/rules', body)
     }
     editorVisible.value = false
-    ElMessage.success('已保存')
+    ElMessage.success(t('common.saved'))
     await load()
   } catch (e) {
     ElMessage.error((e as Error).message)
@@ -285,7 +287,7 @@ async function saveSettings() {
   try {
     await api.put('/api/portforward/settings', settingsForm.value)
     settingsVisible.value = false
-    ElMessage.success('已保存，规则已按新设置重启')
+    ElMessage.success(t('portForward.savedRestarted'))
     await Promise.all([loadSettings(), load()])
   } catch (e) {
     ElMessage.error((e as Error).message)
@@ -300,7 +302,7 @@ async function enableModule() {
   enabling.value = true
   try {
     await api.put('/api/portforward/settings', { ...settings.value, enable: true })
-    ElMessage.success('端口转发模块已启用')
+    ElMessage.success(t('portForward.moduleEnabled'))
     await Promise.all([loadSettings(), load()])
   } catch (e) {
     ElMessage.error((e as Error).message)

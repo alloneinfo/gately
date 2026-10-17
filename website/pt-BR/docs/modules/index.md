@@ -1,0 +1,19 @@
+# Visão geral dos módulos
+
+Cada recurso do Gately é um módulo independente. Todos podem ser ativados, desativados e configurados individualmente, e cada um salva a sua configuração em um arquivo JSON em texto simples.
+
+| Módulo | Recursos | Documentação |
+| --- | --- | --- |
+| DNS dinâmico | 11 provedores de DNS, IP obtido por URL / interface de rede / comando, IPv4 / IPv6, Webhook | [Ver](/pt-BR/docs/modules/ddns) |
+| Travessia STUN | TCP / UDP, keep-alive, UPnP / NAT-PMP, encaminhamento embutido, disparo de Webhook e scripts quando há mudança | [Ver](/pt-BR/docs/modules/stun) |
+| Redirecionamento de portas | TCP / UDP, IPv4 / IPv6, intervalos de portas, failover entre vários destinos, limite de conexões, estatísticas de tráfego | [Ver](/pt-BR/docs/modules/portforward) |
+| Certificados SSL | Emissão e renovação automáticas via ACME DNS-01, upload, mapeamento para um diretório com execução de scripts | [Ver](/pt-BR/docs/modules/ssl) |
+| Serviços Web | Proxy reverso, redirecionamentos, arquivos estáticos, HTTPS, autenticação, controle de acesso, balanceamento de carga e health checks, cache e limitação de taxa, estatísticas de acesso | [Ver](/pt-BR/docs/modules/web) |
+| Firewall WAF | Coraza + OWASP CRS v4 | [Ver](/pt-BR/docs/modules/waf) |
+| Tailscale / frp / cloudflared | Redes e travessia de NAT com binários oficiais gerenciados | [Ver](/pt-BR/docs/modules/tunnels) |
+| Docker | Criação e edição de contêineres, logs e terminal, Compose, atualização de imagens e upgrades, redes e volumes | [Ver](/pt-BR/docs/modules/docker) |
+| Terminal Web | SSH, Telnet, shell local, gerenciador de arquivos SFTP, sessões persistentes | [Ver](/pt-BR/docs/modules/terminal) |
+| Diagnóstico de rede | Ping, traceroute, sondagem de portas, consulta DNS, teste de velocidade, varredura da rede local | [Ver](/pt-BR/docs/modules/nettools) |
+| Central de notificações | Envio de eventos por vários canais e regras | [Ver](/pt-BR/docs/modules/notify) |
+| Backup da configuração | Backups criptografados, política de retenção, backup agendado e restauração | [Ver](/pt-BR/docs/modules/backup) |
+| Arquivos e ferramentas de operação | WebDAV, FTP, gerenciamento de armazenamento, Wake-on-LAN, tarefas agendadas | [Ver](/pt-BR/docs/modules/tools) |

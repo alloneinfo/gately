@@ -1,67 +1,68 @@
 <template>
   <div>
-    <PageHeader title="API 令牌" desc="为脚本与自动化创建带权限、可过期的访问令牌" :icon="KeyRound">
-      <router-link to="/api-docs"><el-button :icon="BookOpen">API 文档</el-button></router-link>
-      <el-button type="primary" :icon="Plus" @click="openCreate">新建令牌</el-button>
+    <PageHeader :title="t('apiTokens.title')" :desc="t('apiTokens.desc')" :icon="KeyRound">
+      <router-link to="/api-docs"><el-button :icon="BookOpen">{{ t('apiTokens.apiDocs') }}</el-button></router-link>
+      <el-button type="primary" :icon="Plus" @click="openCreate">{{ t('apiTokens.create') }}</el-button>
     </PageHeader>
 
     <el-alert type="info" :closable="false" show-icon class="block-gap">
       <template #title>
-        请求头携带 <span class="mono code">Authorization: Bearer gtl_…</span> 即可调用管理 API，每个令牌只拥有创建时勾选的权限。
-        账号、令牌管理、备份恢复、重启与系统设置只能使用登录会话，令牌无法访问。
+        <i18n-t keypath="apiTokens.intro" tag="span">
+          <template #header><span class="mono code">Authorization: Bearer gtl_…</span></template>
+        </i18n-t>
       </template>
     </el-alert>
 
     <div class="g-card">
       <div class="g-card-head">
-        <div class="g-card-title"><ShieldCheck :size="16" />令牌列表 <span class="g-card-desc">共 {{ tokens.length }} 个</span></div>
+        <div class="g-card-title"><ShieldCheck :size="16" />{{ t('apiTokens.listTitle') }} <span class="g-card-desc">{{ t('apiTokens.total', { count: tokens.length }) }}</span></div>
       </div>
 
       <!-- 桌面端：表格 -->
       <div v-if="!isMobile" class="g-card-body table-body">
-        <el-table v-loading="loading" :data="tokens" empty-text="暂无令牌，点击右上角新建">
-          <el-table-column label="名称" min-width="170">
+        <el-table v-loading="loading" :data="tokens" :empty-text="t('apiTokens.emptyDesktop')">
+          <el-table-column :label="t('common.name')" min-width="170">
             <template #default="{ row }">
               <div class="t-name">
                 <span class="t-name-text">{{ row.name }}</span>
-                <el-tooltip v-if="row.legacy" content="这是升级前的单令牌，拥有全部权限。建议改为按需授权的新令牌后删除它。" placement="top">
-                  <el-tag size="small" type="warning" effect="light">遗留</el-tag>
+                <el-tooltip v-if="row.legacy" :content="t('apiTokens.legacyTip')" placement="top">
+                  <el-tag size="small" type="warning" effect="light">{{ t('apiTokens.legacy') }}</el-tag>
                 </el-tooltip>
-                <el-tag v-if="row.expired" size="small" type="danger" effect="light">已过期</el-tag>
+                <el-tag v-if="row.expired" size="small" type="danger" effect="light">{{ t('apiTokens.expired') }}</el-tag>
               </div>
               <div class="meta mono">{{ row.hint }}</div>
             </template>
           </el-table-column>
-          <el-table-column label="权限" min-width="230">
+          <el-table-column :label="t('apiTokens.scopes')" min-width="230">
             <template #default="{ row }">
               <ScopeTags :scopes="row.scopes" :titles="domainTitles" />
             </template>
           </el-table-column>
-          <el-table-column label="过期时间" width="170">
+          <el-table-column :label="t('apiTokens.expiresAt')" width="170">
             <template #default="{ row }">
-              <span v-if="!row.expiresAt" class="muted">永不过期</span>
+              <span v-if="!row.expiresAt" class="muted">{{ t('apiTokens.never') }}</span>
               <span v-else :class="{ 'text-danger': row.expired }">{{ fmtTime(row.expiresAt) }}</span>
             </template>
           </el-table-column>
-          <el-table-column label="最近使用" width="190">
+          <el-table-column :label="t('apiTokens.lastUsed')" width="190">
             <template #default="{ row }">
               <template v-if="row.lastUsedAt">
                 <div>{{ fmtTime(row.lastUsedAt) }}</div>
                 <div v-if="row.lastUsedIP" class="meta mono">{{ row.lastUsedIP }}</div>
               </template>
-              <span v-else class="muted">从未使用</span>
+              <span v-else class="muted">{{ t('apiTokens.neverUsed') }}</span>
             </template>
           </el-table-column>
-          <el-table-column label="启用" width="70" align="center">
+          <el-table-column :label="t('common.enable')" width="70" align="center">
             <template #default="{ row }">
               <el-switch :model-value="!row.disabled" :loading="busyId === row.id" @change="(v: string | number | boolean) => toggle(row, Boolean(v))" />
             </template>
           </el-table-column>
-          <el-table-column label="操作" width="150" align="right" fixed="right">
+          <el-table-column :label="t('common.actions')" width="150" align="right" fixed="right">
             <template #default="{ row }">
-              <el-tooltip content="编辑" placement="top"><el-button text :icon="Pencil" aria-label="编辑" @click="openEdit(row)" /></el-tooltip>
-              <el-tooltip content="重新生成" placement="top"><el-button text :icon="RefreshCw" aria-label="重新生成" @click="regenerate(row)" /></el-tooltip>
-              <el-tooltip content="删除" placement="top"><el-button text type="danger" :icon="Trash2" aria-label="删除" @click="remove(row)" /></el-tooltip>
+              <el-tooltip :content="t('common.edit')" placement="top"><el-button text :icon="Pencil" :aria-label="t('common.edit')" @click="openEdit(row)" /></el-tooltip>
+              <el-tooltip :content="t('apiTokens.regenerate')" placement="top"><el-button text :icon="RefreshCw" :aria-label="t('apiTokens.regenerate')" @click="regenerate(row)" /></el-tooltip>
+              <el-tooltip :content="t('common.delete')" placement="top"><el-button text type="danger" :icon="Trash2" :aria-label="t('common.delete')" @click="remove(row)" /></el-tooltip>
             </template>
           </el-table-column>
         </el-table>
@@ -69,43 +70,43 @@
 
       <!-- 移动端：卡片 -->
       <div v-else class="g-card-body">
-        <div v-for="t in tokens" :key="t.id" class="m-card">
+        <div v-for="tk in tokens" :key="tk.id" class="m-card">
           <div class="m-head">
             <div class="t-name">
-              <span class="t-name-text">{{ t.name }}</span>
-              <el-tag v-if="t.legacy" size="small" type="warning" effect="light">遗留</el-tag>
-              <el-tag v-if="t.expired" size="small" type="danger" effect="light">已过期</el-tag>
+              <span class="t-name-text">{{ tk.name }}</span>
+              <el-tag v-if="tk.legacy" size="small" type="warning" effect="light">{{ t('apiTokens.legacy') }}</el-tag>
+              <el-tag v-if="tk.expired" size="small" type="danger" effect="light">{{ t('apiTokens.expired') }}</el-tag>
             </div>
-            <el-switch :model-value="!t.disabled" :loading="busyId === t.id" @change="(v: string | number | boolean) => toggle(t, Boolean(v))" />
+            <el-switch :model-value="!tk.disabled" :loading="busyId === tk.id" @change="(v: string | number | boolean) => toggle(tk, Boolean(v))" />
           </div>
-          <div class="meta mono">{{ t.hint }}</div>
-          <p v-if="t.legacy" class="legacy-tip">升级前的单令牌，拥有全部权限，建议收紧权限或删除。</p>
-          <ScopeTags :scopes="t.scopes" :titles="domainTitles" class="m-scopes" />
+          <div class="meta mono">{{ tk.hint }}</div>
+          <p v-if="tk.legacy" class="legacy-tip">{{ t('apiTokens.legacyShort') }}</p>
+          <ScopeTags :scopes="tk.scopes" :titles="domainTitles" class="m-scopes" />
           <div class="m-info">
-            <span class="muted">过期</span>
-            <span v-if="!t.expiresAt" class="muted">永不过期</span>
-            <span v-else :class="{ 'text-danger': t.expired }">{{ fmtTime(t.expiresAt) }}</span>
-            <span class="muted">最近使用</span>
-            <span v-if="t.lastUsedAt">{{ fmtTime(t.lastUsedAt) }}<template v-if="t.lastUsedIP"> · <span class="mono">{{ t.lastUsedIP }}</span></template></span>
-            <span v-else class="muted">从未使用</span>
+            <span class="muted">{{ t('apiTokens.expiry') }}</span>
+            <span v-if="!tk.expiresAt" class="muted">{{ t('apiTokens.never') }}</span>
+            <span v-else :class="{ 'text-danger': tk.expired }">{{ fmtTime(tk.expiresAt) }}</span>
+            <span class="muted">{{ t('apiTokens.lastUsed') }}</span>
+            <span v-if="tk.lastUsedAt">{{ fmtTime(tk.lastUsedAt) }}<template v-if="tk.lastUsedIP"> · <span class="mono">{{ tk.lastUsedIP }}</span></template></span>
+            <span v-else class="muted">{{ t('apiTokens.neverUsed') }}</span>
           </div>
           <div class="m-ops">
-            <el-button size="small" :icon="Pencil" @click="openEdit(t)">编辑</el-button>
-            <el-button size="small" :icon="RefreshCw" @click="regenerate(t)">重新生成</el-button>
-            <el-button size="small" type="danger" plain :icon="Trash2" @click="remove(t)">删除</el-button>
+            <el-button size="small" :icon="Pencil" @click="openEdit(tk)">{{ t('common.edit') }}</el-button>
+            <el-button size="small" :icon="RefreshCw" @click="regenerate(tk)">{{ t('apiTokens.regenerate') }}</el-button>
+            <el-button size="small" type="danger" plain :icon="Trash2" @click="remove(tk)">{{ t('common.delete') }}</el-button>
           </div>
         </div>
-        <el-empty v-if="!tokens.length && !loading" description="暂无令牌，点击上方新建" :image-size="60" />
+        <el-empty v-if="!tokens.length && !loading" :description="t('apiTokens.emptyMobile')" :image-size="60" />
       </div>
     </div>
 
     <!-- 新建 / 编辑对话框 -->
-    <el-dialog v-model="formVisible" :title="editingId ? '编辑令牌' : '新建令牌'" width="760px" :fullscreen="isMobile" :close-on-click-modal="false" append-to-body>
+    <el-dialog v-model="formVisible" :title="editingId ? t('apiTokens.editTitle') : t('apiTokens.create')" width="760px" :fullscreen="isMobile" :close-on-click-modal="false" append-to-body>
       <el-form label-width="90px" :label-position="labelPosition" @submit.prevent>
-        <el-form-item label="名称" required>
-          <el-input v-model="form.name" maxlength="64" placeholder="例如：监控脚本、CI 部署" />
+        <el-form-item :label="t('common.name')" required>
+          <el-input v-model="form.name" maxlength="64" :placeholder="t('apiTokens.namePlaceholder')" />
         </el-form-item>
-        <el-form-item label="过期时间">
+        <el-form-item :label="t('apiTokens.expiresAt')">
           <div class="exp-row">
             <el-select v-model="form.expiry" class="exp-select">
               <el-option v-for="o in expiryOptions" :key="o.value" :label="o.label" :value="o.value" />
@@ -114,19 +115,19 @@
               v-if="form.expiry === 'custom'"
               v-model="form.customDate"
               type="datetime"
-              placeholder="选择过期时间"
+              :placeholder="t('apiTokens.pickExpiry')"
               :disabled-date="disablePast"
               class="exp-date"
             />
           </div>
         </el-form-item>
-        <el-form-item label="权限" required>
+        <el-form-item :label="t('apiTokens.scopes')" required>
           <div class="perm">
             <div class="perm-presets">
-              <el-button size="small" @click="applyPreset('read')">全部只读</el-button>
-              <el-button size="small" @click="applyPreset('write')">全部读写</el-button>
-              <el-button size="small" @click="applyPreset('none')">清空</el-button>
-              <span class="perm-count">已授权 {{ grantedCount }} / {{ domains.length }} 项</span>
+              <el-button size="small" @click="applyPreset('read')">{{ t('apiTokens.allRead') }}</el-button>
+              <el-button size="small" @click="applyPreset('write')">{{ t('apiTokens.allWrite') }}</el-button>
+              <el-button size="small" @click="applyPreset('none')">{{ t('common.clear') }}</el-button>
+              <span class="perm-count">{{ t('apiTokens.granted', { granted: grantedCount, total: domains.length }) }}</span>
             </div>
 
             <div v-for="g in domainGroups" :key="g.title" class="perm-group">
@@ -137,29 +138,29 @@
                   <span class="perm-id mono">{{ d.id }}</span>
                 </div>
                 <el-radio-group v-model="levels[d.id]" size="small" class="perm-radio">
-                  <el-radio-button value="none">无</el-radio-button>
-                  <el-radio-button v-if="!d.writeOnly" value="read">只读</el-radio-button>
-                  <el-radio-button v-if="!d.readOnly" value="write">{{ d.writeOnly ? '执行' : '读写' }}</el-radio-button>
+                  <el-radio-button value="none">{{ t('common.none') }}</el-radio-button>
+                  <el-radio-button v-if="!d.writeOnly" value="read">{{ t('apiTokens.readOnly') }}</el-radio-button>
+                  <el-radio-button v-if="!d.readOnly" value="write">{{ d.writeOnly ? t('apiTokens.execute') : t('apiTokens.readWrite') }}</el-radio-button>
                 </el-radio-group>
               </div>
             </div>
-            <div class="form-help">读写权限包含读取。令牌创建后仍可随时调整权限，修改立即生效。</div>
+            <div class="form-help">{{ t('apiTokens.permHelp') }}</div>
           </div>
         </el-form-item>
-        <el-form-item v-if="editingId" label="启用">
+        <el-form-item v-if="editingId" :label="t('common.enable')">
           <el-switch v-model="form.enabled" />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="formVisible = false">取消</el-button>
-        <el-button type="primary" :loading="saving" @click="submit">{{ editingId ? '保存' : '创建' }}</el-button>
+        <el-button @click="formVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button type="primary" :loading="saving" @click="submit">{{ editingId ? t('common.save') : t('common.create') }}</el-button>
       </template>
     </el-dialog>
 
     <!-- 明文仅显示一次：必须点击“我已保存”才能关闭 -->
     <el-dialog
       v-model="secretVisible"
-      title="令牌仅显示这一次"
+      :title="t('apiTokens.secretTitle')"
       width="620px"
       :fullscreen="isMobile"
       :close-on-click-modal="false"
@@ -167,19 +168,19 @@
       :show-close="false"
       append-to-body
     >
-      <el-alert type="warning" :closable="false" show-icon title="关闭此窗口后无法再次查看明文，请立即复制并妥善保存。若遗失只能重新生成。" class="block-gap" />
+      <el-alert type="warning" :closable="false" show-icon :title="t('apiTokens.secretWarn')" class="block-gap" />
       <div class="sec-label">{{ secretName }}</div>
       <div class="sec-box">
         <code ref="secretEl" class="sec-text mono" @click="selectNode(secretEl)">{{ secret }}</code>
-        <el-button type="primary" :icon="Copy" @click="copy(secret, secretEl)">复制</el-button>
+        <el-button type="primary" :icon="Copy" @click="copy(secret, secretEl)">{{ t('common.copy') }}</el-button>
       </div>
-      <div class="sec-label">使用示例</div>
+      <div class="sec-label">{{ t('apiTokens.example') }}</div>
       <div class="sec-box sec-curl-box">
         <pre ref="curlEl" class="sec-curl mono" @click="selectNode(curlEl)">{{ curlExample }}</pre>
-        <el-button :icon="Copy" @click="copy(curlExample, curlEl)">复制</el-button>
+        <el-button :icon="Copy" @click="copy(curlExample, curlEl)">{{ t('common.copy') }}</el-button>
       </div>
       <template #footer>
-        <el-button type="primary" :icon="Check" @click="closeSecret">我已保存</el-button>
+        <el-button type="primary" :icon="Check" @click="closeSecret">{{ t('apiTokens.saved') }}</el-button>
       </template>
     </el-dialog>
   </div>
@@ -188,6 +189,7 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { useI18n } from 'vue-i18n'
 import { BookOpen, Check, Copy, KeyRound, Pencil, Plus, RefreshCw, ShieldCheck, Trash2 } from 'lucide-vue-next'
 import { api, type ScopeDomain, type TokenInput, type TokenSecret, type TokenView } from '../api'
 import PageHeader from '../components/PageHeader.vue'
@@ -198,6 +200,7 @@ import { copyText, selectNode } from '../composables/useClipboard'
 // 单个权限域的授权级别
 type Level = 'none' | 'read' | 'write'
 
+const { t } = useI18n()
 const { isMobile, labelPosition } = useFormLayout()
 
 const tokens = ref<TokenView[]>([])
@@ -244,10 +247,10 @@ const domainGroups = computed(() => {
   const sys = domains.value.filter((d) => d.builtin)
   const groups: { title: string; items: ScopeDomain[] }[] = []
   if (mods.length) {
-    groups.push({ title: '功能模块', items: mods })
+    groups.push({ title: t('apiTokens.groupModules'), items: mods })
   }
   if (sys.length) {
-    groups.push({ title: '系统', items: sys })
+    groups.push({ title: t('apiTokens.groupSystem'), items: sys })
   }
   return groups
 })
@@ -337,14 +340,14 @@ function levelsToScopes(): string[] {
 }
 
 // ---------- 新建 / 编辑 ----------
-const expiryOptions = [
-  { value: 'never', label: '永不过期' },
-  { value: '7', label: '7 天' },
-  { value: '30', label: '30 天' },
-  { value: '90', label: '90 天' },
-  { value: '365', label: '1 年' },
-  { value: 'custom', label: '自定义日期' },
-]
+const expiryOptions = computed(() => [
+  { value: 'never', label: t('apiTokens.never') },
+  { value: '7', label: t('apiTokens.days', { n: 7 }) },
+  { value: '30', label: t('apiTokens.days', { n: 30 }) },
+  { value: '90', label: t('apiTokens.days', { n: 90 }) },
+  { value: '365', label: t('apiTokens.oneYear') },
+  { value: 'custom', label: t('apiTokens.customDate') },
+])
 
 const formVisible = ref(false)
 const editingId = ref('')
@@ -374,18 +377,18 @@ function openCreate() {
   formVisible.value = true
 }
 
-function openEdit(t: TokenView) {
-  editingId.value = t.id
-  form.name = t.name
-  form.enabled = !t.disabled
-  if (t.expiresAt) {
+function openEdit(tk: TokenView) {
+  editingId.value = tk.id
+  form.name = tk.name
+  form.enabled = !tk.disabled
+  if (tk.expiresAt) {
     form.expiry = 'custom'
-    form.customDate = new Date(t.expiresAt)
+    form.customDate = new Date(tk.expiresAt)
   } else {
     form.expiry = 'never'
     form.customDate = null
   }
-  scopesToLevels(t.scopes)
+  scopesToLevels(tk.scopes)
   formVisible.value = true
 }
 
@@ -407,21 +410,21 @@ function resolveExpiry(): string | null | undefined {
 async function submit() {
   const name = form.name.trim()
   if (!name) {
-    ElMessage.warning('请填写令牌名称')
+    ElMessage.warning(t('apiTokens.nameRequired'))
     return
   }
   const scopes = levelsToScopes()
   if (!scopes.length) {
-    ElMessage.warning('请至少选择一项权限')
+    ElMessage.warning(t('apiTokens.scopeRequired'))
     return
   }
   const expiresAt = resolveExpiry()
   if (expiresAt === undefined) {
-    ElMessage.warning('请选择过期时间')
+    ElMessage.warning(t('apiTokens.expiryRequired'))
     return
   }
   if (expiresAt && new Date(expiresAt).getTime() <= Date.now()) {
-    ElMessage.warning('过期时间必须晚于当前时间')
+    ElMessage.warning(t('apiTokens.expiryFuture'))
     return
   }
   const body: TokenInput = { name, scopes, expiresAt }
@@ -430,7 +433,7 @@ async function submit() {
     if (editingId.value) {
       body.disabled = !form.enabled
       await api.put<TokenView>(`/api/tokens/${encodeURIComponent(editingId.value)}`, body)
-      ElMessage.success('已保存')
+      ElMessage.success(t('common.saved'))
       formVisible.value = false
       await load()
     } else {
@@ -447,12 +450,12 @@ async function submit() {
 }
 
 // ---------- 启停 / 重新生成 / 删除 ----------
-async function toggle(t: TokenView, enabled: boolean) {
-  busyId.value = t.id
+async function toggle(tk: TokenView, enabled: boolean) {
+  busyId.value = tk.id
   try {
-    const body: TokenInput = { name: t.name, scopes: t.scopes, expiresAt: t.expiresAt, disabled: !enabled }
-    await api.put<TokenView>(`/api/tokens/${encodeURIComponent(t.id)}`, body)
-    ElMessage.success(enabled ? '已启用' : '已停用')
+    const body: TokenInput = { name: tk.name, scopes: tk.scopes, expiresAt: tk.expiresAt, disabled: !enabled }
+    await api.put<TokenView>(`/api/tokens/${encodeURIComponent(tk.id)}`, body)
+    ElMessage.success(enabled ? t('common.enabled') : t('apiTokens.disabledMsg'))
   } catch (e) {
     ElMessage.error((e as Error).message)
   } finally {
@@ -461,18 +464,18 @@ async function toggle(t: TokenView, enabled: boolean) {
   }
 }
 
-async function regenerate(t: TokenView) {
+async function regenerate(tk: TokenView) {
   try {
-    await ElMessageBox.confirm(`重新生成「${t.name}」后，旧令牌值将立即失效，使用它的脚本需要改用新值。是否继续？`, '重新生成令牌', {
+    await ElMessageBox.confirm(t('apiTokens.regenerateConfirm', { name: tk.name }), t('apiTokens.regenerateTitle'), {
       type: 'warning',
-      confirmButtonText: '重新生成',
-      cancelButtonText: '取消',
+      confirmButtonText: t('apiTokens.regenerate'),
+      cancelButtonText: t('common.cancel'),
     })
   } catch {
     return
   }
   try {
-    const r = await api.post<TokenSecret>(`/api/tokens/${encodeURIComponent(t.id)}/regenerate`)
+    const r = await api.post<TokenSecret>(`/api/tokens/${encodeURIComponent(tk.id)}/regenerate`)
     showSecret(r)
     await load()
   } catch (e) {
@@ -480,20 +483,20 @@ async function regenerate(t: TokenView) {
   }
 }
 
-async function remove(t: TokenView) {
+async function remove(tk: TokenView) {
   try {
-    await ElMessageBox.confirm(`删除「${t.name}」后，该令牌立即失效且无法恢复，使用它的脚本将收到 401。是否继续？`, '删除令牌', {
+    await ElMessageBox.confirm(t('apiTokens.deleteConfirm', { name: tk.name }), t('apiTokens.deleteTitle'), {
       type: 'warning',
-      confirmButtonText: '删除',
+      confirmButtonText: t('common.delete'),
       confirmButtonClass: 'el-button--danger',
-      cancelButtonText: '取消',
+      cancelButtonText: t('common.cancel'),
     })
   } catch {
     return
   }
   try {
-    await api.del(`/api/tokens/${encodeURIComponent(t.id)}`)
-    ElMessage.success('已删除')
+    await api.del(`/api/tokens/${encodeURIComponent(tk.id)}`)
+    ElMessage.success(t('common.deleted'))
     await load()
   } catch (e) {
     ElMessage.error((e as Error).message)

@@ -2,7 +2,7 @@
   <!-- 全局门禁对话框：用户协议确认与二次验证码输入，由 security.ts 的状态驱动 -->
   <el-dialog
     v-model="gate.agreement"
-    title="Web 终端用户协议"
+    :title="t('terminal.security.gateAgreementTitle')"
     width="560px"
     :fullscreen="isMobile"
     :close-on-click-modal="false"
@@ -10,17 +10,17 @@
     append-to-body
     @close="settleAgreement(false)"
   >
-    <pre class="agreement">{{ AGREEMENT_TEXT }}</pre>
-    <el-checkbox v-model="agreed" class="agree-check">我已阅读并同意上述内容</el-checkbox>
+    <pre class="agreement">{{ agreementText() }}</pre>
+    <el-checkbox v-model="agreed" class="agree-check">{{ t('terminal.security.agreeCheck') }}</el-checkbox>
     <template #footer>
-      <el-button @click="settleAgreement(false)">取消</el-button>
-      <el-button type="primary" :disabled="!agreed" :loading="busy" @click="accept">同意并继续</el-button>
+      <el-button @click="settleAgreement(false)">{{ t('common.cancel') }}</el-button>
+      <el-button type="primary" :disabled="!agreed" :loading="busy" @click="accept">{{ t('terminal.security.agreeContinue') }}</el-button>
     </template>
   </el-dialog>
 
   <el-dialog
     v-model="gate.twofa"
-    title="二次验证"
+    :title="t('terminal.security.gateTwofaTitle')"
     width="400px"
     :fullscreen="isMobile"
     :close-on-click-modal="false"
@@ -29,31 +29,33 @@
     @close="settleTwoFA(false)"
     @opened="focusCode"
   >
-    <div class="tip">请输入验证器应用（如 Google Authenticator）中显示的 6 位验证码。验证通过后 30 分钟内无需重复验证。</div>
+    <div class="tip">{{ t('terminal.security.gateTip') }}</div>
     <el-input
       ref="codeInput"
       v-model="code"
       maxlength="6"
       inputmode="numeric"
       autocomplete="one-time-code"
-      placeholder="6 位验证码"
+      :placeholder="t('terminal.security.codePlaceholder')"
       size="large"
       @keyup.enter="verify"
     />
     <div v-if="err" class="err">{{ err }}</div>
     <template #footer>
-      <el-button @click="settleTwoFA(false)">取消</el-button>
-      <el-button type="primary" :loading="busy" :disabled="code.length < 6" @click="verify">验证</el-button>
+      <el-button @click="settleTwoFA(false)">{{ t('common.cancel') }}</el-button>
+      <el-button type="primary" :loading="busy" :disabled="code.length < 6" @click="verify">{{ t('terminal.security.verify') }}</el-button>
     </template>
   </el-dialog>
 </template>
 
 <script setup lang="ts">
 import { nextTick, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { api } from '../../api'
 import { useIsMobile } from '../../composables/useIsMobile'
-import { AGREEMENT_TEXT, gate, settleAgreement, settleTwoFA } from './security'
+import { agreementText, gate, settleAgreement, settleTwoFA } from './security'
 
+const { t } = useI18n()
 const isMobile = useIsMobile()
 const agreed = ref(false)
 const busy = ref(false)

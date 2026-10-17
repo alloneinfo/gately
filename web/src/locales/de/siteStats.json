@@ -1,0 +1,19 @@
+{
+  "title": "Website-Statistik · {name}",
+  "hour1": "1 Stunde",
+  "hour6": "6 Stunden",
+  "hour24": "24 Stunden",
+  "rangeHelp": "Ein Punkt pro Minute; die Zählung beginnt nach einem Neustart oder nach Änderung dieses Listeners neu",
+  "requests": "Anfragen",
+  "bytesOut": "Antwortverkehr gesamt",
+  "errors": "Fehler (4xx / 5xx)",
+  "upstreams": "Backends",
+  "healthy": "Fehlerfrei",
+  "unavailable": "Nicht verfügbar",
+  "upstreamMeta": "Gewicht {weight} · Verbindungen {conns}",
+  "backup": "Reserve",
+  "topIps": "Top 10 Quell-IPs",
+  "topCountries": "Top 10 Länder",
+  "noData": "Keine Daten",
+  "noDataGeo": "Keine Daten (zuerst eine GeoIP-Datenbank importieren)"
+}

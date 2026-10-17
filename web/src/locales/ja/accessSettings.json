@@ -1,0 +1,20 @@
+{
+  "autoBan": "自動ブロック",
+  "authFailBan": "認証失敗によるブロック",
+  "authFailBanHelp": "分。認証に 10 回連続で失敗すると送信元 IP をブロックします。0 でブロックなし（15 分間のレート制限のみ）",
+  "banList": "ブロックリスト",
+  "noBans": "現在ブロックされている IP はありません",
+  "until": "{time} まで",
+  "unban": "解除",
+  "manualBanIp": "IP を手動でブロック",
+  "hours": "時間",
+  "ban": "ブロック",
+  "geoTitle": "GeoIP データベース（国別フィルタ）",
+  "geoLoaded": "読み込み済み: {type}、ビルド日時 {buildTime}、{size} MB",
+  "remove": "削除",
+  "geoNotImported": "未インポート。MaxMind GeoLite2 / DB-IP などの .mmdb 形式の国別・都市別データベースに対応しています",
+  "uploadMmdb": ".mmdb をアップロード",
+  "mmdbUrlPlaceholder": "または .mmdb のダウンロード URL を入力",
+  "geoImported": "GeoIP データベースをインポートしました",
+  "geoDownloaded": "GeoIP データベースをダウンロードして読み込みました"
+}

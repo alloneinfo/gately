@@ -1,0 +1,21 @@
+{
+  "heroLine1": "開源、透明的",
+  "heroLine2": "網路閘道工具集",
+  "feature1": "連接埠轉發、STUN 穿透與動態網域",
+  "feature2": "反向代理、WAF 與憑證自動續簽",
+  "feature3": "不連接專案方伺服器，設定為純文字可稽核",
+  "mobileSub": "開源的網路閘道工具集，家庭與伺服器通用",
+  "title": "登入管理介面",
+  "subtitle": "請輸入管理員帳號與密碼",
+  "username": "使用者名稱",
+  "password": "密碼",
+  "submit": "登入",
+  "thirdParty": "或使用第三方帳號",
+  "loginWith": "使用 {name} 登入",
+  "initialPasswordHint": "首次啟動時，初始密碼會列印在程式日誌中。",
+  "totpTitle": "兩步驟驗證",
+  "totpPrompt": "開啟驗證器 App，輸入 {user} 的 6 位數動態驗證碼",
+  "code": "驗證碼",
+  "verify": "驗證並登入",
+  "backToAccount": "返回修改帳號"
+}

@@ -1,5 +1,6 @@
 // 侧边栏导航与模块元信息：Layout 与总览页共用，保证图标与名称一致。
 import type { Component } from 'vue'
+import { t } from './i18n'
 import {
   Activity,
   ArrowLeftRight,
@@ -28,75 +29,77 @@ import {
 
 export interface NavItem {
   path: string
-  title: string
+  // 文案键名（nav.json），渲染处用 t() 翻译
+  titleKey: string
   icon: Component
   // 对应后端模块 ID（/api/status 中的 modules[].id）
   moduleId?: string
   // 总览页卡片上的一句话说明
-  desc?: string
+  descKey?: string
 }
 
 export interface NavGroup {
-  title: string
+  // 分组标题键名，空串表示无标题
+  titleKey: string
   items: NavItem[]
 }
 
 export const navGroups: NavGroup[] = [
   {
-    title: '',
-    items: [{ path: '/overview', title: '概览', icon: LayoutDashboard }],
+    titleKey: '',
+    items: [{ path: '/overview', titleKey: 'nav.items.overview.title', icon: LayoutDashboard }],
   },
   {
-    title: '网络',
+    titleKey: 'nav.groups.network',
     items: [
-      { path: '/portforward', title: '端口转发', icon: ArrowLeftRight, moduleId: 'portforward', desc: 'TCP / UDP 端口转发与负载均衡' },
-      { path: '/ddns', title: '动态域名', icon: Globe, moduleId: 'ddns', desc: '公网 IP 变化时自动更新解析' },
-      { path: '/stun', title: 'STUN 穿透', icon: Radar, moduleId: 'stun', desc: 'NAT1 网络下无公网 IP 穿透' },
+      { path: '/portforward', titleKey: 'nav.items.portforward.title', icon: ArrowLeftRight, moduleId: 'portforward', descKey: 'nav.items.portforward.desc' },
+      { path: '/ddns', titleKey: 'nav.items.ddns.title', icon: Globe, moduleId: 'ddns', descKey: 'nav.items.ddns.desc' },
+      { path: '/stun', titleKey: 'nav.items.stun.title', icon: Radar, moduleId: 'stun', descKey: 'nav.items.stun.desc' },
     ],
   },
   {
-    title: '组网与穿透',
+    titleKey: 'nav.groups.tunnel',
     items: [
-      { path: '/tailscale', title: 'Tailscale', icon: Network, moduleId: 'tailscale', desc: '加入 Tailscale / Headscale 组网' },
-      { path: '/frp', title: 'frp', icon: Waypoints, moduleId: 'frp', desc: 'frpc / frps 内网穿透' },
-      { path: '/cloudflared', title: 'Cloudflare 隧道', icon: Cloud, moduleId: 'cloudflared', desc: '无需公网 IP 发布内网服务' },
+      { path: '/tailscale', titleKey: 'nav.items.tailscale.title', icon: Network, moduleId: 'tailscale', descKey: 'nav.items.tailscale.desc' },
+      { path: '/frp', titleKey: 'nav.items.frp.title', icon: Waypoints, moduleId: 'frp', descKey: 'nav.items.frp.desc' },
+      { path: '/cloudflared', titleKey: 'nav.items.cloudflared.title', icon: Cloud, moduleId: 'cloudflared', descKey: 'nav.items.cloudflared.desc' },
     ],
   },
   {
-    title: 'Web',
+    titleKey: 'nav.groups.web',
     items: [
-      { path: '/web', title: 'Web 服务', icon: Server, moduleId: 'webservice', desc: '反向代理、重定向与静态站点' },
-      { path: '/waf', title: 'WAF 防火墙', icon: ShieldHalf, moduleId: 'waf', desc: '基于 OWASP CRS 的应用防火墙' },
-      { path: '/ssl', title: 'SSL 证书', icon: ShieldCheck, moduleId: 'ssl', desc: 'ACME 自动申请与续签' },
+      { path: '/web', titleKey: 'nav.items.web.title', icon: Server, moduleId: 'webservice', descKey: 'nav.items.web.desc' },
+      { path: '/waf', titleKey: 'nav.items.waf.title', icon: ShieldHalf, moduleId: 'waf', descKey: 'nav.items.waf.desc' },
+      { path: '/ssl', titleKey: 'nav.items.ssl.title', icon: ShieldCheck, moduleId: 'ssl', descKey: 'nav.items.ssl.desc' },
     ],
   },
   {
-    title: '网络存储',
+    titleKey: 'nav.groups.storage',
     items: [
-      { path: '/storage', title: '存储管理', icon: HardDrive, moduleId: 'storage', desc: '挂载本地目录或远程 WebDAV，在线管理文件' },
-      { path: '/webdav', title: 'WebDAV', icon: FolderSync, moduleId: 'webdav', desc: 'WebDAV 文件共享服务' },
-      { path: '/ftp', title: 'FTP 服务', icon: Server, moduleId: 'ftp', desc: 'FTP / FTPS 文件共享服务' },
+      { path: '/storage', titleKey: 'nav.items.storage.title', icon: HardDrive, moduleId: 'storage', descKey: 'nav.items.storage.desc' },
+      { path: '/webdav', titleKey: 'nav.items.webdav.title', icon: FolderSync, moduleId: 'webdav', descKey: 'nav.items.webdav.desc' },
+      { path: '/ftp', titleKey: 'nav.items.ftp.title', icon: Server, moduleId: 'ftp', descKey: 'nav.items.ftp.desc' },
     ],
   },
   {
-    title: '工具',
+    titleKey: 'nav.groups.tools',
     items: [
-      { path: '/wol', title: '网络唤醒', icon: Power, moduleId: 'wol', desc: '远程唤醒局域网设备' },
-      { path: '/terminal', title: 'Web 终端', icon: SquareTerminal, moduleId: 'webterminal', desc: '浏览器中的 SSH 与本机 Shell' },
-      { path: '/nettools', title: '网络诊断', icon: Activity, moduleId: 'nettools', desc: 'Ping、路由追踪、端口探测、DNS 与局域网扫描' },
-      { path: '/docker', title: 'Docker', icon: Container, moduleId: 'docker', desc: '容器管理与镜像更新' },
-      { path: '/cron', title: '计划任务', icon: CalendarClock, moduleId: 'cron', desc: '定时执行命令或 HTTP 请求' },
+      { path: '/wol', titleKey: 'nav.items.wol.title', icon: Power, moduleId: 'wol', descKey: 'nav.items.wol.desc' },
+      { path: '/terminal', titleKey: 'nav.items.terminal.title', icon: SquareTerminal, moduleId: 'webterminal', descKey: 'nav.items.terminal.desc' },
+      { path: '/nettools', titleKey: 'nav.items.nettools.title', icon: Activity, moduleId: 'nettools', descKey: 'nav.items.nettools.desc' },
+      { path: '/docker', titleKey: 'nav.items.docker.title', icon: Container, moduleId: 'docker', descKey: 'nav.items.docker.desc' },
+      { path: '/cron', titleKey: 'nav.items.cron.title', icon: CalendarClock, moduleId: 'cron', descKey: 'nav.items.cron.desc' },
     ],
   },
   {
-    title: '系统',
+    titleKey: 'nav.groups.system',
     items: [
-      { path: '/notify', title: '通知中心', icon: Bell, moduleId: 'notify', desc: '事件推送到 Telegram、邮件、企业微信等' },
-      { path: '/logs', title: '系统日志', icon: ScrollText },
-      { path: '/api-tokens', title: 'API 令牌', icon: KeyRound },
-      { path: '/api-docs', title: 'API 文档', icon: BookOpen },
-      { path: '/settings', title: '设置', icon: Settings },
-      { path: '/about', title: '关于', icon: Info },
+      { path: '/notify', titleKey: 'nav.items.notify.title', icon: Bell, moduleId: 'notify', descKey: 'nav.items.notify.desc' },
+      { path: '/logs', titleKey: 'nav.items.logs.title', icon: ScrollText },
+      { path: '/api-tokens', titleKey: 'nav.items.apiTokens.title', icon: KeyRound },
+      { path: '/api-docs', titleKey: 'nav.items.apiDocs.title', icon: BookOpen },
+      { path: '/settings', titleKey: 'nav.items.settings.title', icon: Settings },
+      { path: '/about', titleKey: 'nav.items.about.title', icon: Info },
     ],
   },
 ]
@@ -108,9 +111,10 @@ export function navByModule(id: string): NavItem | undefined {
   return navItems.find((i) => i.moduleId === id)
 }
 
-// groupByPath 返回路由所在的导航分组名称。
+// groupByPath 返回路由所在的导航分组名称（已翻译）。
 export function groupByPath(path: string): string {
-  return navGroups.find((g) => g.items.some((i) => path === i.path || path.startsWith(i.path + '/')))?.title ?? ''
+  const g = navGroups.find((g) => g.items.some((i) => path === i.path || path.startsWith(i.path + '/')))
+  return g && g.titleKey ? t(g.titleKey) : ''
 }
 
 // navByPath 按路由路径查找导航项。

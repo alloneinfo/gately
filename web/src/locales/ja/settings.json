@@ -1,0 +1,194 @@
+{
+  "title": "設定",
+  "desc": "アカウントのセキュリティ、アクセス制御、実行パラメーター、バックアップと移行、システム情報",
+  "currentPassword": "現在のパスワード",
+  "notEnabled": "無効",
+  "restartBanner": {
+    "title": "一部の設定は再起動後に反映されます",
+    "desc": "待ち受けアドレスなどの変更は保存済みです。Gately を再起動すると反映されます。",
+    "action": "今すぐ再起動"
+  },
+  "tabs": {
+    "account": "アカウントとセキュリティ",
+    "access": "アクセス制御",
+    "runtime": "ネットワークと実行",
+    "backup": "バックアップと移行"
+  },
+  "admin": {
+    "title": "管理者アカウント",
+    "username": "ユーザー名",
+    "newPassword": "新しいパスワード",
+    "newPasswordPlaceholder": "8 文字以上",
+    "confirmPassword": "新しいパスワード（確認）",
+    "submit": "アカウント情報を変更",
+    "help": "変更後、ログイン中のすべてのセッションが無効になり、再ログインが必要です。",
+    "mismatch": "入力した新しいパスワードが一致しません",
+    "changed": "変更しました。再ログインしてください"
+  },
+  "totp": {
+    "title": "2 段階認証",
+    "enabledDesc": "ログイン時にパスワードに加えて、認証アプリの 6 桁のコードが必要です。",
+    "code": "認証コード",
+    "codePlaceholder": "認証アプリの 6 桁の数字",
+    "disable": "2 段階認証を無効化",
+    "scanDesc": "Google Authenticator や Microsoft Authenticator などのアプリで QR コードをスキャンし、表示されたコードを入力して確認します。",
+    "qrAlt": "QR コード",
+    "manualHint": "スキャンできない場合はキーを手動で入力",
+    "copySecret": "キーをコピー",
+    "confirmEnable": "有効化を確定",
+    "introDesc": "有効にすると、ログイン時に認証アプリが生成するコードの入力が必要になります。パスワードが漏えいしても管理画面を保護できます。",
+    "start": "設定を開始",
+    "enabledMsg": "2 段階認証を有効にしました",
+    "disabledMsg": "2 段階認証を無効にしました"
+  },
+  "loginProtect": {
+    "title": "ログイン保護",
+    "sessionHours": "セッションの有効期間",
+    "sessionHoursHelp": "時間。超過すると再ログインが必要です",
+    "maxFailures": "連続失敗の上限",
+    "maxFailuresHelp": "同じ送信元が連続でパスワードを誤り、この回数に達するとロックします。0 でデフォルト値",
+    "lockMinutes": "ロック時間",
+    "lockMinutesHelp": "分。0 でデフォルト値"
+  },
+  "thirdLogin": {
+    "title": "外部ログイン",
+    "desc": "GitHub、Google、QQ、または任意の OIDC アカウントで管理画面にログインします。ご自身で作成した OAuth アプリを使用し、ログインは中継サーバーを経由しません。",
+    "enable": "有効化",
+    "callbackBase": "コールバックのベース URL",
+    "callbackBasePlaceholder": "https://gately.example.com（ブラウザで管理画面にアクセスする際の URL。パスは含めません）",
+    "callbackHelp": "各プラットフォームに登録するコールバック URL は {url} です。ログインはこのアドレスで管理画面を開いてから開始する必要があります。",
+    "providers": "ログイン方法",
+    "allowed": "許可する ID",
+    "allowedPlaceholder": "1 行に 1 つ、プロバイダー識別子:アカウント の形式（例: github:15172899 または google:me{'@'}gmail.com）。行末に # でメモを付けられます",
+    "allowedHelp": "リストにあるアカウントのみログインできます。GitHub は数値 ID の指定をおすすめします。QQ は初回ログインが拒否されると、コピー可能な識別子が画面に表示されます。",
+    "skipTotp": "2 段階認証をスキップ",
+    "skipTotpHelp": "2 段階認証が有効な場合、オンにすると外部ログインで認証コードを求めません。オフの場合、外部ログインは拒否されます"
+  },
+  "apiToken": {
+    "title": "API トークン",
+    "desc": "API トークンは複数トークンと詳細な権限制御に対応しました。複数のトークンを作成し、それぞれに有効期限と、機能モジュールごとの読み取り専用 / 読み書き権限を設定できます。",
+    "manage": "API トークンを管理",
+    "docs": "API ドキュメントを見る"
+  },
+  "listen": {
+    "title": "管理画面の待ち受け",
+    "http": "HTTP の待ち受け",
+    "needRestart": "再起動が必要",
+    "httpHelp": "形式は :ポート または IP:ポート",
+    "https": "HTTPS の待ち受け",
+    "httpsPlaceholder": "空欄で無効（例: :16643）",
+    "httpsHelp": "証明書はアクセス用ドメインに合わせて「SSL 証明書」から選択します",
+    "forceHttps": "HTTPS を強制",
+    "forceHttpsHelp": "HTTP でのアクセスを HTTPS に自動リダイレクトします（証明書モジュールにそのドメインの証明書がある場合のみ）"
+  },
+  "restrict": {
+    "title": "アクセス制限",
+    "safePath": "セキュアエントリー",
+    "safePathPlaceholder": "空欄で無効（例: /my-entry）",
+    "random": "ランダム生成",
+    "safePathHelp": "設定すると {url} にアクセスしないと管理画面を開けなくなり、それ以外のパスへの直接アクセスは 404 を返します。スキャナーによる管理画面の発見を防げます。エントリーのアドレスを必ず控えておいてください。",
+    "urlPrefix": "http://IP:ポート",
+    "entryName": "エントリー",
+    "lanOnly": "LAN 内からのみ許可",
+    "lanOnlyHelp": "管理画面へのアクセスを LAN 内のアドレス（Tailscale などの 100.64.0.0/10 を含む）のみに制限します"
+  },
+  "network": {
+    "title": "ネットワーク",
+    "dnsServers": "DNS サーバー",
+    "dnsPlaceholder": "空欄でシステムの DNS を使用。IP または IP:ポートを入力できます",
+    "dnsHelp": "すべての外向きの名前解決（DDNS、Webhook、ACME など）に影響します。複数の場合はランダムに選択し、自動でフェイルオーバーします。",
+    "timeZone": "タイムゾーン",
+    "timeZonePlaceholder": "システムに従う",
+    "timeZoneHelp": "ログやスケジュールタスクなどで使用するタイムゾーン。任意の IANA タイムゾーン名を入力できます。現在の設定: {zone}",
+    "dns": {
+      "ali": "Alibaba",
+      "tencent": "Tencent",
+      "baidu": "Baidu",
+      "114": "114",
+      "cloudflare": "Cloudflare",
+      "google": "Google",
+      "quad9": "Quad9"
+    },
+    "zones": {
+      "china": "中国",
+      "hongKong": "香港",
+      "taipei": "台北",
+      "tokyo": "東京",
+      "seoul": "ソウル",
+      "singapore": "シンガポール",
+      "london": "ロンドン",
+      "berlin": "ベルリン",
+      "moscow": "モスクワ",
+      "newYork": "ニューヨーク",
+      "chicago": "シカゴ",
+      "losAngeles": "ロサンゼルス",
+      "sydney": "シドニー",
+      "utc": "協定世界時"
+    }
+  },
+  "runtime": {
+    "title": "実行パラメーター",
+    "logLines": "ログの保持行数",
+    "logLinesHelp": "モジュールごとにメモリ上に保持するログの行数",
+    "gcPercent": "GC パーセント",
+    "gcPercentHelp": "0 でデフォルト（100）。小さくするとメモリ使用量が減りますが、CPU 負荷が増えます",
+    "maxProcs": "最大 CPU コア数",
+    "maxProcsHelp": "0 で自動（本機は {count} コア）"
+  },
+  "restart": {
+    "title": "再起動",
+    "desc": "再起動中は管理画面とすべての転送・プロキシサービスが一時的に中断されます（通常は数秒）。",
+    "button": "Gately を再起動",
+    "confirm": "再起動中は管理画面とすべての転送・プロキシサービスが一時的に中断されます（通常は数秒）。Gately を再起動しますか？",
+    "confirmButton": "再起動",
+    "progress": "Gately を再起動しています…"
+  },
+  "save": {
+    "saved": "保存して反映しました",
+    "savedNeedRestart": "保存しました。一部の設定は再起動後に反映されます"
+  },
+  "import": {
+    "title": "Lucky からインポート",
+    "desc": "Lucky の設定ディレクトリ（Docker のデフォルトは {dir}）にある {lkcf} ファイル（複数選択可）と、Lucky の管理画面でエクスポートしたサイト全体のバックアップ {zip} に対応しています。まずプレビューし、確認してからインポートしてください。インポートした項目は既存の項目の後ろに追加され、同名の項目はスキップされます。",
+    "drag": "ファイルをドロップ、または{click}",
+    "dragClick": "クリックして選択",
+    "dragHint": ".lkcf 設定ファイルまたはサイト全体のバックアップ .zip",
+    "keepEnableTitle": "インポート後も Lucky での有効状態を維持",
+    "keepEnableDesc": "デフォルトはオフです。インポートしたルールはすべて無効になり、確認後に 1 件ずつ有効にします。オンにすると、Lucky で有効だったルールが{bold}。Lucky がまだ動作している場合は、ポートの競合や双方での DNS 更新が発生する可能性があります。",
+    "keepEnableBold": "すぐにポートの待ち受けと DNS レコードの更新を開始します",
+    "preview": "プレビュー",
+    "confirmImport": "インポートを実行",
+    "previewDone": "プレビューが完了しました。内容を確認してからインポートしてください",
+    "imported": "インポート済み",
+    "noModules": "Gately が対応しているモジュールが含まれていません",
+    "noWarnings": "警告はありません",
+    "colModule": "モジュール",
+    "colFound": "検出",
+    "colImportable": "インポート可能",
+    "colWarnings": "警告",
+    "done": "インポートが完了しました。合計 {total} 件",
+    "confirmKeep": "{total} 件の設定をインポートし、Lucky での有効状態を維持します。有効だったルールはすぐに動作します。続行しますか？",
+    "confirmDisabled": "{total} 件の設定をインポートします。インポート後はすべて無効になります。続行しますか？",
+    "confirmButton": "インポート"
+  },
+  "backup": {
+    "title": "Gately の設定をバックアップ",
+    "desc": "すべての設定（アカウント、ルール、証明書など）を含む zip ファイルをダウンロードします。バックアップにはパスワードハッシュ、シークレット、証明書の秘密鍵が含まれるため、安全に保管してください。",
+    "download": "バックアップをダウンロード",
+    "downloadFailed": "ダウンロードに失敗しました ({status})"
+  },
+  "restore": {
+    "title": "設定の復元",
+    "desc": "バックアップ zip で{bold}。元の設定は先に設定ディレクトリの backup-日時 フォルダーに保存され、復元後に Gately が自動で再起動します。",
+    "descBold": "現在のすべての設定を上書きします",
+    "pickFile": "バックアップファイルを選択",
+    "passwordPlaceholder": "バックアップのパスフレーズ",
+    "button": "復元",
+    "confirm": "「{name}」で現在のすべての設定を上書きして自動で再起動します。現在の設定は先に設定ディレクトリへバックアップされます。確認のため「{word}」と入力してください。",
+    "word": "復元",
+    "confirmButton": "復元して再起動",
+    "inputHint": "「{word}」と入力してください",
+    "success": "{count} 個の設定ファイルを復元しました。元の設定は {previous} に保存されています",
+    "progress": "バックアップを適用して再起動しています…"
+  }
+}

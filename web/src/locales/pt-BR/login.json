@@ -1,0 +1,21 @@
+{
+  "heroLine1": "Código aberto e transparente,",
+  "heroLine2": "kit de ferramentas para gateway de rede",
+  "feature1": "Redirecionamento de portas, travessia STUN e DNS dinâmico",
+  "feature2": "Proxy reverso, WAF e renovação automática de certificados",
+  "feature3": "Sem conexão com servidores do projeto; configuração em texto simples e auditável",
+  "mobileSub": "Kit de ferramentas de gateway de rede de código aberto para casa e servidores",
+  "title": "Entrar no console",
+  "subtitle": "Informe o usuário e a senha de administrador",
+  "username": "Nome de usuário",
+  "password": "Senha",
+  "submit": "Entrar",
+  "thirdParty": "Ou use uma conta de terceiros",
+  "loginWith": "Entrar com {name}",
+  "initialPasswordHint": "No primeiro início, a senha inicial é exibida no log do programa.",
+  "totpTitle": "Autenticação em dois fatores",
+  "totpPrompt": "Abra seu app autenticador e informe o código de 6 dígitos de {user}",
+  "code": "Código de verificação",
+  "verify": "Verificar e entrar",
+  "backToAccount": "Voltar para trocar de conta"
+}

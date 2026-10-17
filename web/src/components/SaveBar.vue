@@ -2,18 +2,21 @@
   <!-- 设置页底部的保存栏：有未保存修改时高亮并吸附在底部 -->
   <div class="save-bar" :class="{ dirty }">
     <div class="sb-text">
-      <template v-if="dirty"><CircleDot :size="14" />有未保存的修改</template>
-      <template v-else><CircleCheck :size="14" />所有修改已保存</template>
+      <template v-if="dirty"><CircleDot :size="14" />{{ t('components.saveBar.dirty') }}</template>
+      <template v-else><CircleCheck :size="14" />{{ t('components.saveBar.saved') }}</template>
     </div>
     <div class="sb-ops">
-      <el-button :disabled="!dirty" @click="$emit('reset')">撤销</el-button>
-      <el-button type="primary" :icon="Save" :disabled="!dirty" :loading="saving" @click="$emit('save')">保存设置</el-button>
+      <el-button :disabled="!dirty" @click="$emit('reset')">{{ t('components.saveBar.undo') }}</el-button>
+      <el-button type="primary" :icon="Save" :disabled="!dirty" :loading="saving" @click="$emit('save')">{{ t('components.saveBar.save') }}</el-button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
 import { CircleCheck, CircleDot, Save } from 'lucide-vue-next'
+
+const { t } = useI18n()
 
 defineProps<{ dirty: boolean; saving?: boolean }>()
 defineEmits<{ save: []; reset: [] }>()

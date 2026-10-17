@@ -1,0 +1,19 @@
+{
+  "title": "サイト統計 · {name}",
+  "hour1": "1 時間",
+  "hour6": "6 時間",
+  "hour24": "24 時間",
+  "rangeHelp": "1 分ごとに 1 点。再起動またはこのリスナーの変更後は再集計されます",
+  "requests": "リクエスト数",
+  "bytesOut": "累計レスポンストラフィック",
+  "errors": "エラー（4xx / 5xx）",
+  "upstreams": "バックエンド",
+  "healthy": "正常",
+  "unavailable": "利用不可",
+  "upstreamMeta": "重み {weight} · 接続 {conns}",
+  "backup": "バックアップ",
+  "topIps": "送信元 IP トップ 10",
+  "topCountries": "国別トップ 10",
+  "noData": "データがありません",
+  "noDataGeo": "データがありません（GeoIP データベースのインポートが必要です）"
+}

@@ -1,0 +1,104 @@
+# Notification Center
+
+The Notification Center subscribes to Gately's internal event bus and, according to your rules, pushes events such as DDNS changes, certificate expiry, WAF blocks and process failures to Webhook, Telegram, Bark, WeCom, DingTalk, Feishu and email. The management UI is under the sidebar "System" group → "Notifications".
+
+## How it works
+
+1. Each module publishes events to the in-process event bus when its state changes. Publishing never blocks business logic.
+2. When the Notification Center receives an event, it checks the rules one by one: the rule is enabled, the event level is not lower than the rule's minimum level, and the event type matches the rule's event list.
+3. After a matching rule passes silence deduplication, the message is delivered to the enabled channels selected by the rule. If one event matches several rules, each channel is sent to only once.
+4. The result of each delivery (success, or the reason for failure) is written to "Recent deliveries", which keeps the latest 200 entries in memory. Failures are also written to the module log.
+
+A single delivery times out after 45 seconds.
+
+## Channels
+
+Click "Add channel", choose a type and fill in the fields. Every channel has a name (required), a remark and an enable switch. Secret fields are not shown again after saving; leaving them empty when editing keeps the original value.
+
+| Type | Required fields | Optional fields |
+| --- | --- | --- |
+| Webhook | Request URL | Request method (default GET; GET, POST, PUT or PATCH), headers (one `Key: Value` per line), body, success-match content, timeout (seconds, default 20), skip certificate verification |
+| Telegram | Bot Token, Chat ID | API URL (leave empty to use `https://api.telegram.org`) |
+| Bark | Device Key | Server URL (leave empty to use `https://api.day.app`) |
+| WeCom | Bot URL | None |
+| DingTalk | Bot URL | Signing secret (fill in when the bot has "signature" enabled) |
+| Feishu | Bot URL | Signing secret (fill in when the bot has "signature verification" enabled) |
+| Email | Server, recipients, and at least one of sender or username | Encryption, port, username, password |
+
+URL fields need a full address starting with `http://` or `https://`.
+
+### Webhook template variables
+
+The following variables can be used in the request URL and body, written as the variable name wrapped in curly braces (the `#` prefix form is also accepted):
+
+| Variable | Content |
+| --- | --- |
+| `title` | Title, in the form `[Gately] Event title` |
+| `message` | Detailed description of the event |
+| `text` | Full body, including description, source, level and time |
+| `type` | Event type, such as `ddns.changed` |
+| `source` | Event source |
+| `level` | Level: `info`, `warn` or `error` |
+| `time` | Time in RFC 3339 format |
+
+Extra fields carried by an event (such as `ip` and `container`) can also be used as variables. If a name collides with the table above, the table above takes precedence. Variable values in the URL are URL-escaped.
+
+### Email
+
+| Encryption | Value | Default port |
+| --- | --- | --- |
+| STARTTLS | `starttls` | 587 |
+| SSL/TLS | `tls` | 465 |
+| None | `none` | 25 |
+
+A port of 0 uses the default port for the chosen encryption. You can enter several recipients separated by commas. Emails are sent as UTF-8 plain text. PLAIN authentication is used when the server supports AUTH and a username is set; when the sender is empty, the username is used.
+
+### Signatures and response codes
+
+- DingTalk: once a signing secret is set, requests automatically carry `timestamp` and `sign`.
+- Feishu: once a signing secret is set, the request body automatically carries `timestamp` and `sign`.
+- WeCom, DingTalk, Feishu and Bark check the business return code in the response. An HTTP 200 with a business failure is also recorded as a failed delivery.
+
+## Rules
+
+Click "Add rule":
+
+| Field | Description |
+| --- | --- |
+| Name | Required |
+| Events | At least one. Pick specific event types, `*` for all events, or enter a wildcard such as `ddns.*`. Wildcards use Go `path.Match` syntax |
+| Minimum level | `info`, `warn` or `error`; empty means info. Events below this level are not pushed |
+| Channels | At least one |
+| Silence (seconds) | Within one rule, events of the same type from the same source are pushed only once in this period, and repeats are dropped. 0 disables deduplication |
+| Enabled | Switch |
+
+::: tip
+WAF blocks and upstream state changes can happen frequently. For rules covering them, set a silence time of 300 seconds or more.
+:::
+
+## Event types
+
+| Event type | Name | Level | Trigger |
+| --- | --- | --- | --- |
+| `ddns.changed` | Dynamic DNS: record updated | Info | A DDNS task updated its record successfully |
+| `ddns.failed` | Dynamic DNS: update failed | Error | A DDNS task failed to update |
+| `stun.changed` | STUN: traversal address changed | Info | The traversal address of a STUN rule changed |
+| `ssl.expiring` | Certificate: expiring soon | Warning | Less than 7 days of validity left; each certificate is reminded at most once every 24 hours |
+| `ssl.renew_failed` | Certificate: renewal failed | Error | Certificate issuance or renewal failed |
+| `waf.blocked` | WAF: request blocked | Warning | The WAF blocked a request, with the fields `ip`, `host` and `path` |
+| `upstream.down` | Reverse proxy: upstream down | Error | A backend of a Web service was judged unavailable |
+| `upstream.up` | Reverse proxy: upstream recovered | Info | An unavailable backend recovered |
+| `docker.exited` | Docker: container exited | Warning or Error | A container exited with a non-zero exit code (warning), or was killed for running out of memory (error) |
+| `process.exited` | Child process exited abnormally | Error | A child process managed by Gately exited abnormally and will be restarted automatically; the source is that process's log name |
+| `backup.done` | Backup: completed | Info | A scheduled or manual backup succeeded for all destinations; see [Configuration Backup](/en/docs/modules/backup) |
+| `backup.failed` | Backup: failed | Error | Backup packaging failed, or writing to any destination failed |
+| `auth.failed` | Authentication: repeated failures | Warning | A management UI login failed, with the `ip` field |
+| `auth.banned` | Authentication: IP banned | Warning | Repeated Web service authentication failures triggered an automatic ban |
+| `login.success` | Management UI: login succeeded | Info | A management UI login succeeded, with the `ip` and `user` fields |
+| `notify.test` | Test notification | Info | Produced by the channel's "Test" button; it does not take part in rule matching |
+
+## Sending a test
+
+The "Test" button on a channel card sends a message titled "Test notification" directly to that channel. It bypasses rules and works even if the channel is not enabled. On success, "Test notification sent" is shown; on failure, the specific error is shown. Test results also appear in "Recent deliveries", with "Test" in the rule column.
+
+The matching API is `POST /api/notify/channels/{key}/test`, which can be called with the `notify:write` scope of an [API token](/en/docs/reference/api).

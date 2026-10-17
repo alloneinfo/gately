@@ -1,0 +1,17 @@
+{
+  "fetchIp": "Get IPv{family}",
+  "method": "Method",
+  "typeUrl": "Query URL",
+  "typeInterface": "Network interface",
+  "typeCommand": "Command",
+  "urls": "Query URLs",
+  "urlsPlaceholder": "One per line, tried in order",
+  "interface": "Network interface",
+  "interfacePlaceholder": "Select a network interface",
+  "command": "Command",
+  "commandPlaceholder": "The output only needs to contain an IP, e.g. curl -s https://4.ipw.cn",
+  "regex": "Filter regex",
+  "regexPlaceholder": "Optional; leave empty to pick the first public address",
+  "testFetch": "Test fetch",
+  "fetchSuccess": "Fetched successfully: {ip}"
+}

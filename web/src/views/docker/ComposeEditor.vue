@@ -1,7 +1,7 @@
 <template>
   <el-dialog
     :model-value="modelValue"
-    :title="project ? `编辑 ${project} 的 Compose 文件` : '新建 Compose 项目'"
+    :title="project ? t('docker.compose.editor.editTitle', { project }) : t('docker.compose.editor.newTitle')"
     width="820px"
     :fullscreen="isMobile"
     top="4vh"
@@ -12,16 +12,16 @@
   >
     <div v-loading="loading">
       <el-form :label-position="labelPosition" label-width="80px" @submit.prevent>
-        <el-form-item v-if="!project" label="项目名" required>
-          <el-input v-model="name" placeholder="小写字母、数字、- 或 _" class="mono name" />
+        <el-form-item v-if="!project" :label="t('docker.compose.editor.projectName')" required>
+          <el-input v-model="name" :placeholder="t('docker.compose.editor.namePlaceholder')" class="mono name" />
         </el-form-item>
-        <el-form-item v-else label="文件">
+        <el-form-item v-else :label="t('docker.compose.editor.file')">
           <span class="mono path">{{ path }}</span>
-          <el-tag v-if="!writable" type="warning" class="gap-l">只读</el-tag>
+          <el-tag v-if="!writable" type="warning" class="gap-l">{{ t('docker.compose.editor.readOnly') }}</el-tag>
         </el-form-item>
-        <el-form-item label="内容" class="grow">
+        <el-form-item :label="t('docker.compose.editor.content')" class="grow">
           <div class="full">
-            <div v-if="!project" class="tpl"><el-button size="small" text type="primary" @click="content = sample">插入示例模板</el-button></div>
+            <div v-if="!project" class="tpl"><el-button size="small" text type="primary" @click="content = sample">{{ t('docker.compose.editor.insertSample') }}</el-button></div>
             <el-input v-model="content" type="textarea" :rows="isMobile ? 18 : 22" spellcheck="false" class="mono editor" :readonly="!!project && !writable" placeholder="services:&#10;  app:&#10;    image: nginx" />
           </div>
         </el-form-item>
@@ -29,12 +29,12 @@
     </div>
     <template #footer>
       <div class="foot">
-        <el-button @click="emit('update:modelValue', false)">取消</el-button>
+        <el-button @click="emit('update:modelValue', false)">{{ t('common.cancel') }}</el-button>
         <template v-if="project">
-          <el-button :icon="Save" :loading="saving" :disabled="!writable" @click="save(false)">保存</el-button>
-          <el-button type="primary" :icon="Rocket" :loading="saving" :disabled="!writable" @click="save(true)">保存并应用</el-button>
+          <el-button :icon="Save" :loading="saving" :disabled="!writable" @click="save(false)">{{ t('common.save') }}</el-button>
+          <el-button type="primary" :icon="Rocket" :loading="saving" :disabled="!writable" @click="save(true)">{{ t('docker.compose.editor.saveAndApply') }}</el-button>
         </template>
-        <el-button v-else type="primary" :icon="Rocket" :loading="saving" @click="create">创建并启动</el-button>
+        <el-button v-else type="primary" :icon="Rocket" :loading="saving" @click="create">{{ t('docker.compose.editor.createAndStart') }}</el-button>
       </div>
     </template>
   </el-dialog>
@@ -42,11 +42,14 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { Rocket, Save } from 'lucide-vue-next'
 import { api } from '../../api'
 import { useFormLayout } from '../../composables/useIsMobile'
 import { trackTask } from './tasks'
+
+const { t } = useI18n()
 
 const props = defineProps<{ modelValue: boolean; project?: string }>()
 const emit = defineEmits<{ 'update:modelValue': [v: boolean]; done: [] }>()
@@ -99,9 +102,9 @@ async function save(apply: boolean) {
     const r = await api.put<{ task?: string; ok?: boolean }>(`/api/docker/compose/${encodeURIComponent(props.project!)}/config${apply ? '?apply=1' : ''}`, { content: content.value })
     emit('update:modelValue', false)
     if (r?.task) {
-      trackTask(r.task, `应用 ${props.project}`, () => emit('done'))
+      trackTask(r.task, t('docker.compose.editor.applyTask', { project: props.project }), () => emit('done'))
     } else {
-      ElMessage.success('已保存')
+      ElMessage.success(t('common.saved'))
       emit('done')
     }
   } catch (e) {
@@ -114,18 +117,18 @@ async function save(apply: boolean) {
 async function create() {
   const n = name.value.trim()
   if (!/^[a-z0-9][a-z0-9_-]*$/.test(n)) {
-    ElMessage.warning('项目名只能包含小写字母、数字、- 和 _，且以字母或数字开头')
+    ElMessage.warning(t('docker.compose.editor.nameInvalid'))
     return
   }
   if (!content.value.trim()) {
-    ElMessage.warning('请填写 Compose 内容')
+    ElMessage.warning(t('docker.compose.editor.contentRequired'))
     return
   }
   saving.value = true
   try {
     const r = await api.post<{ task: string }>('/api/docker/compose/projects', { name: n, content: content.value })
     emit('update:modelValue', false)
-    trackTask(r.task, `创建项目 ${n}`, () => emit('done'))
+    trackTask(r.task, t('docker.compose.editor.createTask', { name: n }), () => emit('done'))
   } catch (e) {
     ElMessage.error((e as Error).message)
   } finally {

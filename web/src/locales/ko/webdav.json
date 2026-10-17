@@ -1,0 +1,11 @@
+{
+  "service": "서비스",
+  "listenIpPlaceholder": "비워 두면 모든 주소",
+  "listenIp": "수신 주소",
+  "port": "포트",
+  "statusOff": "사용 안 함",
+  "statusError": "시작 실패",
+  "statusNotRunning": "실행 중 아님",
+  "desc": "이 기기의 디렉터리를 WebDAV 프로토콜로 컴퓨터, 휴대폰, 플레이어와 공유합니다",
+  "tlsHelp": "인증서는 접속 도메인에 맞춰 「SSL 인증서」에서 선택합니다"
+}

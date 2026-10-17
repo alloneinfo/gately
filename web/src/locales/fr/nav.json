@@ -1,0 +1,103 @@
+{
+  "login": "Connexion",
+  "groups": {
+    "network": "Réseau",
+    "tunnel": "Réseaux et tunnels",
+    "web": "Web",
+    "storage": "Stockage réseau",
+    "tools": "Outils",
+    "system": "Système"
+  },
+  "items": {
+    "overview": {
+      "title": "Vue d'ensemble"
+    },
+    "portforward": {
+      "title": "Redirection de ports",
+      "desc": "Redirection de ports TCP / UDP et répartition de charge"
+    },
+    "ddns": {
+      "title": "DNS dynamique",
+      "desc": "Met à jour automatiquement les enregistrements DNS quand votre IP publique change"
+    },
+    "stun": {
+      "title": "Traversée STUN",
+      "desc": "Accédez à des services derrière un NAT1 sans IP publique"
+    },
+    "tailscale": {
+      "title": "Tailscale",
+      "desc": "Rejoindre un réseau Tailscale / Headscale"
+    },
+    "frp": {
+      "title": "frp",
+      "desc": "Traversée NAT frpc / frps"
+    },
+    "cloudflared": {
+      "title": "Tunnel Cloudflare",
+      "desc": "Publiez des services internes sans IP publique"
+    },
+    "web": {
+      "title": "Services Web",
+      "desc": "Proxy inverse, redirections et sites statiques"
+    },
+    "waf": {
+      "title": "Pare-feu WAF",
+      "desc": "Pare-feu applicatif web basé sur OWASP CRS"
+    },
+    "ssl": {
+      "title": "Certificats SSL",
+      "desc": "Émission et renouvellement automatiques via ACME"
+    },
+    "storage": {
+      "title": "Stockage",
+      "desc": "Montez des dossiers locaux ou du WebDAV distant et gérez les fichiers en ligne"
+    },
+    "webdav": {
+      "title": "WebDAV",
+      "desc": "Service de partage de fichiers WebDAV"
+    },
+    "ftp": {
+      "title": "Service FTP",
+      "desc": "Service de partage de fichiers FTP / FTPS"
+    },
+    "wol": {
+      "title": "Wake-on-LAN",
+      "desc": "Réveillez à distance les appareils de votre réseau local"
+    },
+    "terminal": {
+      "title": "Terminal Web",
+      "desc": "SSH et shell local dans votre navigateur"
+    },
+    "nettools": {
+      "title": "Diagnostic réseau",
+      "desc": "Ping, traceroute, test de port, DNS et analyse du réseau local"
+    },
+    "docker": {
+      "title": "Docker",
+      "desc": "Gestion des conteneurs et mise à jour des images"
+    },
+    "cron": {
+      "title": "Tâches planifiées",
+      "desc": "Exécutez des commandes ou des requêtes HTTP selon un calendrier"
+    },
+    "notify": {
+      "title": "Notifications",
+      "desc": "Envoyez les événements vers Telegram, e-mail, WeCom, etc."
+    },
+    "logs": {
+      "title": "Journaux système"
+    },
+    "apiTokens": {
+      "title": "Jetons d'API"
+    },
+    "apiDocs": {
+      "title": "Documentation de l'API"
+    },
+    "settings": {
+      "title": "Paramètres"
+    },
+    "about": {
+      "title": "À propos"
+    }
+  }
+}

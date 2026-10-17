@@ -1,28 +1,28 @@
 <template>
   <div>
     <div class="toolbar">
-      <el-input v-model="keyword" placeholder="搜索名称、镜像或项目" clearable :prefix-icon="Search" class="t-search" />
+      <el-input v-model="keyword" :placeholder="t('docker.container.list.search')" clearable :prefix-icon="Search" class="t-search" />
       <el-radio-group v-model="stateFilter" class="t-filter">
-        <el-radio-button value="all">全部</el-radio-button>
-        <el-radio-button value="running">运行中</el-radio-button>
-        <el-radio-button value="stopped">已停止</el-radio-button>
+        <el-radio-button value="all">{{ t('docker.container.list.all') }}</el-radio-button>
+        <el-radio-button value="running">{{ t('common.running') }}</el-radio-button>
+        <el-radio-button value="stopped">{{ t('common.stopped') }}</el-radio-button>
       </el-radio-group>
-      <el-checkbox v-model="grouped">按项目分组</el-checkbox>
+      <el-checkbox v-model="grouped">{{ t('docker.container.list.groupByProject') }}</el-checkbox>
       <div class="t-ops">
-        <el-button type="primary" :icon="Plus" @click="openForm()">新建容器</el-button>
-        <el-button :icon="SearchCheck" :loading="checkingAll" @click="checkAll">检查全部更新</el-button>
-        <el-button :icon="ArrowUpCircle" :disabled="!selected.length" @click="upgradeSelected">升级选中{{ selected.length ? ` (${selected.length})` : '' }}</el-button>
-        <el-button :icon="RefreshCw" :loading="loading" @click="load">刷新</el-button>
+        <el-button type="primary" :icon="Plus" @click="openForm()">{{ t('docker.container.list.newContainer') }}</el-button>
+        <el-button :icon="SearchCheck" :loading="checkingAll" @click="checkAll">{{ t('docker.container.list.checkAll') }}</el-button>
+        <el-button :icon="ArrowUpCircle" :disabled="!selected.length" @click="upgradeSelected">{{ selected.length ? t('docker.container.list.upgradeSelectedCount', { count: selected.length }) : t('docker.container.list.upgradeSelected') }}</el-button>
+        <el-button :icon="RefreshCw" :loading="loading" @click="load">{{ t('common.refresh') }}</el-button>
       </div>
     </div>
 
     <div v-loading="loading && !containers.length" class="groups">
-      <el-empty v-if="!loading && !filtered.length" description="没有容器" />
+      <el-empty v-if="!loading && !filtered.length" :description="t('docker.container.list.empty')" />
       <div v-for="g in groups" :key="g.key" class="group">
         <button v-if="grouped" type="button" class="g-head" @click="toggle(g.key)">
           <ChevronRight :size="16" class="chev" :class="{ open: !collapsed[g.key] }" />
           <span class="g-name">{{ g.name }}</span>
-          <span class="g-count">{{ g.items.length }} 个容器 · {{ g.items.filter((c) => c.state === 'running').length }} 运行中</span>
+          <span class="g-count">{{ t('docker.container.list.groupCount', { total: g.items.length, running: g.items.filter((c) => c.state === 'running').length }) }}</span>
         </button>
         <div v-show="!grouped || !collapsed[g.key]" class="card-list">
           <ContainerCard v-for="c in g.items" :key="c.id" :c="c" :selected="selectedIds.has(c.id)" :hide-project="grouped" @command="onCommand" @select="onSelect" />
@@ -33,25 +33,27 @@
     <ContainerDetail v-model="detailVisible" :container="detailTarget" :initial-tab="detailTab" />
     <ContainerForm v-model="formVisible" :edit-id="formEditId" :edit-name="formEditName" @saved="load" />
 
-    <el-dialog v-model="delVisible" title="删除容器" width="440px" :fullscreen="false" append-to-body>
-      <p class="dlg-text">确定删除容器 <b>{{ delTarget?.name }}</b>？运行中的容器会被强制停止，该操作无法恢复。</p>
-      <el-checkbox v-model="delVolumes">同时删除匿名卷</el-checkbox>
+    <el-dialog v-model="delVisible" :title="t('docker.container.list.deleteTitle')" width="440px" :fullscreen="false" append-to-body>
+      <i18n-t keypath="docker.container.list.deleteText" tag="p" class="dlg-text">
+        <template #name><b>{{ delTarget?.name }}</b></template>
+      </i18n-t>
+      <el-checkbox v-model="delVolumes">{{ t('docker.container.list.deleteVolumes') }}</el-checkbox>
       <template #footer>
-        <el-button @click="delVisible = false">取消</el-button>
-        <el-button type="danger" :loading="delBusy" @click="doDelete">删除</el-button>
+        <el-button @click="delVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button type="danger" :loading="delBusy" @click="doDelete">{{ t('common.delete') }}</el-button>
       </template>
     </el-dialog>
 
-    <el-dialog v-model="commitVisible" title="提交为镜像" width="480px" :fullscreen="isMobile" append-to-body>
+    <el-dialog v-model="commitVisible" :title="t('docker.container.list.commitTitle')" width="480px" :fullscreen="isMobile" append-to-body>
       <el-form :label-position="labelPosition" label-width="80px">
-        <el-form-item label="仓库名" required><el-input v-model="commitForm.repo" placeholder="例如 myapp/web" class="mono" /></el-form-item>
-        <el-form-item label="标签"><el-input v-model="commitForm.tag" placeholder="latest" class="mono" /></el-form-item>
-        <el-form-item label="备注"><el-input v-model="commitForm.comment" /></el-form-item>
-        <el-form-item label="暂停容器"><el-switch v-model="commitForm.pause" /><span class="help">提交期间暂停以保证一致性</span></el-form-item>
+        <el-form-item :label="t('docker.container.list.repo')" required><el-input v-model="commitForm.repo" :placeholder="t('docker.container.list.repoPlaceholder')" class="mono" /></el-form-item>
+        <el-form-item :label="t('docker.container.list.tag')"><el-input v-model="commitForm.tag" placeholder="latest" class="mono" /></el-form-item>
+        <el-form-item :label="t('common.remark')"><el-input v-model="commitForm.comment" /></el-form-item>
+        <el-form-item :label="t('docker.container.list.pauseContainer')"><el-switch v-model="commitForm.pause" /><span class="help">{{ t('docker.container.list.pauseHelp') }}</span></el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="commitVisible = false">取消</el-button>
-        <el-button type="primary" :loading="commitBusy" @click="doCommit">提交</el-button>
+        <el-button @click="commitVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button type="primary" :loading="commitBusy" @click="doCommit">{{ t('docker.container.list.commit') }}</el-button>
       </template>
     </el-dialog>
   </div>
@@ -59,6 +61,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ArrowUpCircle, ChevronRight, Plus, RefreshCw, Search, SearchCheck } from 'lucide-vue-next'
 import { api } from '../../api'
@@ -69,6 +72,8 @@ import ContainerForm from './ContainerForm.vue'
 import { reportError } from './state'
 import { trackTask } from './tasks'
 import type { ContainerView } from './types'
+
+const { t } = useI18n()
 
 const { isMobile, labelPosition } = useFormLayout()
 const containers = ref<ContainerView[]>([])
@@ -129,7 +134,7 @@ const groups = computed(() => {
     }
     return a.localeCompare(b)
   })
-  return keys.map((key) => ({ key: key || '__none', name: key || '独立容器', items: map.get(key)! }))
+  return keys.map((key) => ({ key: key || '__none', name: key || t('docker.container.list.standalone'), items: map.get(key)! }))
 })
 
 function toggle(key: string) {
@@ -175,7 +180,7 @@ function openDetail(c: ContainerView, tab: string) {
 async function simpleAction(c: ContainerView, action: string) {
   try {
     await api.post(`/api/docker/containers/${c.id}/${action}`)
-    ElMessage.success('已执行')
+    ElMessage.success(t('docker.container.list.executed'))
     await load()
   } catch (e) {
     ElMessage.error((e as Error).message)
@@ -200,10 +205,10 @@ async function onCommand(c: ContainerView, cmd: string) {
       await simpleAction(c, cmd)
       break
     case 'stop':
-      await confirmThen(`停止 ${c.name}？`, '停止容器', () => simpleAction(c, 'stop'))
+      await confirmThen(t('docker.container.list.stopConfirm', { name: c.name }), t('docker.container.list.stopTitle'), () => simpleAction(c, 'stop'))
       break
     case 'kill':
-      await confirmThen(`强制停止（kill）${c.name}？进程将被立即终止，可能丢失未保存的数据。`, '强制停止', () => simpleAction(c, 'kill'))
+      await confirmThen(t('docker.container.list.killConfirm', { name: c.name }), t('docker.container.list.killTitle'), () => simpleAction(c, 'kill'))
       break
     case 'detail':
       openDetail(c, 'overview')
@@ -243,7 +248,7 @@ async function onCommand(c: ContainerView, cmd: string) {
 
 async function rename(c: ContainerView) {
   try {
-    const { value } = await ElMessageBox.prompt('新的容器名称', '重命名', { inputValue: c.name, inputPattern: /^[a-zA-Z0-9][a-zA-Z0-9_.-]*$/, inputErrorMessage: '仅允许字母、数字、_ . -' })
+    const { value } = await ElMessageBox.prompt(t('docker.container.list.renamePrompt'), t('docker.container.list.renameTitle'), { inputValue: c.name, inputPattern: /^[a-zA-Z0-9][a-zA-Z0-9_.-]*$/, inputErrorMessage: t('docker.container.list.renameInvalid') })
     await api.post(`/api/docker/containers/${c.id}/rename`, { name: value })
     await load()
   } catch (e) {
@@ -261,7 +266,7 @@ async function doDelete() {
   try {
     await api.del(`/api/docker/containers/${delTarget.value.id}${delVolumes.value ? '?volumes=1' : ''}`)
     delVisible.value = false
-    ElMessage.success('已删除')
+    ElMessage.success(t('common.deleted'))
     await load()
   } catch (e) {
     ElMessage.error((e as Error).message)
@@ -272,13 +277,13 @@ async function doDelete() {
 
 async function doCommit() {
   if (!commitTarget.value || !commitForm.repo.trim()) {
-    ElMessage.warning('请填写仓库名')
+    ElMessage.warning(t('docker.container.list.repoRequired'))
     return
   }
   commitBusy.value = true
   try {
     await api.post(`/api/docker/containers/${commitTarget.value.id}/commit`, { repo: commitForm.repo.trim(), tag: commitForm.tag.trim() || 'latest', comment: commitForm.comment, pause: commitForm.pause })
-    ElMessage.success('已提交为镜像')
+    ElMessage.success(t('docker.container.list.committed'))
     commitVisible.value = false
   } catch (e) {
     ElMessage.error((e as Error).message)
@@ -300,11 +305,11 @@ async function check(c: ContainerView) {
 }
 
 async function upgrade(c: ContainerView) {
-  await confirmThen(`将拉取最新镜像并按原配置重建 ${c.name}，期间服务会短暂中断；新容器启动失败时自动恢复旧容器。`, '升级容器', async () => {
+  await confirmThen(t('docker.container.list.upgradeConfirm', { name: c.name }), t('docker.container.list.upgradeTitle'), async () => {
     c.busy = true
     try {
       await api.post(`/api/docker/containers/${c.id}/upgrade`)
-      ElMessage.success('升级完成')
+      ElMessage.success(t('docker.container.list.upgradeDone'))
       await load()
     } catch (e) {
       ElMessage.error((e as Error).message)
@@ -318,7 +323,7 @@ async function checkAll() {
   checkingAll.value = true
   try {
     const r = await api.post<{ task: string }>('/api/docker/containers/check-all')
-    trackTask(r.task, '检查全部容器更新', () => {
+    trackTask(r.task, t('docker.container.list.checkAllTask'), () => {
       checkingAll.value = false
       load()
     })
@@ -329,10 +334,10 @@ async function checkAll() {
 }
 
 async function upgradeSelected() {
-  await confirmThen(`将依次升级选中的 ${selected.value.length} 个容器（仅升级有新版本的会实际重建），期间相关服务会短暂中断。`, '批量升级', async () => {
+  await confirmThen(t('docker.container.list.batchConfirm', { count: selected.value.length }), t('docker.container.list.batchTitle'), async () => {
     try {
       const r = await api.post<{ task: string }>('/api/docker/containers/upgrade-batch', { ids: selected.value })
-      trackTask(r.task, '批量升级容器', () => load())
+      trackTask(r.task, t('docker.container.list.batchTask'), () => load())
     } catch (e) {
       ElMessage.error((e as Error).message)
     }

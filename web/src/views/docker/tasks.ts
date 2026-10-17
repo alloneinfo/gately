@@ -2,6 +2,7 @@
 import { reactive } from 'vue'
 import { ElMessage } from 'element-plus'
 import { api } from '../../api'
+import { t } from '../../i18n'
 import type { DockerTask } from './types'
 
 export interface TrackedTask extends DockerTask {
@@ -10,28 +11,28 @@ export interface TrackedTask extends DockerTask {
 }
 
 export const trackedTasks = reactive<TrackedTask[]>([])
-const callbacks = new Map<string, (t: DockerTask) => void>()
+const callbacks = new Map<string, (task: DockerTask) => void>()
 const timers = new Map<string, number>()
 
 async function poll(id: string) {
   try {
-    const t = await api.get<DockerTask>(`/api/docker/tasks/${id}`)
+    const task = await api.get<DockerTask>(`/api/docker/tasks/${id}`)
     const cur = trackedTasks.find((x) => x.id === id)
     if (cur) {
-      Object.assign(cur, t)
+      Object.assign(cur, task)
     }
-    if (t.status === 'running') {
+    if (task.status === 'running') {
       timers.set(id, window.setTimeout(() => poll(id), 1000))
       return
     }
     timers.delete(id)
     const cb = callbacks.get(id)
     callbacks.delete(id)
-    if (t.status === 'error') {
-      ElMessage.error(t.error || `${t.title} 失败`)
+    if (task.status === 'error') {
+      ElMessage.error(task.error || t('docker.task.failed', { title: task.title }))
     }
     if (cb) {
-      cb(t)
+      cb(task)
     }
   } catch (e) {
     // 轮询失败（多为网络抖动）时稍后重试，任务不存在则放弃
@@ -50,7 +51,7 @@ async function poll(id: string) {
 }
 
 // trackTask 开始跟踪一个任务，结束（成功或失败）后调用 onEnd。
-export function trackTask(id: string, title: string, onEnd?: (t: DockerTask) => void) {
+export function trackTask(id: string, title: string, onEnd?: (task: DockerTask) => void) {
   trackedTasks.unshift({ id, kind: '', title, status: 'running', started: new Date().toISOString(), lines: [], dismissed: false })
   if (trackedTasks.length > 5) {
     trackedTasks.length = 5
@@ -65,9 +66,9 @@ export function trackTask(id: string, title: string, onEnd?: (t: DockerTask) => 
 export async function resumeRunningTasks() {
   try {
     const list = await api.get<DockerTask[]>('/api/docker/tasks')
-    for (const t of list ?? []) {
-      if (t.status === 'running' && !trackedTasks.some((x) => x.id === t.id)) {
-        trackTask(t.id, t.title)
+    for (const task of list ?? []) {
+      if (task.status === 'running' && !trackedTasks.some((x) => x.id === task.id)) {
+        trackTask(task.id, task.title)
       }
     }
   } catch {

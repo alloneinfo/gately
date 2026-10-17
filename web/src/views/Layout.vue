@@ -2,7 +2,7 @@
   <div class="layout" :class="{ collapsed }">
     <aside v-if="!isMobile" class="aside">
       <SideNav :collapsed="collapsed" />
-      <button class="collapse-btn" :title="collapsed ? '展开侧栏' : '收起侧栏'" @click="toggleCollapse">
+      <button class="collapse-btn" :title="collapsed ? t('layout.expandSidebar') : t('layout.collapseSidebar')" @click="toggleCollapse">
         <PanelLeftOpen v-if="collapsed" :size="18" />
         <PanelLeftClose v-else :size="18" />
       </button>
@@ -14,7 +14,7 @@
     <div class="main">
       <header class="header">
         <div class="header-left">
-          <button v-if="isMobile" class="icon-btn" aria-label="打开菜单" @click="drawer = true">
+          <button v-if="isMobile" class="icon-btn" :aria-label="t('layout.openMenu')" @click="drawer = true">
             <Menu :size="20" />
           </button>
           <template v-if="isMobile">
@@ -24,10 +24,11 @@
           <template v-else>
             <span v-if="group" class="crumb">{{ group }}</span>
             <ChevronRight v-if="group" :size="14" class="crumb-sep" />
-            <span class="header-title">{{ route.meta.title }}</span>
+            <span class="header-title">{{ t(route.meta.titleKey as string) }}</span>
           </template>
         </div>
         <div class="header-right">
+          <LocaleSwitcher />
           <ThemePicker />
           <el-dropdown trigger="click" @command="onCommand">
             <button class="user-btn">
@@ -37,9 +38,9 @@
             </button>
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item command="password" :icon="KeyRound">修改密码</el-dropdown-item>
-                <el-dropdown-item command="settings" :icon="Settings">系统设置</el-dropdown-item>
-                <el-dropdown-item command="logout" :icon="LogOut" divided>退出登录</el-dropdown-item>
+                <el-dropdown-item command="password" :icon="KeyRound">{{ t('layout.changePassword') }}</el-dropdown-item>
+                <el-dropdown-item command="settings" :icon="Settings">{{ t('layout.systemSettings') }}</el-dropdown-item>
+                <el-dropdown-item command="logout" :icon="LogOut" divided>{{ t('layout.logout') }}</el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
@@ -55,15 +56,18 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { ChevronDown, ChevronRight, KeyRound, LogOut, Menu, PanelLeftClose, PanelLeftOpen, Settings } from 'lucide-vue-next'
 import { api } from '../api'
 import SideNav from '../components/SideNav.vue'
 import AppLogo from '../components/AppLogo.vue'
 import ThemePicker from '../components/ThemePicker.vue'
+import LocaleSwitcher from '../components/LocaleSwitcher.vue'
 import { groupByPath } from '../nav'
 import { useIsMobile } from '../composables/useIsMobile'
 
 const route = useRoute()
+const { t } = useI18n()
 const router = useRouter()
 const isMobile = useIsMobile()
 const username = ref('')

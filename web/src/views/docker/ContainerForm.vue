@@ -1,7 +1,7 @@
 <template>
   <el-dialog
     :model-value="modelValue"
-    :title="editId ? `编辑容器 ${editName}` : '新建容器'"
+    :title="editId ? t('docker.container.form.editTitle', { name: editName }) : t('docker.container.form.newTitle')"
     :width="'720px'"
     :fullscreen="isMobile"
     top="4vh"
@@ -10,142 +10,142 @@
     @update:model-value="(v: boolean) => emit('update:modelValue', v)"
     @open="onOpen"
   >
-    <el-alert v-if="editId" type="warning" :closable="false" show-icon class="gap" title="保存后将重建容器" description="容器会按新配置删除并重新创建，期间服务短暂中断，匿名卷之外的数据卷与挂载保持不变。" />
+    <el-alert v-if="editId" type="warning" :closable="false" show-icon class="gap" :title="t('docker.container.form.rebuildAlert')" :description="t('docker.container.form.rebuildAlertDesc')" />
     <div v-loading="loadingDetail">
       <el-form :model="f" :label-position="labelPosition" label-width="96px" class="ct-form">
         <el-collapse v-model="opened">
-          <el-collapse-item title="基础" name="basic">
-            <el-form-item label="名称"><el-input v-model="f.name" placeholder="留空则由 Docker 随机命名" /></el-form-item>
-            <el-form-item label="镜像" required><el-input v-model="f.image" placeholder="例如 nginx:latest" class="mono" /></el-form-item>
-            <el-form-item v-if="!editId" label="拉取镜像">
+          <el-collapse-item :title="t('docker.container.form.sectionBasic')" name="basic">
+            <el-form-item :label="t('common.name')"><el-input v-model="f.name" :placeholder="t('docker.container.form.namePlaceholder')" /></el-form-item>
+            <el-form-item :label="t('docker.container.form.image')" required><el-input v-model="f.image" :placeholder="t('docker.container.form.imagePlaceholder')" class="mono" /></el-form-item>
+            <el-form-item v-if="!editId" :label="t('docker.container.form.pull')">
               <el-switch v-model="f.pull" />
-              <span class="help">镜像不存在时先拉取（可能耗时，请耐心等待）</span>
+              <span class="help">{{ t('docker.container.form.pullHelp') }}</span>
             </el-form-item>
-            <el-form-item v-if="!editId" label="创建后启动"><el-switch v-model="f.autoStart" /></el-form-item>
-            <el-form-item label="重启策略">
+            <el-form-item v-if="!editId" :label="t('docker.container.form.autoStart')"><el-switch v-model="f.autoStart" /></el-form-item>
+            <el-form-item :label="t('docker.container.form.restartPolicy')">
               <el-select v-model="f.restart" class="w-select">
-                <el-option label="不自动重启 (no)" value="no" />
-                <el-option label="总是重启 (always)" value="always" />
-                <el-option label="除非手动停止 (unless-stopped)" value="unless-stopped" />
-                <el-option label="失败时重启 (on-failure)" value="on-failure" />
+                <el-option :label="t('docker.container.form.restartNo')" value="no" />
+                <el-option :label="t('docker.container.form.restartAlways')" value="always" />
+                <el-option :label="t('docker.container.form.restartUnlessStopped')" value="unless-stopped" />
+                <el-option :label="t('docker.container.form.restartOnFailure')" value="on-failure" />
               </el-select>
               <el-input-number v-if="f.restart === 'on-failure'" v-model="f.restartMaxRetries" :min="0" class="gap-l" />
             </el-form-item>
           </el-collapse-item>
 
-          <el-collapse-item title="命令" name="cmd">
-            <el-form-item label="Command"><el-input v-model="f.command" placeholder="留空使用镜像默认" class="mono" /></el-form-item>
-            <el-form-item label="Entrypoint"><el-input v-model="f.entrypoint" placeholder="留空使用镜像默认" class="mono" /></el-form-item>
-            <el-form-item label="工作目录"><el-input v-model="f.workdir" placeholder="/app" class="mono" /></el-form-item>
-            <el-form-item label="用户"><el-input v-model="f.user" placeholder="例如 1000:1000" class="mono" /></el-form-item>
-            <el-form-item label="主机名"><el-input v-model="f.hostname" /></el-form-item>
+          <el-collapse-item :title="t('docker.container.form.sectionCmd')" name="cmd">
+            <el-form-item label="Command"><el-input v-model="f.command" :placeholder="t('docker.container.form.defaultPlaceholder')" class="mono" /></el-form-item>
+            <el-form-item label="Entrypoint"><el-input v-model="f.entrypoint" :placeholder="t('docker.container.form.defaultPlaceholder')" class="mono" /></el-form-item>
+            <el-form-item :label="t('docker.container.form.workdir')"><el-input v-model="f.workdir" placeholder="/app" class="mono" /></el-form-item>
+            <el-form-item :label="t('docker.container.form.user')"><el-input v-model="f.user" :placeholder="t('docker.container.form.userPlaceholder')" class="mono" /></el-form-item>
+            <el-form-item :label="t('docker.container.form.hostname')"><el-input v-model="f.hostname" /></el-form-item>
             <el-form-item label="TTY"><el-switch v-model="f.tty" /></el-form-item>
-            <el-form-item label="保持 stdin"><el-switch v-model="f.stdinOpen" /></el-form-item>
+            <el-form-item :label="t('docker.container.form.stdinOpen')"><el-switch v-model="f.stdinOpen" /></el-form-item>
           </el-collapse-item>
 
-          <el-collapse-item :title="`端口映射 (${f.ports.length})`" name="ports">
+          <el-collapse-item :title="t('docker.container.form.portsTitle', { count: f.ports.length })" name="ports">
             <div v-for="(p, i) in f.ports" :key="i" class="row">
-              <el-input v-model="p.hostIp" placeholder="主机 IP（可空）" class="c-ip" />
-              <el-input-number v-model="p.host" :min="0" :max="65535" :controls="false" placeholder="主机端口" class="c-port" />
-              <el-input-number v-model="p.container" :min="1" :max="65535" :controls="false" placeholder="容器端口" class="c-port" />
+              <el-input v-model="p.hostIp" :placeholder="t('docker.container.form.hostIp')" class="c-ip" />
+              <el-input-number v-model="p.host" :min="0" :max="65535" :controls="false" :placeholder="t('docker.container.form.hostPort')" class="c-port" />
+              <el-input-number v-model="p.container" :min="1" :max="65535" :controls="false" :placeholder="t('docker.container.form.containerPort')" class="c-port" />
               <el-select v-model="p.proto" class="c-proto">
                 <el-option label="TCP" value="tcp" />
                 <el-option label="UDP" value="udp" />
               </el-select>
-              <el-button text type="danger" :icon="Trash2" class="c-del" aria-label="删除" @click="f.ports.splice(i, 1)" />
+              <el-button text type="danger" :icon="Trash2" class="c-del" :aria-label="t('common.delete')" @click="f.ports.splice(i, 1)" />
             </div>
-            <el-button :icon="Plus" @click="f.ports.push({ hostIp: '', host: null, container: null, proto: 'tcp' })">添加端口</el-button>
+            <el-button :icon="Plus" @click="f.ports.push({ hostIp: '', host: null, container: null, proto: 'tcp' })">{{ t('docker.container.form.addPort') }}</el-button>
           </el-collapse-item>
 
-          <el-collapse-item :title="`挂载 (${f.volumes.length})`" name="mounts">
+          <el-collapse-item :title="t('docker.container.form.mountsTitle', { count: f.volumes.length })" name="mounts">
             <div v-for="(v, i) in f.volumes" :key="i" class="row">
               <el-select v-model="v.type" class="c-type" @change="v.source = ''">
-                <el-option label="目录 (bind)" value="bind" />
-                <el-option label="卷 (volume)" value="volume" />
+                <el-option :label="t('docker.container.form.typeBind')" value="bind" />
+                <el-option :label="t('docker.container.form.typeVolume')" value="volume" />
               </el-select>
-              <el-select v-if="v.type === 'volume'" v-model="v.source" filterable allow-create default-first-option placeholder="卷名（可选择或输入新卷名）" class="c-grow">
+              <el-select v-if="v.type === 'volume'" v-model="v.source" filterable allow-create default-first-option :placeholder="t('docker.container.form.volumePlaceholder')" class="c-grow">
                 <el-option v-for="n in volumeNames" :key="n" :label="n" :value="n" />
               </el-select>
-              <el-input v-else v-model="v.source" placeholder="主机路径 /data" class="c-grow mono" />
-              <el-input v-model="v.target" placeholder="容器路径 /data" class="c-grow mono" />
-              <el-checkbox v-model="v.readOnly">只读</el-checkbox>
-              <el-button text type="danger" :icon="Trash2" class="c-del" aria-label="删除" @click="f.volumes.splice(i, 1)" />
+              <el-input v-else v-model="v.source" :placeholder="t('docker.container.form.hostPath')" class="c-grow mono" />
+              <el-input v-model="v.target" :placeholder="t('docker.container.form.containerPath')" class="c-grow mono" />
+              <el-checkbox v-model="v.readOnly">{{ t('docker.container.form.readOnly') }}</el-checkbox>
+              <el-button text type="danger" :icon="Trash2" class="c-del" :aria-label="t('common.delete')" @click="f.volumes.splice(i, 1)" />
             </div>
-            <el-button :icon="Plus" @click="f.volumes.push({ type: 'bind', source: '', target: '', readOnly: false })">添加挂载</el-button>
+            <el-button :icon="Plus" @click="f.volumes.push({ type: 'bind', source: '', target: '', readOnly: false })">{{ t('docker.container.form.addMount') }}</el-button>
           </el-collapse-item>
 
-          <el-collapse-item :title="`环境变量 (${envRows.length})`" name="env">
+          <el-collapse-item :title="t('docker.container.form.envTitle', { count: envRows.length })" name="env">
             <div v-for="(e, i) in envRows" :key="i" class="row">
               <el-input v-model="e.k" placeholder="KEY" class="c-grow mono" />
               <el-input v-model="e.v" placeholder="VALUE" class="c-grow mono" />
-              <el-button text type="danger" :icon="Trash2" class="c-del" aria-label="删除" @click="envRows.splice(i, 1)" />
+              <el-button text type="danger" :icon="Trash2" class="c-del" :aria-label="t('common.delete')" @click="envRows.splice(i, 1)" />
             </div>
             <div class="btns">
-              <el-button :icon="Plus" @click="envRows.push({ k: '', v: '' })">添加变量</el-button>
-              <el-button :icon="ClipboardPaste" @click="pasteVisible = !pasteVisible">批量粘贴</el-button>
+              <el-button :icon="Plus" @click="envRows.push({ k: '', v: '' })">{{ t('docker.container.form.addVar') }}</el-button>
+              <el-button :icon="ClipboardPaste" @click="pasteVisible = !pasteVisible">{{ t('docker.container.form.bulkPaste') }}</el-button>
             </div>
             <div v-if="pasteVisible" class="paste">
-              <el-input v-model="pasteText" type="textarea" :rows="5" placeholder="每行一个 KEY=VALUE，# 开头为注释" class="mono" />
-              <el-button type="primary" class="gap-t" @click="applyPaste">导入</el-button>
+              <el-input v-model="pasteText" type="textarea" :rows="5" :placeholder="t('docker.container.form.pastePlaceholder')" class="mono" />
+              <el-button type="primary" class="gap-t" @click="applyPaste">{{ t('common.import') }}</el-button>
             </div>
           </el-collapse-item>
 
-          <el-collapse-item title="网络" name="net">
-            <el-form-item label="主网络">
+          <el-collapse-item :title="t('docker.container.form.sectionNet')" name="net">
+            <el-form-item :label="t('docker.container.form.primaryNet')">
               <el-select v-model="f.network" filterable allow-create default-first-option placeholder="bridge" class="w-select">
                 <el-option v-for="n in networkNames" :key="n" :label="n" :value="n" />
               </el-select>
             </el-form-item>
-            <el-form-item label="额外网络">
+            <el-form-item :label="t('docker.container.form.extraNets')">
               <el-select v-model="f.networks" multiple filterable allow-create default-first-option class="w-select">
                 <el-option v-for="n in networkNames" :key="n" :label="n" :value="n" />
               </el-select>
             </el-form-item>
-            <el-form-item label="固定 IP"><el-input v-model="f.ip" placeholder="可空，需自定义网络" class="mono" /></el-form-item>
-            <el-form-item label="别名">
-              <el-select v-model="f.aliases" multiple filterable allow-create default-first-option :reserve-keyword="false" placeholder="输入后回车" class="w-select" />
+            <el-form-item :label="t('docker.container.form.fixedIp')"><el-input v-model="f.ip" :placeholder="t('docker.container.form.fixedIpPlaceholder')" class="mono" /></el-form-item>
+            <el-form-item :label="t('docker.container.form.aliases')">
+              <el-select v-model="f.aliases" multiple filterable allow-create default-first-option :reserve-keyword="false" :placeholder="t('docker.container.form.aliasPlaceholder')" class="w-select" />
             </el-form-item>
             <el-form-item label="DNS">
-              <el-select v-model="f.dns" multiple filterable allow-create default-first-option :reserve-keyword="false" placeholder="例如 8.8.8.8" class="w-select" />
+              <el-select v-model="f.dns" multiple filterable allow-create default-first-option :reserve-keyword="false" :placeholder="t('docker.container.form.dnsPlaceholder')" class="w-select" />
             </el-form-item>
           </el-collapse-item>
 
-          <el-collapse-item title="高级" name="adv">
-            <el-form-item label="特权模式">
+          <el-collapse-item :title="t('docker.container.form.sectionAdv')" name="adv">
+            <el-form-item :label="t('docker.container.form.privileged')">
               <el-switch v-model="f.privileged" />
-              <span class="help">特权容器拥有宿主机几乎全部权限，请谨慎开启</span>
+              <span class="help">{{ t('docker.container.form.privilegedHelp') }}</span>
             </el-form-item>
-            <el-form-item label="添加能力">
+            <el-form-item :label="t('docker.container.form.capAdd')">
               <el-select v-model="f.capAdd" multiple filterable allow-create default-first-option class="w-select">
                 <el-option v-for="c in caps" :key="c" :label="c" :value="c" />
               </el-select>
             </el-form-item>
-            <el-form-item label="移除能力">
+            <el-form-item :label="t('docker.container.form.capDrop')">
               <el-select v-model="f.capDrop" multiple filterable allow-create default-first-option class="w-select">
                 <el-option v-for="c in caps" :key="c" :label="c" :value="c" />
               </el-select>
             </el-form-item>
-            <el-form-item label="内存 (MB)"><el-input-number v-model="f.memoryMB" :min="0" /><span class="help">0 表示不限制</span></el-form-item>
-            <el-form-item label="CPU 核数"><el-input-number v-model="f.cpus" :min="0" :step="0.5" :precision="2" /><span class="help">0 表示不限制</span></el-form-item>
-            <el-form-item label="设备">
+            <el-form-item :label="t('docker.container.form.memory')"><el-input-number v-model="f.memoryMB" :min="0" /><span class="help">{{ t('docker.container.form.unlimitedHelp') }}</span></el-form-item>
+            <el-form-item :label="t('docker.container.form.cpu')"><el-input-number v-model="f.cpus" :min="0" :step="0.5" :precision="2" /><span class="help">{{ t('docker.container.form.unlimitedHelp') }}</span></el-form-item>
+            <el-form-item :label="t('docker.container.form.devices')">
               <div class="full">
                 <div v-for="(d, i) in f.devices" :key="i" class="row">
-                  <el-input v-model="d.host" placeholder="主机设备 /dev/ttyUSB0" class="c-grow mono" />
-                  <el-input v-model="d.container" placeholder="容器内路径" class="c-grow mono" />
+                  <el-input v-model="d.host" :placeholder="t('docker.container.form.hostDevice')" class="c-grow mono" />
+                  <el-input v-model="d.container" :placeholder="t('docker.container.form.containerDevicePath')" class="c-grow mono" />
                   <el-input v-model="d.perm" placeholder="rwm" class="c-perm" />
-                  <el-button text type="danger" :icon="Trash2" class="c-del" aria-label="删除" @click="f.devices.splice(i, 1)" />
+                  <el-button text type="danger" :icon="Trash2" class="c-del" :aria-label="t('common.delete')" @click="f.devices.splice(i, 1)" />
                 </div>
-                <el-button :icon="Plus" @click="f.devices.push({ host: '', container: '', perm: 'rwm' })">添加设备</el-button>
+                <el-button :icon="Plus" @click="f.devices.push({ host: '', container: '', perm: 'rwm' })">{{ t('docker.container.form.addDevice') }}</el-button>
               </div>
             </el-form-item>
-            <el-form-item label="标签">
+            <el-form-item :label="t('docker.container.form.labels')">
               <div class="full">
                 <div v-for="(l, i) in labelRows" :key="i" class="row">
                   <el-input v-model="l.k" placeholder="key" class="c-grow mono" />
                   <el-input v-model="l.v" placeholder="value" class="c-grow mono" />
-                  <el-button text type="danger" :icon="Trash2" class="c-del" aria-label="删除" @click="labelRows.splice(i, 1)" />
+                  <el-button text type="danger" :icon="Trash2" class="c-del" :aria-label="t('common.delete')" @click="labelRows.splice(i, 1)" />
                 </div>
-                <el-button :icon="Plus" @click="labelRows.push({ k: '', v: '' })">添加标签</el-button>
+                <el-button :icon="Plus" @click="labelRows.push({ k: '', v: '' })">{{ t('docker.container.form.addLabel') }}</el-button>
               </div>
             </el-form-item>
           </el-collapse-item>
@@ -154,8 +154,8 @@
     </div>
     <template #footer>
       <div class="foot">
-        <el-button @click="emit('update:modelValue', false)">取消</el-button>
-        <el-button type="primary" :loading="saving" @click="submit">{{ editId ? '保存并重建' : '创建' }}</el-button>
+        <el-button @click="emit('update:modelValue', false)">{{ t('common.cancel') }}</el-button>
+        <el-button type="primary" :loading="saving" @click="submit">{{ editId ? t('docker.container.form.saveAndRebuild') : t('docker.container.form.create') }}</el-button>
       </div>
     </template>
   </el-dialog>
@@ -163,12 +163,15 @@
 
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ClipboardPaste, Plus, Trash2 } from 'lucide-vue-next'
 import { api } from '../../api'
 import { useFormLayout } from '../../composables/useIsMobile'
 import { parseEnvText } from './format'
 import type { ContainerDetail, ContainerSpec, NetworkView, PortSpec, VolumeView } from './types'
+
+const { t } = useI18n()
 
 const props = defineProps<{ modelValue: boolean; editId?: string; editName?: string }>()
 const emit = defineEmits<{ 'update:modelValue': [v: boolean]; saved: [id: string] }>()
@@ -310,13 +313,13 @@ function buildSpec(): ContainerSpec {
 
 async function submit() {
   if (!f.image.trim()) {
-    ElMessage.warning('请填写镜像')
+    ElMessage.warning(t('docker.container.form.imageRequired'))
     opened.value = Array.from(new Set([...opened.value, 'basic']))
     return
   }
   if (props.editId) {
     try {
-      await ElMessageBox.confirm('将删除并按新配置重建该容器，期间服务会短暂中断。继续？', '重建容器', { type: 'warning' })
+      await ElMessageBox.confirm(t('docker.container.form.rebuildConfirm'), t('docker.container.form.rebuildTitle'), { type: 'warning' })
     } catch {
       return
     }
@@ -328,7 +331,7 @@ async function submit() {
       body.autoStart = detailState === 'running'
     }
     const r = await api.post<{ id: string }>(props.editId ? `/api/docker/containers/${props.editId}/edit` : '/api/docker/containers', body)
-    ElMessage.success(props.editId ? '容器已重建' : '容器已创建')
+    ElMessage.success(props.editId ? t('docker.container.form.rebuilt') : t('docker.container.form.created'))
     emit('update:modelValue', false)
     emit('saved', r?.id ?? '')
   } catch (e) {

@@ -1,11 +1,11 @@
 <template>
   <div>
-    <PageHeader title="存储管理" desc="登记本地目录或远程 WebDAV 为挂载点，在浏览器中管理文件" :icon="HardDrive">
-      <el-button type="primary" :icon="Plus" @click="openEditor()">添加挂载点</el-button>
+    <PageHeader :title="t('storage.title')" :desc="t('storage.desc')" :icon="HardDrive">
+      <el-button type="primary" :icon="Plus" @click="openEditor()">{{ t('storage.addMount') }}</el-button>
     </PageHeader>
 
     <div class="card-grid">
-      <el-empty v-if="!mounts.length" description="暂无挂载点，添加后即可浏览与管理文件" class="empty" />
+      <el-empty v-if="!mounts.length" :description="t('storage.empty')" class="empty" />
       <EntityCard v-for="m in mounts" :key="m.key" :class="{ active: m.key === current?.key }">
         <template #lead>
           <div class="mt-icon"><component :is="m.type === 'local' ? Folder : Cloud" :size="18" /></div>
@@ -13,20 +13,20 @@
         <template #title>{{ m.name }}</template>
         <template v-if="m.remark" #sub>{{ m.remark }}</template>
         <template #status>
-          <StatusBadge v-if="!m.enable" type="off" text="已停用" />
-          <StatusBadge v-else-if="m.readOnly" type="info" text="只读" />
-          <StatusBadge v-else type="running" text="可读写" />
+          <StatusBadge v-if="!m.enable" type="off" :text="t('common.disabled')" />
+          <StatusBadge v-else-if="m.readOnly" type="info" :text="t('storage.readOnly')" />
+          <StatusBadge v-else type="running" :text="t('storage.readWrite')" />
         </template>
-        <Field :label="m.type === 'local' ? '本地目录' : 'WebDAV'" mono>{{ m.type === 'local' ? m.path : m.url }}</Field>
+        <Field :label="m.type === 'local' ? t('storage.localDir') : 'WebDAV'" mono>{{ m.type === 'local' ? m.path : m.url }}</Field>
         <template #actions>
           <el-switch :model-value="m.enable" size="small" @change="(v: boolean) => toggle(m, v)" />
-          <el-button text size="small" :icon="Pencil" @click="openEditor(m)">编辑</el-button>
-          <el-popconfirm title="仅移除挂载点，不会删除其中的文件。继续？" @confirm="remove(m)">
+          <el-button text size="small" :icon="Pencil" @click="openEditor(m)">{{ t('common.edit') }}</el-button>
+          <el-popconfirm :title="t('storage.confirmRemove')" @confirm="remove(m)">
             <template #reference>
-              <el-button text size="small" type="danger" :icon="Trash2">移除</el-button>
+              <el-button text size="small" type="danger" :icon="Trash2">{{ t('storage.remove') }}</el-button>
             </template>
           </el-popconfirm>
-          <el-button type="primary" size="small" :icon="FolderOpen" :disabled="!m.enable" @click="browse(m)">浏览</el-button>
+          <el-button type="primary" size="small" :icon="FolderOpen" :disabled="!m.enable" @click="browse(m)">{{ t('storage.browse') }}</el-button>
         </template>
       </EntityCard>
     </div>
@@ -35,10 +35,10 @@
       <div class="g-card-head">
         <div class="g-card-title"><FolderOpen :size="16" />{{ current.name }}</div>
         <div class="toolbar">
-          <el-button size="small" :icon="RefreshCw" @click="refresh">刷新</el-button>
+          <el-button size="small" :icon="RefreshCw" @click="refresh">{{ t('common.refresh') }}</el-button>
           <template v-if="!current.readOnly">
-            <el-button size="small" :icon="FolderPlus" @click="newFolder">新建目录</el-button>
-            <el-button size="small" type="primary" :icon="Upload" :loading="uploading" @click="pickFiles">上传</el-button>
+            <el-button size="small" :icon="FolderPlus" @click="newFolder">{{ t('storage.newFolder') }}</el-button>
+            <el-button size="small" type="primary" :icon="Upload" :loading="uploading" @click="pickFiles">{{ t('common.upload') }}</el-button>
           </template>
           <input ref="fileInput" type="file" multiple hidden @change="onPicked" />
         </div>
@@ -50,28 +50,28 @@
           </el-breadcrumb-item>
         </el-breadcrumb>
         <el-alert v-if="listError" type="error" :title="listError" :closable="false" show-icon />
-        <el-table v-else v-loading="loading" :data="entries" empty-text="空目录" size="small">
-          <el-table-column label="名称" min-width="220">
+        <el-table v-else v-loading="loading" :data="entries" :empty-text="t('storage.emptyDir')" size="small">
+          <el-table-column :label="t('common.name')" min-width="220">
             <template #default="{ row }">
               <a class="name" @click="open(row)">
                 <component :is="row.isDir ? Folder : File" :size="15" class="ico" />{{ row.name }}
               </a>
             </template>
           </el-table-column>
-          <el-table-column label="大小" width="110" align="right">
+          <el-table-column :label="t('storage.size')" width="110" align="right">
             <template #default="{ row }">{{ row.isDir ? '—' : fmtSize(row.size) }}</template>
           </el-table-column>
-          <el-table-column label="修改时间" width="170" class-name="hide-sm">
+          <el-table-column :label="t('storage.modTime')" width="170" class-name="hide-sm">
             <template #default="{ row }">{{ fmtTime(row.modTime) }}</template>
           </el-table-column>
-          <el-table-column label="操作" width="150" align="right">
+          <el-table-column :label="t('common.actions')" width="150" align="right">
             <template #default="{ row }">
-              <el-button v-if="!row.isDir" text size="small" :icon="Download" aria-label="下载" @click="download(row)" />
+              <el-button v-if="!row.isDir" text size="small" :icon="Download" :aria-label="t('common.download')" @click="download(row)" />
               <template v-if="!current.readOnly">
-                <el-button text size="small" :icon="Pencil" aria-label="重命名" @click="rename(row)" />
-                <el-popconfirm :title="`删除 ${row.name}？${row.isDir ? '目录内容会一并删除。' : ''}`" @confirm="del(row)">
+                <el-button text size="small" :icon="Pencil" :aria-label="t('storage.rename')" @click="rename(row)" />
+                <el-popconfirm :title="row.isDir ? t('storage.confirmDeleteDir', { name: row.name }) : t('storage.confirmDeleteFile', { name: row.name })" @confirm="del(row)">
                   <template #reference>
-                    <el-button text size="small" type="danger" :icon="Trash2" aria-label="删除" />
+                    <el-button text size="small" type="danger" :icon="Trash2" :aria-label="t('common.delete')" />
                   </template>
                 </el-popconfirm>
               </template>
@@ -81,34 +81,34 @@
       </div>
     </div>
 
-    <el-dialog v-model="editorVisible" :title="editing.key ? '编辑挂载点' : '添加挂载点'" width="540px" :fullscreen="isMobile">
+    <el-dialog v-model="editorVisible" :title="editing.key ? t('storage.editMount') : t('storage.addMount')" width="540px" :fullscreen="isMobile">
       <el-form :model="editing" label-width="110px" :label-position="labelPosition">
-        <el-form-item label="名称"><el-input v-model="editing.name" /></el-form-item>
-        <el-form-item label="类型">
+        <el-form-item :label="t('common.name')"><el-input v-model="editing.name" /></el-form-item>
+        <el-form-item :label="t('storage.type')">
           <el-radio-group v-model="editing.type">
-            <el-radio-button value="local">本地目录</el-radio-button>
-            <el-radio-button value="webdav">远程 WebDAV</el-radio-button>
+            <el-radio-button value="local">{{ t('storage.localDir') }}</el-radio-button>
+            <el-radio-button value="webdav">{{ t('storage.remoteWebdav') }}</el-radio-button>
           </el-radio-group>
         </el-form-item>
-        <el-form-item v-if="editing.type === 'local'" label="目录">
+        <el-form-item v-if="editing.type === 'local'" :label="t('storage.dir')">
           <el-input v-model="editing.path" class="mono" placeholder="/data/share" />
         </el-form-item>
         <template v-else>
-          <el-form-item label="地址"><el-input v-model="editing.url" class="mono" placeholder="https://nas.example.com:5006/dav" /></el-form-item>
-          <el-form-item label="用户名"><el-input v-model="editing.username" /></el-form-item>
-          <el-form-item label="密码"><el-input v-model="editing.password" type="password" show-password /></el-form-item>
-          <el-form-item label="跳过证书校验">
+          <el-form-item :label="t('storage.url')"><el-input v-model="editing.url" class="mono" placeholder="https://nas.example.com:5006/dav" /></el-form-item>
+          <el-form-item :label="t('storage.username')"><el-input v-model="editing.username" /></el-form-item>
+          <el-form-item :label="t('storage.password')"><el-input v-model="editing.password" type="password" show-password /></el-form-item>
+          <el-form-item :label="t('storage.skipVerify')">
             <el-switch v-model="editing.skipVerify" />
-            <span class="help">仅用于自签名证书的内网服务</span>
+            <span class="help">{{ t('storage.skipVerifyHelp') }}</span>
           </el-form-item>
         </template>
-        <el-form-item label="只读"><el-switch v-model="editing.readOnly" /></el-form-item>
-        <el-form-item label="启用"><el-switch v-model="editing.enable" /></el-form-item>
-        <el-form-item label="备注"><el-input v-model="editing.remark" /></el-form-item>
+        <el-form-item :label="t('storage.readOnlyLabel')"><el-switch v-model="editing.readOnly" /></el-form-item>
+        <el-form-item :label="t('common.enable')"><el-switch v-model="editing.enable" /></el-form-item>
+        <el-form-item :label="t('common.remark')"><el-input v-model="editing.remark" /></el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="editorVisible = false">取消</el-button>
-        <el-button type="primary" @click="save">保存</el-button>
+        <el-button @click="editorVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button type="primary" @click="save">{{ t('common.save') }}</el-button>
       </template>
     </el-dialog>
   </div>
@@ -117,6 +117,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { useI18n } from 'vue-i18n'
 import { Cloud, Download, File, Folder, FolderOpen, FolderPlus, HardDrive, Pencil, Plus, RefreshCw, Trash2, Upload } from 'lucide-vue-next'
 import { api } from '../api'
 import PageHeader from '../components/PageHeader.vue'
@@ -145,6 +146,7 @@ interface Entry {
   modTime: string
 }
 
+const { t } = useI18n()
 const { isMobile, labelPosition } = useFormLayout()
 const mounts = ref<Mount[]>([])
 const editorVisible = ref(false)
@@ -163,7 +165,7 @@ function empty(): Mount {
 }
 
 const crumbs = computed(() => {
-  const out = [{ name: '根目录', path: '/' }]
+  const out = [{ name: t('storage.root'), path: '/' }]
   let acc = ''
   for (const seg of cwd.value.split('/').filter(Boolean)) {
     acc += '/' + seg
@@ -304,7 +306,7 @@ async function onPicked() {
       fd.append('file', f, f.name)
       await api.post(`/api/storage/files/${current.value.key}/upload?path=${encodeURIComponent(cwd.value)}&size=${f.size}`, fd)
     }
-    ElMessage.success('上传完成')
+    ElMessage.success(t('storage.uploadDone'))
   } catch (e) {
     ElMessage.error((e as Error).message)
   } finally {
@@ -316,7 +318,7 @@ async function onPicked() {
 
 async function newFolder() {
   try {
-    const { value } = await ElMessageBox.prompt('目录名称', '新建目录', { inputPattern: /^[^/\\]+$/, inputErrorMessage: '名称不能为空且不含斜杠' })
+    const { value } = await ElMessageBox.prompt(t('storage.folderName'), t('storage.newFolder'), { inputPattern: /^[^/\\]+$/, inputErrorMessage: t('storage.nameInvalid') })
     await api.post(`/api/storage/files/${current.value?.key}/mkdir`, { path: join(cwd.value, value) })
     await refresh()
   } catch (e) {
@@ -328,7 +330,7 @@ async function newFolder() {
 
 async function rename(e: Entry) {
   try {
-    const { value } = await ElMessageBox.prompt('新名称', '重命名', { inputValue: e.name, inputPattern: /^[^/\\]+$/, inputErrorMessage: '名称不能为空且不含斜杠' })
+    const { value } = await ElMessageBox.prompt(t('storage.newName'), t('storage.rename'), { inputValue: e.name, inputPattern: /^[^/\\]+$/, inputErrorMessage: t('storage.nameInvalid') })
     await api.post(`/api/storage/files/${current.value?.key}/rename`, { from: join(cwd.value, e.name), to: join(cwd.value, value) })
     await refresh()
   } catch (err) {

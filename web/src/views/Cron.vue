@@ -1,42 +1,42 @@
 <template>
   <div>
-    <PageHeader title="计划任务" desc="按 cron 表达式定时执行命令或发送 HTTP 请求" :icon="CalendarClock">
-      <el-button type="primary" :icon="Plus" @click="openEditor()">添加任务</el-button>
+    <PageHeader :title="t('cron.title')" :desc="t('cron.desc')" :icon="CalendarClock">
+      <el-button type="primary" :icon="Plus" @click="openEditor()">{{ t('cron.addTask') }}</el-button>
     </PageHeader>
 
     <div class="card-list">
-      <el-empty v-if="!tasks.length" description="暂无任务" />
-      <EntityCard v-for="t in tasks" :key="t.key" :off="!t.enable">
+      <el-empty v-if="!tasks.length" :description="t('cron.empty')" />
+      <EntityCard v-for="tk in tasks" :key="tk.key" :off="!tk.enable">
         <template #lead>
-          <el-switch :model-value="t.enable" @change="(v: string | number | boolean) => toggle(t, Boolean(v))" />
+          <el-switch :model-value="tk.enable" @change="(v: string | number | boolean) => toggle(tk, Boolean(v))" />
         </template>
         <template #title>
-          <span>{{ t.name }}</span>
-          <el-tag size="small" effect="plain">{{ t.type === 'http' ? 'HTTP 请求' : '命令' }}</el-tag>
+          <span>{{ tk.name }}</span>
+          <el-tag size="small" effect="plain">{{ tk.type === 'http' ? t('cron.typeHttp') : t('cron.typeCommand') }}</el-tag>
         </template>
-        <template v-if="t.remark" #sub>{{ t.remark }}</template>
+        <template v-if="tk.remark" #sub>{{ tk.remark }}</template>
         <template #status>
-          <StatusBadge v-bind="taskStatus(t)" />
+          <StatusBadge v-bind="taskStatus(tk)" />
         </template>
-        <Field label="计划" mono>{{ t.spec }}</Field>
-        <Field label="下次执行">{{ t.enable && t.nextRun ? new Date(t.nextRun).toLocaleString() : '-' }}</Field>
-        <Field label="最近执行">
-          <template v-if="last(t)">
-            <span :class="last(t)!.ok ? 'text-ok' : 'text-danger'">{{ last(t)!.ok ? '成功' : '失败' }}</span>
-            <span class="meta"> · {{ new Date(last(t)!.start).toLocaleString() }} · {{ last(t)!.durationMs }}ms</span>
+        <Field :label="t('cron.schedule')" mono>{{ tk.spec }}</Field>
+        <Field :label="t('cron.nextRun')">{{ tk.enable && tk.nextRun ? new Date(tk.nextRun).toLocaleString() : '-' }}</Field>
+        <Field :label="t('cron.lastRun')">
+          <template v-if="last(tk)">
+            <span :class="last(tk)!.ok ? 'text-ok' : 'text-danger'">{{ last(tk)!.ok ? t('cron.success') : t('cron.failure') }}</span>
+            <span class="meta"> · {{ new Date(last(tk)!.start).toLocaleString() }} · {{ last(tk)!.durationMs }}ms</span>
           </template>
-          <span v-else class="muted">尚未执行</span>
+          <span v-else class="muted">{{ t('cron.neverRun') }}</span>
         </Field>
-        <Field :label="t.type === 'http' ? '请求' : '命令'" mono>
-          <span class="ellipsis-2">{{ t.type === 'http' ? `${t.http.method} ${t.http.url}` : t.command }}</span>
+        <Field :label="tk.type === 'http' ? t('cron.request') : t('cron.typeCommand')" mono>
+          <span class="ellipsis-2">{{ tk.type === 'http' ? `${tk.http.method} ${tk.http.url}` : tk.command }}</span>
         </Field>
         <template #actions>
-          <el-button text size="small" :icon="Play" :disabled="t.running" @click="runNow(t)">立即执行</el-button>
-          <el-button text size="small" :icon="History" @click="showHistory(t)">记录</el-button>
-          <el-button text size="small" :icon="Pencil" @click="openEditor(t)">编辑</el-button>
-          <el-popconfirm title="删除该任务？" @confirm="remove(t)">
+          <el-button text size="small" :icon="Play" :disabled="tk.running" @click="runNow(tk)">{{ t('cron.runNow') }}</el-button>
+          <el-button text size="small" :icon="History" @click="showHistory(tk)">{{ t('cron.history') }}</el-button>
+          <el-button text size="small" :icon="Pencil" @click="openEditor(tk)">{{ t('common.edit') }}</el-button>
+          <el-popconfirm :title="t('cron.confirmDelete')" @confirm="remove(tk)">
             <template #reference>
-              <el-button text size="small" type="danger" :icon="Trash2">删除</el-button>
+              <el-button text size="small" type="danger" :icon="Trash2">{{ t('common.delete') }}</el-button>
             </template>
           </el-popconfirm>
         </template>
@@ -45,51 +45,52 @@
 
     <LogCard url="/api/cron/logs" clearable />
 
-    <el-dialog v-model="editorVisible" :title="editing.key ? '编辑任务' : '添加任务'" width="680px" :fullscreen="isMobile">
+    <el-dialog v-model="editorVisible" :title="editing.key ? t('cron.editTask') : t('cron.addTask')" width="680px" :fullscreen="isMobile">
       <el-form :model="editing" label-width="110px" :label-position="labelPosition">
-        <el-form-item label="名称"><el-input v-model="editing.name" /></el-form-item>
-        <el-form-item label="计划">
-          <el-input v-model="editing.spec" class="mono" placeholder="分 时 日 月 周，例如 0 3 * * *；可加秒字段，或 @every 10m" @blur="preview" />
-          <div v-if="nextRuns.length" class="form-help">接下来：{{ nextRuns.map((t) => new Date(t).toLocaleString()).join('；') }}</div>
+        <el-form-item :label="t('common.name')"><el-input v-model="editing.name" /></el-form-item>
+        <el-form-item :label="t('cron.schedule')">
+          <el-input v-model="editing.spec" class="mono" :placeholder="t('cron.specPlaceholder')" @blur="preview" />
+          <div v-if="nextRuns.length" class="form-help">{{ t('cron.nextRuns', { list: nextRuns.map((d) => new Date(d).toLocaleString()).join('；') }) }}</div>
           <div v-if="specError" class="form-help text-danger">{{ specError }}</div>
         </el-form-item>
-        <el-form-item label="类型">
+        <el-form-item :label="t('cron.type')">
           <el-radio-group v-model="editing.type">
-            <el-radio-button value="command">命令</el-radio-button>
-            <el-radio-button value="http">HTTP 请求</el-radio-button>
+            <el-radio-button value="command">{{ t('cron.typeCommand') }}</el-radio-button>
+            <el-radio-button value="http">{{ t('cron.typeHttp') }}</el-radio-button>
           </el-radio-group>
         </el-form-item>
-        <el-form-item v-if="editing.type === 'command'" label="命令">
-          <el-input v-model="editing.command" type="textarea" :rows="4" class="mono" placeholder="以 sh -c 执行" />
+        <el-form-item v-if="editing.type === 'command'" :label="t('cron.typeCommand')">
+          <el-input v-model="editing.command" type="textarea" :rows="4" class="mono" :placeholder="t('cron.commandPlaceholder')" />
         </el-form-item>
         <WebhookEditor v-else v-model="editing.http" :variables="['time', 'taskName']" />
-        <el-form-item label="备注"><el-input v-model="editing.remark" /></el-form-item>
-        <el-form-item label="启用"><el-switch v-model="editing.enable" /></el-form-item>
+        <el-form-item :label="t('common.remark')"><el-input v-model="editing.remark" /></el-form-item>
+        <el-form-item :label="t('common.enable')"><el-switch v-model="editing.enable" /></el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="editorVisible = false">取消</el-button>
-        <el-button type="primary" @click="save">保存</el-button>
+        <el-button @click="editorVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button type="primary" @click="save">{{ t('common.save') }}</el-button>
       </template>
     </el-dialog>
 
-    <el-dialog v-model="historyVisible" title="执行记录" width="760px" :fullscreen="isMobile">
+    <el-dialog v-model="historyVisible" :title="t('cron.historyTitle')" width="760px" :fullscreen="isMobile">
       <el-timeline v-if="history.length">
         <el-timeline-item
           v-for="(r, i) in history"
           :key="i"
           :type="r.ok ? 'success' : 'danger'"
-          :timestamp="new Date(r.start).toLocaleString() + ` · ${r.durationMs}ms` + (r.manual ? ' · 手动' : '')"
+          :timestamp="new Date(r.start).toLocaleString() + ` · ${r.durationMs}ms` + (r.manual ? ' · ' + t('cron.manual') : '')"
         >
-          <pre class="output mono">{{ r.output || '(无输出)' }}</pre>
+          <pre class="output mono">{{ r.output || t('cron.noOutput') }}</pre>
         </el-timeline-item>
       </el-timeline>
-      <el-empty v-else description="暂无记录" />
+      <el-empty v-else :description="t('cron.noHistory')" />
     </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { CalendarClock, History, Pencil, Play, Plus, Trash2 } from 'lucide-vue-next'
 import { api } from '../api'
@@ -127,6 +128,7 @@ interface TaskView extends Task {
   history: Run[] | null
 }
 
+const { t } = useI18n()
 const { isMobile, labelPosition } = useFormLayout()
 const tasks = ref<TaskView[]>([])
 const editorVisible = ref(false)
@@ -149,24 +151,24 @@ function empty(): Task {
   }
 }
 
-function last(t: TaskView) {
-  const h = t.history ?? []
+function last(tk: TaskView) {
+  const h = tk.history ?? []
   return h.length ? h[h.length - 1] : undefined
 }
 
 // taskStatus 计算任务展示状态：停用的任务只显示“已停用”
-function taskStatus(t: TaskView): { type: StatusType; text: string } {
-  if (t.running) {
-    return { type: 'pending', text: '执行中' }
+function taskStatus(tk: TaskView): { type: StatusType; text: string } {
+  if (tk.running) {
+    return { type: 'pending', text: t('cron.running') }
   }
-  if (!t.enable) {
-    return { type: 'off', text: '已停用' }
+  if (!tk.enable) {
+    return { type: 'off', text: t('cron.deactivated') }
   }
-  const l = last(t)
+  const l = last(tk)
   if (l && !l.ok) {
-    return { type: 'error', text: '上次失败' }
+    return { type: 'error', text: t('cron.lastFailed') }
   }
-  return { type: 'running', text: '已排期' }
+  return { type: 'running', text: t('cron.scheduled') }
 }
 
 async function load() {
@@ -184,9 +186,9 @@ async function preview() {
   }
 }
 
-function openEditor(t?: TaskView) {
-  if (t) {
-    const { running: _r, nextRun: _n, history: _h, ...task } = t
+function openEditor(tk?: TaskView) {
+  if (tk) {
+    const { running: _r, nextRun: _n, history: _h, ...task } = tk
     editing.value = JSON.parse(JSON.stringify(task))
   } else {
     editing.value = empty()
@@ -210,33 +212,33 @@ async function save() {
   }
 }
 
-async function toggle(t: TaskView, enable: boolean) {
+async function toggle(tk: TaskView, enable: boolean) {
   try {
-    await api.put(`/api/cron/tasks/${t.key}/enable`, { enable })
+    await api.put(`/api/cron/tasks/${tk.key}/enable`, { enable })
     await load()
   } catch (e) {
     ElMessage.error((e as Error).message)
   }
 }
 
-async function runNow(t: TaskView) {
+async function runNow(tk: TaskView) {
   try {
-    await api.post(`/api/cron/tasks/${t.key}/run`)
-    ElMessage.success('已开始执行')
+    await api.post(`/api/cron/tasks/${tk.key}/run`)
+    ElMessage.success(t('cron.started'))
     window.setTimeout(load, 1000)
   } catch (e) {
     ElMessage.error((e as Error).message)
   }
 }
 
-function showHistory(t: TaskView) {
-  history.value = [...(t.history ?? [])].reverse()
+function showHistory(tk: TaskView) {
+  history.value = [...(tk.history ?? [])].reverse()
   historyVisible.value = true
 }
 
-async function remove(t: TaskView) {
+async function remove(tk: TaskView) {
   try {
-    await api.del(`/api/cron/tasks/${t.key}`)
+    await api.del(`/api/cron/tasks/${tk.key}`)
     await load()
   } catch (e) {
     ElMessage.error((e as Error).message)

@@ -1,0 +1,41 @@
+---
+title: "다운로드"
+description: "Gately 최신 바이너리를 내려받거나 Docker 이미지로 배포하세요."
+---
+
+# Gately 다운로드
+
+## Docker 이미지 (권장)
+
+이미지는 amd64, arm64, arm/v7을 모두 제공합니다.
+
+```bash
+docker pull ghcr.io/wangwanjie/gately:latest
+```
+
+전체 배포 옵션은 [설치 및 배포](/ko/docs/guide/install)를 참고하세요.
+
+## 바이너리
+
+사용하는 플랫폼용 압축 파일을 내려받아 압축을 풀고 `./gately -c /etc/gately`를 실행합니다. Linux(amd64 / arm64 / arm / mips / mipsle / riscv64), macOS, Windows, FreeBSD를 지원합니다.
+
+<DownloadList />
+
+::: tip 다운로드가 느린가요?
+일부 네트워크 환경에서는 GitHub 접속이 느릴 수 있습니다. NAS와 소프트 라우터 사용자는 프록시를 통해 먼저 받아 오거나 Docker 이미지를 사용하세요.
+:::
+
+## 소스에서 빌드
+
+Go 1.26+, Node.js 24+, pnpm이 필요합니다.
+
+```bash
+git clone https://github.com/wangwanjie/gately.git
+cd gately
+make web      # 프런트엔드 빌드
+make build    # bin/gately 출력
+```
+
+## 검증
+
+모든 릴리스에는 체크섬 파일이 포함됩니다. 내려받은 뒤 실행하기 전에 SHA-256을 확인하세요.

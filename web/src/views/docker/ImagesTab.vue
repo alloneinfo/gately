@@ -1,20 +1,20 @@
 <template>
   <div>
     <div class="toolbar">
-      <el-input v-model="keyword" placeholder="搜索标签或 ID" clearable :prefix-icon="Search" class="t-search" />
+      <el-input v-model="keyword" :placeholder="t('docker.image.list.search')" clearable :prefix-icon="Search" class="t-search" />
       <div class="t-ops">
-        <el-button type="primary" :icon="CloudDownload" @click="pullVisible = true">拉取</el-button>
-        <el-button :icon="Hammer" @click="buildVisible = true">构建</el-button>
-        <el-button :icon="PackageOpen" :loading="importing" @click="picker?.click()">导入</el-button>
-        <el-button :icon="Eraser" @click="pruneDangling">清理悬空</el-button>
-        <el-button :icon="RefreshCw" :loading="loading" @click="load">刷新</el-button>
+        <el-button type="primary" :icon="CloudDownload" @click="pullVisible = true">{{ t('docker.image.list.pull') }}</el-button>
+        <el-button :icon="Hammer" @click="buildVisible = true">{{ t('docker.image.list.build') }}</el-button>
+        <el-button :icon="PackageOpen" :loading="importing" @click="picker?.click()">{{ t('common.import') }}</el-button>
+        <el-button :icon="Eraser" @click="pruneDangling">{{ t('docker.image.list.pruneDangling') }}</el-button>
+        <el-button :icon="RefreshCw" :loading="loading" @click="load">{{ t('common.refresh') }}</el-button>
         <input ref="picker" type="file" accept=".tar,application/x-tar" class="hidden" @change="onImport" />
       </div>
     </div>
     <el-progress v-if="importing" :percentage="importPercent" :stroke-width="10" class="gap" />
 
     <div v-loading="loading && !images.length" class="card-list">
-      <el-empty v-if="!loading && !filtered.length" description="没有镜像" />
+      <el-empty v-if="!loading && !filtered.length" :description="t('docker.image.list.empty')" />
       <EntityCard v-for="img in filtered" :key="img.id" :off="img.containers === 0 && img.dangling">
         <template #lead>
           <div class="ico"><Disc3 :size="18" /></div>
@@ -23,28 +23,28 @@
           <span v-if="img.tags?.length" class="mono tag-main">{{ img.tags[0] }}</span>
           <span v-else class="muted">&lt;none&gt;</span>
           <el-tag v-if="img.tags?.length > 1" size="small" type="info">+{{ img.tags.length - 1 }}</el-tag>
-          <el-tag v-if="img.dangling" size="small" type="warning">悬空</el-tag>
+          <el-tag v-if="img.dangling" size="small" type="warning">{{ t('docker.image.list.dangling') }}</el-tag>
         </template>
         <template #sub><span class="mono">{{ shortId(img.id) }}</span></template>
         <template #status>
-          <StatusBadge v-if="img.containers > 0" type="ok" :text="`${img.containers} 个容器使用`" />
-          <StatusBadge v-else type="off" text="未使用" />
+          <StatusBadge v-if="img.containers > 0" type="ok" :text="t('docker.image.list.usedBy', { count: img.containers })" />
+          <StatusBadge v-else type="off" :text="t('docker.image.list.unused')" />
         </template>
-        <Field label="大小">{{ formatBytes(img.size) }}</Field>
-        <Field label="创建时间">{{ formatTime(img.created) }}</Field>
-        <Field v-if="img.tags?.length > 1" label="全部标签" wide mono>
-          <div v-for="t in img.tags" :key="t">{{ t }}</div>
+        <Field :label="t('docker.image.list.size')">{{ formatBytes(img.size) }}</Field>
+        <Field :label="t('docker.image.list.created')">{{ formatTime(img.created) }}</Field>
+        <Field v-if="img.tags?.length > 1" :label="t('docker.image.list.allTags')" wide mono>
+          <div v-for="tg in img.tags" :key="tg">{{ tg }}</div>
         </Field>
         <template #actions>
-          <el-button text :icon="Info" class="btn" @click="showDetail(img)">详情</el-button>
-          <el-button text :icon="Tag" class="btn" @click="openTag(img)">标签</el-button>
+          <el-button text :icon="Info" class="btn" @click="showDetail(img)">{{ t('common.details') }}</el-button>
+          <el-button text :icon="Tag" class="btn" @click="openTag(img)">{{ t('docker.image.list.tags') }}</el-button>
           <el-dropdown trigger="click" @command="(c: string) => onCommand(img, c)">
-            <el-button text :icon="Ellipsis" class="btn">更多</el-button>
+            <el-button text :icon="Ellipsis" class="btn">{{ t('common.more') }}</el-button>
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item command="push" :icon="CloudUpload" :disabled="!img.tags?.length">推送</el-dropdown-item>
-                <el-dropdown-item command="export" :icon="Download">导出 tar</el-dropdown-item>
-                <el-dropdown-item command="delete" :icon="Trash2" divided>删除</el-dropdown-item>
+                <el-dropdown-item command="push" :icon="CloudUpload" :disabled="!img.tags?.length">{{ t('docker.image.list.push') }}</el-dropdown-item>
+                <el-dropdown-item command="export" :icon="Download">{{ t('docker.image.list.exportTar') }}</el-dropdown-item>
+                <el-dropdown-item command="delete" :icon="Trash2" divided>{{ t('common.delete') }}</el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
@@ -56,38 +56,41 @@
     <ImageBuildDialog v-model="buildVisible" @done="load" />
     <ImageDetailDialog v-model="detailVisible" :image-id="detailId" />
 
-    <el-dialog v-model="tagVisible" title="添加标签" width="460px" :fullscreen="isMobile" append-to-body>
+    <el-dialog v-model="tagVisible" :title="t('docker.image.list.addTagTitle')" width="460px" :fullscreen="isMobile" append-to-body>
       <el-form :label-position="labelPosition" label-width="70px" @submit.prevent>
-        <el-form-item label="仓库名" required><el-input v-model="tagForm.repo" placeholder="例如 myrepo/app 或 registry.example.com/app" class="mono" /></el-form-item>
-        <el-form-item label="标签"><el-input v-model="tagForm.tag" placeholder="latest" class="mono" /></el-form-item>
+        <el-form-item :label="t('docker.image.list.repo')" required><el-input v-model="tagForm.repo" :placeholder="t('docker.image.list.repoPlaceholder')" class="mono" /></el-form-item>
+        <el-form-item :label="t('docker.image.list.tag')"><el-input v-model="tagForm.tag" placeholder="latest" class="mono" /></el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="tagVisible = false">取消</el-button>
-        <el-button type="primary" @click="doTag">确定</el-button>
+        <el-button @click="tagVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button type="primary" @click="doTag">{{ t('common.confirm') }}</el-button>
       </template>
     </el-dialog>
 
-    <el-dialog v-model="pushVisible" title="推送镜像" width="460px" :fullscreen="isMobile" append-to-body>
+    <el-dialog v-model="pushVisible" :title="t('docker.image.list.pushTitle')" width="460px" :fullscreen="isMobile" append-to-body>
       <el-form :label-position="labelPosition" label-width="70px" @submit.prevent>
-        <el-form-item label="镜像">
+        <el-form-item :label="t('docker.image.list.image')">
           <el-select v-model="pushRef" class="full">
-            <el-option v-for="t in pushTags" :key="t" :label="t" :value="t" />
+            <el-option v-for="tg in pushTags" :key="tg" :label="tg" :value="tg" />
           </el-select>
         </el-form-item>
       </el-form>
-      <div class="help block">使用「系统 → 设置」中配置的私有仓库账号认证。</div>
+      <div class="help block">{{ t('docker.image.list.pushHint') }}</div>
       <template #footer>
-        <el-button @click="pushVisible = false">取消</el-button>
-        <el-button type="primary" @click="doPush">推送</el-button>
+        <el-button @click="pushVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button type="primary" @click="doPush">{{ t('docker.image.list.push') }}</el-button>
       </template>
     </el-dialog>
 
-    <el-dialog v-model="delVisible" title="删除镜像" width="460px" append-to-body>
-      <p class="dlg-text">确定删除镜像 <b class="mono">{{ delTarget?.tags?.[0] || shortId(delTarget?.id ?? '') }}</b>？<span v-if="(delTarget?.tags?.length ?? 0) > 1">其全部 {{ delTarget?.tags.length }} 个标签都会被移除。</span></p>
-      <el-checkbox v-model="delForce">强制删除（即使被已停止的容器引用）</el-checkbox>
+    <el-dialog v-model="delVisible" :title="t('docker.image.list.deleteTitle')" width="460px" append-to-body>
+      <i18n-t :keypath="(delTarget?.tags?.length ?? 0) > 1 ? 'docker.image.list.deleteTextMulti' : 'docker.image.list.deleteText'" tag="p" class="dlg-text">
+        <template #name><b class="mono">{{ delTarget?.tags?.[0] || shortId(delTarget?.id ?? '') }}</b></template>
+        <template #count>{{ delTarget?.tags?.length ?? 0 }}</template>
+      </i18n-t>
+      <el-checkbox v-model="delForce">{{ t('docker.image.list.deleteForce') }}</el-checkbox>
       <template #footer>
-        <el-button @click="delVisible = false">取消</el-button>
-        <el-button type="danger" :loading="delBusy" @click="doDelete">删除</el-button>
+        <el-button @click="delVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button type="danger" :loading="delBusy" @click="doDelete">{{ t('common.delete') }}</el-button>
       </template>
     </el-dialog>
   </div>
@@ -95,6 +98,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { CloudDownload, CloudUpload, Disc3, Download, Ellipsis, Eraser, Hammer, Info, PackageOpen, RefreshCw, Search, Tag, Trash2 } from 'lucide-vue-next'
 import { api } from '../../api'
@@ -109,6 +113,8 @@ import { download, formatBytes, formatTime, shortId, uploadFile } from './format
 import { reportError } from './state'
 import { trackTask } from './tasks'
 import type { ImageView } from './types'
+
+const { t } = useI18n()
 
 const { isMobile, labelPosition } = useFormLayout()
 const images = ref<ImageView[]>([])
@@ -134,7 +140,7 @@ const delBusy = ref(false)
 
 const filtered = computed(() => {
   const k = keyword.value.trim().toLowerCase()
-  return k ? images.value.filter((i) => i.id.toLowerCase().includes(k) || (i.tags ?? []).some((t) => t.toLowerCase().includes(k))) : images.value
+  return k ? images.value.filter((i) => i.id.toLowerCase().includes(k) || (i.tags ?? []).some((tg) => tg.toLowerCase().includes(k))) : images.value
 })
 
 async function load() {
@@ -163,13 +169,13 @@ function openTag(img: ImageView) {
 
 async function doTag() {
   if (!tagTarget.value || !tagForm.repo.trim()) {
-    ElMessage.warning('请填写仓库名')
+    ElMessage.warning(t('docker.image.list.repoRequired'))
     return
   }
   try {
     await api.post(`/api/docker/images/${encodeURIComponent(tagTarget.value.id)}/tag`, { repo: tagForm.repo.trim(), tag: tagForm.tag.trim() || 'latest' })
     tagVisible.value = false
-    ElMessage.success('已添加标签')
+    ElMessage.success(t('docker.image.list.tagAdded'))
     await load()
   } catch (e) {
     ElMessage.error((e as Error).message)
@@ -181,9 +187,9 @@ async function doPush() {
     return
   }
   try {
-    const t = await api.post<{ task: string }>('/api/docker/images/push', { ref: pushRef.value })
+    const res = await api.post<{ task: string }>('/api/docker/images/push', { ref: pushRef.value })
     pushVisible.value = false
-    trackTask(t.task, `推送 ${pushRef.value}`)
+    trackTask(res.task, t('docker.image.list.pushTask', { ref: pushRef.value }))
   } catch (e) {
     ElMessage.error((e as Error).message)
   }
@@ -197,7 +203,7 @@ async function doDelete() {
   try {
     await api.del(`/api/docker/images/${encodeURIComponent(delTarget.value.id)}${delForce.value ? '?force=1' : ''}`)
     delVisible.value = false
-    ElMessage.success('已删除')
+    ElMessage.success(t('common.deleted'))
     await load()
   } catch (e) {
     ElMessage.error((e as Error).message)
@@ -222,9 +228,9 @@ function onCommand(img: ImageView, cmd: string) {
 
 async function pruneDangling() {
   try {
-    await ElMessageBox.confirm('清理所有悬空镜像（无标签且未被使用）？', '清理悬空镜像', { type: 'warning' })
+    await ElMessageBox.confirm(t('docker.image.list.pruneConfirm'), t('docker.image.list.pruneTitle'), { type: 'warning' })
     const r = await api.post<{ deleted: number; spaceReclaimed: number }>('/api/docker/prune', { target: 'images' })
-    ElMessage.success(`已清理 ${r.deleted} 个，释放 ${formatBytes(r.spaceReclaimed)}`)
+    ElMessage.success(t('docker.image.list.pruned', { deleted: r.deleted, size: formatBytes(r.spaceReclaimed) }))
     await load()
   } catch (e) {
     if (e !== 'cancel' && e !== 'close') {
@@ -244,7 +250,7 @@ async function onImport(ev: Event) {
   importPercent.value = 0
   try {
     await uploadFile('/api/docker/images/load', file, 'application/x-tar', (p) => (importPercent.value = p))
-    ElMessage.success('镜像已导入')
+    ElMessage.success(t('docker.image.list.imported'))
     await load()
   } catch (e) {
     ElMessage.error((e as Error).message)

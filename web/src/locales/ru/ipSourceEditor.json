@@ -1,0 +1,17 @@
+{
+  "fetchIp": "Получение IPv{family}",
+  "method": "Способ",
+  "typeUrl": "URL запроса",
+  "typeInterface": "Сетевой интерфейс",
+  "typeCommand": "Команда",
+  "urls": "URL запроса",
+  "urlsPlaceholder": "По одному в строке, пробуются по порядку",
+  "interface": "Сетевой интерфейс",
+  "interfacePlaceholder": "Выберите сетевой интерфейс",
+  "command": "Команда",
+  "commandPlaceholder": "В выводе должен быть IP-адрес, например curl -s https://4.ipw.cn",
+  "regex": "Регулярное выражение для фильтрации",
+  "regexPlaceholder": "Необязательно; если пусто, берётся первый публичный адрес",
+  "testFetch": "Проверить получение",
+  "fetchSuccess": "Получено: {ip}"
+}

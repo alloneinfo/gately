@@ -2,8 +2,8 @@
 
 export interface ThemeDef {
   id: string
-  name: string
-  desc: string
+  nameKey: string // 主题名称文案键
+  descKey: string // 主题描述文案键
   dark: boolean
   primary: string // 主色
   chart2: string // 图表第二色
@@ -22,8 +22,8 @@ export interface ThemeDef {
 export const themes: ThemeDef[] = [
   {
     id: 'emerald',
-    name: '翠绿',
-    desc: '默认 · 沉稳清晰',
+    nameKey: 'themes.emerald.name',
+    descKey: 'themes.emerald.desc',
     dark: false,
     primary: '#0e7c66',
     chart2: '#6366f1',
@@ -39,8 +39,8 @@ export const themes: ThemeDef[] = [
   },
   {
     id: 'ocean',
-    name: '海洋',
-    desc: '深蓝海岸 · 冷静通透',
+    nameKey: 'themes.ocean.name',
+    descKey: 'themes.ocean.desc',
     dark: false,
     primary: '#0b73c9',
     chart2: '#14b8a6',
@@ -56,8 +56,8 @@ export const themes: ThemeDef[] = [
   },
   {
     id: 'fresh',
-    name: '清新',
-    desc: '薄荷柠绿 · 明亮轻盈',
+    nameKey: 'themes.fresh.name',
+    descKey: 'themes.fresh.desc',
     dark: false,
     primary: '#2fa84f',
     chart2: '#f59e0b',
@@ -73,8 +73,8 @@ export const themes: ThemeDef[] = [
   },
   {
     id: 'sakura',
-    name: '樱花',
-    desc: '柔粉暖调 · 温柔明快',
+    nameKey: 'themes.sakura.name',
+    descKey: 'themes.sakura.desc',
     dark: false,
     primary: '#d6457c',
     chart2: '#8b5cf6',
@@ -90,8 +90,8 @@ export const themes: ThemeDef[] = [
   },
   {
     id: 'sunset',
-    name: '暮光',
-    desc: '琥珀橙红 · 温暖厚重',
+    nameKey: 'themes.sunset.name',
+    descKey: 'themes.sunset.desc',
     dark: false,
     primary: '#d9640f',
     chart2: '#0e9aa7',
@@ -107,8 +107,8 @@ export const themes: ThemeDef[] = [
   },
   {
     id: 'dark',
-    name: '暗黑',
-    desc: '经典深灰 · 夜间护眼',
+    nameKey: 'themes.dark.name',
+    descKey: 'themes.dark.desc',
     dark: true,
     primary: '#2bb596',
     chart2: '#818cf8',
@@ -124,8 +124,8 @@ export const themes: ThemeDef[] = [
   },
   {
     id: 'midnight',
-    name: '午夜',
-    desc: '靛蓝星空 · 沉浸专注',
+    nameKey: 'themes.midnight.name',
+    descKey: 'themes.midnight.desc',
     dark: true,
     primary: '#7c8cff',
     chart2: '#38bdf8',
@@ -141,8 +141,8 @@ export const themes: ThemeDef[] = [
   },
   {
     id: 'punk',
-    name: '朋克',
-    desc: '霓虹粉青 · 锐角赛博',
+    nameKey: 'themes.punk.name',
+    descKey: 'themes.punk.desc',
     dark: true,
     primary: '#ff2e97',
     chart2: '#00e5ff',

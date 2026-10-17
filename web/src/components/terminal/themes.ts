@@ -1,16 +1,19 @@
 // 终端配色主题。
 import type { ITheme } from '@xterm/xterm'
+import { t } from '../../i18n'
 
 export interface TermTheme {
   name: string
-  label: string
+  // label 为产品名等无需翻译的名称；需要翻译的主题改用 labelKey
+  label?: string
+  labelKey?: string
   theme: ITheme
 }
 
 export const termThemes: TermTheme[] = [
   {
     name: 'default',
-    label: '默认深色',
+    labelKey: 'terminal.themes.default',
     theme: {
       background: '#1d1f21', foreground: '#c5c8c6', cursor: '#c5c8c6', selectionBackground: '#373b41',
       black: '#282a2e', red: '#cc6666', green: '#b5bd68', yellow: '#f0c674', blue: '#81a2be', magenta: '#b294bb', cyan: '#8abeb7', white: '#c5c8c6',
@@ -73,7 +76,7 @@ export const termThemes: TermTheme[] = [
   },
   {
     name: 'github-light',
-    label: '浅色（GitHub）',
+    labelKey: 'terminal.themes.githubLight',
     theme: {
       background: '#ffffff', foreground: '#24292f', cursor: '#0969da', selectionBackground: '#b6d6f7',
       black: '#24292f', red: '#cf222e', green: '#116329', yellow: '#9a6700', blue: '#0550ae', magenta: '#8250df', cyan: '#1b7c83', white: '#6e7781',
@@ -83,5 +86,10 @@ export const termThemes: TermTheme[] = [
 ]
 
 export function findTheme(name: string): TermTheme {
-  return termThemes.find((t) => t.name === name) ?? termThemes[0]
+  return termThemes.find((x) => x.name === name) ?? termThemes[0]
+}
+
+// themeLabel 返回主题的显示名称（按当前语言翻译）。
+export function themeLabel(th: TermTheme): string {
+  return th.labelKey ? t(th.labelKey) : (th.label ?? th.name)
 }

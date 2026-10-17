@@ -1,0 +1,14 @@
+{
+  "enable": "Activar Webhook",
+  "url": "URL de la solicitud",
+  "method": "Método de la solicitud",
+  "headers": "Cabeceras de la solicitud",
+  "headersPlaceholder": "Una por línea, con el formato Clave: Valor",
+  "body": "Cuerpo de la solicitud",
+  "successMark": "Marca de éxito",
+  "successPlaceholder": "Una por línea; la solicitud es correcta si la respuesta contiene alguna de ellas. Déjalo vacío para comprobar solo que el código de estado sea 2xx",
+  "timeout": "Tiempo de espera (s)",
+  "ignoreCertError": "Ignorar errores de certificado",
+  "variables": "Variables disponibles",
+  "varsTip": "{plain} o, por compatibilidad con Lucky, {lucky}"
+}

@@ -1,26 +1,28 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { withBase } from 'vitepress'
+import { computed, ref } from 'vue'
+import { useData, withBase } from 'vitepress'
 import {
   Globe, RadioTower, ArrowLeftRight, ShieldCheck, Waypoints, ShieldAlert, Network, Boxes,
   Terminal, HardDrive, Clock, KeyRound, Copy, Check, Github, Lock, Eye, FileJson, Package,
   Bell, DatabaseBackup, Activity, Bot, UserCheck, ChartLine
 } from 'lucide-vue-next'
 
-const installTabs = [
-  {
-    key: 'docker',
-    label: 'Docker',
-    code: `docker run -d --name gately --network host \\
-  -v ./gately-data:/etc/gately \\
-  -v /var/run/docker.sock:/var/run/docker.sock \\
-  ghcr.io/wangwanjie/gately:latest
-docker logs gately 2>&1 | grep 初始密码`
-  },
-  {
-    key: 'compose',
-    label: 'Compose',
-    code: `services:
+// 所有文案来自当前语言包（.vitepress/i18n/<语言>.json 的 home 节点），图标按顺序与条目一一对应
+const { theme, localeIndex } = useData()
+const h = computed(() => theme.value.home)
+const prefix = computed(() => (localeIndex.value === 'root' ? '' : `/${localeIndex.value}`))
+const link = (path: string) => withBase(`${prefix.value}${path}`)
+
+const featureIcons = [
+  Globe, RadioTower, ArrowLeftRight, KeyRound, Waypoints, ShieldAlert, Network, Boxes, Terminal,
+  HardDrive, Clock, ShieldCheck, UserCheck, ChartLine, Bell, DatabaseBackup, Activity, Bot
+]
+const promiseIcons = [Eye, FileJson, Lock, Package]
+
+const features = computed(() => h.value.features.map((f: any, i: number) => ({ ...f, icon: featureIcons[i] })))
+const promises = computed(() => h.value.promises.map((f: any, i: number) => ({ ...f, icon: promiseIcons[i] })))
+
+const COMPOSE = `services:
   gately:
     image: ghcr.io/wangwanjie/gately:latest
     container_name: gately
@@ -31,22 +33,17 @@ docker logs gately 2>&1 | grep 初始密码`
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - TZ=Asia/Shanghai`
-  },
-  {
-    key: 'binary',
-    label: '二进制',
-    code: `# 从 Releases 下载对应平台的压缩包并解压
-./gately -c /etc/gately
 
-# 管理界面默认监听 :16680
-# 用户名 admin，初始密码输出在启动日志中`
-  }
-]
+const installTabs = computed(() => [
+  { key: 'docker', label: 'Docker', code: h.value.installDocker },
+  { key: 'compose', label: 'Compose', code: COMPOSE },
+  { key: 'binary', label: h.value.installTabBinary, code: h.value.installBinary }
+])
 const activeTab = ref('docker')
 const copied = ref(false)
 
 async function copyCode() {
-  const tab = installTabs.find((t) => t.key === activeTab.value)
+  const tab = installTabs.value.find((x) => x.key === activeTab.value)
   if (!tab) {
     return
   }
@@ -61,58 +58,6 @@ async function copyCode() {
   }
 }
 
-const stats = [
-  { value: '~22 MB', label: '单文件，内嵌管理界面' },
-  { value: '0', label: '默认连接项目方服务器' },
-  { value: '全平台', label: 'Linux / macOS / Windows / FreeBSD，含 ARM、MIPS、RISC-V' },
-  { value: 'Apache-2.0', label: '开源协议，源码可审计' }
-]
-
-const features = [
-  { icon: Globe, title: '动态域名', text: '阿里云、Cloudflare、腾讯云、DNSPod、华为云、GoDaddy 等 11 家服务商；URL / 网卡 / 命令取 IP，IPv4 与 IPv6，Webhook 通知。' },
-  { icon: RadioTower, title: 'STUN 穿透', text: 'TCP / UDP 打洞与保活，UPnP / NAT-PMP，内置转发；公网地址变化时触发 Webhook 与脚本。' },
-  { icon: ArrowLeftRight, title: '端口转发', text: 'TCP / UDP、IPv4 / IPv6、端口段、多目标故障转移、连接数限制与流量统计。' },
-  { icon: KeyRound, title: 'SSL 证书', text: 'ACME DNS-01 自动签发与续期，支持通配符与 EAB，可映射到目录并在变化后执行脚本。' },
-  { icon: Waypoints, title: 'Web 服务', text: '按域名反向代理、重定向、静态文件；HTTPS、WebSocket、PROXY 协议；多后端权重与策略、健康检查、压缩、限流与响应缓存。' },
-  { icon: ShieldAlert, title: 'WAF 防火墙', text: '内置 Coraza 与 OWASP CRS v4，按文件启用规则，支持自定义 SecLang，可拦截或仅检测。' },
-  { icon: Network, title: '组网与穿透', text: '以进程托管方式集成 Tailscale、frp（frpc / frps）与 cloudflared 隧道，始终使用上游最新版本。' },
-  { icon: Boxes, title: 'Docker 管理', text: '容器创建与编辑、日志与终端、Compose、镜像更新与一键升级（失败自动回滚）、网络与卷管理。' },
-  { icon: Terminal, title: 'Web 终端', text: 'SSH、Telnet 与本机 Shell（默认关闭），支持代理、持久会话、SFTP 文件管理与分屏。' },
-  { icon: HardDrive, title: '文件服务', text: 'WebDAV、FTP 服务与存储管理，支持本地与远程 WebDAV 挂载及在线文件管理。' },
-  { icon: Clock, title: '计划任务与唤醒', text: 'cron 定时执行命令或 HTTP 请求并保留记录；网络唤醒魔术包广播与在线探测。' },
-  { icon: ShieldCheck, title: '安全加固', text: '两步验证、登录失败限流、安全入口、仅内网访问、管理界面 HTTPS、API 令牌。' },
-  { icon: UserCheck, title: '访问控制', text: '站点路径规则、临时分享链接、认证失败自动封禁、GeoIP 国家过滤与 IP 黑白名单。' },
-  { icon: ChartLine, title: '访问统计与监控', text: '分钟级访问与流量统计，并以 Prometheus 指标暴露，便于接入已有监控。' },
-  { icon: Bell, title: '通知中心', text: 'Webhook、Telegram、Bark、企业微信、钉钉、飞书与邮件；按级别与事件规则推送，支持静默去重。' },
-  { icon: DatabaseBackup, title: '配置备份', text: '加密备份（scrypt + AES-GCM）、保留策略与定时备份，可写入本地目录或存储挂载点。' },
-  { icon: Activity, title: '网络诊断', text: 'Ping、路由追踪、端口探测、DNS 查询、测速与局域网扫描，作为后台任务运行。' },
-  { icon: Bot, title: 'API、命令行与 MCP', text: '多令牌按模块授权，自动生成的 OpenAPI 文档；gately ctl 调用实例，gately mcp 接入 AI 助手。' }
-]
-
-const promises = [
-  { icon: Eye, title: '透明', text: '默认不连接任何项目方服务器，不上报设备信息。公网 IP 查询、STUN 服务器等所有对外地址都可见、可改、可关。' },
-  { icon: FileJson, title: '可审计', text: '配置是明文 JSON，权限 0600，可直接纳入 git 做 diff 与回滚。敏感字段在 API 输出中脱敏。' },
-  { icon: Lock, title: '自主可控', text: '第三方登录使用你自己申请的 OAuth 应用，不经过任何中转；不内置自更新，升级由 Docker 或包管理器负责。' },
-  { icon: Package, title: '单文件部署', text: '一个静态二进制内嵌前端，支持 Docker、systemd、OpenWrt，覆盖 NAS、软路由与云主机。' }
-]
-
-const compare = [
-  ['源码', '开源（Apache-2.0）', '闭源'],
-  ['配置文件', '明文 JSON，可 git 管理', '专有格式（.lkcf）'],
-  ['官方服务', '默认无，对外地址可改可关', '提供在线更新、第三方登录中转等官方服务'],
-  ['第三方登录', '使用自己的 OAuth 应用', '经官方中转服务'],
-  ['从 Lucky 迁移', '一键导入 .lkcf / 整站 zip', '—'],
-  ['升级方式', 'Docker / 包管理器', '内置在线自更新'],
-  ['功能广度', '覆盖常用核心能力', '更丰富，如 DLNA、网盘挂载等']
-]
-
-const faqs = [
-  { q: 'Gately 与 Lucky 是什么关系？', a: 'Gately 是独立实现的开源项目，与 Lucky 项目方没有隶属关系，产品思路来自 Lucky，感谢其作者与社区的贡献。兼容性基于公开可观察的行为、接口与配置格式，不包含从 Lucky 二进制或前端产物复制的代码。' },
-  { q: '可以直接迁移现有 Lucky 配置吗？', a: '可以。在「设置 → 备份与迁移」选择 .lkcf 文件或整站配置 zip，预览后导入。导入的规则默认停用，可与 Lucky 并存，逐个模块切换，也随时可以回退。' },
-  { q: '需要联网到你们的服务器吗？', a: '不需要。Gately 默认不连接任何项目方服务器，也不会上报信息。' },
-  { q: '适合在哪些设备上运行？', a: '家庭 NAS、软路由、云主机与各类服务器均可，提供 Linux（amd64 / arm64 / arm / mips / mipsle / riscv64）、macOS、Windows、FreeBSD 二进制，以及 amd64 / arm64 / arm/v7 的 Docker 镜像。' },
-  { q: '端口转发、STUN 为什么推荐 host 网络？', a: '这些模块需要直接监听宿主机端口。不需要 Docker 管理时，可去掉 docker.sock 挂载。' }
-]
 const openFaq = ref(0)
 </script>
 
@@ -123,15 +68,13 @@ const openFaq = ref(0)
       <div class="wrap hero-grid">
         <div class="hero-text">
           <a class="pill" href="https://github.com/wangwanjie/gately/releases" target="_blank" rel="noreferrer">
-            <span class="dot" />开源 · 可审计 · 可从 Lucky 一键迁移
+            <span class="dot" />{{ h.pill }}
           </a>
-          <h1>看得见的<br /><span class="grad">网络网关工具集</span></h1>
-          <p class="lead">
-            DDNS、STUN 穿透、端口转发、反向代理、证书、WAF、Tailscale、frp，集成在一个约 22 MB 的单文件里。家庭网络、NAS、云主机与各类服务器均可使用。
-          </p>
+          <h1>{{ h.titleLine1 }}<br /><span class="grad">{{ h.titleLine2 }}</span></h1>
+          <p class="lead">{{ h.lead }}</p>
           <div class="cta">
-            <a class="btn primary" :href="withBase('/docs/guide/quick-start')">快速开始</a>
-            <a class="btn" :href="withBase('/download')">下载</a>
+            <a class="btn primary" :href="link('/docs/guide/quick-start')">{{ h.ctaStart }}</a>
+            <a class="btn" :href="link('/download')">{{ h.ctaDownload }}</a>
             <a class="btn ghost" href="https://github.com/wangwanjie/gately" target="_blank" rel="noreferrer">
               <Github :size="16" />GitHub
             </a>
@@ -139,16 +82,9 @@ const openFaq = ref(0)
         </div>
 
         <div class="mock" aria-hidden="true">
-          <div class="mock-bar"><i /><i /><i /><span>gately · 总览</span></div>
+          <div class="mock-bar"><i /><i /><i /><span>{{ h.mockTitle }}</span></div>
           <div class="mock-body">
-            <div class="mock-row" v-for="r in [
-              ['动态域名', '75 条记录已同步', 'ok'],
-              ['STUN 穿透', '18 条规则运行中', 'ok'],
-              ['端口转发', '25 条规则运行中', 'ok'],
-              ['Web 服务', '27 个站点 · HTTPS', 'ok'],
-              ['SSL 证书', '5 张证书 · 自动续期', 'ok'],
-              ['WAF 防火墙', 'CRS v4 · 拦截模式', 'warn']
-            ]" :key="r[0]">
+            <div class="mock-row" v-for="r in h.mockRows" :key="r[0]">
               <span class="state" :class="r[2]" />
               <b>{{ r[0] }}</b>
               <em>{{ r[1] }}</em>
@@ -160,7 +96,7 @@ const openFaq = ref(0)
 
     <!-- Stats -->
     <section class="wrap stats">
-      <div v-for="s in stats" :key="s.label" class="stat">
+      <div v-for="s in h.stats" :key="s.label" class="stat">
         <strong>{{ s.value }}</strong>
         <span>{{ s.label }}</span>
       </div>
@@ -169,8 +105,8 @@ const openFaq = ref(0)
     <!-- Features -->
     <section class="wrap block">
       <header class="head">
-        <h2>常用网络能力，一处管理</h2>
-        <p>覆盖家庭网络与服务器运维最常用的功能，每个模块都可单独启停。</p>
+        <h2>{{ h.featuresTitle }}</h2>
+        <p>{{ h.featuresDesc }}</p>
       </header>
       <div class="grid feat">
         <article v-for="f in features" :key="f.title" class="card">
@@ -179,15 +115,15 @@ const openFaq = ref(0)
           <p>{{ f.text }}</p>
         </article>
       </div>
-      <p class="more"><a :href="withBase('/docs/modules/')">查看全部模块 →</a></p>
+      <p class="more"><a :href="link('/docs/modules/')">{{ h.moreModules }}</a></p>
     </section>
 
     <!-- Promises -->
     <section class="band">
       <div class="wrap">
         <header class="head">
-          <h2>运行在网络边界的软件，应该让你看得清楚</h2>
-          <p>它手握 DNS 密钥与证书私钥，所以每一个行为都应当可以被检查。</p>
+          <h2>{{ h.promisesTitle }}</h2>
+          <p>{{ h.promisesDesc }}</p>
         </header>
         <div class="grid prom">
           <article v-for="p in promises" :key="p.title" class="card flat">
@@ -202,29 +138,30 @@ const openFaq = ref(0)
     <!-- Install -->
     <section class="wrap block">
       <header class="head">
-        <h2>一分钟跑起来</h2>
-        <p>镜像支持 amd64、arm64、arm/v7。启动后访问 <code>http://设备IP:16680</code>，用 <code>admin</code> 与日志中的初始密码登录。</p>
+        <h2>{{ h.installTitle }}</h2>
+        <!-- eslint-disable-next-line vue/no-v-html -->
+        <p v-html="h.installDesc" />
       </header>
       <div class="term">
         <div class="tabs">
-          <button v-for="t in installTabs" :key="t.key" :class="{ on: activeTab === t.key }" @click="activeTab = t.key">
-            {{ t.label }}
+          <button v-for="tab in installTabs" :key="tab.key" :class="{ on: activeTab === tab.key }" @click="activeTab = tab.key">
+            {{ tab.label }}
           </button>
           <button class="copy" @click="copyCode">
-            <component :is="copied ? Check : Copy" :size="14" />{{ copied ? '已复制' : '复制' }}
+            <component :is="copied ? Check : Copy" :size="14" />{{ copied ? h.copied : h.copy }}
           </button>
         </div>
-        <pre><code>{{ installTabs.find((t) => t.key === activeTab)?.code }}</code></pre>
+        <pre><code>{{ installTabs.find((x) => x.key === activeTab)?.code }}</code></pre>
       </div>
-      <p class="more"><a :href="withBase('/docs/guide/install')">完整安装文档 →</a></p>
+      <p class="more"><a :href="link('/docs/guide/install')">{{ h.fullInstall }}</a></p>
     </section>
 
     <!-- Compare -->
     <section class="band">
       <div class="wrap">
         <header class="head">
-          <h2>与 Lucky 对照</h2>
-          <p>Gately 受 Lucky 启发，覆盖常用场景，并可一键导入现有配置。Lucky 的功能更丰富，两者可以并存使用。</p>
+          <h2>{{ h.compareTitle }}</h2>
+          <p>{{ h.compareDesc }}</p>
         </header>
         <div class="tbl">
           <table>
@@ -232,7 +169,7 @@ const openFaq = ref(0)
               <tr><th /><th>Gately</th><th>Lucky</th></tr>
             </thead>
             <tbody>
-              <tr v-for="row in compare" :key="row[0]">
+              <tr v-for="row in h.compareRows" :key="row[0]">
                 <td>{{ row[0] }}</td>
                 <td class="hl">{{ row[1] }}</td>
                 <td>{{ row[2] }}</td>
@@ -240,30 +177,30 @@ const openFaq = ref(0)
             </tbody>
           </table>
         </div>
-        <p class="more"><a :href="withBase('/docs/guide/migration')">阅读迁移指南 →</a></p>
+        <p class="more"><a :href="link('/docs/guide/migration')">{{ h.migrationGuide }}</a></p>
       </div>
     </section>
 
     <!-- FAQ -->
     <section class="wrap block narrow">
-      <header class="head"><h2>常见问题</h2></header>
+      <header class="head"><h2>{{ h.faqTitle }}</h2></header>
       <div class="faq">
-        <div v-for="(f, i) in faqs" :key="f.q" class="qa" :class="{ open: openFaq === i }">
+        <div v-for="(f, i) in h.faqs" :key="f.q" class="qa" :class="{ open: openFaq === i }">
           <button @click="openFaq = openFaq === i ? -1 : i">{{ f.q }}<span>{{ openFaq === i ? '−' : '+' }}</span></button>
           <p v-show="openFaq === i">{{ f.a }}</p>
         </div>
       </div>
-      <p class="more"><a :href="withBase('/docs/guide/faq')">更多问题 →</a></p>
+      <p class="more"><a :href="link('/docs/guide/faq')">{{ h.moreFaq }}</a></p>
     </section>
 
     <!-- CTA -->
     <section class="wrap block">
       <div class="final">
-        <h2>把网络边界的控制权拿回来</h2>
-        <p>开源、透明、单文件。现在就部署一个 Gately。</p>
+        <h2>{{ h.finalTitle }}</h2>
+        <p>{{ h.finalDesc }}</p>
         <div class="cta center">
-          <a class="btn primary lg" :href="withBase('/docs/guide/quick-start')">快速开始</a>
-          <a class="btn lg" href="https://github.com/wangwanjie/gately" target="_blank" rel="noreferrer">在 GitHub 点亮 Star</a>
+          <a class="btn primary lg" :href="link('/docs/guide/quick-start')">{{ h.ctaStart }}</a>
+          <a class="btn lg" href="https://github.com/wangwanjie/gately" target="_blank" rel="noreferrer">{{ h.starOnGithub }}</a>
         </div>
       </div>
     </section>

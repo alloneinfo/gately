@@ -7,9 +7,9 @@
         <el-option label="/bin/bash" value="/bin/bash" />
         <el-option label="/bin/ash" value="/bin/ash" />
       </el-select>
-      <el-input v-model="user" placeholder="用户（可空）" class="o-user" :disabled="connected" />
-      <el-button v-if="!connected" type="primary" :icon="Plug" @click="connect">连接</el-button>
-      <el-button v-else :icon="Unplug" @click="disconnect">断开</el-button>
+      <el-input v-model="user" :placeholder="t('docker.container.term.userPlaceholder')" class="o-user" :disabled="connected" />
+      <el-button v-if="!connected" type="primary" :icon="Plug" @click="connect">{{ t('docker.container.term.connect') }}</el-button>
+      <el-button v-else :icon="Unplug" @click="disconnect">{{ t('docker.container.term.disconnect') }}</el-button>
     </div>
     <div class="term-box">
       <div ref="el" class="term-pane"></div>
@@ -22,11 +22,14 @@
 
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { Plug, Unplug } from 'lucide-vue-next'
 import { Terminal } from '@xterm/xterm'
 import { FitAddon } from '@xterm/addon-fit'
 import '@xterm/xterm/css/xterm.css'
 import { useIsMobile } from '../../composables/useIsMobile'
+
+const { t } = useI18n()
 
 const props = defineProps<{ containerId: string }>()
 const isMobile = useIsMobile()
@@ -148,11 +151,11 @@ function connect() {
   sock.onclose = () => {
     if (ws === sock) {
       connected.value = false
-      term?.write('\r\n\x1b[90m[连接已关闭]\x1b[0m\r\n')
+      term?.write(`\r\n\x1b[90m${t('docker.container.term.closed')}\x1b[0m\r\n`)
     }
   }
   sock.onerror = () => {
-    term?.write('\r\n\x1b[31m[连接失败]\x1b[0m\r\n')
+    term?.write(`\r\n\x1b[31m${t('docker.container.term.failed')}\x1b[0m\r\n`)
   }
 }
 

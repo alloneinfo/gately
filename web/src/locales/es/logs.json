@@ -1,0 +1,5 @@
+{
+  "title": "Registros del sistema",
+  "desc": "Consulta en un solo lugar los registros de ejecución de Gately y los de cada módulo. Los registros solo se guardan en memoria y se borran al reiniciar.",
+  "system": "Sistema"
+}

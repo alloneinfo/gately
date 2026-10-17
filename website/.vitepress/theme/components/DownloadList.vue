@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { useData } from 'vitepress'
 
 interface Asset {
   name: string
@@ -14,13 +15,15 @@ interface Release {
   assets: Asset[]
 }
 
+const { theme, lang } = useData()
+const d = computed(() => theme.value.download)
 const REPO = 'wangwanjie/gately'
 const release = ref<Release | null>(null)
 const loading = ref(true)
 const failed = ref(false)
 
 // 把文件名里的系统/架构识别成可读标签，便于用户挑选
-function describe(name: string): { os: string; arch: string } {
+function describe(name: string, other: string): { os: string; arch: string } {
   const n = name.toLowerCase()
   const os = n.includes('darwin') || n.includes('macos')
     ? 'macOS'
@@ -30,7 +33,7 @@ function describe(name: string): { os: string; arch: string } {
         ? 'FreeBSD'
         : n.includes('linux')
           ? 'Linux'
-          : '其他'
+          : other
   const arch = ['amd64', 'x86_64', 'arm64', 'aarch64', 'armv7', 'armv6', 'arm', 'mipsle', 'mips64le', 'mips', 'riscv64', '386']
     .find((a) => n.includes(a)) ?? ''
   return { os, arch }
@@ -38,7 +41,7 @@ function describe(name: string): { os: string; arch: string } {
 
 const assets = computed(() => {
   const list = (release.value?.assets ?? []).filter((a) => !/\.(sha256|sig|txt|pem)$/i.test(a.name) && !/checksums/i.test(a.name))
-  return list.map((a) => ({ ...a, ...describe(a.name) }))
+  return list.map((a) => ({ ...a, ...describe(a.name, d.value.other) }))
 })
 const groups = computed(() => {
   const map = new Map<string, typeof assets.value>()
@@ -51,6 +54,9 @@ const groups = computed(() => {
   return [...map.entries()]
 })
 const checksum = computed(() => (release.value?.assets ?? []).find((a) => /checksums/i.test(a.name)))
+
+// 把带 {releases} / {image} 占位的提示拆成片段，占位处渲染为链接与代码
+const failedParts = computed(() => String(d.value.failed).split(/(\{releases\}|\{image\})/).filter(Boolean))
 
 function size(n: number) {
   return `${(n / 1024 / 1024).toFixed(1)} MB`
@@ -73,18 +79,20 @@ onMounted(async () => {
 
 <template>
   <div class="dl">
-    <div v-if="loading" class="tip">正在获取最新版本…</div>
+    <div v-if="loading" class="tip">{{ d.loading }}</div>
     <div v-else-if="failed || !release" class="tip">
-      暂时无法获取版本列表（GitHub 访问受限或接口限流）。请直接前往
-      <a :href="`https://github.com/${REPO}/releases`" target="_blank" rel="noreferrer">GitHub Releases</a>
-      下载，或使用 Docker 镜像 <code>ghcr.io/wangwanjie/gately:latest</code>。
+      <template v-for="(part, i) in failedParts" :key="i">
+        <a v-if="part === '{releases}'" :href="`https://github.com/${REPO}/releases`" target="_blank" rel="noreferrer">GitHub Releases</a>
+        <code v-else-if="part === '{image}'">ghcr.io/wangwanjie/gately:latest</code>
+        <template v-else>{{ part }}</template>
+      </template>
     </div>
     <template v-else>
       <div class="ver">
         <strong>{{ release.tag_name }}</strong>
-        <span>发布于 {{ new Date(release.published_at).toLocaleDateString('zh-CN') }}</span>
-        <a :href="release.html_url" target="_blank" rel="noreferrer">更新说明</a>
-        <a v-if="checksum" :href="checksum.browser_download_url" target="_blank" rel="noreferrer">校验和</a>
+        <span>{{ d.publishedAt.replace('{date}', new Date(release.published_at).toLocaleDateString(lang)) }}</span>
+        <a :href="release.html_url" target="_blank" rel="noreferrer">{{ d.releaseNotes }}</a>
+        <a v-if="checksum" :href="checksum.browser_download_url" target="_blank" rel="noreferrer">{{ d.checksums }}</a>
       </div>
       <section v-for="[os, list] in groups" :key="os" class="grp">
         <h3>{{ os }}</h3>

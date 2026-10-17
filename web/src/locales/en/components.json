@@ -1,0 +1,45 @@
+{
+  "clipboard": {
+    "copyFailed": "Unable to copy automatically. The text is selected; press Ctrl/Cmd+C to copy."
+  },
+  "themePicker": {
+    "switchTheme": "Switch theme",
+    "title": "Theme colors",
+    "followSystem": "Follow system (Emerald / Dark)"
+  },
+  "moduleBanner": {
+    "defaultDesc": "While the module is disabled, none of the items below will run. After enabling it, each item follows its own switch.",
+    "enable": "Enable module"
+  },
+  "saveBar": {
+    "dirty": "You have unsaved changes",
+    "saved": "All changes saved",
+    "undo": "Undo",
+    "save": "Save settings"
+  },
+  "logCard": {
+    "title": "Runtime logs"
+  },
+  "logViewer": {
+    "levelAll": "All levels",
+    "levelInfo": "Info and above",
+    "levelWarn": "Warning and above",
+    "levelError": "Errors only",
+    "autoScroll": "Auto scroll",
+    "empty": "No logs yet"
+  },
+  "scopeTags": {
+    "allWrite": "Full access",
+    "allRead": "Read-only (all)",
+    "write": "read/write",
+    "read": "read-only",
+    "none": "No permissions"
+  },
+  "restartOverlay": {
+    "resumeHint": "The page will refresh automatically once the service is back. Keep this page open.",
+    "waited": "Waited {seconds} s",
+    "timeoutTitle": "Timed out",
+    "timeoutDesc": "The service has not responded for a long time. If you changed the admin port or listen address, open the new address manually. You can also check the program logs to see how startup is going.",
+    "reload": "Reload page"
+  }
+}

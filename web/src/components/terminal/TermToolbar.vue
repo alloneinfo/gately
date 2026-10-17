@@ -1,78 +1,78 @@
 <template>
   <div class="toolbar">
     <template v-if="!isMobile">
-      <el-tooltip content="文件管理（SFTP）" placement="bottom"><el-button class="tb" text :icon="FolderOpen" :disabled="!sftpEnabled" @click="$emit('action', 'sftp')" /></el-tooltip>
-      <el-tooltip content="搜索" placement="bottom"><el-button class="tb" text :icon="Search" @click="$emit('action', 'search')" /></el-tooltip>
-      <el-tooltip content="复制选中内容" placement="bottom"><el-button class="tb" text :icon="Copy" @click="$emit('action', 'copy')" /></el-tooltip>
-      <el-tooltip content="粘贴" placement="bottom"><el-button class="tb" text :icon="ClipboardPaste" @click="$emit('action', 'paste')" /></el-tooltip>
+      <el-tooltip :content="t('terminal.toolbar.sftp')" placement="bottom"><el-button class="tb" text :icon="FolderOpen" :disabled="!sftpEnabled" @click="$emit('action', 'sftp')" /></el-tooltip>
+      <el-tooltip :content="t('terminal.toolbar.search')" placement="bottom"><el-button class="tb" text :icon="Search" @click="$emit('action', 'search')" /></el-tooltip>
+      <el-tooltip :content="t('terminal.toolbar.copySelection')" placement="bottom"><el-button class="tb" text :icon="Copy" @click="$emit('action', 'copy')" /></el-tooltip>
+      <el-tooltip :content="t('terminal.toolbar.paste')" placement="bottom"><el-button class="tb" text :icon="ClipboardPaste" @click="$emit('action', 'paste')" /></el-tooltip>
       <span class="sep" />
-      <el-tooltip content="减小字号" placement="bottom"><el-button class="tb" text :icon="Minus" @click="$emit('action', 'font-dec')" /></el-tooltip>
+      <el-tooltip :content="t('terminal.toolbar.fontDec')" placement="bottom"><el-button class="tb" text :icon="Minus" @click="$emit('action', 'font-dec')" /></el-tooltip>
       <span class="font-size">{{ fontSize }}</span>
-      <el-tooltip content="增大字号" placement="bottom"><el-button class="tb" text :icon="Plus" @click="$emit('action', 'font-inc')" /></el-tooltip>
+      <el-tooltip :content="t('terminal.toolbar.fontInc')" placement="bottom"><el-button class="tb" text :icon="Plus" @click="$emit('action', 'font-inc')" /></el-tooltip>
       <el-dropdown trigger="click" @command="(n: string) => $emit('update:themeName', n)">
-        <el-button class="tb" text :icon="Palette" title="终端配色" />
+        <el-button class="tb" text :icon="Palette" :title="t('terminal.toolbar.theme')" />
         <template #dropdown>
           <el-dropdown-menu>
-            <el-dropdown-item v-for="t in termThemes" :key="t.name" :command="t.name" :class="{ 'is-current': t.name === themeName }">
-              <span class="swatch" :style="{ background: t.theme.background, borderColor: t.theme.foreground }" />{{ t.label }}
+            <el-dropdown-item v-for="th in termThemes" :key="th.name" :command="th.name" :class="{ 'is-current': th.name === themeName }">
+              <span class="swatch" :style="{ background: th.theme.background, borderColor: th.theme.foreground }" />{{ themeLabel(th) }}
             </el-dropdown-item>
           </el-dropdown-menu>
         </template>
       </el-dropdown>
       <span class="sep" />
       <el-dropdown trigger="click" @command="(s: Shortcut) => $emit('shortcut', s)">
-        <el-button class="tb wide" text :icon="Zap">快捷命令</el-button>
+        <el-button class="tb wide" text :icon="Zap">{{ t('terminal.toolbar.shortcuts') }}</el-button>
         <template #dropdown>
           <el-dropdown-menu>
             <el-dropdown-item v-for="(s, i) in shortcuts" :key="i" :command="s">
               {{ s.name }}<span class="sc-cmd mono">{{ s.command }}</span>
             </el-dropdown-item>
-            <el-dropdown-item v-if="!shortcuts.length" disabled>暂无快捷命令</el-dropdown-item>
-            <el-dropdown-item divided :icon="Settings2" @click="$emit('action', 'shortcuts-manage')">管理快捷命令</el-dropdown-item>
+            <el-dropdown-item v-if="!shortcuts.length" disabled>{{ t('terminal.toolbar.noShortcuts') }}</el-dropdown-item>
+            <el-dropdown-item divided :icon="Settings2" @click="$emit('action', 'shortcuts-manage')">{{ t('terminal.toolbar.manageShortcuts') }}</el-dropdown-item>
           </el-dropdown-menu>
         </template>
       </el-dropdown>
       <el-dropdown trigger="click" @command="(c: string) => $emit('action', c)">
-        <el-button class="tb wide" text :icon="Columns2">{{ splitMode ? '分屏中' : '分屏' }}</el-button>
+        <el-button class="tb wide" text :icon="Columns2">{{ splitMode ? t('terminal.toolbar.splitting') : t('terminal.toolbar.split') }}</el-button>
         <template #dropdown>
           <el-dropdown-menu>
-            <el-dropdown-item command="split-h" :icon="Columns2">左右分屏</el-dropdown-item>
-            <el-dropdown-item command="split-v" :icon="Rows2">上下分屏</el-dropdown-item>
-            <el-dropdown-item command="split-grid" :icon="LayoutGrid">网格分屏</el-dropdown-item>
-            <el-dropdown-item command="split-off" :icon="Square" :disabled="!splitMode" divided>退出分屏</el-dropdown-item>
+            <el-dropdown-item command="split-h" :icon="Columns2">{{ t('terminal.toolbar.splitH') }}</el-dropdown-item>
+            <el-dropdown-item command="split-v" :icon="Rows2">{{ t('terminal.toolbar.splitV') }}</el-dropdown-item>
+            <el-dropdown-item command="split-grid" :icon="LayoutGrid">{{ t('terminal.toolbar.splitGrid') }}</el-dropdown-item>
+            <el-dropdown-item command="split-off" :icon="Square" :disabled="!splitMode" divided>{{ t('terminal.toolbar.splitOff') }}</el-dropdown-item>
           </el-dropdown-menu>
         </template>
       </el-dropdown>
       <span class="grow" />
-      <el-tooltip content="清屏" placement="bottom"><el-button class="tb" text :icon="Eraser" @click="$emit('action', 'clear')" /></el-tooltip>
-      <el-tooltip content="会话列表" placement="bottom"><el-button class="tb" text :icon="ListTree" @click="$emit('action', 'sessions')" /></el-tooltip>
-      <el-tooltip :content="fullscreen ? '退出全屏' : '全屏'" placement="bottom">
+      <el-tooltip :content="t('terminal.toolbar.clear')" placement="bottom"><el-button class="tb" text :icon="Eraser" @click="$emit('action', 'clear')" /></el-tooltip>
+      <el-tooltip :content="t('terminal.toolbar.sessions')" placement="bottom"><el-button class="tb" text :icon="ListTree" @click="$emit('action', 'sessions')" /></el-tooltip>
+      <el-tooltip :content="fullscreen ? t('terminal.toolbar.exitFullscreen') : t('terminal.toolbar.fullscreen')" placement="bottom">
         <el-button class="tb" text :icon="fullscreen ? Minimize2 : Maximize2" @click="$emit('action', 'fullscreen')" />
       </el-tooltip>
     </template>
 
     <template v-else>
-      <el-button class="tb" text :icon="FolderOpen" :disabled="!sftpEnabled" aria-label="文件管理" @click="$emit('action', 'sftp')" />
-      <el-button class="tb" text :icon="Search" aria-label="搜索" @click="$emit('action', 'search')" />
+      <el-button class="tb" text :icon="FolderOpen" :disabled="!sftpEnabled" :aria-label="t('terminal.toolbar.fileManage')" @click="$emit('action', 'sftp')" />
+      <el-button class="tb" text :icon="Search" :aria-label="t('terminal.toolbar.search')" @click="$emit('action', 'search')" />
       <el-dropdown trigger="click" placement="bottom-end" @command="onMore">
-        <el-button class="tb" text :icon="Ellipsis" aria-label="更多" />
+        <el-button class="tb" text :icon="Ellipsis" :aria-label="t('common.more')" />
         <template #dropdown>
           <el-dropdown-menu>
-            <el-dropdown-item command="copy" :icon="Copy">复制（选区或当前屏幕）</el-dropdown-item>
-            <el-dropdown-item command="paste" :icon="ClipboardPaste">粘贴</el-dropdown-item>
-            <el-dropdown-item command="font-inc" :icon="Plus">增大字号（{{ fontSize }}）</el-dropdown-item>
-            <el-dropdown-item command="font-dec" :icon="Minus">减小字号</el-dropdown-item>
-            <el-dropdown-item command="clear" :icon="Eraser">清屏</el-dropdown-item>
-            <el-dropdown-item command="sessions" :icon="ListTree">会话列表</el-dropdown-item>
-            <el-dropdown-item command="shortcuts-manage" :icon="Settings2">管理快捷命令</el-dropdown-item>
+            <el-dropdown-item command="copy" :icon="Copy">{{ t('terminal.toolbar.copyMobile') }}</el-dropdown-item>
+            <el-dropdown-item command="paste" :icon="ClipboardPaste">{{ t('terminal.toolbar.paste') }}</el-dropdown-item>
+            <el-dropdown-item command="font-inc" :icon="Plus">{{ t('terminal.toolbar.fontIncWithSize', { size: fontSize }) }}</el-dropdown-item>
+            <el-dropdown-item command="font-dec" :icon="Minus">{{ t('terminal.toolbar.fontDec') }}</el-dropdown-item>
+            <el-dropdown-item command="clear" :icon="Eraser">{{ t('terminal.toolbar.clear') }}</el-dropdown-item>
+            <el-dropdown-item command="sessions" :icon="ListTree">{{ t('terminal.toolbar.sessions') }}</el-dropdown-item>
+            <el-dropdown-item command="shortcuts-manage" :icon="Settings2">{{ t('terminal.toolbar.manageShortcuts') }}</el-dropdown-item>
             <el-dropdown-item
-              v-for="t in termThemes"
-              :key="t.name"
-              :command="'theme:' + t.name"
-              :divided="t.name === termThemes[0].name"
-              :class="{ 'is-current': t.name === themeName }"
+              v-for="th in termThemes"
+              :key="th.name"
+              :command="'theme:' + th.name"
+              :divided="th.name === termThemes[0].name"
+              :class="{ 'is-current': th.name === themeName }"
             >
-              <span class="swatch" :style="{ background: t.theme.background, borderColor: t.theme.foreground }" />配色：{{ t.label }}
+              <span class="swatch" :style="{ background: th.theme.background, borderColor: th.theme.foreground }" />{{ t('terminal.toolbar.themeItem', { name: themeLabel(th) }) }}
             </el-dropdown-item>
           </el-dropdown-menu>
         </template>
@@ -85,8 +85,11 @@
 import {
   ClipboardPaste, Columns2, Copy, Ellipsis, Eraser, FolderOpen, LayoutGrid, ListTree, Maximize2, Minimize2, Minus, Palette, Plus, Rows2, Search, Settings2, Square, Zap,
 } from 'lucide-vue-next'
-import { termThemes } from './themes'
+import { useI18n } from 'vue-i18n'
+import { termThemes, themeLabel } from './themes'
 import type { Shortcut } from './types'
+
+const { t } = useI18n()
 
 defineProps<{
   isMobile: boolean

@@ -1,0 +1,17 @@
+{
+  "fetchIp": "IPv{family} abrufen",
+  "method": "Methode",
+  "typeUrl": "Abfrage-URL",
+  "typeInterface": "Netzwerkschnittstelle",
+  "typeCommand": "Befehl",
+  "urls": "Abfrage-URLs",
+  "urlsPlaceholder": "Eine pro Zeile, werden der Reihe nach versucht",
+  "interface": "Netzwerkschnittstelle",
+  "interfacePlaceholder": "Netzwerkschnittstelle auswählen",
+  "command": "Befehl",
+  "commandPlaceholder": "Die Ausgabe muss nur eine IP enthalten, z. B. curl -s https://4.ipw.cn",
+  "regex": "Filter-Regex",
+  "regexPlaceholder": "Optional; leer lassen, um die erste öffentliche Adresse zu verwenden",
+  "testFetch": "Abruf testen",
+  "fetchSuccess": "Erfolgreich abgerufen: {ip}"
+}

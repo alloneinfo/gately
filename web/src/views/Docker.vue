@@ -1,24 +1,24 @@
 <template>
   <div>
-    <PageHeader title="Docker" desc="管理容器、Compose 项目、镜像、网络与卷，检查镜像更新并一键升级" :icon="Container">
-      <el-button :icon="RefreshCw" :loading="refreshing" @click="refresh">刷新</el-button>
+    <PageHeader title="Docker" :desc="t('docker.page.desc')" :icon="Container">
+      <el-button :icon="RefreshCw" :loading="refreshing" @click="refresh">{{ t('common.refresh') }}</el-button>
     </PageHeader>
 
-    <el-alert v-if="dockerError" type="error" title="无法连接 Docker" :closable="false" show-icon class="err">
+    <el-alert v-if="dockerError" type="error" :title="t('docker.page.connectFailed')" :closable="false" show-icon class="err">
       <template #default>
         <div class="err-detail mono">{{ dockerError }}</div>
-        <div>请在「系统」标签的设置中确认 Docker 地址；Gately 运行在容器中时需挂载 /var/run/docker.sock。</div>
-        <el-button v-if="tab !== 'system'" size="small" class="err-btn" :icon="SlidersHorizontal" @click="tab = 'system'">打开设置</el-button>
+        <div>{{ t('docker.page.connectHint') }}</div>
+        <el-button v-if="tab !== 'system'" size="small" class="err-btn" :icon="SlidersHorizontal" @click="tab = 'system'">{{ t('docker.page.openSettings') }}</el-button>
       </template>
     </el-alert>
 
     <el-tabs v-model="tab" class="docker-tabs">
-      <el-tab-pane label="容器" name="containers" lazy><ContainersTab :ref="(el: unknown) => setRef('containers', el)" /></el-tab-pane>
+      <el-tab-pane :label="t('docker.page.tabContainers')" name="containers" lazy><ContainersTab :ref="(el: unknown) => setRef('containers', el)" /></el-tab-pane>
       <el-tab-pane label="Compose" name="compose" lazy><ComposeTab :ref="(el: unknown) => setRef('compose', el)" /></el-tab-pane>
-      <el-tab-pane label="镜像" name="images" lazy><ImagesTab :ref="(el: unknown) => setRef('images', el)" /></el-tab-pane>
-      <el-tab-pane label="网络" name="networks" lazy><NetworksTab :ref="(el: unknown) => setRef('networks', el)" /></el-tab-pane>
-      <el-tab-pane label="卷" name="volumes" lazy><VolumesTab :ref="(el: unknown) => setRef('volumes', el)" /></el-tab-pane>
-      <el-tab-pane label="系统" name="system" lazy><SystemTab :ref="(el: unknown) => setRef('system', el)" @saved="loadInfo" /></el-tab-pane>
+      <el-tab-pane :label="t('docker.page.tabImages')" name="images" lazy><ImagesTab :ref="(el: unknown) => setRef('images', el)" /></el-tab-pane>
+      <el-tab-pane :label="t('docker.page.tabNetworks')" name="networks" lazy><NetworksTab :ref="(el: unknown) => setRef('networks', el)" /></el-tab-pane>
+      <el-tab-pane :label="t('docker.page.tabVolumes')" name="volumes" lazy><VolumesTab :ref="(el: unknown) => setRef('volumes', el)" /></el-tab-pane>
+      <el-tab-pane :label="t('docker.page.tabSystem')" name="system" lazy><SystemTab :ref="(el: unknown) => setRef('system', el)" @saved="loadInfo" /></el-tab-pane>
     </el-tabs>
 
     <TaskPanel />
@@ -27,6 +27,7 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { Container, RefreshCw, SlidersHorizontal } from 'lucide-vue-next'
 import { api } from '../api'
 import PageHeader from '../components/PageHeader.vue'
@@ -45,6 +46,7 @@ interface Reloadable {
   reload?: () => unknown
 }
 
+const { t } = useI18n()
 const tab = ref('containers')
 const refreshing = ref(false)
 // 各标签页实例，用于顶部“刷新”按钮触发当前标签重新加载

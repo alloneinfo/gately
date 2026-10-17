@@ -1,0 +1,20 @@
+{
+  "autoBan": "Auto ban",
+  "authFailBan": "Ban on authentication failure",
+  "authFailBanHelp": "Minutes. After 10 consecutive authentication failures the source IP is banned; 0 disables banning (rate limiting only, for 15 minutes)",
+  "banList": "Ban list",
+  "noBans": "No IPs are currently banned",
+  "until": "Until {time}",
+  "unban": "Unban",
+  "manualBanIp": "IP to ban manually",
+  "hours": "hours",
+  "ban": "Ban",
+  "geoTitle": "GeoIP database (country filtering)",
+  "geoLoaded": "Loaded: {type}, built on {buildTime}, {size} MB",
+  "remove": "Remove",
+  "geoNotImported": "Not imported. Supports .mmdb country or city databases such as MaxMind GeoLite2 and DB-IP",
+  "uploadMmdb": "Upload .mmdb",
+  "mmdbUrlPlaceholder": "Or enter a .mmdb download URL",
+  "geoImported": "GeoIP database imported",
+  "geoDownloaded": "GeoIP database downloaded and loaded"
+}

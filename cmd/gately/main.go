@@ -30,10 +30,10 @@ func main() {
 			os.Exit(ctl.RunMCP(os.Args[2:], os.Stdin, os.Stdout, os.Stderr))
 		}
 	}
-	configDir := flag.String("c", defaultConfigDir(), "配置目录")
-	listen := flag.String("listen", "", "管理界面监听地址，覆盖配置文件，例如 :16680")
-	showVersion := flag.Bool("version", false, "输出版本信息")
-	apiDocs := flag.String("api-docs", "", "把 API 文档（openapi.json 与 API.md）导出到指定目录后退出，用于官网发布")
+	configDir := flag.String("c", defaultConfigDir(), "configuration directory / 配置目录")
+	listen := flag.String("listen", "", "admin UI listen address, overrides the config file, e.g. :16680 / 管理界面监听地址，覆盖配置文件")
+	showVersion := flag.Bool("version", false, "print version info and exit / 输出版本信息")
+	apiDocs := flag.String("api-docs", "", "export API docs (openapi.json and API.md) to the given directory and exit / 导出 API 文档到指定目录后退出")
 	flag.Parse()
 
 	if *apiDocs != "" {

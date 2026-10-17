@@ -1,0 +1,194 @@
+{
+  "title": "Einstellungen",
+  "desc": "Kontosicherheit, Zugriffskontrolle, Laufzeitparameter, Sicherung und Migration sowie Systeminformationen",
+  "currentPassword": "Aktuelles Passwort",
+  "notEnabled": "Nicht aktiviert",
+  "restartBanner": {
+    "title": "Einige Einstellungen erfordern einen Neustart",
+    "desc": "Änderungen wie die Listen-Adresse wurden gespeichert und werden nach einem Neustart von Gately wirksam.",
+    "action": "Jetzt neu starten"
+  },
+  "tabs": {
+    "account": "Konto & Sicherheit",
+    "access": "Zugriffskontrolle",
+    "runtime": "Netzwerk & Laufzeit",
+    "backup": "Sicherung & Migration"
+  },
+  "admin": {
+    "title": "Administratorkonto",
+    "username": "Benutzername",
+    "newPassword": "Neues Passwort",
+    "newPasswordPlaceholder": "Mindestens 8 Zeichen",
+    "confirmPassword": "Neues Passwort bestätigen",
+    "submit": "Zugangsdaten ändern",
+    "help": "Nach der Änderung werden alle angemeldeten Sitzungen ungültig; Sie müssen sich erneut anmelden.",
+    "mismatch": "Die neuen Passwörter stimmen nicht überein",
+    "changed": "Geändert. Bitte erneut anmelden"
+  },
+  "totp": {
+    "title": "Zwei-Faktor-Authentifizierung",
+    "enabledDesc": "Für die Anmeldung wird zusätzlich zum Passwort ein 6-stelliger Code aus Ihrer Authenticator-App benötigt.",
+    "code": "Bestätigungscode",
+    "codePlaceholder": "6-stelliger Code aus Ihrer Authenticator-App",
+    "disable": "Zwei-Faktor-Authentifizierung deaktivieren",
+    "scanDesc": "Scannen Sie den QR-Code mit einer App wie Google Authenticator oder Microsoft Authenticator und geben Sie zur Bestätigung den angezeigten Code ein.",
+    "qrAlt": "QR-Code",
+    "manualHint": "Geben Sie diesen Schlüssel manuell ein, wenn Sie nicht scannen können",
+    "copySecret": "Schlüssel kopieren",
+    "confirmEnable": "Bestätigen und aktivieren",
+    "introDesc": "Nach der Aktivierung ist bei der Anmeldung zusätzlich ein Einmalcode aus Ihrer Authenticator-App nötig, sodass die Konsole auch bei einem Passwortleck geschützt bleibt.",
+    "start": "Los geht’s",
+    "enabledMsg": "Zwei-Faktor-Authentifizierung aktiviert",
+    "disabledMsg": "Zwei-Faktor-Authentifizierung deaktiviert"
+  },
+  "loginProtect": {
+    "title": "Anmeldeschutz",
+    "sessionHours": "Sitzungsdauer",
+    "sessionHoursHelp": "Stunden; danach ist eine erneute Anmeldung nötig",
+    "maxFailures": "Max. aufeinanderfolgende Fehlversuche",
+    "maxFailuresHelp": "Eine Quelle nach so vielen aufeinanderfolgenden falschen Passwörtern sperren; 0 verwendet den Standard",
+    "lockMinutes": "Sperrdauer",
+    "lockMinutesHelp": "Minuten; 0 verwendet den Standard"
+  },
+  "thirdLogin": {
+    "title": "Anmeldung über Drittanbieter",
+    "desc": "Melden Sie sich mit einem GitHub-, Google-, QQ- oder beliebigen OIDC-Konto an der Konsole an. Es werden Ihre eigenen OAuth-Apps verwendet; der Anmeldevorgang läuft nie über einen Relay-Server.",
+    "enable": "Aktivieren",
+    "callbackBase": "Basis-URL für Callbacks",
+    "callbackBasePlaceholder": "https://gately.example.com (die Adresse, mit der Sie die Konsole im Browser öffnen, ohne Pfad)",
+    "callbackHelp": "Die auf jeder Plattform zu registrierende Callback-URL lautet {url}. Die Anmeldung muss nach dem Öffnen der Konsole über diese Adresse gestartet werden.",
+    "providers": "Anmeldeanbieter",
+    "allowed": "Erlaubte Identitäten",
+    "allowedPlaceholder": "Eine pro Zeile: Anbieter:Konto, z. B. github:15172899 oder google:me{'@'}gmail.com; nach # am Zeilenende eine Notiz anfügen",
+    "allowedHelp": "Nur Konten in dieser Liste können sich anmelden. Für GitHub wird eine numerische ID empfohlen. Wird eine QQ-Anmeldung beim ersten Mal abgelehnt, zeigt die Seite eine Kennung an, die Sie kopieren können.",
+    "skipTotp": "Zwei-Faktor-Authentifizierung überspringen",
+    "skipTotpHelp": "Ist die Zwei-Faktor-Authentifizierung aktiviert, fragt die Drittanbieter-Anmeldung bei eingeschalteter Option nicht nach einem Code; bei ausgeschalteter Option wird die Drittanbieter-Anmeldung abgelehnt"
+  },
+  "apiToken": {
+    "title": "API-Tokens",
+    "desc": "API-Tokens unterstützen jetzt mehrere Tokens mit fein abgestuften Berechtigungen: Erstellen Sie mehrere Tokens, jedes mit eigenem Ablaufdatum und Lese- bzw. Schreibzugriff pro Modul.",
+    "manage": "API-Tokens verwalten",
+    "docs": "API-Dokumentation ansehen"
+  },
+  "listen": {
+    "title": "Konsolen-Listener",
+    "http": "HTTP-Listen",
+    "needRestart": "Neustart erforderlich",
+    "httpHelp": "Format: :Port oder IP:Port",
+    "https": "HTTPS-Listen",
+    "httpsPlaceholder": "Leer lassen zum Deaktivieren, z. B. :16643",
+    "httpsHelp": "Das Zertifikat wird anhand der Zugriffsdomain aus „SSL-Zertifikate“ ausgewählt",
+    "forceHttps": "HTTPS erzwingen",
+    "forceHttpsHelp": "HTTP automatisch auf HTTPS umleiten (nur wenn das Zertifikatsmodul ein Zertifikat für die Domain hat)"
+  },
+  "restrict": {
+    "title": "Zugriffsbeschränkungen",
+    "safePath": "Sicherer Einstieg",
+    "safePathPlaceholder": "Leer lassen zum Deaktivieren, z. B. /my-entry",
+    "random": "Zufällig erzeugen",
+    "safePathHelp": "Nach dem Festlegen müssen Sie {url} aufrufen, um die Konsole zu öffnen; jeder andere Pfad liefert 404, sodass Scanner die Konsole nicht finden. Merken Sie sich Ihre Einstiegsadresse.",
+    "urlPrefix": "http://IP:Port",
+    "entryName": "einstieg",
+    "lanOnly": "Nur LAN-Zugriff",
+    "lanOnlyHelp": "Nur LAN-Adressen (einschließlich Tailscale-Adressen aus 100.64.0.0/10) dürfen auf die Konsole zugreifen"
+  },
+  "network": {
+    "title": "Netzwerk",
+    "dnsServers": "DNS-Server",
+    "dnsPlaceholder": "Leer lassen für System-DNS; eine IP oder IP:Port eingeben",
+    "dnsHelp": "Wirkt auf alle ausgehenden Namensauflösungen (DDNS, Webhook, ACME usw.). Bei mehreren Servern wird zufällig einer gewählt, mit automatischem Failover.",
+    "timeZone": "Zeitzone",
+    "timeZonePlaceholder": "System folgen",
+    "timeZoneHelp": "Zeitzone für Protokolle, geplante Aufgaben und mehr. Jeder IANA-Zeitzonenname wird akzeptiert. Aktuell wirksam: {zone}",
+    "dns": {
+      "ali": "Alibaba",
+      "tencent": "Tencent",
+      "baidu": "Baidu",
+      "114": "114",
+      "cloudflare": "Cloudflare",
+      "google": "Google",
+      "quad9": "Quad9"
+    },
+    "zones": {
+      "china": "China",
+      "hongKong": "Hongkong",
+      "taipei": "Taipeh",
+      "tokyo": "Tokio",
+      "seoul": "Seoul",
+      "singapore": "Singapur",
+      "london": "London",
+      "berlin": "Berlin",
+      "moscow": "Moskau",
+      "newYork": "New York",
+      "chicago": "Chicago",
+      "losAngeles": "Los Angeles",
+      "sydney": "Sydney",
+      "utc": "Koordinierte Weltzeit"
+    }
+  },
+  "runtime": {
+    "title": "Laufzeitparameter",
+    "logLines": "Aufbewahrte Protokollzeilen",
+    "logLinesHelp": "Anzahl der Protokollzeilen, die jedes Modul im Arbeitsspeicher hält",
+    "gcPercent": "GC-Prozentsatz",
+    "gcPercentHelp": "0 bedeutet Standard (100); ein niedrigerer Wert senkt den Speicherverbrauch, erhöht aber den CPU-Aufwand",
+    "maxProcs": "Max. CPU-Kerne",
+    "maxProcsHelp": "0 bedeutet automatisch ({count} Kerne auf diesem Rechner)"
+  },
+  "restart": {
+    "title": "Neustart",
+    "desc": "Konsole sowie alle Weiterleitungs- und Proxy-Dienste werden während eines Neustarts kurz unterbrochen (meist einige Sekunden).",
+    "button": "Gately neu starten",
+    "confirm": "Konsole sowie alle Weiterleitungs- und Proxy-Dienste werden während eines Neustarts kurz unterbrochen (meist einige Sekunden). Gately neu starten?",
+    "confirmButton": "Neustarten",
+    "progress": "Gately wird neu gestartet…"
+  },
+  "save": {
+    "saved": "Gespeichert und angewendet",
+    "savedNeedRestart": "Gespeichert. Einige Einstellungen werden nach einem Neustart wirksam"
+  },
+  "import": {
+    "title": "Aus Lucky importieren",
+    "desc": "Unterstützt {lkcf}-Dateien (mehrere möglich) aus dem Lucky-Konfigurationsverzeichnis (Docker-Standard {dir}) sowie Gesamtsicherungen, die aus der Lucky-Konsole exportiert wurden ({zip}). Zuerst die Vorschau ansehen, nach der Bestätigung importieren. Importierte Einträge werden nach den vorhandenen angehängt; Einträge mit gleichem Namen werden übersprungen.",
+    "drag": "Dateien hierher ziehen oder {click}",
+    "dragClick": "zum Auswählen klicken",
+    "dragHint": ".lkcf-Konfigurationsdateien oder eine Gesamtsicherung .zip",
+    "keepEnableTitle": "Aktivierungsstatus aus Lucky nach dem Import beibehalten",
+    "keepEnableDesc": "Standardmäßig aus: Alle importierten Regeln sind deaktiviert, sodass Sie sie nach der Prüfung einzeln aktivieren können. Bei eingeschalteter Option werden in Lucky aktivierte Regeln {bold}. Läuft Lucky noch, kann es zu Portkonflikten kommen oder beide Seiten aktualisieren gleichzeitig Einträge.",
+    "keepEnableBold": "sofort Ports belegen und DNS-Einträge aktualisieren",
+    "preview": "Vorschau",
+    "confirmImport": "Import bestätigen",
+    "previewDone": "Vorschau abgeschlossen. Importieren Sie, wenn alles passt",
+    "imported": "Importiert",
+    "noModules": "Keine von Gately unterstützten Module gefunden",
+    "noWarnings": "Keine Warnungen",
+    "colModule": "Modul",
+    "colFound": "Gefunden",
+    "colImportable": "Importierbar",
+    "colWarnings": "Warnungen",
+    "done": "Import abgeschlossen: {total} Einträge",
+    "confirmKeep": "{total} Einträge werden mit ihrem Aktivierungsstatus aus Lucky importiert: aktivierte Regeln wirken sofort. Fortfahren?",
+    "confirmDisabled": "{total} Einträge werden importiert und sind danach alle deaktiviert. Fortfahren?",
+    "confirmButton": "Importieren"
+  },
+  "backup": {
+    "title": "Gately-Konfiguration sichern",
+    "desc": "Laden Sie eine ZIP-Datei mit der vollständigen Konfiguration (Konto, Regeln, Zertifikate usw.) herunter. Die Sicherung enthält Passwort-Hashes, Geheimnisse und private Zertifikatsschlüssel, bewahren Sie sie daher sicher auf.",
+    "download": "Sicherung herunterladen",
+    "downloadFailed": "Download fehlgeschlagen ({status})"
+  },
+  "restore": {
+    "title": "Konfiguration wiederherstellen",
+    "desc": "Mit einer Sicherungs-ZIP {bold}. Die aktuelle Konfiguration wird zuvor in einem Ordner backup-Zeitstempel im Konfigurationsverzeichnis gesichert, und Gately startet nach der Wiederherstellung automatisch neu.",
+    "descBold": "die gesamte aktuelle Konfiguration überschreiben",
+    "pickFile": "Sicherungsdatei wählen",
+    "passwordPlaceholder": "Passphrase der Sicherung",
+    "button": "Wiederherstellen",
+    "confirm": "Die gesamte aktuelle Konfiguration wird mit „{name}“ überschrieben und Gately startet automatisch neu. Die aktuelle Konfiguration wird zuvor im Konfigurationsverzeichnis gesichert. Geben Sie zur Bestätigung „{word}“ ein.",
+    "word": "wiederherstellen",
+    "confirmButton": "Wiederherstellen und neu starten",
+    "inputHint": "Bitte „{word}“ eingeben",
+    "success": "{count} Konfigurationsdateien wiederhergestellt; die vorherige Konfiguration liegt unter {previous}",
+    "progress": "Sicherung wird angewendet und Neustart läuft…"
+  }
+}

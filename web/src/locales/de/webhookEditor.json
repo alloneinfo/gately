@@ -1,0 +1,14 @@
+{
+  "enable": "Webhook aktivieren",
+  "url": "Anfrage-URL",
+  "method": "Anfragemethode",
+  "headers": "Anfrage-Header",
+  "headersPlaceholder": "Einer pro Zeile im Format Key: Value",
+  "body": "Anfragetext",
+  "successMark": "Erfolgsmarker",
+  "successPlaceholder": "Einer pro Zeile; die Anfrage gilt als erfolgreich, wenn die Antwort einen davon enthält. Leer lassen, um nur den Statuscode 2xx zu prüfen",
+  "timeout": "Zeitlimit (s)",
+  "ignoreCertError": "Zertifikatsfehler ignorieren",
+  "variables": "Verfügbare Variablen",
+  "varsTip": "{plain} oder, aus Kompatibilität mit Lucky, {lucky}"
+}

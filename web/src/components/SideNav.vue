@@ -5,17 +5,17 @@
       <AppLogo :size="30" />
       <div v-if="!collapsed" class="brand-text">
         <div class="brand-name">Gately</div>
-        <div class="brand-sub">网络网关工具集</div>
+        <div class="brand-sub">{{ t('sideNav.brandSub') }}</div>
       </div>
     </div>
     <div class="groups">
-      <div v-for="g in navGroups" :key="g.title" class="group">
-        <div v-if="g.title && !collapsed" class="group-title">{{ g.title }}</div>
-        <div v-else-if="g.title" class="group-sep" />
-        <el-tooltip v-for="it in g.items" :key="it.path" :content="it.title" placement="right" :disabled="!collapsed" :show-after="200">
+      <div v-for="g in navGroups" :key="g.titleKey" class="group">
+        <div v-if="g.titleKey && !collapsed" class="group-title">{{ t(g.titleKey) }}</div>
+        <div v-else-if="g.titleKey" class="group-sep" />
+        <el-tooltip v-for="it in g.items" :key="it.path" :content="t(it.titleKey)" placement="right" :disabled="!collapsed" :show-after="200">
           <router-link :to="it.path" class="nav-item" :class="{ active: isActive(it.path) }" @click="$emit('navigate')">
             <component :is="it.icon" :size="18" :stroke-width="isActive(it.path) ? 2.2 : 1.9" class="nav-icon" />
-            <span v-if="!collapsed" class="nav-text">{{ it.title }}</span>
+            <span v-if="!collapsed" class="nav-text">{{ t(it.titleKey) }}</span>
           </router-link>
         </el-tooltip>
       </div>
@@ -25,6 +25,7 @@
 
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import AppLogo from './AppLogo.vue'
 import { navGroups } from '../nav'
 
@@ -32,6 +33,7 @@ defineProps<{ collapsed?: boolean }>()
 defineEmits<{ navigate: [] }>()
 
 const route = useRoute()
+const { t } = useI18n()
 
 function isActive(path: string) {
   return route.path === path || route.path.startsWith(path + '/')

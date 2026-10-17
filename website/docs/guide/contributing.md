@@ -34,3 +34,9 @@ make lint     # gofmt、go vet、前端类型检查
 ## 许可证
 
 [Apache License 2.0](https://github.com/wangwanjie/gately/blob/main/LICENSE)
+
+## 多语言
+
+- 管理界面文案位于 `web/src/locales/<语言>/<命名空间>.json`，源语言为简体中文，新增或修改文案时至少同步更新 `zh-CN` 与 `en`，提交前运行 `cd web && node scripts/check-i18n.mjs`。约定详见 `web/src/locales/README.md`。
+- 官网语言包位于 `website/.vitepress/i18n/<语言>.json`，各语言页面位于 `website/<语言目录>/`。
+- 当前支持：简体中文、English、繁體中文、日本語、한국어、Español、Français、Deutsch、Русский、Português (Brasil)。

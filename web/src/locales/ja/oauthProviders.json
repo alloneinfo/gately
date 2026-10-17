@@ -1,0 +1,15 @@
+{
+  "keyPlaceholder": "識別子（例: github）",
+  "namePlaceholder": "表示名",
+  "clientIdPlaceholder": "Client ID（QQ は APP ID）",
+  "clientSecretPlaceholder": "Client Secret（QQ は APP Key）",
+  "issuerPlaceholder": "Issuer（例: https://login.example.com）",
+  "addProvider": "ログイン方法を追加",
+  "oidc": "汎用 OIDC",
+  "hints": {
+    "github": "GitHub → Settings → Developer settings → OAuth Apps でアプリを作成します。ID にはログイン名または数値 ID を指定できます（数値 ID はユーザー名を変更しても無効になりません）。",
+    "google": "Google Cloud Console で OAuth クライアント（ウェブアプリケーション）を作成します。ID には確認済みのメールアドレスまたは sub を指定できます。",
+    "qq": "QQ 互聯でウェブサイトアプリを作成します。openid はアプリごとに異なります。初回ログインが拒否されると画面にアカウント識別子が表示されるので、許可リストに追加してください。",
+    "oidc": "OIDC ディスカバリードキュメントに対応した任意のサービス（Authentik、Keycloak、Casdoor など）。ID には確認済みのメールアドレスまたは sub を指定できます。"
+  }
+}

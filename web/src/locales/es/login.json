@@ -1,0 +1,21 @@
+{
+  "heroLine1": "Herramientas de pasarela de red",
+  "heroLine2": "de código abierto y transparentes",
+  "feature1": "Reenvío de puertos, traversal STUN y DNS dinámico",
+  "feature2": "Proxy inverso, WAF y renovación automática de certificados",
+  "feature3": "Sin conexión a los servidores del proyecto; configuración en texto plano y auditable",
+  "mobileSub": "Herramientas de pasarela de red de código abierto para el hogar y servidores",
+  "title": "Inicia sesión en la consola",
+  "subtitle": "Introduce tu usuario y contraseña de administrador",
+  "username": "Usuario",
+  "password": "Contraseña",
+  "submit": "Iniciar sesión",
+  "thirdParty": "O usa una cuenta de terceros",
+  "loginWith": "Iniciar sesión con {name}",
+  "initialPasswordHint": "En el primer arranque, la contraseña inicial se imprime en el registro del programa.",
+  "totpTitle": "Autenticación de dos factores",
+  "totpPrompt": "Abre tu app de autenticación e introduce el código de 6 dígitos de {user}",
+  "code": "Código de verificación",
+  "verify": "Verificar e iniciar sesión",
+  "backToAccount": "Volver para cambiar de cuenta"
+}

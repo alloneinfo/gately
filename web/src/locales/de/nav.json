@@ -1,0 +1,103 @@
+{
+  "login": "Anmelden",
+  "groups": {
+    "network": "Netzwerk",
+    "tunnel": "Vernetzung & Tunnel",
+    "web": "Web",
+    "storage": "Netzwerkspeicher",
+    "tools": "Werkzeuge",
+    "system": "System"
+  },
+  "items": {
+    "overview": {
+      "title": "Übersicht"
+    },
+    "portforward": {
+      "title": "Portweiterleitung",
+      "desc": "TCP-/UDP-Portweiterleitung und Lastverteilung"
+    },
+    "ddns": {
+      "title": "Dynamisches DNS",
+      "desc": "DNS-Einträge automatisch aktualisieren, wenn sich Ihre öffentliche IP ändert"
+    },
+    "stun": {
+      "title": "STUN-Traversal",
+      "desc": "Dienste hinter NAT1 ohne öffentliche IP erreichen"
+    },
+    "tailscale": {
+      "title": "Tailscale",
+      "desc": "Einem Tailscale- / Headscale-Netzwerk beitreten"
+    },
+    "frp": {
+      "title": "frp",
+      "desc": "frpc- / frps-NAT-Traversal"
+    },
+    "cloudflared": {
+      "title": "Cloudflare Tunnel",
+      "desc": "Interne Dienste ohne öffentliche IP veröffentlichen"
+    },
+    "web": {
+      "title": "Web-Dienste",
+      "desc": "Reverse-Proxy, Weiterleitungen und statische Websites"
+    },
+    "waf": {
+      "title": "WAF-Firewall",
+      "desc": "Web Application Firewall auf Basis von OWASP CRS"
+    },
+    "ssl": {
+      "title": "SSL-Zertifikate",
+      "desc": "Automatische ACME-Ausstellung und -Erneuerung"
+    },
+    "storage": {
+      "title": "Speicher",
+      "desc": "Lokale Verzeichnisse oder entferntes WebDAV einbinden und Dateien online verwalten"
+    },
+    "webdav": {
+      "title": "WebDAV",
+      "desc": "WebDAV-Dateifreigabedienst"
+    },
+    "ftp": {
+      "title": "FTP-Dienst",
+      "desc": "FTP- / FTPS-Dateifreigabedienst"
+    },
+    "wol": {
+      "title": "Wake-on-LAN",
+      "desc": "Geräte im LAN aus der Ferne aufwecken"
+    },
+    "terminal": {
+      "title": "Web-Terminal",
+      "desc": "SSH und lokale Shell im Browser"
+    },
+    "nettools": {
+      "title": "Netzwerkdiagnose",
+      "desc": "Ping, Traceroute, Portprüfung, DNS und LAN-Scan"
+    },
+    "docker": {
+      "title": "Docker",
+      "desc": "Container-Verwaltung und Image-Updates"
+    },
+    "cron": {
+      "title": "Geplante Aufgaben",
+      "desc": "Befehle oder HTTP-Anfragen nach Zeitplan ausführen"
+    },
+    "notify": {
+      "title": "Benachrichtigungen",
+      "desc": "Ereignisse an Telegram, E-Mail, WeCom und mehr senden"
+    },
+    "logs": {
+      "title": "Systemprotokolle"
+    },
+    "apiTokens": {
+      "title": "API-Tokens"
+    },
+    "apiDocs": {
+      "title": "API-Dokumentation"
+    },
+    "settings": {
+      "title": "Einstellungen"
+    },
+    "about": {
+      "title": "Über"
+    }
+  }
+}

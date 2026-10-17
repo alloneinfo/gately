@@ -1,33 +1,36 @@
 <template>
   <!-- SSH / Telnet 共用的代理设置 -->
-  <el-form-item label="使用代理">
+  <el-form-item :label="t('terminal.proxy.use')">
     <el-switch v-model="proxy.enabled" />
-    <span class="help">通过 SOCKS5 或 HTTP 代理连接目标主机</span>
+    <span class="help">{{ t('terminal.proxy.useHelp') }}</span>
   </el-form-item>
   <template v-if="proxy.enabled">
-    <el-form-item label="代理类型">
+    <el-form-item :label="t('terminal.proxy.type')">
       <el-radio-group v-model="proxy.type">
         <el-radio-button value="socks5">SOCKS5</el-radio-button>
         <el-radio-button value="http">HTTP</el-radio-button>
       </el-radio-group>
     </el-form-item>
-    <el-form-item label="代理地址">
+    <el-form-item :label="t('terminal.proxy.addr')">
       <div class="row">
-        <el-input v-model="proxy.host" placeholder="主机" />
+        <el-input v-model="proxy.host" :placeholder="t('terminal.proxy.hostPlaceholder')" />
         <el-input-number v-model="proxy.port" :min="1" :max="65535" controls-position="right" />
       </div>
     </el-form-item>
-    <el-form-item label="代理账号">
+    <el-form-item :label="t('terminal.proxy.account')">
       <div class="row">
-        <el-input v-model="proxy.username" placeholder="用户名（可选）" />
-        <el-input v-model="proxy.password" type="password" show-password placeholder="密码（可选）" />
+        <el-input v-model="proxy.username" :placeholder="t('terminal.proxy.userPlaceholder')" />
+        <el-input v-model="proxy.password" type="password" show-password :placeholder="t('terminal.proxy.passPlaceholder')" />
       </div>
     </el-form-item>
   </template>
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
 import type { ProxyConf } from './types'
+
+const { t } = useI18n()
 
 defineProps<{ proxy: ProxyConf }>()
 </script>

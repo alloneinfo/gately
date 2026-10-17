@@ -1,0 +1,103 @@
+{
+  "login": "登入",
+  "groups": {
+    "network": "網路",
+    "tunnel": "組網與穿透",
+    "web": "Web",
+    "storage": "網路儲存",
+    "tools": "工具",
+    "system": "系統"
+  },
+  "items": {
+    "overview": {
+      "title": "概覽"
+    },
+    "portforward": {
+      "title": "連接埠轉發",
+      "desc": "TCP / UDP 連接埠轉發與負載平衡"
+    },
+    "ddns": {
+      "title": "動態網域",
+      "desc": "公網 IP 變動時自動更新解析"
+    },
+    "stun": {
+      "title": "STUN 穿透",
+      "desc": "NAT1 網路下無公網 IP 穿透"
+    },
+    "tailscale": {
+      "title": "Tailscale",
+      "desc": "加入 Tailscale / Headscale 組網"
+    },
+    "frp": {
+      "title": "frp",
+      "desc": "frpc / frps 內網穿透"
+    },
+    "cloudflared": {
+      "title": "Cloudflare 通道",
+      "desc": "無需公網 IP 發佈內網服務"
+    },
+    "web": {
+      "title": "Web 服務",
+      "desc": "反向代理、重新導向與靜態網站"
+    },
+    "waf": {
+      "title": "WAF 防火牆",
+      "desc": "基於 OWASP CRS 的應用程式防火牆"
+    },
+    "ssl": {
+      "title": "SSL 憑證",
+      "desc": "ACME 自動申請與續簽"
+    },
+    "storage": {
+      "title": "儲存管理",
+      "desc": "掛載本機目錄或遠端 WebDAV，線上管理檔案"
+    },
+    "webdav": {
+      "title": "WebDAV",
+      "desc": "WebDAV 檔案分享服務"
+    },
+    "ftp": {
+      "title": "FTP 服務",
+      "desc": "FTP / FTPS 檔案分享服務"
+    },
+    "wol": {
+      "title": "網路喚醒",
+      "desc": "遠端喚醒區域網路裝置"
+    },
+    "terminal": {
+      "title": "Web 終端機",
+      "desc": "瀏覽器中的 SSH 與本機 Shell"
+    },
+    "nettools": {
+      "title": "網路診斷",
+      "desc": "Ping、路由追蹤、連接埠探測、DNS 與區域網路掃描"
+    },
+    "docker": {
+      "title": "Docker",
+      "desc": "容器管理與映像檔更新"
+    },
+    "cron": {
+      "title": "排程工作",
+      "desc": "定時執行命令或 HTTP 請求"
+    },
+    "notify": {
+      "title": "通知中心",
+      "desc": "事件推送到 Telegram、電子郵件、企業微信等"
+    },
+    "logs": {
+      "title": "系統日誌"
+    },
+    "apiTokens": {
+      "title": "API 權杖"
+    },
+    "apiDocs": {
+      "title": "API 文件"
+    },
+    "settings": {
+      "title": "設定"
+    },
+    "about": {
+      "title": "關於"
+    }
+  }
+}

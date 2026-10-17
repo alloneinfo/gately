@@ -9,10 +9,10 @@
         </template>
       </div>
       <div class="ops">
-        <el-button :icon="ArrowUp" :disabled="path === '/'" @click="go(parent)">上级</el-button>
-        <el-button :icon="RefreshCw" :loading="loading" @click="load">刷新</el-button>
-        <el-button :icon="FolderPlus" @click="mkdir">新建文件夹</el-button>
-        <el-button type="primary" :icon="Upload" :loading="uploading" @click="picker?.click()">上传</el-button>
+        <el-button :icon="ArrowUp" :disabled="path === '/'" @click="go(parent)">{{ t('docker.container.files.up') }}</el-button>
+        <el-button :icon="RefreshCw" :loading="loading" @click="load">{{ t('common.refresh') }}</el-button>
+        <el-button :icon="FolderPlus" @click="mkdir">{{ t('docker.container.files.newFolder') }}</el-button>
+        <el-button type="primary" :icon="Upload" :loading="uploading" @click="picker?.click()">{{ t('common.upload') }}</el-button>
         <input ref="picker" type="file" multiple class="hidden" @change="onPick" />
       </div>
     </div>
@@ -26,31 +26,31 @@
         </div>
         <div class="acts" @click.stop>
           <template v-if="!isMobile">
-            <el-button text :icon="Download" aria-label="下载" @click="downloadFile(f)" />
-            <el-button text :icon="Pencil" aria-label="重命名" @click="rename(f)" />
-            <el-button text type="danger" :icon="Trash2" aria-label="删除" @click="remove(f)" />
+            <el-button text :icon="Download" :aria-label="t('common.download')" @click="downloadFile(f)" />
+            <el-button text :icon="Pencil" :aria-label="t('docker.container.files.rename')" @click="rename(f)" />
+            <el-button text type="danger" :icon="Trash2" :aria-label="t('common.delete')" @click="remove(f)" />
           </template>
           <el-dropdown v-else trigger="click" @command="(c: string) => onCmd(c, f)">
-            <el-button text :icon="Ellipsis" class="touch" aria-label="更多" />
+            <el-button text :icon="Ellipsis" class="touch" :aria-label="t('common.more')" />
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item command="download" :icon="Download">下载</el-dropdown-item>
-                <el-dropdown-item command="rename" :icon="Pencil">重命名</el-dropdown-item>
-                <el-dropdown-item command="delete" :icon="Trash2" divided>删除</el-dropdown-item>
+                <el-dropdown-item command="download" :icon="Download">{{ t('common.download') }}</el-dropdown-item>
+                <el-dropdown-item command="rename" :icon="Pencil">{{ t('docker.container.files.rename') }}</el-dropdown-item>
+                <el-dropdown-item command="delete" :icon="Trash2" divided>{{ t('common.delete') }}</el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
         </div>
       </div>
-      <el-empty v-if="!loading && !entries.length" description="目录为空" :image-size="60" />
+      <el-empty v-if="!loading && !entries.length" :description="t('docker.container.files.emptyDir')" :image-size="60" />
     </div>
 
     <el-dialog v-model="editVisible" :title="editPath" :width="'860px'" :fullscreen="isMobile" top="4vh" append-to-body>
-      <el-alert v-if="truncated" type="warning" :closable="false" show-icon class="gap" title="文件超过 1MiB，仅显示前一部分，已禁止保存以免截断原文件" />
+      <el-alert v-if="truncated" type="warning" :closable="false" show-icon class="gap" :title="t('docker.container.files.truncated')" />
       <el-input v-model="content" type="textarea" :rows="isMobile ? 18 : 24" class="editor mono" spellcheck="false" :readonly="truncated" />
       <template #footer>
-        <el-button @click="editVisible = false">关闭</el-button>
-        <el-button type="primary" :icon="Save" :disabled="truncated" :loading="saving" @click="save">保存</el-button>
+        <el-button @click="editVisible = false">{{ t('common.close') }}</el-button>
+        <el-button type="primary" :icon="Save" :disabled="truncated" :loading="saving" @click="save">{{ t('common.save') }}</el-button>
       </template>
     </el-dialog>
   </div>
@@ -58,12 +58,15 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ArrowUp, Download, Ellipsis, File, Folder, FolderPlus, Pencil, RefreshCw, Save, Trash2, Upload } from 'lucide-vue-next'
 import { api } from '../../api'
 import { useIsMobile } from '../../composables/useIsMobile'
 import { download, formatBytes, formatTime } from './format'
 import type { FileEntry } from './types'
+
+const { t } = useI18n()
 
 const props = defineProps<{ containerId: string }>()
 const isMobile = useIsMobile()
@@ -123,7 +126,7 @@ async function open(f: FileEntry) {
     editPath.value = f.path
     editVisible.value = true
   } catch (e) {
-    ElMessage.error(`${(e as Error).message}（二进制文件请使用下载）`)
+    ElMessage.error(t('docker.container.files.binaryHint', { message: (e as Error).message }))
   }
 }
 
@@ -131,7 +134,7 @@ async function save() {
   saving.value = true
   try {
     await api.post(`${base}/write`, { path: editPath.value, content: content.value })
-    ElMessage.success('已保存')
+    ElMessage.success(t('common.saved'))
     editVisible.value = false
     load()
   } catch (e) {
@@ -147,7 +150,7 @@ function downloadFile(f: FileEntry) {
 
 async function mkdir() {
   try {
-    const { value } = await ElMessageBox.prompt('文件夹名称', '新建文件夹', { inputPattern: /^[^/]+$/, inputErrorMessage: '名称不能为空且不能包含 /' })
+    const { value } = await ElMessageBox.prompt(t('docker.container.files.folderName'), t('docker.container.files.newFolder'), { inputPattern: /^[^/]+$/, inputErrorMessage: t('docker.container.files.nameInvalid') })
     await api.post(`${base}/mkdir`, { path: join(path.value, value) })
     load()
   } catch (e) {
@@ -159,7 +162,7 @@ async function mkdir() {
 
 async function rename(f: FileEntry) {
   try {
-    const { value } = await ElMessageBox.prompt('新名称', '重命名', { inputValue: f.name, inputPattern: /^[^/]+$/, inputErrorMessage: '名称不能为空且不能包含 /' })
+    const { value } = await ElMessageBox.prompt(t('docker.container.files.newName'), t('docker.container.files.rename'), { inputValue: f.name, inputPattern: /^[^/]+$/, inputErrorMessage: t('docker.container.files.nameInvalid') })
     await api.post(`${base}/rename`, { from: f.path, to: join(path.value, value) })
     load()
   } catch (e) {
@@ -171,7 +174,7 @@ async function rename(f: FileEntry) {
 
 async function remove(f: FileEntry) {
   try {
-    await ElMessageBox.confirm(`确定删除 ${f.path}${f.dir ? '（含全部内容）' : ''}？该操作无法恢复。`, '删除', { type: 'warning' })
+    await ElMessageBox.confirm(t(f.dir ? 'docker.container.files.deleteConfirmDir' : 'docker.container.files.deleteConfirm', { path: f.path }), t('common.delete'), { type: 'warning' })
     await api.del(`${base}?path=${encodeURIComponent(f.path)}`)
     load()
   } catch (e) {
@@ -206,7 +209,7 @@ async function onPick(ev: Event) {
   uploading.value = true
   try {
     await api.post(`${base}/upload`, fd)
-    ElMessage.success(`已上传 ${files.length} 个文件`)
+    ElMessage.success(t('docker.container.files.uploaded', { count: files.length }))
     load()
   } catch (e) {
     ElMessage.error((e as Error).message)

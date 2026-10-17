@@ -1,0 +1,19 @@
+{
+  "title": "사이트 통계 · {name}",
+  "hour1": "1시간",
+  "hour6": "6시간",
+  "hour24": "24시간",
+  "rangeHelp": "1분에 한 점씩 기록하며, 재시작하거나 이 리스너를 수정하면 다시 집계합니다",
+  "requests": "요청 수",
+  "bytesOut": "누적 응답 트래픽",
+  "errors": "오류 (4xx / 5xx)",
+  "upstreams": "백엔드",
+  "healthy": "정상",
+  "unavailable": "사용 불가",
+  "upstreamMeta": "가중치 {weight} · 연결 {conns}",
+  "backup": "예비",
+  "topIps": "접속 IP 상위 10",
+  "topCountries": "국가 상위 10",
+  "noData": "데이터가 없습니다",
+  "noDataGeo": "데이터가 없습니다 (GeoIP 데이터베이스를 가져와야 합니다)"
+}

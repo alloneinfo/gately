@@ -13,7 +13,7 @@
     <template #header>
       <div class="e-title">
         <span class="ellipsis mono">{{ path }}</span>
-        <span v-if="dirty" class="dirty">● 未保存</span>
+        <span v-if="dirty" class="dirty">{{ t('sftp.editor.dirty') }}</span>
       </div>
     </template>
     <el-skeleton v-if="loading" :rows="6" animated />
@@ -30,14 +30,15 @@
       @keydown="onKey"
     />
     <template #footer>
-      <el-button @click="close">关闭</el-button>
-      <el-button type="primary" :icon="Save" :loading="saving" :disabled="!!error || loading || !dirty" @click="save">保存</el-button>
+      <el-button @click="close">{{ t('common.close') }}</el-button>
+      <el-button type="primary" :icon="Save" :loading="saving" :disabled="!!error || loading || !dirty" @click="save">{{ t('common.save') }}</el-button>
     </template>
   </el-dialog>
 </template>
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Save } from 'lucide-vue-next'
 import { ApiError } from '../../api'
@@ -47,6 +48,7 @@ import { post, readText } from './sftpApi'
 const props = defineProps<{ modelValue: boolean; connKey: string; path: string }>()
 const emit = defineEmits<{ 'update:modelValue': [v: boolean]; saved: [] }>()
 
+const { t } = useI18n()
 const isMobile = useIsMobile()
 const text = ref('')
 const original = ref('')
@@ -63,9 +65,9 @@ async function load() {
     text.value = original.value
   } catch (e) {
     if (e instanceof ApiError && e.status === 413) {
-      error.value = '文件超过 1MB，无法在线编辑，请下载后处理。'
+      error.value = t('sftp.editor.tooLarge')
     } else if (e instanceof ApiError && e.status === 415) {
-      error.value = '这是二进制文件，无法在线编辑。'
+      error.value = t('sftp.editor.binary')
     } else {
       error.value = (e as Error).message
     }
@@ -79,7 +81,7 @@ async function save() {
   try {
     await post(props.connKey, 'write', { path: props.path, content: text.value })
     original.value = text.value
-    ElMessage.success('已保存')
+    ElMessage.success(t('common.saved'))
     emit('saved')
   } catch (e) {
     ElMessage.error((e as Error).message)
@@ -115,7 +117,11 @@ async function beforeClose(done: () => void) {
     return
   }
   try {
-    await ElMessageBox.confirm('有未保存的修改，确定放弃吗？', '提示', { type: 'warning', confirmButtonText: '放弃修改', cancelButtonText: '继续编辑' })
+    await ElMessageBox.confirm(t('sftp.editor.discardConfirm'), t('sftp.editor.discardTitle'), {
+      type: 'warning',
+      confirmButtonText: t('sftp.editor.discard'),
+      cancelButtonText: t('sftp.editor.keepEditing'),
+    })
     done()
   } catch {
     // 用户选择继续编辑

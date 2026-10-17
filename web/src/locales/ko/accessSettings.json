@@ -1,0 +1,20 @@
+{
+  "autoBan": "자동 차단",
+  "authFailBan": "인증 실패 차단",
+  "authFailBanHelp": "분 단위. 인증이 연속 10회 실패하면 접속 IP를 차단하며, 0이면 차단하지 않습니다(15분간 속도 제한만 적용)",
+  "banList": "차단 목록",
+  "noBans": "현재 차단된 IP가 없습니다",
+  "until": "{time}까지",
+  "unban": "해제",
+  "manualBanIp": "IP 수동 차단",
+  "hours": "시간",
+  "ban": "차단",
+  "geoTitle": "GeoIP 데이터베이스 (국가 필터)",
+  "geoLoaded": "로드됨: {type}, 빌드 {buildTime}, {size} MB",
+  "remove": "제거",
+  "geoNotImported": "가져오지 않았습니다. MaxMind GeoLite2 / DB-IP 등의 .mmdb 국가 DB 또는 도시 DB를 지원합니다",
+  "uploadMmdb": ".mmdb 업로드",
+  "mmdbUrlPlaceholder": "또는 .mmdb 다운로드 주소 입력",
+  "geoImported": "GeoIP 데이터베이스를 가져왔습니다",
+  "geoDownloaded": "GeoIP 데이터베이스를 다운로드하여 로드했습니다"
+}

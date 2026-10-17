@@ -1,0 +1,17 @@
+{
+  "fetchIp": "IPv{family} の取得",
+  "method": "取得方法",
+  "typeUrl": "照会 API",
+  "typeInterface": "ネットワークインターフェース",
+  "typeCommand": "コマンド",
+  "urls": "照会 URL",
+  "urlsPlaceholder": "1 行に 1 つ、上から順に試行します",
+  "interface": "ネットワークインターフェース",
+  "interfacePlaceholder": "インターフェースを選択",
+  "command": "コマンド",
+  "commandPlaceholder": "出力に IP が含まれていれば可。例: curl -s https://4.ipw.cn",
+  "regex": "抽出用正規表現",
+  "regexPlaceholder": "任意。空欄の場合は最初のグローバルアドレスを自動選択します",
+  "testFetch": "取得テスト",
+  "fetchSuccess": "取得に成功しました: {ip}"
+}

@@ -9,7 +9,7 @@ docker run -d --name gately --network host \
   -v ./gately-data:/etc/gately \
   -v /var/run/docker.sock:/var/run/docker.sock \
   ghcr.io/wangwanjie/gately:latest
-docker logs gately 2>&1 | grep 初始密码
+docker logs gately 2>&1 | grep -i "initial password"
 ```
 
 不需要 Docker 管理功能时，可以去掉 `docker.sock` 挂载。端口转发、STUN、Web 服务需要监听宿主机端口，推荐使用 `--network host`。

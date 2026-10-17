@@ -1,0 +1,45 @@
+{
+  "clipboard": {
+    "copyFailed": "无法自动复制，已选中文本，请按 Ctrl/Cmd+C 复制"
+  },
+  "themePicker": {
+    "switchTheme": "切换主题",
+    "title": "主题配色",
+    "followSystem": "跟随系统（翠绿 / 暗黑）"
+  },
+  "moduleBanner": {
+    "defaultDesc": "模块停用期间，下列条目全部不会运行；启用模块后，各条目按自身开关生效。",
+    "enable": "启用模块"
+  },
+  "saveBar": {
+    "dirty": "有未保存的修改",
+    "saved": "所有修改已保存",
+    "undo": "撤销",
+    "save": "保存设置"
+  },
+  "logCard": {
+    "title": "运行日志"
+  },
+  "logViewer": {
+    "levelAll": "全部级别",
+    "levelInfo": "信息及以上",
+    "levelWarn": "警告及以上",
+    "levelError": "仅错误",
+    "autoScroll": "自动滚动",
+    "empty": "暂无日志"
+  },
+  "scopeTags": {
+    "allWrite": "全部读写",
+    "allRead": "全部只读",
+    "write": "读写",
+    "read": "只读",
+    "none": "无权限"
+  },
+  "restartOverlay": {
+    "resumeHint": "服务恢复后页面会自动刷新，请勿关闭此页面。",
+    "waited": "已等待 {seconds} 秒",
+    "timeoutTitle": "等待超时",
+    "timeoutDesc": "服务长时间未响应。如修改了管理端口或监听地址，请手动访问新地址；也可以查看程序日志确认启动情况。",
+    "reload": "刷新页面"
+  }
+}

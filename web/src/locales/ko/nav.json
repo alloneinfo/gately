@@ -1,0 +1,103 @@
+{
+  "login": "로그인",
+  "groups": {
+    "network": "네트워크",
+    "tunnel": "연결 및 터널링",
+    "web": "Web",
+    "storage": "네트워크 스토리지",
+    "tools": "도구",
+    "system": "시스템"
+  },
+  "items": {
+    "overview": {
+      "title": "개요"
+    },
+    "portforward": {
+      "title": "포트 포워딩",
+      "desc": "TCP / UDP 포트 포워딩과 로드 밸런싱"
+    },
+    "ddns": {
+      "title": "동적 DNS",
+      "desc": "공인 IP가 바뀌면 DNS 레코드를 자동 업데이트"
+    },
+    "stun": {
+      "title": "STUN 홀 펀칭",
+      "desc": "NAT1 환경에서 공인 IP 없이 외부 접속"
+    },
+    "tailscale": {
+      "title": "Tailscale",
+      "desc": "Tailscale / Headscale 네트워크에 참여"
+    },
+    "frp": {
+      "title": "frp",
+      "desc": "frpc / frps 내부망 터널링"
+    },
+    "cloudflared": {
+      "title": "Cloudflare 터널",
+      "desc": "공인 IP 없이 내부망 서비스 게시"
+    },
+    "web": {
+      "title": "Web 서비스",
+      "desc": "리버스 프록시, 리디렉션, 정적 사이트"
+    },
+    "waf": {
+      "title": "WAF 방화벽",
+      "desc": "OWASP CRS 기반 웹 애플리케이션 방화벽"
+    },
+    "ssl": {
+      "title": "SSL 인증서",
+      "desc": "ACME 자동 발급 및 갱신"
+    },
+    "storage": {
+      "title": "스토리지 관리",
+      "desc": "로컬 디렉터리나 원격 WebDAV를 마운트하고 온라인으로 파일 관리"
+    },
+    "webdav": {
+      "title": "WebDAV",
+      "desc": "WebDAV 파일 공유 서비스"
+    },
+    "ftp": {
+      "title": "FTP 서비스",
+      "desc": "FTP / FTPS 파일 공유 서비스"
+    },
+    "wol": {
+      "title": "Wake-on-LAN",
+      "desc": "LAN 기기를 원격으로 깨우기"
+    },
+    "terminal": {
+      "title": "Web 터미널",
+      "desc": "브라우저에서 SSH와 로컬 셸 사용"
+    },
+    "nettools": {
+      "title": "네트워크 진단",
+      "desc": "Ping, 경로 추적, 포트 확인, DNS, LAN 스캔"
+    },
+    "docker": {
+      "title": "Docker",
+      "desc": "컨테이너 관리와 이미지 업데이트"
+    },
+    "cron": {
+      "title": "예약 작업",
+      "desc": "명령 또는 HTTP 요청을 예약 실행"
+    },
+    "notify": {
+      "title": "알림 센터",
+      "desc": "이벤트를 Telegram, 이메일, WeCom 등으로 전송"
+    },
+    "logs": {
+      "title": "시스템 로그"
+    },
+    "apiTokens": {
+      "title": "API 토큰"
+    },
+    "apiDocs": {
+      "title": "API 문서"
+    },
+    "settings": {
+      "title": "설정"
+    },
+    "about": {
+      "title": "정보"
+    }
+  }
+}

@@ -1,0 +1,103 @@
+{
+  "login": "登录",
+  "groups": {
+    "network": "网络",
+    "tunnel": "组网与穿透",
+    "web": "Web",
+    "storage": "网络存储",
+    "tools": "工具",
+    "system": "系统"
+  },
+  "items": {
+    "overview": {
+      "title": "概览"
+    },
+    "portforward": {
+      "title": "端口转发",
+      "desc": "TCP / UDP 端口转发与负载均衡"
+    },
+    "ddns": {
+      "title": "动态域名",
+      "desc": "公网 IP 变化时自动更新解析"
+    },
+    "stun": {
+      "title": "STUN 穿透",
+      "desc": "NAT1 网络下无公网 IP 穿透"
+    },
+    "tailscale": {
+      "title": "Tailscale",
+      "desc": "加入 Tailscale / Headscale 组网"
+    },
+    "frp": {
+      "title": "frp",
+      "desc": "frpc / frps 内网穿透"
+    },
+    "cloudflared": {
+      "title": "Cloudflare 隧道",
+      "desc": "无需公网 IP 发布内网服务"
+    },
+    "web": {
+      "title": "Web 服务",
+      "desc": "反向代理、重定向与静态站点"
+    },
+    "waf": {
+      "title": "WAF 防火墙",
+      "desc": "基于 OWASP CRS 的应用防火墙"
+    },
+    "ssl": {
+      "title": "SSL 证书",
+      "desc": "ACME 自动申请与续签"
+    },
+    "storage": {
+      "title": "存储管理",
+      "desc": "挂载本地目录或远程 WebDAV，在线管理文件"
+    },
+    "webdav": {
+      "title": "WebDAV",
+      "desc": "WebDAV 文件共享服务"
+    },
+    "ftp": {
+      "title": "FTP 服务",
+      "desc": "FTP / FTPS 文件共享服务"
+    },
+    "wol": {
+      "title": "网络唤醒",
+      "desc": "远程唤醒局域网设备"
+    },
+    "terminal": {
+      "title": "Web 终端",
+      "desc": "浏览器中的 SSH 与本机 Shell"
+    },
+    "nettools": {
+      "title": "网络诊断",
+      "desc": "Ping、路由追踪、端口探测、DNS 与局域网扫描"
+    },
+    "docker": {
+      "title": "Docker",
+      "desc": "容器管理与镜像更新"
+    },
+    "cron": {
+      "title": "计划任务",
+      "desc": "定时执行命令或 HTTP 请求"
+    },
+    "notify": {
+      "title": "通知中心",
+      "desc": "事件推送到 Telegram、邮件、企业微信等"
+    },
+    "logs": {
+      "title": "系统日志"
+    },
+    "apiTokens": {
+      "title": "API 令牌"
+    },
+    "apiDocs": {
+      "title": "API 文档"
+    },
+    "settings": {
+      "title": "设置"
+    },
+    "about": {
+      "title": "关于"
+    }
+  }
+}

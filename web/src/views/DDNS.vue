@@ -1,57 +1,57 @@
 <template>
   <div>
-    <PageHeader title="动态域名" desc="定期获取公网 IP，变化时自动更新 DNS 解析记录" :icon="Globe">
+    <PageHeader :title="t('ddns.title')" :desc="t('ddns.desc')" :icon="Globe">
       <div class="module-toggle">
-        <span class="meta">模块</span>
-        <el-switch v-model="settings.enable" inline-prompt active-text="开" inactive-text="关" @change="saveSettings" />
+        <span class="meta">{{ t('ddns.module') }}</span>
+        <el-switch v-model="settings.enable" inline-prompt :active-text="t('ddns.switchOn')" :inactive-text="t('ddns.switchOff')" @change="saveSettings" />
       </div>
-      <el-button type="primary" :icon="Plus" @click="openEditor()">添加任务</el-button>
+      <el-button type="primary" :icon="Plus" @click="openEditor()">{{ t('ddns.addTask') }}</el-button>
     </PageHeader>
 
-    <ModuleBanner v-if="moduleOff" title="动态域名模块已停用" desc="模块停用期间不会检查 IP，也不会更新任何解析记录；启用后各任务按自身开关运行。" :loading="enabling" @enable="enableModule" />
+    <ModuleBanner v-if="moduleOff" :title="t('ddns.moduleOffTitle')" :desc="t('ddns.moduleOffDesc')" :loading="enabling" @enable="enableModule" />
 
     <div v-loading="loading" class="card-list">
-      <el-empty v-if="!loading && !tasks.length" description="暂无任务，可添加或在「设置 → 备份与迁移」中导入 Lucky 配置" />
-      <EntityCard v-for="t in tasks" :key="t.key" :off="!t.enable || moduleOff">
+      <el-empty v-if="!loading && !tasks.length" :description="t('ddns.empty')" />
+      <EntityCard v-for="tk in tasks" :key="tk.key" :off="!tk.enable || moduleOff">
         <template #lead>
-          <el-switch :model-value="t.enable" @change="(v: string | number | boolean) => toggle(t, Boolean(v))" />
+          <el-switch :model-value="tk.enable" @change="(v: string | number | boolean) => toggle(tk, Boolean(v))" />
         </template>
         <template #title>
-          <span>{{ t.name || '未命名任务' }}</span>
-          <el-tag size="small" effect="plain">{{ providerTitle(t.provider) }}</el-tag>
+          <span>{{ tk.name || t('ddns.unnamedTask') }}</span>
+          <el-tag size="small" effect="plain">{{ providerTitle(tk.provider) }}</el-tag>
         </template>
-        <template v-if="t.remark" #sub>{{ t.remark }}</template>
+        <template v-if="tk.remark" #sub>{{ tk.remark }}</template>
         <template #status>
-          <StatusBadge v-bind="taskStatus(t)" />
+          <StatusBadge v-bind="taskStatus(tk)" />
         </template>
-        <Field label="IPv4" mono>{{ t.ipv4.enable ? t.state.ipv4 || (taskActive(t) ? '获取中…' : '-') : '未启用' }}</Field>
-        <Field label="IPv6" mono>{{ t.ipv6.enable ? t.state.ipv6 || (taskActive(t) ? '获取中…' : '-') : '未启用' }}</Field>
-        <Field label="上次检查">{{ t.state.lastRun ? fmtTime(t.state.lastRun) : '-' }}</Field>
-        <Field label="下次检查">{{ taskActive(t) && t.state.nextRun ? fmtTime(t.state.nextRun) : '-' }}</Field>
+        <Field label="IPv4" mono>{{ tk.ipv4.enable ? tk.state.ipv4 || (taskActive(tk) ? t('ddns.fetching') : '-') : t('ddns.notEnabled') }}</Field>
+        <Field label="IPv6" mono>{{ tk.ipv6.enable ? tk.state.ipv6 || (taskActive(tk) ? t('ddns.fetching') : '-') : t('ddns.notEnabled') }}</Field>
+        <Field :label="t('ddns.lastCheck')">{{ tk.state.lastRun ? fmtTime(tk.state.lastRun) : '-' }}</Field>
+        <Field :label="t('ddns.nextCheck')">{{ taskActive(tk) && tk.state.nextRun ? fmtTime(tk.state.nextRun) : '-' }}</Field>
         <template #extra>
-          <el-alert v-if="t.state.ipError && taskActive(t)" type="error" :title="t.state.ipError" :closable="false" show-icon class="ip-error" />
+          <el-alert v-if="tk.state.ipError && taskActive(tk)" type="error" :title="tk.state.ipError" :closable="false" show-icon class="ip-error" />
           <div class="records">
-            <div v-for="rec in t.records" :key="rec.key" class="rec" :class="{ 'is-off': !rec.enable }">
+            <div v-for="rec in tk.records" :key="rec.key" class="rec" :class="{ 'is-off': !rec.enable }">
               <div class="rec-name">
                 <span class="mono rec-domain">{{ fqdn(rec) }}</span>
                 <el-tag size="small" type="info" class="mono">{{ rec.type }}</el-tag>
               </div>
-              <div class="rec-value mono">{{ (rec.key && t.state.records?.[rec.key]?.value) || '-' }}</div>
+              <div class="rec-value mono">{{ (rec.key && tk.state.records?.[rec.key]?.value) || '-' }}</div>
               <div class="rec-status">
-                <StatusBadge v-bind="recordStatus(t, rec)" />
-                <span v-if="recordSync(t, rec)" class="meta">{{ recordSync(t, rec) }}</span>
+                <StatusBadge v-bind="recordStatus(tk, rec)" />
+                <span v-if="recordSync(tk, rec)" class="meta">{{ recordSync(tk, rec) }}</span>
               </div>
             </div>
-            <div v-if="!t.records.length" class="meta">没有解析记录</div>
+            <div v-if="!tk.records.length" class="meta">{{ t('ddns.noRecords') }}</div>
           </div>
         </template>
         <template #actions>
-          <el-button text size="small" :icon="RefreshCw" :disabled="!taskActive(t) || !t.state.running" @click="sync(t, false)">检查</el-button>
-          <el-button text size="small" :icon="Zap" :disabled="!taskActive(t) || !t.state.running" @click="sync(t, true)">强制同步</el-button>
-          <el-button text size="small" :icon="Pencil" @click="openEditor(t)">编辑</el-button>
-          <el-popconfirm title="确定删除该任务？不会删除服务商处的解析记录" width="240" @confirm="remove(t)">
+          <el-button text size="small" :icon="RefreshCw" :disabled="!taskActive(tk) || !tk.state.running" @click="sync(tk, false)">{{ t('ddns.check') }}</el-button>
+          <el-button text size="small" :icon="Zap" :disabled="!taskActive(tk) || !tk.state.running" @click="sync(tk, true)">{{ t('ddns.forceSync') }}</el-button>
+          <el-button text size="small" :icon="Pencil" @click="openEditor(tk)">{{ t('common.edit') }}</el-button>
+          <el-popconfirm :title="t('ddns.confirmDelete')" width="240" @confirm="remove(tk)">
             <template #reference>
-              <el-button text size="small" type="danger" :icon="Trash2">删除</el-button>
+              <el-button text size="small" type="danger" :icon="Trash2">{{ t('common.delete') }}</el-button>
             </template>
           </el-popconfirm>
         </template>
@@ -60,76 +60,81 @@
 
     <LogCard url="/api/ddns/logs" clearable />
 
-    <el-dialog v-model="editorVisible" :title="editing.key ? '编辑任务' : '添加任务'" width="900px" top="5vh" :fullscreen="isMobile">
+    <el-dialog v-model="editorVisible" :title="editing.key ? t('ddns.editTask') : t('ddns.addTask')" width="900px" top="5vh" :fullscreen="isMobile">
       <el-form :model="editing" label-width="120px" :label-position="labelPosition">
         <el-tabs v-model="tab">
-          <el-tab-pane label="基本" name="basic">
-            <el-form-item label="任务名称"><el-input v-model="editing.name" /></el-form-item>
-            <el-form-item label="DNS 服务商">
+          <el-tab-pane :label="t('ddns.tabBasic')" name="basic">
+            <el-form-item :label="t('ddns.taskName')"><el-input v-model="editing.name" /></el-form-item>
+            <el-form-item :label="t('ddns.dnsProvider')">
               <el-select v-model="editing.provider" filterable class="w-260" @change="onProviderChange">
                 <el-option v-for="p in providers" :key="p.name" :label="p.title" :value="p.name" />
               </el-select>
-              <el-link v-if="currentProvider?.docUrl" :href="currentProvider.docUrl" target="_blank" type="primary" class="doc">获取凭据</el-link>
+              <el-link v-if="currentProvider?.docUrl" :href="currentProvider.docUrl" target="_blank" type="primary" class="doc">{{ t('ddns.getCredentials') }}</el-link>
             </el-form-item>
             <el-form-item v-if="currentProvider?.idLabel" :label="currentProvider.idLabel">
               <el-input v-model="editing.credentials.id" />
             </el-form-item>
             <el-form-item v-if="currentProvider?.secretLabel" :label="currentProvider.secretLabel">
-              <el-input v-model="editing.credentials.secret" type="password" show-password placeholder="已保存的密钥显示为 ********，不修改则保持原值" />
+              <el-input v-model="editing.credentials.secret" type="password" show-password :placeholder="t('ddns.secretPlaceholder')" />
             </el-form-item>
             <el-form-item v-for="f in currentProvider?.extra ?? []" :key="f.key" :label="f.label" :required="f.required">
               <el-input v-model="extra[f.key]" :type="f.multiline ? 'textarea' : 'text'" :rows="3" :placeholder="f.placeholder" />
             </el-form-item>
-            <el-form-item label="检查周期(秒)">
+            <el-form-item :label="t('ddns.interval')">
               <el-input-number v-model="editing.interval" :min="30" :max="86400" />
             </el-form-item>
-            <el-form-item label="强制同步(秒)">
+            <el-form-item :label="t('ddns.forceInterval')">
               <el-input-number v-model="editing.forceInterval" :min="0" :max="604800" />
-              <span class="help">即使 IP 未变化也定期向服务商核对，0 表示关闭</span>
+              <span class="help">{{ t('ddns.forceHelp') }}</span>
             </el-form-item>
-            <el-form-item label="请求超时(秒)">
+            <el-form-item :label="t('ddns.httpTimeout')">
               <el-input-number v-model="editing.httpTimeout" :min="1" :max="120" />
             </el-form-item>
-            <el-form-item label="备注"><el-input v-model="editing.remark" /></el-form-item>
-            <el-form-item label="启用"><el-switch v-model="editing.enable" /></el-form-item>
+            <el-form-item :label="t('common.remark')"><el-input v-model="editing.remark" /></el-form-item>
+            <el-form-item :label="t('common.enable')"><el-switch v-model="editing.enable" /></el-form-item>
           </el-tab-pane>
 
-          <el-tab-pane label="解析记录" name="records">
+          <el-tab-pane :label="t('ddns.tabRecords')" name="records">
             <div class="rec-edit-head">
-              <span>启用</span><span>主机记录</span><span>主域名</span><span>类型</span><span>记录值</span><span>TTL</span>
-              <span>{{ currentProvider?.supportsLine ? '线路' : '' }}</span><span />
+              <span>{{ t('common.enable') }}</span><span>{{ t('ddns.host') }}</span><span>{{ t('ddns.zone') }}</span><span>{{ t('ddns.type') }}</span><span>{{ t('ddns.value') }}</span><span>TTL</span>
+              <span>{{ currentProvider?.supportsLine ? t('ddns.line') : '' }}</span><span />
             </div>
             <div v-for="(row, i) in editing.records" :key="i" class="rec-edit">
-              <div class="re-cell re-enable"><label class="re-label">启用</label><el-switch v-model="row.enable" size="small" /></div>
-              <div class="re-cell"><label class="re-label">主机记录</label><el-input v-model="row.sub" size="small" placeholder="@" /></div>
-              <div class="re-cell"><label class="re-label">主域名</label><el-input v-model="row.zone" size="small" placeholder="example.com" /></div>
+              <div class="re-cell re-enable"><label class="re-label">{{ t('common.enable') }}</label><el-switch v-model="row.enable" size="small" /></div>
+              <div class="re-cell"><label class="re-label">{{ t('ddns.host') }}</label><el-input v-model="row.sub" size="small" placeholder="@" /></div>
+              <div class="re-cell"><label class="re-label">{{ t('ddns.zone') }}</label><el-input v-model="row.zone" size="small" placeholder="example.com" /></div>
               <div class="re-cell">
-                <label class="re-label">类型</label>
+                <label class="re-label">{{ t('ddns.type') }}</label>
                 <el-select v-model="row.type" size="small" @change="onTypeChange(row)">
                   <el-option v-for="ty in ['A', 'AAAA', 'CNAME', 'TXT']" :key="ty" :label="ty" :value="ty" />
                 </el-select>
               </div>
-              <div class="re-cell"><label class="re-label">记录值</label><el-input v-model="row.value" size="small" class="mono" /></div>
+              <div class="re-cell"><label class="re-label">{{ t('ddns.value') }}</label><el-input v-model="row.value" size="small" class="mono" /></div>
               <div class="re-cell"><label class="re-label">TTL</label><el-input-number v-model="row.ttl" size="small" :min="0" :controls="false" class="re-ttl" /></div>
               <div class="re-cell">
                 <template v-if="currentProvider?.supportsLine">
-                  <label class="re-label">线路</label>
-                  <el-input v-model="row.line" size="small" placeholder="默认" />
+                  <label class="re-label">{{ t('ddns.line') }}</label>
+                  <el-input v-model="row.line" size="small" :placeholder="t('ddns.default')" />
                 </template>
               </div>
               <div class="re-cell re-del">
-                <el-button text type="danger" size="small" :icon="Trash2" aria-label="删除记录" @click="editing.records.splice(i, 1)" />
+                <el-button text type="danger" size="small" :icon="Trash2" :aria-label="t('ddns.deleteRecord')" @click="editing.records.splice(i, 1)" />
               </div>
             </div>
-            <el-empty v-if="!editing.records.length" description="还没有解析记录" :image-size="60" />
+            <el-empty v-if="!editing.records.length" :description="t('ddns.noRecordsYet')" :image-size="60" />
             <div class="records-ops">
-              <el-button size="small" :icon="Plus" @click="addRecord('A')">IPv4 记录</el-button>
-              <el-button size="small" :icon="Plus" @click="addRecord('AAAA')">IPv6 记录</el-button>
+              <el-button size="small" :icon="Plus" @click="addRecord('A')">{{ t('ddns.addV4') }}</el-button>
+              <el-button size="small" :icon="Plus" @click="addRecord('AAAA')">{{ t('ddns.addV6') }}</el-button>
             </div>
-            <div class="form-help">记录值可使用 <span class="mono">{ipv4Addr}</span> <span class="mono">{ipv6Addr}</span>，TTL 为 0 时使用服务商默认值</div>
+            <div class="form-help">
+              <i18n-t keypath="ddns.recordValueHelp" tag="span">
+                <template #v4><span class="mono">{ipv4Addr}</span></template>
+                <template #v6><span class="mono">{ipv6Addr}</span></template>
+              </i18n-t>
+            </div>
           </el-tab-pane>
 
-          <el-tab-pane label="IP 来源" name="ip">
+          <el-tab-pane :label="t('ddns.tabIp')" name="ip">
             <IPSourceEditor v-model="editing.ipv4" :family="4" :interfaces="interfaces" />
             <el-divider />
             <IPSourceEditor v-model="editing.ipv6" :family="6" :interfaces="interfaces" />
@@ -144,8 +149,8 @@
         </el-tabs>
       </el-form>
       <template #footer>
-        <el-button @click="editorVisible = false">取消</el-button>
-        <el-button type="primary" :loading="saving" @click="save">保存</el-button>
+        <el-button @click="editorVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button type="primary" :loading="saving" @click="save">{{ t('common.save') }}</el-button>
       </template>
     </el-dialog>
   </div>
@@ -153,6 +158,7 @@
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { Globe, Pencil, Plus, RefreshCw, Trash2, Zap } from 'lucide-vue-next'
 import { api } from '../api'
@@ -226,6 +232,7 @@ interface TaskView extends Task {
 
 type Badge = { type: StatusType; text: string; title?: string }
 
+const { t } = useI18n()
 const { isMobile, labelPosition } = useFormLayout()
 const tasks = ref<TaskView[]>([])
 const providers = ref<ProviderMeta[]>([])
@@ -274,77 +281,77 @@ function fqdn(r: DNSRecord) {
   return !r.sub || r.sub === '@' ? r.zone : `${r.sub}.${r.zone}`
 }
 
-function fmtTime(t: string) {
-  const d = new Date(t)
+function fmtTime(iso: string) {
+  const d = new Date(iso)
   // 当天只显示时间，其余显示日期与时间
   return d.toDateString() === new Date().toDateString() ? d.toLocaleTimeString() : d.toLocaleString()
 }
 
 function actionText(a?: string) {
-  return ({ created: '已创建', updated: '已更新', unchanged: '已是最新' } as Record<string, string>)[a ?? ''] ?? '已同步'
+  return ({ created: t('ddns.actCreated'), updated: t('ddns.actUpdated'), unchanged: t('ddns.actUnchanged') } as Record<string, string>)[a ?? ''] ?? t('ddns.actSynced')
 }
 
 // taskActive 表示任务实际处于运行条件：模块与任务均已启用
-function taskActive(t: TaskView) {
-  return !moduleOff.value && t.enable
+function taskActive(tk: TaskView) {
+  return !moduleOff.value && tk.enable
 }
 
-function recState(t: TaskView, r: DNSRecord): RecordState | undefined {
-  return r.key ? t.state.records?.[r.key] : undefined
+function recState(tk: TaskView, r: DNSRecord): RecordState | undefined {
+  return r.key ? tk.state.records?.[r.key] : undefined
 }
 
 // taskStatus 汇总任务状态。停用的任务只显示“已停用”，不会显示“等待检查”
-function taskStatus(t: TaskView): Badge {
+function taskStatus(tk: TaskView): Badge {
   if (moduleOff.value) {
-    return { type: 'off', text: '模块已停用' }
+    return { type: 'off', text: t('ddns.moduleOff') }
   }
-  if (!t.enable) {
-    return { type: 'off', text: '已停用' }
+  if (!tk.enable) {
+    return { type: 'off', text: t('ddns.deactivated') }
   }
-  if (t.state.ipError) {
-    return { type: 'error', text: '获取 IP 失败', title: t.state.ipError }
+  if (tk.state.ipError) {
+    return { type: 'error', text: t('ddns.ipFailed'), title: tk.state.ipError }
   }
-  const enabled = t.records.filter((r) => r.enable)
-  const failed = enabled.filter((r) => recState(t, r)?.lastError).length
+  const enabled = tk.records.filter((r) => r.enable)
+  const failed = enabled.filter((r) => recState(tk, r)?.lastError).length
   if (failed) {
-    return { type: 'error', text: `${failed} 条同步失败` }
+    return { type: 'error', text: t('ddns.syncFailed', { count: failed }) }
   }
-  if (!t.state.running) {
-    return { type: 'pending', text: '启动中' }
+  if (!tk.state.running) {
+    return { type: 'pending', text: t('ddns.starting') }
   }
   if (!enabled.length) {
-    return { type: 'warn', text: '无启用的记录' }
+    return { type: 'warn', text: t('ddns.noEnabledRecords') }
   }
-  if (enabled.every((r) => recState(t, r))) {
-    return { type: 'ok', text: '正常' }
+  if (enabled.every((r) => recState(tk, r))) {
+    return { type: 'ok', text: t('ddns.ok') }
   }
-  return { type: 'pending', text: '等待检查' }
+  return { type: 'pending', text: t('ddns.waiting') }
 }
 
 // recordStatus 计算单条记录状态：模块停用、任务停用、记录停用都显示为“已停用”
-function recordStatus(t: TaskView, r: DNSRecord): Badge {
+function recordStatus(tk: TaskView, r: DNSRecord): Badge {
   if (moduleOff.value) {
-    return { type: 'off', text: '模块已停用' }
+    return { type: 'off', text: t('ddns.moduleOff') }
   }
-  if (!t.enable) {
-    return { type: 'off', text: '已停用', title: '所属任务已停用' }
+  if (!tk.enable) {
+    return { type: 'off', text: t('ddns.deactivated'), title: t('ddns.taskDeactivated') }
   }
   if (!r.enable) {
-    return { type: 'off', text: '已停用', title: '该记录已停用' }
+    return { type: 'off', text: t('ddns.deactivated'), title: t('ddns.recordDeactivated') }
   }
-  const st = recState(t, r)
+  const st = recState(tk, r)
   if (st?.lastError) {
     return { type: 'error', text: st.lastError, title: st.lastError }
   }
   if (st) {
     return { type: 'ok', text: actionText(st.lastAction) }
   }
-  return { type: 'pending', text: '等待检查' }
+  return { type: 'pending', text: t('ddns.waiting') }
 }
 
-function recordSync(t: TaskView, r: DNSRecord) {
-  const st = recState(t, r)
-  if (!taskActive(t) || !r.enable || !st?.lastSync) {
+function recordSync(tk: TaskView, r: DNSRecord) {
+  const st = recState(tk, r)
+  if (!taskActive(tk) || !r.enable || !st?.lastSync) {
     return ''
   }
   return fmtTime(st.lastSync)
@@ -358,9 +365,9 @@ async function load() {
   }
 }
 
-function openEditor(t?: TaskView) {
-  if (t) {
-    const { state: _state, ...task } = t
+function openEditor(tk?: TaskView) {
+  if (tk) {
+    const { state: _state, ...task } = tk
     editing.value = JSON.parse(JSON.stringify(task))
   } else {
     editing.value = emptyTask()
@@ -413,7 +420,7 @@ async function save() {
       await api.post('/api/ddns/tasks', body)
     }
     editorVisible.value = false
-    ElMessage.success(body.enable && settings.enable ? '已保存，正在检查' : '已保存')
+    ElMessage.success(body.enable && settings.enable ? t('ddns.savedChecking') : t('common.saved'))
     await load()
   } catch (e) {
     ElMessage.error((e as Error).message)
@@ -422,28 +429,28 @@ async function save() {
   }
 }
 
-async function toggle(t: TaskView, enable: boolean) {
+async function toggle(tk: TaskView, enable: boolean) {
   try {
-    await api.put(`/api/ddns/tasks/${t.key}/enable`, { enable })
+    await api.put(`/api/ddns/tasks/${tk.key}/enable`, { enable })
     await load()
   } catch (e) {
     ElMessage.error((e as Error).message)
   }
 }
 
-async function sync(t: TaskView, force: boolean) {
+async function sync(tk: TaskView, force: boolean) {
   try {
-    await api.post(`/api/ddns/tasks/${t.key}/sync${force ? '?force=1' : ''}`)
-    ElMessage.success('已触发')
+    await api.post(`/api/ddns/tasks/${tk.key}/sync${force ? '?force=1' : ''}`)
+    ElMessage.success(t('ddns.triggered'))
     window.setTimeout(load, 1500)
   } catch (e) {
     ElMessage.error((e as Error).message)
   }
 }
 
-async function remove(t: TaskView) {
+async function remove(tk: TaskView) {
   try {
-    await api.del(`/api/ddns/tasks/${t.key}`)
+    await api.del(`/api/ddns/tasks/${tk.key}`)
     await load()
   } catch (e) {
     ElMessage.error((e as Error).message)

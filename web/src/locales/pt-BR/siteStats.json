@@ -1,0 +1,19 @@
+{
+  "title": "Estatísticas do site · {name}",
+  "hour1": "1 hora",
+  "hour6": "6 horas",
+  "hour24": "24 horas",
+  "rangeHelp": "Um ponto por minuto; a contagem recomeça após reiniciar ou após modificar este listener",
+  "requests": "Requisições",
+  "bytesOut": "Tráfego total de respostas",
+  "errors": "Erros (4xx / 5xx)",
+  "upstreams": "Backends",
+  "healthy": "Saudável",
+  "unavailable": "Indisponível",
+  "upstreamMeta": "Peso {weight} · Conexões {conns}",
+  "backup": "Reserva",
+  "topIps": "Top 10 IPs de origem",
+  "topCountries": "Top 10 países",
+  "noData": "Sem dados",
+  "noDataGeo": "Sem dados (importe primeiro um banco de dados GeoIP)"
+}

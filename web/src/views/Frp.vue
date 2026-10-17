@@ -1,66 +1,66 @@
 <template>
   <div>
-    <PageHeader title="frp 内网穿透" desc="用 frpc 把内网服务暴露到公网服务器，或在本机运行 frps 作为服务端" :icon="Waypoints">
-      <el-button :icon="FileUp" @click="openImport">导入配置</el-button>
+    <PageHeader :title="t('frp.title')" :desc="t('frp.desc')" :icon="Waypoints">
+      <el-button :icon="FileUp" @click="openImport">{{ t('frp.importConfig') }}</el-button>
     </PageHeader>
 
     <el-tabs v-model="tab">
-      <el-tab-pane label="客户端 frpc" name="client">
+      <el-tab-pane :label="t('frp.clientTab')" name="client">
         <template v-if="client">
           <el-alert v-if="client.error && client.settings.enable" type="error" :title="client.error" :closable="false" show-icon class="block-gap" />
           <div class="g-card">
             <div class="g-card-head">
-              <div class="g-card-title"><Plug :size="16" />连接 <span v-if="client.version" class="g-card-desc">{{ client.version }}</span></div>
+              <div class="g-card-title"><Plug :size="16" />{{ t('frp.connection') }} <span v-if="client.version" class="g-card-desc">{{ client.version }}</span></div>
               <div class="head-actions">
                 <StatusBadge v-bind="roleBadge(client)" />
-                <el-button type="primary" size="small" :icon="Save" :loading="savingClient" @click="saveClient">保存</el-button>
+                <el-button type="primary" size="small" :icon="Save" :loading="savingClient" @click="saveClient">{{ t('common.save') }}</el-button>
               </div>
             </div>
             <div class="g-card-body">
               <el-form label-width="110px" :label-position="labelPosition" class="svc-form">
-                <el-form-item label="启用"><el-switch v-model="client.settings.enable" /></el-form-item>
-                <el-form-item label="服务端地址"><el-input v-model="client.settings.serverAddr" placeholder="frps 的域名或 IP" /></el-form-item>
-                <el-form-item label="服务端端口"><el-input-number v-model="client.settings.serverPort" :min="1" :max="65535" /></el-form-item>
-                <el-form-item label="令牌"><el-input v-model="client.settings.token" type="password" show-password placeholder="需与 frps 的 token 一致" /></el-form-item>
-                <el-form-item label="用户名"><el-input v-model="client.settings.user" placeholder="可选，用作代理名称前缀" /></el-form-item>
-                <el-form-item label="传输协议">
+                <el-form-item :label="t('common.enable')"><el-switch v-model="client.settings.enable" /></el-form-item>
+                <el-form-item :label="t('frp.serverAddr')"><el-input v-model="client.settings.serverAddr" :placeholder="t('frp.serverAddrPlaceholder')" /></el-form-item>
+                <el-form-item :label="t('frp.serverPort')"><el-input-number v-model="client.settings.serverPort" :min="1" :max="65535" /></el-form-item>
+                <el-form-item :label="t('frp.token')"><el-input v-model="client.settings.token" type="password" show-password :placeholder="t('frp.tokenClientPlaceholder')" /></el-form-item>
+                <el-form-item :label="t('frp.user')"><el-input v-model="client.settings.user" :placeholder="t('frp.userPlaceholder')" /></el-form-item>
+                <el-form-item :label="t('frp.protocol')">
                   <el-select v-model="client.settings.protocol" class="w-200">
-                    <el-option label="tcp（默认）" value="" />
+                    <el-option :label="t('frp.tcpDefault')" value="" />
                     <el-option label="kcp" value="kcp" />
                     <el-option label="quic" value="quic" />
                     <el-option label="websocket" value="websocket" />
                     <el-option label="wss" value="wss" />
                   </el-select>
                 </el-form-item>
-                <el-form-item label="frpc 路径"><el-input v-model="client.settings.binPath" :placeholder="client.binary || '留空自动查找'" class="mono" /></el-form-item>
+                <el-form-item :label="t('frp.frpcPath')"><el-input v-model="client.settings.binPath" :placeholder="client.binary || t('frp.autoFind')" class="mono" /></el-form-item>
               </el-form>
             </div>
           </div>
 
           <div class="g-card">
             <div class="g-card-head">
-              <div class="g-card-title"><ArrowRightLeft :size="16" />代理 <span class="g-card-desc">变更后自动重启 frpc</span></div>
-              <el-button size="small" :icon="Plus" @click="openEditor()">添加代理</el-button>
+              <div class="g-card-title"><ArrowRightLeft :size="16" />{{ t('frp.proxies') }} <span class="g-card-desc">{{ t('frp.proxiesDesc') }}</span></div>
+              <el-button size="small" :icon="Plus" @click="openEditor()">{{ t('frp.addProxy') }}</el-button>
             </div>
             <div class="g-card-body">
-              <el-empty v-if="!proxies.length" description="暂无代理" :image-size="60" />
+              <el-empty v-if="!proxies.length" :description="t('frp.noProxies')" :image-size="60" />
               <div class="card-grid">
                 <EntityCard v-for="p in proxies" :key="p.key" :off="!p.enable">
                   <template #title>{{ p.name }}</template>
                   <template v-if="p.remark" #sub>{{ p.remark }}</template>
                   <template #status><el-tag size="small" type="info">{{ p.type }}</el-tag></template>
-                  <Field label="本地" mono>{{ p.localIp }}:{{ p.localPort }}</Field>
-                  <Field v-if="p.type === 'tcp' || p.type === 'udp'" label="远程端口" mono>{{ p.remotePort }}</Field>
-                  <Field v-else-if="p.type === 'http' || p.type === 'https'" label="域名" mono>
+                  <Field :label="t('frp.local')" mono>{{ p.localIp }}:{{ p.localPort }}</Field>
+                  <Field v-if="p.type === 'tcp' || p.type === 'udp'" :label="t('frp.remotePort')" mono>{{ p.remotePort }}</Field>
+                  <Field v-else-if="p.type === 'http' || p.type === 'https'" :label="t('frp.domain')" mono>
                     <div v-for="d in p.customDomains" :key="d">{{ d }}</div>
-                    <div v-if="p.subdomain">{{ p.subdomain }}.（子域名）</div>
+                    <div v-if="p.subdomain">{{ t('frp.subdomainSuffix', { sub: p.subdomain }) }}</div>
                   </Field>
                   <template #actions>
                     <el-switch :model-value="p.enable" size="small" @change="(v: boolean | string | number) => toggle(p, Boolean(v))" />
-                    <el-button text size="small" :icon="Pencil" @click="openEditor(p)">编辑</el-button>
-                    <el-popconfirm title="删除该代理？" @confirm="remove(p)">
+                    <el-button text size="small" :icon="Pencil" @click="openEditor(p)">{{ t('common.edit') }}</el-button>
+                    <el-popconfirm :title="t('frp.confirmDeleteProxy')" @confirm="remove(p)">
                       <template #reference>
-                        <el-button text size="small" type="danger" :icon="Trash2">删除</el-button>
+                        <el-button text size="small" type="danger" :icon="Trash2">{{ t('common.delete') }}</el-button>
                       </template>
                     </el-popconfirm>
                   </template>
@@ -71,37 +71,37 @@
         </template>
       </el-tab-pane>
 
-      <el-tab-pane label="服务端 frps" name="server">
+      <el-tab-pane :label="t('frp.serverTab')" name="server">
         <template v-if="server">
           <el-alert v-if="server.error && server.settings.enable" type="error" :title="server.error" :closable="false" show-icon class="block-gap" />
           <div class="g-card">
             <div class="g-card-head">
-              <div class="g-card-title"><Server :size="16" />服务 <span v-if="server.version" class="g-card-desc">{{ server.version }}</span></div>
+              <div class="g-card-title"><Server :size="16" />{{ t('frp.service') }} <span v-if="server.version" class="g-card-desc">{{ server.version }}</span></div>
               <div class="head-actions">
                 <StatusBadge v-bind="roleBadge(server)" />
-                <el-button type="primary" size="small" :icon="Save" :loading="savingServer" @click="saveServer">保存</el-button>
+                <el-button type="primary" size="small" :icon="Save" :loading="savingServer" @click="saveServer">{{ t('common.save') }}</el-button>
               </div>
             </div>
             <div class="g-card-body">
               <el-form label-width="130px" :label-position="labelPosition" class="svc-form">
-                <el-form-item label="启用"><el-switch v-model="server.settings.enable" /></el-form-item>
-                <el-form-item label="绑定端口"><el-input-number v-model="server.settings.bindPort" :min="1" :max="65535" /></el-form-item>
-                <el-form-item label="令牌"><el-input v-model="server.settings.token" type="password" show-password placeholder="强烈建议设置，frpc 需使用相同令牌" /></el-form-item>
-                <el-form-item label="HTTP 端口"><el-input-number v-model="server.settings.vhostHttpPort" :min="0" :max="65535" /><span class="help">0 表示不启用 http 代理</span></el-form-item>
-                <el-form-item label="HTTPS 端口"><el-input-number v-model="server.settings.vhostHttpsPort" :min="0" :max="65535" /><span class="help">0 表示不启用 https 代理</span></el-form-item>
-                <el-form-item label="子域名根域名"><el-input v-model="server.settings.subdomainHost" placeholder="如 frp.example.com" /></el-form-item>
-                <el-form-item label="允许的远程端口">
-                  <el-input v-model="server.settings.allowPorts" placeholder="如 6000-6100,7500，留空不限制" class="mono" />
+                <el-form-item :label="t('common.enable')"><el-switch v-model="server.settings.enable" /></el-form-item>
+                <el-form-item :label="t('frp.bindPort')"><el-input-number v-model="server.settings.bindPort" :min="1" :max="65535" /></el-form-item>
+                <el-form-item :label="t('frp.token')"><el-input v-model="server.settings.token" type="password" show-password :placeholder="t('frp.tokenServerPlaceholder')" /></el-form-item>
+                <el-form-item :label="t('frp.httpPort')"><el-input-number v-model="server.settings.vhostHttpPort" :min="0" :max="65535" /><span class="help">{{ t('frp.httpPortHelp') }}</span></el-form-item>
+                <el-form-item :label="t('frp.httpsPort')"><el-input-number v-model="server.settings.vhostHttpsPort" :min="0" :max="65535" /><span class="help">{{ t('frp.httpsPortHelp') }}</span></el-form-item>
+                <el-form-item :label="t('frp.subdomainHost')"><el-input v-model="server.settings.subdomainHost" :placeholder="t('frp.subdomainHostPlaceholder')" /></el-form-item>
+                <el-form-item :label="t('frp.allowPorts')">
+                  <el-input v-model="server.settings.allowPorts" :placeholder="t('frp.allowPortsPlaceholder')" class="mono" />
                 </el-form-item>
-                <el-form-item label="控制台端口"><el-input-number v-model="server.settings.dashboardPort" :min="0" :max="65535" /><span class="help">0 表示关闭</span></el-form-item>
+                <el-form-item :label="t('frp.dashboardPort')"><el-input-number v-model="server.settings.dashboardPort" :min="0" :max="65535" /><span class="help">{{ t('frp.dashboardPortHelp') }}</span></el-form-item>
                 <template v-if="server.settings.dashboardPort">
-                  <el-form-item label="控制台监听"><el-input v-model="server.settings.dashboardAddr" placeholder="127.0.0.1" class="w-200" /></el-form-item>
-                  <el-form-item label="控制台用户"><el-input v-model="server.settings.dashboardUser" class="w-200" /></el-form-item>
-                  <el-form-item label="控制台密码"><el-input v-model="server.settings.dashboardPwd" type="password" show-password class="w-200" /></el-form-item>
+                  <el-form-item :label="t('frp.dashboardAddr')"><el-input v-model="server.settings.dashboardAddr" placeholder="127.0.0.1" class="w-200" /></el-form-item>
+                  <el-form-item :label="t('frp.dashboardUser')"><el-input v-model="server.settings.dashboardUser" class="w-200" /></el-form-item>
+                  <el-form-item :label="t('frp.dashboardPwd')"><el-input v-model="server.settings.dashboardPwd" type="password" show-password class="w-200" /></el-form-item>
                 </template>
-                <el-form-item label="frps 路径"><el-input v-model="server.settings.binPath" :placeholder="server.binary || '留空自动查找'" class="mono" /></el-form-item>
+                <el-form-item :label="t('frp.frpsPath')"><el-input v-model="server.settings.binPath" :placeholder="server.binary || t('frp.autoFind')" class="mono" /></el-form-item>
               </el-form>
-              <div class="form-help">frps 监听的端口需要在防火墙与路由器中放行；Docker 部署时请映射对应端口。</div>
+              <div class="form-help">{{ t('frp.firewallHelp') }}</div>
             </div>
           </div>
         </template>
@@ -110,34 +110,34 @@
 
     <LogCard url="/api/frp/logs" clearable />
 
-    <el-dialog v-model="importVisible" :title="tab === 'client' ? '导入 frpc 配置' : '导入 frps 配置'" width="640px" :fullscreen="isMobile">
-      <el-alert type="info" :closable="false" show-icon class="block-gap" title="支持旧版 frpc.ini / frps.ini（含 [common] 段）和 frp 0.52+ 的 toml。导入不会改变启用状态，确认无误后再手动启用。" />
+    <el-dialog v-model="importVisible" :title="tab === 'client' ? t('frp.importFrpc') : t('frp.importFrps')" width="640px" :fullscreen="isMobile">
+      <el-alert type="info" :closable="false" show-icon class="block-gap" :title="t('frp.importTip')" />
       <div class="import-file">
-        <el-button size="small" :icon="FileUp" @click="pickFile">选择文件</el-button>
-        <span class="help">或直接把配置内容粘贴到下方</span>
+        <el-button size="small" :icon="FileUp" @click="pickFile">{{ t('frp.pickFile') }}</el-button>
+        <span class="help">{{ t('frp.pasteHint') }}</span>
         <input ref="fileInput" type="file" class="hidden-input" @change="onFile" />
       </div>
-      <el-input v-model="importText" type="textarea" :rows="10" class="mono" placeholder="粘贴 frpc.ini / frpc.toml 的内容" @input="importPreview = undefined" />
+      <el-input v-model="importText" type="textarea" :rows="10" class="mono" :placeholder="t('frp.pastePlaceholder')" @input="importPreview = undefined" />
       <el-radio-group v-if="tab === 'client'" v-model="proxyMode" class="import-mode" @change="importPreview = undefined">
-        <el-radio value="append">追加（同名代理保持不变）</el-radio>
-        <el-radio value="replace">替换全部现有代理</el-radio>
+        <el-radio value="append">{{ t('frp.modeAppend') }}</el-radio>
+        <el-radio value="replace">{{ t('frp.modeReplace') }}</el-radio>
       </el-radio-group>
       <div v-if="importPreview" class="import-preview">
-        <div class="preview-title">解析结果</div>
+        <div class="preview-title">{{ t('frp.parseResult') }}</div>
         <div v-if="importPreview.client" class="preview-line mono">
-          {{ importPreview.client.serverAddr || '（未填写）' }}:{{ importPreview.client.serverPort }}
+          {{ importPreview.client.serverAddr || t('frp.notFilled') }}:{{ importPreview.client.serverPort }}
           <template v-if="importPreview.client.protocol"> · {{ importPreview.client.protocol }}</template>
-          <template v-if="importPreview.client.token"> · 含令牌</template>
+          <template v-if="importPreview.client.token"> · {{ t('frp.hasToken') }}</template>
         </div>
         <div v-if="importPreview.server" class="preview-line mono">
           bind {{ importPreview.server.bindPort }}
           <template v-if="importPreview.server.vhostHttpPort"> · http {{ importPreview.server.vhostHttpPort }}</template>
           <template v-if="importPreview.server.vhostHttpsPort"> · https {{ importPreview.server.vhostHttpsPort }}</template>
           <template v-if="importPreview.server.subdomainHost"> · {{ importPreview.server.subdomainHost }}</template>
-          <template v-if="importPreview.server.dashboardPort"> · 控制台 {{ importPreview.server.dashboardAddr }}:{{ importPreview.server.dashboardPort }}</template>
+          <template v-if="importPreview.server.dashboardPort"> · {{ t('frp.dashboard') }} {{ importPreview.server.dashboardAddr }}:{{ importPreview.server.dashboardPort }}</template>
         </div>
         <div v-if="tab === 'client'" class="preview-line">
-          共 {{ importPreview.proxies.length }} 个代理
+          {{ t('frp.proxyCount', { count: importPreview.proxies.length }) }}
           <div class="tags">
             <el-tag v-for="p in importPreview.proxies" :key="p.name" size="small" type="info">{{ p.name }} · {{ p.type }}</el-tag>
           </div>
@@ -146,43 +146,43 @@
         <el-alert v-if="importPreview.applied" type="success" :closable="false" show-icon :title="importDoneText" class="preview-warn" />
       </div>
       <template #footer>
-        <el-button @click="importVisible = false">关闭</el-button>
-        <el-button :loading="importing" :disabled="!importText.trim()" @click="runImport(false)">解析预览</el-button>
-        <el-button type="primary" :loading="importing" :disabled="!importPreview || importPreview.applied" @click="runImport(true)">导入</el-button>
+        <el-button @click="importVisible = false">{{ t('common.close') }}</el-button>
+        <el-button :loading="importing" :disabled="!importText.trim()" @click="runImport(false)">{{ t('frp.parsePreview') }}</el-button>
+        <el-button type="primary" :loading="importing" :disabled="!importPreview || importPreview.applied" @click="runImport(true)">{{ t('common.import') }}</el-button>
       </template>
     </el-dialog>
 
-    <el-dialog v-model="editorVisible" :title="editing.key ? '编辑代理' : '添加代理'" width="540px" :fullscreen="isMobile">
+    <el-dialog v-model="editorVisible" :title="editing.key ? t('frp.editProxy') : t('frp.addProxy')" width="540px" :fullscreen="isMobile">
       <el-form :model="editing" label-width="100px" :label-position="labelPosition">
-        <el-form-item label="名称"><el-input v-model="editing.name" /></el-form-item>
-        <el-form-item label="类型">
+        <el-form-item :label="t('common.name')"><el-input v-model="editing.name" /></el-form-item>
+        <el-form-item :label="t('frp.type')">
           <el-select v-model="editing.type">
             <el-option label="tcp" value="tcp" />
             <el-option label="udp" value="udp" />
             <el-option label="http" value="http" />
             <el-option label="https" value="https" />
-            <el-option label="stcp（私密 TCP）" value="stcp" />
-            <el-option label="xtcp（点对点 TCP）" value="xtcp" />
+            <el-option :label="t('frp.stcpLabel')" value="stcp" />
+            <el-option :label="t('frp.xtcpLabel')" value="xtcp" />
           </el-select>
         </el-form-item>
-        <el-form-item label="本地地址"><el-input v-model="editing.localIp" placeholder="127.0.0.1" /></el-form-item>
-        <el-form-item label="本地端口"><el-input-number v-model="editing.localPort" :min="1" :max="65535" /></el-form-item>
-        <el-form-item v-if="editing.type === 'tcp' || editing.type === 'udp'" label="远程端口">
+        <el-form-item :label="t('frp.localAddr')"><el-input v-model="editing.localIp" placeholder="127.0.0.1" /></el-form-item>
+        <el-form-item :label="t('frp.localPort')"><el-input-number v-model="editing.localPort" :min="1" :max="65535" /></el-form-item>
+        <el-form-item v-if="editing.type === 'tcp' || editing.type === 'udp'" :label="t('frp.remotePort')">
           <el-input-number v-model="editing.remotePort" :min="1" :max="65535" />
         </el-form-item>
         <template v-if="editing.type === 'http' || editing.type === 'https'">
-          <el-form-item label="自定义域名"><el-input v-model="domainsText" placeholder="多个用逗号分隔" /></el-form-item>
-          <el-form-item label="子域名"><el-input v-model="editing.subdomain" placeholder="需 frps 配置了子域名根域名" /></el-form-item>
+          <el-form-item :label="t('frp.customDomains')"><el-input v-model="domainsText" :placeholder="t('frp.domainsPlaceholder')" /></el-form-item>
+          <el-form-item :label="t('frp.subdomain')"><el-input v-model="editing.subdomain" :placeholder="t('frp.subdomainPlaceholder')" /></el-form-item>
         </template>
-        <el-form-item v-if="editing.type === 'stcp' || editing.type === 'xtcp'" label="密钥">
+        <el-form-item v-if="editing.type === 'stcp' || editing.type === 'xtcp'" :label="t('frp.secretKey')">
           <el-input v-model="editing.secretKey" type="password" show-password />
-          <div class="form-help">访问端（visitor）需使用相同密钥</div>
+          <div class="form-help">{{ t('frp.secretHelp') }}</div>
         </el-form-item>
-        <el-form-item label="备注"><el-input v-model="editing.remark" /></el-form-item>
+        <el-form-item :label="t('common.remark')"><el-input v-model="editing.remark" /></el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="editorVisible = false">取消</el-button>
-        <el-button type="primary" @click="saveProxy">保存</el-button>
+        <el-button @click="editorVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button type="primary" @click="saveProxy">{{ t('common.save') }}</el-button>
       </template>
     </el-dialog>
   </div>
@@ -191,6 +191,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
+import { useI18n } from 'vue-i18n'
 import { ArrowRightLeft, FileUp, Pencil, Plug, Plus, Save, Server, Trash2, Waypoints } from 'lucide-vue-next'
 import { api } from '../api'
 import PageHeader from '../components/PageHeader.vue'
@@ -244,6 +245,7 @@ interface Proxy {
   remark: string
 }
 
+const { t } = useI18n()
 const { isMobile, labelPosition } = useFormLayout()
 const tab = ref('client')
 const client = ref<RoleView<ClientSettings>>()
@@ -270,7 +272,7 @@ const proxyMode = ref('append')
 const importing = ref(false)
 const importPreview = ref<ImportResult>()
 const fileInput = ref<HTMLInputElement>()
-const importDoneText = computed(() => (tab.value === 'client' ? `已导入，新增 ${importPreview.value?.added ?? 0} 个代理` : '已导入服务端配置'))
+const importDoneText = computed(() => (tab.value === 'client' ? t('frp.importedClient', { count: importPreview.value?.added ?? 0 }) : t('frp.importedServer')))
 
 const domainsText = computed({
   get: () => (editing.value.customDomains ?? []).join(', '),
@@ -283,12 +285,12 @@ function empty(): Proxy {
 
 function roleBadge(r: RoleView<{ enable: boolean }>): { type: StatusType; text: string; title?: string } {
   if (!r.settings.enable) {
-    return { type: 'off', text: '已停用' }
+    return { type: 'off', text: t('frp.disabled') }
   }
   if (r.error) {
-    return { type: 'error', text: '启动失败', title: r.error }
+    return { type: 'error', text: t('frp.startFailed'), title: r.error }
   }
-  return r.state.running ? { type: 'running', text: '运行中' } : { type: 'warn', text: '未运行' }
+  return r.state.running ? { type: 'running', text: t('common.running') } : { type: 'warn', text: t('frp.notRunning') }
 }
 
 // refresh 仅刷新运行状态，不覆盖用户正在编辑的表单
@@ -317,7 +319,7 @@ async function saveClient() {
   savingClient.value = true
   try {
     await api.put('/api/frp/client', client.value?.settings)
-    ElMessage.success('已保存')
+    ElMessage.success(t('common.saved'))
     await load()
   } catch (e) {
     ElMessage.error((e as Error).message)
@@ -330,7 +332,7 @@ async function saveServer() {
   savingServer.value = true
   try {
     await api.put('/api/frp/server', server.value?.settings)
-    ElMessage.success('已保存')
+    ElMessage.success(t('common.saved'))
     await load()
   } catch (e) {
     ElMessage.error((e as Error).message)

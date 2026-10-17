@@ -1,0 +1,194 @@
+{
+  "title": "设置",
+  "desc": "账号安全、访问控制、运行参数、备份迁移与系统信息",
+  "currentPassword": "当前密码",
+  "notEnabled": "未启用",
+  "restartBanner": {
+    "title": "部分设置需要重启后生效",
+    "desc": "监听地址等修改已保存，重启 Gately 后生效。",
+    "action": "立即重启"
+  },
+  "tabs": {
+    "account": "账号与安全",
+    "access": "访问控制",
+    "runtime": "网络与运行",
+    "backup": "备份与迁移"
+  },
+  "admin": {
+    "title": "管理员账号",
+    "username": "用户名",
+    "newPassword": "新密码",
+    "newPasswordPlaceholder": "至少 8 位",
+    "confirmPassword": "确认新密码",
+    "submit": "修改账号密码",
+    "help": "修改后所有已登录的会话都会失效，需要重新登录。",
+    "mismatch": "两次输入的新密码不一致",
+    "changed": "已修改，请重新登录"
+  },
+  "totp": {
+    "title": "两步验证",
+    "enabledDesc": "登录时除密码外还需要输入验证器 App 中的 6 位动态验证码。",
+    "code": "验证码",
+    "codePlaceholder": "验证器中的 6 位数字",
+    "disable": "关闭两步验证",
+    "scanDesc": "用 Google Authenticator、Microsoft Authenticator 等 App 扫描二维码，然后输入显示的验证码确认。",
+    "qrAlt": "二维码",
+    "manualHint": "无法扫码时手动输入密钥",
+    "copySecret": "复制密钥",
+    "confirmEnable": "确认启用",
+    "introDesc": "启用后登录需要额外输入验证器 App 生成的动态验证码，即使密码泄露也能保护管理界面。",
+    "start": "开始设置",
+    "enabledMsg": "两步验证已启用",
+    "disabledMsg": "两步验证已关闭"
+  },
+  "loginProtect": {
+    "title": "登录保护",
+    "sessionHours": "会话有效期",
+    "sessionHoursHelp": "小时；超过后需要重新登录",
+    "maxFailures": "连续失败上限",
+    "maxFailuresHelp": "同一来源连续输错密码达到次数后锁定，0 使用默认值",
+    "lockMinutes": "锁定时长",
+    "lockMinutesHelp": "分钟，0 使用默认值"
+  },
+  "thirdLogin": {
+    "title": "第三方登录",
+    "desc": "用 GitHub、Google、QQ 或任意 OIDC 账号登录管理界面。使用你自己申请的 OAuth 应用，登录过程不经过任何中转服务器。",
+    "enable": "启用",
+    "callbackBase": "回调基础地址",
+    "callbackBasePlaceholder": "https://gately.example.com（浏览器访问管理界面所用的地址，不带路径）",
+    "callbackHelp": "在各平台登记的回调地址为：{url}。登录须从该地址打开管理界面后发起。",
+    "providers": "登录方式",
+    "allowed": "允许的身份",
+    "allowedPlaceholder": "每行一个：提供方标识:账号，如 github:15172899 或 google:me{'@'}gmail.com；行尾可用 # 加备注",
+    "allowedHelp": "只有列表中的账号可以登录。GitHub 推荐写数字 ID，QQ 首次登录被拒绝时页面会显示可复制的标识。",
+    "skipTotp": "跳过两步验证",
+    "skipTotpHelp": "已启用两步验证时，开启后第三方登录不再要求验证码；关闭则第三方登录被拒绝"
+  },
+  "apiToken": {
+    "title": "API 令牌",
+    "desc": "API 令牌已升级为多令牌与细粒度权限控制：可创建多个令牌，分别设置过期时间与各功能模块的只读 / 读写权限。",
+    "manage": "管理 API 令牌",
+    "docs": "查看 API 文档"
+  },
+  "listen": {
+    "title": "管理界面监听",
+    "http": "HTTP 监听",
+    "needRestart": "需重启",
+    "httpHelp": "格式为 :端口 或 IP:端口",
+    "https": "HTTPS 监听",
+    "httpsPlaceholder": "留空不启用，例如 :16643",
+    "httpsHelp": "证书按访问域名从「SSL 证书」中选择",
+    "forceHttps": "强制 HTTPS",
+    "forceHttpsHelp": "HTTP 访问自动跳转到 HTTPS（仅当证书模块有该域名的证书时）"
+  },
+  "restrict": {
+    "title": "访问限制",
+    "safePath": "安全入口",
+    "safePathPlaceholder": "留空不启用，例如 /my-entry",
+    "random": "随机生成",
+    "safePathHelp": "设置后需访问 {url} 才能打开管理界面，直接访问其他路径返回 404，可防止扫描器发现管理界面。请牢记入口地址。",
+    "urlPrefix": "http://IP:端口",
+    "entryName": "入口",
+    "lanOnly": "仅允许内网访问",
+    "lanOnlyHelp": "只允许内网地址（含 Tailscale 等 100.64.0.0/10 地址）访问管理界面"
+  },
+  "network": {
+    "title": "网络",
+    "dnsServers": "DNS 服务器",
+    "dnsPlaceholder": "留空使用系统 DNS；可输入 IP 或 IP:端口",
+    "dnsHelp": "影响所有出站域名解析（DDNS、Webhook、ACME 等），多个时随机选择并自动故障转移。",
+    "timeZone": "时区",
+    "timeZonePlaceholder": "跟随系统",
+    "timeZoneHelp": "日志、计划任务等使用的时区，可输入任意 IANA 时区名；当前生效：{zone}",
+    "dns": {
+      "ali": "阿里",
+      "tencent": "腾讯",
+      "baidu": "百度",
+      "114": "114",
+      "cloudflare": "Cloudflare",
+      "google": "Google",
+      "quad9": "Quad9"
+    },
+    "zones": {
+      "china": "中国",
+      "hongKong": "香港",
+      "taipei": "台北",
+      "tokyo": "东京",
+      "seoul": "首尔",
+      "singapore": "新加坡",
+      "london": "伦敦",
+      "berlin": "柏林",
+      "moscow": "莫斯科",
+      "newYork": "纽约",
+      "chicago": "芝加哥",
+      "losAngeles": "洛杉矶",
+      "sydney": "悉尼",
+      "utc": "协调世界时"
+    }
+  },
+  "runtime": {
+    "title": "运行参数",
+    "logLines": "日志保留条数",
+    "logLinesHelp": "每个模块在内存中保留的日志条数",
+    "gcPercent": "GC 百分比",
+    "gcPercentHelp": "0 为默认（100）；调小可降低内存占用，但增加 CPU 开销",
+    "maxProcs": "最大 CPU 核数",
+    "maxProcsHelp": "0 为自动（本机 {count} 核）"
+  },
+  "restart": {
+    "title": "重启",
+    "desc": "重启期间管理界面与所有转发、代理服务会短暂中断（通常数秒）。",
+    "button": "重启 Gately",
+    "confirm": "重启期间管理界面与所有转发、代理服务会短暂中断（通常数秒）。确定重启 Gately？",
+    "confirmButton": "重启",
+    "progress": "正在重启 Gately…"
+  },
+  "save": {
+    "saved": "已保存并生效",
+    "savedNeedRestart": "已保存，部分设置需重启后生效"
+  },
+  "import": {
+    "title": "从 Lucky 导入",
+    "desc": "支持 Lucky 配置目录（Docker 默认 {dir}）中的 {lkcf} 文件（可多选），以及 Lucky 后台导出的整站备份 {zip}。先预览，确认后再导入；导入的条目追加到现有条目之后，同名条目会跳过。",
+    "drag": "拖入文件或 {click}",
+    "dragClick": "点击选择",
+    "dragHint": ".lkcf 配置文件或整站备份 .zip",
+    "keepEnableTitle": "导入后保持 Lucky 中的启用状态",
+    "keepEnableDesc": "默认关闭：导入的规则全部为停用状态，检查无误后再逐条启用。开启后，在 Lucky 中启用的规则会{bold}，如果 Lucky 仍在运行，可能出现端口冲突或两边同时更新解析。",
+    "keepEnableBold": "立即监听端口、更新 DNS 解析",
+    "preview": "预览",
+    "confirmImport": "确认导入",
+    "previewDone": "预览完成，确认无误后导入",
+    "imported": "已导入",
+    "noModules": "未包含 Gately 已支持的模块",
+    "noWarnings": "没有警告",
+    "colModule": "模块",
+    "colFound": "发现",
+    "colImportable": "可导入",
+    "colWarnings": "警告",
+    "done": "导入完成，共 {total} 条",
+    "confirmKeep": "将导入 {total} 条配置，并保持 Lucky 中的启用状态：已启用的规则会立即生效。确定继续？",
+    "confirmDisabled": "将导入 {total} 条配置，导入后全部为停用状态。确定继续？",
+    "confirmButton": "导入"
+  },
+  "backup": {
+    "title": "备份 Gately 配置",
+    "desc": "下载包含全部配置（账号、规则、证书等）的 zip 文件。备份中含有密码哈希、密钥与证书私钥，请妥善保存。",
+    "download": "下载备份",
+    "downloadFailed": "下载失败 ({status})"
+  },
+  "restore": {
+    "title": "恢复配置",
+    "desc": "用备份 zip {bold}，原配置会先保存到配置目录下的 backup-时间 文件夹，恢复后 Gately 自动重启。",
+    "descBold": "覆盖当前全部配置",
+    "pickFile": "选择备份文件",
+    "passwordPlaceholder": "备份口令",
+    "button": "恢复",
+    "confirm": "将用「{name}」覆盖当前全部配置并自动重启，当前配置会先备份到配置目录。请输入「{word}」两个字确认。",
+    "word": "恢复",
+    "confirmButton": "恢复并重启",
+    "inputHint": "请输入「{word}」",
+    "success": "已恢复 {count} 个配置文件，原配置保存在 {previous}",
+    "progress": "正在应用备份并重启…"
+  }
+}

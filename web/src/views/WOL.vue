@@ -1,11 +1,11 @@
 <template>
   <div>
-    <PageHeader title="网络唤醒" desc="向局域网设备发送 Wake-on-LAN 魔术包，远程开机" :icon="Power">
-      <el-button type="primary" :icon="Plus" @click="openEditor()">添加设备</el-button>
+    <PageHeader :title="t('wol.title')" :desc="t('wol.desc')" :icon="Power">
+      <el-button type="primary" :icon="Plus" @click="openEditor()">{{ t('wol.addDevice') }}</el-button>
     </PageHeader>
 
     <div class="card-grid">
-      <el-empty v-if="!devices.length" description="暂无设备，可添加或在「设置 → 备份与迁移」中导入 Lucky 配置" class="empty" />
+      <el-empty v-if="!devices.length" :description="t('wol.empty')" class="empty" />
       <EntityCard v-for="d in devices" :key="d.key">
         <template #lead>
           <div class="dev-icon" :class="{ online: status[d.key ?? ''] === 'online' }"><Monitor :size="18" /></div>
@@ -15,41 +15,41 @@
         <template #status>
           <StatusBadge v-bind="devStatus(d)" />
         </template>
-        <Field label="MAC 地址" mono>
+        <Field :label="t('wol.macAddress')" mono>
           <div v-for="m in d.macs" :key="m">{{ m }}</div>
         </Field>
-        <Field label="广播" mono>{{ (d.broadcastIps ?? []).length ? (d.broadcastIps ?? []).join(', ') : '自动' }}:{{ d.port }} ×{{ d.repeat }}</Field>
-        <Field v-if="d.checkAddr" label="在线探测" mono>{{ d.checkAddr }}</Field>
+        <Field :label="t('wol.broadcast')" mono>{{ (d.broadcastIps ?? []).length ? (d.broadcastIps ?? []).join(', ') : t('wol.auto') }}:{{ d.port }} ×{{ d.repeat }}</Field>
+        <Field v-if="d.checkAddr" :label="t('wol.onlineCheck')" mono>{{ d.checkAddr }}</Field>
         <template #actions>
-          <el-button text size="small" :icon="Pencil" @click="openEditor(d)">编辑</el-button>
-          <el-popconfirm title="删除该设备？" @confirm="remove(d)">
+          <el-button text size="small" :icon="Pencil" @click="openEditor(d)">{{ t('common.edit') }}</el-button>
+          <el-popconfirm :title="t('wol.confirmDelete')" @confirm="remove(d)">
             <template #reference>
-              <el-button text size="small" type="danger" :icon="Trash2">删除</el-button>
+              <el-button text size="small" type="danger" :icon="Trash2">{{ t('common.delete') }}</el-button>
             </template>
           </el-popconfirm>
-          <el-button type="primary" size="small" :icon="Zap" :loading="waking[d.key ?? '']" class="wake" @click="wake(d)">唤醒</el-button>
+          <el-button type="primary" size="small" :icon="Zap" :loading="waking[d.key ?? '']" class="wake" @click="wake(d)">{{ t('wol.wake') }}</el-button>
         </template>
       </EntityCard>
     </div>
 
     <LogCard url="/api/wol/logs" clearable />
 
-    <el-dialog v-model="editorVisible" :title="editing.key ? '编辑设备' : '添加设备'" width="540px" :fullscreen="isMobile">
+    <el-dialog v-model="editorVisible" :title="editing.key ? t('wol.editDevice') : t('wol.addDevice')" width="540px" :fullscreen="isMobile">
       <el-form :model="editing" label-width="110px" :label-position="labelPosition">
-        <el-form-item label="名称"><el-input v-model="editing.name" /></el-form-item>
-        <el-form-item label="MAC 地址"><el-input v-model="macsText" type="textarea" :rows="2" class="mono" placeholder="每行一个，如 aa:bb:cc:dd:ee:ff" /></el-form-item>
-        <el-form-item label="广播地址"><el-input v-model="bcText" placeholder="留空自动；多个用逗号分隔，如 192.168.1.255" /></el-form-item>
-        <el-form-item label="端口"><el-input-number v-model="editing.port" :min="1" :max="65535" /></el-form-item>
-        <el-form-item label="重复次数"><el-input-number v-model="editing.repeat" :min="1" :max="20" /></el-form-item>
-        <el-form-item label="在线探测">
-          <el-input v-model="editing.checkAddr" placeholder="可选，如 192.168.1.10:3389" />
-          <div class="form-help">定期以 TCP 连接该地址判断设备是否在线</div>
+        <el-form-item :label="t('common.name')"><el-input v-model="editing.name" /></el-form-item>
+        <el-form-item :label="t('wol.macAddress')"><el-input v-model="macsText" type="textarea" :rows="2" class="mono" :placeholder="t('wol.macPlaceholder')" /></el-form-item>
+        <el-form-item :label="t('wol.broadcastAddress')"><el-input v-model="bcText" :placeholder="t('wol.broadcastPlaceholder')" /></el-form-item>
+        <el-form-item :label="t('wol.port')"><el-input-number v-model="editing.port" :min="1" :max="65535" /></el-form-item>
+        <el-form-item :label="t('wol.repeat')"><el-input-number v-model="editing.repeat" :min="1" :max="20" /></el-form-item>
+        <el-form-item :label="t('wol.onlineCheck')">
+          <el-input v-model="editing.checkAddr" :placeholder="t('wol.checkPlaceholder')" />
+          <div class="form-help">{{ t('wol.checkHelp') }}</div>
         </el-form-item>
-        <el-form-item label="备注"><el-input v-model="editing.remark" /></el-form-item>
+        <el-form-item :label="t('common.remark')"><el-input v-model="editing.remark" /></el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="editorVisible = false">取消</el-button>
-        <el-button type="primary" @click="save">保存</el-button>
+        <el-button @click="editorVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button type="primary" @click="save">{{ t('common.save') }}</el-button>
       </template>
     </el-dialog>
   </div>
@@ -58,6 +58,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
+import { useI18n } from 'vue-i18n'
 import { Monitor, Pencil, Plus, Power, Trash2, Zap } from 'lucide-vue-next'
 import { api } from '../api'
 import PageHeader from '../components/PageHeader.vue'
@@ -79,6 +80,7 @@ interface Device {
   enable: boolean
 }
 
+const { t } = useI18n()
 const { isMobile, labelPosition } = useFormLayout()
 const devices = ref<Device[]>([])
 const status = ref<Record<string, string>>({})
@@ -103,16 +105,16 @@ function empty(): Device {
 // devStatus 计算设备在线状态；未配置探测地址时明确提示，而不是显示为等待
 function devStatus(d: Device): { type: StatusType; text: string } {
   if (!d.checkAddr) {
-    return { type: 'info', text: '未配置探测' }
+    return { type: 'info', text: t('wol.noCheck') }
   }
   const s = status.value[d.key ?? '']
   if (s === 'online') {
-    return { type: 'running', text: '在线' }
+    return { type: 'running', text: t('wol.online') }
   }
   if (s === 'offline') {
-    return { type: 'off', text: '离线' }
+    return { type: 'off', text: t('wol.offline') }
   }
-  return { type: 'pending', text: '探测中' }
+  return { type: 'pending', text: t('wol.probing') }
 }
 
 async function load() {
@@ -145,7 +147,7 @@ async function wake(d: Device) {
   waking[k] = true
   try {
     const r = await api.post<{ sent: number }>(`/api/wol/devices/${k}/wake`)
-    ElMessage.success(`已发送 ${r.sent} 个唤醒包`)
+    ElMessage.success(t('wol.sent', { count: r.sent }))
   } catch (e) {
     ElMessage.error((e as Error).message)
   } finally {

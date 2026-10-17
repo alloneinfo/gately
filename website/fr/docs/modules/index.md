@@ -1,0 +1,19 @@
+# Vue d'ensemble des modules
+
+Chaque fonction de Gately est un module indépendant. Chacun peut être activé, désactivé et configuré séparément, et enregistre sa configuration dans un simple fichier JSON en texte brut.
+
+| Module | Fonctions | Documentation |
+| --- | --- | --- |
+| DNS dynamique | 11 fournisseurs DNS, IP via URL / interface réseau / commande, IPv4 / IPv6, Webhook | [Consulter](/fr/docs/modules/ddns) |
+| Traversée STUN | TCP / UDP, maintien de session, UPnP / NAT-PMP, redirection intégrée, Webhook et scripts déclenchés au changement | [Consulter](/fr/docs/modules/stun) |
+| Redirection de ports | TCP / UDP, IPv4 / IPv6, plages de ports, basculement multi-cibles, limites de connexions, statistiques de trafic | [Consulter](/fr/docs/modules/portforward) |
+| Certificats SSL | Émission et renouvellement automatiques ACME DNS-01, import, mappage vers un répertoire avec scripts | [Consulter](/fr/docs/modules/ssl) |
+| Services Web | Proxy inverse, redirections, fichiers statiques, HTTPS, authentification, contrôle d'accès, répartition de charge et vérifications d'état, cache et limitation de débit, statistiques d'accès | [Consulter](/fr/docs/modules/web) |
+| Pare-feu WAF | Coraza + OWASP CRS v4 | [Consulter](/fr/docs/modules/waf) |
+| Tailscale / frp / cloudflared | Réseau et traversée NAT avec des binaires officiels gérés | [Consulter](/fr/docs/modules/tunnels) |
+| Docker | Création et édition de conteneurs, journaux et terminal, Compose, mises à jour et montées de version d'images, réseaux et volumes | [Consulter](/fr/docs/modules/docker) |
+| Terminal Web | SSH, Telnet, shell local, gestionnaire de fichiers SFTP, sessions persistantes | [Consulter](/fr/docs/modules/terminal) |
+| Diagnostic réseau | Ping, traceroute, test de port, résolution DNS, test de débit, scan du réseau local | [Consulter](/fr/docs/modules/nettools) |
+| Centre de notifications | Envoi d'événements multicanal et règles | [Consulter](/fr/docs/modules/notify) |
+| Sauvegarde de la configuration | Sauvegardes chiffrées, politique de rétention, sauvegarde planifiée et restauration | [Consulter](/fr/docs/modules/backup) |
+| Outils fichiers et exploitation | WebDAV, FTP, gestion du stockage, Wake-on-LAN, tâches planifiées | [Consulter](/fr/docs/modules/tools) |

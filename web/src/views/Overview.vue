@@ -7,13 +7,13 @@
         <div class="hero-text">
           <div class="hero-name">
             {{ host?.hostname || '-' }}
-            <span v-if="host?.inContainer" class="chip"><Container :size="12" />容器内运行</span>
+            <span v-if="host?.inContainer" class="chip"><Container :size="12" />{{ t('overview.inContainer') }}</span>
           </div>
           <div class="hero-sub">{{ platformLine }}</div>
           <div class="hero-meta">
-            <span v-if="host?.bootTime"><Power :size="13" />系统已运行 {{ formatDuration(now / 1000 - host.bootTime) }}</span>
+            <span v-if="host?.bootTime"><Power :size="13" />{{ t('overview.systemUptime', { duration: formatDuration(now / 1000 - host.bootTime) }) }}</span>
             <span v-if="status"><Clock :size="13" />{{ status.timeZone }}</span>
-            <span v-if="host"><RefreshCw :size="13" />更新于 {{ new Date(host.sampledAt).toLocaleTimeString() }}</span>
+            <span v-if="host"><RefreshCw :size="13" />{{ t('overview.updatedAt', { time: new Date(host.sampledAt).toLocaleTimeString() }) }}</span>
           </div>
         </div>
       </div>
@@ -23,11 +23,11 @@
           <span class="v mono" :title="status ? `${status.commit} · ${status.buildDate}` : ''">{{ status?.version ?? '-' }}</span>
         </div>
         <div class="hero-kv">
-          <span class="k">已运行</span>
+          <span class="k">{{ t('overview.uptime') }}</span>
           <span class="v">{{ status ? formatDuration((now - new Date(status.startTime).getTime()) / 1000) : '-' }}</span>
         </div>
         <div class="hero-kv">
-          <span class="k">服务</span>
+          <span class="k">{{ t('overview.service') }}</span>
           <StatusBadge :type="health.type" :text="health.text" />
         </div>
       </div>
@@ -40,23 +40,23 @@
         <div class="gauge-body">
           <RingGauge :value="host?.cpu.usage" />
           <div class="gauge-info">
-            <div class="gi-main" :title="host?.cpu.model">{{ host?.cpu.model || '处理器' }}</div>
-            <div class="gi-row"><span>核心</span><b>{{ host?.cpu.cores ?? '-' }}</b></div>
-            <div class="gi-row"><span>负载</span><b class="mono">{{ loadText }}</b></div>
+            <div class="gi-main" :title="host?.cpu.model">{{ host?.cpu.model || t('overview.processor') }}</div>
+            <div class="gi-row"><span>{{ t('overview.cores') }}</span><b>{{ host?.cpu.cores ?? '-' }}</b></div>
+            <div class="gi-row"><span>{{ t('overview.load') }}</span><b class="mono">{{ loadText }}</b></div>
           </div>
         </div>
         <Sparkline :series="[{ values: hist.cpu, color: 'var(--el-color-primary)' }]" :max="100" :capacity="HISTORY" :height="36" class="gauge-spark" />
       </div>
 
       <div class="gauge-card">
-        <div class="gauge-head"><MemoryStick :size="15" />内存</div>
+        <div class="gauge-head"><MemoryStick :size="15" />{{ t('overview.memory') }}</div>
         <div class="gauge-body">
           <RingGauge :value="memPercent" />
           <div class="gauge-info">
             <div class="gi-main">{{ mem ? `${formatBytes(mem.used)} / ${formatBytes(mem.total)}` : '-' }}</div>
-            <div class="gi-row"><span>可用</span><b>{{ mem ? formatBytes(mem.available) : '-' }}</b></div>
+            <div class="gi-row"><span>{{ t('overview.available') }}</span><b>{{ mem ? formatBytes(mem.available) : '-' }}</b></div>
             <div class="gi-row">
-              <span>交换</span><b>{{ mem && mem.swapTotal ? `${formatBytes(mem.swapUsed)} / ${formatBytes(mem.swapTotal)}` : '未启用' }}</b>
+              <span>{{ t('overview.swap') }}</span><b>{{ mem && mem.swapTotal ? `${formatBytes(mem.swapUsed)} / ${formatBytes(mem.swapTotal)}` : t('overview.swapOff') }}</b>
             </div>
           </div>
         </div>
@@ -64,36 +64,36 @@
       </div>
 
       <div class="gauge-card">
-        <div class="gauge-head"><HardDrive :size="15" />磁盘</div>
+        <div class="gauge-head"><HardDrive :size="15" />{{ t('overview.disk') }}</div>
         <div class="gauge-body">
           <RingGauge :value="diskPercent" />
           <div class="gauge-info">
             <div class="gi-main">{{ disk ? `${formatBytes(disk.used)} / ${formatBytes(disk.total)}` : '-' }}</div>
-            <div class="gi-row"><span>剩余</span><b>{{ disk ? formatBytes(disk.free) : '-' }}</b></div>
-            <div class="gi-row"><span>位置</span><b class="mono ellipsis" :title="disk?.path">{{ disk?.path ?? '-' }}</b></div>
+            <div class="gi-row"><span>{{ t('overview.free') }}</span><b>{{ disk ? formatBytes(disk.free) : '-' }}</b></div>
+            <div class="gi-row"><span>{{ t('overview.location') }}</span><b class="mono ellipsis" :title="disk?.path">{{ disk?.path ?? '-' }}</b></div>
           </div>
         </div>
         <div class="disk-bar">
           <div class="disk-fill" :class="diskLevel" :style="{ width: (diskPercent ?? 0) + '%' }" />
         </div>
-        <div class="disk-note">统计配置目录所在分区</div>
+        <div class="disk-note">{{ t('overview.diskNote') }}</div>
       </div>
 
       <div class="gauge-card">
-        <div class="gauge-head"><Activity :size="15" />网络</div>
+        <div class="gauge-head"><Activity :size="15" />{{ t('overview.network') }}</div>
         <div class="net-rates">
           <div class="net-rate">
             <span class="net-dot rx" /><ArrowDown :size="14" />
             <div>
               <div class="net-val">{{ formatRate(netTotal.rx) }}</div>
-              <div class="net-sub">累计 {{ formatBytes(netTotal.rxBytes) }}</div>
+              <div class="net-sub">{{ t('overview.cumulative', { size: formatBytes(netTotal.rxBytes) }) }}</div>
             </div>
           </div>
           <div class="net-rate">
             <span class="net-dot tx" /><ArrowUp :size="14" />
             <div>
               <div class="net-val">{{ formatRate(netTotal.tx) }}</div>
-              <div class="net-sub">累计 {{ formatBytes(netTotal.txBytes) }}</div>
+              <div class="net-sub">{{ t('overview.cumulative', { size: formatBytes(netTotal.txBytes) }) }}</div>
             </div>
           </div>
         </div>
@@ -113,13 +113,13 @@
     <section class="cols">
       <div class="g-card">
         <div class="g-card-head">
-          <div class="g-card-title"><Network :size="16" />网络接口</div>
-          <span class="g-card-desc">{{ host ? `${host.interfaces.length} 个` : '' }}</span>
+          <div class="g-card-title"><Network :size="16" />{{ t('overview.interfaces') }}</div>
+          <span class="g-card-desc">{{ host ? t('overview.count', { count: host.interfaces.length }) : '' }}</span>
         </div>
         <div v-if="publicIPs.length" class="public-ips">
           <div v-for="p in publicIPs" :key="p.label" class="public-ip">
-            <span class="pip-label"><Globe :size="13" />公网 {{ p.label }}</span>
-            <span class="mono copyable" title="点击复制" @click="copy(p.value)">{{ p.value }}</span>
+            <span class="pip-label"><Globe :size="13" />{{ t('overview.publicIp', { label: p.label }) }}</span>
+            <span class="mono copyable" :title="t('overview.clickToCopy')" @click="copy(p.value)">{{ p.value }}</span>
           </div>
         </div>
         <div class="ifaces">
@@ -133,28 +133,28 @@
               </span>
             </div>
             <div class="iface-addrs">
-              <span v-for="a in i.ipv4" :key="a" class="addr v4 mono copyable" title="点击复制" @click="copy(a.split('/')[0])">{{ a }}</span>
-              <span v-for="a in visibleV6(i.ipv6)" :key="a" class="addr v6 mono copyable" title="点击复制" @click="copy(a.split('/')[0])">{{ a }}</span>
+              <span v-for="a in i.ipv4" :key="a" class="addr v4 mono copyable" :title="t('overview.clickToCopy')" @click="copy(a.split('/')[0])">{{ a }}</span>
+              <span v-for="a in visibleV6(i.ipv6)" :key="a" class="addr v6 mono copyable" :title="t('overview.clickToCopy')" @click="copy(a.split('/')[0])">{{ a }}</span>
               <el-tooltip v-if="i.ipv6.length > visibleV6(i.ipv6).length" placement="top" :show-after="200">
                 <template #content>
                   <div v-for="a in i.ipv6" :key="a" class="mono">{{ a }}</div>
                 </template>
-                <span class="addr more">+{{ i.ipv6.length - visibleV6(i.ipv6).length }} 个 IPv6</span>
+                <span class="addr more">{{ t('overview.moreIpv6', { count: i.ipv6.length - visibleV6(i.ipv6).length }) }}</span>
               </el-tooltip>
             </div>
             <div class="iface-foot">
               <span>MTU {{ i.mtu }}</span>
-              <span>接收 {{ formatBytes(i.rxBytes) }}</span>
-              <span>发送 {{ formatBytes(i.txBytes) }}</span>
+              <span>{{ t('overview.received', { size: formatBytes(i.rxBytes) }) }}</span>
+              <span>{{ t('overview.sent', { size: formatBytes(i.txBytes) }) }}</span>
             </div>
           </div>
-          <div v-if="host && !host.interfaces.length" class="empty">没有检测到可用的网络接口</div>
+          <div v-if="host && !host.interfaces.length" class="empty">{{ t('overview.noInterfaces') }}</div>
         </div>
       </div>
 
       <div class="g-card">
         <div class="g-card-head">
-          <div class="g-card-title"><HeartPulse :size="16" />服务状态</div>
+          <div class="g-card-title"><HeartPulse :size="16" />{{ t('overview.serviceStatus') }}</div>
         </div>
         <div class="services">
           <router-link v-for="s in services" :key="s.id" :to="s.path" class="service">
@@ -167,7 +167,7 @@
               </span>
             </span>
           </router-link>
-          <div v-if="status && !services.length" class="empty">暂无启用的服务</div>
+          <div v-if="status && !services.length" class="empty">{{ t('overview.noServices') }}</div>
         </div>
       </div>
     </section>
@@ -175,7 +175,7 @@
     <!-- ============ Gately 进程 ============ -->
     <section class="g-card proc">
       <div class="g-card-head">
-        <div class="g-card-title"><Boxes :size="16" />Gately 进程</div>
+        <div class="g-card-title"><Boxes :size="16" />{{ t('overview.process') }}</div>
         <span class="g-card-desc">{{ status ? `${status.os}/${status.arch} · ${status.goVersion}` : '' }}</span>
       </div>
       <div class="proc-grid">
@@ -191,6 +191,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
+import { useI18n } from 'vue-i18n'
 import {
   Activity,
   ArrowDown,
@@ -213,6 +214,8 @@ import RingGauge from '../components/RingGauge.vue'
 import Sparkline from '../components/Sparkline.vue'
 import StatusBadge, { type StatusType } from '../components/StatusBadge.vue'
 import { navByModule } from '../nav'
+
+const { t } = useI18n()
 
 // 轮询间隔与趋势图保留的采样点数（约 3 分钟）
 const INTERVAL = 3000
@@ -252,18 +255,18 @@ const loadText = computed(() => {
 
 // 所有展示网卡的速率与累计流量之和
 const netTotal = computed(() => {
-  const t = { rx: undefined as number | undefined, tx: undefined as number | undefined, rxBytes: 0, txBytes: 0 }
+  const total = { rx: undefined as number | undefined, tx: undefined as number | undefined, rxBytes: 0, txBytes: 0 }
   for (const i of host.value?.interfaces ?? []) {
-    t.rxBytes += i.rxBytes
-    t.txBytes += i.txBytes
+    total.rxBytes += i.rxBytes
+    total.txBytes += i.txBytes
     if (i.rxRate !== undefined) {
-      t.rx = (t.rx ?? 0) + i.rxRate
+      total.rx = (total.rx ?? 0) + i.rxRate
     }
     if (i.txRate !== undefined) {
-      t.tx = (t.tx ?? 0) + i.txRate
+      total.tx = (total.tx ?? 0) + i.txRate
     }
   }
-  return t
+  return total
 })
 
 // 公网地址取自动态域名模块最近一次获取到的 IP，不额外访问外部服务
@@ -288,24 +291,24 @@ const services = computed(() => {
         level = it.level
       }
     }
-    out.push({ id: m.id, title: nav.title, path: nav.path, level, items })
+    out.push({ id: m.id, title: t(nav.titleKey), path: nav.path, level, items })
   }
   return out
 })
 
 const health = computed<{ type: StatusType; text: string }>(() => {
   if (!status.value) {
-    return { type: 'pending', text: '加载中' }
+    return { type: 'pending', text: t('overview.loading') }
   }
   const bad = services.value.filter((s) => s.level === 'error').length
   const warn = services.value.filter((s) => s.level === 'warn').length
   if (bad) {
-    return { type: 'error', text: `${bad} 项异常` }
+    return { type: 'error', text: t('overview.abnormal', { count: bad }) }
   }
   if (warn) {
-    return { type: 'warn', text: `${warn} 项需关注` }
+    return { type: 'warn', text: t('overview.attention', { count: warn }) }
   }
-  return { type: 'ok', text: '全部正常' }
+  return { type: 'ok', text: t('overview.allOk') }
 })
 
 const procItems = computed(() => {
@@ -315,19 +318,19 @@ const procItems = computed(() => {
     return []
   }
   const items = [
-    { label: '版本', value: s.version, mono: true },
-    { label: '提交', value: s.commit ? s.commit.slice(0, 12) : '-', mono: true },
-    { label: '构建时间', value: formatTime(s.buildDate) },
-    { label: '启动时间', value: new Date(s.startTime).toLocaleString() },
-    { label: '进程 PID', value: String(p.pid), mono: true },
-    { label: '进程 CPU', value: p.cpu !== undefined ? p.cpu.toFixed(1) + '%' : '-' },
-    { label: '常驻内存', value: p.rss ? formatBytes(p.rss) : '-' },
-    { label: 'Go 堆 / 申请', value: `${formatBytes(p.heapAlloc)} / ${formatBytes(p.heapSys)}` },
-    { label: '协程', value: String(p.goroutines) },
-    { label: '系统线程', value: p.threads ? String(p.threads) : '-' },
-    { label: '文件句柄', value: p.fds ? String(p.fds) : '-' },
-    { label: 'GC 次数', value: String(p.numGC) },
-    { label: '配置目录', value: s.configDir, mono: true, wide: true },
+    { label: t('overview.proc.version'), value: s.version, mono: true },
+    { label: t('overview.proc.commit'), value: s.commit ? s.commit.slice(0, 12) : '-', mono: true },
+    { label: t('overview.proc.buildTime'), value: formatTime(s.buildDate) },
+    { label: t('overview.proc.startTime'), value: new Date(s.startTime).toLocaleString() },
+    { label: t('overview.proc.pid'), value: String(p.pid), mono: true },
+    { label: t('overview.proc.procCpu'), value: p.cpu !== undefined ? p.cpu.toFixed(1) + '%' : '-' },
+    { label: t('overview.proc.rss'), value: p.rss ? formatBytes(p.rss) : '-' },
+    { label: t('overview.proc.goHeap'), value: `${formatBytes(p.heapAlloc)} / ${formatBytes(p.heapSys)}` },
+    { label: t('overview.proc.goroutines'), value: String(p.goroutines) },
+    { label: t('overview.proc.threads'), value: p.threads ? String(p.threads) : '-' },
+    { label: t('overview.proc.fds'), value: p.fds ? String(p.fds) : '-' },
+    { label: t('overview.proc.gcCount'), value: String(p.numGC) },
+    { label: t('overview.proc.configDir'), value: s.configDir, mono: true, wide: true },
   ]
   return items as { label: string; value: string; mono?: boolean; wide?: boolean }[]
 })
@@ -359,9 +362,9 @@ function push(arr: number[], v: number | undefined) {
 async function copy(text: string) {
   try {
     await navigator.clipboard.writeText(text)
-    ElMessage.success('已复制')
+    ElMessage.success(t('common.copied'))
   } catch {
-    ElMessage.warning('复制失败，请手动选择')
+    ElMessage.warning(t('overview.copyFailed'))
   }
 }
 

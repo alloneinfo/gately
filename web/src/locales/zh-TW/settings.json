@@ -1,0 +1,194 @@
+{
+  "title": "設定",
+  "desc": "帳號安全、存取控制、執行參數、備份遷移與系統資訊",
+  "currentPassword": "目前密碼",
+  "notEnabled": "未啟用",
+  "restartBanner": {
+    "title": "部分設定需要重新啟動後生效",
+    "desc": "監聽位址等修改已儲存，重新啟動 Gately 後生效。",
+    "action": "立即重新啟動"
+  },
+  "tabs": {
+    "account": "帳號與安全",
+    "access": "存取控制",
+    "runtime": "網路與執行",
+    "backup": "備份與遷移"
+  },
+  "admin": {
+    "title": "管理員帳號",
+    "username": "使用者名稱",
+    "newPassword": "新密碼",
+    "newPasswordPlaceholder": "至少 8 位",
+    "confirmPassword": "確認新密碼",
+    "submit": "變更帳號密碼",
+    "help": "修改後所有已登入的工作階段都會失效，需要重新登入。",
+    "mismatch": "兩次輸入的新密碼不一致",
+    "changed": "已修改，請重新登入"
+  },
+  "totp": {
+    "title": "兩步驟驗證",
+    "enabledDesc": "登入時除密碼外，還需要輸入驗證器 App 中的 6 位數動態驗證碼。",
+    "code": "驗證碼",
+    "codePlaceholder": "驗證器中的 6 位數字",
+    "disable": "關閉兩步驟驗證",
+    "scanDesc": "用 Google Authenticator、Microsoft Authenticator 等 App 掃描 QR Code，然後輸入顯示的驗證碼確認。",
+    "qrAlt": "QR Code",
+    "manualHint": "無法掃描時請手動輸入金鑰",
+    "copySecret": "複製金鑰",
+    "confirmEnable": "確認啟用",
+    "introDesc": "啟用後登入需要額外輸入驗證器 App 產生的動態驗證碼，即使密碼外洩也能保護管理介面。",
+    "start": "開始設定",
+    "enabledMsg": "兩步驟驗證已啟用",
+    "disabledMsg": "兩步驟驗證已關閉"
+  },
+  "loginProtect": {
+    "title": "登入保護",
+    "sessionHours": "工作階段有效期",
+    "sessionHoursHelp": "小時；超過後需要重新登入",
+    "maxFailures": "連續失敗上限",
+    "maxFailuresHelp": "同一來源連續輸錯密碼達到次數後鎖定，0 使用預設值",
+    "lockMinutes": "鎖定時長",
+    "lockMinutesHelp": "分鐘，0 使用預設值"
+  },
+  "thirdLogin": {
+    "title": "第三方登入",
+    "desc": "用 GitHub、Google、QQ 或任意 OIDC 帳號登入管理介面。使用你自己申請的 OAuth 應用程式，登入過程不經過任何中繼伺服器。",
+    "enable": "啟用",
+    "callbackBase": "回呼基礎位址",
+    "callbackBasePlaceholder": "https://gately.example.com（瀏覽器存取管理介面所用的位址，不含路徑）",
+    "callbackHelp": "在各平台登記的回呼位址為：{url}。登入須從該位址開啟管理介面後發起。",
+    "providers": "登入方式",
+    "allowed": "允許的身分",
+    "allowedPlaceholder": "每行一個：提供者識別碼:帳號，如 github:15172899 或 google:me{'@'}gmail.com；行尾可用 # 加備註",
+    "allowedHelp": "只有清單中的帳號可以登入。GitHub 建議填數字 ID，QQ 首次登入被拒絕時頁面會顯示可複製的識別碼。",
+    "skipTotp": "略過兩步驟驗證",
+    "skipTotpHelp": "已啟用兩步驟驗證時，開啟後第三方登入不再要求驗證碼；關閉則第三方登入會被拒絕"
+  },
+  "apiToken": {
+    "title": "API 權杖",
+    "desc": "API 權杖已升級為多權杖與細粒度權限控制：可建立多個權杖，分別設定到期時間與各功能模組的唯讀 / 讀寫權限。",
+    "manage": "管理 API 權杖",
+    "docs": "查看 API 文件"
+  },
+  "listen": {
+    "title": "管理介面監聽",
+    "http": "HTTP 監聽",
+    "needRestart": "需重新啟動",
+    "httpHelp": "格式為 :連接埠 或 IP:連接埠",
+    "https": "HTTPS 監聽",
+    "httpsPlaceholder": "留空不啟用，例如 :16643",
+    "httpsHelp": "憑證依存取網域從「SSL 憑證」中選擇",
+    "forceHttps": "強制 HTTPS",
+    "forceHttpsHelp": "HTTP 存取自動跳轉到 HTTPS（僅當憑證模組有該網域的憑證時）"
+  },
+  "restrict": {
+    "title": "存取限制",
+    "safePath": "安全入口",
+    "safePathPlaceholder": "留空不啟用，例如 /my-entry",
+    "random": "隨機產生",
+    "safePathHelp": "設定後需存取 {url} 才能開啟管理介面，直接存取其他路徑會回傳 404，可防止掃描器發現管理介面。請牢記入口位址。",
+    "urlPrefix": "http://IP:連接埠",
+    "entryName": "入口",
+    "lanOnly": "僅允許內網存取",
+    "lanOnlyHelp": "只允許內網位址（含 Tailscale 等 100.64.0.0/10 位址）存取管理介面"
+  },
+  "network": {
+    "title": "網路",
+    "dnsServers": "DNS 伺服器",
+    "dnsPlaceholder": "留空使用系統 DNS；可輸入 IP 或 IP:連接埠",
+    "dnsHelp": "影響所有對外網域解析（DDNS、Webhook、ACME 等），多個時隨機選擇並自動容錯移轉。",
+    "timeZone": "時區",
+    "timeZonePlaceholder": "跟隨系統",
+    "timeZoneHelp": "日誌、排程工作等使用的時區，可輸入任意 IANA 時區名稱；目前生效：{zone}",
+    "dns": {
+      "ali": "阿里",
+      "tencent": "騰訊",
+      "baidu": "百度",
+      "114": "114",
+      "cloudflare": "Cloudflare",
+      "google": "Google",
+      "quad9": "Quad9"
+    },
+    "zones": {
+      "china": "中國",
+      "hongKong": "香港",
+      "taipei": "台北",
+      "tokyo": "東京",
+      "seoul": "首爾",
+      "singapore": "新加坡",
+      "london": "倫敦",
+      "berlin": "柏林",
+      "moscow": "莫斯科",
+      "newYork": "紐約",
+      "chicago": "芝加哥",
+      "losAngeles": "洛杉磯",
+      "sydney": "雪梨",
+      "utc": "世界協調時間"
+    }
+  },
+  "runtime": {
+    "title": "執行參數",
+    "logLines": "日誌保留筆數",
+    "logLinesHelp": "每個模組在記憶體中保留的日誌筆數",
+    "gcPercent": "GC 百分比",
+    "gcPercentHelp": "0 為預設（100）；調小可降低記憶體占用，但增加 CPU 開銷",
+    "maxProcs": "最大 CPU 核心數",
+    "maxProcsHelp": "0 為自動（本機 {count} 核）"
+  },
+  "restart": {
+    "title": "重新啟動",
+    "desc": "重新啟動期間，管理介面與所有轉發、代理服務會短暫中斷（通常數秒）。",
+    "button": "重新啟動 Gately",
+    "confirm": "重新啟動期間，管理介面與所有轉發、代理服務會短暫中斷（通常數秒）。確定重新啟動 Gately？",
+    "confirmButton": "重新啟動",
+    "progress": "正在重新啟動 Gately…"
+  },
+  "save": {
+    "saved": "已儲存並生效",
+    "savedNeedRestart": "已儲存，部分設定需重新啟動後生效"
+  },
+  "import": {
+    "title": "從 Lucky 匯入",
+    "desc": "支援 Lucky 設定目錄（Docker 預設 {dir}）中的 {lkcf} 檔案（可多選），以及 Lucky 後台匯出的整站備份 {zip}。先預覽，確認後再匯入；匯入的項目會附加在現有項目之後，同名項目會略過。",
+    "drag": "拖曳檔案至此或 {click}",
+    "dragClick": "點擊選擇",
+    "dragHint": ".lkcf 設定檔或整站備份 .zip",
+    "keepEnableTitle": "匯入後保持 Lucky 中的啟用狀態",
+    "keepEnableDesc": "預設關閉：匯入的規則全部為停用狀態，檢查無誤後再逐條啟用。開啟後，在 Lucky 中啟用的規則會{bold}，如果 Lucky 仍在執行，可能出現連接埠衝突或兩邊同時更新解析。",
+    "keepEnableBold": "立即監聽連接埠、更新 DNS 解析",
+    "preview": "預覽",
+    "confirmImport": "確認匯入",
+    "previewDone": "預覽完成，確認無誤後匯入",
+    "imported": "已匯入",
+    "noModules": "未包含 Gately 已支援的模組",
+    "noWarnings": "沒有警告",
+    "colModule": "模組",
+    "colFound": "發現",
+    "colImportable": "可匯入",
+    "colWarnings": "警告",
+    "done": "匯入完成，共 {total} 筆",
+    "confirmKeep": "將匯入 {total} 筆設定，並保持 Lucky 中的啟用狀態：已啟用的規則會立即生效。確定繼續？",
+    "confirmDisabled": "將匯入 {total} 筆設定，匯入後全部為停用狀態。確定繼續？",
+    "confirmButton": "匯入"
+  },
+  "backup": {
+    "title": "備份 Gately 設定",
+    "desc": "下載包含全部設定（帳號、規則、憑證等）的 zip 檔案。備份中含有密碼雜湊、金鑰與憑證私鑰，請妥善保存。",
+    "download": "下載備份",
+    "downloadFailed": "下載失敗 ({status})"
+  },
+  "restore": {
+    "title": "還原設定",
+    "desc": "用備份 zip {bold}，原設定會先儲存到設定目錄下的 backup-時間 資料夾，還原後 Gately 自動重新啟動。",
+    "descBold": "覆寫目前全部設定",
+    "pickFile": "選擇備份檔案",
+    "passwordPlaceholder": "備份密碼",
+    "button": "還原",
+    "confirm": "將用「{name}」覆寫目前全部設定並自動重新啟動，目前設定會先備份到設定目錄。請輸入「{word}」兩個字確認。",
+    "word": "還原",
+    "confirmButton": "還原並重新啟動",
+    "inputHint": "請輸入「{word}」",
+    "success": "已還原 {count} 個設定檔，原設定儲存在 {previous}",
+    "progress": "正在套用備份並重新啟動…"
+  }
+}

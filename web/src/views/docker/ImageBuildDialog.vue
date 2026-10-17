@@ -1,44 +1,47 @@
 <template>
-  <el-dialog :model-value="modelValue" title="构建镜像" width="680px" :fullscreen="isMobile" top="5vh" append-to-body @update:model-value="(v: boolean) => emit('update:modelValue', v)" @open="onOpen">
+  <el-dialog :model-value="modelValue" :title="t('docker.image.build.title')" width="680px" :fullscreen="isMobile" top="5vh" append-to-body @update:model-value="(v: boolean) => emit('update:modelValue', v)" @open="onOpen">
     <el-form :label-position="labelPosition" label-width="90px" @submit.prevent>
-      <el-form-item label="镜像标签" required><el-input v-model="tag" placeholder="例如 myapp:1.0" class="mono" /></el-form-item>
-      <el-form-item label="构建来源">
+      <el-form-item :label="t('docker.image.build.tag')" required><el-input v-model="tag" :placeholder="t('docker.image.build.tagPlaceholder')" class="mono" /></el-form-item>
+      <el-form-item :label="t('docker.image.build.source')">
         <el-radio-group v-model="mode">
-          <el-radio-button value="dockerfile">内联 Dockerfile</el-radio-button>
-          <el-radio-button value="git">Git 地址</el-radio-button>
+          <el-radio-button value="dockerfile">{{ t('docker.image.build.inlineDockerfile') }}</el-radio-button>
+          <el-radio-button value="git">{{ t('docker.image.build.gitUrl') }}</el-radio-button>
         </el-radio-group>
       </el-form-item>
       <el-form-item v-if="mode === 'dockerfile'" label="Dockerfile">
         <el-input v-model="dockerfile" type="textarea" :rows="isMobile ? 10 : 12" spellcheck="false" class="mono editor" placeholder="FROM alpine:latest&#10;RUN echo hello" />
       </el-form-item>
-      <el-form-item v-else label="Git 地址">
+      <el-form-item v-else :label="t('docker.image.build.gitUrl')">
         <el-input v-model="gitUrl" placeholder="https://github.com/user/repo.git#branch:subdir" class="mono" />
       </el-form-item>
-      <el-form-item label="构建参数">
+      <el-form-item :label="t('docker.image.build.buildArgs')">
         <div class="full">
           <div v-for="(a, i) in args" :key="i" class="row">
             <el-input v-model="a.k" placeholder="ARG" class="mono" />
-            <el-input v-model="a.v" placeholder="值" class="mono" />
-            <el-button text type="danger" :icon="Trash2" aria-label="删除" @click="args.splice(i, 1)" />
+            <el-input v-model="a.v" :placeholder="t('docker.image.build.valuePlaceholder')" class="mono" />
+            <el-button text type="danger" :icon="Trash2" :aria-label="t('common.delete')" @click="args.splice(i, 1)" />
           </div>
-          <el-button :icon="Plus" @click="args.push({ k: '', v: '' })">添加参数</el-button>
+          <el-button :icon="Plus" @click="args.push({ k: '', v: '' })">{{ t('docker.image.build.addArg') }}</el-button>
         </div>
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button @click="emit('update:modelValue', false)">取消</el-button>
-      <el-button type="primary" :icon="Hammer" :loading="busy" @click="build">开始构建</el-button>
+      <el-button @click="emit('update:modelValue', false)">{{ t('common.cancel') }}</el-button>
+      <el-button type="primary" :icon="Hammer" :loading="busy" @click="build">{{ t('docker.image.build.start') }}</el-button>
     </template>
   </el-dialog>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { Hammer, Plus, Trash2 } from 'lucide-vue-next'
 import { api } from '../../api'
 import { useFormLayout } from '../../composables/useIsMobile'
 import { trackTask } from './tasks'
+
+const { t } = useI18n()
 
 defineProps<{ modelValue: boolean }>()
 const emit = defineEmits<{ 'update:modelValue': [v: boolean]; done: [] }>()
@@ -61,19 +64,19 @@ function onOpen() {
 
 async function build() {
   if (!tag.value.trim()) {
-    ElMessage.warning('请填写镜像标签')
+    ElMessage.warning(t('docker.image.build.tagRequired'))
     return
   }
   const body: Record<string, unknown> = { tag: tag.value.trim() }
   if (mode.value === 'dockerfile') {
     if (!dockerfile.value.trim()) {
-      ElMessage.warning('请填写 Dockerfile')
+      ElMessage.warning(t('docker.image.build.dockerfileRequired'))
       return
     }
     body.dockerfile = dockerfile.value
   } else {
     if (!gitUrl.value.trim()) {
-      ElMessage.warning('请填写 Git 地址')
+      ElMessage.warning(t('docker.image.build.gitUrlRequired'))
       return
     }
     body.gitUrl = gitUrl.value.trim()
@@ -89,9 +92,9 @@ async function build() {
   }
   busy.value = true
   try {
-    const t = await api.post<{ task: string }>('/api/docker/images/build', body)
+    const res = await api.post<{ task: string }>('/api/docker/images/build', body)
     emit('update:modelValue', false)
-    trackTask(t.task, `构建 ${tag.value.trim()}`, () => emit('done'))
+    trackTask(res.task, t('docker.image.build.task', { tag: tag.value.trim() }), () => emit('done'))
   } catch (e) {
     ElMessage.error((e as Error).message)
   } finally {

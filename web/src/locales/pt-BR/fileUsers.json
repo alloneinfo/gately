@@ -1,0 +1,17 @@
+{
+  "title": "Usuários",
+  "desc": "Cada usuário pode acessar um diretório ou montar vários diretórios",
+  "addUser": "Adicionar usuário",
+  "username": "Nome de usuário",
+  "password": "Senha",
+  "directory": "Diretório",
+  "readOnly": "Somente leitura",
+  "mountMultiple": "Montar vários diretórios",
+  "mountSummary": "{count} diretórios, listados por nome após o login",
+  "perDirectory": "Por diretório",
+  "deleteUser": "Excluir usuário",
+  "deleteDirectory": "Excluir diretório",
+  "displayName": "Nome de exibição",
+  "addDirectory": "Adicionar diretório",
+  "empty": "Nenhum usuário ainda"
+}

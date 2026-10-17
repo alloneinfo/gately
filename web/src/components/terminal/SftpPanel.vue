@@ -19,58 +19,58 @@
     >
       <!-- 顶部：标题与工具 -->
       <div class="s-head">
-        <el-button class="icon" text :icon="isMobile ? ArrowLeft : X" aria-label="关闭" @click="$emit('update:modelValue', false)" />
-        <div class="s-title"><FolderOpen :size="16" /><span class="ellipsis">文件管理 · {{ conn?.name }}</span></div>
+        <el-button class="icon" text :icon="isMobile ? ArrowLeft : X" :aria-label="t('common.close')" @click="$emit('update:modelValue', false)" />
+        <div class="s-title"><FolderOpen :size="16" /><span class="ellipsis">{{ t('sftp.title', { name: conn?.name ?? '' }) }}</span></div>
         <div class="s-tools">
-          <el-button class="icon" text :icon="RefreshCw" :loading="loading" aria-label="刷新" @click="load(path)" />
+          <el-button class="icon" text :icon="RefreshCw" :loading="loading" :aria-label="t('common.refresh')" @click="load(path)" />
           <el-dropdown trigger="click" @command="onNew">
-            <el-button class="icon" text :icon="FilePlus" aria-label="新建" />
+            <el-button class="icon" text :icon="FilePlus" :aria-label="t('sftp.newItem')" />
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item command="mkdir" :icon="FolderPlus">新建文件夹</el-dropdown-item>
-                <el-dropdown-item command="touch" :icon="FilePlus">新建文件</el-dropdown-item>
+                <el-dropdown-item command="mkdir" :icon="FolderPlus">{{ t('sftp.newFolder') }}</el-dropdown-item>
+                <el-dropdown-item command="touch" :icon="FilePlus">{{ t('sftp.newFile') }}</el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
           <el-dropdown trigger="click" @command="onUploadPick">
-            <el-button class="icon" text :icon="Upload" aria-label="上传" />
+            <el-button class="icon" text :icon="Upload" :aria-label="t('common.upload')" />
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item command="files" :icon="Upload">上传文件</el-dropdown-item>
-                <el-dropdown-item v-if="!isMobile" command="dir" :icon="FolderUp">上传文件夹</el-dropdown-item>
+                <el-dropdown-item command="files" :icon="Upload">{{ t('sftp.uploadFiles') }}</el-dropdown-item>
+                <el-dropdown-item v-if="!isMobile" command="dir" :icon="FolderUp">{{ t('sftp.uploadFolder') }}</el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
           <el-dropdown trigger="click" @command="onQuick">
-            <el-button class="icon" text :icon="Star" aria-label="快速访问" />
+            <el-button class="icon" text :icon="Star" :aria-label="t('sftp.quickAccess')" />
             <template #dropdown>
               <el-dropdown-menu>
                 <el-dropdown-item v-for="d in conn?.quickAccessDirs ?? []" :key="d" :command="'go:' + d">
                   <span class="mono">{{ d }}</span>
                 </el-dropdown-item>
-                <el-dropdown-item v-if="!conn?.quickAccessDirs?.length" disabled>暂无快速访问目录</el-dropdown-item>
-                <el-dropdown-item command="add" divided :icon="Plus" :disabled="!path">添加当前目录</el-dropdown-item>
-                <el-dropdown-item command="manage" :icon="Settings2">管理目录…</el-dropdown-item>
+                <el-dropdown-item v-if="!conn?.quickAccessDirs?.length" disabled>{{ t('sftp.noQuick') }}</el-dropdown-item>
+                <el-dropdown-item command="add" divided :icon="Plus" :disabled="!path">{{ t('sftp.addCurrent') }}</el-dropdown-item>
+                <el-dropdown-item command="manage" :icon="Settings2">{{ t('sftp.manageDirs') }}</el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
           <el-dropdown trigger="click" @command="onSort">
-            <el-button class="icon" text :icon="ArrowUpDown" aria-label="排序" />
+            <el-button class="icon" text :icon="ArrowUpDown" :aria-label="t('sftp.sort')" />
             <template #dropdown>
               <el-dropdown-menu>
                 <el-dropdown-item v-for="o in sortOptions" :key="o.key" :command="o.key" :class="{ 'is-current': sortKey === o.key }">
-                  {{ o.label }}<span v-if="sortKey === o.key">　{{ sortAsc ? '↑' : '↓' }}</span>
+                  {{ t(`sftp.sortBy.${o.key}`) }}<span v-if="sortKey === o.key">　{{ sortAsc ? '↑' : '↓' }}</span>
                 </el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
-          <el-button v-if="isMobile" class="icon" text :type="selectMode ? 'primary' : 'default'" :icon="ListChecks" aria-label="多选" @click="toggleSelectMode" />
+          <el-button v-if="isMobile" class="icon" text :type="selectMode ? 'primary' : 'default'" :icon="ListChecks" :aria-label="t('sftp.multiSelect')" @click="toggleSelectMode" />
         </div>
       </div>
 
       <!-- 路径栏 -->
       <div class="crumbs">
-        <el-button class="icon" text :icon="CornerLeftUp" :disabled="!parent" aria-label="上级目录" @click="load(parent)" />
+        <el-button class="icon" text :icon="CornerLeftUp" :disabled="!parent" :aria-label="t('sftp.parentDir')" @click="load(parent)" />
         <div ref="crumbBox" class="crumb-scroll">
           <template v-for="(c, i) in crumbs" :key="c.path">
             <ChevronRight v-if="i > 1" :size="12" class="crumb-sep" />
@@ -80,21 +80,21 @@
       </div>
 
       <el-alert v-if="error" type="error" :title="error" :closable="false" show-icon class="s-err">
-        <el-button size="small" @click="load(path)">重试</el-button>
+        <el-button size="small" @click="load(path)">{{ t('sftp.retry') }}</el-button>
       </el-alert>
 
       <!-- 桌面端表头 -->
       <div v-if="!isMobile && sorted.length" class="list-head">
         <el-checkbox :model-value="allSelected" :indeterminate="selected.size > 0 && !allSelected" @change="toggleAll" />
-        <span class="c-name">名称</span>
-        <span class="c-size">大小</span>
-        <span class="c-time">修改时间</span>
-        <span class="c-mode">权限</span>
+        <span class="c-name">{{ t('common.name') }}</span>
+        <span class="c-size">{{ t('sftp.col.size') }}</span>
+        <span class="c-time">{{ t('sftp.col.modTime') }}</span>
+        <span class="c-mode">{{ t('sftp.col.mode') }}</span>
         <span class="c-op" />
       </div>
 
       <div class="list" v-loading="loading">
-        <el-empty v-if="!loading && !sorted.length && !error" description="空目录" :image-size="50" />
+        <el-empty v-if="!loading && !sorted.length && !error" :description="t('sftp.emptyDir')" :image-size="50" />
         <div
           v-for="e in sorted"
           :key="e.path"
@@ -127,9 +127,9 @@
             <span class="c-mode mono">{{ modeText(e.mode) }}</span>
           </template>
           <div class="c-op" @click.stop>
-            <el-button v-if="isMobile" class="icon" text :icon="Ellipsis" aria-label="操作" @click="openSheet(e)" />
+            <el-button v-if="isMobile" class="icon" text :icon="Ellipsis" :aria-label="t('sftp.actionsLabel')" @click="openSheet(e)" />
             <el-dropdown v-else trigger="click" @command="(c: string) => runAction(c, e)">
-              <el-button text :icon="Ellipsis" size="small" aria-label="操作" />
+              <el-button text :icon="Ellipsis" size="small" :aria-label="t('sftp.actionsLabel')" />
               <template #dropdown>
                 <el-dropdown-menu>
                   <el-dropdown-item v-for="a in actionsFor(e)" :key="a.cmd" :command="a.cmd" :icon="a.icon" :divided="a.danger">{{ a.label }}</el-dropdown-item>
@@ -143,8 +143,8 @@
       <!-- 上传进度 -->
       <div v-if="uploads.length" class="uploads">
         <div class="up-head">
-          <span>上传 {{ uploads.filter((u) => u.status === 'done').length }}/{{ uploads.length }}</span>
-          <el-button v-if="!uploading" size="small" text @click="uploads = []">清除</el-button>
+          <span>{{ t('sftp.uploadProgress', { done: uploads.filter((u) => u.status === 'done').length, total: uploads.length }) }}</span>
+          <el-button v-if="!uploading" size="small" text @click="uploads = []">{{ t('common.clear') }}</el-button>
         </div>
         <div class="up-list">
           <div v-for="u in uploads" :key="u.id" class="up-item">
@@ -157,20 +157,20 @@
 
       <!-- 底部操作栏 -->
       <div v-if="selected.size || clipboard.length" class="bar">
-        <span v-if="selected.size" class="bar-count">已选 {{ selected.size }} 项</span>
-        <span v-else class="bar-count">剪贴板 {{ clipboard.length }} 项</span>
+        <span v-if="selected.size" class="bar-count">{{ t('sftp.selectedCount', { count: selected.size }) }}</span>
+        <span v-else class="bar-count">{{ t('sftp.clipboardCount', { count: clipboard.length }) }}</span>
         <div class="bar-ops">
-          <el-button v-if="selected.size" :icon="Copy" @click="copySelected">复制</el-button>
-          <el-button v-if="clipboard.length" :icon="ClipboardPaste" type="primary" plain @click="paste">粘贴</el-button>
-          <el-button v-if="selected.size === 1 && selectedEntries[0] && !selectedEntries[0].isDir" :icon="Download" @click="download(selectedEntries[0])">下载</el-button>
-          <el-button v-if="selected.size" :icon="Archive" @click="openCompress(selectedEntries)">压缩</el-button>
-          <el-button v-if="selected.size" :icon="Trash2" type="danger" plain @click="removeEntries(selectedEntries)">删除</el-button>
-          <el-button v-if="selected.size" @click="clearSelection">取消</el-button>
-          <el-button v-else-if="clipboard.length" @click="clipboard = []">清空</el-button>
+          <el-button v-if="selected.size" :icon="Copy" @click="copySelected">{{ t('common.copy') }}</el-button>
+          <el-button v-if="clipboard.length" :icon="ClipboardPaste" type="primary" plain @click="paste">{{ t('sftp.paste') }}</el-button>
+          <el-button v-if="selected.size === 1 && selectedEntries[0] && !selectedEntries[0].isDir" :icon="Download" @click="download(selectedEntries[0])">{{ t('common.download') }}</el-button>
+          <el-button v-if="selected.size" :icon="Archive" @click="openCompress(selectedEntries)">{{ t('sftp.compress') }}</el-button>
+          <el-button v-if="selected.size" :icon="Trash2" type="danger" plain @click="removeEntries(selectedEntries)">{{ t('common.delete') }}</el-button>
+          <el-button v-if="selected.size" @click="clearSelection">{{ t('common.cancel') }}</el-button>
+          <el-button v-else-if="clipboard.length" @click="clipboard = []">{{ t('common.clear') }}</el-button>
         </div>
       </div>
 
-      <div v-if="dragging" class="drop-mask"><Upload :size="36" /><span>松开鼠标上传到 {{ path }}</span></div>
+      <div v-if="dragging" class="drop-mask"><Upload :size="36" /><span>{{ t('sftp.dropHint', { path }) }}</span></div>
     </div>
 
     <input ref="fileInput" type="file" multiple hidden @change="onPicked" />
@@ -191,46 +191,46 @@
     </el-drawer>
 
     <!-- 压缩 -->
-    <el-dialog v-model="compressVisible" title="压缩" width="440px" :fullscreen="isMobile" class="term-dialog" append-to-body>
+    <el-dialog v-model="compressVisible" :title="t('sftp.compressDialog.title')" width="440px" :fullscreen="isMobile" class="term-dialog" append-to-body>
       <el-form label-width="80px" :label-position="isMobile ? 'top' : 'right'">
-        <el-form-item label="文件名"><el-input v-model="compressName" /></el-form-item>
-        <el-form-item label="格式">
+        <el-form-item :label="t('sftp.compressDialog.fileName')"><el-input v-model="compressName" /></el-form-item>
+        <el-form-item :label="t('sftp.compressDialog.format')">
           <el-radio-group v-model="compressFormat" @change="onFormatChange">
             <el-radio-button value="zip">zip</el-radio-button>
             <el-radio-button value="tar.gz">tar.gz</el-radio-button>
           </el-radio-group>
         </el-form-item>
-        <div class="form-help">将压缩 {{ compressTargets.length }} 项，保存到当前目录 {{ path }}</div>
+        <div class="form-help">{{ t('sftp.compressDialog.hint', { count: compressTargets.length, path }) }}</div>
       </el-form>
       <template #footer>
-        <el-button @click="compressVisible = false">取消</el-button>
-        <el-button type="primary" :loading="busy" @click="doCompress">压缩</el-button>
+        <el-button @click="compressVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button type="primary" :loading="busy" @click="doCompress">{{ t('sftp.compress') }}</el-button>
       </template>
     </el-dialog>
 
     <!-- 权限 -->
-    <el-dialog v-model="chmodVisible" title="修改权限" width="400px" :fullscreen="isMobile" class="term-dialog" append-to-body>
+    <el-dialog v-model="chmodVisible" :title="t('sftp.chmodDialog.title')" width="400px" :fullscreen="isMobile" class="term-dialog" append-to-body>
       <el-form label-width="80px" :label-position="isMobile ? 'top' : 'right'">
-        <el-form-item label="目标"><span class="mono ellipsis">{{ chmodEntry?.path }}</span></el-form-item>
-        <el-form-item label="权限">
-          <el-input v-model="chmodMode" maxlength="4" class="mono" placeholder="例如 755" />
+        <el-form-item :label="t('sftp.chmodDialog.target')"><span class="mono ellipsis">{{ chmodEntry?.path }}</span></el-form-item>
+        <el-form-item :label="t('sftp.chmodDialog.mode')">
+          <el-input v-model="chmodMode" maxlength="4" class="mono" :placeholder="t('sftp.chmodDialog.placeholder')" />
           <div class="perm-grid">
-            <div v-for="(g, gi) in ['所有者', '用户组', '其他']" :key="g" class="perm-row">
-              <span class="perm-name">{{ g }}</span>
-              <el-checkbox v-for="(b, bi) in ['读', '写', '执行']" :key="b" :model-value="permBit(gi, bi)" @change="(v: unknown) => setPermBit(gi, bi, !!v)">{{ b }}</el-checkbox>
+            <div v-for="(g, gi) in ['owner', 'group', 'other']" :key="g" class="perm-row">
+              <span class="perm-name">{{ t(`sftp.chmodDialog.${g}`) }}</span>
+              <el-checkbox v-for="(b, bi) in ['read', 'write', 'exec']" :key="b" :model-value="permBit(gi, bi)" @change="(v: unknown) => setPermBit(gi, bi, !!v)">{{ t(`sftp.chmodDialog.${b}`) }}</el-checkbox>
             </div>
           </div>
         </el-form-item>
-        <el-form-item v-if="chmodEntry?.isDir" label="递归"><el-switch v-model="chmodRecursive" /><span class="help">同时修改目录内的所有文件</span></el-form-item>
+        <el-form-item v-if="chmodEntry?.isDir" :label="t('sftp.chmodDialog.recursive')"><el-switch v-model="chmodRecursive" /><span class="help">{{ t('sftp.chmodDialog.recursiveHelp') }}</span></el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="chmodVisible = false">取消</el-button>
-        <el-button type="primary" :loading="busy" @click="doChmod">确定</el-button>
+        <el-button @click="chmodVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button type="primary" :loading="busy" @click="doChmod">{{ t('common.confirm') }}</el-button>
       </template>
     </el-dialog>
 
     <!-- 压缩包预览 -->
-    <el-dialog v-model="previewVisible" :title="`压缩包内容 - ${previewName}`" width="560px" :fullscreen="isMobile" class="term-dialog" append-to-body>
+    <el-dialog v-model="previewVisible" :title="t('sftp.previewDialog.title', { name: previewName })" width="560px" :fullscreen="isMobile" class="term-dialog" append-to-body>
       <el-skeleton v-if="previewLoading" :rows="5" animated />
       <div v-else class="pv-list">
         <div v-for="it in previewItems" :key="it.name" class="pv-row">
@@ -238,7 +238,7 @@
           <span class="pv-name mono">{{ it.name }}</span>
           <span class="meta">{{ it.isDir ? '' : formatBytes(it.size) }}</span>
         </div>
-        <el-empty v-if="!previewItems.length" description="压缩包为空" :image-size="50" />
+        <el-empty v-if="!previewItems.length" :description="t('sftp.previewDialog.empty')" :image-size="50" />
       </div>
     </el-dialog>
 
@@ -249,6 +249,7 @@
 <script setup lang="ts">
 import { computed, nextTick, ref } from 'vue'
 import type { Component } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   Archive, ArrowLeft, ArrowUpDown, ChevronRight, ClipboardPaste, Copy, CornerLeftUp, Download, Ellipsis, FilePlus, FileText, Folder, FolderOpen, FolderPlus, FolderUp, KeyRound,
@@ -260,7 +261,7 @@ import SftpEditor from './SftpEditor.vue'
 import {
   baseName, breadcrumbs, dirName, downloadUrl, isArchive, joinPath, listDir, modeOctal, modeText, post, remove, sortEntries, uploadForm,
 } from './sftpApi'
-import { ensureAccess } from './security'
+import { ensureAccess, isCancel } from './security'
 import { fmtTime, type Conn, type SftpEntry } from './types'
 
 interface Action {
@@ -280,6 +281,7 @@ interface UpItem {
 const props = defineProps<{ modelValue: boolean; conn: Conn | null }>()
 const emit = defineEmits<{ 'update:modelValue': [v: boolean]; quick: []; 'quick-saved': [] }>()
 
+const { t } = useI18n()
 const isMobile = useIsMobile()
 const path = ref('')
 const parent = ref('')
@@ -298,11 +300,8 @@ const dirInput = ref<HTMLInputElement>()
 const dragging = ref(false)
 let dragDepth = 0
 
-const sortOptions = [
-  { key: 'name', label: '按名称' },
-  { key: 'size', label: '按大小' },
-  { key: 'modTime', label: '按修改时间' },
-] as const
+// 排序项只存键名，显示文案在模板中翻译
+const sortOptions = [{ key: 'name' }, { key: 'size' }, { key: 'modTime' }] as const
 
 const key = computed(() => props.conn?.key ?? '')
 const crumbs = computed(() => breadcrumbs(path.value || '/'))
@@ -361,7 +360,7 @@ async function guard(fn: () => Promise<void>, okMsg = '', refresh = true): Promi
     }
     return true
   } catch (e) {
-    if (e !== 'cancel' && e !== 'close' && (e as Error).message !== '已取消') {
+    if (e !== 'cancel' && e !== 'close' && !isCancel(e)) {
       ElMessage.error((e as Error).message)
     }
     return false
@@ -466,20 +465,20 @@ function onRowDblClick(e: SftpEntry) {
 function actionsFor(e: SftpEntry): Action[] {
   const a: Action[] = []
   if (e.isDir) {
-    a.push({ cmd: 'open', label: '打开', icon: FolderOpen })
+    a.push({ cmd: 'open', label: t('sftp.action.open'), icon: FolderOpen })
   } else {
-    a.push({ cmd: 'edit', label: '编辑', icon: FileEdit }, { cmd: 'download', label: '下载', icon: Download })
+    a.push({ cmd: 'edit', label: t('common.edit'), icon: FileEdit }, { cmd: 'download', label: t('common.download'), icon: Download })
   }
   a.push(
-    { cmd: 'rename', label: '重命名', icon: Pencil },
-    { cmd: 'copy', label: '复制', icon: Copy },
-    { cmd: 'chmod', label: '修改权限', icon: KeyRound },
-    { cmd: 'compress', label: '压缩', icon: Archive },
+    { cmd: 'rename', label: t('sftp.action.rename'), icon: Pencil },
+    { cmd: 'copy', label: t('common.copy'), icon: Copy },
+    { cmd: 'chmod', label: t('sftp.action.chmod'), icon: KeyRound },
+    { cmd: 'compress', label: t('sftp.compress'), icon: Archive },
   )
   if (!e.isDir && isArchive(e.name)) {
-    a.push({ cmd: 'decompress', label: '解压到当前目录', icon: FileArchive }, { cmd: 'preview', label: '预览压缩包', icon: FileText })
+    a.push({ cmd: 'decompress', label: t('sftp.action.decompress'), icon: FileArchive }, { cmd: 'preview', label: t('sftp.action.previewArchive'), icon: FileText })
   }
-  a.push({ cmd: 'delete', label: '删除', icon: Trash2, danger: true })
+  a.push({ cmd: 'delete', label: t('common.delete'), icon: Trash2, danger: true })
   return a
 }
 
@@ -514,7 +513,7 @@ function runAction(cmd: string, e: SftpEntry) {
       break
     case 'copy':
       clipboard.value = [e.path]
-      ElMessage.success(`已复制 ${e.name}，到目标目录后点击「粘贴」`)
+      ElMessage.success(t('sftp.msg.copied', { name: e.name }))
       break
     case 'chmod':
       openChmod(e)
@@ -538,11 +537,11 @@ function runAction(cmd: string, e: SftpEntry) {
 async function onNew(cmd: string) {
   const isDir = cmd === 'mkdir'
   try {
-    const { value } = await ElMessageBox.prompt('', isDir ? '新建文件夹' : '新建文件', {
-      inputPlaceholder: '名称',
-      inputValidator: (v) => (!!v && !v.includes('/')) || '名称不能为空且不能包含 /',
+    const { value } = await ElMessageBox.prompt('', isDir ? t('sftp.newFolder') : t('sftp.newFile'), {
+      inputPlaceholder: t('sftp.msg.namePlaceholder'),
+      inputValidator: (v) => (!!v && !v.includes('/')) || t('sftp.msg.nameInvalid'),
     })
-    await guard(() => post(key.value, cmd, { path: joinPath(path.value, value) }).then(() => undefined), '已创建')
+    await guard(() => post(key.value, cmd, { path: joinPath(path.value, value) }).then(() => undefined), t('sftp.msg.created'))
   } catch {
     // 取消输入
   }
@@ -550,14 +549,14 @@ async function onNew(cmd: string) {
 
 async function rename(e: SftpEntry) {
   try {
-    const { value } = await ElMessageBox.prompt('', '重命名', {
+    const { value } = await ElMessageBox.prompt('', t('sftp.action.rename'), {
       inputValue: e.name,
-      inputValidator: (v) => (!!v && !v.includes('/')) || '名称不能为空且不能包含 /',
+      inputValidator: (v) => (!!v && !v.includes('/')) || t('sftp.msg.nameInvalid'),
     })
     if (value === e.name) {
       return
     }
-    await guard(() => post(key.value, 'rename', { from: e.path, to: joinPath(dirName(e.path), value) }).then(() => undefined), '已重命名')
+    await guard(() => post(key.value, 'rename', { from: e.path, to: joinPath(dirName(e.path), value) }).then(() => undefined), t('sftp.msg.renamed'))
   } catch {
     // 取消输入
   }
@@ -568,20 +567,21 @@ async function removeEntries(list: SftpEntry[]) {
     return
   }
   try {
-    const names = list.slice(0, 5).map((e) => e.name).join('、')
-    await ElMessageBox.confirm(`确定删除 ${list.length > 5 ? names + ' 等 ' + list.length + ' 项' : names}？目录会被递归删除，且无法恢复。`, '删除确认', {
+    const names = list.slice(0, 5).map((e) => e.name).join(t('sftp.msg.nameSeparator'))
+    const message = list.length > 5 ? t('sftp.msg.deleteConfirmMany', { names, count: list.length }) : t('sftp.msg.deleteConfirmFew', { names })
+    await ElMessageBox.confirm(message, t('sftp.msg.deleteTitle'), {
       type: 'warning',
-      confirmButtonText: '删除',
+      confirmButtonText: t('common.delete'),
     })
   } catch {
     return
   }
-  await guard(() => remove(key.value, list.map((e) => e.path)).then(() => undefined), '已删除')
+  await guard(() => remove(key.value, list.map((e) => e.path)).then(() => undefined), t('common.deleted'))
 }
 
 function copySelected() {
   clipboard.value = selectedEntries.value.map((e) => e.path)
-  ElMessage.success(`已复制 ${clipboard.value.length} 项，到目标目录后点击「粘贴」`)
+  ElMessage.success(t('sftp.msg.copiedCount', { count: clipboard.value.length }))
   clearSelection()
 }
 
@@ -589,7 +589,7 @@ async function paste() {
   if (!clipboard.value.length) {
     return
   }
-  const ok = await guard(() => post(key.value, 'copy', { from: clipboard.value, to: path.value }).then(() => undefined), '粘贴完成')
+  const ok = await guard(() => post(key.value, 'copy', { from: clipboard.value, to: path.value }).then(() => undefined), t('sftp.msg.pasted'))
   if (ok) {
     clipboard.value = []
   }
@@ -598,7 +598,7 @@ async function paste() {
 // ---- 下载与编辑 ----
 async function download(e: SftpEntry) {
   if (e.isDir) {
-    ElMessage.info('目录请先压缩后再下载')
+    ElMessage.info(t('sftp.msg.dirNeedCompress'))
     return
   }
   try {
@@ -643,7 +643,7 @@ function onFormatChange() {
 
 async function doCompress() {
   if (!compressName.value.trim() || compressName.value.includes('/')) {
-    ElMessage.warning('请输入有效的文件名')
+    ElMessage.warning(t('sftp.msg.invalidFileName'))
     return
   }
   const ok = await guard(
@@ -653,7 +653,7 @@ async function doCompress() {
         dest: joinPath(path.value, compressName.value.trim()),
         format: compressFormat.value,
       }).then(() => undefined),
-    '压缩完成',
+    t('sftp.msg.compressed'),
   )
   if (ok) {
     compressVisible.value = false
@@ -663,8 +663,8 @@ async function doCompress() {
 
 async function decompress(e: SftpEntry) {
   try {
-    const { value } = await ElMessageBox.prompt('解压到目录', `解压 ${e.name}`, { inputValue: path.value })
-    await guard(() => post(key.value, 'decompress', { path: e.path, dest: value }).then(() => undefined), '解压完成')
+    const { value } = await ElMessageBox.prompt(t('sftp.msg.decompressTo'), t('sftp.msg.decompressTitle', { name: e.name }), { inputValue: path.value })
+    await guard(() => post(key.value, 'decompress', { path: e.path, dest: value }).then(() => undefined), t('sftp.msg.decompressed'))
   } catch {
     // 取消输入
   }
@@ -718,13 +718,13 @@ function setPermBit(g: number, b: number, v: boolean) {
 
 async function doChmod() {
   if (!/^[0-7]{3,4}$/.test(chmodMode.value) || !chmodEntry.value) {
-    ElMessage.warning('权限应为 3 到 4 位八进制数字，例如 755')
+    ElMessage.warning(t('sftp.msg.invalidMode'))
     return
   }
   const e = chmodEntry.value
   const ok = await guard(
     () => post(key.value, 'chmod', { path: e.path, mode: chmodMode.value, recursive: chmodRecursive.value }).then(() => undefined),
-    '权限已修改',
+    t('sftp.msg.modeChanged'),
   )
   if (ok) {
     chmodVisible.value = false
@@ -740,11 +740,11 @@ async function onQuick(cmd: string) {
   } else if (cmd === 'add' && props.conn && path.value) {
     const dirs = [...(props.conn.quickAccessDirs ?? [])]
     if (dirs.includes(path.value)) {
-      ElMessage.info('该目录已在快速访问中')
+      ElMessage.info(t('sftp.msg.quickExists'))
       return
     }
     dirs.push(path.value)
-    await guard(() => api.put(`/api/webterminal/connections/${encodeURIComponent(key.value)}/quickaccess`, { dirs }).then(() => undefined), '已添加', false)
+    await guard(() => api.put(`/api/webterminal/connections/${encodeURIComponent(key.value)}/quickaccess`, { dirs }).then(() => undefined), t('sftp.msg.added'), false)
     emit('quick-saved')
   }
 }

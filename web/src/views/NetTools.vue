@@ -1,52 +1,52 @@
 <template>
   <div>
-    <PageHeader title="网络诊断" desc="Ping、路由追踪、端口探测、DNS 查询、测速与局域网扫描" :icon="Activity">
-      <el-button :icon="ShieldBan" @click="openSettings">禁止探测列表</el-button>
+    <PageHeader :title="t('netTools.title')" :desc="t('netTools.desc')" :icon="Activity">
+      <el-button :icon="ShieldBan" @click="openSettings">{{ t('netTools.denyList') }}</el-button>
     </PageHeader>
 
     <el-card shadow="never" class="card">
       <el-tabs v-model="tool" @tab-change="onToolChange">
         <el-tab-pane label="Ping" name="ping" />
-        <el-tab-pane label="路由追踪" name="traceroute" />
-        <el-tab-pane label="端口探测" name="tcp" />
-        <el-tab-pane label="DNS 查询" name="dns" />
-        <el-tab-pane label="测速" name="speed" />
-        <el-tab-pane label="局域网扫描" name="scan" />
+        <el-tab-pane :label="t('netTools.traceroute')" name="traceroute" />
+        <el-tab-pane :label="t('netTools.tcp')" name="tcp" />
+        <el-tab-pane :label="t('netTools.dns')" name="dns" />
+        <el-tab-pane :label="t('netTools.speed')" name="speed" />
+        <el-tab-pane :label="t('netTools.scan')" name="scan" />
       </el-tabs>
 
       <el-form :model="form" inline class="form" @submit.prevent="run">
-        <el-form-item v-if="['ping', 'traceroute', 'tcp', 'dns'].includes(tool)" :label="tool === 'dns' ? '域名 / IP' : '目标'">
-          <el-input v-model="form.target" :placeholder="tool === 'dns' ? 'example.com' : '主机名或 IP'" class="w-260" clearable />
+        <el-form-item v-if="['ping', 'traceroute', 'tcp', 'dns'].includes(tool)" :label="tool === 'dns' ? t('netTools.domainOrIp') : t('netTools.target')">
+          <el-input v-model="form.target" :placeholder="tool === 'dns' ? 'example.com' : t('netTools.hostPlaceholder')" class="w-260" clearable />
         </el-form-item>
-        <el-form-item v-if="tool === 'ping'" label="次数"><el-input-number v-model="form.count" :min="1" :max="20" /></el-form-item>
-        <el-form-item v-if="tool === 'tcp'" label="端口">
+        <el-form-item v-if="tool === 'ping'" :label="t('netTools.count')"><el-input-number v-model="form.count" :min="1" :max="20" /></el-form-item>
+        <el-form-item v-if="tool === 'tcp'" :label="t('netTools.port')">
           <el-input v-model="form.ports" placeholder="22,80,443,8000-8100" class="w-260 mono" />
         </el-form-item>
         <template v-if="tool === 'dns'">
-          <el-form-item label="类型">
+          <el-form-item :label="t('netTools.type')">
             <el-select v-model="form.type" class="w-110">
-              <el-option v-for="t in ['A', 'AAAA', 'CNAME', 'MX', 'TXT', 'NS', 'PTR']" :key="t" :label="t" :value="t" />
+              <el-option v-for="rt in ['A', 'AAAA', 'CNAME', 'MX', 'TXT', 'NS', 'PTR']" :key="rt" :label="rt" :value="rt" />
             </el-select>
           </el-form-item>
-          <el-form-item label="DNS 服务器">
-            <el-input v-model="form.server" placeholder="留空用系统；如 223.5.5.5 或 https://dns.alidns.com/dns-query" class="w-360" clearable />
+          <el-form-item :label="t('netTools.dnsServer')">
+            <el-input v-model="form.server" :placeholder="t('netTools.dnsServerPlaceholder')" class="w-360" clearable />
           </el-form-item>
         </template>
         <template v-if="tool === 'speed'">
-          <el-form-item label="下载地址"><el-input v-model="form.url" placeholder="留空使用 Cloudflare 测速节点" class="w-360" clearable /></el-form-item>
-          <el-form-item label="时长(秒)"><el-input-number v-model="form.seconds" :min="2" :max="30" /></el-form-item>
+          <el-form-item :label="t('netTools.downloadUrl')"><el-input v-model="form.url" :placeholder="t('netTools.downloadUrlPlaceholder')" class="w-360" clearable /></el-form-item>
+          <el-form-item :label="t('netTools.duration')"><el-input-number v-model="form.seconds" :min="2" :max="30" /></el-form-item>
         </template>
-        <el-form-item v-if="tool === 'scan'" label="网段">
-          <el-select v-model="form.cidr" filterable allow-create default-first-option clearable placeholder="默认本机网段" class="w-260">
+        <el-form-item v-if="tool === 'scan'" :label="t('netTools.cidr')">
+          <el-select v-model="form.cidr" filterable allow-create default-first-option clearable :placeholder="t('netTools.cidrPlaceholder')" class="w-260">
             <el-option v-for="n in networks" :key="n" :label="n" :value="n" />
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" native-type="submit" :icon="Play" :loading="starting" :disabled="running">开始</el-button>
-          <el-button v-if="running" :icon="Square" @click="cancel">停止</el-button>
+          <el-button type="primary" native-type="submit" :icon="Play" :loading="starting" :disabled="running">{{ t('netTools.start') }}</el-button>
+          <el-button v-if="running" :icon="Square" @click="cancel">{{ t('common.stop') }}</el-button>
         </el-form-item>
       </el-form>
-      <div v-if="tool === 'scan'" class="form-help">仅扫描私有网段（最多 1024 个地址）。通过 TCP 探测判断在线，MAC 来自系统邻居表。</div>
+      <div v-if="tool === 'scan'" class="form-help">{{ t('netTools.scanHelp') }}</div>
     </el-card>
 
     <el-card v-if="current" shadow="never" class="card">
@@ -62,31 +62,31 @@
       <el-table v-if="current.tool === 'scan' && hosts.length" :data="hosts" size="small" stripe class="tbl">
         <el-table-column prop="ip" label="IP" width="140" />
         <el-table-column prop="mac" label="MAC" width="160"><template #default="{ row }"><span class="mono">{{ row.mac || '-' }}</span></template></el-table-column>
-        <el-table-column prop="hostname" label="主机名" min-width="160" show-overflow-tooltip />
-        <el-table-column label="开放端口" min-width="140"><template #default="{ row }">{{ (row.ports ?? []).join(', ') || '-' }}</template></el-table-column>
+        <el-table-column prop="hostname" :label="t('netTools.hostname')" min-width="160" show-overflow-tooltip />
+        <el-table-column :label="t('netTools.openPorts')" min-width="140"><template #default="{ row }">{{ (row.ports ?? []).join(', ') || '-' }}</template></el-table-column>
         <el-table-column label="" width="120">
           <template #default="{ row }">
-            <el-button v-if="row.mac" text size="small" :icon="Power" @click="addWol(row)">加入唤醒</el-button>
+            <el-button v-if="row.mac" text size="small" :icon="Power" @click="addWol(row)">{{ t('netTools.addWol') }}</el-button>
           </template>
         </el-table-column>
       </el-table>
     </el-card>
 
     <el-card v-if="history.length" shadow="never" class="card">
-      <template #header>最近任务</template>
-      <div v-for="t in history" :key="t.id" class="hist" @click="select(t.id)">
-        <StatusBadge :type="statusType(t.status)" :text="statusText(t.status)" />
-        <span class="t-title">{{ t.title }}</span>
-        <span class="meta">{{ new Date(t.started).toLocaleTimeString() }}</span>
+      <template #header>{{ t('netTools.recentTasks') }}</template>
+      <div v-for="task in history" :key="task.id" class="hist" @click="select(task.id)">
+        <StatusBadge :type="statusType(task.status)" :text="statusText(task.status)" />
+        <span class="t-title">{{ task.title }}</span>
+        <span class="meta">{{ new Date(task.started).toLocaleTimeString() }}</span>
       </div>
     </el-card>
 
-    <el-dialog v-model="settingsVisible" title="禁止探测列表" width="480px" :fullscreen="isMobile">
-      <p class="form-help">云厂商元数据地址（169.254.169.254 等）始终被禁止。可追加不允许诊断工具访问的 IP 或网段，每行一个。</p>
+    <el-dialog v-model="settingsVisible" :title="t('netTools.denyList')" width="480px" :fullscreen="isMobile">
+      <p class="form-help">{{ t('netTools.denyHelp') }}</p>
       <el-input v-model="denyText" type="textarea" :rows="5" class="mono" placeholder="10.0.0.0/8" />
       <template #footer>
-        <el-button @click="settingsVisible = false">取消</el-button>
-        <el-button type="primary" @click="saveSettings">保存</el-button>
+        <el-button @click="settingsVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button type="primary" @click="saveSettings">{{ t('common.save') }}</el-button>
       </template>
     </el-dialog>
   </div>
@@ -95,6 +95,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
+import { useI18n } from 'vue-i18n'
 import { Activity, Play, Power, ShieldBan, Square } from 'lucide-vue-next'
 import { api } from '../api'
 import PageHeader from '../components/PageHeader.vue'
@@ -118,6 +119,7 @@ interface Task {
   started: string
 }
 
+const { t } = useI18n()
 const { isMobile } = useFormLayout()
 const tool = ref('ping')
 const form = reactive({ target: '', count: 4, ports: '22,80,443', type: 'A', server: '', url: '', seconds: 8, cidr: '' })
@@ -138,7 +140,7 @@ function statusType(s: string): StatusType {
   return s === 'running' ? 'pending' : s === 'done' ? 'running' : s === 'error' ? 'error' : 'off'
 }
 function statusText(s: string) {
-  return ({ running: '运行中', done: '完成', error: '失败', canceled: '已取消' } as Record<string, string>)[s] ?? s
+  return ({ running: t('common.running'), done: t('netTools.done'), error: t('netTools.failed'), canceled: t('netTools.canceled') } as Record<string, string>)[s] ?? s
 }
 
 function onToolChange() {
@@ -148,9 +150,9 @@ function onToolChange() {
 async function run() {
   starting.value = true
   try {
-    const t = await api.post<Task>('/api/nettools/run', { tool: tool.value, ...form })
-    current.value = t
-    poll(t.id)
+    const task = await api.post<Task>('/api/nettools/run', { tool: tool.value, ...form })
+    current.value = task
+    poll(task.id)
   } catch (e) {
     ElMessage.error((e as Error).message)
   } finally {
@@ -162,9 +164,9 @@ function poll(id: string) {
   window.clearInterval(timer)
   const tick = async () => {
     try {
-      const t = await api.get<Task>(`/api/nettools/tasks/${id}`)
-      current.value = t
-      if (t.status !== 'running') {
+      const task = await api.get<Task>(`/api/nettools/tasks/${id}`)
+      current.value = task
+      if (task.status !== 'running') {
         window.clearInterval(timer)
         loadHistory()
       }
@@ -186,18 +188,18 @@ async function loadHistory() {
 }
 
 async function select(id: string) {
-  const t = await api.get<Task>(`/api/nettools/tasks/${id}`)
-  tool.value = t.tool
-  current.value = t
-  if (t.status === 'running') {
+  const task = await api.get<Task>(`/api/nettools/tasks/${id}`)
+  tool.value = task.tool
+  current.value = task
+  if (task.status === 'running') {
     poll(id)
   }
 }
 
 async function addWol(h: Host) {
   try {
-    await api.post('/api/wol/devices', { name: h.hostname || h.ip, macs: [h.mac], broadcastIps: [], port: 9, repeat: 3, checkAddr: '', remark: `局域网扫描添加（${h.ip}）`, enable: true })
-    ElMessage.success('已加入网络唤醒设备')
+    await api.post('/api/wol/devices', { name: h.hostname || h.ip, macs: [h.mac], broadcastIps: [], port: 9, repeat: 3, checkAddr: '', remark: t('netTools.wolRemark', { ip: h.ip }), enable: true })
+    ElMessage.success(t('netTools.wolAdded'))
   } catch (e) {
     ElMessage.error((e as Error).message)
   }
@@ -213,7 +215,7 @@ async function saveSettings() {
   try {
     await api.put('/api/nettools/settings', { deny: denyText.value.split('\n').map((s) => s.trim()).filter(Boolean) })
     settingsVisible.value = false
-    ElMessage.success('已保存')
+    ElMessage.success(t('common.saved'))
   } catch (e) {
     ElMessage.error((e as Error).message)
   }

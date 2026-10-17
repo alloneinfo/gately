@@ -1,36 +1,39 @@
 <template>
   <!-- 后台任务浮条：展示最近的任务进度，结束后可手动关闭 -->
   <div v-if="visible.length" class="task-panel">
-    <div v-for="t in visible" :key="t.id" class="task" :class="`is-${t.status}`">
+    <div v-for="task in visible" :key="task.id" class="task" :class="`is-${task.status}`">
       <div class="task-head">
-        <Loader v-if="t.status === 'running'" :size="16" class="spin" />
-        <CircleCheck v-else-if="t.status === 'done'" :size="16" class="ok" />
+        <Loader v-if="task.status === 'running'" :size="16" class="spin" />
+        <CircleCheck v-else-if="task.status === 'done'" :size="16" class="ok" />
         <CircleX v-else :size="16" class="bad" />
-        <span class="task-title">{{ t.title || '后台任务' }}</span>
-        <el-button text size="small" class="task-btn" @click="toggle(t.id)">{{ open[t.id] ? '收起' : '详情' }}</el-button>
-        <el-button v-if="t.status !== 'running'" text size="small" :icon="X" class="task-btn" aria-label="关闭" @click="t.dismissed = true" />
+        <span class="task-title">{{ task.title || t('docker.taskPanel.defaultTitle') }}</span>
+        <el-button text size="small" class="task-btn" @click="toggle(task.id)">{{ open[task.id] ? t('docker.taskPanel.collapse') : t('common.details') }}</el-button>
+        <el-button v-if="task.status !== 'running'" text size="small" :icon="X" class="task-btn" :aria-label="t('common.close')" @click="task.dismissed = true" />
       </div>
-      <div v-if="t.status === 'error' && t.error" class="task-err">{{ t.error }}</div>
-      <pre v-else-if="lastLine(t)" class="task-line mono">{{ lastLine(t) }}</pre>
-      <pre v-if="open[t.id]" class="task-lines mono">{{ (t.lines ?? []).join('\n') || '(暂无输出)' }}</pre>
+      <div v-if="task.status === 'error' && task.error" class="task-err">{{ task.error }}</div>
+      <pre v-else-if="lastLine(task)" class="task-line mono">{{ lastLine(task) }}</pre>
+      <pre v-if="open[task.id]" class="task-lines mono">{{ (task.lines ?? []).join('\n') || t('docker.taskPanel.noOutput') }}</pre>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, reactive } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { CircleCheck, CircleX, Loader, X } from 'lucide-vue-next'
 import { trackedTasks, type TrackedTask } from './tasks'
 
+const { t } = useI18n()
+
 const open = reactive<Record<string, boolean>>({})
-const visible = computed(() => trackedTasks.filter((t) => !t.dismissed).slice(0, 3))
+const visible = computed(() => trackedTasks.filter((task) => !task.dismissed).slice(0, 3))
 
 function toggle(id: string) {
   open[id] = !open[id]
 }
 
-function lastLine(t: TrackedTask): string {
-  const l = t.lines ?? []
+function lastLine(task: TrackedTask): string {
+  const l = task.lines ?? []
   return l.length ? l[l.length - 1] : ''
 }
 </script>

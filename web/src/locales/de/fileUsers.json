@@ -1,0 +1,17 @@
+{
+  "title": "Benutzer",
+  "desc": "Jeder Benutzer kann auf ein Verzeichnis zugreifen oder mehrere Verzeichnisse einbinden",
+  "addUser": "Benutzer hinzufügen",
+  "username": "Benutzername",
+  "password": "Passwort",
+  "directory": "Verzeichnis",
+  "readOnly": "Schreibgeschützt",
+  "mountMultiple": "Mehrere Verzeichnisse einbinden",
+  "mountSummary": "{count} Verzeichnisse, nach der Anmeldung nach Namen aufgelistet",
+  "perDirectory": "Pro Verzeichnis",
+  "deleteUser": "Benutzer löschen",
+  "deleteDirectory": "Verzeichnis löschen",
+  "displayName": "Anzeigename",
+  "addDirectory": "Verzeichnis hinzufügen",
+  "empty": "Noch keine Benutzer"
+}

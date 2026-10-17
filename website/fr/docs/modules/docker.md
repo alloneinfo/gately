@@ -1,0 +1,80 @@
+# Docker
+
+Gérez les conteneurs, projets Compose, images, réseaux et volumes de l'hôte via le socket Docker. Le point d'entrée est « Docker » dans la barre latérale, et la page comporte six onglets : « Conteneurs », « Compose », « Images », « Réseaux », « Volumes » et « Système ». Lorsque Docker est inaccessible, le haut de la page affiche le détail de l'erreur et un bouton raccourci pour ouvrir les paramètres.
+
+## Activation
+
+Lorsque Gately s'exécute dans un conteneur, montez le socket Docker de l'hôte :
+
+```bash
+-v /var/run/docker.sock:/var/run/docker.sock
+```
+
+L'adresse Docker vaut par défaut `unix:///var/run/docker.sock` et peut être modifiée dans les paramètres de l'onglet « Système ».
+
+::: warning Remarque de sécurité
+Monter `docker.sock` revient à accorder un accès de niveau root à l'hôte. Si vous n'avez pas besoin de gérer Docker, retirez ce montage et protégez l'interface d'administration (authentification à deux facteurs, entrée de sécurité, accès limité au réseau local).
+:::
+
+## Conteneurs
+
+- La liste peut être filtrée par « Tous », « En cours » et « Arrêtés ». Les cartes affichent l'image, le réseau, les ports, les montages et l'état des mises à jour ;
+- Actions : démarrer, arrêter, redémarrer, mettre en pause, reprendre, arrêt forcé (kill), renommer, supprimer (avec ou sans volumes anonymes), valider (commit) en image ;
+- **Création et modification** : le formulaire couvre le nom, l'image (qui peut être téléchargée avant la création), le démarrage après création, la commande et l'Entrypoint, les variables d'environnement, les redirections de ports (TCP/UDP, avec une IP hôte facultative), les montages (dossier bind et volume, éventuellement en lecture seule), le réseau principal et les réseaux supplémentaires, l'IP fixe, les alias, la politique de redémarrage (`no`, `always`, `unless-stopped`, `on-failure` avec un nombre maximal de tentatives), le mode privilégié, l'ajout ou le retrait de capabilities, les périphériques, l'utilisateur, le répertoire de travail, le nom d'hôte, le DNS, les labels, la limite de mémoire (Mo), le nombre de CPU, le TTY et le maintien de stdin ouvert. La modification recrée le conteneur à partir de sa configuration d'origine ; les réglages non couverts par le formulaire conservent leurs valeurs d'origine, et une recréation en échec est annulée automatiquement ;
+- Onglets de la page de détail :
+  - Aperçu : état, code de sortie, nombre de redémarrages, état de santé, détails réseau, montages, ainsi que le projet Compose et le service auxquels il appartient ;
+  - Journaux : consultation des journaux récents, avec horodatage facultatif ;
+  - Terminal : ouvre un terminal interactif dans un conteneur en cours d'exécution (`/bin/sh` par défaut ; la commande et l'utilisateur peuvent être précisés) ;
+  - Fichiers : parcourir les fichiers du conteneur, modifier un texte en ligne (jusqu'à 1 Mio), téléverser, télécharger (les dossiers sont empaquetés en tar.gz), renommer, créer des dossiers, supprimer. La suppression exécute `rm -rf` dans le conteneur, qui doit donc être en cours d'exécution ;
+  - Surveillance : échantillons de CPU, mémoire, réseau et E/S disque, nombre de processus, ainsi que la liste des processus du conteneur.
+
+## Compose
+
+Les projets Compose sont agrégés à partir des labels des conteneurs tels que `com.docker.compose.project`. Ils affichent un état (en cours, partiellement en cours, arrêté) et leurs services.
+
+- Démarrer, arrêter, redémarrer, mettre en pause, reprendre, `down` (avec ou sans volumes nommés) et consulter les journaux combinés (chaque ligne est préfixée par le nom du service) ;
+- Créer un projet : collez le contenu du fichier compose ; Gately l'écrit dans `compose/<name>/compose.yaml` du répertoire de configuration et exécute up. Ces projets sont marqués « managed » ; vous pouvez modifier le fichier Compose, l'enregistrer et l'appliquer, ou supprimer le projet entier ;
+- Pour les projets existants, le premier fichier compose peut être modifié en ligne (le fichier doit être accessible en écriture), avec l'option d'exécuter up immédiatement après la réécriture ;
+- `up`, le téléchargement des images, les builds et la lecture/écriture des fichiers dépendent de la commande `docker compose` et de l'accès au chemin du fichier compose. Si elle est indisponible, l'interface affiche « docker compose command not found ».
+
+## Images
+
+- La liste affiche les tags, la taille, la date de création, le nombre de conteneurs qui référencent chaque image et son statut « dangling ». Les détails incluent l'historique des couches, les variables d'environnement, les ports exposés, etc. ;
+- **Pull** : l'authentification utilise les comptes de registre définis dans les paramètres de l'onglet « Système ». Si un pull direct échoue et que des adresses de miroir sont configurées, elles sont essayées dans l'ordre et l'image est re-taguée avec son nom d'origine. La recherche sur Docker Hub est prise en charge ;
+- Push, ajout de tag, suppression (avec option de forçage), build (Dockerfile en ligne ou URL Git, avec arguments de build), ainsi qu'import et export tar (format `docker save`) ;
+- **Vérification des mises à jour** : vérifiez un seul conteneur ou utilisez « Tout vérifier » ; les résultats sont signalés sur chaque conteneur ;
+- **Mise à niveau en un clic** : télécharge la nouvelle image et recrée le conteneur avec sa configuration existante ; une mise à niveau en échec revient automatiquement au conteneur d'origine. La sélection multiple permet les mises à niveau par lot ;
+- « Nettoyer les images orphelines » supprime en un clic toutes les images sans tag et inutilisées.
+
+## Réseaux et volumes
+
+- Réseaux : la liste affiche le pilote, la portée, le sous-réseau, la passerelle et les conteneurs rattachés. Vous pouvez créer (pilote, sous-réseau, passerelle, réseau interne, IPv6) et supprimer des réseaux, ainsi que connecter ou déconnecter des conteneurs. Les réseaux intégrés sont protégés ;
+- Volumes : affiche le pilote, le point de montage, la taille, le nombre de références et les conteneurs utilisant chaque volume. Vous pouvez créer, supprimer (avec option de forçage), exporter en tar.gz et importer depuis un tar.gz. L'export et l'import utilisent un conteneur auxiliaire alpine temporaire, et l'image est téléchargée automatiquement si elle est absente.
+
+## Système
+
+L'onglet « Système » contient :
+
+- Infos sur l'hôte et Docker : version, version de l'API, OS et architecture, noyau, CPU et mémoire, pilote de stockage, répertoire de données, nombre de conteneurs et d'images, version du CLI Compose ;
+- Utilisation du disque : nombre, taille et espace récupérable pour les images, conteneurs, volumes et le cache de build ;
+- Nettoyage : conteneurs arrêtés, images orphelines, toutes les images inutilisées, réseaux inutilisés, volumes inutilisés (les données sont définitivement perdues), cache de build ;
+- Paramètres :
+
+| Champ | Description |
+| --- | --- |
+| `host` | Adresse Docker, par défaut `unix:///var/run/docker.sock` |
+| `mirrors` | Liste d'adresses de miroir, essayées dans l'ordre lorsqu'un pull direct échoue |
+| `registries` | Identifiants de registres privés (`server`, `username`, `password`) ; le mot de passe est masqué dans l'interface |
+| `autoCheckHours` | Si supérieur à 0, les mises à jour des images des conteneurs sont vérifiées automatiquement à cet intervalle en heures ; 0 désactive la vérification |
+
+## Tâches en arrière-plan
+
+Les opérations longues telles que pull, push, build, vérification par lot, mise à niveau par lot et Compose up s'exécutent comme tâches en arrière-plan. Le panneau des tâches en bas de la page affiche la sortie en direct et l'état (en cours, terminé, erreur), permet de consulter l'historique et d'effacer les tâches terminées. Les tâches encore en cours sont restaurées après un rafraîchissement de la page.
+
+## Notifications d'événements
+
+Gately s'abonne au flux d'événements Docker et publie un événement `docker.exited` lorsqu'un conteneur se termine de façon anormale (code de sortie non nul) ou est tué par l'OOM killer. Vous pouvez configurer les canaux de réception dans le [Centre de notifications](/fr/docs/modules/notify). Un arrêt normal avec le code de sortie 0 ne déclenche pas de notification. Lorsque Docker est temporairement indisponible, l'abonnement est retenté toutes les 30 secondes.
+
+## API
+
+Consultez l'[API Docker](/en/docs/reference/docker-api) pour la référence complète de l'API.

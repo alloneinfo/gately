@@ -1,0 +1,17 @@
+{
+  "title": "使用者",
+  "desc": "每位使用者可存取一個目錄，或掛載多個目錄",
+  "addUser": "新增使用者",
+  "username": "使用者名稱",
+  "password": "密碼",
+  "directory": "目錄",
+  "readOnly": "唯讀",
+  "mountMultiple": "掛載多個目錄",
+  "mountSummary": "{count} 個目錄，登入後依名稱列出",
+  "perDirectory": "依目錄",
+  "deleteUser": "刪除使用者",
+  "deleteDirectory": "刪除目錄",
+  "displayName": "顯示名稱",
+  "addDirectory": "新增目錄",
+  "empty": "暫無使用者"
+}

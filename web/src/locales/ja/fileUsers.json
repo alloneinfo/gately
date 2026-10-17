@@ -1,0 +1,17 @@
+{
+  "title": "ユーザー",
+  "desc": "ユーザーごとに 1 つのディレクトリ、または複数のディレクトリをマウントできます",
+  "addUser": "ユーザーを追加",
+  "username": "ユーザー名",
+  "password": "パスワード",
+  "directory": "ディレクトリ",
+  "readOnly": "読み取り専用",
+  "mountMultiple": "複数のディレクトリをマウント",
+  "mountSummary": "{count} 件のディレクトリ。ログイン後に名前で一覧表示されます",
+  "perDirectory": "ディレクトリ別",
+  "deleteUser": "ユーザーを削除",
+  "deleteDirectory": "ディレクトリを削除",
+  "displayName": "表示名",
+  "addDirectory": "ディレクトリを追加",
+  "empty": "ユーザーがいません"
+}

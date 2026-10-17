@@ -1,0 +1,14 @@
+{
+  "enable": "啟用 Webhook",
+  "url": "請求網址",
+  "method": "請求方法",
+  "headers": "請求標頭",
+  "headersPlaceholder": "每行一個，格式 Key: Value",
+  "body": "請求本文",
+  "successMark": "成功標記",
+  "successPlaceholder": "每行一個，回應包含任意一項即視為成功；留空則只檢查 2xx 狀態碼",
+  "timeout": "逾時(秒)",
+  "ignoreCertError": "忽略憑證錯誤",
+  "variables": "可用變數",
+  "varsTip": "{plain} 或相容 Lucky 的 {lucky}"
+}

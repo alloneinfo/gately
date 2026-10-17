@@ -1,0 +1,34 @@
+{
+  "emerald": {
+    "name": "Smaragd",
+    "desc": "Standard · ruhig und klar"
+  },
+  "ocean": {
+    "name": "Ozean",
+    "desc": "Tiefblaue Küste · kühl und frisch"
+  },
+  "fresh": {
+    "name": "Frisch",
+    "desc": "Minze und Limette · hell und leicht"
+  },
+  "sakura": {
+    "name": "Sakura",
+    "desc": "Zartrosa · warm und sanft"
+  },
+  "sunset": {
+    "name": "Sonnenuntergang",
+    "desc": "Bernstein und Orange · warm und satt"
+  },
+  "dark": {
+    "name": "Dunkel",
+    "desc": "Klassisches Dunkelgrau · augenschonend bei Nacht"
+  },
+  "midnight": {
+    "name": "Mitternacht",
+    "desc": "Indigoblauer Nachthimmel · konzentriert und immersiv"
+  },
+  "punk": {
+    "name": "Punk",
+    "desc": "Neonpink und Cyan · scharfer Cyberpunk"
+  }
+}

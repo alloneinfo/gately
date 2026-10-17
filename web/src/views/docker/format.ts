@@ -1,18 +1,19 @@
 // Docker 界面的格式化与小工具；字节格式化复用 api.ts 中的 formatBytes。
 import { formatBytes } from '../../api'
+import { t } from '../../i18n'
 
 export { formatBytes }
 
 // 把秒级时间戳、毫秒级时间戳或 RFC3339 字符串统一格式化为本地时间。
-export function formatTime(t: number | string | undefined): string {
-  if (t === undefined || t === '' || t === 0) {
+export function formatTime(value: number | string | undefined): string {
+  if (value === undefined || value === '' || value === 0) {
     return '-'
   }
   let d: Date
-  if (typeof t === 'number') {
-    d = new Date(t < 1e12 ? t * 1000 : t)
+  if (typeof value === 'number') {
+    d = new Date(value < 1e12 ? value * 1000 : value)
   } else {
-    d = new Date(t)
+    d = new Date(value)
   }
   if (isNaN(d.getTime()) || d.getFullYear() < 1971) {
     return '-'
@@ -24,7 +25,7 @@ export function formatTime(t: number | string | undefined): string {
 // 容器卷大小可能为 -1 表示未知。
 export function formatSize(n: number | undefined): string {
   if (n === undefined || n < 0) {
-    return '未知'
+    return t('common.unknown')
   }
   return formatBytes(n)
 }
@@ -83,7 +84,7 @@ export function uploadFile(url: string, file: File, contentType: string, onProgr
         onProgress(Math.round((e.loaded / e.total) * 100))
       }
     }
-    xhr.onerror = () => reject(new Error('网络错误，上传失败'))
+    xhr.onerror = () => reject(new Error(t('docker.upload.networkError')))
     xhr.onload = () => {
       let data: Record<string, unknown> = {}
       try {
@@ -95,7 +96,7 @@ export function uploadFile(url: string, file: File, contentType: string, onProgr
         resolve(data)
         return
       }
-      reject(new Error((data.error as string) ?? `请求失败 (${xhr.status})`))
+      reject(new Error((data.error as string) ?? t('common.requestFailed', { status: xhr.status })))
     }
     xhr.send(file)
   })
@@ -104,13 +105,13 @@ export function uploadFile(url: string, file: File, contentType: string, onProgr
 // 容器状态到徽标的映射。
 export function containerBadge(state: string): { type: 'running' | 'off' | 'warn' | 'pending' | 'error' | 'info'; text: string } {
   const map: Record<string, { type: 'running' | 'off' | 'warn' | 'pending' | 'error' | 'info'; text: string }> = {
-    running: { type: 'running', text: '运行中' },
-    exited: { type: 'off', text: '已停止' },
-    created: { type: 'off', text: '已创建' },
-    paused: { type: 'warn', text: '已暂停' },
-    restarting: { type: 'pending', text: '重启中' },
-    dead: { type: 'error', text: '异常' },
-    removing: { type: 'pending', text: '删除中' },
+    running: { type: 'running', text: t('common.running') },
+    exited: { type: 'off', text: t('common.stopped') },
+    created: { type: 'off', text: t('docker.state.created') },
+    paused: { type: 'warn', text: t('docker.state.paused') },
+    restarting: { type: 'pending', text: t('docker.state.restarting') },
+    dead: { type: 'error', text: t('docker.state.dead') },
+    removing: { type: 'pending', text: t('docker.state.removing') },
   }
   return map[state] ?? { type: 'info', text: state }
 }

@@ -1,39 +1,39 @@
 <template>
   <div class="g-card">
     <div class="g-card-head">
-      <div class="g-card-title"><SlidersHorizontal :size="16" />Docker 设置</div>
-      <el-button type="primary" :icon="Save" :loading="saving" :disabled="!loaded" @click="save">保存</el-button>
+      <div class="g-card-title"><SlidersHorizontal :size="16" />{{ t('docker.settings.title') }}</div>
+      <el-button type="primary" :icon="Save" :loading="saving" :disabled="!loaded" @click="save">{{ t('common.save') }}</el-button>
     </div>
     <div v-loading="loading" class="g-card-body">
       <el-form v-if="loaded" :label-position="labelPosition" label-width="110px" @submit.prevent>
-        <el-form-item label="Docker 地址">
+        <el-form-item :label="t('docker.settings.host')">
           <el-input v-model="s.host" placeholder="unix:///var/run/docker.sock" class="mono" />
-          <div class="form-help">Gately 运行在容器中时需挂载 /var/run/docker.sock</div>
+          <div class="form-help">{{ t('docker.settings.hostHelp') }}</div>
         </el-form-item>
-        <el-form-item label="自动检查更新">
+        <el-form-item :label="t('docker.settings.autoCheck')">
           <el-input-number v-model="s.autoCheckHours" :min="0" :max="720" />
-          <span class="help">间隔小时数，0 表示不自动检查</span>
+          <span class="help">{{ t('docker.settings.autoCheckHelp') }}</span>
         </el-form-item>
-        <el-form-item label="镜像加速">
+        <el-form-item :label="t('docker.settings.mirrors')">
           <div class="full">
             <div v-for="(m, idx) in s.mirrors" :key="idx" class="row">
-              <el-input v-model="s.mirrors[idx]" :title="m" placeholder="镜像加速地址，例如 mirror.example.com" class="mono" />
-              <el-button text type="danger" :icon="Trash2" aria-label="删除" @click="s.mirrors.splice(idx, 1)" />
+              <el-input v-model="s.mirrors[idx]" :title="m" :placeholder="t('docker.settings.mirrorPlaceholder')" class="mono" />
+              <el-button text type="danger" :icon="Trash2" :aria-label="t('common.delete')" @click="s.mirrors.splice(idx, 1)" />
             </div>
-            <el-button :icon="Plus" @click="s.mirrors.push('')">添加加速地址</el-button>
-            <div class="form-help">拉取失败时依次尝试这些地址，成功后自动改回原镜像名</div>
+            <el-button :icon="Plus" @click="s.mirrors.push('')">{{ t('docker.settings.addMirror') }}</el-button>
+            <div class="form-help">{{ t('docker.settings.mirrorHelp') }}</div>
           </div>
         </el-form-item>
-        <el-form-item label="私有仓库">
+        <el-form-item :label="t('docker.settings.registries')">
           <div class="full">
             <div v-for="(r, i) in s.registries" :key="i" class="row reg">
-              <el-input v-model="r.server" placeholder="仓库地址 registry.example.com" class="mono" />
-              <el-input v-model="r.username" placeholder="用户名" />
-              <el-input v-model="r.password" type="password" show-password placeholder="密码 / 令牌" />
-              <el-button text type="danger" :icon="Trash2" aria-label="删除" @click="s.registries.splice(i, 1)" />
+              <el-input v-model="r.server" :placeholder="t('docker.settings.serverPlaceholder')" class="mono" />
+              <el-input v-model="r.username" :placeholder="t('docker.settings.username')" />
+              <el-input v-model="r.password" type="password" show-password :placeholder="t('docker.settings.passwordPlaceholder')" />
+              <el-button text type="danger" :icon="Trash2" :aria-label="t('common.delete')" @click="s.registries.splice(i, 1)" />
             </div>
-            <el-button :icon="Plus" @click="s.registries.push({ server: '', username: '', password: '' })">添加仓库账号</el-button>
-            <div class="form-help">已保存的密码显示为 ******，保持不变即保留原值</div>
+            <el-button :icon="Plus" @click="s.registries.push({ server: '', username: '', password: '' })">{{ t('docker.settings.addRegistry') }}</el-button>
+            <div class="form-help">{{ t('docker.settings.registryHelp') }}</div>
           </div>
         </el-form-item>
       </el-form>
@@ -43,11 +43,14 @@
 
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { Plus, Save, SlidersHorizontal, Trash2 } from 'lucide-vue-next'
 import { api } from '../../api'
 import { useFormLayout } from '../../composables/useIsMobile'
 import type { DockerSettings } from './types'
+
+const { t } = useI18n()
 
 const emit = defineEmits<{ saved: [] }>()
 const { labelPosition } = useFormLayout()
@@ -77,7 +80,7 @@ async function save() {
       mirrors: s.mirrors.map((m) => m.trim()).filter(Boolean),
       registries: s.registries.filter((r) => r.server.trim() !== '').map((r) => ({ ...r, server: r.server.trim() })),
     })
-    ElMessage.success('已保存')
+    ElMessage.success(t('common.saved'))
     emit('saved')
     await load()
   } catch (e) {

@@ -1,0 +1,14 @@
+{
+  "enable": "Enable Webhook",
+  "url": "Request URL",
+  "method": "Request method",
+  "headers": "Request headers",
+  "headersPlaceholder": "One per line, in the format Key: Value",
+  "body": "Request body",
+  "successMark": "Success marker",
+  "successPlaceholder": "One per line; the request succeeds if the response contains any of them. Leave empty to check only for a 2xx status code",
+  "timeout": "Timeout (s)",
+  "ignoreCertError": "Ignore certificate errors",
+  "variables": "Available variables",
+  "varsTip": "{plain} or, for Lucky compatibility, {lucky}"
+}

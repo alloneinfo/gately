@@ -1,0 +1,11 @@
+{
+  "service": "Service",
+  "listenIp": "Listen address",
+  "listenIpPlaceholder": "Leave empty to listen on all addresses",
+  "port": "Port",
+  "statusOff": "Disabled",
+  "statusError": "Failed to start",
+  "statusNotRunning": "Not running",
+  "desc": "Share local directories over WebDAV with computers, phones and media players",
+  "tlsHelp": "The certificate is chosen from \"SSL Certificates\" by the access domain"
+}

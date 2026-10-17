@@ -4,14 +4,17 @@
     <div class="icon"><PowerOff :size="18" /></div>
     <div class="text">
       <div class="title">{{ title }}</div>
-      <div class="desc">{{ desc ?? '模块停用期间，下列条目全部不会运行；启用模块后，各条目按自身开关生效。' }}</div>
+      <div class="desc">{{ desc ?? t('components.moduleBanner.defaultDesc') }}</div>
     </div>
-    <el-button type="primary" :icon="Power" :loading="loading" @click="$emit('enable')">{{ action ?? '启用模块' }}</el-button>
+    <el-button type="primary" :icon="Power" :loading="loading" @click="$emit('enable')">{{ action ?? t('components.moduleBanner.enable') }}</el-button>
   </div>
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
 import { Power, PowerOff } from 'lucide-vue-next'
+
+const { t } = useI18n()
 
 defineProps<{ title: string; desc?: string; action?: string; loading?: boolean }>()
 defineEmits<{ enable: [] }>()

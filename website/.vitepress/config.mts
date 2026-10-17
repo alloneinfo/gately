@@ -1,118 +1,173 @@
-import { defineConfig } from 'vitepress'
+import { existsSync, readFileSync } from 'node:fs'
+import { dirname, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { defineConfig, type DefaultTheme, type HeadConfig } from 'vitepress'
+import { FALLBACK_CODE, SOURCE_CODE, englishOnlySlugs, sidebarGroups, siteLocales, type SiteLocale } from './i18n/structure'
 
 const SITE = 'https://gately.cn'
 const REPO = 'https://github.com/wangwanjie/gately'
-const DESC = '开源、可审计的网络网关工具集：DDNS、STUN 穿透、端口转发、反向代理、证书、WAF、Tailscale、frp 集成在一个单文件中，受 Lucky 启发的开源实现。'
+const here = dirname(fileURLToPath(import.meta.url))
+
+// 读取语言包；尚未提供语言包的语言不会出现在站点中
+function loadPack(code: string): any | null {
+  const file = resolve(here, 'i18n', `${code}.json`)
+  return existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : null
+}
+
+const packs = siteLocales
+  .map((loc) => ({ loc, pack: loadPack(loc.code) }))
+  .filter((x): x is { loc: SiteLocale; pack: any } => x.pack !== null)
+
+function prefixOf(loc: SiteLocale) {
+  return loc.dir ? `/${loc.dir}` : ''
+}
+
+// 侧边栏：参考类大文档只有英文版，其余语言链接到英文页面并在标题后注明
+function buildSidebar(loc: SiteLocale, pack: any): DefaultTheme.SidebarItem[] {
+  const hasEnglish = packs.some((p) => p.loc.code === FALLBACK_CODE)
+  return sidebarGroups.map((g) => ({
+    text: pack.sidebar.groups[g.id],
+    items: g.slugs.map((slug) => {
+      const title = pack.sidebar.items[slug]
+      const link = slug === 'modules/index' ? '/docs/modules/' : `/docs/${slug}`
+      const onlyEnglish = englishOnlySlugs.includes(slug) && loc.code !== SOURCE_CODE && loc.code !== FALLBACK_CODE
+      if (onlyEnglish && hasEnglish) {
+        return { text: `${title}${pack.sidebar.englishOnly ?? ''}`, link: `/en${link}` }
+      }
+      return { text: title, link: `${prefixOf(loc)}${link}` }
+    })
+  }))
+}
+
+function buildThemeConfig(loc: SiteLocale, pack: any): DefaultTheme.Config & Record<string, unknown> {
+  const p = prefixOf(loc)
+  const ui = pack.ui
+  return {
+    nav: [
+      { text: pack.nav.home, link: `${p}/` },
+      { text: pack.nav.docs, link: `${p}/docs/guide/introduction`, activeMatch: `${p}/docs/` },
+      { text: pack.nav.modules, link: `${p}/docs/modules/`, activeMatch: `${p}/docs/modules/` },
+      { text: pack.nav.download, link: `${p}/download` },
+      { text: pack.nav.comparison, link: `${p}/docs/guide/comparison` },
+      { text: pack.nav.changelog, link: `${REPO}/releases` }
+    ],
+    sidebar: { [`${p}/docs/`]: buildSidebar(loc, pack) },
+    editLink: { pattern: `${REPO}/edit/main/website/:path`, text: ui.editLink },
+    lastUpdated: { text: ui.lastUpdated },
+    outline: { label: ui.outlineLabel, level: [2, 3] },
+    docFooter: { prev: ui.docPrev, next: ui.docNext },
+    darkModeSwitchLabel: ui.darkModeSwitchLabel,
+    lightModeSwitchTitle: ui.lightModeSwitchTitle,
+    darkModeSwitchTitle: ui.darkModeSwitchTitle,
+    sidebarMenuLabel: ui.sidebarMenuLabel,
+    returnToTopLabel: ui.returnToTopLabel,
+    langMenuLabel: ui.langMenuLabel,
+    footer: {
+      message: ui.footerMessage,
+      copyright: `© 2026 Gately Contributors · <a href="${REPO}" target="_blank" rel="noreferrer">GitHub</a>`
+    },
+    // 首页与下载页组件使用的文案
+    home: pack.home,
+    download: pack.download
+  }
+}
+
+// 本地搜索的各语言界面文案
+const searchLocales = Object.fromEntries(
+  packs.map(({ loc, pack }) => [
+    loc.dir || 'root',
+    {
+      translations: {
+        button: { buttonText: pack.ui.searchButton, buttonAriaLabel: pack.ui.searchButton },
+        modal: {
+          noResultsText: pack.ui.noResultsText,
+          resetButtonTitle: pack.ui.resetButtonTitle,
+          footer: { selectText: pack.ui.selectText, navigateText: pack.ui.navigateText, closeText: pack.ui.closeText }
+        }
+      }
+    }
+  ])
+)
+
+const locales = Object.fromEntries(
+  packs.map(({ loc, pack }) => [
+    loc.dir || 'root',
+    {
+      label: pack.label,
+      lang: pack.lang,
+      link: loc.dir ? `/${loc.dir}/` : undefined,
+      description: pack.description,
+      themeConfig: buildThemeConfig(loc, pack),
+      head: [
+        ['meta', { name: 'keywords', content: pack.keywords }],
+        ['meta', { property: 'og:title', content: pack.ogTitle }],
+        ['meta', { property: 'og:description', content: pack.description }],
+        ['meta', { property: 'og:locale', content: pack.lang.replace('-', '_') }]
+      ] as HeadConfig[]
+    }
+  ])
+)
+
+// 首次访问时按浏览器语言跳转到对应语言；用户手动选择过语言则尊重其选择。
+// 语言清单与匹配规则由构建时注入，保持与站点语言一致。
+const redirectScript = `(function(){try{
+var K='gately.site.locale',L=${JSON.stringify(
+  packs.map(({ loc }) => ({ code: loc.code, dir: loc.dir, match: loc.match }))
+)},F='${FALLBACK_CODE}';
+var p=location.pathname,dirs=L.filter(function(l){return l.dir}).map(function(l){return l.dir});
+var cur=''; for(var i=0;i<dirs.length;i++){ if(p==='/'+dirs[i]||p.indexOf('/'+dirs[i]+'/')===0){cur=dirs[i];break} }
+var saved=localStorage.getItem(K);
+if(saved!==null){ return }
+var langs=(navigator.languages&&navigator.languages.length)?navigator.languages:[navigator.language||''];
+var hit=null;
+for(var a=0;a<langs.length&&!hit;a++){var s=String(langs[a]).toLowerCase();
+ for(var b=0;b<L.length&&!hit;b++){ var m=L[b].match; for(var c=0;c<m.length;c++){ if(s===m[c]||s.indexOf(m[c]+'-')===0){hit=L[b];break} } } }
+if(!hit){ hit=L.filter(function(l){return l.code===F})[0]||L[0] }
+if(cur!==hit.dir && cur===''){
+  var target=(hit.dir?'/'+hit.dir:'')+p;
+  if(hit.dir && /^\\/docs\\/reference\\/(api-reference|docker-api|webterminal-api)/.test(p) && hit.code!=='en'){ target='/en'+p }
+  location.replace(target+location.search+location.hash);
+}
+}catch(e){}})();`
 
 export default defineConfig({
-  lang: 'zh-CN',
   title: 'Gately',
   titleTemplate: ':title - Gately',
-  description: DESC,
   cleanUrls: true,
   lastUpdated: true,
   sitemap: { hostname: SITE },
   head: [
     ['link', { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' }],
     ['meta', { name: 'theme-color', content: '#0e7c66' }],
-    ['meta', { name: 'keywords', content: 'Gately,Lucky 替代,DDNS,STUN,内网穿透,端口转发,反向代理,ACME,WAF,Tailscale,frp,NAS' }],
     ['meta', { property: 'og:type', content: 'website' }],
-    ['meta', { property: 'og:title', content: 'Gately - 开源可审计的网络网关工具集' }],
-    ['meta', { property: 'og:description', content: DESC }],
-    ['meta', { property: 'og:url', content: SITE }]
+    ['meta', { property: 'og:url', content: SITE }],
+    ['script', {}, redirectScript]
   ],
+  locales,
   themeConfig: {
     logo: '/favicon.svg',
     siteTitle: 'Gately',
-    nav: [
-      { text: '首页', link: '/' },
-      { text: '文档', link: '/docs/guide/introduction', activeMatch: '/docs/' },
-      { text: '功能模块', link: '/docs/modules/', activeMatch: '/docs/modules/' },
-      { text: '下载', link: '/download' },
-      { text: '对比 Lucky', link: '/docs/guide/comparison' },
-      { text: '更新日志', link: `${REPO}/releases` }
-    ],
-    sidebar: {
-      '/docs/': [
-        {
-          text: '开始使用',
-          items: [
-            { text: '项目简介', link: '/docs/guide/introduction' },
-            { text: '快速开始', link: '/docs/guide/quick-start' },
-            { text: '安装部署', link: '/docs/guide/install' },
-            { text: '配置与运行参数', link: '/docs/guide/configuration' },
-            { text: '命令行与 MCP', link: '/docs/guide/cli-mcp' },
-            { text: '从 Lucky 迁移', link: '/docs/guide/migration' },
-            { text: '与 Lucky 对比', link: '/docs/guide/comparison' },
-            { text: '常见问题', link: '/docs/guide/faq' }
-          ]
-        },
-        {
-          text: '功能模块',
-          items: [
-            { text: '模块总览', link: '/docs/modules/' },
-            { text: '动态域名 DDNS', link: '/docs/modules/ddns' },
-            { text: 'STUN 穿透', link: '/docs/modules/stun' },
-            { text: '端口转发', link: '/docs/modules/portforward' },
-            { text: 'SSL 证书', link: '/docs/modules/ssl' },
-            { text: 'Web 服务', link: '/docs/modules/web' },
-            { text: 'WAF 防火墙', link: '/docs/modules/waf' },
-            { text: 'Tailscale / frp / cloudflared', link: '/docs/modules/tunnels' },
-            { text: 'Docker 管理', link: '/docs/modules/docker' },
-            { text: 'Web 终端', link: '/docs/modules/terminal' },
-            { text: '网络诊断', link: '/docs/modules/nettools' },
-            { text: '通知中心', link: '/docs/modules/notify' },
-            { text: '配置备份', link: '/docs/modules/backup' },
-            { text: '文件与运维工具', link: '/docs/modules/tools' }
-          ]
-        },
-        {
-          text: '安全',
-          items: [
-            { text: '安全模型与隐私承诺', link: '/docs/guide/security' },
-            { text: '加固建议', link: '/docs/guide/hardening' }
-          ]
-        },
-        {
-          text: '参考',
-          items: [
-            { text: 'API 令牌与 OpenAPI', link: '/docs/reference/api' },
-            { text: '接口清单', link: '/docs/reference/api-reference' },
-            { text: 'Docker API', link: '/docs/reference/docker-api' },
-            { text: 'Web 终端 API', link: '/docs/reference/webterminal-api' },
-            { text: '参与贡献', link: '/docs/guide/contributing' }
-          ]
-        }
-      ]
-    },
     socialLinks: [{ icon: 'github', link: REPO }],
-    search: {
-      provider: 'local',
-      options: {
-        translations: {
-          button: { buttonText: '搜索文档', buttonAriaLabel: '搜索文档' },
-          modal: {
-            noResultsText: '没有找到相关结果',
-            resetButtonTitle: '清除查询',
-            footer: { selectText: '选择', navigateText: '切换', closeText: '关闭' }
-          }
-        }
+    search: { provider: 'local', options: { locales: searchLocales } }
+  },
+  // 为每个页面输出多语言互链，便于搜索引擎按语言展示
+  transformHead({ pageData }) {
+    const rel = pageData.relativePath.replace(/(^|\/)index\.md$/, '$1').replace(/\.md$/, '')
+    const current = siteLocales.find((l) => l.dir && rel.startsWith(`${l.dir}/`))
+    const slug = current ? rel.slice(current.dir.length + 1) : rel
+    const tags: HeadConfig[] = []
+    for (const { loc } of packs) {
+      const target = `${loc.dir ? `${loc.dir}/` : ''}${slug}`
+      const file = resolve(here, '..', `${target}.md`.replace(/\/\.md$/, '/index.md'))
+      const idx = resolve(here, '..', target, 'index.md')
+      if (!existsSync(file) && !existsSync(idx)) {
+        continue
       }
-    },
-    editLink: {
-      pattern: `${REPO}/edit/main/website/:path`,
-      text: '在 GitHub 上编辑此页'
-    },
-    lastUpdated: { text: '最后更新' },
-    outline: { label: '本页目录', level: [2, 3] },
-    docFooter: { prev: '上一页', next: '下一页' },
-    darkModeSwitchLabel: '外观',
-    sidebarMenuLabel: '菜单',
-    returnToTopLabel: '回到顶部',
-    langMenuLabel: '语言',
-    footer: {
-      message: '以 Apache-2.0 许可证开源发布。Gately 与 Lucky 项目方无任何隶属关系。',
-      copyright: `© 2026 Gately Contributors · <a href="${REPO}" target="_blank" rel="noreferrer">GitHub</a>`
+      tags.push(['link', { rel: 'alternate', hreflang: loc.code, href: `${SITE}/${target}` }])
+      if (loc.code === FALLBACK_CODE) {
+        tags.push(['link', { rel: 'alternate', hreflang: 'x-default', href: `${SITE}/${target}` }])
+      }
     }
+    return tags
   }
 })

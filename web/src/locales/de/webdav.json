@@ -1,0 +1,11 @@
+{
+  "service": "Dienst",
+  "listenIp": "Listen-Adresse",
+  "listenIpPlaceholder": "Leer lassen, um auf allen Adressen zu lauschen",
+  "port": "Port",
+  "statusOff": "Deaktiviert",
+  "statusError": "Start fehlgeschlagen",
+  "statusNotRunning": "Läuft nicht",
+  "desc": "Lokale Verzeichnisse per WebDAV für Computer, Smartphones und Mediaplayer freigeben",
+  "tlsHelp": "Das Zertifikat wird anhand der Zugriffsdomain aus „SSL-Zertifikate“ ausgewählt"
+}

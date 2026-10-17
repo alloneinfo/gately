@@ -1,0 +1,15 @@
+{
+  "keyPlaceholder": "Ключ, например github",
+  "namePlaceholder": "Отображаемое имя",
+  "clientIdPlaceholder": "Client ID (APP ID для QQ)",
+  "clientSecretPlaceholder": "Client Secret (APP Key для QQ)",
+  "issuerPlaceholder": "Issuer, например https://login.example.com",
+  "addProvider": "Добавить способ входа",
+  "oidc": "Универсальный OIDC",
+  "hints": {
+    "github": "Создайте приложение в GitHub → Settings → Developer settings → OAuth Apps. Идентификатором может быть логин или числовой ID (числовой ID остаётся действительным после переименования).",
+    "google": "Создайте клиент OAuth (веб-приложение) в Google Cloud Console. Идентификатором может быть подтверждённый адрес электронной почты или sub.",
+    "qq": "Создайте приложение для сайта в QQ Connect. Для каждого приложения openid свой; если первый вход отклонён, на странице отобразится идентификатор аккаунта, который можно добавить в список разрешённых.",
+    "oidc": "Любой сервис с поддержкой документов OIDC discovery (Authentik, Keycloak, Casdoor и т. д.). Идентификатором может быть подтверждённый адрес электронной почты или sub."
+  }
+}

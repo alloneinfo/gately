@@ -1,42 +1,42 @@
 <template>
   <div>
-    <PageHeader title="设置" desc="账号安全、访问控制、运行参数、备份迁移与系统信息" :icon="Settings2" />
+    <PageHeader :title="t('settings.title')" :desc="t('settings.desc')" :icon="Settings2" />
 
     <div v-if="form?.restartRequired" class="restart-banner">
       <RotateCw :size="18" class="rb-icon" />
       <div class="rb-text">
-        <div class="rb-title">部分设置需要重启后生效</div>
-        <div class="rb-desc">监听地址等修改已保存，重启 Gately 后生效。</div>
+        <div class="rb-title">{{ t('settings.restartBanner.title') }}</div>
+        <div class="rb-desc">{{ t('settings.restartBanner.desc') }}</div>
       </div>
-      <el-button type="warning" :icon="RotateCw" @click="confirmRestart">立即重启</el-button>
+      <el-button type="warning" :icon="RotateCw" @click="confirmRestart">{{ t('settings.restartBanner.action') }}</el-button>
     </div>
 
     <el-tabs v-model="tab" class="settings-tabs">
       <!-- ============ 账号与安全 ============ -->
       <el-tab-pane name="account">
-        <template #label><span class="tab-label"><UserRound :size="15" />账号与安全</span></template>
+        <template #label><span class="tab-label"><UserRound :size="15" />{{ t('settings.tabs.account') }}</span></template>
         <div class="grid-2">
           <div class="g-card">
             <div class="g-card-head">
-              <div class="g-card-title"><KeyRound :size="16" />管理员账号</div>
+              <div class="g-card-title"><KeyRound :size="16" />{{ t('settings.admin.title') }}</div>
             </div>
             <div class="g-card-body">
               <el-form :model="account" label-width="100px" :label-position="labelPosition" class="narrow">
-                <el-form-item label="当前密码" required>
+                <el-form-item :label="t('settings.currentPassword')" required>
                   <el-input v-model="account.oldPassword" type="password" show-password autocomplete="current-password" />
                 </el-form-item>
-                <el-form-item label="用户名" required>
+                <el-form-item :label="t('settings.admin.username')" required>
                   <el-input v-model="account.username" autocomplete="username" />
                 </el-form-item>
-                <el-form-item label="新密码" required>
-                  <el-input v-model="account.newPassword" type="password" show-password placeholder="至少 8 位" autocomplete="new-password" />
+                <el-form-item :label="t('settings.admin.newPassword')" required>
+                  <el-input v-model="account.newPassword" type="password" show-password :placeholder="t('settings.admin.newPasswordPlaceholder')" autocomplete="new-password" />
                 </el-form-item>
-                <el-form-item label="确认新密码" required>
+                <el-form-item :label="t('settings.admin.confirmPassword')" required>
                   <el-input v-model="account.confirm" type="password" show-password autocomplete="new-password" />
                 </el-form-item>
                 <el-form-item label=" ">
-                  <el-button type="primary" :loading="accountSaving" @click="saveAccount">修改账号密码</el-button>
-                  <div class="form-help">修改后所有已登录的会话都会失效，需要重新登录。</div>
+                  <el-button type="primary" :loading="accountSaving" @click="saveAccount">{{ t('settings.admin.submit') }}</el-button>
+                  <div class="form-help">{{ t('settings.admin.help') }}</div>
                 </el-form-item>
               </el-form>
             </div>
@@ -44,40 +44,40 @@
 
           <div class="g-card">
             <div class="g-card-head">
-              <div class="g-card-title"><Smartphone :size="16" />两步验证</div>
-              <StatusBadge :type="totp.enabled ? 'ok' : 'off'" :text="totp.enabled ? '已启用' : '未启用'" />
+              <div class="g-card-title"><Smartphone :size="16" />{{ t('settings.totp.title') }}</div>
+              <StatusBadge :type="totp.enabled ? 'ok' : 'off'" :text="totp.enabled ? t('common.enabled') : t('settings.notEnabled')" />
             </div>
             <div class="g-card-body">
               <template v-if="totp.enabled">
-                <p class="desc">登录时除密码外还需要输入验证器 App 中的 6 位动态验证码。</p>
+                <p class="desc">{{ t('settings.totp.enabledDesc') }}</p>
                 <el-form label-width="100px" :label-position="labelPosition" class="narrow">
-                  <el-form-item label="当前密码"><el-input v-model="totp.password" type="password" show-password /></el-form-item>
-                  <el-form-item label="验证码"><el-input v-model="totp.code" maxlength="6" inputmode="numeric" class="mono" placeholder="验证器中的 6 位数字" /></el-form-item>
-                  <el-form-item label=" "><el-button type="danger" plain @click="disableTOTP">关闭两步验证</el-button></el-form-item>
+                  <el-form-item :label="t('settings.currentPassword')"><el-input v-model="totp.password" type="password" show-password /></el-form-item>
+                  <el-form-item :label="t('settings.totp.code')"><el-input v-model="totp.code" maxlength="6" inputmode="numeric" class="mono" :placeholder="t('settings.totp.codePlaceholder')" /></el-form-item>
+                  <el-form-item label=" "><el-button type="danger" plain @click="disableTOTP">{{ t('settings.totp.disable') }}</el-button></el-form-item>
                 </el-form>
               </template>
               <template v-else-if="totp.secret">
-                <p class="desc">用 Google Authenticator、Microsoft Authenticator 等 App 扫描二维码，然后输入显示的验证码确认。</p>
+                <p class="desc">{{ t('settings.totp.scanDesc') }}</p>
                 <div class="qr-wrap">
-                  <img v-if="totp.qr" :src="totp.qr" class="qr" alt="二维码" />
+                  <img v-if="totp.qr" :src="totp.qr" class="qr" :alt="t('settings.totp.qrAlt')" />
                   <div class="secret-box">
-                    <div class="meta">无法扫码时手动输入密钥</div>
+                    <div class="meta">{{ t('settings.totp.manualHint') }}</div>
                     <div class="mono secret">{{ totp.secret }}</div>
-                    <el-button size="small" text :icon="Copy" @click="copy(totp.secret)">复制密钥</el-button>
+                    <el-button size="small" text :icon="Copy" @click="copy(totp.secret)">{{ t('settings.totp.copySecret') }}</el-button>
                   </div>
                 </div>
                 <el-form label-width="100px" :label-position="labelPosition" class="narrow">
-                  <el-form-item label="验证码"><el-input v-model="totp.code" maxlength="6" inputmode="numeric" class="mono" /></el-form-item>
-                  <el-form-item label="当前密码"><el-input v-model="totp.password" type="password" show-password /></el-form-item>
+                  <el-form-item :label="t('settings.totp.code')"><el-input v-model="totp.code" maxlength="6" inputmode="numeric" class="mono" /></el-form-item>
+                  <el-form-item :label="t('settings.currentPassword')"><el-input v-model="totp.password" type="password" show-password /></el-form-item>
                   <el-form-item label=" ">
-                    <el-button type="primary" @click="enableTOTP">确认启用</el-button>
-                    <el-button @click="cancelTOTP">取消</el-button>
+                    <el-button type="primary" @click="enableTOTP">{{ t('settings.totp.confirmEnable') }}</el-button>
+                    <el-button @click="cancelTOTP">{{ t('common.cancel') }}</el-button>
                   </el-form-item>
                 </el-form>
               </template>
               <template v-else>
-                <p class="desc">启用后登录需要额外输入验证器 App 生成的动态验证码，即使密码泄露也能保护管理界面。</p>
-                <el-button type="primary" plain :icon="ShieldCheck" @click="setupTOTP">开始设置</el-button>
+                <p class="desc">{{ t('settings.totp.introDesc') }}</p>
+                <el-button type="primary" plain :icon="ShieldCheck" @click="setupTOTP">{{ t('settings.totp.start') }}</el-button>
               </template>
             </div>
           </div>
@@ -85,21 +85,21 @@
 
         <div v-if="form" class="g-card">
           <div class="g-card-head">
-            <div class="g-card-title"><LockKeyhole :size="16" />登录保护</div>
+            <div class="g-card-title"><LockKeyhole :size="16" />{{ t('settings.loginProtect.title') }}</div>
           </div>
           <div class="g-card-body">
             <el-form :model="form" label-width="140px" :label-position="labelPosition">
-              <el-form-item label="会话有效期">
+              <el-form-item :label="t('settings.loginProtect.sessionHours')">
                 <el-input-number v-model="form.sessionHours" :min="1" :max="8760" />
-                <span class="help">小时；超过后需要重新登录</span>
+                <span class="help">{{ t('settings.loginProtect.sessionHoursHelp') }}</span>
               </el-form-item>
-              <el-form-item label="连续失败上限">
+              <el-form-item :label="t('settings.loginProtect.maxFailures')">
                 <el-input-number v-model="form.maxLoginFailures" :min="0" :max="100" />
-                <span class="help">同一来源连续输错密码达到次数后锁定，0 使用默认值</span>
+                <span class="help">{{ t('settings.loginProtect.maxFailuresHelp') }}</span>
               </el-form-item>
-              <el-form-item label="锁定时长">
+              <el-form-item :label="t('settings.loginProtect.lockMinutes')">
                 <el-input-number v-model="form.lockMinutes" :min="0" :max="10080" />
-                <span class="help">分钟，0 使用默认值</span>
+                <span class="help">{{ t('settings.loginProtect.lockMinutesHelp') }}</span>
               </el-form-item>
             </el-form>
           </div>
@@ -107,30 +107,29 @@
 
         <div v-if="form" class="g-card">
           <div class="g-card-head">
-            <div class="g-card-title"><KeyRound :size="16" />第三方登录</div>
-            <StatusBadge :type="login.enable ? 'ok' : 'off'" :text="login.enable ? '已启用' : '未启用'" />
+            <div class="g-card-title"><KeyRound :size="16" />{{ t('settings.thirdLogin.title') }}</div>
+            <StatusBadge :type="login.enable ? 'ok' : 'off'" :text="login.enable ? t('common.enabled') : t('settings.notEnabled')" />
           </div>
           <div class="g-card-body">
-            <p class="desc">
-              用 GitHub、Google、QQ 或任意 OIDC 账号登录管理界面。使用你自己申请的 OAuth 应用，登录过程不经过任何中转服务器。
-            </p>
+            <p class="desc">{{ t('settings.thirdLogin.desc') }}</p>
             <el-form :model="login" label-width="140px" :label-position="labelPosition">
-              <el-form-item label="启用"><el-switch v-model="login.enable" /></el-form-item>
-              <el-form-item label="回调基础地址">
-                <el-input v-model="login.callbackBase" placeholder="https://gately.example.com（浏览器访问管理界面所用的地址，不带路径）" />
-                <div class="form-help">
-                  在各平台登记的回调地址为：<span class="mono">{{ (login.callbackBase || 'https://...').replace(/\/$/, '') }}/api/login/oauth/callback</span>。
-                  登录须从该地址打开管理界面后发起。
-                </div>
+              <el-form-item :label="t('settings.thirdLogin.enable')"><el-switch v-model="login.enable" /></el-form-item>
+              <el-form-item :label="t('settings.thirdLogin.callbackBase')">
+                <el-input v-model="login.callbackBase" :placeholder="t('settings.thirdLogin.callbackBasePlaceholder')" />
+                <i18n-t keypath="settings.thirdLogin.callbackHelp" tag="div" class="form-help">
+                  <template #url>
+                    <span class="mono">{{ (login.callbackBase || 'https://...').replace(/\/$/, '') }}/api/login/oauth/callback</span>
+                  </template>
+                </i18n-t>
               </el-form-item>
-              <el-form-item label="登录方式"><OAuthProviders v-model="login.providers" /></el-form-item>
-              <el-form-item label="允许的身份">
-                <el-input v-model="allowedText" type="textarea" :rows="4" class="mono" placeholder="每行一个：提供方标识:账号，如 github:15172899 或 google:me@gmail.com；行尾可用 # 加备注" />
-                <div class="form-help">只有列表中的账号可以登录。GitHub 推荐写数字 ID，QQ 首次登录被拒绝时页面会显示可复制的标识。</div>
+              <el-form-item :label="t('settings.thirdLogin.providers')"><OAuthProviders v-model="login.providers" /></el-form-item>
+              <el-form-item :label="t('settings.thirdLogin.allowed')">
+                <el-input v-model="allowedText" type="textarea" :rows="4" class="mono" :placeholder="t('settings.thirdLogin.allowedPlaceholder')" />
+                <div class="form-help">{{ t('settings.thirdLogin.allowedHelp') }}</div>
               </el-form-item>
-              <el-form-item label="跳过两步验证">
+              <el-form-item :label="t('settings.thirdLogin.skipTotp')">
                 <el-switch v-model="login.skipTotp" />
-                <span class="help">已启用两步验证时，开启后第三方登录不再要求验证码；关闭则第三方登录被拒绝</span>
+                <span class="help">{{ t('settings.thirdLogin.skipTotpHelp') }}</span>
               </el-form-item>
             </el-form>
           </div>
@@ -139,15 +138,13 @@
         <!-- 单令牌已升级为多令牌 + 权限控制，管理入口迁移到独立页面 -->
         <div class="g-card">
           <div class="g-card-head">
-            <div class="g-card-title"><Code2 :size="16" />API 令牌</div>
+            <div class="g-card-title"><Code2 :size="16" />{{ t('settings.apiToken.title') }}</div>
           </div>
           <div class="g-card-body">
-            <p class="desc token-moved">
-              API 令牌已升级为多令牌与细粒度权限控制：可创建多个令牌，分别设置过期时间与各功能模块的只读 / 读写权限。
-            </p>
+            <p class="desc token-moved">{{ t('settings.apiToken.desc') }}</p>
             <div class="token-links">
-              <router-link to="/api-tokens"><el-button type="primary" :icon="KeyRound">管理 API 令牌</el-button></router-link>
-              <router-link to="/api-docs"><el-button :icon="BookOpen">查看 API 文档</el-button></router-link>
+              <router-link to="/api-tokens"><el-button type="primary" :icon="KeyRound">{{ t('settings.apiToken.manage') }}</el-button></router-link>
+              <router-link to="/api-docs"><el-button :icon="BookOpen">{{ t('settings.apiToken.docs') }}</el-button></router-link>
             </div>
           </div>
         </div>
@@ -156,47 +153,49 @@
 
       <!-- ============ 访问控制 ============ -->
       <el-tab-pane name="access">
-        <template #label><span class="tab-label"><ShieldCheck :size="15" />访问控制</span></template>
+        <template #label><span class="tab-label"><ShieldCheck :size="15" />{{ t('settings.tabs.access') }}</span></template>
         <div v-if="form" class="g-card">
           <div class="g-card-head">
-            <div class="g-card-title"><Network :size="16" />管理界面监听</div>
+            <div class="g-card-title"><Network :size="16" />{{ t('settings.listen.title') }}</div>
           </div>
           <div class="g-card-body">
             <el-form :model="form" label-width="140px" :label-position="labelPosition">
-              <el-form-item label="HTTP 监听">
+              <el-form-item :label="t('settings.listen.http')">
                 <el-input v-model="form.listen" placeholder=":16680" class="w-280 mono" />
-                <span class="help"><el-tag size="small" type="warning">需重启</el-tag> 格式为 :端口 或 IP:端口</span>
+                <span class="help"><el-tag size="small" type="warning">{{ t('settings.listen.needRestart') }}</el-tag> {{ t('settings.listen.httpHelp') }}</span>
               </el-form-item>
-              <el-form-item label="HTTPS 监听">
-                <el-input v-model="form.httpsListen" placeholder="留空不启用，例如 :16643" class="w-280 mono" />
-                <span class="help"><el-tag size="small" type="warning">需重启</el-tag> 证书按访问域名从「SSL 证书」中选择</span>
+              <el-form-item :label="t('settings.listen.https')">
+                <el-input v-model="form.httpsListen" :placeholder="t('settings.listen.httpsPlaceholder')" class="w-280 mono" />
+                <span class="help"><el-tag size="small" type="warning">{{ t('settings.listen.needRestart') }}</el-tag> {{ t('settings.listen.httpsHelp') }}</span>
               </el-form-item>
-              <el-form-item label="强制 HTTPS">
+              <el-form-item :label="t('settings.listen.forceHttps')">
                 <el-switch v-model="form.forceHTTPS" :disabled="!form.httpsListen && !form.forceHTTPS" />
-                <span class="help">HTTP 访问自动跳转到 HTTPS（仅当证书模块有该域名的证书时）</span>
+                <span class="help">{{ t('settings.listen.forceHttpsHelp') }}</span>
               </el-form-item>
             </el-form>
           </div>
         </div>
         <div v-if="form" class="g-card">
           <div class="g-card-head">
-            <div class="g-card-title"><DoorClosed :size="16" />访问限制</div>
+            <div class="g-card-title"><DoorClosed :size="16" />{{ t('settings.restrict.title') }}</div>
           </div>
           <div class="g-card-body">
             <el-form :model="form" label-width="140px" :label-position="labelPosition">
-              <el-form-item label="安全入口">
-                <el-input v-model="form.safePath" placeholder="留空不启用，例如 /my-entry" class="w-280 mono">
+              <el-form-item :label="t('settings.restrict.safePath')">
+                <el-input v-model="form.safePath" :placeholder="t('settings.restrict.safePathPlaceholder')" class="w-280 mono">
                   <template #append>
-                    <el-button :icon="Sparkles" aria-label="随机生成" @click="randomEntry" />
+                    <el-button :icon="Sparkles" :aria-label="t('settings.restrict.random')" @click="randomEntry" />
                   </template>
                 </el-input>
-                <div class="form-help">
-                  设置后需访问 <span class="mono code">http://IP:端口{{ entryPath || '/<入口>' }}</span> 才能打开管理界面，直接访问其他路径返回 404，可防止扫描器发现管理界面。请牢记入口地址。
-                </div>
+                <i18n-t keypath="settings.restrict.safePathHelp" tag="div" class="form-help">
+                  <template #url>
+                    <span class="mono code">{{ t('settings.restrict.urlPrefix') }}{{ entryPath || '/<' + t('settings.restrict.entryName') + '>' }}</span>
+                  </template>
+                </i18n-t>
               </el-form-item>
-              <el-form-item label="仅允许内网访问">
+              <el-form-item :label="t('settings.restrict.lanOnly')">
                 <el-switch v-model="form.lanOnly" />
-                <span class="help">只允许内网地址（含 Tailscale 等 100.64.0.0/10 地址）访问管理界面</span>
+                <span class="help">{{ t('settings.restrict.lanOnlyHelp') }}</span>
               </el-form-item>
             </el-form>
           </div>
@@ -206,14 +205,14 @@
 
       <!-- ============ 网络与运行 ============ -->
       <el-tab-pane name="runtime">
-        <template #label><span class="tab-label"><Cpu :size="15" />网络与运行</span></template>
+        <template #label><span class="tab-label"><Cpu :size="15" />{{ t('settings.tabs.runtime') }}</span></template>
         <div v-if="form" class="g-card">
           <div class="g-card-head">
-            <div class="g-card-title"><Globe :size="16" />网络</div>
+            <div class="g-card-title"><Globe :size="16" />{{ t('settings.network.title') }}</div>
           </div>
           <div class="g-card-body">
             <el-form :model="form" label-width="140px" :label-position="labelPosition">
-              <el-form-item label="DNS 服务器">
+              <el-form-item :label="t('settings.network.dnsServers')">
                 <el-select
                   v-model="dnsServers"
                   multiple
@@ -221,50 +220,50 @@
                   allow-create
                   default-first-option
                   :reserve-keyword="false"
-                  placeholder="留空使用系统 DNS；可输入 IP 或 IP:端口"
+                  :placeholder="t('settings.network.dnsPlaceholder')"
                   class="w-480"
                 >
                   <el-option v-for="d in dnsPresets" :key="d.value" :label="`${d.value}（${d.label}）`" :value="d.value" />
                 </el-select>
-                <div class="form-help">影响所有出站域名解析（DDNS、Webhook、ACME 等），多个时随机选择并自动故障转移。</div>
+                <div class="form-help">{{ t('settings.network.dnsHelp') }}</div>
               </el-form-item>
-              <el-form-item label="时区">
-                <el-select v-model="form.timeZone" filterable allow-create default-first-option clearable placeholder="跟随系统" class="w-280">
+              <el-form-item :label="t('settings.network.timeZone')">
+                <el-select v-model="form.timeZone" filterable allow-create default-first-option clearable :placeholder="t('settings.network.timeZonePlaceholder')" class="w-280">
                   <el-option v-for="z in timeZones" :key="z.value" :label="`${z.label}  ${z.value}`" :value="z.value" />
                 </el-select>
-                <div class="form-help">日志、计划任务等使用的时区，可输入任意 IANA 时区名；当前生效：{{ info?.timeZone || '-' }}</div>
+                <div class="form-help">{{ t('settings.network.timeZoneHelp', { zone: info?.timeZone || '-' }) }}</div>
               </el-form-item>
             </el-form>
           </div>
         </div>
         <div v-if="form" class="g-card">
           <div class="g-card-head">
-            <div class="g-card-title"><Gauge :size="16" />运行参数</div>
+            <div class="g-card-title"><Gauge :size="16" />{{ t('settings.runtime.title') }}</div>
           </div>
           <div class="g-card-body">
             <el-form :model="form" label-width="140px" :label-position="labelPosition">
-              <el-form-item label="日志保留条数">
+              <el-form-item :label="t('settings.runtime.logLines')">
                 <el-input-number v-model="form.logLines" :min="100" :max="20000" :step="500" />
-                <span class="help">每个模块在内存中保留的日志条数</span>
+                <span class="help">{{ t('settings.runtime.logLinesHelp') }}</span>
               </el-form-item>
-              <el-form-item label="GC 百分比">
+              <el-form-item :label="t('settings.runtime.gcPercent')">
                 <el-input-number v-model="form.gcPercent" :min="0" :max="1000" :step="10" />
-                <span class="help">0 为默认（100）；调小可降低内存占用，但增加 CPU 开销</span>
+                <span class="help">{{ t('settings.runtime.gcPercentHelp') }}</span>
               </el-form-item>
-              <el-form-item label="最大 CPU 核数">
+              <el-form-item :label="t('settings.runtime.maxProcs')">
                 <el-input-number v-model="form.maxProcs" :min="0" :max="1024" />
-                <span class="help">0 为自动（本机 {{ info?.numCPU ?? '-' }} 核）</span>
+                <span class="help">{{ t('settings.runtime.maxProcsHelp', { count: info?.numCPU ?? '-' }) }}</span>
               </el-form-item>
             </el-form>
           </div>
         </div>
         <div class="g-card">
           <div class="g-card-head">
-            <div class="g-card-title"><RotateCw :size="16" />重启</div>
+            <div class="g-card-title"><RotateCw :size="16" />{{ t('settings.restart.title') }}</div>
           </div>
           <div class="g-card-body restart-row">
-            <span class="muted">重启期间管理界面与所有转发、代理服务会短暂中断（通常数秒）。</span>
-            <el-button type="warning" plain :icon="RotateCw" @click="confirmRestart">重启 Gately</el-button>
+            <span class="muted">{{ t('settings.restart.desc') }}</span>
+            <el-button type="warning" plain :icon="RotateCw" @click="confirmRestart">{{ t('settings.restart.button') }}</el-button>
           </div>
         </div>
         <SaveBar :dirty="dirty" :saving="saving" @save="saveSettings" @reset="resetSettings" />
@@ -272,56 +271,59 @@
 
       <!-- ============ 备份与迁移 ============ -->
       <el-tab-pane name="backup">
-        <template #label><span class="tab-label"><ArchiveRestore :size="15" />备份与迁移</span></template>
+        <template #label><span class="tab-label"><ArchiveRestore :size="15" />{{ t('settings.tabs.backup') }}</span></template>
         <div class="g-card">
           <div class="g-card-head">
-            <div class="g-card-title"><Import :size="16" />从 Lucky 导入</div>
+            <div class="g-card-title"><Import :size="16" />{{ t('settings.import.title') }}</div>
           </div>
           <div class="g-card-body">
-            <p class="desc">
-              支持 Lucky 配置目录（Docker 默认 <span class="mono code">/app/conf</span>）中的 <span class="mono code">*.lkcf</span> 文件（可多选），以及 Lucky 后台导出的整站备份
-              <span class="mono code">.zip</span>。先预览，确认后再导入；导入的条目追加到现有条目之后，同名条目会跳过。
-            </p>
+            <i18n-t keypath="settings.import.desc" tag="p" class="desc">
+              <template #dir><span class="mono code">/app/conf</span></template>
+              <template #lkcf><span class="mono code">*.lkcf</span></template>
+              <template #zip><span class="mono code">.zip</span></template>
+            </i18n-t>
             <el-upload v-model:file-list="files" :auto-upload="false" multiple accept=".lkcf,.zip" drag class="upload">
               <UploadCloud :size="32" :stroke-width="1.5" class="upload-icon" />
-              <div class="upload-text">拖入文件或 <em>点击选择</em></div>
-              <div class="meta">.lkcf 配置文件或整站备份 .zip</div>
+              <i18n-t keypath="settings.import.drag" tag="div" class="upload-text">
+                <template #click><em>{{ t('settings.import.dragClick') }}</em></template>
+              </i18n-t>
+              <div class="meta">{{ t('settings.import.dragHint') }}</div>
             </el-upload>
             <div class="keep-enable">
               <el-switch v-model="keepEnable" />
               <div>
-                <div class="ke-title">导入后保持 Lucky 中的启用状态</div>
-                <div class="ke-desc">
-                  默认关闭：导入的规则全部为停用状态，检查无误后再逐条启用。开启后，在 Lucky 中启用的规则会<b>立即监听端口、更新 DNS 解析</b>，如果 Lucky 仍在运行，可能出现端口冲突或两边同时更新解析。
-                </div>
+                <div class="ke-title">{{ t('settings.import.keepEnableTitle') }}</div>
+                <i18n-t keypath="settings.import.keepEnableDesc" tag="div" class="ke-desc">
+                  <template #bold><b>{{ t('settings.import.keepEnableBold') }}</b></template>
+                </i18n-t>
               </div>
             </div>
             <div class="ops">
-              <el-button :icon="Eye" :disabled="!files.length" :loading="busy && !importing" @click="runImport(true)">预览</el-button>
-              <el-button type="primary" :icon="Import" :disabled="!files.length || !previewed || imported" :loading="importing" @click="confirmImport">确认导入</el-button>
-              <span v-if="previewed && !imported" class="meta">预览完成，确认无误后导入</span>
-              <span v-if="imported" class="text-ok ops-done"><CircleCheck :size="14" />已导入</span>
+              <el-button :icon="Eye" :disabled="!files.length" :loading="busy && !importing" @click="runImport(true)">{{ t('settings.import.preview') }}</el-button>
+              <el-button type="primary" :icon="Import" :disabled="!files.length || !previewed || imported" :loading="importing" @click="confirmImport">{{ t('settings.import.confirmImport') }}</el-button>
+              <span v-if="previewed && !imported" class="meta">{{ t('settings.import.previewDone') }}</span>
+              <span v-if="imported" class="text-ok ops-done"><CircleCheck :size="14" />{{ t('settings.import.imported') }}</span>
             </div>
 
             <div v-for="r in results" :key="r.file" class="result">
               <div class="result-file"><FileText :size="14" /><span class="mono">{{ r.file }}</span></div>
               <el-alert v-if="r.error" type="error" :title="r.error" :closable="false" show-icon />
-              <el-alert v-else-if="!r.reports.length" type="info" title="未包含 Gately 已支持的模块" :closable="false" show-icon />
+              <el-alert v-else-if="!r.reports.length" type="info" :title="t('settings.import.noModules')" :closable="false" show-icon />
               <el-table v-else :data="r.reports" size="small" row-key="module" class="result-table">
                 <el-table-column type="expand" width="32">
                   <template #default="{ row }">
                     <ul v-if="row.warnings?.length" class="warns">
                       <li v-for="w in row.warnings" :key="w">{{ w }}</li>
                     </ul>
-                    <div v-else class="meta warns">没有警告</div>
+                    <div v-else class="meta warns">{{ t('settings.import.noWarnings') }}</div>
                   </template>
                 </el-table-column>
-                <el-table-column prop="title" label="模块" min-width="90" />
-                <el-table-column prop="found" label="发现" width="60" align="right" />
-                <el-table-column :label="imported ? '已导入' : '可导入'" width="70" align="right">
+                <el-table-column prop="title" :label="t('settings.import.colModule')" min-width="90" />
+                <el-table-column prop="found" :label="t('settings.import.colFound')" width="60" align="right" />
+                <el-table-column :label="imported ? t('settings.import.imported') : t('settings.import.colImportable')" width="70" align="right">
                   <template #default="{ row }"><b>{{ row.imported }}</b></template>
                 </el-table-column>
-                <el-table-column label="警告" width="70" align="right">
+                <el-table-column :label="t('settings.import.colWarnings')" width="70" align="right">
                   <template #default="{ row }">
                     <span v-if="row.warnings?.length" class="warn-count">{{ row.warnings.length }}</span>
                     <span v-else class="muted">0</span>
@@ -335,27 +337,29 @@
         <div class="grid-2">
           <div class="g-card">
             <div class="g-card-head">
-              <div class="g-card-title"><DownloadCloud :size="16" />备份 Gately 配置</div>
+              <div class="g-card-title"><DownloadCloud :size="16" />{{ t('settings.backup.title') }}</div>
             </div>
             <div class="g-card-body">
-              <p class="desc">下载包含全部配置（账号、规则、证书等）的 zip 文件。备份中含有密码哈希、密钥与证书私钥，请妥善保存。</p>
-              <el-button type="primary" plain :icon="Download" :loading="downloading" @click="downloadBackup">下载备份</el-button>
+              <p class="desc">{{ t('settings.backup.desc') }}</p>
+              <el-button type="primary" plain :icon="Download" :loading="downloading" @click="downloadBackup">{{ t('settings.backup.download') }}</el-button>
             </div>
           </div>
           <div class="g-card">
             <div class="g-card-head">
-              <div class="g-card-title"><UploadCloud :size="16" />恢复配置</div>
+              <div class="g-card-title"><UploadCloud :size="16" />{{ t('settings.restore.title') }}</div>
             </div>
             <div class="g-card-body">
-              <p class="desc">用备份 zip <b>覆盖当前全部配置</b>，原配置会先保存到配置目录下的 backup-时间 文件夹，恢复后 Gately 自动重启。</p>
+              <i18n-t keypath="settings.restore.desc" tag="p" class="desc">
+                <template #bold><b>{{ t('settings.restore.descBold') }}</b></template>
+              </i18n-t>
               <div class="restore-row">
                 <label class="file-btn">
                   <FileArchive :size="14" />
-                  <span>{{ restoreFile ? restoreFile.name : '选择备份文件' }}</span>
+                  <span>{{ restoreFile ? restoreFile.name : t('settings.restore.pickFile') }}</span>
                   <input type="file" accept=".zip,.enc" @change="onRestorePick" />
                 </label>
-                <el-input v-if="restoreFile?.name.endsWith('.enc')" v-model="restorePassword" show-password placeholder="备份口令" style="width: 160px" />
-                <el-button type="danger" :icon="ArchiveRestore" :disabled="!restoreFile" :loading="restoring" @click="confirmRestore">恢复</el-button>
+                <el-input v-if="restoreFile?.name.endsWith('.enc')" v-model="restorePassword" show-password :placeholder="t('settings.restore.passwordPlaceholder')" style="width: 160px" />
+                <el-button type="danger" :icon="ArchiveRestore" :disabled="!restoreFile" :loading="restoring" @click="confirmRestore">{{ t('settings.restore.button') }}</el-button>
               </div>
             </div>
           </div>
@@ -374,6 +378,7 @@
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import BackupSchedule from '../components/BackupSchedule.vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import QRCode from 'qrcode'
 import { ElMessage, ElMessageBox, type UploadUserFile } from 'element-plus'
 import {
@@ -411,6 +416,7 @@ import SaveBar from '../components/SaveBar.vue'
 import RestartOverlay from '../components/RestartOverlay.vue'
 import { useFormLayout } from '../composables/useIsMobile'
 
+const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const { labelPosition } = useFormLayout()
@@ -495,7 +501,7 @@ async function saveSettings() {
   try {
     const r = await api.put<SystemSettings>('/api/system/settings', form.value)
     applySettings(r)
-    ElMessage.success(r.restartRequired ? '已保存，部分设置需重启后生效' : '已保存并生效')
+    ElMessage.success(r.restartRequired ? t('settings.save.savedNeedRestart') : t('settings.save.saved'))
     loadInfo()
   } catch (e) {
     ElMessage.error((e as Error).message)
@@ -519,7 +525,7 @@ function randomEntry() {
 async function copy(text: string) {
   try {
     await navigator.clipboard.writeText(text)
-    ElMessage.success('已复制')
+    ElMessage.success(t('common.copied'))
   } catch {
     // 非 HTTPS 环境下剪贴板 API 不可用，退回到选择复制
     const ta = document.createElement('textarea')
@@ -528,36 +534,37 @@ async function copy(text: string) {
     ta.select()
     document.execCommand('copy')
     ta.remove()
-    ElMessage.success('已复制')
+    ElMessage.success(t('common.copied'))
   }
 }
 
-const dnsPresets = [
-  { value: '223.5.5.5', label: '阿里' },
-  { value: '119.29.29.29', label: '腾讯' },
-  { value: '180.76.76.76', label: '百度' },
-  { value: '114.114.114.114', label: '114' },
-  { value: '1.1.1.1', label: 'Cloudflare' },
-  { value: '8.8.8.8', label: 'Google' },
-  { value: '9.9.9.9', label: 'Quad9' },
-]
+// 预设项的显示名依赖当前语言，用 computed 保证切换语言后刷新
+const dnsPresets = computed(() => [
+  { value: '223.5.5.5', label: t('settings.network.dns.ali') },
+  { value: '119.29.29.29', label: t('settings.network.dns.tencent') },
+  { value: '180.76.76.76', label: t('settings.network.dns.baidu') },
+  { value: '114.114.114.114', label: t('settings.network.dns.114') },
+  { value: '1.1.1.1', label: t('settings.network.dns.cloudflare') },
+  { value: '8.8.8.8', label: t('settings.network.dns.google') },
+  { value: '9.9.9.9', label: t('settings.network.dns.quad9') },
+])
 
-const timeZones = [
-  { value: 'Asia/Shanghai', label: '中国' },
-  { value: 'Asia/Hong_Kong', label: '香港' },
-  { value: 'Asia/Taipei', label: '台北' },
-  { value: 'Asia/Tokyo', label: '东京' },
-  { value: 'Asia/Seoul', label: '首尔' },
-  { value: 'Asia/Singapore', label: '新加坡' },
-  { value: 'Europe/London', label: '伦敦' },
-  { value: 'Europe/Berlin', label: '柏林' },
-  { value: 'Europe/Moscow', label: '莫斯科' },
-  { value: 'America/New_York', label: '纽约' },
-  { value: 'America/Chicago', label: '芝加哥' },
-  { value: 'America/Los_Angeles', label: '洛杉矶' },
-  { value: 'Australia/Sydney', label: '悉尼' },
-  { value: 'UTC', label: '协调世界时' },
-]
+const timeZones = computed(() => [
+  { value: 'Asia/Shanghai', label: t('settings.network.zones.china') },
+  { value: 'Asia/Hong_Kong', label: t('settings.network.zones.hongKong') },
+  { value: 'Asia/Taipei', label: t('settings.network.zones.taipei') },
+  { value: 'Asia/Tokyo', label: t('settings.network.zones.tokyo') },
+  { value: 'Asia/Seoul', label: t('settings.network.zones.seoul') },
+  { value: 'Asia/Singapore', label: t('settings.network.zones.singapore') },
+  { value: 'Europe/London', label: t('settings.network.zones.london') },
+  { value: 'Europe/Berlin', label: t('settings.network.zones.berlin') },
+  { value: 'Europe/Moscow', label: t('settings.network.zones.moscow') },
+  { value: 'America/New_York', label: t('settings.network.zones.newYork') },
+  { value: 'America/Chicago', label: t('settings.network.zones.chicago') },
+  { value: 'America/Los_Angeles', label: t('settings.network.zones.losAngeles') },
+  { value: 'Australia/Sydney', label: t('settings.network.zones.sydney') },
+  { value: 'UTC', label: t('settings.network.zones.utc') },
+])
 
 // ---------- 账号 ----------
 const account = reactive({ oldPassword: '', username: '', newPassword: '', confirm: '' })
@@ -565,13 +572,13 @@ const accountSaving = ref(false)
 
 async function saveAccount() {
   if (account.newPassword !== account.confirm) {
-    ElMessage.error('两次输入的新密码不一致')
+    ElMessage.error(t('settings.admin.mismatch'))
     return
   }
   accountSaving.value = true
   try {
     await api.put('/api/account', { oldPassword: account.oldPassword, username: account.username, newPassword: account.newPassword })
-    ElMessage.success('已修改，请重新登录')
+    ElMessage.success(t('settings.admin.changed'))
     router.replace({ name: 'login' })
   } catch (e) {
     ElMessage.error((e as Error).message)
@@ -606,7 +613,7 @@ async function enableTOTP() {
   try {
     await api.post('/api/account/totp/enable', { password: totp.password, code: totp.code })
     Object.assign(totp, { enabled: true, secret: '', qr: '', code: '', password: '' })
-    ElMessage.success('两步验证已启用')
+    ElMessage.success(t('settings.totp.enabledMsg'))
   } catch (e) {
     ElMessage.error((e as Error).message)
   }
@@ -617,7 +624,7 @@ async function disableTOTP() {
     // 关闭时后端要求同时校验密码与当前验证码
     await api.post('/api/account/totp/disable', { password: totp.password, code: totp.code })
     Object.assign(totp, { enabled: false, password: '', code: '' })
-    ElMessage.success('两步验证已关闭')
+    ElMessage.success(t('settings.totp.disabledMsg'))
   } catch (e) {
     ElMessage.error((e as Error).message)
   }
@@ -663,7 +670,7 @@ async function runImport(dryRun: boolean) {
     imported.value = !dryRun
     if (!dryRun) {
       const total = r.reduce((n, f) => n + f.reports.reduce((m, x) => m + x.imported, 0), 0)
-      ElMessage.success(`导入完成，共 ${total} 条`)
+      ElMessage.success(t('settings.import.done', { total }))
     }
   } catch (e) {
     ElMessage.error((e as Error).message)
@@ -678,10 +685,10 @@ async function confirmImport() {
   try {
     await ElMessageBox.confirm(
       keepEnable.value
-        ? `将导入 ${total} 条配置，并保持 Lucky 中的启用状态：已启用的规则会立即生效。确定继续？`
-        : `将导入 ${total} 条配置，导入后全部为停用状态。确定继续？`,
-      '确认导入',
-      { type: keepEnable.value ? 'warning' : 'info', confirmButtonText: '导入', cancelButtonText: '取消' },
+        ? t('settings.import.confirmKeep', { total })
+        : t('settings.import.confirmDisabled', { total }),
+      t('settings.import.confirmImport'),
+      { type: keepEnable.value ? 'warning' : 'info', confirmButtonText: t('settings.import.confirmButton'), cancelButtonText: t('common.cancel') },
     )
   } catch {
     return
@@ -700,10 +707,10 @@ async function downloadBackup() {
   try {
     const resp = await fetch('/api/system/backup', { credentials: 'same-origin' })
     if (!resp.ok) {
-      const t = await resp.text()
-      let msg = `下载失败 (${resp.status})`
+      const body = await resp.text()
+      let msg = t('settings.backup.downloadFailed', { status: resp.status })
       try {
-        msg = JSON.parse(t).error ?? msg
+        msg = JSON.parse(body).error ?? msg
       } catch {
         // 非 JSON 错误响应保持默认提示
       }
@@ -736,17 +743,19 @@ async function confirmRestore() {
   if (!restoreFile.value) {
     return
   }
+  // 确认口令随当前语言变化
+  const confirmWord = t('settings.restore.word')
   try {
     await ElMessageBox.prompt(
-      `将用「${restoreFile.value.name}」覆盖当前全部配置并自动重启，当前配置会先备份到配置目录。请输入「恢复」两个字确认。`,
-      '恢复配置',
+      t('settings.restore.confirm', { name: restoreFile.value.name, word: confirmWord }),
+      t('settings.restore.title'),
       {
         type: 'warning',
-        confirmButtonText: '恢复并重启',
-        cancelButtonText: '取消',
+        confirmButtonText: t('settings.restore.confirmButton'),
+        cancelButtonText: t('common.cancel'),
         confirmButtonClass: 'el-button--danger',
-        inputPlaceholder: '恢复',
-        inputValidator: (v: string) => v === '恢复' || '请输入「恢复」',
+        inputPlaceholder: confirmWord,
+        inputValidator: (v: string) => v === confirmWord || t('settings.restore.inputHint', { word: confirmWord }),
       },
     )
   } catch {
@@ -760,8 +769,8 @@ async function confirmRestore() {
   restoring.value = true
   try {
     const r = await api.post<{ restored: number; previous: string }>('/api/system/restore', fd)
-    ElMessage.success(`已恢复 ${r.restored} 个配置文件，原配置保存在 ${r.previous}`)
-    overlay.value?.start('正在应用备份并重启…')
+    ElMessage.success(t('settings.restore.success', { count: r.restored, previous: r.previous }))
+    overlay.value?.start(t('settings.restore.progress'))
   } catch (e) {
     ElMessage.error((e as Error).message)
   } finally {
@@ -782,17 +791,17 @@ async function loadInfo() {
 
 async function confirmRestart() {
   try {
-    await ElMessageBox.confirm('重启期间管理界面与所有转发、代理服务会短暂中断（通常数秒）。确定重启 Gately？', '重启 Gately', {
+    await ElMessageBox.confirm(t('settings.restart.confirm'), t('settings.restart.button'), {
       type: 'warning',
-      confirmButtonText: '重启',
-      cancelButtonText: '取消',
+      confirmButtonText: t('settings.restart.confirmButton'),
+      cancelButtonText: t('common.cancel'),
     })
   } catch {
     return
   }
   try {
     await api.post('/api/system/restart')
-    overlay.value?.start('正在重启 Gately…')
+    overlay.value?.start(t('settings.restart.progress'))
   } catch (e) {
     ElMessage.error((e as Error).message)
   }

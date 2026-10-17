@@ -1,0 +1,14 @@
+{
+  "enable": "Webhook 사용",
+  "url": "요청 주소",
+  "method": "요청 메서드",
+  "headers": "요청 헤더",
+  "headersPlaceholder": "한 줄에 하나씩, 형식: Key: Value",
+  "body": "요청 본문",
+  "successMark": "성공 판별 문자열",
+  "successPlaceholder": "한 줄에 하나씩, 응답에 하나라도 포함되면 성공으로 간주합니다. 비워 두면 2xx 상태 코드만 확인합니다",
+  "timeout": "제한 시간(초)",
+  "ignoreCertError": "인증서 오류 무시",
+  "variables": "사용 가능한 변수",
+  "varsTip": "{plain} 또는 Lucky 호환 {lucky}"
+}

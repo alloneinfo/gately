@@ -1,0 +1,19 @@
+{
+  "title": "站点统计 · {name}",
+  "hour1": "1 小时",
+  "hour6": "6 小时",
+  "hour24": "24 小时",
+  "rangeHelp": "每分钟一个点，重启或修改该监听后重新计数",
+  "requests": "请求数",
+  "bytesOut": "累计响应流量",
+  "errors": "错误（4xx / 5xx）",
+  "upstreams": "后端",
+  "healthy": "健康",
+  "unavailable": "不可用",
+  "upstreamMeta": "权重 {weight} · 连接 {conns}",
+  "backup": "备用",
+  "topIps": "来源 IP Top 10",
+  "topCountries": "国家 Top 10",
+  "noData": "暂无数据",
+  "noDataGeo": "暂无数据（需导入 GeoIP 数据库）"
+}

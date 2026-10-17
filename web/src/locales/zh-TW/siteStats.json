@@ -1,0 +1,19 @@
+{
+  "title": "站台統計 · {name}",
+  "hour1": "1 小時",
+  "hour6": "6 小時",
+  "hour24": "24 小時",
+  "rangeHelp": "每分鐘一個點，重新啟動或修改該監聽後重新計數",
+  "requests": "請求數",
+  "bytesOut": "累計回應流量",
+  "errors": "錯誤（4xx / 5xx）",
+  "upstreams": "後端",
+  "healthy": "健康",
+  "unavailable": "無法使用",
+  "upstreamMeta": "權重 {weight} · 連線 {conns}",
+  "backup": "備援",
+  "topIps": "來源 IP Top 10",
+  "topCountries": "國家 Top 10",
+  "noData": "暫無資料",
+  "noDataGeo": "暫無資料（需匯入 GeoIP 資料庫）"
+}

@@ -1,0 +1,103 @@
+{
+  "login": "Sign in",
+  "groups": {
+    "network": "Network",
+    "tunnel": "Networking & Tunnels",
+    "web": "Web",
+    "storage": "Network Storage",
+    "tools": "Tools",
+    "system": "System"
+  },
+  "items": {
+    "overview": {
+      "title": "Overview"
+    },
+    "portforward": {
+      "title": "Port Forwarding",
+      "desc": "TCP / UDP port forwarding and load balancing"
+    },
+    "ddns": {
+      "title": "Dynamic DNS",
+      "desc": "Update DNS records automatically when your public IP changes"
+    },
+    "stun": {
+      "title": "STUN Traversal",
+      "desc": "Reach services behind NAT1 without a public IP"
+    },
+    "tailscale": {
+      "title": "Tailscale",
+      "desc": "Join a Tailscale / Headscale network"
+    },
+    "frp": {
+      "title": "frp",
+      "desc": "frpc / frps NAT traversal"
+    },
+    "cloudflared": {
+      "title": "Cloudflare Tunnel",
+      "desc": "Publish internal services without a public IP"
+    },
+    "web": {
+      "title": "Web Services",
+      "desc": "Reverse proxy, redirects and static sites"
+    },
+    "waf": {
+      "title": "WAF Firewall",
+      "desc": "Web application firewall based on OWASP CRS"
+    },
+    "ssl": {
+      "title": "SSL Certificates",
+      "desc": "Automatic ACME issuance and renewal"
+    },
+    "storage": {
+      "title": "Storage",
+      "desc": "Mount local directories or remote WebDAV and manage files online"
+    },
+    "webdav": {
+      "title": "WebDAV",
+      "desc": "WebDAV file sharing service"
+    },
+    "ftp": {
+      "title": "FTP Service",
+      "desc": "FTP / FTPS file sharing service"
+    },
+    "wol": {
+      "title": "Wake-on-LAN",
+      "desc": "Wake up devices on your LAN remotely"
+    },
+    "terminal": {
+      "title": "Web Terminal",
+      "desc": "SSH and local shell in your browser"
+    },
+    "nettools": {
+      "title": "Network Diagnostics",
+      "desc": "Ping, traceroute, port probe, DNS and LAN scan"
+    },
+    "docker": {
+      "title": "Docker",
+      "desc": "Container management and image updates"
+    },
+    "cron": {
+      "title": "Scheduled Tasks",
+      "desc": "Run commands or HTTP requests on a schedule"
+    },
+    "notify": {
+      "title": "Notifications",
+      "desc": "Push events to Telegram, email, WeCom and more"
+    },
+    "logs": {
+      "title": "System Logs"
+    },
+    "apiTokens": {
+      "title": "API Tokens"
+    },
+    "apiDocs": {
+      "title": "API Docs"
+    },
+    "settings": {
+      "title": "Settings"
+    },
+    "about": {
+      "title": "About"
+    }
+  }
+}

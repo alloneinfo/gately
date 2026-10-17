@@ -2,12 +2,12 @@
   <div class="term-pane" :style="{ background: bg }">
     <div ref="host" class="term-host"></div>
     <div v-if="status === 'reconnecting' || status === 'connecting' || status === 'closed' || status === 'ended'" class="term-badge" :class="status">
-      <template v-if="status === 'connecting'">连接中…</template>
-      <template v-else-if="status === 'reconnecting'">连接中断，正在重连（第 {{ attempts }} 次）…</template>
+      <template v-if="status === 'connecting'">{{ t('terminal.pane.connecting') }}</template>
+      <template v-else-if="status === 'reconnecting'">{{ t('terminal.pane.reconnecting', { count: attempts }) }}</template>
       <template v-else>
-        <span>{{ status === 'ended' ? '会话已结束' : '连接已断开' }}</span>
-        <button v-if="status === 'closed'" class="badge-btn" @click="reconnect">重连</button>
-        <button class="badge-btn" @click="restart">新建会话</button>
+        <span>{{ status === 'ended' ? t('terminal.pane.ended') : t('terminal.pane.closed') }}</span>
+        <button v-if="status === 'closed'" class="badge-btn" @click="reconnect">{{ t('terminal.pane.reconnect') }}</button>
+        <button class="badge-btn" @click="restart">{{ t('terminal.pane.newSession') }}</button>
       </template>
     </div>
   </div>
@@ -15,6 +15,7 @@
 
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { Terminal } from '@xterm/xterm'
 import { FitAddon } from '@xterm/addon-fit'
 import { SearchAddon } from '@xterm/addon-search'
@@ -26,6 +27,8 @@ import { ctrlChar, keySequence, type KeyName } from './terminalKeys'
 import { findTheme } from './themes'
 import { FONT_MAX, FONT_MIN } from './prefs'
 import type { PaneStatus } from './types'
+
+const { t } = useI18n()
 
 const props = defineProps<{
   connKey: string
@@ -116,7 +119,7 @@ async function connect() {
       return
     }
     if (isCancel(e)) {
-      writeNote('已取消，未建立连接', '90')
+      writeNote(t('terminal.pane.cancelled'), '90')
       setStatus('closed')
       return
     }
@@ -161,7 +164,7 @@ async function connect() {
       return
     }
     if (!sid) {
-      writeNote('连接失败或被服务端拒绝', '31')
+      writeNote(t('terminal.pane.failed'), '31')
       setStatus('closed')
       return
     }
@@ -194,7 +197,7 @@ function onControl(raw: string) {
     emit('notice', m.d ?? '')
   } else if (m.t === 'x') {
     ended = true
-    writeNote(`会话已结束：${m.d ?? ''}`, '31')
+    writeNote(t('terminal.pane.endedReason', { reason: m.d ?? '' }), '31')
     setStatus('ended')
   }
 }
@@ -203,7 +206,7 @@ function onControl(raw: string) {
 function scheduleRetry() {
   attempts.value++
   if (attempts.value > MAX_RETRY) {
-    writeNote('多次重连失败，已停止自动重连', '31')
+    writeNote(t('terminal.pane.retryGiveUp'), '31')
     setStatus('closed')
     return
   }
@@ -221,7 +224,7 @@ function scheduleRetry() {
       } catch (e) {
         if (e instanceof ApiError && e.status === 404) {
           ended = true
-          writeNote('会话已不存在（可能已超时或被结束）', '31')
+          writeNote(t('terminal.pane.sessionGone'), '31')
           setStatus('ended')
           return
         }

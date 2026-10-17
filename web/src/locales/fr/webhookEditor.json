@@ -1,0 +1,14 @@
+{
+  "enable": "Activer le Webhook",
+  "url": "URL de la requête",
+  "method": "Méthode de la requête",
+  "headers": "En-têtes de la requête",
+  "headersPlaceholder": "Un par ligne, au format Clé: Valeur",
+  "body": "Corps de la requête",
+  "successMark": "Marqueur de réussite",
+  "successPlaceholder": "Un par ligne ; la requête réussit si la réponse contient l'un d'eux. Laisser vide pour vérifier uniquement le code d'état 2xx",
+  "timeout": "Délai d'expiration (s)",
+  "ignoreCertError": "Ignorer les erreurs de certificat",
+  "variables": "Variables disponibles",
+  "varsTip": "{plain} ou, pour la compatibilité Lucky, {lucky}"
+}

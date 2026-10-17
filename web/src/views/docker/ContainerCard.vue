@@ -11,15 +11,15 @@
     <template #status>
       <StatusBadge v-bind="containerBadge(c.state)" />
     </template>
-    <Field label="镜像" mono>
+    <Field :label="t('docker.container.card.image')" mono>
       {{ c.image }}
       <div v-if="c.update" class="upd">
-        <StatusBadge v-if="c.update.error" type="error" text="检查失败" :title="c.update.error" />
-        <StatusBadge v-else-if="c.update.hasUpdate" type="warn" text="有新版本" />
-        <StatusBadge v-else type="ok" text="已是最新" />
+        <StatusBadge v-if="c.update.error" type="error" :text="t('docker.container.card.checkFailed')" :title="c.update.error" />
+        <StatusBadge v-else-if="c.update.hasUpdate" type="warn" :text="t('docker.container.card.hasUpdate')" />
+        <StatusBadge v-else type="ok" :text="t('docker.container.card.upToDate')" />
       </div>
     </Field>
-    <Field label="端口" mono>
+    <Field :label="t('docker.container.card.ports')" mono>
       <div v-for="p in c.ports ?? []" :key="p">
         <a v-if="isTcpPort(p)" href="javascript:void(0)" class="port" @click.prevent="openPort(p)">{{ p }}</a>
         <span v-else>{{ p }}</span>
@@ -27,26 +27,26 @@
       <span v-if="!(c.ports ?? []).length" class="muted">-</span>
     </Field>
     <template #actions>
-      <el-button v-if="c.state !== 'running'" text type="primary" :icon="Play" class="btn" :loading="c.busy" @click="emit('command', c, 'start')">启动</el-button>
-      <el-button v-else text type="danger" :icon="Square" class="btn" @click="emit('command', c, 'stop')">停止</el-button>
-      <el-button v-if="c.state === 'running'" text :icon="RotateCw" class="btn" @click="emit('command', c, 'restart')">重启</el-button>
-      <el-button text :icon="PanelRight" class="btn" @click="emit('command', c, 'detail')">详情</el-button>
+      <el-button v-if="c.state !== 'running'" text type="primary" :icon="Play" class="btn" :loading="c.busy" @click="emit('command', c, 'start')">{{ t('common.start') }}</el-button>
+      <el-button v-else text type="danger" :icon="Square" class="btn" @click="emit('command', c, 'stop')">{{ t('common.stop') }}</el-button>
+      <el-button v-if="c.state === 'running'" text :icon="RotateCw" class="btn" @click="emit('command', c, 'restart')">{{ t('common.restart') }}</el-button>
+      <el-button text :icon="PanelRight" class="btn" @click="emit('command', c, 'detail')">{{ t('common.details') }}</el-button>
       <el-dropdown trigger="click" @command="(cmd: string) => emit('command', c, cmd)">
-        <el-button text :icon="Ellipsis" class="btn">更多</el-button>
+        <el-button text :icon="Ellipsis" class="btn">{{ t('common.more') }}</el-button>
         <template #dropdown>
           <el-dropdown-menu>
-            <el-dropdown-item command="logs" :icon="ScrollText">日志</el-dropdown-item>
-            <el-dropdown-item v-if="c.state === 'running'" command="term" :icon="SquareTerminal">终端</el-dropdown-item>
-            <el-dropdown-item command="files" :icon="FolderOpen">文件</el-dropdown-item>
-            <el-dropdown-item v-if="c.state === 'running'" command="pause" :icon="Pause" divided>暂停</el-dropdown-item>
-            <el-dropdown-item v-if="c.state === 'paused'" command="unpause" :icon="Play" divided>恢复</el-dropdown-item>
-            <el-dropdown-item v-if="c.state === 'running' || c.state === 'paused'" command="kill" :icon="Zap">强制停止 (kill)</el-dropdown-item>
-            <el-dropdown-item command="edit" :icon="Pencil" divided>编辑</el-dropdown-item>
-            <el-dropdown-item command="rename" :icon="TextCursorInput">重命名</el-dropdown-item>
-            <el-dropdown-item command="commit" :icon="GitCommitHorizontal">提交为镜像</el-dropdown-item>
-            <el-dropdown-item command="check" :icon="SearchCheck" divided>检查更新</el-dropdown-item>
-            <el-dropdown-item v-if="c.update?.hasUpdate" command="upgrade" :icon="ArrowUpCircle">升级</el-dropdown-item>
-            <el-dropdown-item command="delete" :icon="Trash2" divided>删除</el-dropdown-item>
+            <el-dropdown-item command="logs" :icon="ScrollText">{{ t('docker.container.card.logs') }}</el-dropdown-item>
+            <el-dropdown-item v-if="c.state === 'running'" command="term" :icon="SquareTerminal">{{ t('docker.container.card.terminal') }}</el-dropdown-item>
+            <el-dropdown-item command="files" :icon="FolderOpen">{{ t('docker.container.card.files') }}</el-dropdown-item>
+            <el-dropdown-item v-if="c.state === 'running'" command="pause" :icon="Pause" divided>{{ t('docker.container.card.pause') }}</el-dropdown-item>
+            <el-dropdown-item v-if="c.state === 'paused'" command="unpause" :icon="Play" divided>{{ t('docker.container.card.unpause') }}</el-dropdown-item>
+            <el-dropdown-item v-if="c.state === 'running' || c.state === 'paused'" command="kill" :icon="Zap">{{ t('docker.container.card.kill') }}</el-dropdown-item>
+            <el-dropdown-item command="edit" :icon="Pencil" divided>{{ t('common.edit') }}</el-dropdown-item>
+            <el-dropdown-item command="rename" :icon="TextCursorInput">{{ t('docker.container.card.rename') }}</el-dropdown-item>
+            <el-dropdown-item command="commit" :icon="GitCommitHorizontal">{{ t('docker.container.card.commit') }}</el-dropdown-item>
+            <el-dropdown-item command="check" :icon="SearchCheck" divided>{{ t('docker.container.card.checkUpdate') }}</el-dropdown-item>
+            <el-dropdown-item v-if="c.update?.hasUpdate" command="upgrade" :icon="ArrowUpCircle">{{ t('docker.container.card.upgrade') }}</el-dropdown-item>
+            <el-dropdown-item command="delete" :icon="Trash2" divided>{{ t('common.delete') }}</el-dropdown-item>
           </el-dropdown-menu>
         </template>
       </el-dropdown>
@@ -55,12 +55,15 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
 import { ArrowUpCircle, Ellipsis, FolderOpen, GitCommitHorizontal, PanelRight, Pause, Pencil, Play, RotateCw, ScrollText, SearchCheck, Square, SquareTerminal, TextCursorInput, Trash2, Zap } from 'lucide-vue-next'
 import EntityCard from '../../components/EntityCard.vue'
 import Field from '../../components/Field.vue'
 import StatusBadge from '../../components/StatusBadge.vue'
 import { containerBadge, isTcpPort, openPort } from './format'
 import type { ContainerView } from './types'
+
+const { t } = useI18n()
 
 defineProps<{ c: ContainerView; selected: boolean; hideProject?: boolean }>()
 const emit = defineEmits<{ command: [c: ContainerView, cmd: string]; select: [id: string, v: boolean] }>()

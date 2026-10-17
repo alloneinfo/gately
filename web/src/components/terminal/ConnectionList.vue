@@ -1,14 +1,14 @@
 <template>
   <div class="g-card conn-card">
     <div class="g-card-head">
-      <div class="g-card-title"><Cable :size="16" />连接 <span class="meta">{{ conns.length }} 个</span></div>
+      <div class="g-card-title"><Cable :size="16" />{{ t('termConn.list.title') }} <span class="meta">{{ t('termConn.list.count', { count: conns.length }) }}</span></div>
       <div class="head-ops">
         <el-button v-if="conns.length > 1" size="small" :type="sortMode ? 'primary' : 'default'" :icon="ArrowUpDown" @click="sortMode = !sortMode">
-          {{ sortMode ? '完成' : '排序' }}
+          {{ sortMode ? t('termConn.list.done') : t('termConn.list.sort') }}
         </el-button>
       </div>
     </div>
-    <el-empty v-if="!conns.length" description="暂无连接，点击右上角「添加连接」" :image-size="60" />
+    <el-empty v-if="!conns.length" :description="t('termConn.list.empty')" :image-size="60" />
     <div class="list">
       <div
         v-for="(c, i) in conns"
@@ -28,9 +28,9 @@
         <div class="conn-main">
           <div class="conn-name">
             <span class="ellipsis">{{ c.name }}</span>
-            <el-tag size="small" effect="plain">{{ typeLabel[c.type] }}</el-tag>
-            <el-tag v-if="!c.enable" size="small" type="info">已停用</el-tag>
-            <span v-if="openCount(c.key)" class="open-dot" :title="`已打开 ${openCount(c.key)} 个会话`">{{ openCount(c.key) }}</span>
+            <el-tag size="small" effect="plain">{{ t(`termConn.type.${c.type}`) }}</el-tag>
+            <el-tag v-if="!c.enable" size="small" type="info">{{ t('termConn.list.disabledTag') }}</el-tag>
+            <span v-if="openCount(c.key)" class="open-dot" :title="t('termConn.list.openSessions', { count: openCount(c.key) })">{{ openCount(c.key) }}</span>
           </div>
           <div class="conn-addr mono">{{ connAddr(c) }}</div>
           <div v-if="c.remark" class="conn-remark">{{ c.remark }}</div>
@@ -38,22 +38,22 @@
         <div class="conn-ops" @click.stop>
           <template v-if="sortMode">
             <GripVertical v-if="!isMobile" :size="16" class="grip" />
-            <el-button class="op" text :icon="ChevronUp" :disabled="i === 0" aria-label="上移" @click="move(i, -1)" />
-            <el-button class="op" text :icon="ChevronDown" :disabled="i === conns.length - 1" aria-label="下移" @click="move(i, 1)" />
+            <el-button class="op" text :icon="ChevronUp" :disabled="i === 0" :aria-label="t('termConn.list.moveUp')" @click="move(i, -1)" />
+            <el-button class="op" text :icon="ChevronDown" :disabled="i === conns.length - 1" :aria-label="t('termConn.list.moveDown')" @click="move(i, 1)" />
           </template>
           <template v-else>
-            <el-button v-if="!isMobile" size="small" type="primary" plain :icon="Play" :disabled="!c.enable" @click="$emit('connect', c)">连接</el-button>
+            <el-button v-if="!isMobile" size="small" type="primary" plain :icon="Play" :disabled="!c.enable" @click="$emit('connect', c)">{{ t('termConn.list.connect') }}</el-button>
             <el-dropdown trigger="click" @command="(cmd: string) => onCommand(c, cmd)">
-              <el-button class="op" text :icon="Ellipsis" aria-label="更多" />
+              <el-button class="op" text :icon="Ellipsis" :aria-label="t('termConn.list.more')" />
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item command="edit" :icon="Pencil">编辑</el-dropdown-item>
-                  <el-dropdown-item command="duplicate" :icon="Copy">复制连接</el-dropdown-item>
-                  <el-dropdown-item v-if="c.type !== 'telnet'" command="sftp" :icon="FolderOpen">文件管理</el-dropdown-item>
-                  <el-dropdown-item v-if="c.type !== 'telnet'" command="quick" :icon="Star">快速访问目录</el-dropdown-item>
-                  <el-dropdown-item v-if="c.type !== 'local'" command="test" :icon="Plug">测试连接</el-dropdown-item>
-                  <el-dropdown-item v-if="c.type === 'ssh'" command="resetkey" :icon="KeyRound">重置主机指纹</el-dropdown-item>
-                  <el-dropdown-item command="delete" :icon="Trash2" divided>删除</el-dropdown-item>
+                  <el-dropdown-item command="edit" :icon="Pencil">{{ t('termConn.list.edit') }}</el-dropdown-item>
+                  <el-dropdown-item command="duplicate" :icon="Copy">{{ t('termConn.list.duplicate') }}</el-dropdown-item>
+                  <el-dropdown-item v-if="c.type !== 'telnet'" command="sftp" :icon="FolderOpen">{{ t('termConn.list.sftp') }}</el-dropdown-item>
+                  <el-dropdown-item v-if="c.type !== 'telnet'" command="quick" :icon="Star">{{ t('termConn.list.quick') }}</el-dropdown-item>
+                  <el-dropdown-item v-if="c.type !== 'local'" command="test" :icon="Plug">{{ t('termConn.list.test') }}</el-dropdown-item>
+                  <el-dropdown-item v-if="c.type === 'ssh'" command="resetkey" :icon="KeyRound">{{ t('termConn.list.resetKey') }}</el-dropdown-item>
+                  <el-dropdown-item command="delete" :icon="Trash2" divided>{{ t('common.delete') }}</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -66,12 +66,13 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   ArrowUpDown, Cable, ChevronDown, ChevronUp, Copy, Ellipsis, FolderOpen, GripVertical, KeyRound, Network, Pencil, Play, Plug, Server, Star, Terminal as TerminalIcon, Trash2,
 } from 'lucide-vue-next'
 import { api } from '../../api'
-import { MASK, connAddr, normalizeConn, typeLabel, type Conn } from './types'
+import { MASK, connAddr, normalizeConn, type Conn } from './types'
 
 const props = defineProps<{ conns: Conn[]; isMobile: boolean; openCounts: Record<string, number> }>()
 const emit = defineEmits<{
@@ -82,6 +83,7 @@ const emit = defineEmits<{
   reload: []
 }>()
 
+const { t } = useI18n()
 const sortMode = ref(false)
 const dragKey = ref('')
 const overKey = ref('')
@@ -130,9 +132,9 @@ function move(i: number, d: number) {
   if (j < 0 || j >= keys.length) {
     return
   }
-  const t = keys[i]
+  const tmp = keys[i]
   keys[i] = keys[j]
-  keys[j] = t
+  keys[j] = tmp
   saveOrder(keys)
 }
 
@@ -157,7 +159,7 @@ function onDrop(target: Conn) {
 function duplicate(c: Conn) {
   const copy = normalizeConn(JSON.parse(JSON.stringify(c)))
   copy.key = ''
-  copy.name = `${c.name} 副本`
+  copy.name = t('termConn.list.copySuffix', { name: c.name })
   copy.ssh.hostKey = ''
   const clear = (v: string) => (/^\*+$/.test(v) || v === MASK ? '' : v)
   copy.ssh.password = clear(copy.ssh.password)
@@ -167,7 +169,7 @@ function duplicate(c: Conn) {
   copy.telnet.password = clear(copy.telnet.password)
   copy.telnet.proxy.password = clear(copy.telnet.proxy.password)
   emit('edit', copy)
-  ElMessage.info('已复制配置，密码、私钥等敏感信息需要重新填写')
+  ElMessage.info(t('termConn.list.copyHint'))
 }
 
 async function onCommand(c: Conn, cmd: string) {
@@ -181,20 +183,20 @@ async function onCommand(c: Conn, cmd: string) {
     } else if (cmd === 'quick') {
       emit('quick', c)
     } else if (cmd === 'test') {
-      const loading = ElMessage({ message: '正在测试连接…', duration: 0, type: 'info' })
+      const loading = ElMessage({ message: t('termConn.list.testing'), duration: 0, type: 'info' })
       try {
         const r = await api.post<{ message?: string } | null>(`/api/webterminal/connections/${encodeURIComponent(c.key)}/test`)
-        ElMessage.success(r?.message || `${c.name} 连接成功`)
+        ElMessage.success(r?.message || t('termConn.list.testOk', { name: c.name }))
       } finally {
         loading.close()
       }
     } else if (cmd === 'resetkey') {
-      await ElMessageBox.confirm('重置后，下次连接时会重新记录主机指纹。主机重装或更换密钥后需要执行此操作。', `重置 ${c.name} 的主机指纹`, { type: 'warning' })
+      await ElMessageBox.confirm(t('termConn.list.resetConfirm'), t('termConn.list.resetTitle', { name: c.name }), { type: 'warning' })
       await api.del(`/api/webterminal/connections/${encodeURIComponent(c.key)}/hostkey`)
-      ElMessage.success('已重置')
+      ElMessage.success(t('termConn.list.resetDone'))
       emit('reload')
     } else if (cmd === 'delete') {
-      await ElMessageBox.confirm(`删除连接「${c.name}」？`, '确认', { type: 'warning' })
+      await ElMessageBox.confirm(t('termConn.list.deleteConfirm', { name: c.name }), t('termConn.list.confirmTitle'), { type: 'warning' })
       await api.del(`/api/webterminal/connections/${encodeURIComponent(c.key)}`)
       emit('reload')
     }

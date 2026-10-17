@@ -6,14 +6,14 @@
         <template v-if="!timedOut">
           <Loader2 :size="36" class="spin" />
           <div class="title">{{ title }}</div>
-          <div class="desc">服务恢复后页面会自动刷新，请勿关闭此页面。</div>
-          <div class="elapsed">已等待 {{ elapsed }} 秒</div>
+          <div class="desc">{{ t('components.restartOverlay.resumeHint') }}</div>
+          <div class="elapsed">{{ t('components.restartOverlay.waited', { seconds: elapsed }) }}</div>
         </template>
         <template v-else>
           <TriangleAlert :size="36" class="warn" />
-          <div class="title">等待超时</div>
-          <div class="desc">服务长时间未响应。如修改了管理端口或监听地址，请手动访问新地址；也可以查看程序日志确认启动情况。</div>
-          <el-button type="primary" :icon="RefreshCw" @click="reload">刷新页面</el-button>
+          <div class="title">{{ t('components.restartOverlay.timeoutTitle') }}</div>
+          <div class="desc">{{ t('components.restartOverlay.timeoutDesc') }}</div>
+          <el-button type="primary" :icon="RefreshCw" @click="reload">{{ t('components.restartOverlay.reload') }}</el-button>
         </template>
       </div>
     </div>
@@ -22,7 +22,10 @@
 
 <script setup lang="ts">
 import { onBeforeUnmount, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { Loader2, RefreshCw, TriangleAlert } from 'lucide-vue-next'
+
+const { t } = useI18n()
 
 const visible = ref(false)
 const title = ref('')

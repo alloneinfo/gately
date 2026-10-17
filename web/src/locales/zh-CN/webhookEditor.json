@@ -1,0 +1,14 @@
+{
+  "enable": "启用 Webhook",
+  "url": "请求地址",
+  "method": "请求方法",
+  "headers": "请求头",
+  "headersPlaceholder": "每行一个，格式 Key: Value",
+  "body": "请求体",
+  "successMark": "成功标识",
+  "successPlaceholder": "每行一个，响应包含任意一项即成功；留空只检查 2xx 状态码",
+  "timeout": "超时(秒)",
+  "ignoreCertError": "忽略证书错误",
+  "variables": "可用变量",
+  "varsTip": "{plain} 或兼容 Lucky 的 {lucky}"
+}

@@ -1,0 +1,5 @@
+{
+  "title": "Logs do sistema",
+  "desc": "Veja em um só lugar os logs de execução do Gately e os logs de cada módulo. Os logs ficam apenas na memória e são apagados ao reiniciar.",
+  "system": "Sistema"
+}

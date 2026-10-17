@@ -1,0 +1,15 @@
+{
+  "keyPlaceholder": "Clé, p. ex. github",
+  "namePlaceholder": "Nom affiché",
+  "clientIdPlaceholder": "Client ID (APP ID pour QQ)",
+  "clientSecretPlaceholder": "Client Secret (APP Key pour QQ)",
+  "issuerPlaceholder": "Émetteur, p. ex. https://login.example.com",
+  "addProvider": "Ajouter une méthode de connexion",
+  "oidc": "OIDC générique",
+  "hints": {
+    "github": "Créez une application dans GitHub → Settings → Developer settings → OAuth Apps. Une identité peut être un nom de connexion ou un ID numérique (un ID numérique reste valide après un renommage).",
+    "google": "Créez un client OAuth (application Web) dans la Google Cloud Console. Une identité peut être une adresse e-mail vérifiée ou le sub.",
+    "qq": "Créez une application de site web sur QQ Connect. L'openid diffère pour chaque application ; lorsqu'une première connexion est refusée, la page affiche l'identifiant du compte, que vous pouvez ajouter à la liste d'autorisation.",
+    "oidc": "Tout service prenant en charge les documents de découverte OIDC (Authentik, Keycloak, Casdoor, etc.). Une identité peut être une adresse e-mail vérifiée ou le sub."
+  }
+}

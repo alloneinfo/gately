@@ -1,5 +1,6 @@
 // 管理 API 封装：会话通过 HttpOnly Cookie 维持，401 时跳转登录页。
 import router from './router'
+import { t } from './i18n'
 
 export class ApiError extends Error {
   constructor(
@@ -26,10 +27,10 @@ async function request<T>(method: string, url: string, body?: unknown): Promise<
     if (router.currentRoute.value.name !== 'login') {
       router.push({ name: 'login', query: { redirect: router.currentRoute.value.fullPath } })
     }
-    throw new ApiError(data?.error ?? '未登录', 401, data)
+    throw new ApiError(data?.error ?? t('common.notLoggedIn'), 401, data)
   }
   if (!resp.ok) {
-    throw new ApiError(data?.error ?? `请求失败 (${resp.status})`, resp.status, data)
+    throw new ApiError(data?.error ?? t('common.requestFailed', { status: resp.status }), resp.status, data)
   }
   return data as T
 }
@@ -223,12 +224,12 @@ export function formatDuration(sec: number): string {
   s %= 3600
   const m = Math.floor(s / 60)
   if (d > 0) {
-    return `${d} 天 ${h} 小时`
+    return t('common.durationDaysHours', { d, h })
   }
   if (h > 0) {
-    return `${h} 小时 ${m} 分`
+    return t('common.durationHoursMinutes', { h, m })
   }
-  return `${m} 分钟`
+  return t('common.durationMinutes', { m })
 }
 
 // TokenView 对应 GET /api/tokens 的一项（不含明文）。

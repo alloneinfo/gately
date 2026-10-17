@@ -1,59 +1,59 @@
 <template>
   <div>
-    <el-form-item v-if="site.webAuth || site.basicAuth" label="认证范围">
-      <el-checkbox v-model="site.authOptional">仅对下方标记为「必须认证」的路径启用认证，其余路径公开</el-checkbox>
+    <el-form-item v-if="site.webAuth || site.basicAuth" :label="t('siteAccess.authScope')">
+      <el-checkbox v-model="site.authOptional">{{ t('siteAccess.authOptional') }}</el-checkbox>
     </el-form-item>
 
-    <el-form-item label="路径规则">
+    <el-form-item :label="t('siteAccess.pathRules')">
       <div class="rows">
         <div v-for="(r, i) in site.rules" :key="i" class="row">
           <el-input v-model="r.prefix" placeholder="/admin" class="w-prefix mono" />
           <el-select v-model="r.auth" class="w-auth">
-            <el-option label="认证：沿用站点" value="" />
-            <el-option label="无需认证" value="off" />
-            <el-option label="必须认证" value="on" />
+            <el-option :label="t('siteAccess.authInherit')" value="" />
+            <el-option :label="t('siteAccess.authOff')" value="off" />
+            <el-option :label="t('siteAccess.authOn')" value="on" />
           </el-select>
           <el-select v-model="r.ipMode" class="w-ip">
-            <el-option label="IP：沿用站点" value="" />
-            <el-option label="IP 白名单" value="whitelist" />
-            <el-option label="IP 黑名单" value="blacklist" />
+            <el-option :label="t('siteAccess.ipInherit')" value="" />
+            <el-option :label="t('siteAccess.ipWhitelist')" value="whitelist" />
+            <el-option :label="t('siteAccess.ipBlacklist')" value="blacklist" />
           </el-select>
           <el-input v-if="r.ipMode" :model-value="(r.ipList ?? []).join(', ')" placeholder="192.168.1.0/24, 10.0.0.1" class="mono flex" @update:model-value="(v: string) => (r.ipList = v.split(/[,\s]+/).filter(Boolean))" />
           <el-button text type="danger" :icon="Trash2" @click="site.rules.splice(i, 1)" />
         </div>
-        <el-button text :icon="Plus" @click="site.rules.push({ prefix: '/', auth: '', ipMode: '', ipList: [] })">添加规则</el-button>
-        <div class="form-help">按路径前缀匹配，最长前缀优先；路径会先规范化（消除 ../ 与重复斜杠）再匹配</div>
+        <el-button text :icon="Plus" @click="site.rules.push({ prefix: '/', auth: '', ipMode: '', ipList: [] })">{{ t('siteAccess.addRule') }}</el-button>
+        <div class="form-help">{{ t('siteAccess.rulesHelp') }}</div>
       </div>
     </el-form-item>
 
-    <el-form-item label="国家过滤">
+    <el-form-item :label="t('siteAccess.countryFilter')">
       <el-radio-group v-model="site.countryMode">
-        <el-radio-button value="">关闭</el-radio-button>
-        <el-radio-button value="allow">仅允许</el-radio-button>
-        <el-radio-button value="deny">拒绝</el-radio-button>
+        <el-radio-button value="">{{ t('siteAccess.countryOff') }}</el-radio-button>
+        <el-radio-button value="allow">{{ t('siteAccess.countryAllow') }}</el-radio-button>
+        <el-radio-button value="deny">{{ t('siteAccess.countryDeny') }}</el-radio-button>
       </el-radio-group>
     </el-form-item>
-    <el-form-item v-if="site.countryMode" label="国家代码">
-      <el-input :model-value="(site.countries ?? []).join(', ')" class="mono" placeholder="两位 ISO 代码，逗号分隔，如 CN, HK, US" @update:model-value="(v: string) => (site.countries = v.split(/[,\s]+/).filter(Boolean))" />
+    <el-form-item v-if="site.countryMode" :label="t('siteAccess.countryCodes')">
+      <el-input :model-value="(site.countries ?? []).join(', ')" class="mono" :placeholder="t('siteAccess.countryCodesPlaceholder')" @update:model-value="(v: string) => (site.countries = v.split(/[,\s]+/).filter(Boolean))" />
       <div class="form-help">
-        内网地址始终放行。
-        <span v-if="geoLoaded">GeoIP 数据库已加载。</span>
-        <span v-else class="warn">尚未导入 GeoIP 数据库，过滤暂不生效（在「全局设置」中导入）。</span>
+        {{ t('siteAccess.lanAlwaysAllowed') }}
+        <span v-if="geoLoaded">{{ t('siteAccess.geoLoaded') }}</span>
+        <span v-else class="warn">{{ t('siteAccess.geoMissing') }}</span>
       </div>
     </el-form-item>
 
-    <el-form-item v-if="site.webAuth || site.basicAuth" label="分享链接">
+    <el-form-item v-if="site.webAuth || site.basicAuth" :label="t('siteAccess.shareLinks')">
       <div class="rows">
         <div v-for="(l, i) in site.shareLinks" :key="l.key ?? i" class="row">
-          <el-input v-model="l.name" placeholder="名称，如 给张三" class="w-name" />
-          <el-date-picker v-model="l.expiresAt" type="datetime" placeholder="不过期" value-format="YYYY-MM-DDTHH:mm:ssZ" class="w-date" />
+          <el-input v-model="l.name" :placeholder="t('siteAccess.shareNamePlaceholder')" class="w-name" />
+          <el-date-picker v-model="l.expiresAt" type="datetime" :placeholder="t('siteAccess.noExpiry')" value-format="YYYY-MM-DDTHH:mm:ssZ" class="w-date" />
           <el-input-number v-model="l.maxUses" :min="0" controls-position="right" class="w-uses" />
-          <el-input v-model="l.pathPrefix" placeholder="路径限制，如 /docs" class="mono w-path" />
-          <el-button text :icon="Copy" :disabled="!l.token" :title="l.token ? '复制链接' : '保存后可复制'" @click="copyLink(l)" />
+          <el-input v-model="l.pathPrefix" :placeholder="t('siteAccess.pathLimitPlaceholder')" class="mono w-path" />
+          <el-button text :icon="Copy" :disabled="!l.token" :title="l.token ? t('siteAccess.copyLink') : t('siteAccess.copyAfterSave')" @click="copyLink(l)" />
           <el-button text type="danger" :icon="Trash2" @click="site.shareLinks.splice(i, 1)" />
         </div>
-        <el-button text :icon="Plus" @click="addLink">添加分享链接</el-button>
-        <div class="form-help">持链接访问一次即可获得最长 24 小时的免登录会话。次数为 0 表示不限；兑换次数在重启后清零；删除链接后已发出的会话立即失效</div>
+        <el-button text :icon="Plus" @click="addLink">{{ t('siteAccess.addShareLink') }}</el-button>
+        <div class="form-help">{{ t('siteAccess.shareHelp') }}</div>
       </div>
     </el-form-item>
   </div>
@@ -61,6 +61,7 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { Copy, Plus, Trash2 } from 'lucide-vue-next'
 import { api } from '../api'
 import { copyText } from '../composables/useClipboard'
@@ -92,6 +93,7 @@ export interface AccessFields {
   shareLinks: ShareLink[]
 }
 
+const { t } = useI18n()
 const props = defineProps<{ tls: boolean; port: number }>()
 const site = defineModel<AccessFields>('site', { required: true })
 const geoLoaded = ref(true)

@@ -1,0 +1,19 @@
+# 模組總覽
+
+Gately 的每項能力都是獨立模組，可單獨啟停、單獨設定，設定各自儲存為一個純文字 JSON 檔案。
+
+| 模組 | 能力 | 文件 |
+| --- | --- | --- |
+| 動態網域 | 11 家 DNS 服務商，URL / 網卡 / 命令取得 IP，IPv4 / IPv6，Webhook | [查看](/zh-TW/docs/modules/ddns) |
+| STUN 穿透 | TCP / UDP、保活、UPnP / NAT-PMP、內建轉發、變更時觸發 Webhook 與指令碼 | [查看](/zh-TW/docs/modules/stun) |
+| 連接埠轉發 | TCP / UDP、IPv4 / IPv6、連接埠範圍、多目標容錯移轉、連線數限制、流量統計 | [查看](/zh-TW/docs/modules/portforward) |
+| SSL 憑證 | ACME DNS-01 自動簽發與續期、上傳、對應到目錄並執行指令碼 | [查看](/zh-TW/docs/modules/ssl) |
+| Web 服務 | 反向代理、重新導向、靜態檔案、HTTPS、驗證、存取控制、負載平衡與健康檢查、快取與限流、存取統計 | [查看](/zh-TW/docs/modules/web) |
+| WAF 防火牆 | Coraza + OWASP CRS v4 | [查看](/zh-TW/docs/modules/waf) |
+| Tailscale / frp / cloudflared | 託管官方執行檔的組網與內網穿透 | [查看](/zh-TW/docs/modules/tunnels) |
+| Docker 管理 | 容器建立與編輯、日誌與終端機、Compose、映像檔更新與升級、網路與磁碟區 | [查看](/zh-TW/docs/modules/docker) |
+| Web 終端機 | SSH、Telnet、本機 Shell、SFTP 檔案管理、持久工作階段 | [查看](/zh-TW/docs/modules/terminal) |
+| 網路診斷 | Ping、路由追蹤、連接埠探測、DNS 查詢、測速、區域網路掃描 | [查看](/zh-TW/docs/modules/nettools) |
+| 通知中心 | 多管道事件推送與規則 | [查看](/zh-TW/docs/modules/notify) |
+| 設定備份 | 加密備份、保留策略、排程備份與還原 | [查看](/zh-TW/docs/modules/backup) |
+| 檔案與維運工具 | WebDAV、FTP、儲存管理、網路喚醒、排程工作 | [查看](/zh-TW/docs/modules/tools) |

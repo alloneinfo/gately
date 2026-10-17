@@ -1,0 +1,45 @@
+{
+  "clipboard": {
+    "copyFailed": "Automatisches Kopieren nicht möglich. Der Text ist markiert; drücken Sie zum Kopieren Strg/Cmd+C."
+  },
+  "themePicker": {
+    "switchTheme": "Design wechseln",
+    "title": "Designfarben",
+    "followSystem": "System folgen (Smaragd / Dunkel)"
+  },
+  "moduleBanner": {
+    "defaultDesc": "Solange das Modul deaktiviert ist, wird keiner der folgenden Einträge ausgeführt. Nach der Aktivierung richtet sich jeder Eintrag nach seinem eigenen Schalter.",
+    "enable": "Modul aktivieren"
+  },
+  "saveBar": {
+    "dirty": "Es gibt ungespeicherte Änderungen",
+    "saved": "Alle Änderungen gespeichert",
+    "undo": "Rückgängig",
+    "save": "Einstellungen speichern"
+  },
+  "logCard": {
+    "title": "Laufzeitprotokolle"
+  },
+  "logViewer": {
+    "levelAll": "Alle Stufen",
+    "levelInfo": "Info und höher",
+    "levelWarn": "Warnung und höher",
+    "levelError": "Nur Fehler",
+    "autoScroll": "Automatisch scrollen",
+    "empty": "Noch keine Protokolle"
+  },
+  "scopeTags": {
+    "allWrite": "Vollzugriff",
+    "allRead": "Schreibgeschützt (alle)",
+    "write": "Lesen/Schreiben",
+    "read": "schreibgeschützt",
+    "none": "Keine Berechtigungen"
+  },
+  "restartOverlay": {
+    "resumeHint": "Die Seite wird automatisch aktualisiert, sobald der Dienst wieder erreichbar ist. Lassen Sie diese Seite geöffnet.",
+    "waited": "{seconds} s gewartet",
+    "timeoutTitle": "Zeitüberschreitung",
+    "timeoutDesc": "Der Dienst antwortet seit längerer Zeit nicht. Falls Sie den Admin-Port oder die Listen-Adresse geändert haben, öffnen Sie die neue Adresse manuell. Außerdem können Sie in den Programmprotokollen prüfen, wie der Start verläuft.",
+    "reload": "Seite neu laden"
+  }
+}

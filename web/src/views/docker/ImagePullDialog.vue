@@ -1,19 +1,19 @@
 <template>
-  <el-dialog :model-value="modelValue" title="拉取镜像" width="560px" :fullscreen="isMobile" append-to-body @update:model-value="(v: boolean) => emit('update:modelValue', v)" @open="onOpen">
+  <el-dialog :model-value="modelValue" :title="t('docker.image.pull.title')" width="560px" :fullscreen="isMobile" append-to-body @update:model-value="(v: boolean) => emit('update:modelValue', v)" @open="onOpen">
     <el-form :label-position="labelPosition" label-width="80px" @submit.prevent>
-      <el-form-item label="镜像" required>
-        <el-input v-model="ref" placeholder="例如 nginx:latest 或 ghcr.io/org/app:tag" class="mono" @keyup.enter="pull" />
+      <el-form-item :label="t('docker.image.pull.image')" required>
+        <el-input v-model="ref" :placeholder="t('docker.image.pull.imagePlaceholder')" class="mono" @keyup.enter="pull" />
       </el-form-item>
-      <el-form-item label="搜索">
+      <el-form-item :label="t('common.search')">
         <div class="full">
-          <el-input v-model="term" placeholder="在 Docker Hub 搜索镜像" :prefix-icon="Search" clearable @keyup.enter="search">
-            <template #append><el-button :loading="searching" @click="search">搜索</el-button></template>
+          <el-input v-model="term" :placeholder="t('docker.image.pull.searchPlaceholder')" :prefix-icon="Search" clearable @keyup.enter="search">
+            <template #append><el-button :loading="searching" @click="search">{{ t('common.search') }}</el-button></template>
           </el-input>
           <div class="results">
             <div v-for="r in results" :key="r.name" class="res" @click="pick(r.name)">
               <div class="res-top">
                 <b class="mono">{{ r.name }}</b>
-                <el-tag v-if="r.official" size="small" type="success">官方</el-tag>
+                <el-tag v-if="r.official" size="small" type="success">{{ t('docker.image.pull.official') }}</el-tag>
                 <span class="stars"><Star :size="12" />{{ r.stars }}</span>
               </div>
               <div v-if="r.description" class="res-desc">{{ r.description }}</div>
@@ -23,20 +23,23 @@
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button @click="emit('update:modelValue', false)">取消</el-button>
-      <el-button type="primary" :icon="CloudDownload" :loading="busy" @click="pull">拉取</el-button>
+      <el-button @click="emit('update:modelValue', false)">{{ t('common.cancel') }}</el-button>
+      <el-button type="primary" :icon="CloudDownload" :loading="busy" @click="pull">{{ t('docker.image.pull.pull') }}</el-button>
     </template>
   </el-dialog>
 </template>
 
 <script setup lang="ts">
 import { ref as vref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { CloudDownload, Search, Star } from 'lucide-vue-next'
 import { api } from '../../api'
 import { useFormLayout } from '../../composables/useIsMobile'
 import { trackTask } from './tasks'
 import type { ImageSearchItem } from './types'
+
+const { t } = useI18n()
 
 defineProps<{ modelValue: boolean }>()
 const emit = defineEmits<{ 'update:modelValue': [v: boolean]; done: [] }>()
@@ -66,7 +69,7 @@ async function search() {
   try {
     results.value = (await api.post<ImageSearchItem[]>('/api/docker/images/search', { term: term.value.trim(), limit: 25 })) ?? []
     if (!results.value.length) {
-      ElMessage.info('没有搜索结果')
+      ElMessage.info(t('docker.image.pull.noResults'))
     }
   } catch (e) {
     ElMessage.error((e as Error).message)
@@ -78,14 +81,14 @@ async function search() {
 async function pull() {
   const r = ref.value.trim()
   if (!r) {
-    ElMessage.warning('请填写镜像名')
+    ElMessage.warning(t('docker.image.pull.imageRequired'))
     return
   }
   busy.value = true
   try {
-    const t = await api.post<{ task: string }>('/api/docker/images/pull', { ref: r })
+    const res = await api.post<{ task: string }>('/api/docker/images/pull', { ref: r })
     emit('update:modelValue', false)
-    trackTask(t.task, `拉取 ${r}`, () => emit('done'))
+    trackTask(res.task, t('docker.image.pull.task', { ref: r }), () => emit('done'))
   } catch (e) {
     ElMessage.error((e as Error).message)
   } finally {

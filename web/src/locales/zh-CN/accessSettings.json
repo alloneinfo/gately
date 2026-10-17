@@ -1,0 +1,20 @@
+{
+  "autoBan": "自动封禁",
+  "authFailBan": "认证失败封禁",
+  "authFailBanHelp": "分钟；认证连续失败达到 10 次后封禁来源 IP，0 为不封禁（仅限流 15 分钟）",
+  "banList": "封禁列表",
+  "noBans": "当前没有被封禁的 IP",
+  "until": "至 {time}",
+  "unban": "解除",
+  "manualBanIp": "手动封禁 IP",
+  "hours": "小时",
+  "ban": "封禁",
+  "geoTitle": "GeoIP 数据库（国家过滤）",
+  "geoLoaded": "已加载：{type}，构建于 {buildTime}，{size} MB",
+  "remove": "移除",
+  "geoNotImported": "未导入。支持 MaxMind GeoLite2 / DB-IP 等 .mmdb 国家库或城市库",
+  "uploadMmdb": "上传 .mmdb",
+  "mmdbUrlPlaceholder": "或填写 .mmdb 下载地址",
+  "geoImported": "GeoIP 数据库已导入",
+  "geoDownloaded": "GeoIP 数据库已下载并加载"
+}

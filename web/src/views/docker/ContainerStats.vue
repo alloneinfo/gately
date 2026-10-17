@@ -7,13 +7,13 @@
         <Sparkline :series="[{ values: cpu, color: 'var(--el-color-primary)' }]" :height="40" :capacity="CAP" :max="cpuMax" />
       </div>
       <div class="tile">
-        <div class="t-label">内存</div>
+        <div class="t-label">{{ t('docker.container.stats.memory') }}</div>
         <div class="t-value">{{ cur ? formatBytes(cur.memUsage) : '-' }}<small v-if="cur && cur.memLimit"> / {{ formatBytes(cur.memLimit) }}</small></div>
         <Sparkline :series="[{ values: mem, color: 'var(--g-chart-2)' }]" :height="40" :capacity="CAP" :max="100" />
         <div class="t-sub">{{ cur ? cur.memPercent.toFixed(1) : '-' }}%</div>
       </div>
       <div class="tile">
-        <div class="t-label">网络 接收 / 发送（速率）</div>
+        <div class="t-label">{{ t('docker.container.stats.netTitle') }}</div>
         <div class="t-value sm">↓ {{ rate(rxRate) }}　↑ {{ rate(txRate) }}</div>
         <Sparkline
           :series="[
@@ -23,11 +23,11 @@
           :height="40"
           :capacity="CAP"
         />
-        <div class="t-sub">累计 ↓ {{ cur ? formatBytes(cur.netRx) : '-' }}　↑ {{ cur ? formatBytes(cur.netTx) : '-' }}</div>
+        <div class="t-sub">{{ t('docker.container.stats.netTotal', { rx: cur ? formatBytes(cur.netRx) : '-', tx: cur ? formatBytes(cur.netTx) : '-' }) }}</div>
       </div>
       <div class="tile">
-        <div class="t-label">块 IO 读 / 写（速率）</div>
-        <div class="t-value sm">读 {{ rate(brRate) }}　写 {{ rate(bwRate) }}</div>
+        <div class="t-label">{{ t('docker.container.stats.ioTitle') }}</div>
+        <div class="t-value sm">{{ t('docker.container.stats.ioRate', { read: rate(brRate), write: rate(bwRate) }) }}</div>
         <Sparkline
           :series="[
             { values: br, color: 'var(--el-color-primary)' },
@@ -36,20 +36,20 @@
           :height="40"
           :capacity="CAP"
         />
-        <div class="t-sub">累计 读 {{ cur ? formatBytes(cur.blockRead) : '-' }}　写 {{ cur ? formatBytes(cur.blockWrite) : '-' }}　进程 {{ cur?.pids ?? '-' }}</div>
+        <div class="t-sub">{{ t('docker.container.stats.ioTotal', { read: cur ? formatBytes(cur.blockRead) : '-', write: cur ? formatBytes(cur.blockWrite) : '-', pids: cur?.pids ?? '-' }) }}</div>
       </div>
     </div>
 
     <div class="g-card proc">
       <div class="g-card-head">
-        <div class="g-card-title"><Cpu :size="16" />进程</div>
-        <el-button size="small" :icon="RefreshCw" @click="loadProcs">刷新</el-button>
+        <div class="g-card-title"><Cpu :size="16" />{{ t('docker.container.stats.processes') }}</div>
+        <el-button size="small" :icon="RefreshCw" @click="loadProcs">{{ t('common.refresh') }}</el-button>
       </div>
       <div class="g-card-body">
         <div v-if="!isMobile" class="tbl-wrap">
           <table class="tbl mono">
             <thead>
-              <tr><th v-for="t in procs.titles" :key="t">{{ t }}</th></tr>
+              <tr><th v-for="title in procs.titles" :key="title">{{ title }}</th></tr>
             </thead>
             <tbody>
               <tr v-for="(p, i) in procs.processes" :key="i"><td v-for="(c, j) in p" :key="j">{{ c }}</td></tr>
@@ -63,7 +63,7 @@
             </div>
           </div>
         </div>
-        <el-empty v-if="!procs.processes.length" description="暂无进程信息" :image-size="50" />
+        <el-empty v-if="!procs.processes.length" :description="t('docker.container.stats.noProcesses')" :image-size="50" />
       </div>
     </div>
   </div>
@@ -71,6 +71,7 @@
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { Cpu, RefreshCw } from 'lucide-vue-next'
 import { api } from '../../api'
@@ -78,6 +79,8 @@ import Sparkline from '../../components/Sparkline.vue'
 import { useIsMobile } from '../../composables/useIsMobile'
 import { formatBytes } from './format'
 import type { ContainerStats } from './types'
+
+const { t } = useI18n()
 
 const props = defineProps<{ containerId: string }>()
 const isMobile = useIsMobile()

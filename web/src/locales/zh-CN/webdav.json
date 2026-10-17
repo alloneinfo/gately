@@ -1,0 +1,11 @@
+{
+  "service": "服务",
+  "listenIpPlaceholder": "留空表示所有地址",
+  "listenIp": "监听地址",
+  "port": "端口",
+  "statusOff": "已停用",
+  "statusError": "启动失败",
+  "statusNotRunning": "未运行",
+  "desc": "把本机目录以 WebDAV 协议共享给电脑、手机与播放器",
+  "tlsHelp": "证书按访问域名从「SSL 证书」中选择"
+}

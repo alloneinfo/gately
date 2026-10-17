@@ -1,5 +1,6 @@
 // SFTP 文件管理的接口封装与路径、权限辅助函数。
 import { ApiError, api } from '../../api'
+import { t } from '../../i18n'
 import { withAccess } from './security'
 import type { SftpEntry, SftpList } from './types'
 
@@ -36,7 +37,7 @@ export function readText(key: string, path: string): Promise<string> {
     }
     if (!resp.ok) {
       const d = (data ?? {}) as Record<string, unknown>
-      throw new ApiError(String(d.error ?? `请求失败 (${resp.status})`), resp.status, d)
+      throw new ApiError(String(d.error ?? t('common.requestFailed', { status: resp.status })), resp.status, d)
     }
     if (data && typeof data === 'object' && typeof (data as { content?: unknown }).content === 'string') {
       return (data as { content: string }).content
@@ -68,10 +69,10 @@ export function uploadForm(key: string, fd: FormData, onProgress: (percent: numb
           if (xhr.status >= 200 && xhr.status < 300) {
             resolve()
           } else {
-            reject(new ApiError(String(data?.error ?? `上传失败 (${xhr.status})`), xhr.status, data))
+            reject(new ApiError(String(data?.error ?? t('sftp.api.uploadFailed', { status: xhr.status })), xhr.status, data))
           }
         }
-        xhr.onerror = () => reject(new ApiError('网络错误，上传失败', 0))
+        xhr.onerror = () => reject(new ApiError(t('sftp.api.networkError'), 0))
         xhr.send(fd)
       }),
   )

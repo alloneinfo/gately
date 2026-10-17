@@ -1,75 +1,75 @@
 <template>
   <div>
-    <PageHeader title="WAF 防火墙" desc="基于 Coraza 与 OWASP 核心规则集（CRS），在 Web 服务的站点中引用实例即可启用" :icon="ShieldHalf">
-      <el-button type="primary" :icon="Plus" @click="openEditor()">添加实例</el-button>
+    <PageHeader :title="t('waf.title')" :desc="t('waf.desc')" :icon="ShieldHalf">
+      <el-button type="primary" :icon="Plus" @click="openEditor()">{{ t('waf.addInstance') }}</el-button>
     </PageHeader>
 
     <div class="card-list">
-      <el-empty v-if="!instances.length" description="暂无实例" />
+      <el-empty v-if="!instances.length" :description="t('waf.empty')" />
       <EntityCard v-for="w in instances" :key="w.key" :off="!w.enable">
         <template #lead>
           <el-switch :model-value="w.enable" @change="(v: string | number | boolean) => toggle(w, Boolean(v))" />
         </template>
         <template #title>
           <span>{{ w.name }}</span>
-          <el-tag :type="w.mode === 'block' ? 'danger' : 'warning'" size="small" effect="plain">{{ w.mode === 'block' ? '拦截' : '仅检测' }}</el-tag>
+          <el-tag :type="w.mode === 'block' ? 'danger' : 'warning'" size="small" effect="plain">{{ w.mode === 'block' ? t('waf.modeBlockShort') : t('waf.modeDetectShort') }}</el-tag>
         </template>
         <template #sub><span class="mono">{{ w.key }}</span><span v-if="w.remark"> · {{ w.remark }}</span></template>
         <template #status>
           <StatusBadge v-bind="instStatus(w)" />
         </template>
-        <Field label="规则组" wide>
+        <Field :label="t('waf.ruleSets')" wide>
           <div v-for="(r, i) in w.ruleSets ?? []" :key="i" class="ruleset-line" :class="{ off: !r.enable }">
             <span class="dot" />
-            {{ r.type === 'crs' ? 'OWASP CRS' : '自定义' }}{{ r.remark ? '：' + r.remark : '' }}
-            <span v-if="r.type === 'crs'" class="meta">（{{ r.param ? r.param.split('\n').filter(Boolean).length + ' 个文件' : '全部规则' }}）</span>
+            {{ r.type === 'crs' ? 'OWASP CRS' : t('waf.custom') }}{{ r.remark ? t('waf.remarkSuffix', { remark: r.remark }) : '' }}
+            <span v-if="r.type === 'crs'" class="meta">{{ r.param ? t('waf.ruleFiles', { count: r.param.split('\n').filter(Boolean).length }) : t('waf.allRules') }}</span>
           </div>
-          <span v-if="!(w.ruleSets ?? []).length" class="muted">无</span>
+          <span v-if="!(w.ruleSets ?? []).length" class="muted">{{ t('common.none') }}</span>
         </Field>
-        <Field label="阈值 / 偏执等级">入站 {{ w.inboundThreshold }} · 出站 {{ w.outboundThreshold }} · PL{{ w.paranoia }}</Field>
-        <Field label="已拦截"><span :class="{ 'text-danger': w.blocked > 0 }">{{ w.blocked }}</span></Field>
-        <Field label="规则命中">{{ w.matched }}</Field>
+        <Field :label="t('waf.thresholdParanoia')">{{ t('waf.thresholdValue', { inbound: w.inboundThreshold, outbound: w.outboundThreshold, level: w.paranoia }) }}</Field>
+        <Field :label="t('waf.blocked')"><span :class="{ 'text-danger': w.blocked > 0 }">{{ w.blocked }}</span></Field>
+        <Field :label="t('waf.matched')">{{ w.matched }}</Field>
         <template v-if="w.error && w.enable" #extra>
           <div class="err-line">{{ w.error }}</div>
         </template>
         <template #actions>
-          <el-button text size="small" :icon="Pencil" @click="openEditor(w)">编辑</el-button>
-          <el-popconfirm title="删除该实例？引用它的站点将不再检查" width="240" @confirm="remove(w)">
+          <el-button text size="small" :icon="Pencil" @click="openEditor(w)">{{ t('common.edit') }}</el-button>
+          <el-popconfirm :title="t('waf.deleteConfirm')" width="240" @confirm="remove(w)">
             <template #reference>
-              <el-button text size="small" type="danger" :icon="Trash2">删除</el-button>
+              <el-button text size="small" type="danger" :icon="Trash2">{{ t('common.delete') }}</el-button>
             </template>
           </el-popconfirm>
         </template>
       </EntityCard>
     </div>
 
-    <LogCard url="/api/waf/logs" title="拦截与命中日志" clearable />
+    <LogCard url="/api/waf/logs" :title="t('waf.logTitle')" clearable />
 
-    <el-dialog v-model="editorVisible" :title="editing.key ? '编辑实例' : '添加实例'" width="760px" top="5vh" :fullscreen="isMobile">
+    <el-dialog v-model="editorVisible" :title="editing.key ? t('waf.editInstance') : t('waf.addInstance')" width="760px" top="5vh" :fullscreen="isMobile">
       <el-form :model="editing" label-width="120px" :label-position="labelPosition">
-        <el-form-item label="名称"><el-input v-model="editing.name" /></el-form-item>
-        <el-form-item label="模式">
+        <el-form-item :label="t('common.name')"><el-input v-model="editing.name" /></el-form-item>
+        <el-form-item :label="t('waf.mode')">
           <el-radio-group v-model="editing.mode">
-            <el-radio-button value="block">拦截</el-radio-button>
-            <el-radio-button value="detect">仅检测（只记录日志）</el-radio-button>
+            <el-radio-button value="block">{{ t('waf.modeBlock') }}</el-radio-button>
+            <el-radio-button value="detect">{{ t('waf.modeDetect') }}</el-radio-button>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="偏执等级">
+        <el-form-item :label="t('waf.paranoia')">
           <el-slider v-model="editing.paranoia" :min="1" :max="4" show-stops class="slider" />
-          <span class="help">越高越严格，误报也越多，建议从 1 开始</span>
+          <span class="help">{{ t('waf.paranoiaHelp') }}</span>
         </el-form-item>
-        <el-form-item label="入站阈值"><el-input-number v-model="editing.inboundThreshold" :min="1" :max="100" /></el-form-item>
-        <el-form-item label="出站阈值"><el-input-number v-model="editing.outboundThreshold" :min="1" :max="100" /></el-form-item>
-        <el-divider content-position="left">规则组</el-divider>
+        <el-form-item :label="t('waf.inbound')"><el-input-number v-model="editing.inboundThreshold" :min="1" :max="100" /></el-form-item>
+        <el-form-item :label="t('waf.outbound')"><el-input-number v-model="editing.outboundThreshold" :min="1" :max="100" /></el-form-item>
+        <el-divider content-position="left">{{ t('waf.ruleSets') }}</el-divider>
         <div v-for="(r, i) in editing.ruleSets" :key="i" class="ruleset">
           <div class="ruleset-head">
             <el-switch v-model="r.enable" size="small" />
             <el-radio-group v-model="r.type" size="small">
               <el-radio-button value="crs">OWASP CRS</el-radio-button>
-              <el-radio-button value="custom">自定义 SecLang</el-radio-button>
+              <el-radio-button value="custom">{{ t('waf.customSecLang') }}</el-radio-button>
             </el-radio-group>
-            <el-input v-model="r.remark" size="small" placeholder="备注" class="rs-remark" />
-            <el-button text type="danger" size="small" :icon="Trash2" aria-label="删除规则组" @click="editing.ruleSets.splice(i, 1)" />
+            <el-input v-model="r.remark" size="small" :placeholder="t('common.remark')" class="rs-remark" />
+            <el-button text type="danger" size="small" :icon="Trash2" :aria-label="t('waf.deleteRuleSet')" @click="editing.ruleSets.splice(i, 1)" />
           </div>
           <el-select
             v-if="r.type === 'crs'"
@@ -78,7 +78,7 @@
             filterable
             collapse-tags
             collapse-tags-tooltip
-            placeholder="留空表示启用全部规则文件"
+            :placeholder="t('waf.crsPlaceholder')"
             style="width: 100%"
             @update:model-value="(v: string[]) => (r.param = v.join('\n'))"
           >
@@ -86,13 +86,13 @@
           </el-select>
           <el-input v-else v-model="r.param" type="textarea" :rows="4" class="mono" placeholder='SecRule REQUEST_URI "@beginsWith /admin" "id:10001,phase:1,deny,status:403"' />
         </div>
-        <el-button size="small" :icon="Plus" @click="editing.ruleSets.push({ enable: true, remark: '', type: 'crs', param: '' })">添加规则组</el-button>
-        <el-form-item label="备注" class="remark"><el-input v-model="editing.remark" /></el-form-item>
-        <el-form-item label="启用"><el-switch v-model="editing.enable" /></el-form-item>
+        <el-button size="small" :icon="Plus" @click="editing.ruleSets.push({ enable: true, remark: '', type: 'crs', param: '' })">{{ t('waf.addRuleSet') }}</el-button>
+        <el-form-item :label="t('common.remark')" class="remark"><el-input v-model="editing.remark" /></el-form-item>
+        <el-form-item :label="t('common.enable')"><el-switch v-model="editing.enable" /></el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="editorVisible = false">取消</el-button>
-        <el-button type="primary" :loading="saving" @click="save">保存</el-button>
+        <el-button @click="editorVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button type="primary" :loading="saving" @click="save">{{ t('common.save') }}</el-button>
       </template>
     </el-dialog>
   </div>
@@ -100,6 +100,7 @@
 
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { Pencil, Plus, ShieldHalf, Trash2 } from 'lucide-vue-next'
 import { api } from '../api'
@@ -136,6 +137,7 @@ interface InstanceView extends Instance {
   matched: number
 }
 
+const { t } = useI18n()
 const { isMobile, labelPosition } = useFormLayout()
 const instances = ref<InstanceView[]>([])
 const crsFiles = ref<string[]>([])
@@ -145,18 +147,18 @@ const editing = ref<Instance>(empty())
 let timer: number | undefined
 
 function empty(): Instance {
-  return { name: '', enable: true, mode: 'block', paranoia: 1, inboundThreshold: 5, outboundThreshold: 4, ruleSets: [{ enable: true, remark: 'OWASP 核心规则', type: 'crs', param: '' }], remark: '' }
+  return { name: '', enable: true, mode: 'block', paranoia: 1, inboundThreshold: 5, outboundThreshold: 4, ruleSets: [{ enable: true, remark: t('waf.defaultRuleSetRemark'), type: 'crs', param: '' }], remark: '' }
 }
 
 // instStatus 计算实例展示状态：停用的实例只显示“已停用”
 function instStatus(w: InstanceView): { type: StatusType; text: string; title?: string } {
   if (!w.enable) {
-    return { type: 'off', text: '已停用' }
+    return { type: 'off', text: t('waf.statusOff') }
   }
   if (w.error) {
-    return { type: 'error', text: '编译失败', title: w.error }
+    return { type: 'error', text: t('waf.statusCompileFailed'), title: w.error }
   }
-  return { type: 'running', text: w.mode === 'block' ? '防护中' : '检测中' }
+  return { type: 'running', text: w.mode === 'block' ? t('waf.statusProtecting') : t('waf.statusDetecting') }
 }
 
 function crsSelected(r: RuleSet) {
@@ -188,7 +190,7 @@ async function save() {
       await api.post('/api/waf/instances', body)
     }
     editorVisible.value = false
-    ElMessage.success('已保存并生效')
+    ElMessage.success(t('waf.savedApplied'))
     await load()
   } catch (e) {
     ElMessage.error((e as Error).message)

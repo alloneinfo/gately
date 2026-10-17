@@ -1,0 +1,5 @@
+{
+  "title": "Journaux système",
+  "desc": "Consultez au même endroit les journaux d'exécution de Gately et ceux de chaque module. Les journaux restent en mémoire uniquement et sont effacés au redémarrage.",
+  "system": "Système"
+}

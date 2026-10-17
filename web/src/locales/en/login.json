@@ -1,0 +1,21 @@
+{
+  "heroLine1": "Open-source, transparent",
+  "heroLine2": "network gateway toolkit",
+  "feature1": "Port forwarding, STUN traversal and dynamic DNS",
+  "feature2": "Reverse proxy, WAF and automatic certificate renewal",
+  "feature3": "No connection to project servers; plain-text, auditable configuration",
+  "mobileSub": "Open-source network gateway toolkit for home and servers",
+  "title": "Sign in to the console",
+  "subtitle": "Enter your administrator username and password",
+  "username": "Username",
+  "password": "Password",
+  "submit": "Sign in",
+  "thirdParty": "Or use a third-party account",
+  "loginWith": "Sign in with {name}",
+  "initialPasswordHint": "On first launch, the initial password is printed in the program log.",
+  "totpTitle": "Two-factor authentication",
+  "totpPrompt": "Open your authenticator app and enter the 6-digit code for {user}",
+  "code": "Verification code",
+  "verify": "Verify and sign in",
+  "backToAccount": "Back to change account"
+}

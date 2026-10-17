@@ -1,0 +1,104 @@
+# Benachrichtigungszentrale
+
+Die Benachrichtigungszentrale abonniert den internen Ereignisbus von Gately und sendet nach Ihren Regeln Ereignisse wie DDNS-Änderungen, ablaufende Zertifikate, WAF-Blockierungen und Prozessausfälle an Webhook, Telegram, Bark, WeCom, DingTalk, Feishu und E-Mail. Die Verwaltung finden Sie in der Seitenleiste unter der Gruppe „System“ → „Benachrichtigungen“.
+
+## Funktionsweise
+
+1. Jedes Modul veröffentlicht bei Statusänderungen Ereignisse auf dem prozessinternen Ereignisbus. Das Veröffentlichen blockiert nie die Geschäftslogik.
+2. Erhält die Benachrichtigungszentrale ein Ereignis, prüft sie die Regeln nacheinander: Die Regel ist aktiviert, die Ereignisstufe ist nicht niedriger als die Mindeststufe der Regel, und der Ereignistyp passt zur Ereignisliste der Regel.
+3. Nachdem eine passende Regel die Deduplizierung per Ruhezeit passiert hat, wird die Nachricht an die in der Regel gewählten, aktivierten Kanäle zugestellt. Passt ein Ereignis auf mehrere Regeln, wird an jeden Kanal nur einmal gesendet.
+4. Das Ergebnis jeder Zustellung (Erfolg oder Fehlergrund) wird in „Letzte Zustellungen“ geschrieben, das die letzten 200 Einträge im Arbeitsspeicher hält. Fehler werden zusätzlich ins Modul-Log geschrieben.
+
+Eine einzelne Zustellung läuft nach 45 Sekunden in ein Timeout.
+
+## Kanäle
+
+Klicken Sie auf „Kanal hinzufügen“, wählen Sie einen Typ und füllen Sie die Felder aus. Jeder Kanal hat einen Namen (Pflicht), eine Bemerkung und einen Aktivierungsschalter. Geheime Felder werden nach dem Speichern nicht erneut angezeigt; lassen Sie sie beim Bearbeiten leer, bleibt der ursprüngliche Wert erhalten.
+
+| Typ | Pflichtfelder | Optionale Felder |
+| --- | --- | --- |
+| Webhook | Anfrage-URL | Anfragemethode (Standard GET; GET, POST, PUT oder PATCH), Header (je Zeile ein `Key: Value`), Body, Erfolgs-Abgleichstext, Timeout (Sekunden, Standard 20), Zertifikatsprüfung überspringen |
+| Telegram | Bot-Token, Chat-ID | API-URL (leer lassen für `https://api.telegram.org`) |
+| Bark | Device Key | Server-URL (leer lassen für `https://api.day.app`) |
+| WeCom | Bot-URL | Keine |
+| DingTalk | Bot-URL | Signatur-Secret (eintragen, wenn beim Bot „Signatur“ aktiviert ist) |
+| Feishu | Bot-URL | Signatur-Secret (eintragen, wenn beim Bot „Signaturprüfung“ aktiviert ist) |
+| E-Mail | Server, Empfänger sowie mindestens eines von Absender oder Benutzername | Verschlüsselung, Port, Benutzername, Passwort |
+
+URL-Felder brauchen eine vollständige Adresse, die mit `http://` oder `https://` beginnt.
+
+### Template-Variablen für Webhooks
+
+In Anfrage-URL und Body lassen sich die folgenden Variablen verwenden, geschrieben als Variablenname in geschweiften Klammern (die Form mit dem Präfix `#` wird ebenfalls akzeptiert):
+
+| Variable | Inhalt |
+| --- | --- |
+| `title` | Titel in der Form `[Gately] Ereignistitel` |
+| `message` | Ausführliche Beschreibung des Ereignisses |
+| `text` | Vollständiger Text einschließlich Beschreibung, Quelle, Stufe und Zeit |
+| `type` | Ereignistyp, etwa `ddns.changed` |
+| `source` | Ereignisquelle |
+| `level` | Stufe: `info`, `warn` oder `error` |
+| `time` | Zeit im Format RFC 3339 |
+
+Zusätzliche Felder, die ein Ereignis mitführt (etwa `ip` und `container`), lassen sich ebenfalls als Variablen nutzen. Kollidiert ein Name mit der Tabelle oben, hat die Tabelle Vorrang. Variablenwerte in der URL werden URL-escaped.
+
+### E-Mail
+
+| Verschlüsselung | Wert | Standardport |
+| --- | --- | --- |
+| STARTTLS | `starttls` | 587 |
+| SSL/TLS | `tls` | 465 |
+| Keine | `none` | 25 |
+
+Bei Port 0 wird der Standardport der gewählten Verschlüsselung verwendet. Mehrere Empfänger können Sie kommagetrennt eingeben. E-Mails werden als UTF-8-Klartext gesendet. PLAIN-Authentifizierung wird verwendet, wenn der Server AUTH unterstützt und ein Benutzername gesetzt ist; ist der Absender leer, wird der Benutzername verwendet.
+
+### Signaturen und Antwortcodes
+
+- DingTalk: Ist ein Signatur-Secret gesetzt, tragen Anfragen automatisch `timestamp` und `sign`.
+- Feishu: Ist ein Signatur-Secret gesetzt, trägt der Anfragekörper automatisch `timestamp` und `sign`.
+- WeCom, DingTalk, Feishu und Bark prüfen den fachlichen Rückgabecode in der Antwort. Auch ein HTTP 200 mit fachlichem Fehler wird als fehlgeschlagene Zustellung erfasst.
+
+## Regeln
+
+Klicken Sie auf „Regel hinzufügen“:
+
+| Feld | Beschreibung |
+| --- | --- |
+| Name | Pflicht |
+| Ereignisse | Mindestens eines. Wählen Sie bestimmte Ereignistypen, `*` für alle Ereignisse oder geben Sie einen Platzhalter wie `ddns.*` ein. Platzhalter verwenden die Syntax von Go `path.Match` |
+| Mindeststufe | `info`, `warn` oder `error`; leer bedeutet info. Ereignisse unterhalb dieser Stufe werden nicht gesendet |
+| Kanäle | Mindestens einer |
+| Ruhezeit (Sekunden) | Innerhalb einer Regel werden Ereignisse desselben Typs aus derselben Quelle in diesem Zeitraum nur einmal gesendet, Wiederholungen werden verworfen. 0 schaltet die Deduplizierung ab |
+| Aktiviert | Schalter |
+
+::: tip
+WAF-Blockierungen und Statusänderungen von Upstreams können häufig auftreten. Setzen Sie bei Regeln, die sie abdecken, eine Ruhezeit von 300 Sekunden oder mehr.
+:::
+
+## Ereignistypen
+
+| Ereignistyp | Name | Stufe | Auslöser |
+| --- | --- | --- | --- |
+| `ddns.changed` | Dynamisches DNS: Eintrag aktualisiert | Info | Eine DDNS-Aufgabe hat ihren Eintrag erfolgreich aktualisiert |
+| `ddns.failed` | Dynamisches DNS: Aktualisierung fehlgeschlagen | Fehler | Eine DDNS-Aufgabe konnte nicht aktualisieren |
+| `stun.changed` | STUN: Traversal-Adresse geändert | Info | Die Traversal-Adresse einer STUN-Regel hat sich geändert |
+| `ssl.expiring` | Zertifikat: läuft bald ab | Warnung | Weniger als 7 Tage Gültigkeit übrig; pro Zertifikat wird höchstens alle 24 Stunden erinnert |
+| `ssl.renew_failed` | Zertifikat: Erneuerung fehlgeschlagen | Fehler | Ausstellung oder Erneuerung des Zertifikats ist fehlgeschlagen |
+| `waf.blocked` | WAF: Anfrage blockiert | Warnung | Die WAF hat eine Anfrage blockiert, mit den Feldern `ip`, `host` und `path` |
+| `upstream.down` | Reverse Proxy: Upstream ausgefallen | Fehler | Ein Backend eines Web-Dienstes wurde als nicht verfügbar eingestuft |
+| `upstream.up` | Reverse Proxy: Upstream wiederhergestellt | Info | Ein nicht verfügbares Backend ist wieder erreichbar |
+| `docker.exited` | Docker: Container beendet | Warnung oder Fehler | Ein Container wurde mit einem Exit-Code ungleich 0 beendet (Warnung) oder wegen Speichermangels beendet (Fehler) |
+| `process.exited` | Kindprozess abnormal beendet | Fehler | Ein von Gately verwalteter Kindprozess wurde abnormal beendet und wird automatisch neu gestartet; die Quelle ist der Log-Name dieses Prozesses |
+| `backup.done` | Sicherung: abgeschlossen | Info | Eine geplante oder manuelle Sicherung war für alle Ziele erfolgreich; siehe [Konfigurationssicherung](/de/docs/modules/backup) |
+| `backup.failed` | Sicherung: fehlgeschlagen | Fehler | Das Packen der Sicherung oder das Schreiben auf irgendein Ziel ist fehlgeschlagen |
+| `auth.failed` | Authentifizierung: wiederholte Fehlschläge | Warnung | Eine Anmeldung an der Verwaltungsoberfläche ist fehlgeschlagen, mit dem Feld `ip` |
+| `auth.banned` | Authentifizierung: IP gesperrt | Warnung | Wiederholte Authentifizierungsfehler bei Web-Diensten haben eine automatische Sperre ausgelöst |
+| `login.success` | Verwaltungsoberfläche: Anmeldung erfolgreich | Info | Eine Anmeldung an der Verwaltungsoberfläche war erfolgreich, mit den Feldern `ip` und `user` |
+| `notify.test` | Testbenachrichtigung | Info | Wird von der Schaltfläche „Testen“ des Kanals erzeugt und nimmt nicht am Regelabgleich teil |
+
+## Test senden
+
+Die Schaltfläche „Testen“ auf der Kanalkarte sendet eine Nachricht mit dem Titel „Testbenachrichtigung“ direkt an diesen Kanal. Sie umgeht die Regeln und funktioniert auch bei einem nicht aktivierten Kanal. Bei Erfolg erscheint „Testbenachrichtigung gesendet“, bei einem Fehler der konkrete Fehler. Testergebnisse erscheinen ebenfalls in „Letzte Zustellungen“, mit „Test“ in der Regelspalte.
+
+Die zugehörige API ist `POST /api/notify/channels/{key}/test`, aufrufbar mit dem Scope `notify:write` eines [API-Tokens](/de/docs/reference/api).

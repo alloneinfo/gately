@@ -5,9 +5,9 @@
       <div class="hero-glow" />
       <AppLogo :size="76" class="hero-logo" />
       <h1>Gately</h1>
-      <p class="tagline">开源、可审计的网络网关，家庭与服务器通用</p>
+      <p class="tagline">{{ t('about.tagline') }}</p>
       <p class="intro">
-        DDNS、STUN 穿透、端口转发、反向代理、SSL 证书、WAF 等常用能力集成在一个单文件中，可一键导入 Lucky 配置。每一行代码都公开，每一个对外地址都可见。
+        {{ t('about.intro') }}
       </p>
       <div class="badges">
         <span class="badge"><span class="bk">version</span><span class="bv mono">{{ info?.version ?? '-' }}</span></span>
@@ -17,37 +17,34 @@
         <span class="badge"><span class="bk">docker</span><span class="bv">amd64 · arm64 · arm/v7</span></span>
       </div>
       <div class="actions">
-        <el-button type="primary" tag="a" :href="REPO" target="_blank" rel="noopener" :icon="Github">GitHub 仓库</el-button>
-        <el-button tag="a" :href="`${REPO}/releases`" target="_blank" rel="noopener" :icon="Package">版本发布</el-button>
-        <el-button tag="a" :href="`${REPO}/issues`" target="_blank" rel="noopener" :icon="MessageSquare">反馈问题</el-button>
-        <el-button :icon="RefreshCw" :loading="checking" @click="checkUpdate">检查更新</el-button>
+        <el-button type="primary" tag="a" :href="REPO" target="_blank" rel="noopener" :icon="Github">{{ t('about.repo') }}</el-button>
+        <el-button tag="a" :href="`${REPO}/releases`" target="_blank" rel="noopener" :icon="Package">{{ t('about.releases') }}</el-button>
+        <el-button tag="a" :href="`${REPO}/issues`" target="_blank" rel="noopener" :icon="MessageSquare">{{ t('about.feedback') }}</el-button>
+        <el-button :icon="RefreshCw" :loading="checking" @click="checkUpdate">{{ t('about.checkUpdate') }}</el-button>
       </div>
       <el-alert v-if="update" :type="update.hasUpdate ? 'success' : 'info'" :closable="false" show-icon class="update">
         <template #title>
-          <template v-if="update.hasUpdate">发现新版本 {{ update.latest }}（当前 {{ update.current }}）</template>
-          <template v-else>当前已是最新版本{{ update.latest ? `（最新发布 ${update.latest}）` : '' }}</template>
+          <template v-if="update.hasUpdate">{{ t('about.newVersion', { latest: update.latest, current: update.current }) }}</template>
+          <template v-else>{{ t('about.upToDate') }}{{ update.latest ? t('about.latestRelease', { latest: update.latest }) : '' }}</template>
         </template>
         <template #default>
-          <div v-if="update.publishedAt && update.latest" class="meta">发布于 {{ new Date(update.publishedAt).toLocaleString() }}</div>
+          <div v-if="update.publishedAt && update.latest" class="meta">{{ t('about.publishedAt', { time: new Date(update.publishedAt).toLocaleString() }) }}</div>
           <pre v-if="update.hasUpdate && update.notes" class="notes">{{ update.notes }}</pre>
-          <a v-if="update.url" :href="update.url" target="_blank" rel="noopener">查看发布页</a>
+          <a v-if="update.url" :href="update.url" target="_blank" rel="noopener">{{ t('about.viewRelease') }}</a>
         </template>
       </el-alert>
-      <div class="hint">检查更新只在点击时访问 api.github.com，平时不会主动联网。</div>
+      <div class="hint">{{ t('about.updateHint') }}</div>
     </section>
 
     <!-- ============ 为什么 ============ -->
     <section class="block">
-      <h2><Sparkles :size="18" />为什么做 Gately</h2>
-      <p class="lead">
-        Lucky 是国内 NAS 与家庭网络用户熟悉的优秀工具，也为 Gately 提供了产品思路，没有 Lucky 就不会有 Gately。Lucky 以闭源方式免费分发，Gately 选择完全开源：对于运行在网络边界、手握 DNS 密钥和证书私钥的软件，开源让用户能够看到它在做什么。Gately
-        用开源代码实现同类能力，并保持配置可迁移，让你在不改变使用习惯的前提下，多一个可以审计的选择。
-      </p>
+      <h2><Sparkles :size="18" />{{ t('about.whyTitle') }}</h2>
+      <p class="lead">{{ t('about.whyBody') }}</p>
     </section>
 
     <!-- ============ 透明度承诺 ============ -->
     <section class="block">
-      <h2><ShieldCheck :size="18" />透明度承诺</h2>
+      <h2><ShieldCheck :size="18" />{{ t('about.promiseTitle') }}</h2>
       <div class="promises">
         <div v-for="p in promises" :key="p.title" class="promise">
           <div class="promise-icon"><component :is="p.icon" :size="20" /></div>
@@ -59,7 +56,7 @@
 
     <!-- ============ 功能 ============ -->
     <section class="block">
-      <h2><LayoutGrid :size="18" />功能一览</h2>
+      <h2><LayoutGrid :size="18" />{{ t('about.featuresTitle') }}</h2>
       <div class="features">
         <div v-for="f in features" :key="f.title" class="feature">
           <div class="feature-head">
@@ -67,7 +64,7 @@
             <div class="feature-title">{{ f.title }}</div>
           </div>
           <div class="feature-tags">
-            <span v-for="t in f.tags" :key="t">{{ t }}</span>
+            <span v-for="tag in f.tags" :key="tag">{{ tag }}</span>
           </div>
         </div>
       </div>
@@ -76,35 +73,46 @@
     <!-- ============ 快速开始 ============ -->
     <section class="block two">
       <div>
-        <h2><Rocket :size="18" />快速开始</h2>
-        <p class="muted small">Docker 镜像支持 amd64、arm64、arm/v7，推荐使用 host 网络以便监听宿主机端口。</p>
+        <h2><Rocket :size="18" />{{ t('about.quickStart') }}</h2>
+        <p class="muted small">{{ t('about.dockerNote') }}</p>
         <div class="code">
-          <button class="code-copy" title="复制" @click="copy(DOCKER_CMD)"><Copy :size="14" /></button>
+          <button class="code-copy" :title="t('common.copy')" @click="copy(DOCKER_CMD)"><Copy :size="14" /></button>
           <pre class="mono">{{ DOCKER_CMD }}</pre>
         </div>
         <p class="muted small">
-          也可以从
-          <a :href="`${REPO}/releases`" target="_blank" rel="noopener">Releases</a>
-          下载 Linux / macOS / Windows / FreeBSD 二进制，执行 <code class="mono">./gately -c /etc/gately</code> 运行。
+          <i18n-t keypath="about.binaryNote" tag="span">
+            <template #releases>
+              <a :href="`${REPO}/releases`" target="_blank" rel="noopener">Releases</a>
+            </template>
+            <template #cmd><code class="mono">./gately -c /etc/gately</code></template>
+          </i18n-t>
         </p>
       </div>
       <div>
-        <h2><ArrowRightLeft :size="18" />从 Lucky 迁移</h2>
+        <h2><ArrowRightLeft :size="18" />{{ t('about.migrateTitle') }}</h2>
         <ol class="steps">
           <li>
-            <b>导出</b>
-            <span>找到 Lucky 配置目录中的 <code class="mono">lucky_*.lkcf</code>，或整站配置 zip。</span>
+            <b>{{ t('about.stepExport') }}</b>
+            <span>
+              <i18n-t keypath="about.stepExportDesc" tag="span">
+                <template #file><code class="mono">lucky_*.lkcf</code></template>
+              </i18n-t>
+            </span>
           </li>
           <li>
-            <b>导入</b>
-            <span>在 <router-link to="/settings?tab=backup">设置 → 备份与迁移</router-link> 中上传，预览后导入，规则默认停用。</span>
+            <b>{{ t('about.stepImport') }}</b>
+            <span>
+              <i18n-t keypath="about.stepImportDesc" tag="span">
+                <template #link><router-link to="/settings?tab=backup">{{ t('about.backupLink') }}</router-link></template>
+              </i18n-t>
+            </span>
           </li>
           <li>
-            <b>切换</b>
-            <span>按模块逐个在 Lucky 中停用、在 Gately 中启用，确认无误后再停掉 Lucky。</span>
+            <b>{{ t('about.stepSwitch') }}</b>
+            <span>{{ t('about.stepSwitchDesc') }}</span>
           </li>
         </ol>
-        <a :href="`${REPO}/blob/main/docs/MIGRATION.md`" target="_blank" rel="noopener" class="link"><BookOpen :size="14" />完整迁移指南</a>
+        <a :href="`${REPO}/blob/main/docs/MIGRATION.md`" target="_blank" rel="noopener" class="link"><BookOpen :size="14" />{{ t('about.migrationGuide') }}</a>
       </div>
     </section>
 
@@ -114,8 +122,10 @@
         <span v-for="s in stack" :key="s">{{ s }}</span>
       </div>
       <div class="muted small">
-        以 <a :href="`${REPO}/blob/main/LICENSE`" target="_blank" rel="noopener">Apache License 2.0</a> 发布 · 没有
-        <a href="https://github.com/gdy666/lucky" target="_blank" rel="noopener">Lucky</a> 就没有 Gately，感谢其带来的产品灵感 · 与 Lucky 的兼容仅基于公开可观察的行为与配置格式
+        <i18n-t keypath="about.footerNote" tag="span">
+          <template #license><a :href="`${REPO}/blob/main/LICENSE`" target="_blank" rel="noopener">Apache License 2.0</a></template>
+          <template #lucky><a href="https://github.com/gdy666/lucky" target="_blank" rel="noopener">Lucky</a></template>
+        </i18n-t>
       </div>
       <div v-if="info" class="muted small mono">{{ info.version }} · {{ info.commit || 'none' }} · {{ info.buildDate || 'unknown' }}</div>
     </footer>
@@ -123,8 +133,9 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
+import { useI18n } from 'vue-i18n'
 import {
   ArrowLeftRight,
   ArrowRightLeft,
@@ -157,38 +168,40 @@ import {
 import { api, type SystemInfo, type UpdateInfo } from '../api'
 import AppLogo from '../components/AppLogo.vue'
 
+const { t } = useI18n()
+
 const REPO = 'https://github.com/wangwanjie/gately'
 const DOCKER_CMD = `docker run -d --name gately --network host \\
   -v ./gately-data:/etc/gately \\
   -v /var/run/docker.sock:/var/run/docker.sock \\
   ghcr.io/wangwanjie/gately:latest
-docker logs gately 2>&1 | grep 初始密码`
+docker logs gately 2>&1 | grep -i "initial password"`
 
-const promises = [
-  { icon: Scale, title: '代码开源', desc: '源码以 Apache-2.0 开源，任何人都可以审查、构建和贡献。' },
-  { icon: WifiOff, title: '不回传数据', desc: '不连接任何项目方服务器，不上报设备信息；第三方登录使用你自己的 OAuth 应用。' },
-  { icon: Eye, title: '对外地址可见', desc: '公网 IP 查询、STUN 服务器等所有对外地址都可见、可改、可关。' },
-  { icon: FileBraces, title: '配置明文', desc: '配置为明文 JSON，可直接纳入 git 做审计和回滚。' },
-]
+const promises = computed(() => [
+  { icon: Scale, title: t('about.promises.openSource.title'), desc: t('about.promises.openSource.desc') },
+  { icon: WifiOff, title: t('about.promises.noTelemetry.title'), desc: t('about.promises.noTelemetry.desc') },
+  { icon: Eye, title: t('about.promises.visibleAddr.title'), desc: t('about.promises.visibleAddr.desc') },
+  { icon: FileBraces, title: t('about.promises.plainConfig.title'), desc: t('about.promises.plainConfig.desc') },
+])
 
 // 与 README 的功能表保持一致
-const features = [
-  { icon: Globe, title: '动态域名', tags: ['阿里云', 'Cloudflare', '腾讯云 / DNSPod', '华为云', 'GoDaddy', 'Porkbun', 'dynv6', 'DuckDNS', '自定义回调', 'IPv4 / IPv6', 'Webhook'] },
-  { icon: Radar, title: 'STUN 穿透', tags: ['TCP / UDP', '保活', 'UPnP / NAT-PMP', '内置转发', '地址变化通知', '脚本'] },
-  { icon: ArrowLeftRight, title: '端口转发', tags: ['TCP / UDP', 'IPv4 / IPv6', '端口段', '故障转移', '连接数限制', '流量统计'] },
-  { icon: ShieldCheck, title: 'SSL 证书', tags: ['ACME DNS-01', '通配符', 'EAB', '自动续期', '上传 / 读取文件', '映射到目录'] },
-  { icon: Server, title: 'Web 服务', tags: ['反向代理', '重定向', '静态文件', 'HTTPS', 'WebSocket', 'PROXY 协议', 'OIDC / GitHub 登录', 'IP 黑白名单'] },
-  { icon: ShieldHalf, title: 'WAF 防火墙', tags: ['Coraza', 'OWASP CRS v4', '按文件启用规则', '自定义 SecLang', '仅检测模式'] },
-  { icon: Container, title: 'Docker 管理', tags: ['容器启停', '日志', '镜像更新检查', '一键升级', '失败自动回滚'] },
-  { icon: SquareTerminal, title: 'Web 终端', tags: ['SSH', '主机密钥信任', '本机 Shell'] },
-  { icon: Power, title: '网络唤醒', tags: ['魔术包广播', '在线探测'] },
-  { icon: FolderSync, title: 'WebDAV', tags: ['多用户', '独立目录', '只读'] },
-  { icon: CalendarClock, title: '计划任务', tags: ['cron 表达式', '命令', 'HTTP 请求', '执行记录'] },
-  { icon: LockKeyhole, title: '安全与设置', tags: ['两步验证', '登录限流', '安全入口', '仅内网访问', 'API 令牌', 'DoH', '备份恢复'] },
-  { icon: Import, title: '从 Lucky 迁移', tags: ['.lkcf', '整站 zip', '端口转发', 'DDNS', 'STUN', '证书', '反向代理', 'WAF'] },
-]
+const features = computed(() => [
+  { icon: Globe, title: t('about.features.ddns'), tags: [t('about.tags.aliyun'), 'Cloudflare', t('about.tags.tencent'), t('about.tags.huawei'), 'GoDaddy', 'Porkbun', 'dynv6', 'DuckDNS', t('about.tags.customCallback'), 'IPv4 / IPv6', 'Webhook'] },
+  { icon: Radar, title: t('about.features.stun'), tags: ['TCP / UDP', t('about.tags.keepAlive'), 'UPnP / NAT-PMP', t('about.tags.builtinForward'), t('about.tags.addrChangeNotify'), t('about.tags.script')] },
+  { icon: ArrowLeftRight, title: t('about.features.portforward'), tags: ['TCP / UDP', 'IPv4 / IPv6', t('about.tags.portRange'), t('about.tags.failover'), t('about.tags.connLimit'), t('about.tags.trafficStats')] },
+  { icon: ShieldCheck, title: t('about.features.ssl'), tags: ['ACME DNS-01', t('about.tags.wildcard'), 'EAB', t('about.tags.autoRenew'), t('about.tags.uploadRead'), t('about.tags.mapToDir')] },
+  { icon: Server, title: t('about.features.web'), tags: [t('about.tags.reverseProxy'), t('about.tags.redirect'), t('about.tags.staticFiles'), 'HTTPS', 'WebSocket', t('about.tags.proxyProtocol'), t('about.tags.oidcLogin'), t('about.tags.ipAcl')] },
+  { icon: ShieldHalf, title: t('about.features.waf'), tags: ['Coraza', 'OWASP CRS v4', t('about.tags.rulesPerFile'), t('about.tags.customSecLang'), t('about.tags.detectOnly')] },
+  { icon: Container, title: t('about.features.docker'), tags: [t('about.tags.containerOps'), t('about.tags.logs'), t('about.tags.imageCheck'), t('about.tags.oneClickUpgrade'), t('about.tags.autoRollback')] },
+  { icon: SquareTerminal, title: t('about.features.terminal'), tags: ['SSH', t('about.tags.hostKeyTrust'), t('about.tags.localShell')] },
+  { icon: Power, title: t('about.features.wol'), tags: [t('about.tags.magicPacket'), t('about.tags.onlineProbe')] },
+  { icon: FolderSync, title: 'WebDAV', tags: [t('about.tags.multiUser'), t('about.tags.separateDir'), t('about.tags.readOnly')] },
+  { icon: CalendarClock, title: t('about.features.cron'), tags: [t('about.tags.cronExpr'), t('about.tags.command'), t('about.tags.httpRequest'), t('about.tags.runHistory')] },
+  { icon: LockKeyhole, title: t('about.features.security'), tags: [t('about.tags.twoFactor'), t('about.tags.loginLimit'), t('about.tags.secureEntry'), t('about.tags.lanOnly'), t('about.tags.apiToken'), 'DoH', t('about.tags.backupRestore')] },
+  { icon: Import, title: t('about.features.luckyMigrate'), tags: ['.lkcf', t('about.tags.siteZip'), t('about.tags.portforward'), 'DDNS', 'STUN', t('about.tags.cert'), t('about.tags.reverseProxy'), 'WAF'] },
+])
 
-const stack = ['Go', 'Vue 3', 'TypeScript', 'Element Plus', 'lego', 'Coraza', 'go:embed 单文件']
+const stack = computed(() => ['Go', 'Vue 3', 'TypeScript', 'Element Plus', 'lego', 'Coraza', t('about.stackEmbed')])
 
 const info = ref<SystemInfo>()
 const update = ref<UpdateInfo>()
@@ -208,9 +221,9 @@ async function checkUpdate() {
 async function copy(text: string) {
   try {
     await navigator.clipboard.writeText(text)
-    ElMessage.success('已复制')
+    ElMessage.success(t('common.copied'))
   } catch {
-    ElMessage.warning('复制失败，请手动选择')
+    ElMessage.warning(t('about.copyFailed'))
   }
 }
 

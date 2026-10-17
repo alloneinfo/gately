@@ -1,0 +1,194 @@
+{
+  "title": "Settings",
+  "desc": "Account security, access control, runtime parameters, backup and migration, and system information",
+  "currentPassword": "Current password",
+  "notEnabled": "Not enabled",
+  "restartBanner": {
+    "title": "Some settings require a restart to take effect",
+    "desc": "Changes such as the listen address have been saved and take effect after Gately restarts.",
+    "action": "Restart now"
+  },
+  "tabs": {
+    "account": "Account & Security",
+    "access": "Access Control",
+    "runtime": "Network & Runtime",
+    "backup": "Backup & Migration"
+  },
+  "admin": {
+    "title": "Administrator account",
+    "username": "Username",
+    "newPassword": "New password",
+    "newPasswordPlaceholder": "At least 8 characters",
+    "confirmPassword": "Confirm new password",
+    "submit": "Change credentials",
+    "help": "All signed-in sessions are invalidated after the change; you will need to sign in again.",
+    "mismatch": "The new passwords do not match",
+    "changed": "Changed. Please sign in again"
+  },
+  "totp": {
+    "title": "Two-factor authentication",
+    "enabledDesc": "Signing in requires a 6-digit code from your authenticator app in addition to the password.",
+    "code": "Verification code",
+    "codePlaceholder": "6-digit code from your authenticator",
+    "disable": "Disable two-factor authentication",
+    "scanDesc": "Scan the QR code with an app such as Google Authenticator or Microsoft Authenticator, then enter the displayed code to confirm.",
+    "qrAlt": "QR code",
+    "manualHint": "Enter this key manually if you cannot scan",
+    "copySecret": "Copy key",
+    "confirmEnable": "Confirm and enable",
+    "introDesc": "Once enabled, signing in also requires a one-time code from your authenticator app, protecting the console even if your password leaks.",
+    "start": "Get started",
+    "enabledMsg": "Two-factor authentication enabled",
+    "disabledMsg": "Two-factor authentication disabled"
+  },
+  "loginProtect": {
+    "title": "Login protection",
+    "sessionHours": "Session lifetime",
+    "sessionHoursHelp": "Hours; sign in again after this period",
+    "maxFailures": "Max consecutive failures",
+    "maxFailuresHelp": "Lock a source after this many consecutive wrong passwords; 0 uses the default",
+    "lockMinutes": "Lockout duration",
+    "lockMinutesHelp": "Minutes; 0 uses the default"
+  },
+  "thirdLogin": {
+    "title": "Third-party sign-in",
+    "desc": "Sign in to the console with a GitHub, Google, QQ or any OIDC account. Uses your own OAuth apps; the sign-in flow never goes through a relay server.",
+    "enable": "Enable",
+    "callbackBase": "Callback base URL",
+    "callbackBasePlaceholder": "https://gately.example.com (the address you use in the browser to open the console, without a path)",
+    "callbackHelp": "The callback URL to register on each platform is {url}. Sign-in must be started after opening the console from this address.",
+    "providers": "Sign-in providers",
+    "allowed": "Allowed identities",
+    "allowedPlaceholder": "One per line: provider:account, e.g. github:15172899 or google:me{'@'}gmail.com; add a note after # at the end of a line",
+    "allowedHelp": "Only accounts in this list can sign in. For GitHub, a numeric ID is recommended. When a QQ sign-in is rejected the first time, the page shows an identifier you can copy.",
+    "skipTotp": "Skip two-factor authentication",
+    "skipTotpHelp": "When two-factor authentication is enabled, turning this on stops third-party sign-in from asking for a code; turning it off rejects third-party sign-in"
+  },
+  "apiToken": {
+    "title": "API tokens",
+    "desc": "API tokens now support multiple tokens with fine-grained permissions: create several tokens, each with its own expiry and read-only / read-write access per module.",
+    "manage": "Manage API tokens",
+    "docs": "View API docs"
+  },
+  "listen": {
+    "title": "Console listener",
+    "http": "HTTP listen",
+    "needRestart": "Restart required",
+    "httpHelp": "Format: :port or IP:port",
+    "https": "HTTPS listen",
+    "httpsPlaceholder": "Leave empty to disable, e.g. :16643",
+    "httpsHelp": "The certificate is chosen by access domain from \"SSL certificates\"",
+    "forceHttps": "Force HTTPS",
+    "forceHttpsHelp": "Redirect HTTP to HTTPS automatically (only when the certificate module has a certificate for the domain)"
+  },
+  "restrict": {
+    "title": "Access restrictions",
+    "safePath": "Secure entry",
+    "safePathPlaceholder": "Leave empty to disable, e.g. /my-entry",
+    "random": "Generate randomly",
+    "safePathHelp": "Once set, you must visit {url} to open the console; any other path returns 404, which keeps scanners from finding the console. Remember your entry address.",
+    "urlPrefix": "http://IP:port",
+    "entryName": "entry",
+    "lanOnly": "LAN access only",
+    "lanOnlyHelp": "Allow only LAN addresses (including Tailscale 100.64.0.0/10 addresses) to access the console"
+  },
+  "network": {
+    "title": "Network",
+    "dnsServers": "DNS servers",
+    "dnsPlaceholder": "Leave empty to use system DNS; enter an IP or IP:port",
+    "dnsHelp": "Affects all outbound name resolution (DDNS, Webhook, ACME, etc.). With multiple servers, one is picked at random with automatic failover.",
+    "timeZone": "Time zone",
+    "timeZonePlaceholder": "Follow system",
+    "timeZoneHelp": "Time zone used for logs, scheduled tasks and more. Any IANA time zone name is accepted. Currently in effect: {zone}",
+    "dns": {
+      "ali": "Alibaba",
+      "tencent": "Tencent",
+      "baidu": "Baidu",
+      "114": "114",
+      "cloudflare": "Cloudflare",
+      "google": "Google",
+      "quad9": "Quad9"
+    },
+    "zones": {
+      "china": "China",
+      "hongKong": "Hong Kong",
+      "taipei": "Taipei",
+      "tokyo": "Tokyo",
+      "seoul": "Seoul",
+      "singapore": "Singapore",
+      "london": "London",
+      "berlin": "Berlin",
+      "moscow": "Moscow",
+      "newYork": "New York",
+      "chicago": "Chicago",
+      "losAngeles": "Los Angeles",
+      "sydney": "Sydney",
+      "utc": "Coordinated Universal Time"
+    }
+  },
+  "runtime": {
+    "title": "Runtime parameters",
+    "logLines": "Log retention lines",
+    "logLinesHelp": "Number of log lines each module keeps in memory",
+    "gcPercent": "GC percent",
+    "gcPercentHelp": "0 means default (100); lowering it reduces memory use but increases CPU overhead",
+    "maxProcs": "Max CPU cores",
+    "maxProcsHelp": "0 means automatic ({count} cores on this machine)"
+  },
+  "restart": {
+    "title": "Restart",
+    "desc": "The console and all forwarding and proxy services are briefly interrupted during a restart (usually a few seconds).",
+    "button": "Restart Gately",
+    "confirm": "The console and all forwarding and proxy services are briefly interrupted during a restart (usually a few seconds). Restart Gately?",
+    "confirmButton": "Restart",
+    "progress": "Restarting Gately…"
+  },
+  "save": {
+    "saved": "Saved and applied",
+    "savedNeedRestart": "Saved. Some settings take effect after a restart"
+  },
+  "import": {
+    "title": "Import from Lucky",
+    "desc": "Supports {lkcf} files (multiple allowed) from the Lucky configuration directory (Docker default {dir}), and whole-site backups exported from the Lucky console ({zip}). Preview first, then import after confirming. Imported entries are appended after existing ones; entries with the same name are skipped.",
+    "drag": "Drop files here or {click}",
+    "dragClick": "click to select",
+    "dragHint": ".lkcf config files or a whole-site backup .zip",
+    "keepEnableTitle": "Keep the enabled state from Lucky after import",
+    "keepEnableDesc": "Off by default: all imported rules are disabled, so you can enable them one by one after checking. When on, rules enabled in Lucky will {bold}. If Lucky is still running, port conflicts may occur or both sides may update records at the same time.",
+    "keepEnableBold": "start listening on ports and updating DNS records immediately",
+    "preview": "Preview",
+    "confirmImport": "Confirm import",
+    "previewDone": "Preview complete. Import once everything looks right",
+    "imported": "Imported",
+    "noModules": "No modules supported by Gately were found",
+    "noWarnings": "No warnings",
+    "colModule": "Module",
+    "colFound": "Found",
+    "colImportable": "Importable",
+    "colWarnings": "Warnings",
+    "done": "Import complete: {total} entries",
+    "confirmKeep": "{total} entries will be imported with their enabled state from Lucky: enabled rules take effect immediately. Continue?",
+    "confirmDisabled": "{total} entries will be imported, all disabled after import. Continue?",
+    "confirmButton": "Import"
+  },
+  "backup": {
+    "title": "Back up Gately configuration",
+    "desc": "Download a zip file containing the full configuration (account, rules, certificates, etc.). The backup contains password hashes, secrets and certificate private keys, so store it safely.",
+    "download": "Download backup",
+    "downloadFailed": "Download failed ({status})"
+  },
+  "restore": {
+    "title": "Restore configuration",
+    "desc": "Use a backup zip to {bold}. The current configuration is first saved to a backup-timestamp folder in the config directory, and Gately restarts automatically after the restore.",
+    "descBold": "overwrite all current configuration",
+    "pickFile": "Choose backup file",
+    "passwordPlaceholder": "Backup passphrase",
+    "button": "Restore",
+    "confirm": "All current configuration will be overwritten with \"{name}\" and Gately will restart automatically. The current configuration is backed up to the config directory first. Type \"{word}\" to confirm.",
+    "word": "restore",
+    "confirmButton": "Restore and restart",
+    "inputHint": "Please type \"{word}\"",
+    "success": "Restored {count} configuration files; the previous configuration is saved at {previous}",
+    "progress": "Applying backup and restarting…"
+  }
+}

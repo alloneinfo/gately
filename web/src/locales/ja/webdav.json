@@ -1,0 +1,11 @@
+{
+  "service": "サービス",
+  "listenIpPlaceholder": "空欄ですべてのアドレス",
+  "listenIp": "待ち受けアドレス",
+  "port": "ポート",
+  "statusOff": "無効",
+  "statusError": "起動失敗",
+  "statusNotRunning": "未実行",
+  "desc": "本機のディレクトリを WebDAV でパソコン・スマートフォン・プレーヤーに共有します",
+  "tlsHelp": "証明書はアクセス用ドメインに合わせて「SSL 証明書」から選択します"
+}

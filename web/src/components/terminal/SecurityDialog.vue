@@ -1,7 +1,7 @@
 <template>
   <el-dialog
     :model-value="modelValue"
-    title="用户协议与二次验证"
+    :title="t('terminal.security.dialogTitle')"
     width="520px"
     :fullscreen="isMobile"
     class="term-dialog"
@@ -12,45 +12,45 @@
     <template v-if="state">
       <div class="block">
         <div class="block-head">
-          <span class="block-title">用户协议</span>
-          <el-tag :type="state.agreementAccepted ? 'success' : 'warning'" size="small">{{ state.agreementAccepted ? '已确认' : '未确认' }}</el-tag>
+          <span class="block-title">{{ t('terminal.security.agreement') }}</span>
+          <el-tag :type="state.agreementAccepted ? 'success' : 'warning'" size="small">{{ state.agreementAccepted ? t('terminal.security.confirmed') : t('terminal.security.unconfirmed') }}</el-tag>
         </div>
-        <div class="block-desc">首次使用 Web 终端前需要确认用户协议。</div>
-        <el-button v-if="!state.agreementAccepted" :loading="busy" @click="acceptAgreement">阅读并确认协议</el-button>
-        <el-button v-else text @click="showText = !showText">{{ showText ? '收起协议' : '查看协议' }}</el-button>
-        <pre v-if="showText || !state.agreementAccepted" class="agreement">{{ AGREEMENT_TEXT }}</pre>
+        <div class="block-desc">{{ t('terminal.security.agreementDesc') }}</div>
+        <el-button v-if="!state.agreementAccepted" :loading="busy" @click="acceptAgreement">{{ t('terminal.security.readAndConfirm') }}</el-button>
+        <el-button v-else text @click="showText = !showText">{{ showText ? t('terminal.security.hideAgreement') : t('terminal.security.showAgreement') }}</el-button>
+        <pre v-if="showText || !state.agreementAccepted" class="agreement">{{ agreementText() }}</pre>
       </div>
 
       <div class="block">
         <div class="block-head">
-          <span class="block-title">二次验证（TOTP）</span>
-          <el-tag :type="state.twoFAEnable ? 'success' : 'info'" size="small">{{ state.twoFAEnable ? '已启用' : '未启用' }}</el-tag>
+          <span class="block-title">{{ t('terminal.security.twofaTitle') }}</span>
+          <el-tag :type="state.twoFAEnable ? 'success' : 'info'" size="small">{{ state.twoFAEnable ? t('common.enabled') : t('terminal.security.twofaOff') }}</el-tag>
         </div>
-        <div class="block-desc">启用后，新建会话、附着会话与文件管理需要先输入验证器应用中的 6 位验证码，验证通过后 30 分钟内有效。</div>
+        <div class="block-desc">{{ t('terminal.security.twofaDesc') }}</div>
 
         <template v-if="!state.twoFAEnable">
-          <el-button v-if="!setup" :loading="busy" @click="startSetup">启用二次验证</el-button>
+          <el-button v-if="!setup" :loading="busy" @click="startSetup">{{ t('terminal.security.enableTwofa') }}</el-button>
           <div v-else class="setup">
-            <div class="step">1. 使用验证器应用（Google Authenticator、Microsoft Authenticator 等）扫描二维码：</div>
-            <img v-if="qr" :src="qr" class="qr" alt="二维码" />
-            <div class="step">无法扫码时，手动输入密钥：<span class="secret mono">{{ setup.secret }}</span></div>
-            <div class="step">2. 输入应用中显示的 6 位验证码完成启用：</div>
+            <div class="step">{{ t('terminal.security.step1') }}</div>
+            <img v-if="qr" :src="qr" class="qr" :alt="t('terminal.security.qrAlt')" />
+            <div class="step">{{ t('terminal.security.manualSecret') }}<span class="secret mono">{{ setup.secret }}</span></div>
+            <div class="step">{{ t('terminal.security.step2') }}</div>
             <div class="code-row">
-              <el-input v-model="code" maxlength="6" inputmode="numeric" placeholder="6 位验证码" @keyup.enter="enable" />
-              <el-button type="primary" :loading="busy" :disabled="code.length < 6" @click="enable">确认启用</el-button>
-              <el-button @click="cancelSetup">取消</el-button>
+              <el-input v-model="code" maxlength="6" inputmode="numeric" :placeholder="t('terminal.security.codePlaceholder')" @keyup.enter="enable" />
+              <el-button type="primary" :loading="busy" :disabled="code.length < 6" @click="enable">{{ t('terminal.security.confirmEnable') }}</el-button>
+              <el-button @click="cancelSetup">{{ t('common.cancel') }}</el-button>
             </div>
           </div>
         </template>
         <div v-else class="code-row">
-          <el-input v-model="code" maxlength="6" inputmode="numeric" placeholder="输入验证码以关闭" @keyup.enter="disable" />
-          <el-button type="danger" plain :loading="busy" :disabled="code.length < 6" @click="disable">关闭二次验证</el-button>
+          <el-input v-model="code" maxlength="6" inputmode="numeric" :placeholder="t('terminal.security.codeToDisable')" @keyup.enter="disable" />
+          <el-button type="danger" plain :loading="busy" :disabled="code.length < 6" @click="disable">{{ t('terminal.security.disableTwofa') }}</el-button>
         </div>
       </div>
     </template>
     <el-skeleton v-else :rows="4" animated />
     <template #footer>
-      <el-button @click="$emit('update:modelValue', false)">关闭</el-button>
+      <el-button @click="$emit('update:modelValue', false)">{{ t('common.close') }}</el-button>
     </template>
   </el-dialog>
 </template>
@@ -59,14 +59,16 @@
 import { ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import QRCode from 'qrcode'
+import { useI18n } from 'vue-i18n'
 import { api } from '../../api'
 import { useIsMobile } from '../../composables/useIsMobile'
-import { AGREEMENT_TEXT } from './security'
+import { agreementText } from './security'
 import type { SecurityState } from './types'
 
 defineProps<{ modelValue: boolean }>()
 defineEmits<{ 'update:modelValue': [v: boolean] }>()
 
+const { t } = useI18n()
 const isMobile = useIsMobile()
 const state = ref<SecurityState>()
 const setup = ref<{ secret: string; url: string }>()
@@ -102,7 +104,7 @@ async function run(fn: () => Promise<void>) {
 function acceptAgreement() {
   return run(async () => {
     await api.post('/api/webterminal/security/agreement')
-    ElMessage.success('已确认用户协议')
+    ElMessage.success(t('terminal.security.agreementAccepted'))
     await load()
   })
 }
@@ -127,7 +129,7 @@ function enable() {
   const secret = setup.value.secret
   return run(async () => {
     await api.post('/api/webterminal/security/2fa/enable', { secret, code: code.value })
-    ElMessage.success('二次验证已启用')
+    ElMessage.success(t('terminal.security.twofaEnabled'))
     await load()
   })
 }
@@ -138,7 +140,7 @@ function disable() {
   }
   return run(async () => {
     await api.post('/api/webterminal/security/2fa/disable', { code: code.value })
-    ElMessage.success('二次验证已关闭')
+    ElMessage.success(t('terminal.security.twofaDisabled'))
     await load()
   })
 }

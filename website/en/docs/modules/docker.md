@@ -1,0 +1,80 @@
+# Docker
+
+Manage containers, Compose projects, images, networks and volumes on the host through the Docker socket. The entry point is "Docker" in the sidebar, and the page is split into six tabs: "Containers", "Compose", "Images", "Networks", "Volumes" and "System". When Docker cannot be reached, the top of the page shows the error details and a shortcut button to open the settings.
+
+## Enabling
+
+When Gately runs in a container, mount the host's Docker socket:
+
+```bash
+-v /var/run/docker.sock:/var/run/docker.sock
+```
+
+The Docker address defaults to `unix:///var/run/docker.sock` and can be changed in the settings on the "System" tab.
+
+::: warning Security note
+Mounting `docker.sock` is equivalent to granting root-level access to the host. If you do not need Docker management, remove the mount and protect the management UI (two-factor authentication, security entrance, LAN-only access).
+:::
+
+## Containers
+
+- The list can be filtered by "All", "Running" and "Stopped". Cards show the image, network, ports, mounts and update status;
+- Actions: start, stop, restart, pause, resume, force kill, rename, delete (optionally with anonymous volumes), commit as image;
+- **Create and edit**: the form covers name, image (can be pulled before creation), start after creation, command and Entrypoint, environment variables, port mappings (TCP/UDP, with an optional host IP), mounts (directory bind and volume, optionally read-only), primary network and extra networks, fixed IP, aliases, restart policy (`no`, `always`, `unless-stopped`, `on-failure` with a maximum retry count), privileged mode, adding or dropping capabilities, device mappings, user, working directory, hostname, DNS, labels, memory limit (MB), CPU count, TTY and keep stdin open. Editing recreates the container based on its original configuration; settings the form does not cover keep their original values, and a failed recreation rolls back automatically;
+- Detail page tabs:
+  - Overview: status, exit code, restart count, health status, network details, mounts, and the Compose project and service it belongs to;
+  - Logs: view recent logs, with optional timestamps;
+  - Terminal: open an interactive terminal inside a running container (`/bin/sh` by default; command and user can be specified);
+  - Files: browse files in the container, edit text online (up to 1 MiB), upload, download (directories are packed as tar.gz), rename, create directories, delete. Deletion runs `rm -rf` inside the container, so the container must be running;
+  - Monitoring: samples of CPU, memory, network and disk I/O, and process count, plus the list of processes inside the container.
+
+## Compose
+
+Compose projects are aggregated from container labels such as `com.docker.compose.project`. They show a status (running, partially running, stopped) and their services.
+
+- Start, stop, restart, pause, resume, `down` (optionally with named volumes), and view combined logs (each line prefixed with the service name);
+- Create a project: paste the compose content, and Gately writes it to `compose/<name>/compose.yaml` in the configuration directory and runs up. Such projects are marked "managed"; you can edit the Compose file, save and apply it, or delete the whole project;
+- For existing projects, the first compose file can be edited online (the file must be writable), with an option to run up immediately after writing it back;
+- `up`, image pulls, builds and file reads and writes depend on the `docker compose` command line and access to the compose file path. When unavailable, the UI shows "docker compose command not found".
+
+## Images
+
+- The list shows tags, size, creation time, the number of containers referencing each image and dangling status. Details include layer history, environment variables, exposed ports and more;
+- **Pull**: authenticates with the registry accounts in the "System" settings. If a direct pull fails and mirror addresses are configured, they are tried in order and the image is re-tagged with its original name. Docker Hub search is supported;
+- Push, add tag, delete (optionally forced), build (inline Dockerfile or Git URL, with build arguments), and import and export tar (`docker save` format);
+- **Update check**: check a single container or use "Check all updates"; results are marked on each container;
+- **One-click upgrade**: pulls the new image and recreates the container with its existing configuration; a failed upgrade rolls back to the original container automatically. Multi-select for batch upgrades is supported;
+- "Clean dangling" removes all untagged, unused images in one click.
+
+## Networks and volumes
+
+- Networks: the list shows driver, scope, subnet, gateway and attached containers. You can create (driver, subnet, gateway, internal network, IPv6) and delete networks, and connect or disconnect containers. Built-in networks are protected;
+- Volumes: shows driver, mount point, size, reference count and the containers using each volume. You can create, delete (optionally forced), export as tar.gz, and import from tar.gz. Export and import use a temporary alpine helper container, and the image is pulled automatically if missing.
+
+## System
+
+The "System" tab contains:
+
+- Host and Docker info: version, API version, OS and architecture, kernel, CPU and memory, storage driver, data directory, container and image counts, Compose CLI version;
+- Disk usage: count, size and reclaimable space for images, containers, volumes and build cache;
+- Cleanup: stopped containers, dangling images, all unused images, unused networks, unused volumes (data is lost permanently), build cache;
+- Settings:
+
+| Field | Description |
+| --- | --- |
+| `host` | Docker address, default `unix:///var/run/docker.sock` |
+| `mirrors` | List of mirror addresses, tried in order when a direct pull fails |
+| `registries` | Private registry credentials (`server`, `username`, `password`); the password is masked in the UI |
+| `autoCheckHours` | When greater than 0, container image updates are checked automatically at this interval in hours; 0 turns it off |
+
+## Background tasks
+
+Long-running operations such as pull, push, build, batch check, batch upgrade and Compose up run as background tasks. The task panel at the bottom of the page shows live output and status (running, done, error), lets you view history, and clears finished tasks. Tasks that are still running are restored after a page refresh.
+
+## Event notifications
+
+Gately subscribes to the Docker event stream and publishes a `docker.exited` event when a container exits abnormally (non-zero exit code) or is killed by the OOM killer. You can configure receiving channels in the [Notification Center](/en/docs/modules/notify). A normal stop with exit code 0 does not trigger a notification. When Docker is temporarily unavailable, the subscription is retried every 30 seconds.
+
+## API
+
+See the [Docker API](/en/docs/reference/docker-api) for the complete API reference.

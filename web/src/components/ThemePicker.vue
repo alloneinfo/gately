@@ -1,20 +1,20 @@
 <template>
   <el-popover trigger="click" :width="316" placement="bottom-end" popper-class="theme-popper">
     <template #reference>
-      <button class="picker-btn" aria-label="切换主题" title="切换主题">
+      <button class="picker-btn" :aria-label="t('components.themePicker.switchTheme')" :title="t('components.themePicker.switchTheme')">
         <Palette :size="18" />
       </button>
     </template>
     <div class="picker">
-      <div class="picker-title">主题配色</div>
+      <div class="picker-title">{{ t('components.themePicker.title') }}</div>
       <div class="grid">
         <button
-          v-for="t in themes"
-          :key="t.id"
+          v-for="th in themes"
+          :key="th.id"
           class="swatch"
-          :class="{ active: choice === t.id }"
-          :style="{ '--p': t.primary, '--c2': t.chart2, '--bg': t.page, '--card': t.card, '--side': t.sidebar, '--bd': t.border, '--r': Math.min(t.radius, 6) + 'px' }"
-          @click="setTheme(t.id)"
+          :class="{ active: choice === th.id }"
+          :style="{ '--p': th.primary, '--c2': th.chart2, '--bg': th.page, '--card': th.card, '--side': th.sidebar, '--bd': th.border, '--r': Math.min(th.radius, 6) + 'px' }"
+          @click="setTheme(th.id)"
         >
           <span class="preview">
             <span class="pv-side" />
@@ -24,15 +24,15 @@
             </span>
           </span>
           <span class="sw-name">
-            {{ t.name }}
-            <Check v-if="choice === t.id" :size="13" class="sw-check" />
+            {{ t(th.nameKey) }}
+            <Check v-if="choice === th.id" :size="13" class="sw-check" />
           </span>
-          <span class="sw-desc">{{ t.desc }}</span>
+          <span class="sw-desc">{{ t(th.descKey) }}</span>
         </button>
       </div>
       <button class="auto" :class="{ active: choice === AUTO_ID }" @click="setTheme(AUTO_ID)">
         <MonitorSmartphone :size="15" />
-        跟随系统（翠绿 / 暗黑）
+        {{ t('components.themePicker.followSystem') }}
         <Check v-if="choice === AUTO_ID" :size="14" class="sw-check" />
       </button>
     </div>
@@ -40,10 +40,12 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
 import { Check, MonitorSmartphone, Palette } from 'lucide-vue-next'
 import { AUTO_ID, themes } from '../themes'
 import { useTheme } from '../composables/useTheme'
 
+const { t } = useI18n()
 const { choice, setTheme } = useTheme()
 </script>
 

@@ -1,0 +1,37 @@
+# Perguntas frequentes
+
+## Qual é a relação entre o Gately e o Lucky?
+
+O Gately é uma implementação open source independente, sem afiliação com o projeto Lucky. A ideia do produto vem do Lucky; sem o Lucky não haveria o Gately, e agradecemos ao autor e à comunidade do Lucky. A compatibilidade se baseia em comportamentos, interfaces e formatos de configuração observáveis publicamente, e o repositório recusa código copiado de binários ou artefatos de frontend do Lucky.
+
+## Ele precisa se conectar aos servidores do projeto?
+
+Não. Por padrão, o Gately não se conecta a nenhum servidor do projeto e não envia informações do dispositivo. Endereços externos, como a consulta do IP público, usam serviços públicos de terceiros e podem ser alterados na tarefa correspondente.
+
+## Onde está a senha inicial?
+
+Ela é gravada no log na primeira inicialização e exibida uma única vez. Em implantações com Docker, execute `docker logs gately 2>&1 | grep -i "initial password"`.
+
+## Esqueci a senha do administrador. O que fazer?
+
+Pare o Gately, apague o `account.json` do diretório de configuração e inicie de novo: o programa recria a conta `admin` e imprime uma nova senha inicial no log. Depois de entrar, revise as configurações de segurança, como a autenticação em dois fatores.
+
+## Por que `--network host` é recomendado?
+
+Redirecionamento de portas, STUN e serviços Web precisam escutar diretamente nas portas do host. Com a rede bridge, você mesmo precisa mapear cada porta usada.
+
+## Posso executá-lo junto com o Lucky?
+
+Sim. A porta de administração padrão é a 16680, que não conflita com a 16601 do Lucky. As regras importadas ficam desativadas por padrão, evitando disputa por portas e mapeamentos UPnP do roteador com um Lucky ainda em execução.
+
+## Por que preciso fornecer os binários de Tailscale, frp e cloudflared?
+
+Esses três módulos gerenciam programas externos oficiais, que o Gately não embute. Assim você sempre pode usar a versão mais recente do projeto original. Veja onde colocá-los em [Configuração e opções de execução](/pt-BR/docs/guide/configuration).
+
+## Com a regra STUN ativa, o acesso externo continua sem funcionar?
+
+Quando a porta WAN do roteador está atrás de um CGNAT da operadora (100.64.0.0/10), as portas abertas pela travessia não são acessíveis de fora; é uma limitação do próprio ambiente de rede. Use [Tailscale / frp / Cloudflare Tunnel](/pt-BR/docs/modules/tunnels).
+
+## Como relatar problemas ou participar do desenvolvimento?
+
+Abra uma issue em [GitHub Issues](https://github.com/wangwanjie/gately/issues). As convenções de desenvolvimento estão em [Como contribuir](/pt-BR/docs/guide/contributing).

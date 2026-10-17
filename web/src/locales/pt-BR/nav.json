@@ -1,0 +1,103 @@
+{
+  "login": "Entrar",
+  "groups": {
+    "network": "Rede",
+    "tunnel": "Rede e túneis",
+    "web": "Web",
+    "storage": "Armazenamento em rede",
+    "tools": "Ferramentas",
+    "system": "Sistema"
+  },
+  "items": {
+    "overview": {
+      "title": "Visão geral"
+    },
+    "portforward": {
+      "title": "Redirecionamento de portas",
+      "desc": "Redirecionamento de portas TCP / UDP e balanceamento de carga"
+    },
+    "ddns": {
+      "title": "DNS dinâmico",
+      "desc": "Atualiza os registros DNS automaticamente quando seu IP público muda"
+    },
+    "stun": {
+      "title": "Travessia STUN",
+      "desc": "Acesse serviços atrás de NAT1 sem IP público"
+    },
+    "tailscale": {
+      "title": "Tailscale",
+      "desc": "Entre em uma rede Tailscale / Headscale"
+    },
+    "frp": {
+      "title": "frp",
+      "desc": "Travessia de NAT com frpc / frps"
+    },
+    "cloudflared": {
+      "title": "Cloudflare Tunnel",
+      "desc": "Publique serviços internos sem IP público"
+    },
+    "web": {
+      "title": "Serviços Web",
+      "desc": "Proxy reverso, redirecionamentos e sites estáticos"
+    },
+    "waf": {
+      "title": "Firewall WAF",
+      "desc": "Firewall de aplicações web baseado no OWASP CRS"
+    },
+    "ssl": {
+      "title": "Certificados SSL",
+      "desc": "Emissão e renovação automáticas via ACME"
+    },
+    "storage": {
+      "title": "Armazenamento",
+      "desc": "Monte diretórios locais ou WebDAV remoto e gerencie arquivos online"
+    },
+    "webdav": {
+      "title": "WebDAV",
+      "desc": "Serviço de compartilhamento de arquivos WebDAV"
+    },
+    "ftp": {
+      "title": "Serviço FTP",
+      "desc": "Serviço de compartilhamento de arquivos FTP / FTPS"
+    },
+    "wol": {
+      "title": "Wake-on-LAN",
+      "desc": "Ligue remotamente dispositivos da sua rede local"
+    },
+    "terminal": {
+      "title": "Terminal Web",
+      "desc": "SSH e shell local no navegador"
+    },
+    "nettools": {
+      "title": "Diagnóstico de rede",
+      "desc": "Ping, traceroute, teste de porta, DNS e varredura da rede local"
+    },
+    "docker": {
+      "title": "Docker",
+      "desc": "Gerenciamento de contêineres e atualização de imagens"
+    },
+    "cron": {
+      "title": "Tarefas agendadas",
+      "desc": "Execute comandos ou requisições HTTP em um agendamento"
+    },
+    "notify": {
+      "title": "Notificações",
+      "desc": "Envie eventos para Telegram, e-mail, WeCom e mais"
+    },
+    "logs": {
+      "title": "Logs do sistema"
+    },
+    "apiTokens": {
+      "title": "Tokens de API"
+    },
+    "apiDocs": {
+      "title": "Documentação da API"
+    },
+    "settings": {
+      "title": "Configurações"
+    },
+    "about": {
+      "title": "Sobre"
+    }
+  }
+}

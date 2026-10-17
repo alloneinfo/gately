@@ -1,0 +1,104 @@
+# Centro de notificaciones
+
+El Centro de notificaciones se suscribe al bus de eventos interno de Gately y, según tus reglas, envía eventos como cambios de DDNS, caducidad de certificados, bloqueos del WAF y fallos de procesos a Webhook, Telegram, Bark, WeCom, DingTalk, Feishu y correo electrónico. La interfaz de administración está en el grupo «Sistema» de la barra lateral → «Notificaciones».
+
+## Cómo funciona
+
+1. Cada módulo publica eventos en el bus de eventos del proceso cuando cambia su estado. La publicación nunca bloquea la lógica de negocio.
+2. Cuando el Centro de notificaciones recibe un evento, comprueba las reglas una a una: la regla está activada, el nivel del evento no es inferior al nivel mínimo de la regla y el tipo de evento coincide con la lista de eventos de la regla.
+3. Cuando una regla coincidente supera la deduplicación por silenciamiento, el mensaje se entrega a los canales activados que la regla haya seleccionado. Si un evento coincide con varias reglas, cada canal recibe el envío una sola vez.
+4. El resultado de cada entrega (éxito o motivo del fallo) se escribe en «Envíos recientes», que conserva en memoria las últimas 200 entradas. Los fallos también se escriben en el registro del módulo.
+
+Una entrega individual agota el tiempo a los 45 segundos.
+
+## Canales
+
+Pulsa «Añadir canal», elige un tipo y rellena los campos. Todos los canales tienen un nombre (obligatorio), una nota y un interruptor de activación. Los campos secretos no se vuelven a mostrar tras guardar; si los dejas vacíos al editar, se conserva el valor original.
+
+| Tipo | Campos obligatorios | Campos opcionales |
+| --- | --- | --- |
+| Webhook | URL de la petición | Método de la petición (por defecto GET; GET, POST, PUT o PATCH), cabeceras (un `Clave: Valor` por línea), cuerpo, contenido de coincidencia de éxito, tiempo de espera (segundos, por defecto 20), omitir la verificación del certificado |
+| Telegram | Bot Token, Chat ID | URL de la API (déjala vacía para usar `https://api.telegram.org`) |
+| Bark | Device Key | URL del servidor (déjala vacía para usar `https://api.day.app`) |
+| WeCom | URL del bot | Ninguno |
+| DingTalk | URL del bot | Secreto de firma (rellénalo cuando el bot tenga activada la «firma») |
+| Feishu | URL del bot | Secreto de firma (rellénalo cuando el bot tenga activada la «verificación de firma») |
+| Correo | Servidor, destinatarios y al menos uno entre remitente o usuario | Cifrado, puerto, usuario, contraseña |
+
+Los campos de URL requieren una dirección completa que empiece por `http://` o `https://`.
+
+### Variables de plantilla del webhook
+
+Las siguientes variables se pueden usar en la URL de la petición y en el cuerpo, escritas como el nombre de la variable entre llaves (también se acepta la forma con el prefijo `#`):
+
+| Variable | Contenido |
+| --- | --- |
+| `title` | Título, con la forma `[Gately] Título del evento` |
+| `message` | Descripción detallada del evento |
+| `text` | Cuerpo completo, con descripción, origen, nivel y hora |
+| `type` | Tipo de evento, como `ddns.changed` |
+| `source` | Origen del evento |
+| `level` | Nivel: `info`, `warn` o `error` |
+| `time` | Hora en formato RFC 3339 |
+
+Los campos adicionales que lleva un evento (como `ip` y `container`) también se pueden usar como variables. Si un nombre coincide con los de la tabla anterior, prevalece la tabla anterior. Los valores de las variables en la URL se escapan para URL.
+
+### Correo
+
+| Cifrado | Valor | Puerto por defecto |
+| --- | --- | --- |
+| STARTTLS | `starttls` | 587 |
+| SSL/TLS | `tls` | 465 |
+| Ninguno | `none` | 25 |
+
+Un puerto 0 usa el puerto por defecto del cifrado elegido. Puedes introducir varios destinatarios separados por comas. Los correos se envían como texto plano UTF-8. Se usa la autenticación PLAIN cuando el servidor admite AUTH y se ha definido un usuario; cuando el remitente está vacío, se usa el usuario.
+
+### Firmas y códigos de respuesta
+
+- DingTalk: una vez definido un secreto de firma, las peticiones llevan automáticamente `timestamp` y `sign`.
+- Feishu: una vez definido un secreto de firma, el cuerpo de la petición lleva automáticamente `timestamp` y `sign`.
+- WeCom, DingTalk, Feishu y Bark comprueban el código de retorno de negocio de la respuesta. Un HTTP 200 con un fallo de negocio también se registra como una entrega fallida.
+
+## Reglas
+
+Pulsa «Añadir regla»:
+
+| Campo | Descripción |
+| --- | --- |
+| Nombre | Obligatorio |
+| Eventos | Al menos uno. Elige tipos de evento concretos, `*` para todos los eventos, o introduce un comodín como `ddns.*`. Los comodines usan la sintaxis `path.Match` de Go |
+| Nivel mínimo | `info`, `warn` o `error`; vacío significa info. Los eventos por debajo de este nivel no se envían |
+| Canales | Al menos uno |
+| Silencio (s) | Dentro de una misma regla, los eventos del mismo tipo y del mismo origen se envían una sola vez en este periodo y las repeticiones se descartan. 0 desactiva la deduplicación |
+| Activada | Interruptor |
+
+::: tip
+Los bloqueos del WAF y los cambios de estado de los backends pueden ocurrir con mucha frecuencia. En las reglas que los cubran, define un tiempo de silenciamiento de 300 segundos o más.
+:::
+
+## Tipos de evento
+
+| Tipo de evento | Nombre | Nivel | Desencadenante |
+| --- | --- | --- | --- |
+| `ddns.changed` | DNS dinámico: registro actualizado | Info | Una tarea DDNS actualizó su registro correctamente |
+| `ddns.failed` | DNS dinámico: fallo de actualización | Error | Una tarea DDNS no pudo actualizarse |
+| `stun.changed` | STUN: dirección de traversal modificada | Info | Cambió la dirección de traversal de una regla STUN |
+| `ssl.expiring` | Certificado: caduca pronto | Advertencia | Quedan menos de 7 días de validez; cada certificado se recuerda como máximo una vez cada 24 horas |
+| `ssl.renew_failed` | Certificado: fallo de renovación | Error | Falló la emisión o la renovación de un certificado |
+| `waf.blocked` | WAF: petición bloqueada | Advertencia | El WAF bloqueó una petición, con los campos `ip`, `host` y `path` |
+| `upstream.down` | Proxy inverso: backend caído | Error | Un backend de un servicio web se consideró no disponible |
+| `upstream.up` | Proxy inverso: backend recuperado | Info | Un backend no disponible se recuperó |
+| `docker.exited` | Docker: contenedor terminado | Advertencia o Error | Un contenedor terminó con un código de salida distinto de cero (advertencia) o fue terminado por quedarse sin memoria (error) |
+| `process.exited` | Subproceso terminado de forma anómala | Error | Un subproceso gestionado por Gately terminó de forma anómala y se reiniciará automáticamente; el origen es el nombre de registro de ese proceso |
+| `backup.done` | Copia de seguridad: completada | Info | Una copia programada o manual se realizó correctamente en todos los destinos; consulta [Copia de seguridad de la configuración](/es/docs/modules/backup) |
+| `backup.failed` | Copia de seguridad: fallida | Error | Falló el empaquetado de la copia o la escritura en algún destino |
+| `auth.failed` | Autenticación: fallos repetidos | Advertencia | Falló un inicio de sesión en la interfaz de administración, con el campo `ip` |
+| `auth.banned` | Autenticación: IP bloqueada | Advertencia | Los fallos repetidos de autenticación de un servicio web activaron un bloqueo automático |
+| `login.success` | Interfaz de administración: inicio de sesión correcto | Info | Un inicio de sesión en la interfaz de administración se realizó correctamente, con los campos `ip` y `user` |
+| `notify.test` | Notificación de prueba | Info | Generada por el botón «Probar» del canal; no participa en la coincidencia con las reglas |
+
+## Enviar una prueba
+
+El botón «Probar» de la tarjeta de un canal envía un mensaje titulado «Notificación de prueba» directamente a ese canal. Se salta las reglas y funciona incluso si el canal no está activado. Si se completa, se muestra «Notificación de prueba enviada»; si falla, se muestra el error concreto. Los resultados de las pruebas también aparecen en «Envíos recientes», con «Prueba» en la columna de la regla.
+
+La API correspondiente es `POST /api/notify/channels/{key}/test`, a la que se puede llamar con el alcance `notify:write` de un [token de API](/es/docs/reference/api).
