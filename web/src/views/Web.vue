@@ -62,7 +62,12 @@
               <div class="site-actions">
                 <el-button v-if="l.running" text size="small" :icon="BarChart3" @click="openStats(l, row)">{{ t('web.stats') }}</el-button>
                 <el-button text size="small" :icon="Pencil" @click="openSite(l, row)">{{ t('common.edit') }}</el-button>
-                <el-popconfirm v-if="!row.isDefault" :title="t('web.deleteSiteConfirm')" @confirm="removeSite(l, row)">
+                <el-popconfirm v-if="row.isDefault" :title="t('web.resetDefaultConfirm')" width="260" @confirm="resetDefaultSite(l)">
+                  <template #reference>
+                    <el-button text size="small" type="danger" :icon="Trash2" :aria-label="t('common.reset')" />
+                  </template>
+                </el-popconfirm>
+                <el-popconfirm v-else :title="t('web.deleteSiteConfirm')" @confirm="removeSite(l, row)">
                   <template #reference>
                     <el-button text size="small" type="danger" :icon="Trash2" :aria-label="t('web.deleteSite')" />
                   </template>
@@ -88,6 +93,7 @@
     <SiteStats ref="statsDialog" />
 
     <el-dialog v-model="listenerVisible" :title="editingListener.key ? t('web.editListener') : t('web.addListener')" width="560px" :fullscreen="isMobile">
+      <el-alert v-if="!editingListener.key" :title="t('web.newListenerHint')" type="info" :closable="false" show-icon class="listener-hint" />
       <el-form :model="editingListener" label-width="130px" :label-position="labelPosition">
         <el-form-item :label="t('common.name')"><el-input v-model="editingListener.name" /></el-form-item>
         <el-form-item :label="t('web.network')">
@@ -123,6 +129,7 @@
 
     <el-dialog v-model="siteVisible" :title="siteIsDefault ? t('web.defaultSite') : site.key ? t('web.editSite') : t('web.addSite')" width="760px" top="5vh" :fullscreen="isMobile">
       <el-form :model="site" label-width="130px" :label-position="labelPosition">
+        <el-alert v-if="siteIsDefault" :title="t('web.defaultSiteHint')" type="info" :closable="false" show-icon class="listener-hint" />
         <el-tabs v-model="siteTab">
           <el-tab-pane :label="t('web.tabBasic')" name="basic">
             <el-form-item v-if="!siteIsDefault" :label="t('web.domains')" required>
@@ -483,7 +490,8 @@ function siteRows(l: ListenerView): SiteRow[] {
 
 // 去掉运行状态字段，得到可提交的监听配置
 function plain(l: ListenerView): Listener {
-  const { running: _r, error: _e, stats: _s, ...rest } = l
+  // 剥离仅用于展示的运行态字段，后端保存接口会拒绝未知字段
+  const { running: _r, error: _e, stats: _s, upstreams: _u, ...rest } = l
   return JSON.parse(JSON.stringify(rest))
 }
 
@@ -628,6 +636,18 @@ async function removeSite(lv: ListenerView, row: SiteRow) {
   }
 }
 
+// resetDefaultSite 清空默认站点配置并保持停用（默认站点无法删除）
+async function resetDefaultSite(lv: ListenerView) {
+  const l = plain(lv)
+  l.default = { ...emptySite(), key: lv.default.key, enable: false }
+  try {
+    await putListener(l)
+    await load()
+  } catch (e) {
+    ElMessage.error((e as Error).message)
+  }
+}
+
 async function fetchSettings() {
   const s = await api.get<{ enable: boolean; trustedProxies: string[] | null; oauthCallbackBase: string; oauthProviders: OAuthProvider[] | null; autoBanSeconds: number }>('/api/webservice/settings')
   moduleEnabled.value = s.enable
@@ -675,6 +695,9 @@ onBeforeUnmount(() => window.clearInterval(timer))
 </script>
 
 <style scoped>
+.listener-hint {
+  margin-bottom: 16px;
+}
 .sites {
   border: 1px solid var(--g-border);
   border-radius: 8px;
