@@ -15,23 +15,26 @@ var (
 	selfHost string
 )
 
-var containerIDPattern = regexp.MustCompile(`[0-9a-f]{64}`)
+// containerIDPatterns 依次匹配 mountinfo 中的 /containers/<id>/、cgroup 中的 docker/<id> 与 docker-<id>.scope。
+// 必须带上路径前缀：overlay 一行的 upperdir 里也有 64 位十六进制层 ID，直接匹配会取错。
+var containerIDPatterns = []*regexp.Regexp{
+	regexp.MustCompile(`/containers/([0-9a-f]{64})/`),
+	regexp.MustCompile(`/docker/([0-9a-f]{64})(?:[/\s]|$)`),
+	regexp.MustCompile(`docker-([0-9a-f]{64})\.scope`),
+}
 
 // detectSelf 读取当前进程所在的容器 ID（64 位十六进制）与主机名；不在容器中时 ID 为空。
 func detectSelf() {
 	selfHost, _ = os.Hostname()
-	// 优先从 mountinfo / cgroup 中提取完整容器 ID，兼容自定义主机名
+	// 优先从 mountinfo / cgroup 中提取完整容器 ID，兼容自定义主机名与 host 网络模式（主机名为宿主机名）
 	for _, f := range []string{"/proc/self/mountinfo", "/proc/self/cgroup"} {
 		data, err := os.ReadFile(f)
 		if err != nil {
 			continue
 		}
-		for _, line := range strings.Split(string(data), "\n") {
-			if !strings.Contains(line, "docker") && !strings.Contains(line, "containers") {
-				continue
-			}
-			if id := containerIDPattern.FindString(line); id != "" {
-				selfCID = id
+		for _, re := range containerIDPatterns {
+			if m := re.FindStringSubmatch(string(data)); m != nil {
+				selfCID = m[1]
 				return
 			}
 		}
