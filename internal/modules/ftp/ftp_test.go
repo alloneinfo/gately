@@ -1,17 +1,22 @@
 package ftp
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"net"
 	"net/textproto"
+	"os"
+	"path/filepath"
 	"strconv"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/wangwanjie/gately/internal/config"
 	"github.com/wangwanjie/gately/internal/logbuf"
 	"github.com/wangwanjie/gately/internal/module"
+	"github.com/wangwanjie/gately/internal/mountfs"
 )
 
 func TestSettingsValidate(t *testing.T) {
@@ -78,5 +83,101 @@ func TestFTPLogin(t *testing.T) {
 	}
 	if c := login("rw", "bad"); c != 530 {
 		t.Fatalf("错误密码应返回 530，实际 %d", c)
+	}
+}
+
+// TestFTPMounts 验证多目录用户：根目录列出挂载名称，只读挂载拒绝上传。
+func TestFTPMounts(t *testing.T) {
+	ln, _ := net.Listen("tcp4", "127.0.0.1:0")
+	port := ln.Addr().(*net.TCPAddr).Port
+	ln.Close()
+	rw, ro := t.TempDir(), t.TempDir()
+	if err := os.WriteFile(filepath.Join(ro, "readme.txt"), []byte("hello"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	st, _ := config.Open(t.TempDir())
+	m := New(nil)
+	if err := m.Init(module.Env{Store: st, Logs: logbuf.New(20, log.New(io.Discard, "", 0))}); err != nil {
+		t.Fatal(err)
+	}
+	m.settings = Settings{Enable: true, ListenIP: "127.0.0.1", Port: port, Users: []User{
+		{Name: "u", Password: "p", Root: "/ignored", Mounts: []mountfs.Mount{{Name: "data", Path: rw}, {Name: "docs", Path: ro, ReadOnly: true}}},
+	}}
+	if err := m.settings.Validate(); err != nil {
+		t.Fatal(err)
+	}
+	if m.settings.Users[0].Root != "" {
+		t.Fatal("多目录用户的单目录字段应被清空")
+	}
+	m.restartLocked()
+	if m.err != "" {
+		t.Fatal(m.err)
+	}
+	defer m.Stop()
+
+	conn, err := net.DialTimeout("tcp", "127.0.0.1:"+strconv.Itoa(port), 3*time.Second)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer conn.Close()
+	_ = conn.SetDeadline(time.Now().Add(10 * time.Second))
+	tp := textproto.NewConn(conn)
+	cmd := func(expect int, format string, args ...any) string {
+		t.Helper()
+		_ = tp.PrintfLine(format, args...)
+		_, msg, err := tp.ReadResponse(expect)
+		if err != nil {
+			t.Fatalf("%s: %v", fmt.Sprintf(format, args...), err)
+		}
+		return msg
+	}
+	if _, _, err := tp.ReadResponse(220); err != nil {
+		t.Fatal(err)
+	}
+	cmd(331, "USER u")
+	cmd(230, "PASS p")
+	// transfer 通过 EPSV 建立数据连接执行 c，返回读取到的数据
+	transfer := func(c string, upload []byte) (string, int) {
+		t.Helper()
+		msg := cmd(229, "EPSV")
+		var dataPort int
+		if _, err := fmt.Sscanf(msg[strings.Index(msg, "(|||"):], "(|||%d|)", &dataPort); err != nil {
+			t.Fatalf("解析 EPSV 响应失败: %q", msg)
+		}
+		dc, err := net.DialTimeout("tcp", "127.0.0.1:"+strconv.Itoa(dataPort), 3*time.Second)
+		if err != nil {
+			t.Fatal(err)
+		}
+		_ = tp.PrintfLine("%s", c)
+		code, _, _ := tp.ReadResponse(0)
+		if code != 150 {
+			dc.Close()
+			return "", code
+		}
+		var out []byte
+		if upload != nil {
+			_, _ = dc.Write(upload)
+		} else {
+			out, _ = io.ReadAll(dc)
+		}
+		dc.Close()
+		code, _, _ = tp.ReadResponse(0)
+		return string(out), code
+	}
+	list, code := transfer("NLST /", nil)
+	if code != 226 || !strings.Contains(list, "data") || !strings.Contains(list, "docs") {
+		t.Fatalf("根目录应列出挂载名称，code=%d list=%q", code, list)
+	}
+	if body, code := transfer("RETR /docs/readme.txt", nil); code != 226 || body != "hello" {
+		t.Fatalf("读取只读挂载失败: %d %q", code, body)
+	}
+	if _, code := transfer("STOR /data/up.txt", []byte("x")); code != 226 {
+		t.Fatalf("上传到可写挂载失败: %d", code)
+	}
+	if _, err := os.Stat(filepath.Join(rw, "up.txt")); err != nil {
+		t.Fatal("文件应写入可写挂载目录")
+	}
+	if _, code := transfer("STOR /docs/up.txt", []byte("x")); code < 400 {
+		t.Fatalf("只读挂载应拒绝上传，实际 %d", code)
 	}
 }

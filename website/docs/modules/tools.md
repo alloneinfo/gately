@@ -10,9 +10,14 @@
 | `listenIp` | 空 | 监听地址，留空监听所有地址 |
 | `port` | 18800 | 监听端口 |
 | `tls` | 关闭 | 启用 HTTPS，证书由 [SSL 证书](/docs/modules/ssl) 模块按 SNI 提供 |
-| `users` | 无 | 多用户，每个用户包含 `name`、`password`、`root`（绝对路径目录）与 `readOnly` |
+| `users` | 无 | 多用户，每个用户包含 `name`、`password`、`root`（绝对路径目录）与 `readOnly`，或使用 `mounts` 挂载多个目录 |
 
-每个用户映射到独立目录，可设为只读。
+每个用户可以映射到一个目录，也可以挂载多个目录：
+
+- **单个目录**：填写 `root` 与 `readOnly`，登录后根目录就是该目录。
+- **多个目录**：在界面中点「挂载多个目录」，或在 `mounts` 中填写多项，每项包含 `name`（显示名称，不能含 `/`，同一用户内不重复）、`path`（绝对路径）与 `readOnly`。登录后根目录按名称列出各目录，根目录本身不能写入，文件也不能在不同目录之间移动。
+
+从 Lucky 迁移时，用户的挂载列表会转换为多个目录；Lucky 中重复出现的同名同密码用户会合并为一个用户。
 
 ## FTP
 
@@ -29,9 +34,9 @@
 | `idleTimeout` | 900 | 连接空闲多少秒后断开 |
 | `connectionTimeout` | 30 | 建立数据连接的超时秒数 |
 | `disableActiveMode` | 关闭 | 仅使用被动模式，更适合 NAT 环境 |
-| `users` | 无 | 多用户，字段同 WebDAV：`name`、`password`、`root`、`readOnly`，用户名不可重复 |
+| `users` | 无 | 多用户，字段同 WebDAV：`name`、`password`、`root`、`readOnly` 或 `mounts`，用户名不可重复 |
 
-可从 Lucky 的 FTP 配置导入参数。
+可从 Lucky 的 FTP 配置导入服务参数与用户（见 [从 Lucky 迁移](/docs/guide/migration)）。
 
 ## 存储管理
 
@@ -45,6 +50,8 @@
 | `url`、`username`、`password` | 远程 WebDAV 地址（以 `http://` 或 `https://` 开头）与账号，密码在界面中脱敏（`webdav` 使用） |
 | `skipVerify` | 跳过 HTTPS 证书校验（`webdav` 使用） |
 | `readOnly` | 只读挂载，文件管理拒绝一切写操作 |
+
+可从 Lucky 的存储管理导入本地目录与 WebDAV 存储，阿里云盘与系统挂载不迁移。
 
 在线文件管理支持浏览目录、下载文件、流式上传（不把整个文件载入内存）、新建目录、重命名和删除。挂载点可作为备份任务的目标位置，备份文件写入挂载点中指定的目录，并按保留策略清理旧文件。
 

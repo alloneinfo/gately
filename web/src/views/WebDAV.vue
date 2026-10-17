@@ -24,25 +24,7 @@
       </div>
     </div>
 
-    <div v-if="settings" class="g-card">
-      <div class="g-card-head">
-        <div class="g-card-title"><Users :size="16" />用户 <span class="g-card-desc">每个用户可访问各自的目录</span></div>
-        <el-button size="small" :icon="UserPlus" @click="settings.users.push({ name: '', password: '', root: '', readOnly: false })">添加用户</el-button>
-      </div>
-      <div class="g-card-body">
-        <div v-if="settings.users.length" class="u-head">
-          <span>用户名</span><span>密码</span><span>目录</span><span>只读</span><span />
-        </div>
-        <div v-for="(u, i) in settings.users" :key="i" class="u-row">
-          <div class="u-cell"><label class="u-label">用户名</label><el-input v-model="u.name" /></div>
-          <div class="u-cell"><label class="u-label">密码</label><el-input v-model="u.password" type="password" show-password /></div>
-          <div class="u-cell u-root"><label class="u-label">目录</label><el-input v-model="u.root" placeholder="/data/share" class="mono" /></div>
-          <div class="u-cell u-ro"><label class="u-label">只读</label><el-switch v-model="u.readOnly" /></div>
-          <div class="u-cell u-del"><el-button text type="danger" :icon="Trash2" aria-label="删除用户" @click="settings.users.splice(i, 1)" /></div>
-        </div>
-        <el-empty v-if="!settings.users.length" description="暂无用户" :image-size="60" />
-      </div>
-    </div>
+    <FileUsers v-if="settings" v-model="settings.users" />
 
     <LogCard url="/api/webdav/logs" clearable />
   </div>
@@ -51,25 +33,20 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
-import { FolderSync, Save, Server, Trash2, UserPlus, Users } from 'lucide-vue-next'
+import { FolderSync, Save, Server } from 'lucide-vue-next'
 import { api } from '../api'
 import PageHeader from '../components/PageHeader.vue'
 import StatusBadge, { type StatusType } from '../components/StatusBadge.vue'
 import LogCard from '../components/LogCard.vue'
+import FileUsers, { type FileUser } from '../components/FileUsers.vue'
 import { useFormLayout } from '../composables/useIsMobile'
 
-interface User {
-  name: string
-  password: string
-  root: string
-  readOnly: boolean
-}
 interface Settings {
   enable: boolean
   listenIp: string
   port: number
   tls: boolean
-  users: User[]
+  users: FileUser[]
 }
 
 const { labelPosition } = useFormLayout()
@@ -94,7 +71,7 @@ const svcStatus = computed((): { type: StatusType; text: string; title?: string 
 })
 
 async function load() {
-  const r = await api.get<{ settings: Settings & { users: User[] | null }; running: boolean; error: string }>('/api/webdav/settings')
+  const r = await api.get<{ settings: Settings & { users: FileUser[] | null }; running: boolean; error: string }>('/api/webdav/settings')
   settings.value = { ...r.settings, users: r.settings.users ?? [] }
   savedEnable.value = r.settings.enable
   running.value = r.running
@@ -132,60 +109,9 @@ onMounted(load)
 .w-260 {
   width: 260px;
 }
-.u-head,
-.u-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 2fr) 60px 40px;
-  gap: 10px;
-  align-items: center;
-}
-.u-head {
-  font-size: 12px;
-  color: var(--el-text-color-secondary);
-  padding-bottom: 6px;
-}
-.u-row {
-  padding: 8px 0;
-  border-top: 1px solid var(--g-border);
-}
-.u-label {
-  display: none;
-}
 @media (max-width: 767.98px) {
   .w-260 {
     width: 100%;
-  }
-  .u-head {
-    display: none;
-  }
-  .u-row {
-    grid-template-columns: 1fr 1fr;
-    padding: 12px;
-    margin-bottom: 10px;
-    border: 1px solid var(--g-border);
-    border-radius: 8px;
-    position: relative;
-  }
-  .u-label {
-    display: block;
-    font-size: 12px;
-    color: var(--el-text-color-secondary);
-    margin-bottom: 2px;
-  }
-  .u-root {
-    grid-column: 1 / -1;
-  }
-  .u-ro {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .u-ro .u-label {
-    margin: 0;
-  }
-  .u-del {
-    display: flex;
-    justify-content: flex-end;
   }
 }
 </style>

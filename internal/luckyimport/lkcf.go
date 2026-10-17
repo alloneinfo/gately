@@ -136,6 +136,9 @@ type Options struct {
 	// ResolveThirdParty 把 Lucky 第三方登录身份的 Key 解析为 Gately 的允许列表项（提供方key:标识）；
 	// all 为真时返回全部启用的身份，missing 为身份表中找不到的 Key 数量。未导入身份表时为 nil
 	ResolveThirdParty func(keys []string, all bool) (entries []string, missing int)
+	// ResolveStore 把 Lucky 存储管理中的存储 Key 解析为本地目录，供 FTP / WebDAV 的挂载使用；
+	// 无法解析时 why 为原因。为 nil 时引用存储的挂载会被跳过
+	ResolveStore func(key string) (dir, why string)
 }
 
 // Importer 由支持从 Lucky 迁移的模块实现。

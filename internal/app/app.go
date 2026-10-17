@@ -528,6 +528,14 @@ func (a *App) handleLuckyImport(w http.ResponseWriter, r *http.Request) {
 	if len(ids.List) > 0 {
 		opts.ResolveThirdParty = ids.Resolve
 	}
+	// FTP / WebDAV 用户可能引用存储管理中的存储，先汇总本次上传的存储列表，再回退到已导入的存储
+	var docs []luckyimport.Document
+	for _, pe := range parsed {
+		if pe.err == nil {
+			docs = append(docs, pe.doc)
+		}
+	}
+	opts.ResolveStore = a.luckyStoreResolver(docs)
 	for i, pe := range parsed {
 		res := fileResult{File: pe.name, Reports: []*luckyimport.Report{}}
 		doc, err := pe.doc, pe.err
@@ -564,6 +572,32 @@ func (a *App) handleLuckyImport(w http.ResponseWriter, r *http.Request) {
 		results = append(results, res)
 	}
 	httpx.OK(w, results)
+}
+
+// luckyStoreResolver 汇总 docs 中的 Lucky 存储管理列表，生成存储 Key 到本地目录的解析函数；
+// 本次未上传的存储回退到存储模块中已导入的同 Key 挂载点。
+func (a *App) luckyStoreResolver(docs []luckyimport.Document) func(string) (string, string) {
+	items := map[string]luckyimport.StorageItem{}
+	for _, doc := range docs {
+		list, ok, err := luckyimport.StorageList(doc)
+		if !ok || err != nil {
+			continue
+		}
+		for _, it := range list {
+			items[it.Key] = it
+		}
+	}
+	type pathLookup interface {
+		MountPath(key string) (string, bool)
+	}
+	var fallback func(string) (string, bool)
+	for _, e := range a.modules {
+		if pl, ok := e.mod.(pathLookup); ok {
+			fallback = pl.MountPath
+			break
+		}
+	}
+	return luckyimport.StoreResolver(items, fallback)
 }
 
 func readUpload(fh *multipart.FileHeader) ([]byte, error) {

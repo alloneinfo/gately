@@ -14,6 +14,7 @@ import (
 	"github.com/wangwanjie/gately/internal/config"
 	"github.com/wangwanjie/gately/internal/logbuf"
 	"github.com/wangwanjie/gately/internal/module"
+	"github.com/wangwanjie/gately/internal/mountfs"
 )
 
 func TestWebDAVUsers(t *testing.T) {
@@ -30,6 +31,7 @@ func TestWebDAVUsers(t *testing.T) {
 	m.settings = Settings{Enable: true, ListenIP: "127.0.0.1", Port: port, Users: []User{
 		{Name: "rw", Password: "p1", Root: rootA},
 		{Name: "ro", Password: "p2", Root: rootB, ReadOnly: true},
+		{Name: "multi", Password: "p3", Mounts: []mountfs.Mount{{Name: "a", Path: rootA}, {Name: "b", Path: rootB, ReadOnly: true}}},
 	}}
 	if err := m.settings.Validate(); err != nil {
 		t.Fatal(err)
@@ -66,5 +68,31 @@ func TestWebDAVUsers(t *testing.T) {
 	}
 	if c := do("GET", "/a.txt", "ro", "p2", ""); c != 404 {
 		t.Fatalf("用户之间目录应隔离: %d", c)
+	}
+
+	// 多目录用户：根目录列出挂载名称，各挂载按自身的只读设置读写
+	req, _ := http.NewRequest("PROPFIND", base+"/", nil)
+	req.Header.Set("Depth", "1")
+	req.SetBasicAuth("multi", "p3")
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	listing, _ := io.ReadAll(resp.Body)
+	resp.Body.Close()
+	if resp.StatusCode != 207 || !strings.Contains(string(listing), "<D:href>/a/</D:href>") || !strings.Contains(string(listing), "<D:href>/b/</D:href>") {
+		t.Fatalf("根目录应列出挂载: %d %s", resp.StatusCode, listing)
+	}
+	if c := do("GET", "/b/readme.txt", "multi", "p3", ""); c != 200 {
+		t.Fatalf("应能读取只读挂载: %d", c)
+	}
+	if c := do("PUT", "/a/m.txt", "multi", "p3", "m"); c != 201 {
+		t.Fatalf("应能写入可写挂载: %d", c)
+	}
+	if c := do("PUT", "/b/m.txt", "multi", "p3", "m"); c == 201 {
+		t.Fatal("只读挂载不应能写入")
+	}
+	if c := do("PUT", "/m.txt", "multi", "p3", "m"); c == 201 {
+		t.Fatal("虚拟根目录不应能写入")
 	}
 }

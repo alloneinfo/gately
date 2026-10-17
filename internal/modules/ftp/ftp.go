@@ -1,4 +1,4 @@
-// Package ftp 实现 FTP 文件服务：多用户、每个用户映射到独立目录，可设为只读，支持 FTPS 与被动端口范围。
+// Package ftp 实现 FTP 文件服务：多用户、每个用户映射到一个或多个目录，可设为只读，支持 FTPS 与被动端口范围。
 package ftp
 
 import (
@@ -23,6 +23,7 @@ import (
 	"github.com/wangwanjie/gately/internal/httpx"
 	"github.com/wangwanjie/gately/internal/logbuf"
 	"github.com/wangwanjie/gately/internal/module"
+	"github.com/wangwanjie/gately/internal/mountfs"
 )
 
 // ID 是模块标识。
@@ -39,9 +40,11 @@ const (
 type User struct {
 	Name     string `json:"name"`
 	Password string `json:"password"`
-	// Root 为该用户可访问的目录（绝对路径）
+	// Root 为该用户可访问的目录（绝对路径），ReadOnly 作用于该目录；Mounts 非空时二者不再使用
 	Root     string `json:"root"`
 	ReadOnly bool   `json:"readOnly"`
+	// Mounts 为多个目录：登录后根目录按名称列出各目录，每个目录可单独设为只读
+	Mounts []mountfs.Mount `json:"mounts,omitempty"`
 }
 
 // Settings 是模块配置。
@@ -112,6 +115,14 @@ func (s *Settings) Validate() error {
 			return fmt.Errorf("用户 %s 重复", u.Name)
 		}
 		seen[u.Name] = true
+		if len(u.Mounts) > 0 {
+			// 多目录模式下根目录为虚拟目录，单目录字段清空，避免两套配置并存
+			u.Root, u.ReadOnly = "", false
+			if err := mountfs.Validate(u.Mounts); err != nil {
+				return fmt.Errorf("用户 %s: %w", u.Name, err)
+			}
+			continue
+		}
 		if !filepath.IsAbs(u.Root) {
 			return fmt.Errorf("用户 %s 的目录需为绝对路径", u.Name)
 		}
@@ -165,9 +176,14 @@ func (d *driver) AuthUser(cc ftpserver.ClientContext, user, pass string) (ftpser
 		d.logs.Add(logbuf.LevelWarn, "", fmt.Sprintf("%s 认证失败（用户 %q）", cc.RemoteAddr(), user))
 		return nil, errors.New("用户名或密码错误")
 	}
-	var fs afero.Fs = afero.NewBasePathFs(afero.NewOsFs(), u.Root)
-	if u.ReadOnly {
-		fs = afero.NewReadOnlyFs(fs)
+	var fs afero.Fs
+	if len(u.Mounts) > 0 {
+		fs = mountfs.Afero(u.Mounts)
+	} else {
+		fs = afero.NewBasePathFs(afero.NewOsFs(), u.Root)
+		if u.ReadOnly {
+			fs = afero.NewReadOnlyFs(fs)
+		}
 	}
 	d.logs.Add(logbuf.LevelInfo, "", fmt.Sprintf("%s 登录（用户 %q）", cc.RemoteAddr(), user))
 	return fs, nil

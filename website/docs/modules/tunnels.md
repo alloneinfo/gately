@@ -28,12 +28,14 @@ Docker 部署时把二进制放进挂载的配置目录即可，例如 `./gately
 - **frpc 客户端**：tcp / udp / http / https / stcp / xtcp 代理，增删即生效；
 - **frps 服务端**：端口白名单、子域名、控制台；
 - **导入已有配置**：页头的「导入配置」支持旧版 `frpc.ini` / `frps.ini`（含 `[common]` 段）和 frp 0.52+ 的 `toml`，可选择文件或粘贴内容。先预览解析结果与被忽略的字段，再确认导入；客户端可选择追加（同名代理保持不变）或替换全部代理。导入不会改变启用状态，也可通过接口 `POST /api/frp/import` 调用。
+- **从 Lucky 迁移**：`lucky_frp.lkcf` 中的第一个客户端实例与第一个服务端实例可直接导入，见 [从 Lucky 迁移](/docs/guide/migration)。
 
 ## Cloudflare 隧道
 
 - 令牌隧道与 trycloudflare 临时隧道；
 - 多隧道、自动重启；
 - 展示公网地址。
+- 可从 Lucky 导入使用隧道令牌的隧道。
 
 ## 如何选择
 

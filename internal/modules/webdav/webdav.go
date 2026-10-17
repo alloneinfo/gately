@@ -1,4 +1,4 @@
-// Package webdav 实现 WebDAV 文件服务：多用户、每个用户映射到独立目录，可设为只读。
+// Package webdav 实现 WebDAV 文件服务：多用户、每个用户映射到一个或多个目录，可设为只读。
 package webdav
 
 import (
@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"net"
 	"net/http"
-	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -24,6 +23,7 @@ import (
 	"github.com/wangwanjie/gately/internal/httpx"
 	"github.com/wangwanjie/gately/internal/logbuf"
 	"github.com/wangwanjie/gately/internal/module"
+	"github.com/wangwanjie/gately/internal/mountfs"
 )
 
 // ID 是模块标识。
@@ -33,9 +33,11 @@ const ID = "webdav"
 type User struct {
 	Name     string `json:"name"`
 	Password string `json:"password"`
-	// Root 为该用户可访问的目录（绝对路径）
+	// Root 为该用户可访问的目录（绝对路径），ReadOnly 作用于该目录；Mounts 非空时二者不再使用
 	Root     string `json:"root"`
 	ReadOnly bool   `json:"readOnly"`
+	// Mounts 为多个目录：登录后根目录按名称列出各目录，每个目录可单独设为只读
+	Mounts []mountfs.Mount `json:"mounts,omitempty"`
 }
 
 // Settings 是模块配置。
@@ -76,6 +78,14 @@ func (s *Settings) Validate() error {
 			return fmt.Errorf("用户 %s 重复", u.Name)
 		}
 		seen[u.Name] = true
+		if len(u.Mounts) > 0 {
+			// 多目录模式下根目录为虚拟目录，单目录字段清空，避免两套配置并存
+			u.Root, u.ReadOnly = "", false
+			if err := mountfs.Validate(u.Mounts); err != nil {
+				return fmt.Errorf("用户 %s: %w", u.Name, err)
+			}
+			continue
+		}
 		if !filepath.IsAbs(u.Root) {
 			return fmt.Errorf("用户 %s 的目录需为绝对路径", u.Name)
 		}
@@ -84,19 +94,6 @@ func (s *Settings) Validate() error {
 		return errors.New("启用 WebDAV 时至少添加一个用户")
 	}
 	return nil
-}
-
-// readOnlyFS 拒绝所有写操作。
-type readOnlyFS struct{ xwebdav.FileSystem }
-
-func (readOnlyFS) Mkdir(context.Context, string, os.FileMode) error { return os.ErrPermission }
-func (readOnlyFS) RemoveAll(context.Context, string) error          { return os.ErrPermission }
-func (readOnlyFS) Rename(context.Context, string, string) error     { return os.ErrPermission }
-func (r readOnlyFS) OpenFile(ctx context.Context, name string, flag int, perm os.FileMode) (xwebdav.File, error) {
-	if flag&(os.O_WRONLY|os.O_RDWR|os.O_CREATE|os.O_TRUNC|os.O_APPEND) != 0 {
-		return nil, os.ErrPermission
-	}
-	return r.FileSystem.OpenFile(ctx, name, flag, perm)
 }
 
 type userHandler struct {
@@ -166,9 +163,14 @@ func (m *Module) restartLocked() {
 	}
 	m.handlers = map[string]*userHandler{}
 	for _, u := range m.settings.Users {
-		var fs xwebdav.FileSystem = xwebdav.Dir(u.Root)
-		if u.ReadOnly {
-			fs = readOnlyFS{fs}
+		var fs xwebdav.FileSystem
+		if len(u.Mounts) > 0 {
+			fs = mountfs.WebDAV(u.Mounts)
+		} else {
+			fs = xwebdav.Dir(u.Root)
+			if u.ReadOnly {
+				fs = mountfs.ReadOnlyDAV{FileSystem: fs}
+			}
 		}
 		m.handlers[u.Name] = &userHandler{user: u, handler: &xwebdav.Handler{FileSystem: fs, LockSystem: xwebdav.NewMemLS()}}
 	}
