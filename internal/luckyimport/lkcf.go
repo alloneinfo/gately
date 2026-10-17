@@ -1,6 +1,6 @@
 // Package luckyimport 解析 Lucky 的 .lkcf 配置文件，用于迁移到 Gately。
 //
-// 文件格式（逆向自 Lucky 2.27.2，见 docs/analysis/lucky-2.27.2.md）：
+// 文件格式（针对 Lucky 2.27.2 导出的配置）：
 //
 //	[0]      版本号，固定为 0x01
 //	[1:33]   AES-256 密钥

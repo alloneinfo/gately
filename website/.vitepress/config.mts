@@ -2,7 +2,7 @@ import { defineConfig } from 'vitepress'
 
 const SITE = 'https://gately.cn'
 const REPO = 'https://github.com/wangwanjie/gately'
-const DESC = '开源、可审计的网络网关工具集：DDNS、STUN 穿透、端口转发、反向代理、证书、WAF、Tailscale、frp 集成在一个单文件中，Lucky 的开源替代。'
+const DESC = '开源、可审计的网络网关工具集：DDNS、STUN 穿透、端口转发、反向代理、证书、WAF、Tailscale、frp 集成在一个单文件中，受 Lucky 启发的开源实现。'
 
 export default defineConfig({
   lang: 'zh-CN',

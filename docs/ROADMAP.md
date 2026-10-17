@@ -2,7 +2,7 @@
 
 ## 目标
 
-做一个开源、可审计、社区驱动的 Lucky 替代品：覆盖家庭网络、NAS 与服务器用户最常用的 DDNS、STUN 穿透、端口转发、反向代理、证书管理，并能一键导入现有 Lucky 配置。
+受 Lucky 启发，做一个开源、可审计、社区驱动的同类工具：覆盖家庭网络、NAS 与服务器用户最常用的 DDNS、STUN 穿透、端口转发、反向代理、证书管理，并能一键导入现有 Lucky 配置。
 
 设计原则：
 
@@ -36,7 +36,6 @@ internal/module/       模块接口与注册表
 internal/modules/*/    各功能模块
 internal/luckyimport/  Lucky .lkcf 解密与字段映射
 web/                   前端工程，构建产物由 web/embed.go 嵌入
-docs/analysis/         Lucky 逆向分析结论
 ```
 
 ## 里程碑

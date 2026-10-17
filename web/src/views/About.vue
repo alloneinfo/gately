@@ -40,8 +40,8 @@
     <section class="block">
       <h2><Sparkles :size="18" />为什么做 Gately</h2>
       <p class="lead">
-        Lucky 功能强大，但闭源、二进制加壳，配置文件经过混淆，并包含与官方服务器通信的逻辑。对于运行在网络边界、手握 DNS 密钥和证书私钥的软件，用户应当能看到它在做什么。Gately
-        用开源代码重新实现了这些能力，并保持配置可迁移，让你在不改变使用习惯的前提下换到一个可以审计的实现。
+        Lucky 是国内 NAS 与家庭网络用户熟悉的优秀工具，也为 Gately 提供了产品思路，没有 Lucky 就不会有 Gately。Lucky 以闭源方式免费分发，Gately 选择完全开源：对于运行在网络边界、手握 DNS 密钥和证书私钥的软件，开源让用户能够看到它在做什么。Gately
+        用开源代码实现同类能力，并保持配置可迁移，让你在不改变使用习惯的前提下，多一个可以审计的选择。
       </p>
     </section>
 
@@ -114,8 +114,8 @@
         <span v-for="s in stack" :key="s">{{ s }}</span>
       </div>
       <div class="muted small">
-        以 <a :href="`${REPO}/blob/main/LICENSE`" target="_blank" rel="noopener">Apache License 2.0</a> 发布 · 感谢
-        <a href="https://github.com/gdy666/lucky" target="_blank" rel="noopener">Lucky</a> 带来的产品灵感 · 与 Lucky 的兼容仅基于公开可观察的行为与配置格式
+        以 <a :href="`${REPO}/blob/main/LICENSE`" target="_blank" rel="noopener">Apache License 2.0</a> 发布 · 没有
+        <a href="https://github.com/gdy666/lucky" target="_blank" rel="noopener">Lucky</a> 就没有 Gately，感谢其带来的产品灵感 · 与 Lucky 的兼容仅基于公开可观察的行为与配置格式
       </div>
       <div v-if="info" class="muted small mono">{{ info.version }} · {{ info.commit || 'none' }} · {{ info.buildDate || 'unknown' }}</div>
     </footer>
