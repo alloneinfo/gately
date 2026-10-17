@@ -30,6 +30,10 @@ func main() {
 			os.Exit(ctl.RunCtl(os.Args[2:], i18n.NewWriterFor(os.Stdout, i18n.FromEnv()), i18n.NewWriterFor(os.Stderr, i18n.FromEnv())))
 		case "mcp":
 			os.Exit(ctl.RunMCP(os.Args[2:], os.Stdin, os.Stdout, i18n.NewWriterFor(os.Stderr, i18n.FromEnv())))
+		case "version":
+			// 与 -version 等价，避免 docker exec gately gately version 误启动第二个服务实例
+			printVersion()
+			return
 		}
 	}
 	// 标准日志（含启动失败等 log.Fatalf）按服务端语言翻译
@@ -40,6 +44,12 @@ func main() {
 	apiDocs := flag.String("api-docs", "", "export API docs (openapi.json and API.md) to the given directory and exit / 导出 API 文档到指定目录后退出")
 	flag.Parse()
 
+	// 多余的位置参数不属于任何子命令，拒绝启动，避免误启动第二个服务实例去抢占端口
+	if flag.NArg() > 0 {
+		fmt.Fprintf(os.Stderr, "未知子命令: %s\n", flag.Arg(0))
+		os.Exit(2)
+	}
+
 	if *apiDocs != "" {
 		if err := exportAPIDocs(*apiDocs); err != nil {
 			log.Fatalf("导出 API 文档失败: %v", err)
@@ -48,13 +58,7 @@ func main() {
 	}
 
 	if *showVersion {
-		info, _ := json.Marshal(map[string]string{
-			"version":   version.Version,
-			"commit":    version.Commit,
-			"buildDate": version.BuildDate,
-			"go":        runtime.Version(),
-		})
-		fmt.Println(string(info))
+		printVersion()
 		return
 	}
 
@@ -119,4 +123,15 @@ func exportAPIDocs(dir string) error {
 		}
 	}
 	return nil
+}
+
+// printVersion 以 JSON 输出版本信息。
+func printVersion() {
+	info, _ := json.Marshal(map[string]string{
+		"version":   version.Version,
+		"commit":    version.Commit,
+		"buildDate": version.BuildDate,
+		"go":        runtime.Version(),
+	})
+	fmt.Println(string(info))
 }
