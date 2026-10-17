@@ -41,6 +41,7 @@ export default defineConfig({
             { text: '快速开始', link: '/docs/guide/quick-start' },
             { text: '安装部署', link: '/docs/guide/install' },
             { text: '配置与运行参数', link: '/docs/guide/configuration' },
+            { text: '命令行与 MCP', link: '/docs/guide/cli-mcp' },
             { text: '从 Lucky 迁移', link: '/docs/guide/migration' },
             { text: '与 Lucky 对比', link: '/docs/guide/comparison' },
             { text: '常见问题', link: '/docs/guide/faq' }
@@ -59,6 +60,9 @@ export default defineConfig({
             { text: 'Tailscale / frp / cloudflared', link: '/docs/modules/tunnels' },
             { text: 'Docker 管理', link: '/docs/modules/docker' },
             { text: 'Web 终端', link: '/docs/modules/terminal' },
+            { text: '网络诊断', link: '/docs/modules/nettools' },
+            { text: '通知中心', link: '/docs/modules/notify' },
+            { text: '配置备份', link: '/docs/modules/backup' },
             { text: '文件与运维工具', link: '/docs/modules/tools' }
           ]
         },
@@ -72,6 +76,8 @@ export default defineConfig({
         {
           text: '参考',
           items: [
+            { text: 'API 令牌与 OpenAPI', link: '/docs/reference/api' },
+            { text: '接口清单', link: '/docs/reference/api-reference' },
             { text: 'Docker API', link: '/docs/reference/docker-api' },
             { text: 'Web 终端 API', link: '/docs/reference/webterminal-api' },
             { text: '参与贡献', link: '/docs/guide/contributing' }

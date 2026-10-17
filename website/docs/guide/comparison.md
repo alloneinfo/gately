@@ -30,6 +30,8 @@ Lucky 的分析结论见仓库中的 [逆向分析报告](https://github.com/wan
 | Web 终端 | ✅ |
 | WebDAV / FTP / 存储管理 | ✅ |
 | 网络唤醒 / 计划任务 | ✅ |
+| 通知中心 / 配置备份 / 网络诊断 | ✅ |
+| API 令牌 / OpenAPI / 命令行 / MCP | ✅ |
 | DLNA、网盘挂载、rclone、全局 IP 过滤、HTTP/3 | 规划中，视社区需求排期 |
 
 ## 有意为之的差异

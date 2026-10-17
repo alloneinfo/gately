@@ -5,3 +5,5 @@ node_modules/
 docs/guide/migration.md
 docs/reference/docker-api.md
 docs/reference/webterminal-api.md
+docs/reference/api-reference.md
+public/openapi.json

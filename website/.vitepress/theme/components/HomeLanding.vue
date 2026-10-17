@@ -3,7 +3,8 @@ import { ref } from 'vue'
 import { withBase } from 'vitepress'
 import {
   Globe, RadioTower, ArrowLeftRight, ShieldCheck, Waypoints, ShieldAlert, Network, Boxes,
-  Terminal, HardDrive, Clock, KeyRound, Copy, Check, Github, Lock, Eye, FileJson, Package
+  Terminal, HardDrive, Clock, KeyRound, Copy, Check, Github, Lock, Eye, FileJson, Package,
+  Bell, DatabaseBackup, Activity, Bot, UserCheck, ChartLine
 } from 'lucide-vue-next'
 
 const installTabs = [
@@ -72,14 +73,20 @@ const features = [
   { icon: RadioTower, title: 'STUN 穿透', text: 'TCP / UDP 打洞与保活，UPnP / NAT-PMP，内置转发；公网地址变化时触发 Webhook 与脚本。' },
   { icon: ArrowLeftRight, title: '端口转发', text: 'TCP / UDP、IPv4 / IPv6、端口段、多目标故障转移、连接数限制与流量统计。' },
   { icon: KeyRound, title: 'SSL 证书', text: 'ACME DNS-01 自动签发与续期，支持通配符与 EAB，可映射到目录并在变化后执行脚本。' },
-  { icon: Waypoints, title: 'Web 服务', text: '按域名反向代理、重定向、静态文件；HTTPS、WebSocket、PROXY 协议；基本认证与 GitHub / Google / QQ / OIDC 登录。' },
+  { icon: Waypoints, title: 'Web 服务', text: '按域名反向代理、重定向、静态文件；HTTPS、WebSocket、PROXY 协议；多后端权重与策略、健康检查、压缩、限流与响应缓存。' },
   { icon: ShieldAlert, title: 'WAF 防火墙', text: '内置 Coraza 与 OWASP CRS v4，按文件启用规则，支持自定义 SecLang，可拦截或仅检测。' },
   { icon: Network, title: '组网与穿透', text: '以进程托管方式集成 Tailscale、frp（frpc / frps）与 cloudflared 隧道，始终使用上游最新版本。' },
-  { icon: Boxes, title: 'Docker 管理', text: '容器启停、日志、镜像更新检查与一键升级，失败自动回滚。' },
-  { icon: Terminal, title: 'Web 终端', text: 'SSH（主机密钥首次信任）与本机 Shell（默认关闭），在浏览器里完成日常运维。' },
+  { icon: Boxes, title: 'Docker 管理', text: '容器创建与编辑、日志与终端、Compose、镜像更新与一键升级（失败自动回滚）、网络与卷管理。' },
+  { icon: Terminal, title: 'Web 终端', text: 'SSH、Telnet 与本机 Shell（默认关闭），支持代理、持久会话、SFTP 文件管理与分屏。' },
   { icon: HardDrive, title: '文件服务', text: 'WebDAV、FTP 服务与存储管理，支持本地与远程 WebDAV 挂载及在线文件管理。' },
   { icon: Clock, title: '计划任务与唤醒', text: 'cron 定时执行命令或 HTTP 请求并保留记录；网络唤醒魔术包广播与在线探测。' },
-  { icon: ShieldCheck, title: '安全加固', text: '两步验证、登录失败限流、安全入口、仅内网访问、管理界面 HTTPS、API 令牌。' }
+  { icon: ShieldCheck, title: '安全加固', text: '两步验证、登录失败限流、安全入口、仅内网访问、管理界面 HTTPS、API 令牌。' },
+  { icon: UserCheck, title: '访问控制', text: '站点路径规则、临时分享链接、认证失败自动封禁、GeoIP 国家过滤与 IP 黑白名单。' },
+  { icon: ChartLine, title: '访问统计与监控', text: '分钟级访问与流量统计，并以 Prometheus 指标暴露，便于接入已有监控。' },
+  { icon: Bell, title: '通知中心', text: 'Webhook、Telegram、Bark、企业微信、钉钉、飞书与邮件；按级别与事件规则推送，支持静默去重。' },
+  { icon: DatabaseBackup, title: '配置备份', text: '加密备份（scrypt + AES-GCM）、保留策略与定时备份，可写入本地目录或存储挂载点。' },
+  { icon: Activity, title: '网络诊断', text: 'Ping、路由追踪、端口探测、DNS 查询、测速与局域网扫描，作为后台任务运行。' },
+  { icon: Bot, title: 'API、命令行与 MCP', text: '多令牌按模块授权，自动生成的 OpenAPI 文档；gately ctl 调用实例，gately mcp 接入 AI 助手。' }
 ]
 
 const promises = [

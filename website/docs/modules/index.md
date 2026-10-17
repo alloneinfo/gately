@@ -8,9 +8,12 @@ Gately 的每项能力是一个独立模块，可单独启停、单独配置，�
 | STUN 穿透 | TCP / UDP、保活、UPnP / NAT-PMP、内置转发、变化时触发 Webhook 与脚本 | [查看](/docs/modules/stun) |
 | 端口转发 | TCP / UDP、IPv4 / IPv6、端口段、多目标故障转移、连接数限制、流量统计 | [查看](/docs/modules/portforward) |
 | SSL 证书 | ACME DNS-01 自动签发与续期、上传、映射到目录并执行脚本 | [查看](/docs/modules/ssl) |
-| Web 服务 | 反向代理、重定向、静态文件、HTTPS、认证、IP 黑白名单 | [查看](/docs/modules/web) |
+| Web 服务 | 反向代理、重定向、静态文件、HTTPS、认证、访问控制、负载均衡与健康检查、缓存与限流、访问统计 | [查看](/docs/modules/web) |
 | WAF 防火墙 | Coraza + OWASP CRS v4 | [查看](/docs/modules/waf) |
 | Tailscale / frp / cloudflared | 托管官方二进制的组网与内网穿透 | [查看](/docs/modules/tunnels) |
-| Docker 管理 | 容器启停、日志、镜像更新与一键升级 | [查看](/docs/modules/docker) |
-| Web 终端 | SSH 与本机 Shell | [查看](/docs/modules/terminal) |
+| Docker 管理 | 容器创建与编辑、日志与终端、Compose、镜像更新与升级、网络与卷 | [查看](/docs/modules/docker) |
+| Web 终端 | SSH、Telnet、本机 Shell、SFTP 文件管理、持久会话 | [查看](/docs/modules/terminal) |
+| 网络诊断 | Ping、路由追踪、端口探测、DNS 查询、测速、局域网扫描 | [查看](/docs/modules/nettools) |
+| 通知中心 | 多渠道事件推送与规则 | [查看](/docs/modules/notify) |
+| 配置备份 | 加密备份、保留策略、定时备份与恢复 | [查看](/docs/modules/backup) |
 | 文件与运维工具 | WebDAV、FTP、存储管理、网络唤醒、计划任务 | [查看](/docs/modules/tools) |

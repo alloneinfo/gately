@@ -22,12 +22,18 @@ Lucky 功能强大，但闭源、二进制加壳，配置文件经过混淆，�
 | Tailscale | 托管 tailscaled（用户态网络，容器友好）或接入系统已有守护进程；认证密钥/登录链接、Headscale、子网路由、出口节点、节点列表与 SOCKS5 代理、固定端口、tailscaled 额外参数与环境变量 |
 | frp | frpc 客户端（tcp/udp/http/https/stcp/xtcp 代理，增删即生效）与 frps 服务端（端口白名单、子域名、控制台），可一键导入旧版 ini / 新版 toml 配置 |
 | Cloudflare 隧道 | cloudflared 令牌隧道与 trycloudflare 临时隧道，多隧道、自动重启、公网地址展示 |
-| Web 服务 | 按域名反向代理/重定向/静态文件/固定文本；HTTPS；WebSocket；PROXY 协议收发；基本认证、网页认证、GitHub/Google/QQ/OIDC 登录；IP 黑白名单 |
+| Web 服务 | 按域名反向代理/重定向/静态文件/固定文本；HTTPS；WebSocket；PROXY 协议收发；基本认证、网页认证、GitHub/Google/QQ/OIDC 登录；IP 黑白名单、路径规则、临时分享链接、认证失败自动封禁、GeoIP 国家过滤；后端权重/备用/负载均衡策略、主动与被动健康检查、压缩、限流、响应缓存、路径重写；分钟级访问统计与 Prometheus 指标 |
 | WAF 防火墙 | Coraza + OWASP CRS v4，可按文件启用规则、自定义 SecLang、拦截/仅检测 |
-| Docker 管理 | 容器启停、日志、镜像更新检查与一键升级（失败自动回滚） |
-| Web 终端 | SSH（主机密钥首次信任）、本机 Shell（默认关闭） |
+| Docker 管理 | 容器创建与编辑、日志与终端、Compose、镜像更新检查与一键升级（失败自动回滚）、网络与卷 |
+| Web 终端 | SSH（主机密钥首次信任）、Telnet、本机 Shell（默认关闭）；代理、持久会话、SFTP 文件管理、2FA 与协议确认、快捷命令、分屏 |
+| 网络诊断 | Ping、路由追踪、端口探测、DNS 查询、测速、局域网扫描 |
+| 通知中心 | Webhook、Telegram、Bark、企业微信、钉钉、飞书、邮件；级别、通配与静默去重规则 |
+| 配置备份 | 加密备份（scrypt + AES-GCM）、保留策略、定时备份到本地目录或存储挂载点 |
+| 命令行与 MCP | `gately ctl` 调用运行中的实例，`gately mcp` 以 stdio 提供 MCP 服务（默认只读） |
 | 网络唤醒 | 魔术包广播、在线探测 |
 | WebDAV | 多用户、独立目录、只读 |
+| FTP | 多用户、独立目录、只读，支持 FTPS 与被动端口范围 |
+| 存储管理 | 本地目录与远程 WebDAV 挂载，在线文件管理 |
 | 计划任务 | cron 表达式，命令或 HTTP 请求，执行记录 |
 | 安全与设置 | 两步验证（TOTP）、登录失败限流、安全入口、仅内网访问、管理界面 HTTPS、多 API 令牌（按模块读写授权）、自定义 DNS（支持 DoH）、时区、配置备份与恢复 |
 | 迁移 | 导入 Lucky 的 `.lkcf` 或整站配置 zip：端口转发、DDNS、STUN、证书、反向代理、WAF、网络唤醒、Web 终端、WebDAV、基础设置 |

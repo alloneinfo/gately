@@ -7,7 +7,9 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const pairs = [
   ['../docs/MIGRATION.md', 'docs/guide/migration.md'],
   ['../docs/DOCKER_API.md', 'docs/reference/docker-api.md'],
-  ['../docs/webterminal-api.md', 'docs/reference/webterminal-api.md']
+  ['../docs/webterminal-api.md', 'docs/reference/webterminal-api.md'],
+  ['../docs/api/API.md', 'docs/reference/api-reference.md'],
+  ['../docs/api/openapi.json', 'public/openapi.json']
 ]
 
 for (const [from, to] of pairs) {

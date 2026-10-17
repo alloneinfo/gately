@@ -9,13 +9,15 @@
 - [ ] 设置安全入口，使管理界面只能通过自定义路径访问
 - [ ] 开启「仅内网访问」，需要外网管理时通过 VPN（如 [Tailscale](/docs/modules/tunnels)）进入
 - [ ] 在不可信网络中访问时，启用管理界面 HTTPS
-- [ ] 自动化脚本使用 API 令牌，避免共享管理员密码
+- [ ] 自动化脚本与 [命令行 / MCP](/docs/guide/cli-mcp) 使用最小权限的 [API 令牌](/docs/reference/api)，设置过期时间，避免共享管理员密码
+- [ ] 为 [配置备份](/docs/modules/backup) 设置加密口令，并开启定时备份
+- [ ] 在 [通知中心](/docs/modules/notify) 配置登录、证书、备份失败等事件的推送
 
 ## 对外服务
 
 - 通过 [Web 服务](/docs/modules/web) 暴露内网服务时，启用 HTTPS，并配合基本认证、网页认证或第三方登录；
 - 对公网站点开启 [WAF](/docs/modules/waf)，先以「仅检测」观察误报，再切换为「拦截」；
-- 使用 IP 黑白名单限制来源。
+- 使用 IP 黑白名单、GeoIP 国家过滤与认证失败自动封禁限制来源。
 
 ## Docker
 
