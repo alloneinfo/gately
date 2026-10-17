@@ -4,6 +4,8 @@
 
 An open-source, auditable network gateway toolkit for home networks, NAS boxes, cloud hosts, and servers of all kinds. Inspired by [Lucky](https://github.com/gdy666/lucky), it offers the same class of features in a fully open-source form. DDNS, STUN traversal, port forwarding, reverse proxy, certificates, WAF, and more ship in a single ~22 MB file, and your Lucky configuration imports with one click.
 
+![Gately overview](docs/images/overview.png)
+
 ## Why Gately
 
 Lucky is a well-loved tool among NAS and home-network users in China. It brings DDNS, STUN traversal, reverse proxy, and more together in one place, and it gave Gately its product direction; without Lucky there would be no Gately. Lucky is distributed free of charge as closed-source software, while Gately is fully open source, so users and the community can read the source and the configuration directly. For software that sits on your network edge and holds your DNS keys and certificate private keys, open source lets you see exactly what it does. Gately's commitments:

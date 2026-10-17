@@ -4,6 +4,8 @@
 
 開源、可稽核的網路閘道工具集，家用網路、NAS、雲端主機與各類伺服器皆可使用，靈感來自 [Lucky](https://github.com/gdy666/lucky)，以完全開源的方式提供同類功能。DDNS、STUN 穿透、連接埠轉發、反向代理、憑證、WAF 等常用功能整合在一個約 22 MB 的單一檔案中，並可一鍵匯入 Lucky 設定。
 
+![Gately 概覽](docs/images/overview.png)
+
 ## 為什麼做 Gately
 
 Lucky 是中國 NAS 與家用網路使用者熟悉的優秀工具，把 DDNS、STUN 穿透、反向代理等功能整合在一起，也為 Gately 提供了產品思路，沒有 Lucky 就不會有 Gately。Lucky 以閉源方式免費散布，Gately 選擇完全開源，讓使用者和社群可以直接檢視原始碼與設定。對於運行在網路邊界、掌握 DNS 金鑰與憑證私鑰的軟體，開源讓使用者能夠看見它在做什麼。Gately 的承諾：

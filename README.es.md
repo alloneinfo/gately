@@ -4,6 +4,8 @@
 
 Conjunto de herramientas de puerta de enlace de red, de código abierto y auditable, para redes domésticas, NAS, hosts en la nube y todo tipo de servidores. Está inspirado en [Lucky](https://github.com/gdy666/lucky) y ofrece capacidades equivalentes de forma totalmente abierta. DDNS, túneles STUN, reenvío de puertos, proxy inverso, certificados, WAF y otras funciones habituales se integran en un único archivo de unos 22 MB, y la configuración de Lucky se puede importar con un clic.
 
+![Resumen de Gately](docs/images/overview.png)
+
 ## Por qué Gately
 
 Lucky es una excelente herramienta, muy conocida entre los usuarios chinos de NAS y redes domésticas, que reúne DDNS, túneles STUN, proxy inverso y más. También aportó la idea de producto de Gately: sin Lucky no existiría Gately. Lucky se distribuye gratis pero con código cerrado; Gately opta por ser totalmente abierto para que usuarios y comunidad puedan revisar directamente el código fuente y la configuración. Un software que se ejecuta en el borde de la red y maneja claves DNS y claves privadas de certificados debe permitir que los usuarios vean lo que hace. Los compromisos de Gately:
