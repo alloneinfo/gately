@@ -12,6 +12,7 @@
   "submit": "Iniciar sesión",
   "thirdParty": "O usa una cuenta de terceros",
   "loginWith": "Iniciar sesión con {name}",
+  "redirecting": "Redirigiendo a {name}…",
   "initialPasswordHint": "En el primer arranque, la contraseña inicial se imprime en el registro del programa.",
   "totpTitle": "Autenticación de dos factores",
   "totpPrompt": "Abre tu app de autenticación e introduce el código de 6 dígitos de {user}",

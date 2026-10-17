@@ -44,7 +44,18 @@
           </el-form>
           <div v-if="providers.length" class="third">
             <div class="third-title"><span>{{ t('login.thirdParty') }}</span></div>
-            <a v-for="p in providers" :key="p.key" :href="p.url" class="third-btn">{{ t('login.loginWith', { name: p.name }) }}</a>
+            <a
+              v-for="p in providers"
+              :key="p.key"
+              :href="p.url"
+              class="third-btn"
+              :class="{ busy: redirecting === p.key, disabled: redirecting && redirecting !== p.key }"
+              :aria-busy="redirecting === p.key"
+              @click="startThird($event, p)"
+            >
+              <LoaderCircle v-if="redirecting === p.key" :size="15" class="spin" />
+              {{ redirecting === p.key ? t('login.redirecting', { name: p.name }) : t('login.loginWith', { name: p.name }) }}
+            </a>
           </div>
           <p class="hint"><Info :size="14" />{{ t('login.initialPasswordHint') }}</p>
         </template>
@@ -81,7 +92,7 @@ import { nextTick, onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { ElMessage, type InputInstance } from 'element-plus'
-import { ArrowLeft, ArrowLeftRight, ArrowRight, Info, LockKeyhole, Server, ShieldCheck, UserRound } from 'lucide-vue-next'
+import { LoaderCircle, ArrowLeft, ArrowLeftRight, ArrowRight, Info, LockKeyhole, Server, ShieldCheck, UserRound } from 'lucide-vue-next'
 import { api, ApiError } from '../api'
 import AppLogo from '../components/AppLogo.vue'
 import ThemePicker from '../components/ThemePicker.vue'
@@ -95,6 +106,24 @@ const loading = ref(false)
 const needCode = ref(false)
 const codeInput = ref<InputInstance>()
 const providers = ref<{ key: string; name: string; type: string; url: string }[]>([])
+
+// 正在跳转的第三方登录方式；非空时按钮显示进度并禁止重复点击
+const redirecting = ref('')
+
+function startThird(e: MouseEvent, p: { key: string }) {
+  if (redirecting.value) {
+    e.preventDefault()
+    return
+  }
+  redirecting.value = p.key
+}
+
+// 从授权页点浏览器返回时页面可能来自缓存，需复位按钮状态
+window.addEventListener('pageshow', (e) => {
+  if (e.persisted) {
+    redirecting.value = ''
+  }
+})
 
 // 第三方登录失败时，后端带着原因跳回登录页
 if (typeof route.query.oauthError === 'string') {
@@ -171,6 +200,24 @@ function back() {
   text-decoration: none;
   font-size: 14px;
   transition: background 0.15s;
+}
+.third-btn.busy {
+  opacity: 0.8;
+  pointer-events: none;
+}
+.third-btn.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+.third-btn .spin {
+  margin-right: 6px;
+  vertical-align: -2px;
+  animation: third-spin 1s linear infinite;
+}
+@keyframes third-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 .third-btn:hover {
   background: var(--g-hover, rgba(127, 127, 127, 0.1));

@@ -12,6 +12,7 @@
   "submit": "Sign in",
   "thirdParty": "Or use a third-party account",
   "loginWith": "Sign in with {name}",
+  "redirecting": "Redirecting to {name}…",
   "initialPasswordHint": "On first launch, the initial password is printed in the program log.",
   "totpTitle": "Two-factor authentication",
   "totpPrompt": "Open your authenticator app and enter the 6-digit code for {user}",

@@ -12,6 +12,7 @@
   "submit": "ログイン",
   "thirdParty": "または外部アカウントでログイン",
   "loginWith": "{name} でログイン",
+  "redirecting": "{name} に移動しています…",
   "initialPasswordHint": "初回起動時の初期パスワードはプログラムのログに出力されます。",
   "totpTitle": "2 段階認証",
   "totpPrompt": "認証アプリを開き、{user} の 6 桁のコードを入力してください",

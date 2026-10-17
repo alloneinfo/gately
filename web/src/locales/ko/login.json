@@ -12,6 +12,7 @@
   "submit": "로그인",
   "thirdParty": "또는 다른 계정으로 로그인",
   "loginWith": "{name}(으)로 로그인",
+  "redirecting": "{name}(으)로 이동 중…",
   "initialPasswordHint": "처음 시작할 때 초기 비밀번호가 프로그램 로그에 출력됩니다.",
   "totpTitle": "2단계 인증",
   "totpPrompt": "인증 앱을 열고 {user}의 6자리 인증 코드를 입력하세요",

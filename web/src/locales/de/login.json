@@ -12,6 +12,7 @@
   "submit": "Anmelden",
   "thirdParty": "Oder ein Drittanbieter-Konto verwenden",
   "loginWith": "Mit {name} anmelden",
+  "redirecting": "Weiterleitung zu {name} …",
   "initialPasswordHint": "Beim ersten Start wird das Anfangspasswort im Programmprotokoll ausgegeben.",
   "totpTitle": "Zwei-Faktor-Authentifizierung",
   "totpPrompt": "Öffnen Sie Ihre Authenticator-App und geben Sie den 6-stelligen Code für {user} ein",

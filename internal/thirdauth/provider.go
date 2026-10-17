@@ -126,7 +126,28 @@ var (
 	oidcCache   = map[string]oidcConfig{}
 )
 
+// googleConfig 是 Google 固定的 OIDC 端点；内置后无需在发起登录时由服务器访问 accounts.google.com，
+// 服务器无法直连 Google 的网络环境下，点击登录也能立即跳转到授权页。
+var googleConfig = oidcConfig{
+	AuthorizationEndpoint: "https://accounts.google.com/o/oauth2/v2/auth",
+	TokenEndpoint:         "https://oauth2.googleapis.com/token",
+	UserinfoEndpoint:      "https://openidconnect.googleapis.com/v1/userinfo",
+}
+
+// oidcEndpoints 返回提供方的 OIDC 端点：默认 Google 使用内置端点，其余走发现文档。
+func (p Provider) oidcEndpoints(ctx context.Context) (oidcConfig, error) {
+	if p.Type == TypeGoogle && p.Issuer == "" {
+		return googleConfig, nil
+	}
+	return discoverOIDC(ctx, p.issuer())
+}
+
+// discoveryTimeout 是读取发现文档的超时，避免身份提供方不可达时登录请求一直挂起。
+const discoveryTimeout = 10 * time.Second
+
 func discoverOIDC(ctx context.Context, issuer string) (oidcConfig, error) {
+	ctx, cancel := context.WithTimeout(ctx, discoveryTimeout)
+	defer cancel()
 	oidcCacheMu.Lock()
 	c, ok := oidcCache[issuer]
 	oidcCacheMu.Unlock()
@@ -163,7 +184,7 @@ func (p Provider) AuthorizeURL(ctx context.Context, redirect, state string) (str
 		v.Set("scope", "get_user_info")
 		return Endpoints.QQ.Authorize + "?" + v.Encode(), nil
 	default:
-		c, err := discoverOIDC(ctx, p.issuer())
+		c, err := p.oidcEndpoints(ctx)
 		if err != nil {
 			return "", err
 		}
@@ -179,7 +200,7 @@ func (p Provider) Exchange(ctx context.Context, code, redirect string) (Identity
 	case p.Type == TypeQQ:
 		return p.exchangeQQ(ctx, code, redirect)
 	case p.isOIDC():
-		c, err := discoverOIDC(ctx, p.issuer())
+		c, err := p.oidcEndpoints(ctx)
 		if err != nil {
 			return Identity{}, err
 		}

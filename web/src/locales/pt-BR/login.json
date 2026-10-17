@@ -12,6 +12,7 @@
   "submit": "Entrar",
   "thirdParty": "Ou use uma conta de terceiros",
   "loginWith": "Entrar com {name}",
+  "redirecting": "Redirecionando para {name}…",
   "initialPasswordHint": "No primeiro início, a senha inicial é exibida no log do programa.",
   "totpTitle": "Autenticação em dois fatores",
   "totpPrompt": "Abra seu app autenticador e informe o código de 6 dígitos de {user}",

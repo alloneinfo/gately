@@ -12,6 +12,7 @@
   "submit": "Se connecter",
   "thirdParty": "Ou utilisez un compte tiers",
   "loginWith": "Se connecter avec {name}",
+  "redirecting": "Redirection vers {name}…",
   "initialPasswordHint": "Au premier lancement, le mot de passe initial est affiché dans le journal du programme.",
   "totpTitle": "Authentification à deux facteurs",
   "totpPrompt": "Ouvrez votre application d'authentification et saisissez le code à 6 chiffres de {user}",
