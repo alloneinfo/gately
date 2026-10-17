@@ -117,6 +117,10 @@ make lint     # gofmt、go vet、前端类型检查
 - 新模块需要：配置结构与校验、运行时启停、REST 接口、单元测试；能从 Lucky 迁移的模块实现 `luckyimport.Importer`，希望在总览页展示状态的模块实现 `module.Summarizer`。
 - 代码注释使用中文；控制语句必须使用大括号。
 
+## Star 趋势
+
+[![Star History Chart](https://api.star-history.com/svg?repos=wangwanjie/gately&type=Date)](https://star-history.com/#wangwanjie/gately&Date)
+
 ## 许可证
 
 [Apache License 2.0](LICENSE)
