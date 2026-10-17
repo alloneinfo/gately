@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useData, withBase } from 'vitepress'
+import AiNotice from './AiNotice.vue'
 import {
   Globe, RadioTower, ArrowLeftRight, ShieldCheck, Waypoints, ShieldAlert, Network, Boxes,
   Terminal, HardDrive, Clock, KeyRound, Copy, Check, Github, Lock, Eye, FileJson, Package,
@@ -63,6 +64,7 @@ const openFaq = ref(0)
 
 <template>
   <div class="gl">
+    <div class="wrap notice-wrap"><AiNotice /></div>
     <!-- Hero -->
     <section class="hero">
       <div class="wrap hero-grid">
@@ -208,6 +210,7 @@ const openFaq = ref(0)
 </template>
 
 <style scoped>
+.notice-wrap { padding-top: 16px; padding-bottom: 0; }
 .gl { color: var(--vp-c-text-1); overflow-x: hidden; }
 .wrap { max-width: 1152px; margin: 0 auto; padding: 0 24px; }
 .narrow { max-width: 820px; }

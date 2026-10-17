@@ -76,7 +76,7 @@ Erstellen Sie auf der Seite „API-Tokens“ der Verwaltungsoberfläche ein Toke
 curl -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns/tasks
 ```
 
-Konto, Zwei-Faktor-Authentifizierung, Token-Verwaltung sowie die Schnittstellen für Backup, Wiederherstellung, Neustart und Systemeinstellungen sind nur mit einer Anmeldesitzung zugänglich. Alle Schnittstellen, erforderlichen Berechtigungen und Datenstrukturen finden Sie auf der Seite „API-Dokumentation“ der Verwaltungsoberfläche; mit `make api-docs` lassen sie sich nach [docs/api](docs/api) exportieren (`openapi.json` und `API.md`), auf die die Website https://gately.cn bei der Veröffentlichung direkt verweist.
+Konto, Zwei-Faktor-Authentifizierung, Token-Verwaltung sowie die Schnittstellen für Backup, Wiederherstellung, Neustart und Systemeinstellungen sind nur mit einer Anmeldesitzung zugänglich. Alle Schnittstellen, erforderlichen Berechtigungen und Datenstrukturen finden Sie auf der Seite „API-Dokumentation“ der Verwaltungsoberfläche; mit `make api-docs` lassen sie sich nach [docs/api](docs/api/de) exportieren (`openapi.json` und `API.md`), auf die die Website https://gately.cn bei der Veröffentlichung direkt verweist.
 
 Beim Upgrade von einer älteren Version wird das bisherige globale API-Token automatisch zu einem „Altbestand“-Token (der Wert bleibt gleich, mit Rechten für alle Module). Es empfiehlt sich, auf der Seite „API-Tokens“ die Rechte einzuschränken oder es durch ein neues Token zu ersetzen.
 

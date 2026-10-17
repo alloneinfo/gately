@@ -51,5 +51,6 @@
   "notLoggedIn": "未登入",
   "durationDaysHours": "{d} 天 {h} 小時",
   "durationHoursMinutes": "{h} 小時 {m} 分",
-  "durationMinutes": "{m} 分鐘"
+  "durationMinutes": "{m} 分鐘",
+  "aiTranslated": "介面由 AI 翻譯，內容可能有疏漏。歡迎到 GitHub 協助改進。"
 }

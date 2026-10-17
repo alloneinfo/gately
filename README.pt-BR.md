@@ -76,7 +76,7 @@ Na página "Tokens de API" do painel de administração, crie um token (é poss�
 curl -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns/tasks
 ```
 
-Conta, autenticação em dois fatores, gerenciamento de tokens e as interfaces de backup, restauração, reinício e configurações do sistema só podem ser usadas com uma sessão de login. Todas as interfaces, permissões necessárias e estruturas de dados estão na página "Documentação da API" do painel de administração; também é possível exportá-las com `make api-docs` para [docs/api](docs/api) (`openapi.json` e `API.md`), que o site https://gately.cn referencia diretamente na publicação.
+Conta, autenticação em dois fatores, gerenciamento de tokens e as interfaces de backup, restauração, reinício e configurações do sistema só podem ser usadas com uma sessão de login. Todas as interfaces, permissões necessárias e estruturas de dados estão na página "Documentação da API" do painel de administração; também é possível exportá-las com `make api-docs` para [docs/api](docs/api/pt-BR) (`openapi.json` e `API.md`), que o site https://gately.cn referencia diretamente na publicação.
 
 Ao atualizar de uma versão antiga, o token de API global anterior se torna automaticamente um token "Legado" (o valor não muda e tem permissão em todos os módulos). Recomenda-se restringir suas permissões na página "Tokens de API" ou substituí-lo por um novo token.
 

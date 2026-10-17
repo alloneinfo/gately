@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/wangwanjie/gately/internal/i18n"
 	"io"
 	"net/http"
 	"net/url"
@@ -104,6 +105,8 @@ func (c *Client) Do(ctx context.Context, method, path string, body []byte) ([]by
 	if err != nil {
 		return nil, err
 	}
+	// 让服务端按命令行所在系统的语言返回错误说明与状态文案
+	req.Header.Set("Accept-Language", i18n.FromEnv())
 	if body != nil {
 		req.Header.Set("Content-Type", "application/json")
 	}

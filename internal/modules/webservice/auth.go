@@ -5,7 +5,6 @@ import (
 	"crypto/sha256"
 	"crypto/subtle"
 	"encoding/hex"
-	"html/template"
 	"net/http"
 	"net/netip"
 	"net/url"
@@ -15,6 +14,7 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 
+	"github.com/wangwanjie/gately/internal/i18n"
 	"github.com/wangwanjie/gately/internal/thirdauth"
 )
 
@@ -282,7 +282,7 @@ func (a *authenticator) check(w http.ResponseWriter, r *http.Request, s Site) bo
 	return false
 }
 
-var loginTmpl = template.Must(template.New("login").Parse(`<!doctype html>
+const loginSrc = `<!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>登录 - {{.Host}}</title>
 <style>
@@ -304,7 +304,7 @@ button{width:100%;padding:10px;border:0;border-radius:6px;background:#0e7c66;col
 <button type="submit">登录</button>
 {{end}}
 {{range .Providers}}<a class="oauth" href="{{$.StartURL}}?p={{.Key}}&next={{$.Next}}">使用 {{.Name}} 登录</a>{{end}}
-</form></body></html>`))
+</form></body></html>`
 
 // safeNext 只允许站内相对路径，防止开放重定向。
 func safeNext(next string) string {
@@ -377,7 +377,11 @@ func (a *authenticator) handleLogin(w http.ResponseWriter, r *http.Request, s Si
 	if _, failed := data["Error"]; failed {
 		w.WriteHeader(http.StatusUnauthorized)
 	}
-	_ = loginTmpl.Execute(w, data)
+	lang := visitorLang(r)
+	if msg, ok := data["Error"].(string); ok {
+		data["Error"] = i18n.Tr(lang, msg)
+	}
+	_ = executeLocalized(w, "login", loginSrc, lang, data)
 }
 
 // hostOnly 去掉 Host 中的端口。

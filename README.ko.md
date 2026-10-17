@@ -76,7 +76,7 @@ docker logs gately 2>&1 | grep -i "initial password"
 curl -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns/tasks
 ```
 
-계정, 2단계 인증, 토큰 관리, 그리고 백업, 복원, 재시작, 시스템 설정 API는 로그인 세션으로만 사용할 수 있습니다. 전체 API, 필요한 권한, 데이터 구조는 관리 콘솔의 "API 문서" 페이지에서 확인할 수 있으며, `make api-docs`로 [docs/api](docs/api)(`openapi.json`과 `API.md`)에 내보낼 수도 있습니다. 공식 사이트 https://gately.cn 에서도 이 파일을 그대로 참조합니다.
+계정, 2단계 인증, 토큰 관리, 그리고 백업, 복원, 재시작, 시스템 설정 API는 로그인 세션으로만 사용할 수 있습니다. 전체 API, 필요한 권한, 데이터 구조는 관리 콘솔의 "API 문서" 페이지에서 확인할 수 있으며, `make api-docs`로 [docs/api](docs/api/ko)(`openapi.json`과 `API.md`)에 내보낼 수도 있습니다. 공식 사이트 https://gately.cn 에서도 이 파일을 그대로 참조합니다.
 
 이전 버전에서 업그레이드하면 기존 전역 API 토큰은 자동으로 "레거시 토큰"이 됩니다(값은 그대로이며 모든 모듈 권한을 가짐). API 토큰 페이지에서 권한을 줄이거나 새 토큰으로 교체하는 것을 권장합니다.
 

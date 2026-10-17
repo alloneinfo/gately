@@ -2,6 +2,7 @@ package app
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"reflect"
 	"regexp"
@@ -10,6 +11,7 @@ import (
 
 	"github.com/wangwanjie/gately/internal/apitoken"
 	"github.com/wangwanjie/gately/internal/httpx"
+	"github.com/wangwanjie/gately/internal/i18n"
 	"github.com/wangwanjie/gately/internal/version"
 )
 
@@ -154,15 +156,20 @@ func crudSummary(r routeInfo, verb string) string {
 	if noun == "" {
 		noun = "条目"
 	}
+	// 用整句格式串而不是拼接，便于各语言按自己的语序翻译
 	switch verb {
 	case "列表":
-		return "获取" + noun + "列表"
+		return fmt.Sprintf("获取%s列表", noun)
 	case "调整排序":
-		return "调整" + noun + "排序"
+		return fmt.Sprintf("调整%s排序", noun)
 	case "启用或停用":
-		return "启用或停用" + noun
+		return fmt.Sprintf("启用或停用%s", noun)
+	case "新增":
+		return fmt.Sprintf("新增%s", noun)
+	case "修改":
+		return fmt.Sprintf("修改%s", noun)
 	}
-	return verb + noun
+	return fmt.Sprintf("删除%s", noun)
 }
 
 func (m docModel) buildOpenAPI() map[string]any {
@@ -222,11 +229,11 @@ func (m docModel) operation(e endpoint) map[string]any {
 	desc := e.Desc
 	switch e.Scope {
 	case apitoken.Denied:
-		desc += "\n\n**仅登录会话可用，API 令牌无法访问此接口。**"
+		desc += "\n\n" + "**仅登录会话可用，API 令牌无法访问此接口。**"
 	case apitoken.Any:
-		desc += "\n\n任何有效的 API 令牌均可访问，无需特定权限。"
+		desc += "\n\n" + "任何有效的 API 令牌均可访问，无需特定权限。"
 	default:
-		desc += "\n\n所需权限：`" + e.Scope + "`。"
+		desc += "\n\n" + fmt.Sprintf("所需权限：`%s`。", e.Scope)
 	}
 	op["description"] = strings.TrimSpace(desc)
 	op["x-required-scope"] = e.Scope
@@ -272,12 +279,49 @@ func (a *App) handleOpenAPI(w http.ResponseWriter, r *http.Request) {
 	httpx.OK(w, a.buildDoc().buildOpenAPI())
 }
 
-// APIDocs 返回 OpenAPI JSON 与 Markdown 文档，供命令行导出静态文件。
-func (a *App) APIDocs() (openapi []byte, markdown []byte, err error) {
+// APIDocs 返回指定语言的 OpenAPI JSON 与 Markdown 文档，供命令行导出静态文件；lang 为空或 zh-CN 时输出中文原文。
+func (a *App) APIDocs(lang string) (openapi []byte, markdown []byte, err error) {
 	m := a.buildDoc()
-	openapi, err = json.MarshalIndent(m.buildOpenAPI(), "", "  ")
+	raw, err := json.Marshal(m.buildOpenAPI())
 	if err != nil {
 		return nil, nil, err
 	}
-	return append(openapi, '\n'), []byte(m.markdown()), nil
+	var v any
+	if err := json.Unmarshal(raw, &v); err != nil {
+		return nil, nil, err
+	}
+	// 说明文字按语言翻译；翻译表里没有的内容保持中文原文
+	v = trDocDeep(lang, v)
+	openapi, err = json.MarshalIndent(v, "", "  ")
+	if err != nil {
+		return nil, nil, err
+	}
+	return append(openapi, '\n'), []byte(m.markdown(func(x string) string { return i18n.Tr(lang, x) })), nil
+}
+
+// trDocDeep 翻译文档中的字符串；接口说明由多个段落（以空行分隔）拼成，整体匹配不上时按段落翻译。
+func trDocDeep(lang string, v any) any {
+	switch x := v.(type) {
+	case string:
+		out := i18n.Tr(lang, x)
+		if out == x && strings.Contains(x, "\n\n") {
+			parts := strings.Split(x, "\n\n")
+			for i := range parts {
+				parts[i] = i18n.Tr(lang, parts[i])
+			}
+			out = strings.Join(parts, "\n\n")
+		}
+		return out
+	case []any:
+		for i := range x {
+			x[i] = trDocDeep(lang, x[i])
+		}
+		return x
+	case map[string]any:
+		for k, e := range x {
+			x[k] = trDocDeep(lang, e)
+		}
+		return x
+	}
+	return v
 }

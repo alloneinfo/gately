@@ -124,7 +124,10 @@
       "losAngeles": "Los Angeles",
       "sydney": "Sydney",
       "utc": "Temps universel coordonné"
-    }
+    },
+    "serverLanguage": "Langue du serveur",
+    "serverLanguageAuto": "Suivre le système",
+    "serverLanguageHelp": "Langue des journaux, des notifications et des autres sorties sans contexte de page. Si le champ est vide, elle suit l'environnement du système (GATELY_LANG, LANG)."
   },
   "runtime": {
     "title": "Paramètres d'exécution",

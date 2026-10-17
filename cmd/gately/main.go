@@ -15,6 +15,7 @@ import (
 
 	"github.com/wangwanjie/gately/internal/app"
 	"github.com/wangwanjie/gately/internal/ctl"
+	"github.com/wangwanjie/gately/internal/i18n"
 	"github.com/wangwanjie/gately/internal/modules/registry"
 	"github.com/wangwanjie/gately/internal/version"
 	"github.com/wangwanjie/gately/web"
@@ -25,11 +26,14 @@ func main() {
 	if len(os.Args) > 1 {
 		switch os.Args[1] {
 		case "ctl":
-			os.Exit(ctl.RunCtl(os.Args[2:], os.Stdout, os.Stderr))
+			// 命令行自身的提示按系统语言翻译
+			os.Exit(ctl.RunCtl(os.Args[2:], i18n.NewWriterFor(os.Stdout, i18n.FromEnv()), i18n.NewWriterFor(os.Stderr, i18n.FromEnv())))
 		case "mcp":
-			os.Exit(ctl.RunMCP(os.Args[2:], os.Stdin, os.Stdout, os.Stderr))
+			os.Exit(ctl.RunMCP(os.Args[2:], os.Stdin, os.Stdout, i18n.NewWriterFor(os.Stderr, i18n.FromEnv())))
 		}
 	}
+	// 标准日志（含启动失败等 log.Fatalf）按服务端语言翻译
+	log.SetOutput(i18n.NewWriter(os.Stderr))
 	configDir := flag.String("c", defaultConfigDir(), "configuration directory / 配置目录")
 	listen := flag.String("listen", "", "admin UI listen address, overrides the config file, e.g. :16680 / 管理界面监听地址，覆盖配置文件")
 	showVersion := flag.Bool("version", false, "print version info and exit / 输出版本信息")
@@ -94,15 +98,25 @@ func exportAPIDocs(dir string) error {
 	if err != nil {
 		return err
 	}
-	spec, md, err := a.APIDocs()
-	if err != nil {
-		return err
+	// 简体中文输出在 dir 根目录，其余语言输出在 dir/<语言>/ 下，文档由同一份接口目录翻译生成，无需手工同步
+	for _, lang := range i18n.Langs {
+		out := dir
+		if lang != i18n.SourceLang {
+			out = filepath.Join(dir, lang)
+		}
+		spec, md, err := a.APIDocs(lang)
+		if err != nil {
+			return err
+		}
+		if err := os.MkdirAll(out, 0o755); err != nil {
+			return err
+		}
+		if err := os.WriteFile(filepath.Join(out, "openapi.json"), spec, 0o644); err != nil {
+			return err
+		}
+		if err := os.WriteFile(filepath.Join(out, "API.md"), md, 0o644); err != nil {
+			return err
+		}
 	}
-	if err := os.MkdirAll(dir, 0o755); err != nil {
-		return err
-	}
-	if err := os.WriteFile(filepath.Join(dir, "openapi.json"), spec, 0o644); err != nil {
-		return err
-	}
-	return os.WriteFile(filepath.Join(dir, "API.md"), md, 0o644)
+	return nil
 }

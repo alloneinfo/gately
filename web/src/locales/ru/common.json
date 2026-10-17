@@ -51,5 +51,6 @@
   "notLoggedIn": "Вход не выполнен",
   "durationDaysHours": "{d} д {h} ч",
   "durationHoursMinutes": "{h} ч {m} мин",
-  "durationMinutes": "{m} мин"
+  "durationMinutes": "{m} мин",
+  "aiTranslated": "Интерфейс переведён с помощью ИИ и может содержать неточности. Помогите улучшить перевод на GitHub."
 }

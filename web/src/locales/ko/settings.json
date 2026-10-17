@@ -124,7 +124,10 @@
       "losAngeles": "로스앤젤레스",
       "sydney": "시드니",
       "utc": "협정 세계시"
-    }
+    },
+    "serverLanguage": "서버 언어",
+    "serverLanguageAuto": "시스템 설정 따르기",
+    "serverLanguageHelp": "로그, 알림처럼 화면 컨텍스트가 없는 출력에 사용하는 언어입니다. 비워 두면 시스템 환경 변수(GATELY_LANG, LANG)에 따라 자동으로 선택합니다."
   },
   "runtime": {
     "title": "실행 매개변수",

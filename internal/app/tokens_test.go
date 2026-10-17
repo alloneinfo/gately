@@ -35,7 +35,7 @@ func TestAPIDocsCoverAllRoutes(t *testing.T) {
 			t.Errorf("接口缺少文档摘要，请在 apicatalog.go 补充: %s %s", e.Method, e.Path)
 		}
 	}
-	spec, md, err := a.APIDocs()
+	spec, md, err := a.APIDocs("")
 	if err != nil {
 		t.Fatal(err)
 	}

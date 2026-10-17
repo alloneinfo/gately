@@ -354,7 +354,7 @@ func (m *Manager) Require(next http.Handler) http.Handler {
 		if !ok {
 			w.Header().Set("Content-Type", "application/json; charset=utf-8")
 			w.WriteHeader(http.StatusUnauthorized)
-			_, _ = w.Write([]byte(`{"error":"未登录或登录已过期"}` + "\n"))
+			_ = json.NewEncoder(w).Encode(map[string]string{"error": "未登录或登录已过期"})
 			return
 		}
 		next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), ctxKey{}, user)))

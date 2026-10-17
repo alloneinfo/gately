@@ -1,0 +1,1235 @@
+# API управления Gately
+
+API управления Gately предназначен для скриптов и массового управления в автоматизации.
+
+Аутентификация: создайте токен на странице «API-токены» панели управления и передавайте в заголовке запроса `Authorization: Bearer gtl_xxxx`.
+
+Права: каждый токен имеет только те права, которые отмечены при создании, в формате `<модуль>:read` или `<модуль>:write`, право на запись включает чтение. Интерфейсы учётных записей, двухфакторной аутентификации, управления токенами, а также резервного копирования, восстановления, перезапуска и системных настроек доступны только в сессии входа.
+
+В теле запроса используется `Content-Type: application/json`, ошибки всегда возвращаются в виде `{"error": "описание"}`.
+
+Сайт: https://gately.cn
+
+Машиночитаемое описание находится в `openapi.json` (OpenAPI 3.0) в том же каталоге.
+
+## Быстрый старт
+
+```bash
+# Просмотр состояния системы (требуется status:read)
+curl -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/status
+
+# Список всех задач DDNS (требуется ddns:read)
+curl -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns/tasks
+
+# Немедленно синхронизировать задачу DDNS (требуется ddns:write, key берётся из списка, полученного на предыдущем шаге)
+curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns/tasks/<key>/sync
+```
+
+## Права
+
+| Область прав | Название | Доступные права |
+| --- | --- | --- |
+| `portforward` | Проброс портов | `portforward:read`、`portforward:write` |
+| `ddns` | Динамический DNS | `ddns:read`、`ddns:write` |
+| `stun` | Проброс STUN | `stun:read`、`stun:write` |
+| `tailscale` | Сеть Tailscale | `tailscale:read`、`tailscale:write` |
+| `frp` | Проброс внутренней сети frp | `frp:read`、`frp:write` |
+| `cloudflared` | Туннель Cloudflare | `cloudflared:read`、`cloudflared:write` |
+| `ssl` | SSL-сертификат | `ssl:read`、`ssl:write` |
+| `waf` | Брандмауэр WAF | `waf:read`、`waf:write` |
+| `webservice` | Веб-служба | `webservice:read`、`webservice:write` |
+| `wol` | Wake-on-LAN | `wol:read`、`wol:write` |
+| `webterminal` | Веб-терминал | `webterminal:read`、`webterminal:write` |
+| `cron` | Запланированная задача | `cron:read`、`cron:write` |
+| `docker` | Управление Docker | `docker:read`、`docker:write` |
+| `webdav` | WebDAV | `webdav:read`、`webdav:write` |
+| `ftp` | Служба FTP | `ftp:read`、`ftp:write` |
+| `storage` | Управление хранилищем | `storage:read`、`storage:write` |
+| `notify` | Центр уведомлений | `notify:read`、`notify:write` |
+| `nettools` | Диагностика сети | `nettools:read`、`nettools:write` |
+| `backup` | Резервная копия конфигурации | `backup:read`、`backup:write` |
+| `status` | Состояние системы | `status:read` |
+| `logs` | Системный журнал | `logs:read` |
+| `import` | Импорт конфигурации Lucky | `import:write` |
+
+Шаблоны: `*:read` означает доступ только на чтение ко всем модулям, `*:write` или `*` означает чтение и запись для всех модулей.
+
+## Проброс портов
+
+| Метод | Путь | Необходимое право | Описание |
+| --- | --- | --- | --- |
+| GET | `/api/portforward/logs` | `portforward:read` | Просмотр журнала работы модуля |
+| DELETE | `/api/portforward/logs` | `portforward:write` | Очистить журнал работы модуля |
+| GET | `/api/portforward/rules` | `portforward:read` | Список: Правило проброса портов |
+| POST | `/api/portforward/rules` | `portforward:write` | Добавить: Правило проброса портов |
+| PUT | `/api/portforward/rules/{key}` | `portforward:write` | Изменить: Правило проброса портов |
+| DELETE | `/api/portforward/rules/{key}` | `portforward:write` | Удалить: Правило проброса портов |
+| PUT | `/api/portforward/rules/{key}/enable` | `portforward:write` | Включить или отключить: Правило проброса портов |
+| PUT | `/api/portforward/rules-order` | `portforward:write` | Изменить порядок: Правило проброса портов |
+| GET | `/api/portforward/settings` | `portforward:read` | Чтение глобальных настроек проброса портов |
+| PUT | `/api/portforward/settings` | `portforward:write` | Сохранить глобальные настройки проброса портов |
+
+## Динамический DNS
+
+| Метод | Путь | Необходимое право | Описание |
+| --- | --- | --- | --- |
+| GET | `/api/ddns/logs` | `ddns:read` | Просмотр журнала работы модуля |
+| DELETE | `/api/ddns/logs` | `ddns:write` | Очистить журнал работы модуля |
+| GET | `/api/ddns/tasks` | `ddns:read` | Список: Задача DDNS |
+| POST | `/api/ddns/tasks` | `ddns:write` | Добавить: Задача DDNS |
+| PUT | `/api/ddns/tasks/{key}` | `ddns:write` | Изменить: Задача DDNS |
+| DELETE | `/api/ddns/tasks/{key}` | `ddns:write` | Удалить: Задача DDNS |
+| PUT | `/api/ddns/tasks/{key}/enable` | `ddns:write` | Включить или отключить: Задача DDNS |
+| PUT | `/api/ddns/tasks-order` | `ddns:write` | Изменить порядок: Задача DDNS |
+| POST | `/api/ddns/tasks/{key}/sync` | `ddns:write` | Немедленно синхронизировать задачу DDNS |
+| GET | `/api/ddns/providers` | `ddns:read` | Список поддерживаемых DNS-провайдеров и необходимых им параметров |
+| GET | `/api/ddns/netinterfaces` | `ddns:read` | Список сетевых адаптеров и адресов этой машины |
+| POST | `/api/ddns/iptest` | `ddns:write` | Проверить получение публичного IP |
+| GET | `/api/ddns/defaults` | `ddns:read` | Чтение значений DDNS по умолчанию |
+| GET | `/api/ddns/settings` | `ddns:read` | Чтение глобальных настроек DDNS |
+| PUT | `/api/ddns/settings` | `ddns:write` | Сохранить глобальные настройки DDNS |
+
+## Проброс STUN
+
+| Метод | Путь | Необходимое право | Описание |
+| --- | --- | --- | --- |
+| GET | `/api/stun/logs` | `stun:read` | Просмотр журнала работы модуля |
+| DELETE | `/api/stun/logs` | `stun:write` | Очистить журнал работы модуля |
+| GET | `/api/stun/rules` | `stun:read` | Список: Правило STUN |
+| POST | `/api/stun/rules` | `stun:write` | Добавить: Правило STUN |
+| PUT | `/api/stun/rules/{key}` | `stun:write` | Изменить: Правило STUN |
+| DELETE | `/api/stun/rules/{key}` | `stun:write` | Удалить: Правило STUN |
+| PUT | `/api/stun/rules/{key}/enable` | `stun:write` | Включить или отключить: Правило STUN |
+| PUT | `/api/stun/rules-order` | `stun:write` | Изменить порядок: Правило STUN |
+| POST | `/api/stun/rules/{key}/restart` | `stun:write` | Перезапустить правило STUN |
+| GET | `/api/stun/netinterfaces` | `stun:read` | Список сетевых адаптеров и адресов этой машины |
+| GET | `/api/stun/settings` | `stun:read` | Чтение глобальных настроек STUN |
+| PUT | `/api/stun/settings` | `stun:write` | Сохранить глобальные настройки STUN |
+
+## Сеть Tailscale
+
+| Метод | Путь | Необходимое право | Описание |
+| --- | --- | --- | --- |
+| GET | `/api/tailscale/logs` | `tailscale:read` | Просмотр журнала работы модуля |
+| DELETE | `/api/tailscale/logs` | `tailscale:write` | Очистить журнал работы модуля |
+| GET | `/api/tailscale/settings` | `tailscale:read` | Чтение настроек Tailscale |
+| PUT | `/api/tailscale/settings` | `tailscale:write` | Сохранить настройки Tailscale |
+| GET | `/api/tailscale/status` | `tailscale:read` | Просмотр состояния подключения Tailscale |
+| POST | `/api/tailscale/restart` | `tailscale:write` | Перезапустить Tailscale |
+| POST | `/api/tailscale/logout` | `tailscale:write` | Выйти из Tailscale |
+
+## Проброс внутренней сети frp
+
+| Метод | Путь | Необходимое право | Описание |
+| --- | --- | --- | --- |
+| GET | `/api/frp/logs` | `frp:read` | Просмотр журнала работы модуля |
+| DELETE | `/api/frp/logs` | `frp:write` | Очистить журнал работы модуля |
+| GET | `/api/frp/proxies` | `frp:read` | Список: Элемент |
+| POST | `/api/frp/proxies` | `frp:write` | Добавить: Элемент |
+| PUT | `/api/frp/proxies/{key}` | `frp:write` | Изменить: Элемент |
+| DELETE | `/api/frp/proxies/{key}` | `frp:write` | Удалить: Элемент |
+| PUT | `/api/frp/proxies/{key}/enable` | `frp:write` | Включить или отключить: Элемент |
+| PUT | `/api/frp/proxies-order` | `frp:write` | Изменить порядок: Элемент |
+| POST | `/api/frp/import` | `frp:write` | Импорт существующей конфигурации frpc / frps (поддерживаются старый ini и новый toml); если apply равен false, выполняется только предпросмотр |
+| GET | `/api/frp/client` | `frp:read` | Чтение конфигурации клиента frp |
+| PUT | `/api/frp/client` | `frp:write` | Сохранить конфигурацию клиента frp |
+| GET | `/api/frp/server` | `frp:read` | Чтение конфигурации сервера frp |
+| PUT | `/api/frp/server` | `frp:write` | Сохранить конфигурацию сервера frp |
+
+## Туннель Cloudflare
+
+| Метод | Путь | Необходимое право | Описание |
+| --- | --- | --- | --- |
+| GET | `/api/cloudflared/logs` | `cloudflared:read` | Просмотр журнала работы модуля |
+| DELETE | `/api/cloudflared/logs` | `cloudflared:write` | Очистить журнал работы модуля |
+| GET | `/api/cloudflared/tunnels` | `cloudflared:read` | Список: Туннель Cloudflare |
+| POST | `/api/cloudflared/tunnels` | `cloudflared:write` | Добавить: Туннель Cloudflare |
+| PUT | `/api/cloudflared/tunnels/{key}` | `cloudflared:write` | Изменить: Туннель Cloudflare |
+| DELETE | `/api/cloudflared/tunnels/{key}` | `cloudflared:write` | Удалить: Туннель Cloudflare |
+| PUT | `/api/cloudflared/tunnels/{key}/enable` | `cloudflared:write` | Включить или отключить: Туннель Cloudflare |
+| PUT | `/api/cloudflared/tunnels-order` | `cloudflared:write` | Изменить порядок: Туннель Cloudflare |
+| POST | `/api/cloudflared/tunnels/{key}/restart` | `cloudflared:write` | Перезапустить туннель Cloudflare |
+| GET | `/api/cloudflared/settings` | `cloudflared:read` | Чтение настроек туннеля Cloudflare |
+| PUT | `/api/cloudflared/settings` | `cloudflared:write` | Сохранить настройки туннеля Cloudflare |
+
+## SSL-сертификат
+
+| Метод | Путь | Необходимое право | Описание |
+| --- | --- | --- | --- |
+| GET | `/api/ssl/logs` | `ssl:read` | Просмотр журнала работы модуля |
+| DELETE | `/api/ssl/logs` | `ssl:write` | Очистить журнал работы модуля |
+| GET | `/api/ssl/certs` | `ssl:read` | Список: Сертификат |
+| POST | `/api/ssl/certs` | `ssl:write` | Добавить: Сертификат |
+| PUT | `/api/ssl/certs/{key}` | `ssl:write` | Изменить: Сертификат |
+| DELETE | `/api/ssl/certs/{key}` | `ssl:write` | Удалить: Сертификат |
+| PUT | `/api/ssl/certs/{key}/enable` | `ssl:write` | Включить или отключить: Сертификат |
+| PUT | `/api/ssl/certs-order` | `ssl:write` | Изменить порядок: Сертификат |
+| POST | `/api/ssl/certs/{key}/renew` | `ssl:write` | Немедленно выпустить или продлить сертификат |
+| GET | `/api/ssl/certs/{key}/download` | `ssl:write` | Скачать сертификат и закрытый ключ |
+| GET | `/api/ssl/providers` | `ssl:read` | Список поддерживаемых провайдеров DNS-проверки |
+| GET | `/api/ssl/settings` | `ssl:read` | Чтение глобальных настроек сертификатов |
+| PUT | `/api/ssl/settings` | `ssl:write` | Сохранить глобальные настройки сертификатов |
+
+## Брандмауэр WAF
+
+| Метод | Путь | Необходимое право | Описание |
+| --- | --- | --- | --- |
+| GET | `/api/waf/logs` | `waf:read` | Просмотр журнала работы модуля |
+| DELETE | `/api/waf/logs` | `waf:write` | Очистить журнал работы модуля |
+| GET | `/api/waf/instances` | `waf:read` | Список: Экземпляр WAF |
+| POST | `/api/waf/instances` | `waf:write` | Добавить: Экземпляр WAF |
+| PUT | `/api/waf/instances/{key}` | `waf:write` | Изменить: Экземпляр WAF |
+| DELETE | `/api/waf/instances/{key}` | `waf:write` | Удалить: Экземпляр WAF |
+| PUT | `/api/waf/instances/{key}/enable` | `waf:write` | Включить или отключить: Экземпляр WAF |
+| PUT | `/api/waf/instances-order` | `waf:write` | Изменить порядок: Экземпляр WAF |
+| GET | `/api/waf/crs` | `waf:read` | Список файлов правил OWASP CRS |
+| GET | `/api/waf/crs/{file}` | `waf:read` | Прочитать один файл правил CRS |
+
+## Веб-служба
+
+| Метод | Путь | Необходимое право | Описание |
+| --- | --- | --- | --- |
+| GET | `/api/webservice/logs` | `webservice:read` | Просмотр журнала работы модуля |
+| DELETE | `/api/webservice/logs` | `webservice:write` | Очистить журнал работы модуля |
+| GET | `/api/webservice/listeners` | `webservice:read` | Список: Прослушивание веб-службы |
+| POST | `/api/webservice/listeners` | `webservice:write` | Добавить: Прослушивание веб-службы |
+| PUT | `/api/webservice/listeners/{key}` | `webservice:write` | Изменить: Прослушивание веб-службы |
+| DELETE | `/api/webservice/listeners/{key}` | `webservice:write` | Удалить: Прослушивание веб-службы |
+| PUT | `/api/webservice/listeners/{key}/enable` | `webservice:write` | Включить или отключить: Прослушивание веб-службы |
+| PUT | `/api/webservice/listeners-order` | `webservice:write` | Изменить порядок: Прослушивание веб-службы |
+| GET | `/api/webservice/settings` | `webservice:read` | Чтение глобальных настроек веб-службы |
+| PUT | `/api/webservice/settings` | `webservice:write` | Сохранить глобальные настройки веб-службы |
+| GET | `/api/webservice/stats` | `webservice:read` | Поминутная статистика сайта (?listener=&site=&minutes=) |
+| GET | `/api/webservice/metrics` | `webservice:read` | Метрики в текстовом формате Prometheus |
+| GET | `/api/webservice/bans` | `webservice:read` | Заблокированные в данный момент IP |
+| POST | `/api/webservice/bans` | `webservice:write` | Заблокировать IP вручную |
+| DELETE | `/api/webservice/bans` | `webservice:write` | Снять блокировку (body: {"key": адрес}) |
+| GET | `/api/webservice/geoip` | `webservice:read` | Состояние базы данных GeoIP |
+| POST | `/api/webservice/geoip/upload` | `webservice:write` | Загрузить базу данных GeoIP (поле multipart file, .mmdb) |
+| POST | `/api/webservice/geoip/download` | `webservice:write` | Скачать базу данных GeoIP (.mmdb) по адресу |
+| DELETE | `/api/webservice/geoip` | `webservice:write` | Удалить базу данных GeoIP |
+
+## Wake-on-LAN
+
+| Метод | Путь | Необходимое право | Описание |
+| --- | --- | --- | --- |
+| GET | `/api/wol/logs` | `wol:read` | Просмотр журнала работы модуля |
+| DELETE | `/api/wol/logs` | `wol:write` | Очистить журнал работы модуля |
+| GET | `/api/wol/devices` | `wol:read` | Список: Разбудить устройство |
+| POST | `/api/wol/devices` | `wol:write` | Добавить: Разбудить устройство |
+| PUT | `/api/wol/devices/{key}` | `wol:write` | Изменить: Разбудить устройство |
+| DELETE | `/api/wol/devices/{key}` | `wol:write` | Удалить: Разбудить устройство |
+| PUT | `/api/wol/devices/{key}/enable` | `wol:write` | Включить или отключить: Разбудить устройство |
+| PUT | `/api/wol/devices-order` | `wol:write` | Изменить порядок: Разбудить устройство |
+| POST | `/api/wol/devices/{key}/wake` | `wol:write` | Отправить на устройство magic-пакет пробуждения |
+| GET | `/api/wol/status` | `wol:read` | Просмотр состояния устройства в сети |
+
+## Веб-терминал
+
+| Метод | Путь | Необходимое право | Описание |
+| --- | --- | --- | --- |
+| GET | `/api/webterminal/logs` | `webterminal:read` | Просмотр журнала работы модуля |
+| DELETE | `/api/webterminal/logs` | `webterminal:write` | Очистить журнал работы модуля |
+| GET | `/api/webterminal/connections` | `webterminal:read` | Список: Подключение терминала |
+| POST | `/api/webterminal/connections` | `webterminal:write` | Добавить: Подключение терминала |
+| PUT | `/api/webterminal/connections/{key}` | `webterminal:write` | Изменить: Подключение терминала |
+| DELETE | `/api/webterminal/connections/{key}` | `webterminal:write` | Удалить: Подключение терминала |
+| PUT | `/api/webterminal/connections/{key}/enable` | `webterminal:write` | Включить или отключить: Подключение терминала |
+| PUT | `/api/webterminal/connections-order` | `webterminal:write` | Изменить порядок: Подключение терминала |
+| DELETE | `/api/webterminal/connections/{key}/hostkey` | `webterminal:write` | Удалить записанные ключи хоста |
+| POST | `/api/webterminal/connections/{key}/test` | `webterminal:write` | Проверить сохранённое подключение |
+| POST | `/api/webterminal/connections/test` | `webterminal:write` | Проверить временные параметры подключения |
+| PUT | `/api/webterminal/connections/{key}/quickaccess` | `webterminal:write` | Быстрый вход для настройки подключения |
+| GET | `/api/webterminal/connections/{key}/ws` | `webterminal:write` | Открыть сессию терминала (WebSocket) |
+| GET | `/api/webterminal/sessions/{id}/ws` | `webterminal:write` | Подключиться к существующей сессии терминала (WebSocket) |
+| GET | `/api/webterminal/sessions` | `webterminal:read` | Список сессий терминала |
+| GET | `/api/webterminal/sessions/{id}` | `webterminal:read` | Просмотр сведений о сессии терминала |
+| PUT | `/api/webterminal/sessions/{id}/remark` | `webterminal:write` | Изменить заметку сессии терминала |
+| GET | `/api/webterminal/sessions/{id}/stats` | `webterminal:read` | Просмотр статистики сессий терминала |
+| DELETE | `/api/webterminal/sessions/{id}` | `webterminal:write` | Закрыть сессию терминала |
+| GET | `/api/webterminal/security` | Только сессия входа | Просмотр состояния настроек безопасности терминала |
+| POST | `/api/webterminal/security/agreement` | Только сессия входа | Подтвердить соглашение об использовании терминала |
+| POST | `/api/webterminal/security/2fa/setup` | Только сессия входа | Сгенерировать ключ двухфакторной аутентификации терминала |
+| POST | `/api/webterminal/security/2fa/enable` | Только сессия входа | Включить двухфакторную аутентификацию терминала |
+| POST | `/api/webterminal/security/2fa/disable` | Только сессия входа | Отключить двухфакторную аутентификацию терминала |
+| POST | `/api/webterminal/security/verify2fa` | Только сессия входа | Проверить код двухфакторной аутентификации терминала |
+| GET | `/api/webterminal/security/check2fa` | Только сессия входа | Проверить, пройдена ли двухфакторная аутентификация терминала |
+| GET | `/api/webterminal/sftp/{key}/list` | `webterminal:read` | Список удалённых каталогов |
+| GET | `/api/webterminal/sftp/{key}/read` | `webterminal:write` | Чтение удалённого файла |
+| POST | `/api/webterminal/sftp/{key}/write` | `webterminal:write` | Записать удалённый файл |
+| POST | `/api/webterminal/sftp/{key}/upload` | `webterminal:write` | Загрузить файл на удалённый хост |
+| POST | `/api/webterminal/sftp/{key}/mkdir` | `webterminal:write` | Создать удалённый каталог |
+| POST | `/api/webterminal/sftp/{key}/touch` | `webterminal:write` | Создать пустой удалённый файл |
+| POST | `/api/webterminal/sftp/{key}/rename` | `webterminal:write` | Переименовать или переместить удалённый файл |
+| POST | `/api/webterminal/sftp/{key}/copy` | `webterminal:write` | Копировать удалённый файл |
+| POST | `/api/webterminal/sftp/{key}/chmod` | `webterminal:write` | Изменить права удалённого файла |
+| DELETE | `/api/webterminal/sftp/{key}/remove` | `webterminal:write` | Удалить удалённый файл |
+| POST | `/api/webterminal/sftp/{key}/compress` | `webterminal:write` | Архивировать файлы на удалённом хосте |
+| POST | `/api/webterminal/sftp/{key}/decompress` | `webterminal:write` | Распаковать файлы на удалённом хосте |
+| GET | `/api/webterminal/sftp/{key}/preview-archive` | `webterminal:write` | Предпросмотр содержимого удалённого архива |
+| GET | `/api/webterminal/settings` | `webterminal:read` | Чтение настроек веб-терминала |
+| PUT | `/api/webterminal/settings` | `webterminal:write` | Сохранить настройки веб-терминала |
+| GET | `/api/webterminal/shells` | `webterminal:read` | Список доступных на этой машине оболочек (Shell) |
+| GET | `/api/webterminal/globalshortcuts` | `webterminal:read` | Чтение глобальных быстрых команд |
+| PUT | `/api/webterminal/globalshortcuts` | `webterminal:write` | Сохранить глобальные быстрые команды |
+| GET | `/api/webterminal/splitlayout` | `webterminal:read` | Чтение раскладки разделённых панелей |
+| PUT | `/api/webterminal/splitlayout` | `webterminal:write` | Сохранить раскладку разделённых панелей |
+| DELETE | `/api/webterminal/splitlayout` | `webterminal:write` | Сбросить раскладку разделённых панелей |
+
+## Запланированная задача
+
+| Метод | Путь | Необходимое право | Описание |
+| --- | --- | --- | --- |
+| GET | `/api/cron/logs` | `cron:read` | Просмотр журнала работы модуля |
+| DELETE | `/api/cron/logs` | `cron:write` | Очистить журнал работы модуля |
+| GET | `/api/cron/tasks` | `cron:read` | Список: Запланированная задача |
+| POST | `/api/cron/tasks` | `cron:write` | Добавить: Запланированная задача |
+| PUT | `/api/cron/tasks/{key}` | `cron:write` | Изменить: Запланированная задача |
+| DELETE | `/api/cron/tasks/{key}` | `cron:write` | Удалить: Запланированная задача |
+| PUT | `/api/cron/tasks/{key}/enable` | `cron:write` | Включить или отключить: Запланированная задача |
+| PUT | `/api/cron/tasks-order` | `cron:write` | Изменить порядок: Запланированная задача |
+| POST | `/api/cron/tasks/{key}/run` | `cron:write` | Немедленно выполнить запланированную задачу |
+| POST | `/api/cron/parse` | `cron:write` | Разобрать выражение Cron и показать предпросмотр |
+
+## Управление Docker
+
+| Метод | Путь | Необходимое право | Описание |
+| --- | --- | --- | --- |
+| GET | `/api/docker/logs` | `docker:read` | Просмотр журнала работы модуля |
+| DELETE | `/api/docker/logs` | `docker:write` | Очистить журнал работы модуля |
+| GET | `/api/docker/tasks` | `docker:read` | Список фоновых задач |
+| GET | `/api/docker/tasks/{id}` | `docker:read` | Просмотр хода выполнения и вывода фоновой задачи |
+| DELETE | `/api/docker/tasks` | `docker:write` | Очистить завершённые фоновые задачи |
+| GET | `/api/docker/images` | `docker:read` | Список образов |
+| POST | `/api/docker/images/pull` | `docker:write` | Загрузить образ |
+| POST | `/api/docker/images/push` | `docker:write` | Отправить образ |
+| POST | `/api/docker/images/search` | `docker:write` | Поиск образов |
+| POST | `/api/docker/images/load` | `docker:write` | Импортировать файл образа |
+| POST | `/api/docker/images/build` | `docker:write` | Собрать образ |
+| GET | `/api/docker/images/{id}` | `docker:read` | Просмотр сведений об образе |
+| POST | `/api/docker/images/{id}/tag` | `docker:write` | Присвоить тег образу |
+| DELETE | `/api/docker/images/{id}` | `docker:write` | Удалить образ |
+| GET | `/api/docker/images/{id}/export` | `docker:write` | Экспортировать образ |
+| GET | `/api/docker/networks` | `docker:read` | Список сетей |
+| POST | `/api/docker/networks` | `docker:write` | Создать сеть |
+| DELETE | `/api/docker/networks/{id}` | `docker:write` | Удалить сеть |
+| POST | `/api/docker/networks/{id}/connect` | `docker:write` | Подключить контейнер к сети |
+| POST | `/api/docker/networks/{id}/disconnect` | `docker:write` | Отключить контейнер от сети |
+| GET | `/api/docker/volumes` | `docker:read` | Список томов |
+| POST | `/api/docker/volumes` | `docker:write` | Создать том данных |
+| DELETE | `/api/docker/volumes/{name}` | `docker:write` | Удалить том данных |
+| GET | `/api/docker/volumes/{name}/export` | `docker:write` | Экспортировать том данных |
+| POST | `/api/docker/volumes/{name}/import` | `docker:write` | Импортировать данные в том |
+| GET | `/api/docker/compose/projects` | `docker:read` | Список проектов Compose |
+| POST | `/api/docker/compose/projects` | `docker:write` | Создать проект Compose |
+| POST | `/api/docker/compose/{project}/up` | `docker:write` | Запустить проект Compose |
+| POST | `/api/docker/compose/{project}/pull` | `docker:write` | Загрузить образы проекта Compose |
+| POST | `/api/docker/compose/{project}/{action}` | `docker:write` | Выполнить операцию над проектом Compose |
+| GET | `/api/docker/compose/{project}/config` | `docker:write` | Чтение файла конфигурации Compose |
+| PUT | `/api/docker/compose/{project}/config` | `docker:write` | Сохранить файл конфигурации Compose |
+| GET | `/api/docker/compose/{project}/logs` | `docker:read` | Просмотр журнала проекта Compose |
+| DELETE | `/api/docker/compose/{project}` | `docker:write` | Удалить проект Compose |
+| GET | `/api/docker/info` | `docker:read` | Просмотр информации о движке Docker |
+| GET | `/api/docker/disk-usage` | `docker:read` | Просмотр использования диска Docker |
+| POST | `/api/docker/prune` | `docker:write` | Очистить неиспользуемые ресурсы Docker |
+| GET | `/api/docker/settings` | `docker:read` | Чтение настроек модуля Docker |
+| PUT | `/api/docker/settings` | `docker:write` | Сохранить настройки модуля Docker |
+| GET | `/api/docker/containers` | `docker:read` | Список контейнеров |
+| POST | `/api/docker/containers` | `docker:write` | Создать контейнер |
+| POST | `/api/docker/containers/check-all` | `docker:write` | Проверить обновления образов всех контейнеров |
+| POST | `/api/docker/containers/upgrade-batch` | `docker:write` | Пакетное обновление контейнеров |
+| POST | `/api/docker/images/upgrade-check` | `docker:write` | Проверить, есть ли новая версия образа |
+| GET | `/api/docker/containers/{id}` | `docker:read` | Просмотр сведений о контейнере |
+| DELETE | `/api/docker/containers/{id}` | `docker:write` | Удалить контейнер |
+| POST | `/api/docker/containers/{id}/edit` | `docker:write` | Изменить конфигурацию контейнера и пересоздать его |
+| POST | `/api/docker/containers/{id}/rename` | `docker:write` | Переименовать контейнер |
+| POST | `/api/docker/containers/{id}/commit` | `docker:write` | Сохранить контейнер как образ |
+| POST | `/api/docker/containers/{id}/check` | `docker:write` | Проверить, есть ли обновления образа контейнера |
+| POST | `/api/docker/containers/{id}/upgrade` | `docker:write` | Обновить образ контейнера и пересоздать контейнер |
+| POST | `/api/docker/containers/{id}/{action}` | `docker:write` | Выполнить операцию над контейнером |
+| GET | `/api/docker/containers/{id}/logs` | `docker:read` | Просмотр журнала контейнера |
+| GET | `/api/docker/containers/{id}/stats` | `docker:read` | Просмотр использования ресурсов контейнером |
+| GET | `/api/docker/containers/{id}/processes` | `docker:read` | Просмотр процессов внутри контейнера |
+| GET | `/api/docker/containers/{id}/files/list` | `docker:read` | Список каталогов внутри контейнера |
+| GET | `/api/docker/containers/{id}/files/read` | `docker:write` | Чтение файла внутри контейнера |
+| GET | `/api/docker/containers/{id}/files/download` | `docker:write` | Скачать файл из контейнера |
+| POST | `/api/docker/containers/{id}/files/write` | `docker:write` | Записать файл внутри контейнера |
+| POST | `/api/docker/containers/{id}/files/mkdir` | `docker:write` | Создать каталог внутри контейнера |
+| POST | `/api/docker/containers/{id}/files/rename` | `docker:write` | Переименовать файл внутри контейнера |
+| POST | `/api/docker/containers/{id}/files/upload` | `docker:write` | Загрузить файл в контейнер |
+| DELETE | `/api/docker/containers/{id}/files` | `docker:write` | Удалить файл внутри контейнера |
+| GET | `/api/docker/containers/{id}/exec` | `docker:write` | Открыть терминал внутри контейнера (WebSocket) |
+
+## WebDAV
+
+| Метод | Путь | Необходимое право | Описание |
+| --- | --- | --- | --- |
+| GET | `/api/webdav/logs` | `webdav:read` | Просмотр журнала работы модуля |
+| DELETE | `/api/webdav/logs` | `webdav:write` | Очистить журнал работы модуля |
+| GET | `/api/webdav/settings` | `webdav:read` | Чтение настроек WebDAV |
+| PUT | `/api/webdav/settings` | `webdav:write` | Сохранить настройки WebDAV |
+
+## Служба FTP
+
+| Метод | Путь | Необходимое право | Описание |
+| --- | --- | --- | --- |
+| GET | `/api/ftp/logs` | `ftp:read` | Просмотр журнала работы модуля |
+| DELETE | `/api/ftp/logs` | `ftp:write` | Очистить журнал работы модуля |
+| GET | `/api/ftp/settings` | `ftp:read` | Чтение настроек FTP |
+| PUT | `/api/ftp/settings` | `ftp:write` | Сохранить настройки FTP |
+
+## Управление хранилищем
+
+| Метод | Путь | Необходимое право | Описание |
+| --- | --- | --- | --- |
+| GET | `/api/storage/logs` | `storage:read` | Просмотр журнала работы модуля |
+| DELETE | `/api/storage/logs` | `storage:write` | Очистить журнал работы модуля |
+| GET | `/api/storage/mounts` | `storage:read` | Список: Элемент |
+| POST | `/api/storage/mounts` | `storage:write` | Добавить: Элемент |
+| PUT | `/api/storage/mounts/{key}` | `storage:write` | Изменить: Элемент |
+| DELETE | `/api/storage/mounts/{key}` | `storage:write` | Удалить: Элемент |
+| PUT | `/api/storage/mounts/{key}/enable` | `storage:write` | Включить или отключить: Элемент |
+| PUT | `/api/storage/mounts-order` | `storage:write` | Изменить порядок: Элемент |
+| GET | `/api/storage/files/{key}/list` | `storage:read` | Список каталогов хранилища |
+| GET | `/api/storage/files/{key}/download` | `storage:write` | Скачать файл из хранилища |
+| POST | `/api/storage/files/{key}/upload` | `storage:write` | Загрузить файл в хранилище |
+| POST | `/api/storage/files/{key}/mkdir` | `storage:write` | Создать каталог хранилища |
+| POST | `/api/storage/files/{key}/rename` | `storage:write` | Переименовать или переместить файл хранилища |
+| DELETE | `/api/storage/files/{key}` | `storage:write` | Удалить файл хранилища |
+
+## Центр уведомлений
+
+| Метод | Путь | Необходимое право | Описание |
+| --- | --- | --- | --- |
+| GET | `/api/notify/logs` | `notify:read` | Просмотр журнала работы модуля |
+| DELETE | `/api/notify/logs` | `notify:write` | Очистить журнал работы модуля |
+| GET | `/api/notify/channels` | `notify:read` | Список: Каналы уведомлений |
+| POST | `/api/notify/channels` | `notify:write` | Добавить: Каналы уведомлений |
+| PUT | `/api/notify/channels/{key}` | `notify:write` | Изменить: Каналы уведомлений |
+| DELETE | `/api/notify/channels/{key}` | `notify:write` | Удалить: Каналы уведомлений |
+| PUT | `/api/notify/channels/{key}/enable` | `notify:write` | Включить или отключить: Каналы уведомлений |
+| PUT | `/api/notify/channels-order` | `notify:write` | Изменить порядок: Каналы уведомлений |
+| GET | `/api/notify/rules` | `notify:read` | Список: Правила уведомлений |
+| POST | `/api/notify/rules` | `notify:write` | Добавить: Правила уведомлений |
+| PUT | `/api/notify/rules/{key}` | `notify:write` | Изменить: Правила уведомлений |
+| DELETE | `/api/notify/rules/{key}` | `notify:write` | Удалить: Правила уведомлений |
+| PUT | `/api/notify/rules/{key}/enable` | `notify:write` | Включить или отключить: Правила уведомлений |
+| PUT | `/api/notify/rules-order` | `notify:write` | Изменить порядок: Правила уведомлений |
+| GET | `/api/notify/event-types` | `notify:read` | Типы событий, на которые можно подписаться |
+| GET | `/api/notify/history` | `notify:read` | Последние записи доставки |
+| POST | `/api/notify/channels/{key}/test` | `notify:write` | Отправить тестовое уведомление в канал |
+
+## Диагностика сети
+
+| Метод | Путь | Необходимое право | Описание |
+| --- | --- | --- | --- |
+| GET | `/api/nettools/logs` | `nettools:read` | Просмотр журнала работы модуля |
+| DELETE | `/api/nettools/logs` | `nettools:write` | Очистить журнал работы модуля |
+| POST | `/api/nettools/run` | `nettools:write` | Запустить инструмент диагностики, возвращает задачу (tool: ping / traceroute / tcp / dns / speed / scan) |
+| GET | `/api/nettools/tasks` | `nettools:read` | Последние задачи диагностики |
+| GET | `/api/nettools/tasks/{id}` | `nettools:read` | Сведения о задаче и вывод |
+| DELETE | `/api/nettools/tasks/{id}` | `nettools:write` | Отменить выполняемую задачу или удалить завершённую |
+| GET | `/api/nettools/settings` | `nettools:read` | Настройки диагностики |
+| PUT | `/api/nettools/settings` | `nettools:write` | Изменить список запрещённых для сканирования адресов |
+| GET | `/api/nettools/networks` | `nettools:read` | Подсети этой машины, доступные для сканирования локальной сети |
+
+## Резервная копия конфигурации
+
+| Метод | Путь | Необходимое право | Описание |
+| --- | --- | --- | --- |
+| GET | `/api/backup/logs` | `backup:read` | Просмотр журнала работы модуля |
+| DELETE | `/api/backup/logs` | `backup:write` | Очистить журнал работы модуля |
+| GET | `/api/backup/targets` | `backup:read` | Список: Назначение резервных копий |
+| POST | `/api/backup/targets` | `backup:write` | Добавить: Назначение резервных копий |
+| PUT | `/api/backup/targets/{key}` | `backup:write` | Изменить: Назначение резервных копий |
+| DELETE | `/api/backup/targets/{key}` | `backup:write` | Удалить: Назначение резервных копий |
+| PUT | `/api/backup/targets/{key}/enable` | `backup:write` | Включить или отключить: Назначение резервных копий |
+| PUT | `/api/backup/targets-order` | `backup:write` | Изменить порядок: Назначение резервных копий |
+| GET | `/api/backup/settings` | `backup:read` | Настройки резервного копирования |
+| PUT | `/api/backup/settings` | `backup:write` | Изменить настройки резервного копирования (передайте заполнитель вместо пароля, чтобы оставить его без изменений) |
+| POST | `/api/backup/run` | `backup:write` | Выполнить резервное копирование сейчас |
+| GET | `/api/backup/status` | `backup:read` | Результат последней резервной копии и время следующего запуска |
+| GET | `/api/backup/mounts` | `backup:read` | Точки монтирования хранилищ, доступные как назначение резервных копий |
+| GET | `/api/backup/local` | Только сессия входа | Список локальных файлов резервных копий |
+| GET | `/api/backup/local/{name}` | Только сессия входа | Скачать локальный файл резервной копии |
+
+## Система
+
+| Метод | Путь | Необходимое право | Описание |
+| --- | --- | --- | --- |
+| GET | `/api/session` | Любой действующий токен | Просмотр текущего удостоверения аутентификации |
+| GET | `/api/status` | `status:read` | Просмотр состояния системы и модулей |
+| GET | `/api/logs` | `logs:read` | Просмотр системного журнала |
+| GET | `/api/system/settings` | Только сессия входа | Чтение глобальных настроек |
+| PUT | `/api/system/settings` | Только сессия входа | Сохранить глобальные настройки |
+| GET | `/api/system/info` | `status:read` | Просмотр информации о системе |
+| GET | `/api/system/update` | `status:read` | Проверить наличие новой версии |
+| GET | `/api/system/backup` | Только сессия входа | Скачать резервную копию конфигурации |
+| POST | `/api/system/restore` | Только сессия входа | Восстановить конфигурацию из резервной копии |
+| POST | `/api/system/restart` | Только сессия входа | Перезапустить Gately |
+| GET | `/api/openapi.json` | Любой действующий токен | Получить описание OpenAPI этого API |
+
+## Импорт конфигурации
+
+| Метод | Путь | Необходимое право | Описание |
+| --- | --- | --- | --- |
+| POST | `/api/import/lucky` | `import:write` | Импорт конфигурации Lucky |
+
+## API-токен
+
+| Метод | Путь | Необходимое право | Описание |
+| --- | --- | --- | --- |
+| GET | `/api/tokens` | Только сессия входа | Список API-токенов |
+| GET | `/api/tokens/scopes` | Только сессия входа | Список областей прав, доступных для назначения |
+| POST | `/api/tokens` | Только сессия входа | Создать API-токен |
+| PUT | `/api/tokens/{id}` | Только сессия входа | Изменить имя, права, срок действия и состояние API-токена |
+| POST | `/api/tokens/{id}/regenerate` | Только сессия входа | Перегенерировать токен в открытом виде |
+| DELETE | `/api/tokens/{id}` | Только сессия входа | Удалить API-токен |
+
+## Учётная запись
+
+| Метод | Путь | Необходимое право | Описание |
+| --- | --- | --- | --- |
+| PUT | `/api/account` | Только сессия входа | Изменить имя пользователя и пароль администратора |
+| GET | `/api/account/totp` | Только сессия входа | Просмотр состояния двухфакторной аутентификации |
+| POST | `/api/account/totp/setup` | Только сессия входа | Сгенерировать ключ двухфакторной аутентификации |
+| POST | `/api/account/totp/enable` | Только сессия входа | Включить двухфакторную аутентификацию |
+| POST | `/api/account/totp/disable` | Только сессия входа | Отключить двухфакторную аутентификацию |
+
+## Структуры данных
+
+### backup.LocalFile
+
+| Поле | Тип |
+| --- | --- |
+| `modTime` | Время (RFC 3339) |
+| `name` | string |
+| `size` | integer |
+
+### backup.Result
+
+| Поле | Тип |
+| --- | --- |
+| `error` | string |
+| `file` | string |
+| `ok` | boolean |
+| `pruned` | integer |
+| `target` | string |
+
+### backup.Settings
+
+| Поле | Тип |
+| --- | --- |
+| `enable` | boolean |
+| `keep` | integer |
+| `localEnable` | boolean |
+| `password` | string |
+| `schedule` | string |
+
+### backup.Status
+
+| Поле | Тип |
+| --- | --- |
+| `lastRun` | Время (RFC 3339) |
+| `manual` | boolean |
+| `nextRun` | Время (RFC 3339) |
+| `results` | Массив из `backup.Result` |
+| `running` | boolean |
+
+### backup.Target
+
+| Поле | Тип |
+| --- | --- |
+| `dir` | string |
+| `enable` | boolean |
+| `key` | string |
+| `mount` | string |
+| `name` | string |
+
+### backup.settingsView
+
+| Поле | Тип |
+| --- | --- |
+| `enable` | boolean |
+| `hasPassword` | boolean |
+| `keep` | integer |
+| `localEnable` | boolean |
+| `password` | string |
+| `schedule` | string |
+
+### cloudflared.Tunnel
+
+| Поле | Тип |
+| --- | --- |
+| `edgeIpVersion` | string |
+| `enable` | boolean |
+| `key` | string |
+| `mode` | string |
+| `name` | string |
+| `protocol` | string |
+| `remark` | string |
+| `service` | string |
+| `token` | string |
+
+### cron.Task
+
+| Поле | Тип |
+| --- | --- |
+| `command` | string |
+| `enable` | boolean |
+| `http` | `webhook.Config` |
+| `key` | string |
+| `name` | string |
+| `remark` | string |
+| `spec` | string |
+| `type` | string |
+
+### crud.enableRequest
+
+| Поле | Тип |
+| --- | --- |
+| `enable` | boolean |
+
+### crud.orderRequest
+
+| Поле | Тип |
+| --- | --- |
+| `keys` | Массив из string |
+
+### ddns.Record
+
+| Поле | Тип |
+| --- | --- |
+| `enable` | boolean |
+| `key` | string |
+| `line` | string |
+| `remark` | string |
+| `sub` | string |
+| `ttl` | integer |
+| `type` | string |
+| `value` | string |
+| `zone` | string |
+
+### ddns.Task
+
+| Поле | Тип |
+| --- | --- |
+| `credentials` | `dnsprovider.Credentials` |
+| `enable` | boolean |
+| `forceInterval` | integer |
+| `httpTimeout` | integer |
+| `interval` | integer |
+| `ipv4` | `ipsource.Source` |
+| `ipv6` | `ipsource.Source` |
+| `key` | string |
+| `name` | string |
+| `provider` | string |
+| `records` | Массив из `ddns.Record` |
+| `remark` | string |
+| `webhook` | `webhook.Config` |
+
+### dnsprovider.Credentials
+
+| Поле | Тип |
+| --- | --- |
+| `extra` | Словарь из string |
+| `id` | string |
+| `secret` | string |
+
+### events.TypeInfo
+
+| Поле | Тип |
+| --- | --- |
+| `level` | string |
+| `name` | string |
+| `type` | string |
+
+### frp.ClientSettings
+
+| Поле | Тип |
+| --- | --- |
+| `binPath` | string |
+| `enable` | boolean |
+| `protocol` | string |
+| `serverAddr` | string |
+| `serverPort` | integer |
+| `token` | string |
+| `user` | string |
+
+### frp.ImportRequest
+
+| Поле | Тип |
+| --- | --- |
+| `apply` | boolean |
+| `content` | string |
+| `proxyMode` | string |
+| `role` | string |
+
+### frp.ImportResponse
+
+| Поле | Тип |
+| --- | --- |
+| `added` | integer |
+| `applied` | boolean |
+| `client` | `frp.ClientSettings` |
+| `proxies` | Массив из `frp.Proxy` |
+| `role` | string |
+| `server` | `frp.ServerSettings` |
+| `warnings` | Массив из string |
+
+### frp.Proxy
+
+| Поле | Тип |
+| --- | --- |
+| `customDomains` | Массив из string |
+| `enable` | boolean |
+| `key` | string |
+| `localIp` | string |
+| `localPort` | integer |
+| `name` | string |
+| `remark` | string |
+| `remotePort` | integer |
+| `secretKey` | string |
+| `subdomain` | string |
+| `type` | string |
+
+### frp.ServerSettings
+
+| Поле | Тип |
+| --- | --- |
+| `allowPorts` | string |
+| `binPath` | string |
+| `bindPort` | integer |
+| `dashboardAddr` | string |
+| `dashboardPort` | integer |
+| `dashboardPwd` | string |
+| `dashboardUser` | string |
+| `enable` | boolean |
+| `subdomainHost` | string |
+| `token` | string |
+| `vhostHttpPort` | integer |
+| `vhostHttpsPort` | integer |
+
+### geoip.Info
+
+| Поле | Тип |
+| --- | --- |
+| `buildTime` | Время (RFC 3339) |
+| `loaded` | boolean |
+| `size` | integer |
+| `type` | string |
+
+### ipsource.Source
+
+| Поле | Тип |
+| --- | --- |
+| `command` | string |
+| `enable` | boolean |
+| `interface` | string |
+| `regex` | string |
+| `type` | string |
+| `urls` | Массив из string |
+
+### nettools.Request
+
+| Поле | Тип |
+| --- | --- |
+| `cidr` | string |
+| `count` | integer |
+| `ports` | string |
+| `seconds` | integer |
+| `server` | string |
+| `target` | string |
+| `tool` | string |
+| `type` | string |
+| `url` | string |
+
+### nettools.Settings
+
+| Поле | Тип |
+| --- | --- |
+| `deny` | Массив из string |
+
+### nettools.Task
+
+| Поле | Тип |
+| --- | --- |
+| `error` | string |
+| `finished` | Время (RFC 3339) |
+| `id` | string |
+| `lines` | Массив из string |
+| `result` | Любое |
+| `started` | Время (RFC 3339) |
+| `status` | string |
+| `title` | string |
+| `tool` | string |
+
+### notify.Channel
+
+| Поле | Тип |
+| --- | --- |
+| `enable` | boolean |
+| `from` | string |
+| `host` | string |
+| `key` | string |
+| `kind` | string |
+| `name` | string |
+| `port` | integer |
+| `remark` | string |
+| `secret` | string |
+| `security` | string |
+| `target` | string |
+| `url` | string |
+| `user` | string |
+| `webhook` | `webhook.Config` |
+
+### notify.Record
+
+| Поле | Тип |
+| --- | --- |
+| `channel` | string |
+| `error` | string |
+| `ok` | boolean |
+| `rule` | string |
+| `time` | Время (RFC 3339) |
+| `title` | string |
+| `type` | string |
+
+### notify.Rule
+
+| Поле | Тип |
+| --- | --- |
+| `channels` | Массив из string |
+| `enable` | boolean |
+| `events` | Массив из string |
+| `key` | string |
+| `minLevel` | string |
+| `name` | string |
+| `silence` | integer |
+
+### portforward.Rule
+
+| Поле | Тип |
+| --- | --- |
+| `enable` | boolean |
+| `key` | string |
+| `listenAddress` | string |
+| `listenPorts` | string |
+| `maxConnections` | integer |
+| `name` | string |
+| `protocols` | Массив из string |
+| `remark` | string |
+| `targetAddresses` | Массив из string |
+| `targetPorts` | string |
+| `udpSessionTimeout` | integer |
+
+### ssl.ACMEConfig
+
+| Поле | Тип |
+| --- | --- |
+| `ca` | string |
+| `credentials` | `dnsprovider.Credentials` |
+| `directoryUrl` | string |
+| `disableAuthoritativeCheck` | boolean |
+| `domains` | Массив из string |
+| `eabHmac` | string |
+| `eabKid` | string |
+| `email` | string |
+| `keyType` | string |
+| `propagationTimeout` | integer |
+| `provider` | string |
+| `resolvers` | Массив из string |
+| `skipPropagationCheck` | boolean |
+| `zone` | string |
+
+### ssl.Cert
+
+| Поле | Тип |
+| --- | --- |
+| `acme` | `ssl.ACMEConfig` |
+| `certFile` | string |
+| `certPem` | string |
+| `enable` | boolean |
+| `issuerPem` | string |
+| `key` | string |
+| `keyFile` | string |
+| `keyPem` | string |
+| `mapping` | `ssl.Mapping` |
+| `remark` | string |
+| `source` | string |
+| `updatedAt` | Время (RFC 3339) |
+
+### ssl.Mapping
+
+| Поле | Тип |
+| --- | --- |
+| `dir` | string |
+| `enable` | boolean |
+| `script` | string |
+
+### storage.Mount
+
+| Поле | Тип |
+| --- | --- |
+| `enable` | boolean |
+| `key` | string |
+| `name` | string |
+| `password` | string |
+| `path` | string |
+| `readOnly` | boolean |
+| `remark` | string |
+| `skipVerify` | boolean |
+| `type` | string |
+| `url` | string |
+| `username` | string |
+
+### storage.MountInfo
+
+| Поле | Тип |
+| --- | --- |
+| `enable` | boolean |
+| `key` | string |
+| `name` | string |
+| `readOnly` | boolean |
+| `type` | string |
+
+### stun.Bind
+
+| Поле | Тип |
+| --- | --- |
+| `interface` | string |
+| `ip` | string |
+| `mode` | string |
+| `regex` | string |
+
+### stun.Rule
+
+| Поле | Тип |
+| --- | --- |
+| `autoRetry` | boolean |
+| `bind` | `stun.Bind` |
+| `disableCheck` | boolean |
+| `disableForward` | boolean |
+| `enable` | boolean |
+| `heartbeatInterval` | integer |
+| `keepAliveServers` | Массив из string |
+| `key` | string |
+| `localPort` | integer |
+| `maxConnections` | integer |
+| `name` | string |
+| `natpmp` | boolean |
+| `natpmpGateway` | string |
+| `protocol` | string |
+| `remark` | string |
+| `retryInterval` | integer |
+| `script` | string |
+| `scriptEnable` | boolean |
+| `stunServers` | Массив из string |
+| `stunTimeout` | integer |
+| `targetAddresses` | Массив из string |
+| `targetPort` | integer |
+| `udpSessionTimeout` | integer |
+| `upnp` | boolean |
+| `upnpControlUrl` | string |
+| `upnpGateway` | string |
+| `upnpInternalPort` | integer |
+| `upnpLocalHost` | string |
+| `useGlobalServers` | boolean |
+| `useGlobalWebhook` | boolean |
+| `webhook` | `webhook.Config` |
+| `webhookOnlyOnChange` | boolean |
+
+### waf.Instance
+
+| Поле | Тип |
+| --- | --- |
+| `enable` | boolean |
+| `inboundThreshold` | integer |
+| `key` | string |
+| `mode` | string |
+| `name` | string |
+| `outboundThreshold` | integer |
+| `paranoia` | integer |
+| `remark` | string |
+| `ruleSets` | Массив из `waf.RuleSet` |
+
+### waf.RuleSet
+
+| Поле | Тип |
+| --- | --- |
+| `enable` | boolean |
+| `param` | string |
+| `remark` | string |
+| `type` | string |
+
+### webhook.Config
+
+| Поле | Тип |
+| --- | --- |
+| `body` | string |
+| `enable` | boolean |
+| `headers` | Массив из string |
+| `insecureSkipVerify` | boolean |
+| `method` | string |
+| `successContent` | Массив из string |
+| `timeout` | integer |
+| `url` | string |
+
+### webservice.BanInfo
+
+| Поле | Тип |
+| --- | --- |
+| `key` | string |
+| `manual` | boolean |
+| `reason` | string |
+| `until` | Время (RFC 3339) |
+
+### webservice.CacheConfig
+
+| Поле | Тип |
+| --- | --- |
+| `enable` | boolean |
+| `maxMb` | integer |
+| `ttl` | integer |
+
+### webservice.HealthCheck
+
+| Поле | Тип |
+| --- | --- |
+| `enable` | boolean |
+| `fails` | integer |
+| `interval` | integer |
+| `mode` | string |
+| `passes` | integer |
+| `path` | string |
+| `timeout` | integer |
+
+### webservice.Listener
+
+| Поле | Тип |
+| --- | --- |
+| `acceptProxyProtocol` | boolean |
+| `default` | `webservice.Site` |
+| `enable` | boolean |
+| `key` | string |
+| `listenIp` | string |
+| `minTls` | string |
+| `name` | string |
+| `network` | string |
+| `port` | integer |
+| `remark` | string |
+| `sites` | Массив из `webservice.Site` |
+| `tls` | boolean |
+
+### webservice.PathRule
+
+| Поле | Тип |
+| --- | --- |
+| `auth` | string |
+| `ipList` | Массив из string |
+| `ipMode` | string |
+| `prefix` | string |
+
+### webservice.Point
+
+| Поле | Тип |
+| --- | --- |
+| `bytes` | integer |
+| `requests` | integer |
+| `s4xx` | integer |
+| `s5xx` | integer |
+| `t` | integer |
+
+### webservice.RateLimit
+
+| Поле | Тип |
+| --- | --- |
+| `burst` | integer |
+| `enable` | boolean |
+| `maxConns` | integer |
+| `rate` | number |
+
+### webservice.Rewrite
+
+| Поле | Тип |
+| --- | --- |
+| `code` | integer |
+| `pattern` | string |
+| `redirect` | boolean |
+| `to` | string |
+
+### webservice.ShareLink
+
+| Поле | Тип |
+| --- | --- |
+| `expiresAt` | Время (RFC 3339) |
+| `key` | string |
+| `maxUses` | integer |
+| `name` | string |
+| `pathPrefix` | string |
+| `token` | string |
+
+### webservice.Site
+
+| Поле | Тип |
+| --- | --- |
+| `accessLog` | boolean |
+| `authOptional` | boolean |
+| `basicAuth` | boolean |
+| `cache` | `webservice.CacheConfig` |
+| `compress` | boolean |
+| `contentType` | string |
+| `cors` | boolean |
+| `countries` | Массив из string |
+| `countryMode` | string |
+| `disableKeepAlives` | boolean |
+| `domains` | Массив из string |
+| `enable` | boolean |
+| `forwardedHeaders` | boolean |
+| `health` | `webservice.HealthCheck` |
+| `insecureSkipVerify` | boolean |
+| `ipList` | Массив из string |
+| `ipMode` | string |
+| `keepPath` | boolean |
+| `key` | string |
+| `lbPolicy` | string |
+| `listDir` | boolean |
+| `name` | string |
+| `oauthUsers` | Массив из string |
+| `rateLimit` | `webservice.RateLimit` |
+| `redirectCode` | integer |
+| `redirectTo` | string |
+| `remark` | string |
+| `requestHeaders` | Массив из string |
+| `responseHeaders` | Массив из string |
+| `rewrites` | Массив из `webservice.Rewrite` |
+| `root` | string |
+| `rules` | Массив из `webservice.PathRule` |
+| `sendProxyProtocol` | boolean |
+| `shareLinks` | Массив из `webservice.ShareLink` |
+| `statusCode` | integer |
+| `targets` | Массив из string |
+| `text` | string |
+| `type` | string |
+| `useTargetHost` | boolean |
+| `users` | Массив из string |
+| `waf` | string |
+| `webAuth` | boolean |
+
+### webservice.SiteStatsView
+
+| Поле | Тип |
+| --- | --- |
+| `bytesOut` | integer |
+| `series` | Массив из `webservice.Point` |
+| `status` | Словарь из integer |
+| `topCountries` | Массив из `webservice.TopItem` |
+| `topIps` | Массив из `webservice.TopItem` |
+| `upstreams` | Массив из `webservice.UpstreamStatus` |
+
+### webservice.TopItem
+
+| Поле | Тип |
+| --- | --- |
+| `count` | integer |
+| `key` | string |
+
+### webservice.UpstreamStatus
+
+| Поле | Тип |
+| --- | --- |
+| `backup` | boolean |
+| `conns` | integer |
+| `healthy` | boolean |
+| `url` | string |
+| `weight` | integer |
+
+### webservice.banRequest
+
+| Поле | Тип |
+| --- | --- |
+| `key` | string |
+| `seconds` | integer |
+
+### webservice.geoipDownload
+
+| Поле | Тип |
+| --- | --- |
+| `url` | string |
+
+### webterminal.Connection
+
+| Поле | Тип |
+| --- | --- |
+| `enable` | boolean |
+| `key` | string |
+| `local` | `webterminal.LocalConfig` |
+| `name` | string |
+| `quickAccessDirs` | Массив из string |
+| `remark` | string |
+| `ssh` | `webterminal.SSHConfig` |
+| `telnet` | `webterminal.TelnetConfig` |
+| `type` | string |
+
+### webterminal.LocalConfig
+
+| Поле | Тип |
+| --- | --- |
+| `env` | Словарь из string |
+| `shell` | string |
+| `workDir` | string |
+
+### webterminal.Proxy
+
+| Поле | Тип |
+| --- | --- |
+| `enabled` | boolean |
+| `host` | string |
+| `password` | string |
+| `port` | integer |
+| `type` | string |
+| `username` | string |
+
+### webterminal.SSHConfig
+
+| Поле | Тип |
+| --- | --- |
+| `authType` | string |
+| `host` | string |
+| `hostKey` | string |
+| `keepAlive` | integer |
+| `keyFile` | string |
+| `passphrase` | string |
+| `password` | string |
+| `port` | integer |
+| `privateKey` | string |
+| `proxy` | `webterminal.Proxy` |
+| `timeout` | integer |
+| `username` | string |
+| `workDir` | string |
+
+### webterminal.TelnetConfig
+
+| Поле | Тип |
+| --- | --- |
+| `host` | string |
+| `password` | string |
+| `port` | integer |
+| `proxy` | `webterminal.Proxy` |
+| `timeout` | integer |
+| `username` | string |
+
+### wol.Device
+
+| Поле | Тип |
+| --- | --- |
+| `broadcastIps` | Массив из string |
+| `checkAddr` | string |
+| `enable` | boolean |
+| `key` | string |
+| `macs` | Массив из string |
+| `name` | string |
+| `port` | integer |
+| `remark` | string |
+| `repeat` | integer |
+

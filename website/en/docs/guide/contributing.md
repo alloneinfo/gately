@@ -21,6 +21,13 @@ For frontend development, run `cd web && pnpm dev`; `/api` is proxied to local `
 - A new module needs: a config structure with validation, runtime start/stop, REST endpoints and unit tests. Modules that can be migrated from Lucky implement `luckyimport.Importer`, and modules that should show status on the overview page implement `module.Summarizer`.
 - Code comments are written in Chinese; control statements must use braces.
 
+## Internationalization
+
+- Admin UI text lives in `web/src/locales/<lang>/<namespace>.json` (Simplified Chinese is the source). When adding or changing text, update at least `zh-CN` and `en`, then run `cd web && node scripts/check-i18n.mjs`. See `web/src/locales/README.md`.
+- Website language packs live in `website/.vitepress/i18n/<lang>.json`; pages live in `website/<lang-dir>/`.
+- Backend runtime text (error messages, logs, notifications, API docs) uses the Chinese string literals in the source as keys; translations live in `internal/i18n/locales/<lang>.json`. After adding or changing Chinese text, run `go run ./internal/i18n/cmd/i18nsync -root .` to sync new keys into every language file and fill in the translations. `go test ./internal/i18n` checks that every language is complete and that format verbs match the original. For sentences with dynamic parts, use a single `fmt.Sprintf` format string instead of concatenating several Chinese fragments, so each language can reorder the words.
+- API docs are generated per language by the program: `make api-docs` writes them to `docs/api/<lang>/`, so nothing needs to be synced by hand.
+
 ## Extra tests
 
 Some tests are skipped by default and need extra setup:

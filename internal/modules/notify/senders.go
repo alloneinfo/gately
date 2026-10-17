@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/wangwanjie/gately/internal/i18n"
 	"io"
 	"net"
 	"net/http"
@@ -50,11 +51,16 @@ var levelLabel = map[string]string{
 
 // NewMessage 把事件格式化为人可读的消息。
 func NewMessage(e events.Event) Message {
+	// 通知内容按服务端语言翻译（事件文案由程序生成，用户自定义的内容不在翻译表中，会原样保留）
+	lang := i18n.ServerLang()
+	tr := func(s string) string { return i18n.Tr(lang, s) }
+	e.Title = tr(e.Title)
+	e.Message = tr(e.Message)
 	title := e.Title
 	if title == "" {
 		title = e.Type
 	}
-	label := levelLabel[e.Level]
+	label := tr(levelLabel[e.Level])
 	if label == "" {
 		label = e.Level
 	}
@@ -64,10 +70,10 @@ func NewMessage(e events.Event) Message {
 		b.WriteString("\n")
 	}
 	if e.Source != "" {
-		b.WriteString("来源：" + e.Source + "\n")
+		b.WriteString(tr("来源：") + e.Source + "\n")
 	}
-	b.WriteString("级别：" + label + "\n")
-	b.WriteString("时间：" + e.Time.Format("2006-01-02 15:04:05"))
+	b.WriteString(tr("级别：") + label + "\n")
+	b.WriteString(tr("时间：") + e.Time.Format("2006-01-02 15:04:05"))
 	return Message{Event: e, Title: "[Gately] " + title, Text: b.String()}
 }
 

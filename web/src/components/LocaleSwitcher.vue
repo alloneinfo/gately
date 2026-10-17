@@ -10,6 +10,10 @@
           <span v-else class="check" />
           {{ l.name }}
         </el-dropdown-item>
+        <!-- 译文由 AI 生成，非简体中文界面给出提示并链接到 GitHub -->
+        <el-dropdown-item v-if="locale !== 'zh-CN'" command="__notice" divided class="notice">
+          <a :href="ISSUES_URL" target="_blank" rel="noreferrer" @click.stop>{{ t('common.aiTranslated') }}</a>
+        </el-dropdown-item>
       </el-dropdown-menu>
     </template>
   </el-dropdown>
@@ -23,7 +27,12 @@ import { locales } from '../i18n/locales'
 
 const { t, locale } = useI18n()
 
+const ISSUES_URL = 'https://github.com/wangwanjie/gately/issues'
+
 function onCommand(code: string) {
+  if (code === '__notice') {
+    return
+  }
   setLocale(code)
 }
 </script>
@@ -52,6 +61,19 @@ function onCommand(code: string) {
   display: inline-block;
   width: 14px;
   margin-right: 6px;
+}
+.notice {
+  max-width: 260px;
+  white-space: normal;
+  line-height: 1.5;
+  font-size: 12px;
+}
+.notice a {
+  color: var(--el-text-color-secondary);
+  text-decoration: none;
+}
+.notice a:hover {
+  color: var(--el-color-primary);
 }
 .active {
   color: var(--el-color-primary);

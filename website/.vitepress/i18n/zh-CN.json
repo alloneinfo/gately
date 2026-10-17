@@ -70,7 +70,8 @@
     "langMenuLabel": "语言",
     "lightModeSwitchTitle": "切换到浅色模式",
     "darkModeSwitchTitle": "切换到深色模式",
-    "footerMessage": "以 Apache-2.0 许可证开源发布。Gately 与 Lucky 项目方无任何隶属关系。"
+    "footerMessage": "以 Apache-2.0 许可证开源发布。Gately 与 Lucky 项目方无任何隶属关系。",
+    "aiNotice": "本页由 AI 翻译，可能存在不准确之处。欢迎在 GitHub 上帮助改进。"
   },
   "home": {
     "pill": "开源 · 可审计 · 可从 Lucky 一键迁移",
@@ -81,49 +82,151 @@
     "ctaDownload": "下载",
     "mockTitle": "gately · 总览",
     "mockRows": [
-      ["动态域名", "75 条记录已同步", "ok"],
-      ["STUN 穿透", "18 条规则运行中", "ok"],
-      ["端口转发", "25 条规则运行中", "ok"],
-      ["Web 服务", "27 个站点 · HTTPS", "ok"],
-      ["SSL 证书", "5 张证书 · 自动续期", "ok"],
-      ["WAF 防火墙", "CRS v4 · 拦截模式", "warn"]
+      [
+        "动态域名",
+        "75 条记录已同步",
+        "ok"
+      ],
+      [
+        "STUN 穿透",
+        "18 条规则运行中",
+        "ok"
+      ],
+      [
+        "端口转发",
+        "25 条规则运行中",
+        "ok"
+      ],
+      [
+        "Web 服务",
+        "27 个站点 · HTTPS",
+        "ok"
+      ],
+      [
+        "SSL 证书",
+        "5 张证书 · 自动续期",
+        "ok"
+      ],
+      [
+        "WAF 防火墙",
+        "CRS v4 · 拦截模式",
+        "warn"
+      ]
     ],
     "stats": [
-      { "value": "~22 MB", "label": "单文件，内嵌管理界面" },
-      { "value": "0", "label": "默认连接项目方服务器" },
-      { "value": "全平台", "label": "Linux / macOS / Windows / FreeBSD，含 ARM、MIPS、RISC-V" },
-      { "value": "Apache-2.0", "label": "开源协议，源码可审计" }
+      {
+        "value": "~22 MB",
+        "label": "单文件，内嵌管理界面"
+      },
+      {
+        "value": "0",
+        "label": "默认连接项目方服务器"
+      },
+      {
+        "value": "全平台",
+        "label": "Linux / macOS / Windows / FreeBSD，含 ARM、MIPS、RISC-V"
+      },
+      {
+        "value": "Apache-2.0",
+        "label": "开源协议，源码可审计"
+      }
     ],
     "featuresTitle": "常用网络能力，一处管理",
     "featuresDesc": "覆盖家庭网络与服务器运维最常用的功能，每个模块都可单独启停。",
     "features": [
-      { "title": "动态域名", "text": "阿里云、Cloudflare、腾讯云、DNSPod、华为云、GoDaddy 等 11 家服务商；URL / 网卡 / 命令取 IP，IPv4 与 IPv6，Webhook 通知。" },
-      { "title": "STUN 穿透", "text": "TCP / UDP 打洞与保活，UPnP / NAT-PMP，内置转发；公网地址变化时触发 Webhook 与脚本。" },
-      { "title": "端口转发", "text": "TCP / UDP、IPv4 / IPv6、端口段、多目标故障转移、连接数限制与流量统计。" },
-      { "title": "SSL 证书", "text": "ACME DNS-01 自动签发与续期，支持通配符与 EAB，可映射到目录并在变化后执行脚本。" },
-      { "title": "Web 服务", "text": "按域名反向代理、重定向、静态文件；HTTPS、WebSocket、PROXY 协议；多后端权重与策略、健康检查、压缩、限流与响应缓存。" },
-      { "title": "WAF 防火墙", "text": "内置 Coraza 与 OWASP CRS v4，按文件启用规则，支持自定义 SecLang，可拦截或仅检测。" },
-      { "title": "组网与穿透", "text": "以进程托管方式集成 Tailscale、frp（frpc / frps）与 cloudflared 隧道，始终使用上游最新版本。" },
-      { "title": "Docker 管理", "text": "容器创建与编辑、日志与终端、Compose、镜像更新与一键升级（失败自动回滚）、网络与卷管理。" },
-      { "title": "Web 终端", "text": "SSH、Telnet 与本机 Shell（默认关闭），支持代理、持久会话、SFTP 文件管理与分屏。" },
-      { "title": "文件服务", "text": "WebDAV、FTP 服务与存储管理，支持本地与远程 WebDAV 挂载及在线文件管理。" },
-      { "title": "计划任务与唤醒", "text": "cron 定时执行命令或 HTTP 请求并保留记录；网络唤醒魔术包广播与在线探测。" },
-      { "title": "安全加固", "text": "两步验证、登录失败限流、安全入口、仅内网访问、管理界面 HTTPS、API 令牌。" },
-      { "title": "访问控制", "text": "站点路径规则、临时分享链接、认证失败自动封禁、GeoIP 国家过滤与 IP 黑白名单。" },
-      { "title": "访问统计与监控", "text": "分钟级访问与流量统计，并以 Prometheus 指标暴露，便于接入已有监控。" },
-      { "title": "通知中心", "text": "Webhook、Telegram、Bark、企业微信、钉钉、飞书与邮件；按级别与事件规则推送，支持静默去重。" },
-      { "title": "配置备份", "text": "加密备份（scrypt + AES-GCM）、保留策略与定时备份，可写入本地目录或存储挂载点。" },
-      { "title": "网络诊断", "text": "Ping、路由追踪、端口探测、DNS 查询、测速与局域网扫描，作为后台任务运行。" },
-      { "title": "API、命令行与 MCP", "text": "多令牌按模块授权，自动生成的 OpenAPI 文档；gately ctl 调用实例，gately mcp 接入 AI 助手。" }
+      {
+        "title": "动态域名",
+        "text": "阿里云、Cloudflare、腾讯云、DNSPod、华为云、GoDaddy 等 11 家服务商；URL / 网卡 / 命令取 IP，IPv4 与 IPv6，Webhook 通知。"
+      },
+      {
+        "title": "STUN 穿透",
+        "text": "TCP / UDP 打洞与保活，UPnP / NAT-PMP，内置转发；公网地址变化时触发 Webhook 与脚本。"
+      },
+      {
+        "title": "端口转发",
+        "text": "TCP / UDP、IPv4 / IPv6、端口段、多目标故障转移、连接数限制与流量统计。"
+      },
+      {
+        "title": "SSL 证书",
+        "text": "ACME DNS-01 自动签发与续期，支持通配符与 EAB，可映射到目录并在变化后执行脚本。"
+      },
+      {
+        "title": "Web 服务",
+        "text": "按域名反向代理、重定向、静态文件；HTTPS、WebSocket、PROXY 协议；多后端权重与策略、健康检查、压缩、限流与响应缓存。"
+      },
+      {
+        "title": "WAF 防火墙",
+        "text": "内置 Coraza 与 OWASP CRS v4，按文件启用规则，支持自定义 SecLang，可拦截或仅检测。"
+      },
+      {
+        "title": "组网与穿透",
+        "text": "以进程托管方式集成 Tailscale、frp（frpc / frps）与 cloudflared 隧道，始终使用上游最新版本。"
+      },
+      {
+        "title": "Docker 管理",
+        "text": "容器创建与编辑、日志与终端、Compose、镜像更新与一键升级（失败自动回滚）、网络与卷管理。"
+      },
+      {
+        "title": "Web 终端",
+        "text": "SSH、Telnet 与本机 Shell（默认关闭），支持代理、持久会话、SFTP 文件管理与分屏。"
+      },
+      {
+        "title": "文件服务",
+        "text": "WebDAV、FTP 服务与存储管理，支持本地与远程 WebDAV 挂载及在线文件管理。"
+      },
+      {
+        "title": "计划任务与唤醒",
+        "text": "cron 定时执行命令或 HTTP 请求并保留记录；网络唤醒魔术包广播与在线探测。"
+      },
+      {
+        "title": "安全加固",
+        "text": "两步验证、登录失败限流、安全入口、仅内网访问、管理界面 HTTPS、API 令牌。"
+      },
+      {
+        "title": "访问控制",
+        "text": "站点路径规则、临时分享链接、认证失败自动封禁、GeoIP 国家过滤与 IP 黑白名单。"
+      },
+      {
+        "title": "访问统计与监控",
+        "text": "分钟级访问与流量统计，并以 Prometheus 指标暴露，便于接入已有监控。"
+      },
+      {
+        "title": "通知中心",
+        "text": "Webhook、Telegram、Bark、企业微信、钉钉、飞书与邮件；按级别与事件规则推送，支持静默去重。"
+      },
+      {
+        "title": "配置备份",
+        "text": "加密备份（scrypt + AES-GCM）、保留策略与定时备份，可写入本地目录或存储挂载点。"
+      },
+      {
+        "title": "网络诊断",
+        "text": "Ping、路由追踪、端口探测、DNS 查询、测速与局域网扫描，作为后台任务运行。"
+      },
+      {
+        "title": "API、命令行与 MCP",
+        "text": "多令牌按模块授权，自动生成的 OpenAPI 文档；gately ctl 调用实例，gately mcp 接入 AI 助手。"
+      }
     ],
     "moreModules": "查看全部模块 →",
     "promisesTitle": "运行在网络边界的软件，应该让你看得清楚",
     "promisesDesc": "它手握 DNS 密钥与证书私钥，所以每一个行为都应当可以被检查。",
     "promises": [
-      { "title": "透明", "text": "默认不连接任何项目方服务器，不上报设备信息。公网 IP 查询、STUN 服务器等所有对外地址都可见、可改、可关。" },
-      { "title": "可审计", "text": "配置是明文 JSON，权限 0600，可直接纳入 git 做 diff 与回滚。敏感字段在 API 输出中脱敏。" },
-      { "title": "自主可控", "text": "第三方登录使用你自己申请的 OAuth 应用，不经过任何中转；不内置自更新，升级由 Docker 或包管理器负责。" },
-      { "title": "单文件部署", "text": "一个静态二进制内嵌前端，支持 Docker、systemd、OpenWrt，覆盖 NAS、软路由与云主机。" }
+      {
+        "title": "透明",
+        "text": "默认不连接任何项目方服务器，不上报设备信息。公网 IP 查询、STUN 服务器等所有对外地址都可见、可改、可关。"
+      },
+      {
+        "title": "可审计",
+        "text": "配置是明文 JSON，权限 0600，可直接纳入 git 做 diff 与回滚。敏感字段在 API 输出中脱敏。"
+      },
+      {
+        "title": "自主可控",
+        "text": "第三方登录使用你自己申请的 OAuth 应用，不经过任何中转；不内置自更新，升级由 Docker 或包管理器负责。"
+      },
+      {
+        "title": "单文件部署",
+        "text": "一个静态二进制内嵌前端，支持 Docker、systemd、OpenWrt，覆盖 NAS、软路由与云主机。"
+      }
     ],
     "installTitle": "一分钟跑起来",
     "installDesc": "镜像支持 amd64、arm64、arm/v7。启动后访问 <code>http://设备IP:16680</code>，用 <code>admin</code> 与日志中的初始密码登录。",
@@ -136,22 +239,65 @@
     "compareTitle": "与 Lucky 对照",
     "compareDesc": "Gately 受 Lucky 启发，覆盖常用场景，并可一键导入现有配置。Lucky 的功能更丰富，两者可以并存使用。",
     "compareRows": [
-      ["源码", "开源（Apache-2.0）", "闭源"],
-      ["配置文件", "明文 JSON，可 git 管理", "专有格式（.lkcf）"],
-      ["官方服务", "默认无，对外地址可改可关", "提供在线更新、第三方登录中转等官方服务"],
-      ["第三方登录", "使用自己的 OAuth 应用", "经官方中转服务"],
-      ["从 Lucky 迁移", "一键导入 .lkcf / 整站 zip", "—"],
-      ["升级方式", "Docker / 包管理器", "内置在线自更新"],
-      ["功能广度", "覆盖常用核心能力", "更丰富，如 DLNA、网盘挂载等"]
+      [
+        "源码",
+        "开源（Apache-2.0）",
+        "闭源"
+      ],
+      [
+        "配置文件",
+        "明文 JSON，可 git 管理",
+        "专有格式（.lkcf）"
+      ],
+      [
+        "官方服务",
+        "默认无，对外地址可改可关",
+        "提供在线更新、第三方登录中转等官方服务"
+      ],
+      [
+        "第三方登录",
+        "使用自己的 OAuth 应用",
+        "经官方中转服务"
+      ],
+      [
+        "从 Lucky 迁移",
+        "一键导入 .lkcf / 整站 zip",
+        "—"
+      ],
+      [
+        "升级方式",
+        "Docker / 包管理器",
+        "内置在线自更新"
+      ],
+      [
+        "功能广度",
+        "覆盖常用核心能力",
+        "更丰富，如 DLNA、网盘挂载等"
+      ]
     ],
     "migrationGuide": "阅读迁移指南 →",
     "faqTitle": "常见问题",
     "faqs": [
-      { "q": "Gately 与 Lucky 是什么关系？", "a": "Gately 是独立实现的开源项目，与 Lucky 项目方没有隶属关系，产品思路来自 Lucky，感谢其作者与社区的贡献。兼容性基于公开可观察的行为、接口与配置格式，不包含从 Lucky 二进制或前端产物复制的代码。" },
-      { "q": "可以直接迁移现有 Lucky 配置吗？", "a": "可以。在「设置 → 备份与迁移」选择 .lkcf 文件或整站配置 zip，预览后导入。导入的规则默认停用，可与 Lucky 并存，逐个模块切换，也随时可以回退。" },
-      { "q": "需要联网到你们的服务器吗？", "a": "不需要。Gately 默认不连接任何项目方服务器，也不会上报信息。" },
-      { "q": "适合在哪些设备上运行？", "a": "家庭 NAS、软路由、云主机与各类服务器均可，提供 Linux（amd64 / arm64 / arm / mips / mipsle / riscv64）、macOS、Windows、FreeBSD 二进制，以及 amd64 / arm64 / arm/v7 的 Docker 镜像。" },
-      { "q": "端口转发、STUN 为什么推荐 host 网络？", "a": "这些模块需要直接监听宿主机端口。不需要 Docker 管理时，可去掉 docker.sock 挂载。" }
+      {
+        "q": "Gately 与 Lucky 是什么关系？",
+        "a": "Gately 是独立实现的开源项目，与 Lucky 项目方没有隶属关系，产品思路来自 Lucky，感谢其作者与社区的贡献。兼容性基于公开可观察的行为、接口与配置格式，不包含从 Lucky 二进制或前端产物复制的代码。"
+      },
+      {
+        "q": "可以直接迁移现有 Lucky 配置吗？",
+        "a": "可以。在「设置 → 备份与迁移」选择 .lkcf 文件或整站配置 zip，预览后导入。导入的规则默认停用，可与 Lucky 并存，逐个模块切换，也随时可以回退。"
+      },
+      {
+        "q": "需要联网到你们的服务器吗？",
+        "a": "不需要。Gately 默认不连接任何项目方服务器，也不会上报信息。"
+      },
+      {
+        "q": "适合在哪些设备上运行？",
+        "a": "家庭 NAS、软路由、云主机与各类服务器均可，提供 Linux（amd64 / arm64 / arm / mips / mipsle / riscv64）、macOS、Windows、FreeBSD 二进制，以及 amd64 / arm64 / arm/v7 的 Docker 镜像。"
+      },
+      {
+        "q": "端口转发、STUN 为什么推荐 host 网络？",
+        "a": "这些模块需要直接监听宿主机端口。不需要 Docker 管理时，可去掉 docker.sock 挂载。"
+      }
     ],
     "moreFaq": "更多问题 →",
     "finalTitle": "把网络边界的控制权拿回来",

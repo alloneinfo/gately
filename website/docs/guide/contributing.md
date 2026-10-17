@@ -39,4 +39,6 @@ make lint     # gofmt、go vet、前端类型检查
 
 - 管理界面文案位于 `web/src/locales/<语言>/<命名空间>.json`，源语言为简体中文，新增或修改文案时至少同步更新 `zh-CN` 与 `en`，提交前运行 `cd web && node scripts/check-i18n.mjs`。约定详见 `web/src/locales/README.md`。
 - 官网语言包位于 `website/.vitepress/i18n/<语言>.json`，各语言页面位于 `website/<语言目录>/`。
+- 后端运行时文案（错误说明、日志、通知、接口文档）以源码里的中文字面量为键，译文在 `internal/i18n/locales/<语言>.json`。新增或修改中文文案后运行 `go run ./internal/i18n/cmd/i18nsync -root .` 把新键同步进各语言文件并补全译文，`go test ./internal/i18n` 会检查所有语言是否完整、格式动词是否与原文一致。需要拼接的句子请使用 `fmt.Sprintf` 的整句格式串，不要拼接多段中文，否则无法按各语言语序翻译。
+- 接口文档由程序按各语言生成：`make api-docs` 输出到 `docs/api/<语言>/`，无需手工同步。
 - 当前支持：简体中文、English、繁體中文、日本語、한국어、Español、Français、Deutsch、Русский、Português (Brasil)。

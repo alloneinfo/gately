@@ -124,7 +124,10 @@
       "losAngeles": "Los Angeles",
       "sydney": "Sydney",
       "utc": "Koordinierte Weltzeit"
-    }
+    },
+    "serverLanguage": "Serversprache",
+    "serverLanguageAuto": "Systemeinstellung folgen",
+    "serverLanguageHelp": "Sprache für Protokolle, Benachrichtigungen und andere Ausgaben ohne Seitenkontext. Bei leerem Feld wird sie anhand der Systemumgebung (GATELY_LANG, LANG) gewählt."
   },
   "runtime": {
     "title": "Laufzeitparameter",

@@ -16,6 +16,7 @@ import (
 
 	"github.com/wangwanjie/gately/internal/auth"
 	"github.com/wangwanjie/gately/internal/httpx"
+	"github.com/wangwanjie/gately/internal/i18n"
 	"github.com/wangwanjie/gately/internal/logbuf"
 	"github.com/wangwanjie/gately/internal/resolver"
 	"github.com/wangwanjie/gately/internal/thirdauth"
@@ -39,6 +40,8 @@ type Settings struct {
 	// LegacyAPIToken 是旧版的单个全局 API 令牌，仅用于启动时迁移为"遗留令牌"，迁移后清空。
 	// 现在的令牌由 apitoken 包管理，保存在 tokens.json。
 	LegacyAPIToken string `json:"apiToken,omitempty"`
+	// Language 为服务端语言（日志、通知等无请求上下文的输出）；为空时按系统环境（GATELY_LANG / LANG）自动选择
+	Language string `json:"language"`
 	// TimeZone 为 IANA 时区名，例如 Asia/Shanghai；为空使用系统时区
 	TimeZone string `json:"timeZone"`
 	// DNSServers 为自定义 DNS 服务器，影响所有出站域名解析（DDNS、Webhook、ACME 等）；
@@ -79,6 +82,7 @@ func (s *Settings) normalize() {
 	}
 	s.DNSServers = dns
 	s.ThirdLogin.Normalize()
+	s.Language = i18n.Normalize(s.Language)
 }
 
 // Validate 校验设置。
@@ -137,6 +141,7 @@ func restartRequired(old, cur Settings) bool {
 // applyRuntime 应用无需重启即可生效的设置。
 func (a *App) applyRuntime() {
 	s := a.settingsSnapshot()
+	i18n.SetServerLang(s.Language)
 	a.auth.SetLimits(s.MaxLoginFailures, time.Duration(s.LockMinutes)*time.Minute)
 	if s.TimeZone != "" {
 		if loc, err := time.LoadLocation(s.TimeZone); err == nil {

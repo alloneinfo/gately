@@ -70,7 +70,8 @@
     "langMenuLabel": "Idioma",
     "lightModeSwitchTitle": "Mudar para o tema claro",
     "darkModeSwitchTitle": "Mudar para o tema escuro",
-    "footerMessage": "Distribuído sob a licença Apache-2.0. O Gately não tem nenhuma afiliação com o projeto Lucky."
+    "footerMessage": "Distribuído sob a licença Apache-2.0. O Gately não tem nenhuma afiliação com o projeto Lucky.",
+    "aiNotice": "Esta página foi traduzida com IA e pode conter imprecisões. Ajude a melhorar no GitHub."
   },
   "home": {
     "pill": "Código aberto · Auditável · Migração do Lucky com um clique",
@@ -81,49 +82,151 @@
     "ctaDownload": "Download",
     "mockTitle": "gately · Visão geral",
     "mockRows": [
-      ["DNS dinâmico", "75 registros sincronizados", "ok"],
-      ["Travessia STUN", "18 regras em execução", "ok"],
-      ["Redirecionamento de portas", "25 regras em execução", "ok"],
-      ["Serviços Web", "27 sites · HTTPS", "ok"],
-      ["Certificados SSL", "5 certificados · renovação automática", "ok"],
-      ["Firewall WAF", "CRS v4 · modo de bloqueio", "warn"]
+      [
+        "DNS dinâmico",
+        "75 registros sincronizados",
+        "ok"
+      ],
+      [
+        "Travessia STUN",
+        "18 regras em execução",
+        "ok"
+      ],
+      [
+        "Redirecionamento de portas",
+        "25 regras em execução",
+        "ok"
+      ],
+      [
+        "Serviços Web",
+        "27 sites · HTTPS",
+        "ok"
+      ],
+      [
+        "Certificados SSL",
+        "5 certificados · renovação automática",
+        "ok"
+      ],
+      [
+        "Firewall WAF",
+        "CRS v4 · modo de bloqueio",
+        "warn"
+      ]
     ],
     "stats": [
-      { "value": "~22 MB", "label": "Binário único, com a interface de administração embutida" },
-      { "value": "0", "label": "Conexões aos servidores do projeto por padrão" },
-      { "value": "Multiplataforma", "label": "Linux / macOS / Windows / FreeBSD, incluindo ARM, MIPS e RISC-V" },
-      { "value": "Apache-2.0", "label": "Licença open source, código-fonte auditável" }
+      {
+        "value": "~22 MB",
+        "label": "Binário único, com a interface de administração embutida"
+      },
+      {
+        "value": "0",
+        "label": "Conexões aos servidores do projeto por padrão"
+      },
+      {
+        "value": "Multiplataforma",
+        "label": "Linux / macOS / Windows / FreeBSD, incluindo ARM, MIPS e RISC-V"
+      },
+      {
+        "value": "Apache-2.0",
+        "label": "Licença open source, código-fonte auditável"
+      }
     ],
     "featuresTitle": "As ferramentas de rede do dia a dia, gerenciadas em um só lugar",
     "featuresDesc": "Cobre os recursos mais usados em redes domésticas e na operação de servidores. Cada módulo pode ser ativado ou desativado individualmente.",
     "features": [
-      { "title": "DNS dinâmico", "text": "11 provedores, incluindo Alibaba Cloud, Cloudflare, Tencent Cloud, DNSPod, Huawei Cloud e GoDaddy; detecção de IP por URL, interface de rede ou comando, IPv4 e IPv6, notificações por webhook." },
-      { "title": "Travessia STUN", "text": "Hole punching e keep-alive para TCP / UDP, UPnP / NAT-PMP, encaminhamento embutido; dispara webhooks e scripts quando o endereço público muda." },
-      { "title": "Redirecionamento de portas", "text": "TCP / UDP, IPv4 / IPv6, intervalos de portas, failover entre vários destinos, limite de conexões e estatísticas de tráfego." },
-      { "title": "Certificados SSL", "text": "Emissão e renovação automáticas via ACME DNS-01, com suporte a wildcard e EAB; mapeie certificados para um diretório e execute um script após cada alteração." },
-      { "title": "Serviços Web", "text": "Proxy reverso por domínio, redirecionamentos e arquivos estáticos; HTTPS, WebSocket e protocolo PROXY; políticas com vários backends e pesos, health checks, compressão, limitação de taxa e cache de respostas." },
-      { "title": "Firewall WAF", "text": "Coraza e OWASP CRS v4 embutidos, regras ativadas por arquivo, suporte a SecLang personalizado, modo de bloqueio ou apenas detecção." },
-      { "title": "Redes e túneis", "text": "Gerencia Tailscale, frp (frpc / frps) e túneis cloudflared como processos supervisionados, sempre com a versão mais recente do projeto original." },
-      { "title": "Gerenciamento do Docker", "text": "Criação e edição de contêineres, logs e terminais, Compose, atualização de imagens com upgrade em um clique (rollback automático em caso de falha), redes e volumes." },
-      { "title": "Terminal Web", "text": "SSH, Telnet e shell local (desativado por padrão), com suporte a proxy, sessões persistentes, gerenciamento de arquivos via SFTP e painéis divididos." },
-      { "title": "Serviços de arquivos", "text": "Serviços WebDAV e FTP e gerenciamento de armazenamento, com montagens WebDAV locais e remotas e gerenciador de arquivos online." },
-      { "title": "Tarefas agendadas e Wake-on-LAN", "text": "Tarefas cron que executam comandos ou requisições HTTP e mantêm o histórico de execuções; broadcast do pacote mágico de Wake-on-LAN e verificação de status online." },
-      { "title": "Reforço de segurança", "text": "Autenticação em dois fatores, limitação de tentativas de login, caminho de entrada seguro, acesso apenas pela rede local, HTTPS na interface de administração e tokens de API." },
-      { "title": "Controle de acesso", "text": "Regras de caminho por site, links de compartilhamento temporários, banimento automático após falhas de autenticação, filtro de países por GeoIP e listas de IPs permitidos e bloqueados." },
-      { "title": "Estatísticas e monitoramento", "text": "Estatísticas de acessos e tráfego por minuto, expostas como métricas Prometheus para o seu monitoramento atual." },
-      { "title": "Central de notificações", "text": "Webhook, Telegram, Bark, WeCom, DingTalk, Feishu e e-mail; envio por severidade e regras de eventos, com silenciamento e desduplicação." },
-      { "title": "Backup da configuração", "text": "Backups criptografados (scrypt + AES-GCM), políticas de retenção e backups agendados em um diretório local ou ponto de montagem de armazenamento." },
-      { "title": "Diagnóstico de rede", "text": "Ping, traceroute, sondagem de portas, consulta DNS, teste de velocidade e varredura da rede local, executados como tarefas em segundo plano." },
-      { "title": "API, CLI e MCP", "text": "Vários tokens com permissões por módulo e documentação OpenAPI gerada automaticamente; use gately ctl para controlar uma instância e gately mcp para conectar assistentes de IA." }
+      {
+        "title": "DNS dinâmico",
+        "text": "11 provedores, incluindo Alibaba Cloud, Cloudflare, Tencent Cloud, DNSPod, Huawei Cloud e GoDaddy; detecção de IP por URL, interface de rede ou comando, IPv4 e IPv6, notificações por webhook."
+      },
+      {
+        "title": "Travessia STUN",
+        "text": "Hole punching e keep-alive para TCP / UDP, UPnP / NAT-PMP, encaminhamento embutido; dispara webhooks e scripts quando o endereço público muda."
+      },
+      {
+        "title": "Redirecionamento de portas",
+        "text": "TCP / UDP, IPv4 / IPv6, intervalos de portas, failover entre vários destinos, limite de conexões e estatísticas de tráfego."
+      },
+      {
+        "title": "Certificados SSL",
+        "text": "Emissão e renovação automáticas via ACME DNS-01, com suporte a wildcard e EAB; mapeie certificados para um diretório e execute um script após cada alteração."
+      },
+      {
+        "title": "Serviços Web",
+        "text": "Proxy reverso por domínio, redirecionamentos e arquivos estáticos; HTTPS, WebSocket e protocolo PROXY; políticas com vários backends e pesos, health checks, compressão, limitação de taxa e cache de respostas."
+      },
+      {
+        "title": "Firewall WAF",
+        "text": "Coraza e OWASP CRS v4 embutidos, regras ativadas por arquivo, suporte a SecLang personalizado, modo de bloqueio ou apenas detecção."
+      },
+      {
+        "title": "Redes e túneis",
+        "text": "Gerencia Tailscale, frp (frpc / frps) e túneis cloudflared como processos supervisionados, sempre com a versão mais recente do projeto original."
+      },
+      {
+        "title": "Gerenciamento do Docker",
+        "text": "Criação e edição de contêineres, logs e terminais, Compose, atualização de imagens com upgrade em um clique (rollback automático em caso de falha), redes e volumes."
+      },
+      {
+        "title": "Terminal Web",
+        "text": "SSH, Telnet e shell local (desativado por padrão), com suporte a proxy, sessões persistentes, gerenciamento de arquivos via SFTP e painéis divididos."
+      },
+      {
+        "title": "Serviços de arquivos",
+        "text": "Serviços WebDAV e FTP e gerenciamento de armazenamento, com montagens WebDAV locais e remotas e gerenciador de arquivos online."
+      },
+      {
+        "title": "Tarefas agendadas e Wake-on-LAN",
+        "text": "Tarefas cron que executam comandos ou requisições HTTP e mantêm o histórico de execuções; broadcast do pacote mágico de Wake-on-LAN e verificação de status online."
+      },
+      {
+        "title": "Reforço de segurança",
+        "text": "Autenticação em dois fatores, limitação de tentativas de login, caminho de entrada seguro, acesso apenas pela rede local, HTTPS na interface de administração e tokens de API."
+      },
+      {
+        "title": "Controle de acesso",
+        "text": "Regras de caminho por site, links de compartilhamento temporários, banimento automático após falhas de autenticação, filtro de países por GeoIP e listas de IPs permitidos e bloqueados."
+      },
+      {
+        "title": "Estatísticas e monitoramento",
+        "text": "Estatísticas de acessos e tráfego por minuto, expostas como métricas Prometheus para o seu monitoramento atual."
+      },
+      {
+        "title": "Central de notificações",
+        "text": "Webhook, Telegram, Bark, WeCom, DingTalk, Feishu e e-mail; envio por severidade e regras de eventos, com silenciamento e desduplicação."
+      },
+      {
+        "title": "Backup da configuração",
+        "text": "Backups criptografados (scrypt + AES-GCM), políticas de retenção e backups agendados em um diretório local ou ponto de montagem de armazenamento."
+      },
+      {
+        "title": "Diagnóstico de rede",
+        "text": "Ping, traceroute, sondagem de portas, consulta DNS, teste de velocidade e varredura da rede local, executados como tarefas em segundo plano."
+      },
+      {
+        "title": "API, CLI e MCP",
+        "text": "Vários tokens com permissões por módulo e documentação OpenAPI gerada automaticamente; use gately ctl para controlar uma instância e gately mcp para conectar assistentes de IA."
+      }
     ],
     "moreModules": "Ver todos os módulos →",
     "promisesTitle": "Um software na borda da sua rede deve ser fácil de inspecionar",
     "promisesDesc": "Ele guarda suas chaves de DNS e as chaves privadas dos certificados, então cada comportamento precisa estar aberto à verificação.",
     "promises": [
-      { "title": "Transparente", "text": "Por padrão, nenhuma conexão com servidores do projeto e nenhum envio de informações do dispositivo. Todo endereço externo, como a consulta do IP público e os servidores STUN, é visível, editável e pode ser desativado." },
-      { "title": "Auditável", "text": "A configuração é JSON em texto simples, com permissão 0600, pronta para diff e rollback no git. Campos sensíveis são mascarados na saída da API." },
-      { "title": "Sob o seu controle", "text": "O login de terceiros usa aplicativos OAuth que você mesmo registra, sem intermediários. Não há autoatualização embutida; as atualizações vêm do Docker ou do gerenciador de pacotes." },
-      { "title": "Implantação em um único arquivo", "text": "Um binário estático com o frontend embutido. Roda com Docker, systemd e OpenWrt, atendendo NAS, soft routers e servidores em nuvem." }
+      {
+        "title": "Transparente",
+        "text": "Por padrão, nenhuma conexão com servidores do projeto e nenhum envio de informações do dispositivo. Todo endereço externo, como a consulta do IP público e os servidores STUN, é visível, editável e pode ser desativado."
+      },
+      {
+        "title": "Auditável",
+        "text": "A configuração é JSON em texto simples, com permissão 0600, pronta para diff e rollback no git. Campos sensíveis são mascarados na saída da API."
+      },
+      {
+        "title": "Sob o seu controle",
+        "text": "O login de terceiros usa aplicativos OAuth que você mesmo registra, sem intermediários. Não há autoatualização embutida; as atualizações vêm do Docker ou do gerenciador de pacotes."
+      },
+      {
+        "title": "Implantação em um único arquivo",
+        "text": "Um binário estático com o frontend embutido. Roda com Docker, systemd e OpenWrt, atendendo NAS, soft routers e servidores em nuvem."
+      }
     ],
     "installTitle": "Funcionando em um minuto",
     "installDesc": "Há imagens para amd64, arm64 e arm/v7. Depois de iniciar, abra <code>http://IP_DO_DISPOSITIVO:16680</code> e entre como <code>admin</code> com a senha inicial exibida nos logs.",
@@ -136,22 +239,65 @@
     "compareTitle": "Comparação com o Lucky",
     "compareDesc": "O Gately é inspirado no Lucky, cobre os casos de uso mais comuns e importa a sua configuração atual com um clique. O Lucky oferece mais recursos, e os dois podem funcionar lado a lado.",
     "compareRows": [
-      ["Código-fonte", "Código aberto (Apache-2.0)", "Código fechado"],
-      ["Arquivo de configuração", "JSON em texto simples, compatível com git", "Formato proprietário (.lkcf)"],
-      ["Serviços oficiais", "Nenhum por padrão; os endereços externos são editáveis e podem ser desativados", "Atualização online, intermediário de login de terceiros e outros serviços oficiais"],
-      ["Login de terceiros", "Seus próprios aplicativos OAuth", "Pelo serviço intermediário oficial"],
-      ["Migração do Lucky", "Importação com um clique de .lkcf / zip do site inteiro", "—"],
-      ["Atualizações", "Docker / gerenciador de pacotes", "Autoatualização online embutida"],
-      ["Abrangência de recursos", "Cobre os recursos centrais mais usados", "Mais ampla, como DLNA e montagem de armazenamento em nuvem"]
+      [
+        "Código-fonte",
+        "Código aberto (Apache-2.0)",
+        "Código fechado"
+      ],
+      [
+        "Arquivo de configuração",
+        "JSON em texto simples, compatível com git",
+        "Formato proprietário (.lkcf)"
+      ],
+      [
+        "Serviços oficiais",
+        "Nenhum por padrão; os endereços externos são editáveis e podem ser desativados",
+        "Atualização online, intermediário de login de terceiros e outros serviços oficiais"
+      ],
+      [
+        "Login de terceiros",
+        "Seus próprios aplicativos OAuth",
+        "Pelo serviço intermediário oficial"
+      ],
+      [
+        "Migração do Lucky",
+        "Importação com um clique de .lkcf / zip do site inteiro",
+        "—"
+      ],
+      [
+        "Atualizações",
+        "Docker / gerenciador de pacotes",
+        "Autoatualização online embutida"
+      ],
+      [
+        "Abrangência de recursos",
+        "Cobre os recursos centrais mais usados",
+        "Mais ampla, como DLNA e montagem de armazenamento em nuvem"
+      ]
     ],
     "migrationGuide": "Leia o guia de migração →",
     "faqTitle": "Perguntas frequentes",
     "faqs": [
-      { "q": "Qual é a relação entre o Gately e o Lucky?", "a": "O Gately é uma implementação open source independente, sem afiliação com o projeto Lucky. A ideia do produto vem do Lucky, e agradecemos ao seu autor e à comunidade. A compatibilidade se baseia em comportamentos, interfaces e formatos de configuração observáveis publicamente, e nenhum código foi copiado de binários ou artefatos de frontend do Lucky." },
-      { "q": "Posso migrar diretamente a minha configuração atual do Lucky?", "a": "Sim. Em Configurações → Backup e migração, escolha um arquivo .lkcf ou o zip de configuração do site inteiro, confira a prévia e importe. As regras importadas ficam desativadas por padrão, então você pode rodar junto com o Lucky, migrar módulo por módulo e voltar atrás a qualquer momento." },
-      { "q": "Ele precisa se conectar aos servidores de vocês?", "a": "Não. Por padrão, o Gately não se conecta a nenhum servidor do projeto e não envia nenhuma informação." },
-      { "q": "Em quais dispositivos ele roda?", "a": "NAS domésticos, soft routers, servidores em nuvem e servidores de todo tipo. Há binários para Linux (amd64 / arm64 / arm / mips / mipsle / riscv64), macOS, Windows e FreeBSD, além de imagens Docker para amd64 / arm64 / arm/v7." },
-      { "q": "Por que a rede host é recomendada para redirecionamento de portas e STUN?", "a": "Esses módulos escutam diretamente nas portas do host. Se você não precisa do gerenciamento do Docker, pode remover a montagem do docker.sock." }
+      {
+        "q": "Qual é a relação entre o Gately e o Lucky?",
+        "a": "O Gately é uma implementação open source independente, sem afiliação com o projeto Lucky. A ideia do produto vem do Lucky, e agradecemos ao seu autor e à comunidade. A compatibilidade se baseia em comportamentos, interfaces e formatos de configuração observáveis publicamente, e nenhum código foi copiado de binários ou artefatos de frontend do Lucky."
+      },
+      {
+        "q": "Posso migrar diretamente a minha configuração atual do Lucky?",
+        "a": "Sim. Em Configurações → Backup e migração, escolha um arquivo .lkcf ou o zip de configuração do site inteiro, confira a prévia e importe. As regras importadas ficam desativadas por padrão, então você pode rodar junto com o Lucky, migrar módulo por módulo e voltar atrás a qualquer momento."
+      },
+      {
+        "q": "Ele precisa se conectar aos servidores de vocês?",
+        "a": "Não. Por padrão, o Gately não se conecta a nenhum servidor do projeto e não envia nenhuma informação."
+      },
+      {
+        "q": "Em quais dispositivos ele roda?",
+        "a": "NAS domésticos, soft routers, servidores em nuvem e servidores de todo tipo. Há binários para Linux (amd64 / arm64 / arm / mips / mipsle / riscv64), macOS, Windows e FreeBSD, além de imagens Docker para amd64 / arm64 / arm/v7."
+      },
+      {
+        "q": "Por que a rede host é recomendada para redirecionamento de portas e STUN?",
+        "a": "Esses módulos escutam diretamente nas portas do host. Se você não precisa do gerenciamento do Docker, pode remover a montagem do docker.sock."
+      }
     ],
     "moreFaq": "Mais perguntas →",
     "finalTitle": "Retome o controle da borda da sua rede",

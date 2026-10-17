@@ -70,7 +70,8 @@
     "langMenuLabel": "Sprache",
     "lightModeSwitchTitle": "Zum hellen Design wechseln",
     "darkModeSwitchTitle": "Zum dunklen Design wechseln",
-    "footerMessage": "Veröffentlicht unter der Apache-2.0-Lizenz. Gately steht in keiner Verbindung zum Lucky-Projekt."
+    "footerMessage": "Veröffentlicht unter der Apache-2.0-Lizenz. Gately steht in keiner Verbindung zum Lucky-Projekt.",
+    "aiNotice": "Diese Seite wurde mit KI übersetzt und kann Ungenauigkeiten enthalten. Hilf mit, sie auf GitHub zu verbessern."
   },
   "home": {
     "pill": "Open Source · Prüfbar · Migration von Lucky mit einem Klick",
@@ -81,49 +82,151 @@
     "ctaDownload": "Download",
     "mockTitle": "gately · Übersicht",
     "mockRows": [
-      ["Dynamisches DNS", "75 Einträge synchron", "ok"],
-      ["STUN-Traversal", "18 Regeln aktiv", "ok"],
-      ["Portweiterleitung", "25 Regeln aktiv", "ok"],
-      ["Web-Dienste", "27 Sites · HTTPS", "ok"],
-      ["SSL-Zertifikate", "5 Zertifikate · automatische Erneuerung", "ok"],
-      ["WAF-Firewall", "CRS v4 · Blockiermodus", "warn"]
+      [
+        "Dynamisches DNS",
+        "75 Einträge synchron",
+        "ok"
+      ],
+      [
+        "STUN-Traversal",
+        "18 Regeln aktiv",
+        "ok"
+      ],
+      [
+        "Portweiterleitung",
+        "25 Regeln aktiv",
+        "ok"
+      ],
+      [
+        "Web-Dienste",
+        "27 Sites · HTTPS",
+        "ok"
+      ],
+      [
+        "SSL-Zertifikate",
+        "5 Zertifikate · automatische Erneuerung",
+        "ok"
+      ],
+      [
+        "WAF-Firewall",
+        "CRS v4 · Blockiermodus",
+        "warn"
+      ]
     ],
     "stats": [
-      { "value": "~22 MB", "label": "Einzelne Binärdatei mit eingebetteter Verwaltungsoberfläche" },
-      { "value": "0", "label": "Verbindungen zu Projektservern standardmäßig" },
-      { "value": "Plattformübergreifend", "label": "Linux / macOS / Windows / FreeBSD, auch ARM, MIPS und RISC-V" },
-      { "value": "Apache-2.0", "label": "Open-Source-Lizenz, prüfbarer Quellcode" }
+      {
+        "value": "~22 MB",
+        "label": "Einzelne Binärdatei mit eingebetteter Verwaltungsoberfläche"
+      },
+      {
+        "value": "0",
+        "label": "Verbindungen zu Projektservern standardmäßig"
+      },
+      {
+        "value": "Plattformübergreifend",
+        "label": "Linux / macOS / Windows / FreeBSD, auch ARM, MIPS und RISC-V"
+      },
+      {
+        "value": "Apache-2.0",
+        "label": "Open-Source-Lizenz, prüfbarer Quellcode"
+      }
     ],
     "featuresTitle": "Die wichtigsten Netzwerkfunktionen an einem Ort verwalten",
     "featuresDesc": "Deckt ab, was Heimnetz und Serverbetrieb am häufigsten brauchen. Jedes Modul lässt sich einzeln aktivieren und deaktivieren.",
     "features": [
-      { "title": "Dynamisches DNS", "text": "11 Anbieter, darunter Alibaba Cloud, Cloudflare, Tencent Cloud, DNSPod, Huawei Cloud und GoDaddy; IP-Ermittlung per URL, Netzwerkschnittstelle oder Befehl, IPv4 und IPv6, Webhook-Benachrichtigungen." },
-      { "title": "STUN-Traversal", "text": "TCP-/UDP-Hole-Punching und Keep-alive, UPnP / NAT-PMP, integrierte Weiterleitung; löst Webhooks und Skripte aus, wenn sich die öffentliche Adresse ändert." },
-      { "title": "Portweiterleitung", "text": "TCP / UDP, IPv4 / IPv6, Portbereiche, Failover über mehrere Ziele, Verbindungslimits und Traffic-Statistiken." },
-      { "title": "SSL-Zertifikate", "text": "Automatische ACME-DNS-01-Ausstellung und -Erneuerung mit Wildcard- und EAB-Unterstützung; Zertifikate in ein Verzeichnis abbilden und nach Änderungen ein Skript ausführen." },
-      { "title": "Web-Dienste", "text": "Reverse Proxy pro Domain, Weiterleitungen und statische Dateien; HTTPS, WebSocket und PROXY-Protokoll; gewichtete Multi-Backend-Strategien, Health-Checks, Kompression, Ratenbegrenzung und Antwort-Caching." },
-      { "title": "WAF-Firewall", "text": "Integriertes Coraza mit OWASP CRS v4, Regeln dateiweise aktivierbar, eigene SecLang-Regeln, wahlweise blockieren oder nur erkennen." },
-      { "title": "Netzwerk & Tunnel", "text": "Betreibt Tailscale, frp (frpc / frps) und cloudflared-Tunnel als verwaltete Prozesse und nutzt stets die neueste Upstream-Version." },
-      { "title": "Docker-Verwaltung", "text": "Container erstellen und bearbeiten, Logs und Terminal, Compose, Image-Updates mit Ein-Klick-Upgrade (automatisches Rollback bei Fehlern), Netzwerke und Volumes." },
-      { "title": "Web-Terminal", "text": "SSH, Telnet und lokale Shell (standardmäßig deaktiviert) mit Proxy-Unterstützung, persistenten Sitzungen, SFTP-Dateiverwaltung und geteilten Ansichten." },
-      { "title": "Dateidienste", "text": "WebDAV- und FTP-Dienste mit Speicherverwaltung, lokalen und entfernten WebDAV-Einbindungen sowie Dateiverwaltung im Browser." },
-      { "title": "Geplante Aufgaben & Wake-on-LAN", "text": "Cron-Jobs führen Befehle oder HTTP-Anfragen aus und protokollieren jeden Lauf; Wake-on-LAN-Magic-Packets per Broadcast und Online-Prüfung." },
-      { "title": "Sicherheitshärtung", "text": "Zwei-Faktor-Authentifizierung, Ratenbegrenzung bei der Anmeldung, sicherer Einstiegspfad, Zugriff nur aus dem LAN, HTTPS für die Verwaltungsoberfläche und API-Token." },
-      { "title": "Zugriffskontrolle", "text": "Pfadregeln pro Site, temporäre Freigabelinks, automatische Sperren bei wiederholten Anmeldefehlern, GeoIP-Länderfilter sowie IP-Allow- und Blocklisten." },
-      { "title": "Zugriffsstatistik & Monitoring", "text": "Zugriffs- und Traffic-Statistiken im Minutentakt, als Prometheus-Metriken bereitgestellt für Ihren bestehenden Monitoring-Stack." },
-      { "title": "Benachrichtigungszentrale", "text": "Webhook, Telegram, Bark, WeCom, DingTalk, Feishu und E-Mail; Versand nach Schweregrad und Ereignisregeln, mit Ruhezeit und Deduplizierung." },
-      { "title": "Konfigurationssicherung", "text": "Verschlüsselte Sicherungen (scrypt + AES-GCM), Aufbewahrungsrichtlinien und geplante Sicherungen in ein lokales Verzeichnis oder einen Speicher-Mountpunkt." },
-      { "title": "Netzwerkdiagnose", "text": "Ping, Traceroute, Portprüfung, DNS-Abfrage, Geschwindigkeitstest und LAN-Scan, jeweils als Hintergrundaufgabe." },
-      { "title": "API, CLI & MCP", "text": "Mehrere Token mit Berechtigungen pro Modul und automatisch erzeugte OpenAPI-Doku; mit gately ctl steuern Sie eine Instanz, mit gately mcp binden Sie KI-Assistenten an." }
+      {
+        "title": "Dynamisches DNS",
+        "text": "11 Anbieter, darunter Alibaba Cloud, Cloudflare, Tencent Cloud, DNSPod, Huawei Cloud und GoDaddy; IP-Ermittlung per URL, Netzwerkschnittstelle oder Befehl, IPv4 und IPv6, Webhook-Benachrichtigungen."
+      },
+      {
+        "title": "STUN-Traversal",
+        "text": "TCP-/UDP-Hole-Punching und Keep-alive, UPnP / NAT-PMP, integrierte Weiterleitung; löst Webhooks und Skripte aus, wenn sich die öffentliche Adresse ändert."
+      },
+      {
+        "title": "Portweiterleitung",
+        "text": "TCP / UDP, IPv4 / IPv6, Portbereiche, Failover über mehrere Ziele, Verbindungslimits und Traffic-Statistiken."
+      },
+      {
+        "title": "SSL-Zertifikate",
+        "text": "Automatische ACME-DNS-01-Ausstellung und -Erneuerung mit Wildcard- und EAB-Unterstützung; Zertifikate in ein Verzeichnis abbilden und nach Änderungen ein Skript ausführen."
+      },
+      {
+        "title": "Web-Dienste",
+        "text": "Reverse Proxy pro Domain, Weiterleitungen und statische Dateien; HTTPS, WebSocket und PROXY-Protokoll; gewichtete Multi-Backend-Strategien, Health-Checks, Kompression, Ratenbegrenzung und Antwort-Caching."
+      },
+      {
+        "title": "WAF-Firewall",
+        "text": "Integriertes Coraza mit OWASP CRS v4, Regeln dateiweise aktivierbar, eigene SecLang-Regeln, wahlweise blockieren oder nur erkennen."
+      },
+      {
+        "title": "Netzwerk & Tunnel",
+        "text": "Betreibt Tailscale, frp (frpc / frps) und cloudflared-Tunnel als verwaltete Prozesse und nutzt stets die neueste Upstream-Version."
+      },
+      {
+        "title": "Docker-Verwaltung",
+        "text": "Container erstellen und bearbeiten, Logs und Terminal, Compose, Image-Updates mit Ein-Klick-Upgrade (automatisches Rollback bei Fehlern), Netzwerke und Volumes."
+      },
+      {
+        "title": "Web-Terminal",
+        "text": "SSH, Telnet und lokale Shell (standardmäßig deaktiviert) mit Proxy-Unterstützung, persistenten Sitzungen, SFTP-Dateiverwaltung und geteilten Ansichten."
+      },
+      {
+        "title": "Dateidienste",
+        "text": "WebDAV- und FTP-Dienste mit Speicherverwaltung, lokalen und entfernten WebDAV-Einbindungen sowie Dateiverwaltung im Browser."
+      },
+      {
+        "title": "Geplante Aufgaben & Wake-on-LAN",
+        "text": "Cron-Jobs führen Befehle oder HTTP-Anfragen aus und protokollieren jeden Lauf; Wake-on-LAN-Magic-Packets per Broadcast und Online-Prüfung."
+      },
+      {
+        "title": "Sicherheitshärtung",
+        "text": "Zwei-Faktor-Authentifizierung, Ratenbegrenzung bei der Anmeldung, sicherer Einstiegspfad, Zugriff nur aus dem LAN, HTTPS für die Verwaltungsoberfläche und API-Token."
+      },
+      {
+        "title": "Zugriffskontrolle",
+        "text": "Pfadregeln pro Site, temporäre Freigabelinks, automatische Sperren bei wiederholten Anmeldefehlern, GeoIP-Länderfilter sowie IP-Allow- und Blocklisten."
+      },
+      {
+        "title": "Zugriffsstatistik & Monitoring",
+        "text": "Zugriffs- und Traffic-Statistiken im Minutentakt, als Prometheus-Metriken bereitgestellt für Ihren bestehenden Monitoring-Stack."
+      },
+      {
+        "title": "Benachrichtigungszentrale",
+        "text": "Webhook, Telegram, Bark, WeCom, DingTalk, Feishu und E-Mail; Versand nach Schweregrad und Ereignisregeln, mit Ruhezeit und Deduplizierung."
+      },
+      {
+        "title": "Konfigurationssicherung",
+        "text": "Verschlüsselte Sicherungen (scrypt + AES-GCM), Aufbewahrungsrichtlinien und geplante Sicherungen in ein lokales Verzeichnis oder einen Speicher-Mountpunkt."
+      },
+      {
+        "title": "Netzwerkdiagnose",
+        "text": "Ping, Traceroute, Portprüfung, DNS-Abfrage, Geschwindigkeitstest und LAN-Scan, jeweils als Hintergrundaufgabe."
+      },
+      {
+        "title": "API, CLI & MCP",
+        "text": "Mehrere Token mit Berechtigungen pro Modul und automatisch erzeugte OpenAPI-Doku; mit gately ctl steuern Sie eine Instanz, mit gately mcp binden Sie KI-Assistenten an."
+      }
     ],
     "moreModules": "Alle Module ansehen →",
     "promisesTitle": "Software am Netzwerkrand sollte sich leicht durchschauen lassen",
     "promisesDesc": "Sie verwaltet Ihre DNS-Schlüssel und privaten Zertifikatsschlüssel, daher muss jedes Verhalten überprüfbar sein.",
     "promises": [
-      { "title": "Transparent", "text": "Standardmäßig keine Verbindungen zu Projektservern und keine Übermittlung von Geräteinformationen. Jede ausgehende Adresse, etwa für die Abfrage der öffentlichen IP oder STUN-Server, ist sichtbar, änderbar und abschaltbar." },
-      { "title": "Prüfbar", "text": "Die Konfiguration ist einfaches JSON mit Dateirechten 0600 und eignet sich direkt für Git-Diffs und Rollbacks. Sensible Felder werden in der API-Ausgabe maskiert." },
-      { "title": "In Ihrer Hand", "text": "Die Anmeldung über Drittanbieter nutzt Ihre eigenen OAuth-Apps, ohne Relay dazwischen. Es gibt kein eingebautes Selbst-Update; Upgrades erfolgen über Docker oder Ihren Paketmanager." },
-      { "title": "Bereitstellung als einzelne Datei", "text": "Eine statische Binärdatei mit eingebettetem Frontend. Läuft unter Docker, systemd und OpenWrt, auf NAS, Soft-Routern und Cloud-Hosts." }
+      {
+        "title": "Transparent",
+        "text": "Standardmäßig keine Verbindungen zu Projektservern und keine Übermittlung von Geräteinformationen. Jede ausgehende Adresse, etwa für die Abfrage der öffentlichen IP oder STUN-Server, ist sichtbar, änderbar und abschaltbar."
+      },
+      {
+        "title": "Prüfbar",
+        "text": "Die Konfiguration ist einfaches JSON mit Dateirechten 0600 und eignet sich direkt für Git-Diffs und Rollbacks. Sensible Felder werden in der API-Ausgabe maskiert."
+      },
+      {
+        "title": "In Ihrer Hand",
+        "text": "Die Anmeldung über Drittanbieter nutzt Ihre eigenen OAuth-Apps, ohne Relay dazwischen. Es gibt kein eingebautes Selbst-Update; Upgrades erfolgen über Docker oder Ihren Paketmanager."
+      },
+      {
+        "title": "Bereitstellung als einzelne Datei",
+        "text": "Eine statische Binärdatei mit eingebettetem Frontend. Läuft unter Docker, systemd und OpenWrt, auf NAS, Soft-Routern und Cloud-Hosts."
+      }
     ],
     "installTitle": "In einer Minute startklar",
     "installDesc": "Images gibt es für amd64, arm64 und arm/v7. Rufen Sie nach dem Start <code>http://GERÄTE_IP:16680</code> auf und melden Sie sich als <code>admin</code> mit dem Initialpasswort aus dem Log an.",
@@ -136,22 +239,65 @@
     "compareTitle": "Vergleich mit Lucky",
     "compareDesc": "Gately ist von Lucky inspiriert, deckt die gängigen Anwendungsfälle ab und übernimmt Ihre bestehende Konfiguration mit einem Klick. Lucky bietet mehr Funktionen, beide lassen sich parallel betreiben.",
     "compareRows": [
-      ["Quellcode", "Open Source (Apache-2.0)", "Closed Source"],
-      ["Konfigurationsdatei", "Einfaches JSON, Git-tauglich", "Proprietäres Format (.lkcf)"],
-      ["Offizielle Dienste", "Standardmäßig keine; ausgehende Adressen sind änderbar und abschaltbar", "Online-Updates, Relay für Anmeldung über Drittanbieter und weitere offizielle Dienste"],
-      ["Anmeldung über Drittanbieter", "Eigene OAuth-Apps", "Über den offiziellen Relay-Dienst"],
-      ["Migration von Lucky", "Import von .lkcf / Zip der gesamten Site mit einem Klick", "—"],
-      ["Upgrades", "Docker / Paketmanager", "Eingebautes Online-Selbst-Update"],
-      ["Funktionsumfang", "Deckt die gängigen Kernfunktionen ab", "Größer, z. B. DLNA und Cloud-Laufwerk-Einbindung"]
+      [
+        "Quellcode",
+        "Open Source (Apache-2.0)",
+        "Closed Source"
+      ],
+      [
+        "Konfigurationsdatei",
+        "Einfaches JSON, Git-tauglich",
+        "Proprietäres Format (.lkcf)"
+      ],
+      [
+        "Offizielle Dienste",
+        "Standardmäßig keine; ausgehende Adressen sind änderbar und abschaltbar",
+        "Online-Updates, Relay für Anmeldung über Drittanbieter und weitere offizielle Dienste"
+      ],
+      [
+        "Anmeldung über Drittanbieter",
+        "Eigene OAuth-Apps",
+        "Über den offiziellen Relay-Dienst"
+      ],
+      [
+        "Migration von Lucky",
+        "Import von .lkcf / Zip der gesamten Site mit einem Klick",
+        "—"
+      ],
+      [
+        "Upgrades",
+        "Docker / Paketmanager",
+        "Eingebautes Online-Selbst-Update"
+      ],
+      [
+        "Funktionsumfang",
+        "Deckt die gängigen Kernfunktionen ab",
+        "Größer, z. B. DLNA und Cloud-Laufwerk-Einbindung"
+      ]
     ],
     "migrationGuide": "Migrationsanleitung lesen →",
     "faqTitle": "FAQ",
     "faqs": [
-      { "q": "In welchem Verhältnis steht Gately zu Lucky?", "a": "Gately ist eine eigenständige Open-Source-Implementierung ohne Verbindung zum Lucky-Projekt. Die Produktidee stammt von Lucky, wir danken dem Autor und der Community. Die Kompatibilität beruht auf öffentlich beobachtbarem Verhalten, Schnittstellen und Konfigurationsformaten; Code aus Lucky-Binärdateien oder Frontend-Artefakten wird nicht übernommen." },
-      { "q": "Kann ich meine bestehende Lucky-Konfiguration direkt übernehmen?", "a": "Ja. Wählen Sie unter Einstellungen → Sicherung & Migration eine .lkcf-Datei oder ein Zip der gesamten Site-Konfiguration, prüfen Sie die Vorschau und importieren Sie. Importierte Regeln sind standardmäßig deaktiviert, sodass Sie parallel zu Lucky arbeiten, Modul für Modul umschalten und jederzeit zurückwechseln können." },
-      { "q": "Muss Gately sich mit Ihren Servern verbinden?", "a": "Nein. Gately verbindet sich standardmäßig mit keinem Projektserver und übermittelt keine Daten." },
-      { "q": "Auf welchen Geräten läuft Gately?", "a": "Auf Heim-NAS, Soft-Routern, Cloud-Hosts und Servern aller Art. Es gibt Binärdateien für Linux (amd64 / arm64 / arm / mips / mipsle / riscv64), macOS, Windows und FreeBSD sowie Docker-Images für amd64 / arm64 / arm/v7." },
-      { "q": "Warum wird für Portweiterleitung und STUN das Host-Netzwerk empfohlen?", "a": "Diese Module lauschen direkt auf Ports des Hosts. Wenn Sie keine Docker-Verwaltung brauchen, können Sie die docker.sock-Einbindung weglassen." }
+      {
+        "q": "In welchem Verhältnis steht Gately zu Lucky?",
+        "a": "Gately ist eine eigenständige Open-Source-Implementierung ohne Verbindung zum Lucky-Projekt. Die Produktidee stammt von Lucky, wir danken dem Autor und der Community. Die Kompatibilität beruht auf öffentlich beobachtbarem Verhalten, Schnittstellen und Konfigurationsformaten; Code aus Lucky-Binärdateien oder Frontend-Artefakten wird nicht übernommen."
+      },
+      {
+        "q": "Kann ich meine bestehende Lucky-Konfiguration direkt übernehmen?",
+        "a": "Ja. Wählen Sie unter Einstellungen → Sicherung & Migration eine .lkcf-Datei oder ein Zip der gesamten Site-Konfiguration, prüfen Sie die Vorschau und importieren Sie. Importierte Regeln sind standardmäßig deaktiviert, sodass Sie parallel zu Lucky arbeiten, Modul für Modul umschalten und jederzeit zurückwechseln können."
+      },
+      {
+        "q": "Muss Gately sich mit Ihren Servern verbinden?",
+        "a": "Nein. Gately verbindet sich standardmäßig mit keinem Projektserver und übermittelt keine Daten."
+      },
+      {
+        "q": "Auf welchen Geräten läuft Gately?",
+        "a": "Auf Heim-NAS, Soft-Routern, Cloud-Hosts und Servern aller Art. Es gibt Binärdateien für Linux (amd64 / arm64 / arm / mips / mipsle / riscv64), macOS, Windows und FreeBSD sowie Docker-Images für amd64 / arm64 / arm/v7."
+      },
+      {
+        "q": "Warum wird für Portweiterleitung und STUN das Host-Netzwerk empfohlen?",
+        "a": "Diese Module lauschen direkt auf Ports des Hosts. Wenn Sie keine Docker-Verwaltung brauchen, können Sie die docker.sock-Einbindung weglassen."
+      }
     ],
     "moreFaq": "Weitere Fragen →",
     "finalTitle": "Holen Sie sich die Kontrolle über Ihren Netzwerkrand zurück",

@@ -1,0 +1,375 @@
+// Package i18n 为后端运行时文案提供多语言：源码中的中文字面量即键，译文放在 locales/<语言>.json。
+//
+// 翻译发生在输出边界（HTTP 错误与数据、日志、通知、API 文档），业务代码仍然产生中文原文，
+// 因此不需要改动调用点；带 %s / %d 的格式串按模板匹配，译文可用 %[n]s 调整参数顺序。
+package i18n
+
+import (
+	"embed"
+	"encoding/json"
+	"os"
+	"regexp"
+	"sort"
+	"strconv"
+	"strings"
+	"sync"
+)
+
+// SourceLang 是源码文案使用的语言，翻译为该语言时原样返回。
+const SourceLang = "zh-CN"
+
+// FallbackLang 是无法识别语言偏好时使用的语言。
+const FallbackLang = "en"
+
+// Langs 是支持的语言，顺序同官网与管理界面。
+var Langs = []string{"zh-CN", "en", "zh-TW", "ja", "ko", "es", "fr", "de", "ru", "pt-BR"}
+
+//go:embed locales/*.json
+var localeFS embed.FS
+
+var (
+	loadOnce sync.Once
+	catalogs map[string]*catalog
+)
+
+// Normalize 把任意语言标识（如 zh_CN.UTF-8、en-US、pt）规整为受支持的语言代码，无法识别时返回空串。
+func Normalize(tag string) string {
+	tag = strings.ToLower(strings.TrimSpace(tag))
+	if i := strings.IndexAny(tag, ".@"); i >= 0 {
+		tag = tag[:i]
+	}
+	tag = strings.ReplaceAll(tag, "_", "-")
+	switch {
+	case tag == "":
+		return ""
+	case tag == "c" || tag == "posix":
+		return ""
+	case strings.HasPrefix(tag, "zh-tw"), strings.HasPrefix(tag, "zh-hk"), strings.HasPrefix(tag, "zh-mo"), strings.HasPrefix(tag, "zh-hant"):
+		return "zh-TW"
+	case tag == "zh" || strings.HasPrefix(tag, "zh-"):
+		return "zh-CN"
+	case strings.HasPrefix(tag, "pt"):
+		return "pt-BR"
+	}
+	base := tag
+	if i := strings.Index(base, "-"); i >= 0 {
+		base = base[:i]
+	}
+	for _, l := range Langs {
+		if l == base {
+			return l
+		}
+	}
+	return ""
+}
+
+// FromAcceptLanguage 解析 Accept-Language 头，返回第一个受支持的语言；没有时返回空串。
+func FromAcceptLanguage(h string) string {
+	for _, part := range strings.Split(h, ",") {
+		tag, _, _ := strings.Cut(strings.TrimSpace(part), ";")
+		if l := Normalize(tag); l != "" {
+			return l
+		}
+	}
+	return ""
+}
+
+// FromEnv 按 GATELY_LANG、LC_ALL、LC_MESSAGES、LANG 的顺序读取系统语言，识别不了时返回 FallbackLang。
+func FromEnv() string {
+	for _, k := range []string{"GATELY_LANG", "LC_ALL", "LC_MESSAGES", "LANG"} {
+		if l := Normalize(os.Getenv(k)); l != "" {
+			return l
+		}
+	}
+	return FallbackLang
+}
+
+var (
+	serverMu   sync.RWMutex
+	serverLang = ""
+)
+
+// SetServerLang 设置服务端语言（日志、通知等无请求上下文的输出）；传入空串表示按系统环境自动选择。
+func SetServerLang(l string) {
+	serverMu.Lock()
+	serverLang = Normalize(l)
+	serverMu.Unlock()
+}
+
+// ServerLang 返回服务端语言。
+func ServerLang() string {
+	serverMu.RLock()
+	l := serverLang
+	serverMu.RUnlock()
+	if l != "" {
+		return l
+	}
+	return FromEnv()
+}
+
+type catalog struct {
+	exact map[string]string
+	tmpls []*tmpl
+	// segs 是可用于句中替换的固定片段（按长度降序），覆盖“前缀 + 动态内容”这类拼接出来的文案
+	segs []string
+	// cache 缓存已翻译结果，日志轮询会反复翻译同一批文案
+	cacheMu sync.Mutex
+	cache   map[string]string
+}
+
+type tmpl struct {
+	re   *regexp.Regexp
+	out  string
+	nlit int
+	// must 是模板中最长的固定片段，用于在跑正则前快速排除不相关的句子
+	must string
+}
+
+// verbRe 匹配格式动词；%% 先于动词被消费，因此“%% packet”不会被误判为动词。
+var verbRe = regexp.MustCompile(`%%|%(\[\d+\])?[-+# 0]*\d*(\.\d+)?[a-zA-Z]`)
+
+// realVerbs 返回字符串中的真实动词位置（排除 %%）。
+func realVerbs(k string) [][]int {
+	var out [][]int
+	for _, loc := range verbRe.FindAllStringIndex(k, -1) {
+		if k[loc[0]:loc[1]] != "%%" {
+			out = append(out, loc)
+		}
+	}
+	return out
+}
+
+func load() {
+	loadOnce.Do(func() {
+		catalogs = map[string]*catalog{}
+		for _, l := range Langs {
+			if l == SourceLang {
+				continue
+			}
+			raw, err := localeFS.ReadFile("locales/" + l + ".json")
+			if err != nil {
+				continue
+			}
+			var m map[string]string
+			if json.Unmarshal(raw, &m) != nil {
+				continue
+			}
+			catalogs[l] = buildCatalog(m)
+		}
+	})
+}
+
+func buildCatalog(m map[string]string) *catalog {
+	c := &catalog{exact: map[string]string{}}
+	for k, v := range m {
+		if v == "" {
+			continue
+		}
+		locs := realVerbs(k)
+		if len(locs) == 0 {
+			c.exact[k] = v
+			continue
+		}
+		var sb strings.Builder
+		nlit := 0
+		must := ""
+		prev := 0
+		for _, loc := range locs {
+			lit := strings.ReplaceAll(k[prev:loc[0]], "%%", "%")
+			nlit += len([]rune(lit))
+			if len(lit) > len(must) {
+				must = lit
+			}
+			sb.WriteString(regexp.QuoteMeta(lit))
+			verb := k[loc[1]-1]
+			switch {
+			case verb == 'd':
+				sb.WriteString(`(-?\d+)`)
+			case loc[1] == len(k):
+				// 以动词结尾时取到句末，常见于“失败: %w”这类包装错误
+				sb.WriteString(`(.+)`)
+			default:
+				sb.WriteString(`(.+?)`)
+			}
+			prev = loc[1]
+		}
+		tail := strings.ReplaceAll(k[prev:], "%%", "%")
+		nlit += len([]rune(tail))
+		if len(tail) > len(must) {
+			must = tail
+		}
+		sb.WriteString(regexp.QuoteMeta(tail))
+		re, err := regexp.Compile("(?s)" + sb.String())
+		if err != nil {
+			continue
+		}
+		c.tmpls = append(c.tmpls, &tmpl{re: re, out: v, nlit: nlit, must: must})
+		// 模板同时保留一份精确匹配，避免格式串本身被当作普通文本时漏翻
+		c.exact[k] = v
+	}
+	for k := range c.exact {
+		if segmentOK(k) && len(realVerbs(k)) == 0 {
+			c.segs = append(c.segs, k)
+		}
+	}
+	sort.Slice(c.segs, func(i, j int) bool { return len(c.segs[i]) > len(c.segs[j]) })
+	c.cache = map[string]string{}
+	// 字面量更长的模板优先，避免短模板抢先匹配
+	sort.Slice(c.tmpls, func(i, j int) bool { return c.tmpls[i].nlit > c.tmpls[j].nlit })
+	return c
+}
+
+// fill 把捕获的参数代入译文模板，支持 %% 与 %[n]x 形式的显式序号。
+func (t *tmpl) fill(lang string, args []string) string {
+	var sb strings.Builder
+	out := t.out
+	next := 0
+	prev := 0
+	for _, loc := range verbRe.FindAllStringIndex(out, -1) {
+		sb.WriteString(out[prev:loc[0]])
+		prev = loc[1]
+		spec := out[loc[0]:loc[1]]
+		if spec == "%%" {
+			sb.WriteByte('%')
+			continue
+		}
+		idx := next
+		if strings.HasPrefix(spec, "%[") {
+			if n, err := strconv.Atoi(spec[2:strings.Index(spec, "]")]); err == nil {
+				idx = n - 1
+			}
+		} else {
+			next++
+		}
+		if idx >= 0 && idx < len(args) {
+			sb.WriteString(args[idx])
+		}
+	}
+	sb.WriteString(out[prev:])
+	return sb.String()
+}
+
+// Tr 把中文原文翻译为目标语言；找不到译文时原样返回。
+func Tr(lang, s string) string {
+	if lang == "" || lang == SourceLang || s == "" || !hasHan(s) {
+		return s
+	}
+	load()
+	c := catalogs[lang]
+	if c == nil {
+		return s
+	}
+	return c.translate(lang, s, 0)
+}
+
+func hasHan(s string) bool {
+	for _, r := range s {
+		if r >= 0x4e00 && r <= 0x9fff {
+			return true
+		}
+	}
+	return false
+}
+
+// segmentOK 判断固定片段能否用于句中替换：太短的词（如“删除”）容易误伤，除非以冒号结尾（拼接前缀）。
+func segmentOK(k string) bool {
+	if len([]rune(k)) >= 4 {
+		return true
+	}
+	t := strings.TrimRight(k, " ")
+	return strings.HasSuffix(t, ":") || strings.HasSuffix(t, "：")
+}
+
+func (c *catalog) translate(lang, s string, depth int) string {
+	if v, ok := c.exact[s]; ok {
+		return v
+	}
+	if depth == 0 {
+		c.cacheMu.Lock()
+		v, ok := c.cache[s]
+		c.cacheMu.Unlock()
+		if ok {
+			return v
+		}
+		out := c.translateSlow(lang, s, depth)
+		c.cacheMu.Lock()
+		if len(c.cache) >= 8192 {
+			c.cache = map[string]string{}
+		}
+		c.cache[s] = out
+		c.cacheMu.Unlock()
+		return out
+	}
+	return c.translateSlow(lang, s, depth)
+}
+
+func (c *catalog) translateSlow(lang, s string, depth int) string {
+	if v, ok := c.exact[s]; ok {
+		return v
+	}
+	if depth > 4 {
+		return s
+	}
+	// 先尝试整句匹配，再对句中出现的已知模板逐段替换（如“加载失败: <内层错误>”）
+	for _, t := range c.tmpls {
+		if t.must != "" && !strings.Contains(s, t.must) {
+			continue
+		}
+		if m := t.re.FindStringSubmatchIndex(s); m != nil && m[0] == 0 && m[1] == len(s) {
+			return t.fill(lang, c.capture(lang, s, m, depth))
+		}
+	}
+	out := s
+	for _, t := range c.tmpls {
+		if !hasHan(out) {
+			break
+		}
+		if t.must != "" && !strings.Contains(out, t.must) {
+			continue
+		}
+		cur := out
+		out = replaceAllIndex(t, cur, func(m []int) string {
+			return t.fill(lang, c.capture(lang, cur, m, depth))
+		})
+	}
+	// 最后替换拼接出来的固定前缀/片段
+	for _, k := range c.segs {
+		if !hasHan(out) {
+			break
+		}
+		if strings.Contains(out, k) {
+			out = strings.ReplaceAll(out, k, c.exact[k])
+		}
+	}
+	return out
+}
+
+func (c *catalog) capture(lang, s string, m []int, depth int) []string {
+	var args []string
+	for i := 2; i+1 < len(m); i += 2 {
+		part := s[m[i]:m[i+1]]
+		args = append(args, c.translate(lang, part, depth+1))
+	}
+	return args
+}
+
+func replaceAllIndex(t *tmpl, s string, repl func(m []int) string) string {
+	var sb strings.Builder
+	last := 0
+	for _, m := range t.re.FindAllStringSubmatchIndex(s, -1) {
+		sb.WriteString(s[last:m[0]])
+		sb.WriteString(repl(m))
+		last = m[1]
+	}
+	sb.WriteString(s[last:])
+	return sb.String()
+}
+
+// Verbs 返回格式串中的动词序列（不含 %%），供校验译文与原文参数一致。
+func Verbs(s string) []string {
+	var out []string
+	for _, loc := range realVerbs(s) {
+		out = append(out, s[loc[0]:loc[1]])
+	}
+	return out
+}

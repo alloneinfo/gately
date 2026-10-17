@@ -76,7 +76,7 @@ docker logs gately 2>&1 | grep -i "initial password"
 curl -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns/tasks
 ```
 
-帳號、兩步驟驗證、權杖管理以及備份、還原、重啟、系統設定介面只能使用登入工作階段。全部介面、所需權限與資料結構見管理後台「API 文件」頁，也可以用 `make api-docs` 匯出到 [docs/api](docs/api)（`openapi.json` 與 `API.md`），官網 https://gately.cn 發布時直接引用。
+帳號、兩步驟驗證、權杖管理以及備份、還原、重啟、系統設定介面只能使用登入工作階段。全部介面、所需權限與資料結構見管理後台「API 文件」頁，也可以用 `make api-docs` 匯出到 [docs/api](docs/api/zh-TW)（`openapi.json` 與 `API.md`），官網 https://gately.cn 發布時直接引用。
 
 從舊版升級時，原本的全域 API 權杖會自動變成一筆「舊版權杖」（值不變，擁有全部模組權限），建議在 API 權杖頁收緊權限或換成新權杖。
 

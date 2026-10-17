@@ -1,0 +1,1235 @@
+# API d'administration de Gately
+
+L'API d'administration de Gately permet la gestion en masse par scripts et automatisation.
+
+Authentification : créez un jeton dans la page « Jetons API » de l'interface d'administration et ajoutez l'en-tête de requête `Authorization: Bearer gtl_xxxx`.
+
+Permissions : chaque jeton ne possède que les permissions cochées à sa création, au format `<module>:read` ou `<module>:write` ; l'écriture inclut la lecture. Les interfaces de compte, d'authentification à deux facteurs, de gestion des jetons, de sauvegarde, de restauration, de redémarrage et de paramètres système exigent une session connectée.
+
+Le corps de la requête utilise `Content-Type: application/json` ; les erreurs sont renvoyées au format `{"error": "description"}`.
+
+Site officiel : https://gately.cn
+
+Une description lisible par machine se trouve dans `openapi.json` (OpenAPI 3.0) du même répertoire.
+
+## Démarrage rapide
+
+```bash
+# Consulter l'état du système (nécessite status:read)
+curl -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/status
+
+# Lister toutes les tâches DDNS (nécessite ddns:read)
+curl -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns/tasks
+
+# Synchroniser immédiatement une tâche DDNS (nécessite ddns:write, la clé provient de la liste renvoyée à l'étape précédente)
+curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns/tasks/<key>/sync
+```
+
+## Permissions
+
+| Domaine de permission | Nom | Permissions disponibles |
+| --- | --- | --- |
+| `portforward` | Redirection de ports | `portforward:read`、`portforward:write` |
+| `ddns` | DNS dynamique | `ddns:read`、`ddns:write` |
+| `stun` | Traversée STUN | `stun:read`、`stun:write` |
+| `tailscale` | Réseau Tailscale | `tailscale:read`、`tailscale:write` |
+| `frp` | Traversée de réseau frp | `frp:read`、`frp:write` |
+| `cloudflared` | Tunnel Cloudflare | `cloudflared:read`、`cloudflared:write` |
+| `ssl` | Certificat SSL | `ssl:read`、`ssl:write` |
+| `waf` | Pare-feu WAF | `waf:read`、`waf:write` |
+| `webservice` | Service Web | `webservice:read`、`webservice:write` |
+| `wol` | Wake-on-LAN | `wol:read`、`wol:write` |
+| `webterminal` | Terminal Web | `webterminal:read`、`webterminal:write` |
+| `cron` | Tâche planifiée | `cron:read`、`cron:write` |
+| `docker` | Gestion Docker | `docker:read`、`docker:write` |
+| `webdav` | WebDAV | `webdav:read`、`webdav:write` |
+| `ftp` | Service FTP | `ftp:read`、`ftp:write` |
+| `storage` | Gestion du stockage | `storage:read`、`storage:write` |
+| `notify` | Centre de notifications | `notify:read`、`notify:write` |
+| `nettools` | Diagnostic réseau | `nettools:read`、`nettools:write` |
+| `backup` | Sauvegarde de configuration | `backup:read`、`backup:write` |
+| `status` | État du système | `status:read` |
+| `logs` | Journaux système | `logs:read` |
+| `import` | Import de configuration Lucky | `import:write` |
+
+Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `*:write` ou `*` la lecture et l'écriture sur tous les modules.
+
+## Redirection de ports
+
+| Méthode | Chemin | Permission requise | Description |
+| --- | --- | --- | --- |
+| GET | `/api/portforward/logs` | `portforward:read` | Consulter les journaux d'exécution d'un module |
+| DELETE | `/api/portforward/logs` | `portforward:write` | Vider les journaux d'exécution d'un module |
+| GET | `/api/portforward/rules` | `portforward:read` | Lister Règle de redirection de ports |
+| POST | `/api/portforward/rules` | `portforward:write` | Ajouter Règle de redirection de ports |
+| PUT | `/api/portforward/rules/{key}` | `portforward:write` | Modifier Règle de redirection de ports |
+| DELETE | `/api/portforward/rules/{key}` | `portforward:write` | Supprimer Règle de redirection de ports |
+| PUT | `/api/portforward/rules/{key}/enable` | `portforward:write` | Activer ou désactiver Règle de redirection de ports |
+| PUT | `/api/portforward/rules-order` | `portforward:write` | Réordonner Règle de redirection de ports |
+| GET | `/api/portforward/settings` | `portforward:read` | Lire les paramètres globaux de redirection de ports |
+| PUT | `/api/portforward/settings` | `portforward:write` | Enregistrer les paramètres globaux de redirection de ports |
+
+## DNS dynamique
+
+| Méthode | Chemin | Permission requise | Description |
+| --- | --- | --- | --- |
+| GET | `/api/ddns/logs` | `ddns:read` | Consulter les journaux d'exécution d'un module |
+| DELETE | `/api/ddns/logs` | `ddns:write` | Vider les journaux d'exécution d'un module |
+| GET | `/api/ddns/tasks` | `ddns:read` | Lister Tâche DDNS |
+| POST | `/api/ddns/tasks` | `ddns:write` | Ajouter Tâche DDNS |
+| PUT | `/api/ddns/tasks/{key}` | `ddns:write` | Modifier Tâche DDNS |
+| DELETE | `/api/ddns/tasks/{key}` | `ddns:write` | Supprimer Tâche DDNS |
+| PUT | `/api/ddns/tasks/{key}/enable` | `ddns:write` | Activer ou désactiver Tâche DDNS |
+| PUT | `/api/ddns/tasks-order` | `ddns:write` | Réordonner Tâche DDNS |
+| POST | `/api/ddns/tasks/{key}/sync` | `ddns:write` | Synchroniser immédiatement une tâche DDNS |
+| GET | `/api/ddns/providers` | `ddns:read` | Lister les fournisseurs DNS pris en charge et leurs paramètres requis |
+| GET | `/api/ddns/netinterfaces` | `ddns:read` | Lister les cartes réseau de cette machine et leurs adresses |
+| POST | `/api/ddns/iptest` | `ddns:write` | Tester l'obtention de l'IP publique |
+| GET | `/api/ddns/defaults` | `ddns:read` | Lire les valeurs par défaut DDNS |
+| GET | `/api/ddns/settings` | `ddns:read` | Lire les paramètres globaux DDNS |
+| PUT | `/api/ddns/settings` | `ddns:write` | Enregistrer les paramètres globaux DDNS |
+
+## Traversée STUN
+
+| Méthode | Chemin | Permission requise | Description |
+| --- | --- | --- | --- |
+| GET | `/api/stun/logs` | `stun:read` | Consulter les journaux d'exécution d'un module |
+| DELETE | `/api/stun/logs` | `stun:write` | Vider les journaux d'exécution d'un module |
+| GET | `/api/stun/rules` | `stun:read` | Lister Règle STUN |
+| POST | `/api/stun/rules` | `stun:write` | Ajouter Règle STUN |
+| PUT | `/api/stun/rules/{key}` | `stun:write` | Modifier Règle STUN |
+| DELETE | `/api/stun/rules/{key}` | `stun:write` | Supprimer Règle STUN |
+| PUT | `/api/stun/rules/{key}/enable` | `stun:write` | Activer ou désactiver Règle STUN |
+| PUT | `/api/stun/rules-order` | `stun:write` | Réordonner Règle STUN |
+| POST | `/api/stun/rules/{key}/restart` | `stun:write` | Redémarrer une règle STUN |
+| GET | `/api/stun/netinterfaces` | `stun:read` | Lister les cartes réseau de cette machine et leurs adresses |
+| GET | `/api/stun/settings` | `stun:read` | Lire les paramètres globaux STUN |
+| PUT | `/api/stun/settings` | `stun:write` | Enregistrer les paramètres globaux STUN |
+
+## Réseau Tailscale
+
+| Méthode | Chemin | Permission requise | Description |
+| --- | --- | --- | --- |
+| GET | `/api/tailscale/logs` | `tailscale:read` | Consulter les journaux d'exécution d'un module |
+| DELETE | `/api/tailscale/logs` | `tailscale:write` | Vider les journaux d'exécution d'un module |
+| GET | `/api/tailscale/settings` | `tailscale:read` | Lire les paramètres Tailscale |
+| PUT | `/api/tailscale/settings` | `tailscale:write` | Enregistrer les paramètres Tailscale |
+| GET | `/api/tailscale/status` | `tailscale:read` | Consulter l'état de connexion Tailscale |
+| POST | `/api/tailscale/restart` | `tailscale:write` | Redémarrer Tailscale |
+| POST | `/api/tailscale/logout` | `tailscale:write` | Se déconnecter de Tailscale |
+
+## Traversée de réseau frp
+
+| Méthode | Chemin | Permission requise | Description |
+| --- | --- | --- | --- |
+| GET | `/api/frp/logs` | `frp:read` | Consulter les journaux d'exécution d'un module |
+| DELETE | `/api/frp/logs` | `frp:write` | Vider les journaux d'exécution d'un module |
+| GET | `/api/frp/proxies` | `frp:read` | Lister Entrée |
+| POST | `/api/frp/proxies` | `frp:write` | Ajouter Entrée |
+| PUT | `/api/frp/proxies/{key}` | `frp:write` | Modifier Entrée |
+| DELETE | `/api/frp/proxies/{key}` | `frp:write` | Supprimer Entrée |
+| PUT | `/api/frp/proxies/{key}/enable` | `frp:write` | Activer ou désactiver Entrée |
+| PUT | `/api/frp/proxies-order` | `frp:write` | Réordonner Entrée |
+| POST | `/api/frp/import` | `frp:write` | Importer une configuration frpc / frps existante (anciens ini et nouveaux toml pris en charge) ; aperçu uniquement si apply vaut false |
+| GET | `/api/frp/client` | `frp:read` | Lire la configuration du client frp |
+| PUT | `/api/frp/client` | `frp:write` | Enregistrer la configuration du client frp |
+| GET | `/api/frp/server` | `frp:read` | Lire la configuration du serveur frp |
+| PUT | `/api/frp/server` | `frp:write` | Enregistrer la configuration du serveur frp |
+
+## Tunnel Cloudflare
+
+| Méthode | Chemin | Permission requise | Description |
+| --- | --- | --- | --- |
+| GET | `/api/cloudflared/logs` | `cloudflared:read` | Consulter les journaux d'exécution d'un module |
+| DELETE | `/api/cloudflared/logs` | `cloudflared:write` | Vider les journaux d'exécution d'un module |
+| GET | `/api/cloudflared/tunnels` | `cloudflared:read` | Lister Tunnel Cloudflare |
+| POST | `/api/cloudflared/tunnels` | `cloudflared:write` | Ajouter Tunnel Cloudflare |
+| PUT | `/api/cloudflared/tunnels/{key}` | `cloudflared:write` | Modifier Tunnel Cloudflare |
+| DELETE | `/api/cloudflared/tunnels/{key}` | `cloudflared:write` | Supprimer Tunnel Cloudflare |
+| PUT | `/api/cloudflared/tunnels/{key}/enable` | `cloudflared:write` | Activer ou désactiver Tunnel Cloudflare |
+| PUT | `/api/cloudflared/tunnels-order` | `cloudflared:write` | Réordonner Tunnel Cloudflare |
+| POST | `/api/cloudflared/tunnels/{key}/restart` | `cloudflared:write` | Redémarrer un tunnel Cloudflare |
+| GET | `/api/cloudflared/settings` | `cloudflared:read` | Lire les paramètres du tunnel Cloudflare |
+| PUT | `/api/cloudflared/settings` | `cloudflared:write` | Enregistrer les paramètres du tunnel Cloudflare |
+
+## Certificat SSL
+
+| Méthode | Chemin | Permission requise | Description |
+| --- | --- | --- | --- |
+| GET | `/api/ssl/logs` | `ssl:read` | Consulter les journaux d'exécution d'un module |
+| DELETE | `/api/ssl/logs` | `ssl:write` | Vider les journaux d'exécution d'un module |
+| GET | `/api/ssl/certs` | `ssl:read` | Lister Certificat |
+| POST | `/api/ssl/certs` | `ssl:write` | Ajouter Certificat |
+| PUT | `/api/ssl/certs/{key}` | `ssl:write` | Modifier Certificat |
+| DELETE | `/api/ssl/certs/{key}` | `ssl:write` | Supprimer Certificat |
+| PUT | `/api/ssl/certs/{key}/enable` | `ssl:write` | Activer ou désactiver Certificat |
+| PUT | `/api/ssl/certs-order` | `ssl:write` | Réordonner Certificat |
+| POST | `/api/ssl/certs/{key}/renew` | `ssl:write` | Émettre ou renouveler un certificat immédiatement |
+| GET | `/api/ssl/certs/{key}/download` | `ssl:write` | Télécharger le certificat et la clé privée |
+| GET | `/api/ssl/providers` | `ssl:read` | Lister les fournisseurs de validation DNS pris en charge |
+| GET | `/api/ssl/settings` | `ssl:read` | Lire les paramètres globaux des certificats |
+| PUT | `/api/ssl/settings` | `ssl:write` | Enregistrer les paramètres globaux des certificats |
+
+## Pare-feu WAF
+
+| Méthode | Chemin | Permission requise | Description |
+| --- | --- | --- | --- |
+| GET | `/api/waf/logs` | `waf:read` | Consulter les journaux d'exécution d'un module |
+| DELETE | `/api/waf/logs` | `waf:write` | Vider les journaux d'exécution d'un module |
+| GET | `/api/waf/instances` | `waf:read` | Lister Instance WAF |
+| POST | `/api/waf/instances` | `waf:write` | Ajouter Instance WAF |
+| PUT | `/api/waf/instances/{key}` | `waf:write` | Modifier Instance WAF |
+| DELETE | `/api/waf/instances/{key}` | `waf:write` | Supprimer Instance WAF |
+| PUT | `/api/waf/instances/{key}/enable` | `waf:write` | Activer ou désactiver Instance WAF |
+| PUT | `/api/waf/instances-order` | `waf:write` | Réordonner Instance WAF |
+| GET | `/api/waf/crs` | `waf:read` | Lister les fichiers de règles OWASP CRS |
+| GET | `/api/waf/crs/{file}` | `waf:read` | Lire un fichier de règles CRS |
+
+## Service Web
+
+| Méthode | Chemin | Permission requise | Description |
+| --- | --- | --- | --- |
+| GET | `/api/webservice/logs` | `webservice:read` | Consulter les journaux d'exécution d'un module |
+| DELETE | `/api/webservice/logs` | `webservice:write` | Vider les journaux d'exécution d'un module |
+| GET | `/api/webservice/listeners` | `webservice:read` | Lister Écoute du service Web |
+| POST | `/api/webservice/listeners` | `webservice:write` | Ajouter Écoute du service Web |
+| PUT | `/api/webservice/listeners/{key}` | `webservice:write` | Modifier Écoute du service Web |
+| DELETE | `/api/webservice/listeners/{key}` | `webservice:write` | Supprimer Écoute du service Web |
+| PUT | `/api/webservice/listeners/{key}/enable` | `webservice:write` | Activer ou désactiver Écoute du service Web |
+| PUT | `/api/webservice/listeners-order` | `webservice:write` | Réordonner Écoute du service Web |
+| GET | `/api/webservice/settings` | `webservice:read` | Lire les paramètres globaux du service Web |
+| PUT | `/api/webservice/settings` | `webservice:write` | Enregistrer les paramètres globaux du service Web |
+| GET | `/api/webservice/stats` | `webservice:read` | Statistiques par minute du site (?listener=&site=&minutes=) |
+| GET | `/api/webservice/metrics` | `webservice:read` | Métriques au format texte Prometheus |
+| GET | `/api/webservice/bans` | `webservice:read` | IP actuellement bannies |
+| POST | `/api/webservice/bans` | `webservice:write` | Bannir une IP manuellement |
+| DELETE | `/api/webservice/bans` | `webservice:write` | Lever un bannissement (le body est {"key": adresse}) |
+| GET | `/api/webservice/geoip` | `webservice:read` | État de la base GeoIP |
+| POST | `/api/webservice/geoip/upload` | `webservice:write` | Téléverser la base GeoIP (champ multipart file, .mmdb) |
+| POST | `/api/webservice/geoip/download` | `webservice:write` | Télécharger la base GeoIP (.mmdb) depuis une adresse |
+| DELETE | `/api/webservice/geoip` | `webservice:write` | Supprimer la base GeoIP |
+
+## Wake-on-LAN
+
+| Méthode | Chemin | Permission requise | Description |
+| --- | --- | --- | --- |
+| GET | `/api/wol/logs` | `wol:read` | Consulter les journaux d'exécution d'un module |
+| DELETE | `/api/wol/logs` | `wol:write` | Vider les journaux d'exécution d'un module |
+| GET | `/api/wol/devices` | `wol:read` | Lister Réveiller l'appareil |
+| POST | `/api/wol/devices` | `wol:write` | Ajouter Réveiller l'appareil |
+| PUT | `/api/wol/devices/{key}` | `wol:write` | Modifier Réveiller l'appareil |
+| DELETE | `/api/wol/devices/{key}` | `wol:write` | Supprimer Réveiller l'appareil |
+| PUT | `/api/wol/devices/{key}/enable` | `wol:write` | Activer ou désactiver Réveiller l'appareil |
+| PUT | `/api/wol/devices-order` | `wol:write` | Réordonner Réveiller l'appareil |
+| POST | `/api/wol/devices/{key}/wake` | `wol:write` | Envoyer un paquet magique de réveil à l'appareil |
+| GET | `/api/wol/status` | `wol:read` | Consulter l'état en ligne des appareils |
+
+## Terminal Web
+
+| Méthode | Chemin | Permission requise | Description |
+| --- | --- | --- | --- |
+| GET | `/api/webterminal/logs` | `webterminal:read` | Consulter les journaux d'exécution d'un module |
+| DELETE | `/api/webterminal/logs` | `webterminal:write` | Vider les journaux d'exécution d'un module |
+| GET | `/api/webterminal/connections` | `webterminal:read` | Lister Connexion de terminal |
+| POST | `/api/webterminal/connections` | `webterminal:write` | Ajouter Connexion de terminal |
+| PUT | `/api/webterminal/connections/{key}` | `webterminal:write` | Modifier Connexion de terminal |
+| DELETE | `/api/webterminal/connections/{key}` | `webterminal:write` | Supprimer Connexion de terminal |
+| PUT | `/api/webterminal/connections/{key}/enable` | `webterminal:write` | Activer ou désactiver Connexion de terminal |
+| PUT | `/api/webterminal/connections-order` | `webterminal:write` | Réordonner Connexion de terminal |
+| DELETE | `/api/webterminal/connections/{key}/hostkey` | `webterminal:write` | Effacer la clé d'hôte enregistrée |
+| POST | `/api/webterminal/connections/{key}/test` | `webterminal:write` | Tester une connexion enregistrée |
+| POST | `/api/webterminal/connections/test` | `webterminal:write` | Tester des paramètres de connexion temporaires |
+| PUT | `/api/webterminal/connections/{key}/quickaccess` | `webterminal:write` | Accès rapide pour définir la connexion |
+| GET | `/api/webterminal/connections/{key}/ws` | `webterminal:write` | Ouvrir une session de terminal (WebSocket) |
+| GET | `/api/webterminal/sessions/{id}/ws` | `webterminal:write` | Se rattacher à une session de terminal existante (WebSocket) |
+| GET | `/api/webterminal/sessions` | `webterminal:read` | Lister les sessions de terminal |
+| GET | `/api/webterminal/sessions/{id}` | `webterminal:read` | Consulter les détails d'une session de terminal |
+| PUT | `/api/webterminal/sessions/{id}/remark` | `webterminal:write` | Modifier la note d'une session de terminal |
+| GET | `/api/webterminal/sessions/{id}/stats` | `webterminal:read` | Consulter les statistiques des sessions de terminal |
+| DELETE | `/api/webterminal/sessions/{id}` | `webterminal:write` | Fermer la session de terminal |
+| GET | `/api/webterminal/security` | Session connectée uniquement | Consulter l'état des paramètres de sécurité du terminal |
+| POST | `/api/webterminal/security/agreement` | Session connectée uniquement | Accepter le contrat d'utilisation du terminal |
+| POST | `/api/webterminal/security/2fa/setup` | Session connectée uniquement | Générer une clé d'authentification à deux facteurs du terminal |
+| POST | `/api/webterminal/security/2fa/enable` | Session connectée uniquement | Activer l'authentification à deux facteurs du terminal |
+| POST | `/api/webterminal/security/2fa/disable` | Session connectée uniquement | Désactiver l'authentification à deux facteurs du terminal |
+| POST | `/api/webterminal/security/verify2fa` | Session connectée uniquement | Vérifier le code d'authentification à deux facteurs du terminal |
+| GET | `/api/webterminal/security/check2fa` | Session connectée uniquement | Vérifier si l'authentification à deux facteurs du terminal est validée |
+| GET | `/api/webterminal/sftp/{key}/list` | `webterminal:read` | Lister le répertoire distant |
+| GET | `/api/webterminal/sftp/{key}/read` | `webterminal:write` | Lire un fichier distant |
+| POST | `/api/webterminal/sftp/{key}/write` | `webterminal:write` | Écrire un fichier distant |
+| POST | `/api/webterminal/sftp/{key}/upload` | `webterminal:write` | Téléverser un fichier vers l'hôte distant |
+| POST | `/api/webterminal/sftp/{key}/mkdir` | `webterminal:write` | Créer un répertoire distant |
+| POST | `/api/webterminal/sftp/{key}/touch` | `webterminal:write` | Créer un fichier vide distant |
+| POST | `/api/webterminal/sftp/{key}/rename` | `webterminal:write` | Renommer ou déplacer un fichier distant |
+| POST | `/api/webterminal/sftp/{key}/copy` | `webterminal:write` | Copier un fichier distant |
+| POST | `/api/webterminal/sftp/{key}/chmod` | `webterminal:write` | Modifier les permissions d'un fichier distant |
+| DELETE | `/api/webterminal/sftp/{key}/remove` | `webterminal:write` | Supprimer un fichier distant |
+| POST | `/api/webterminal/sftp/{key}/compress` | `webterminal:write` | Compresser des fichiers sur l'hôte distant |
+| POST | `/api/webterminal/sftp/{key}/decompress` | `webterminal:write` | Décompresser des fichiers sur l'hôte distant |
+| GET | `/api/webterminal/sftp/{key}/preview-archive` | `webterminal:write` | Prévisualiser le contenu d'une archive distante |
+| GET | `/api/webterminal/settings` | `webterminal:read` | Lire les paramètres du terminal Web |
+| PUT | `/api/webterminal/settings` | `webterminal:write` | Enregistrer les paramètres du terminal Web |
+| GET | `/api/webterminal/shells` | `webterminal:read` | Lister les shells disponibles sur cette machine |
+| GET | `/api/webterminal/globalshortcuts` | `webterminal:read` | Lire les commandes rapides globales |
+| PUT | `/api/webterminal/globalshortcuts` | `webterminal:write` | Enregistrer les commandes rapides globales |
+| GET | `/api/webterminal/splitlayout` | `webterminal:read` | Lire la disposition en écran partagé |
+| PUT | `/api/webterminal/splitlayout` | `webterminal:write` | Enregistrer la disposition en écran partagé |
+| DELETE | `/api/webterminal/splitlayout` | `webterminal:write` | Effacer la disposition en écran partagé |
+
+## Tâche planifiée
+
+| Méthode | Chemin | Permission requise | Description |
+| --- | --- | --- | --- |
+| GET | `/api/cron/logs` | `cron:read` | Consulter les journaux d'exécution d'un module |
+| DELETE | `/api/cron/logs` | `cron:write` | Vider les journaux d'exécution d'un module |
+| GET | `/api/cron/tasks` | `cron:read` | Lister Tâche planifiée |
+| POST | `/api/cron/tasks` | `cron:write` | Ajouter Tâche planifiée |
+| PUT | `/api/cron/tasks/{key}` | `cron:write` | Modifier Tâche planifiée |
+| DELETE | `/api/cron/tasks/{key}` | `cron:write` | Supprimer Tâche planifiée |
+| PUT | `/api/cron/tasks/{key}/enable` | `cron:write` | Activer ou désactiver Tâche planifiée |
+| PUT | `/api/cron/tasks-order` | `cron:write` | Réordonner Tâche planifiée |
+| POST | `/api/cron/tasks/{key}/run` | `cron:write` | Exécuter immédiatement une tâche planifiée |
+| POST | `/api/cron/parse` | `cron:write` | Analyser et prévisualiser une expression Cron |
+
+## Gestion Docker
+
+| Méthode | Chemin | Permission requise | Description |
+| --- | --- | --- | --- |
+| GET | `/api/docker/logs` | `docker:read` | Consulter les journaux d'exécution d'un module |
+| DELETE | `/api/docker/logs` | `docker:write` | Vider les journaux d'exécution d'un module |
+| GET | `/api/docker/tasks` | `docker:read` | Lister les tâches d'arrière-plan |
+| GET | `/api/docker/tasks/{id}` | `docker:read` | Consulter la progression et la sortie d'une tâche d'arrière-plan |
+| DELETE | `/api/docker/tasks` | `docker:write` | Nettoyer les tâches d'arrière-plan terminées |
+| GET | `/api/docker/images` | `docker:read` | Lister les images |
+| POST | `/api/docker/images/pull` | `docker:write` | Télécharger une image |
+| POST | `/api/docker/images/push` | `docker:write` | Pousser une image |
+| POST | `/api/docker/images/search` | `docker:write` | Rechercher des images |
+| POST | `/api/docker/images/load` | `docker:write` | Importer un fichier d'image |
+| POST | `/api/docker/images/build` | `docker:write` | Construire une image |
+| GET | `/api/docker/images/{id}` | `docker:read` | Consulter les détails d'une image |
+| POST | `/api/docker/images/{id}/tag` | `docker:write` | Étiqueter l'image |
+| DELETE | `/api/docker/images/{id}` | `docker:write` | Supprimer une image |
+| GET | `/api/docker/images/{id}/export` | `docker:write` | Exporter une image |
+| GET | `/api/docker/networks` | `docker:read` | Lister les réseaux |
+| POST | `/api/docker/networks` | `docker:write` | Créer un réseau |
+| DELETE | `/api/docker/networks/{id}` | `docker:write` | Supprimer un réseau |
+| POST | `/api/docker/networks/{id}/connect` | `docker:write` | Connecter le conteneur à un réseau |
+| POST | `/api/docker/networks/{id}/disconnect` | `docker:write` | Déconnecter le conteneur d'un réseau |
+| GET | `/api/docker/volumes` | `docker:read` | Lister les volumes |
+| POST | `/api/docker/volumes` | `docker:write` | Créer un volume |
+| DELETE | `/api/docker/volumes/{name}` | `docker:write` | Supprimer un volume |
+| GET | `/api/docker/volumes/{name}/export` | `docker:write` | Exporter un volume |
+| POST | `/api/docker/volumes/{name}/import` | `docker:write` | Importer des données dans un volume |
+| GET | `/api/docker/compose/projects` | `docker:read` | Lister les projets Compose |
+| POST | `/api/docker/compose/projects` | `docker:write` | Créer un projet Compose |
+| POST | `/api/docker/compose/{project}/up` | `docker:write` | Démarrer un projet Compose |
+| POST | `/api/docker/compose/{project}/pull` | `docker:write` | Télécharger les images d'un projet Compose |
+| POST | `/api/docker/compose/{project}/{action}` | `docker:write` | Exécuter une action sur un projet Compose |
+| GET | `/api/docker/compose/{project}/config` | `docker:write` | Lire le fichier de configuration Compose |
+| PUT | `/api/docker/compose/{project}/config` | `docker:write` | Enregistrer le fichier de configuration Compose |
+| GET | `/api/docker/compose/{project}/logs` | `docker:read` | Consulter les journaux d'un projet Compose |
+| DELETE | `/api/docker/compose/{project}` | `docker:write` | Supprimer un projet Compose |
+| GET | `/api/docker/info` | `docker:read` | Consulter les informations du moteur Docker |
+| GET | `/api/docker/disk-usage` | `docker:read` | Consulter l'espace disque utilisé par Docker |
+| POST | `/api/docker/prune` | `docker:write` | Nettoyer les ressources Docker inutiles |
+| GET | `/api/docker/settings` | `docker:read` | Lire les paramètres du module Docker |
+| PUT | `/api/docker/settings` | `docker:write` | Enregistrer les paramètres du module Docker |
+| GET | `/api/docker/containers` | `docker:read` | Lister les conteneurs |
+| POST | `/api/docker/containers` | `docker:write` | Créer un conteneur |
+| POST | `/api/docker/containers/check-all` | `docker:write` | Vérifier les mises à jour de toutes les images de conteneurs |
+| POST | `/api/docker/containers/upgrade-batch` | `docker:write` | Mettre à niveau des conteneurs en masse |
+| POST | `/api/docker/images/upgrade-check` | `docker:write` | Vérifier si une image a une nouvelle version |
+| GET | `/api/docker/containers/{id}` | `docker:read` | Consulter les détails d'un conteneur |
+| DELETE | `/api/docker/containers/{id}` | `docker:write` | Supprimer un conteneur |
+| POST | `/api/docker/containers/{id}/edit` | `docker:write` | Modifier la configuration du conteneur et le recréer |
+| POST | `/api/docker/containers/{id}/rename` | `docker:write` | Renommer un conteneur |
+| POST | `/api/docker/containers/{id}/commit` | `docker:write` | Valider le conteneur comme image |
+| POST | `/api/docker/containers/{id}/check` | `docker:write` | Vérifier si l'image d'un conteneur a une mise à jour |
+| POST | `/api/docker/containers/{id}/upgrade` | `docker:write` | Mettre à niveau l'image du conteneur et le recréer |
+| POST | `/api/docker/containers/{id}/{action}` | `docker:write` | Exécuter une action sur un conteneur |
+| GET | `/api/docker/containers/{id}/logs` | `docker:read` | Consulter les journaux d'un conteneur |
+| GET | `/api/docker/containers/{id}/stats` | `docker:read` | Consulter l'utilisation des ressources d'un conteneur |
+| GET | `/api/docker/containers/{id}/processes` | `docker:read` | Consulter les processus d'un conteneur |
+| GET | `/api/docker/containers/{id}/files/list` | `docker:read` | Lister le répertoire dans le conteneur |
+| GET | `/api/docker/containers/{id}/files/read` | `docker:write` | Lire un fichier dans le conteneur |
+| GET | `/api/docker/containers/{id}/files/download` | `docker:write` | Télécharger un fichier du conteneur |
+| POST | `/api/docker/containers/{id}/files/write` | `docker:write` | Écrire un fichier dans le conteneur |
+| POST | `/api/docker/containers/{id}/files/mkdir` | `docker:write` | Créer un répertoire dans le conteneur |
+| POST | `/api/docker/containers/{id}/files/rename` | `docker:write` | Renommer un fichier dans le conteneur |
+| POST | `/api/docker/containers/{id}/files/upload` | `docker:write` | Téléverser un fichier vers le conteneur |
+| DELETE | `/api/docker/containers/{id}/files` | `docker:write` | Supprimer un fichier dans le conteneur |
+| GET | `/api/docker/containers/{id}/exec` | `docker:write` | Ouvrir un terminal dans le conteneur (WebSocket) |
+
+## WebDAV
+
+| Méthode | Chemin | Permission requise | Description |
+| --- | --- | --- | --- |
+| GET | `/api/webdav/logs` | `webdav:read` | Consulter les journaux d'exécution d'un module |
+| DELETE | `/api/webdav/logs` | `webdav:write` | Vider les journaux d'exécution d'un module |
+| GET | `/api/webdav/settings` | `webdav:read` | Lire les paramètres WebDAV |
+| PUT | `/api/webdav/settings` | `webdav:write` | Enregistrer les paramètres WebDAV |
+
+## Service FTP
+
+| Méthode | Chemin | Permission requise | Description |
+| --- | --- | --- | --- |
+| GET | `/api/ftp/logs` | `ftp:read` | Consulter les journaux d'exécution d'un module |
+| DELETE | `/api/ftp/logs` | `ftp:write` | Vider les journaux d'exécution d'un module |
+| GET | `/api/ftp/settings` | `ftp:read` | Lire les paramètres FTP |
+| PUT | `/api/ftp/settings` | `ftp:write` | Enregistrer les paramètres FTP |
+
+## Gestion du stockage
+
+| Méthode | Chemin | Permission requise | Description |
+| --- | --- | --- | --- |
+| GET | `/api/storage/logs` | `storage:read` | Consulter les journaux d'exécution d'un module |
+| DELETE | `/api/storage/logs` | `storage:write` | Vider les journaux d'exécution d'un module |
+| GET | `/api/storage/mounts` | `storage:read` | Lister Entrée |
+| POST | `/api/storage/mounts` | `storage:write` | Ajouter Entrée |
+| PUT | `/api/storage/mounts/{key}` | `storage:write` | Modifier Entrée |
+| DELETE | `/api/storage/mounts/{key}` | `storage:write` | Supprimer Entrée |
+| PUT | `/api/storage/mounts/{key}/enable` | `storage:write` | Activer ou désactiver Entrée |
+| PUT | `/api/storage/mounts-order` | `storage:write` | Réordonner Entrée |
+| GET | `/api/storage/files/{key}/list` | `storage:read` | Lister le répertoire de stockage |
+| GET | `/api/storage/files/{key}/download` | `storage:write` | Télécharger un fichier du stockage |
+| POST | `/api/storage/files/{key}/upload` | `storage:write` | Téléverser un fichier vers le stockage |
+| POST | `/api/storage/files/{key}/mkdir` | `storage:write` | Créer un répertoire de stockage |
+| POST | `/api/storage/files/{key}/rename` | `storage:write` | Renommer ou déplacer un fichier de stockage |
+| DELETE | `/api/storage/files/{key}` | `storage:write` | Supprimer un fichier du stockage |
+
+## Centre de notifications
+
+| Méthode | Chemin | Permission requise | Description |
+| --- | --- | --- | --- |
+| GET | `/api/notify/logs` | `notify:read` | Consulter les journaux d'exécution d'un module |
+| DELETE | `/api/notify/logs` | `notify:write` | Vider les journaux d'exécution d'un module |
+| GET | `/api/notify/channels` | `notify:read` | Lister Canaux de notification |
+| POST | `/api/notify/channels` | `notify:write` | Ajouter Canaux de notification |
+| PUT | `/api/notify/channels/{key}` | `notify:write` | Modifier Canaux de notification |
+| DELETE | `/api/notify/channels/{key}` | `notify:write` | Supprimer Canaux de notification |
+| PUT | `/api/notify/channels/{key}/enable` | `notify:write` | Activer ou désactiver Canaux de notification |
+| PUT | `/api/notify/channels-order` | `notify:write` | Réordonner Canaux de notification |
+| GET | `/api/notify/rules` | `notify:read` | Lister Règles de notification |
+| POST | `/api/notify/rules` | `notify:write` | Ajouter Règles de notification |
+| PUT | `/api/notify/rules/{key}` | `notify:write` | Modifier Règles de notification |
+| DELETE | `/api/notify/rules/{key}` | `notify:write` | Supprimer Règles de notification |
+| PUT | `/api/notify/rules/{key}/enable` | `notify:write` | Activer ou désactiver Règles de notification |
+| PUT | `/api/notify/rules-order` | `notify:write` | Réordonner Règles de notification |
+| GET | `/api/notify/event-types` | `notify:read` | Types d'événements auxquels s'abonner |
+| GET | `/api/notify/history` | `notify:read` | Dernières livraisons |
+| POST | `/api/notify/channels/{key}/test` | `notify:write` | Envoyer une notification de test au canal |
+
+## Diagnostic réseau
+
+| Méthode | Chemin | Permission requise | Description |
+| --- | --- | --- | --- |
+| GET | `/api/nettools/logs` | `nettools:read` | Consulter les journaux d'exécution d'un module |
+| DELETE | `/api/nettools/logs` | `nettools:write` | Vider les journaux d'exécution d'un module |
+| POST | `/api/nettools/run` | `nettools:write` | Exécuter un outil de diagnostic et renvoyer la tâche (tool : ping / traceroute / tcp / dns / speed / scan) |
+| GET | `/api/nettools/tasks` | `nettools:read` | Dernières tâches de diagnostic |
+| GET | `/api/nettools/tasks/{id}` | `nettools:read` | Détails et sortie de la tâche |
+| DELETE | `/api/nettools/tasks/{id}` | `nettools:write` | Annuler une tâche en cours ou supprimer une tâche terminée |
+| GET | `/api/nettools/settings` | `nettools:read` | Paramètres de diagnostic |
+| PUT | `/api/nettools/settings` | `nettools:write` | Modifier la liste des sondages interdits |
+| GET | `/api/nettools/networks` | `nettools:read` | Segments de réseau locaux utilisables pour l'analyse du réseau local |
+
+## Sauvegarde de configuration
+
+| Méthode | Chemin | Permission requise | Description |
+| --- | --- | --- | --- |
+| GET | `/api/backup/logs` | `backup:read` | Consulter les journaux d'exécution d'un module |
+| DELETE | `/api/backup/logs` | `backup:write` | Vider les journaux d'exécution d'un module |
+| GET | `/api/backup/targets` | `backup:read` | Lister Destination de sauvegarde |
+| POST | `/api/backup/targets` | `backup:write` | Ajouter Destination de sauvegarde |
+| PUT | `/api/backup/targets/{key}` | `backup:write` | Modifier Destination de sauvegarde |
+| DELETE | `/api/backup/targets/{key}` | `backup:write` | Supprimer Destination de sauvegarde |
+| PUT | `/api/backup/targets/{key}/enable` | `backup:write` | Activer ou désactiver Destination de sauvegarde |
+| PUT | `/api/backup/targets-order` | `backup:write` | Réordonner Destination de sauvegarde |
+| GET | `/api/backup/settings` | `backup:read` | Paramètres de sauvegarde |
+| PUT | `/api/backup/settings` | `backup:write` | Modifier les paramètres de sauvegarde (un espace réservé pour la phrase secrète la laisse inchangée) |
+| POST | `/api/backup/run` | `backup:write` | Lancer une sauvegarde immédiatement |
+| GET | `/api/backup/status` | `backup:read` | Résultat de la dernière sauvegarde et heure de la prochaine exécution |
+| GET | `/api/backup/mounts` | `backup:read` | Points de montage de stockage utilisables comme destinations de sauvegarde |
+| GET | `/api/backup/local` | Session connectée uniquement | Liste des fichiers de sauvegarde locaux |
+| GET | `/api/backup/local/{name}` | Session connectée uniquement | Télécharger un fichier de sauvegarde local |
+
+## Système
+
+| Méthode | Chemin | Permission requise | Description |
+| --- | --- | --- | --- |
+| GET | `/api/session` | Tout jeton valide | Consulter l'identité authentifiée actuelle |
+| GET | `/api/status` | `status:read` | Consulter l'état du système et des modules |
+| GET | `/api/logs` | `logs:read` | Consulter les journaux système |
+| GET | `/api/system/settings` | Session connectée uniquement | Lire les paramètres globaux |
+| PUT | `/api/system/settings` | Session connectée uniquement | Enregistrer les paramètres globaux |
+| GET | `/api/system/info` | `status:read` | Consulter les informations système |
+| GET | `/api/system/update` | `status:read` | Rechercher une nouvelle version |
+| GET | `/api/system/backup` | Session connectée uniquement | Télécharger la sauvegarde de configuration |
+| POST | `/api/system/restore` | Session connectée uniquement | Restaurer la configuration depuis une sauvegarde |
+| POST | `/api/system/restart` | Session connectée uniquement | Redémarrer Gately |
+| GET | `/api/openapi.json` | Tout jeton valide | Obtenir la description OpenAPI de cette API |
+
+## Import de configuration
+
+| Méthode | Chemin | Permission requise | Description |
+| --- | --- | --- | --- |
+| POST | `/api/import/lucky` | `import:write` | Importer la configuration Lucky |
+
+## Jeton API
+
+| Méthode | Chemin | Permission requise | Description |
+| --- | --- | --- | --- |
+| GET | `/api/tokens` | Session connectée uniquement | Lister les jetons API |
+| GET | `/api/tokens/scopes` | Session connectée uniquement | Lister les domaines de permission attribuables |
+| POST | `/api/tokens` | Session connectée uniquement | Créer un jeton API |
+| PUT | `/api/tokens/{id}` | Session connectée uniquement | Modifier le nom, les permissions, l'expiration et l'état d'un jeton API |
+| POST | `/api/tokens/{id}/regenerate` | Session connectée uniquement | Régénérer le jeton en clair |
+| DELETE | `/api/tokens/{id}` | Session connectée uniquement | Supprimer un jeton API |
+
+## Compte
+
+| Méthode | Chemin | Permission requise | Description |
+| --- | --- | --- | --- |
+| PUT | `/api/account` | Session connectée uniquement | Modifier le nom d'utilisateur et le mot de passe de l'administrateur |
+| GET | `/api/account/totp` | Session connectée uniquement | Consulter l'état de l'authentification à deux facteurs |
+| POST | `/api/account/totp/setup` | Session connectée uniquement | Générer une clé d'authentification à deux facteurs |
+| POST | `/api/account/totp/enable` | Session connectée uniquement | Activer l'authentification à deux facteurs |
+| POST | `/api/account/totp/disable` | Session connectée uniquement | Désactiver l'authentification à deux facteurs |
+
+## Structures de données
+
+### backup.LocalFile
+
+| Champ | Type |
+| --- | --- |
+| `modTime` | Heure (RFC 3339) |
+| `name` | string |
+| `size` | integer |
+
+### backup.Result
+
+| Champ | Type |
+| --- | --- |
+| `error` | string |
+| `file` | string |
+| `ok` | boolean |
+| `pruned` | integer |
+| `target` | string |
+
+### backup.Settings
+
+| Champ | Type |
+| --- | --- |
+| `enable` | boolean |
+| `keep` | integer |
+| `localEnable` | boolean |
+| `password` | string |
+| `schedule` | string |
+
+### backup.Status
+
+| Champ | Type |
+| --- | --- |
+| `lastRun` | Heure (RFC 3339) |
+| `manual` | boolean |
+| `nextRun` | Heure (RFC 3339) |
+| `results` | Tableau de `backup.Result` |
+| `running` | boolean |
+
+### backup.Target
+
+| Champ | Type |
+| --- | --- |
+| `dir` | string |
+| `enable` | boolean |
+| `key` | string |
+| `mount` | string |
+| `name` | string |
+
+### backup.settingsView
+
+| Champ | Type |
+| --- | --- |
+| `enable` | boolean |
+| `hasPassword` | boolean |
+| `keep` | integer |
+| `localEnable` | boolean |
+| `password` | string |
+| `schedule` | string |
+
+### cloudflared.Tunnel
+
+| Champ | Type |
+| --- | --- |
+| `edgeIpVersion` | string |
+| `enable` | boolean |
+| `key` | string |
+| `mode` | string |
+| `name` | string |
+| `protocol` | string |
+| `remark` | string |
+| `service` | string |
+| `token` | string |
+
+### cron.Task
+
+| Champ | Type |
+| --- | --- |
+| `command` | string |
+| `enable` | boolean |
+| `http` | `webhook.Config` |
+| `key` | string |
+| `name` | string |
+| `remark` | string |
+| `spec` | string |
+| `type` | string |
+
+### crud.enableRequest
+
+| Champ | Type |
+| --- | --- |
+| `enable` | boolean |
+
+### crud.orderRequest
+
+| Champ | Type |
+| --- | --- |
+| `keys` | Tableau de string |
+
+### ddns.Record
+
+| Champ | Type |
+| --- | --- |
+| `enable` | boolean |
+| `key` | string |
+| `line` | string |
+| `remark` | string |
+| `sub` | string |
+| `ttl` | integer |
+| `type` | string |
+| `value` | string |
+| `zone` | string |
+
+### ddns.Task
+
+| Champ | Type |
+| --- | --- |
+| `credentials` | `dnsprovider.Credentials` |
+| `enable` | boolean |
+| `forceInterval` | integer |
+| `httpTimeout` | integer |
+| `interval` | integer |
+| `ipv4` | `ipsource.Source` |
+| `ipv6` | `ipsource.Source` |
+| `key` | string |
+| `name` | string |
+| `provider` | string |
+| `records` | Tableau de `ddns.Record` |
+| `remark` | string |
+| `webhook` | `webhook.Config` |
+
+### dnsprovider.Credentials
+
+| Champ | Type |
+| --- | --- |
+| `extra` | Table de correspondance de string |
+| `id` | string |
+| `secret` | string |
+
+### events.TypeInfo
+
+| Champ | Type |
+| --- | --- |
+| `level` | string |
+| `name` | string |
+| `type` | string |
+
+### frp.ClientSettings
+
+| Champ | Type |
+| --- | --- |
+| `binPath` | string |
+| `enable` | boolean |
+| `protocol` | string |
+| `serverAddr` | string |
+| `serverPort` | integer |
+| `token` | string |
+| `user` | string |
+
+### frp.ImportRequest
+
+| Champ | Type |
+| --- | --- |
+| `apply` | boolean |
+| `content` | string |
+| `proxyMode` | string |
+| `role` | string |
+
+### frp.ImportResponse
+
+| Champ | Type |
+| --- | --- |
+| `added` | integer |
+| `applied` | boolean |
+| `client` | `frp.ClientSettings` |
+| `proxies` | Tableau de `frp.Proxy` |
+| `role` | string |
+| `server` | `frp.ServerSettings` |
+| `warnings` | Tableau de string |
+
+### frp.Proxy
+
+| Champ | Type |
+| --- | --- |
+| `customDomains` | Tableau de string |
+| `enable` | boolean |
+| `key` | string |
+| `localIp` | string |
+| `localPort` | integer |
+| `name` | string |
+| `remark` | string |
+| `remotePort` | integer |
+| `secretKey` | string |
+| `subdomain` | string |
+| `type` | string |
+
+### frp.ServerSettings
+
+| Champ | Type |
+| --- | --- |
+| `allowPorts` | string |
+| `binPath` | string |
+| `bindPort` | integer |
+| `dashboardAddr` | string |
+| `dashboardPort` | integer |
+| `dashboardPwd` | string |
+| `dashboardUser` | string |
+| `enable` | boolean |
+| `subdomainHost` | string |
+| `token` | string |
+| `vhostHttpPort` | integer |
+| `vhostHttpsPort` | integer |
+
+### geoip.Info
+
+| Champ | Type |
+| --- | --- |
+| `buildTime` | Heure (RFC 3339) |
+| `loaded` | boolean |
+| `size` | integer |
+| `type` | string |
+
+### ipsource.Source
+
+| Champ | Type |
+| --- | --- |
+| `command` | string |
+| `enable` | boolean |
+| `interface` | string |
+| `regex` | string |
+| `type` | string |
+| `urls` | Tableau de string |
+
+### nettools.Request
+
+| Champ | Type |
+| --- | --- |
+| `cidr` | string |
+| `count` | integer |
+| `ports` | string |
+| `seconds` | integer |
+| `server` | string |
+| `target` | string |
+| `tool` | string |
+| `type` | string |
+| `url` | string |
+
+### nettools.Settings
+
+| Champ | Type |
+| --- | --- |
+| `deny` | Tableau de string |
+
+### nettools.Task
+
+| Champ | Type |
+| --- | --- |
+| `error` | string |
+| `finished` | Heure (RFC 3339) |
+| `id` | string |
+| `lines` | Tableau de string |
+| `result` | Tous |
+| `started` | Heure (RFC 3339) |
+| `status` | string |
+| `title` | string |
+| `tool` | string |
+
+### notify.Channel
+
+| Champ | Type |
+| --- | --- |
+| `enable` | boolean |
+| `from` | string |
+| `host` | string |
+| `key` | string |
+| `kind` | string |
+| `name` | string |
+| `port` | integer |
+| `remark` | string |
+| `secret` | string |
+| `security` | string |
+| `target` | string |
+| `url` | string |
+| `user` | string |
+| `webhook` | `webhook.Config` |
+
+### notify.Record
+
+| Champ | Type |
+| --- | --- |
+| `channel` | string |
+| `error` | string |
+| `ok` | boolean |
+| `rule` | string |
+| `time` | Heure (RFC 3339) |
+| `title` | string |
+| `type` | string |
+
+### notify.Rule
+
+| Champ | Type |
+| --- | --- |
+| `channels` | Tableau de string |
+| `enable` | boolean |
+| `events` | Tableau de string |
+| `key` | string |
+| `minLevel` | string |
+| `name` | string |
+| `silence` | integer |
+
+### portforward.Rule
+
+| Champ | Type |
+| --- | --- |
+| `enable` | boolean |
+| `key` | string |
+| `listenAddress` | string |
+| `listenPorts` | string |
+| `maxConnections` | integer |
+| `name` | string |
+| `protocols` | Tableau de string |
+| `remark` | string |
+| `targetAddresses` | Tableau de string |
+| `targetPorts` | string |
+| `udpSessionTimeout` | integer |
+
+### ssl.ACMEConfig
+
+| Champ | Type |
+| --- | --- |
+| `ca` | string |
+| `credentials` | `dnsprovider.Credentials` |
+| `directoryUrl` | string |
+| `disableAuthoritativeCheck` | boolean |
+| `domains` | Tableau de string |
+| `eabHmac` | string |
+| `eabKid` | string |
+| `email` | string |
+| `keyType` | string |
+| `propagationTimeout` | integer |
+| `provider` | string |
+| `resolvers` | Tableau de string |
+| `skipPropagationCheck` | boolean |
+| `zone` | string |
+
+### ssl.Cert
+
+| Champ | Type |
+| --- | --- |
+| `acme` | `ssl.ACMEConfig` |
+| `certFile` | string |
+| `certPem` | string |
+| `enable` | boolean |
+| `issuerPem` | string |
+| `key` | string |
+| `keyFile` | string |
+| `keyPem` | string |
+| `mapping` | `ssl.Mapping` |
+| `remark` | string |
+| `source` | string |
+| `updatedAt` | Heure (RFC 3339) |
+
+### ssl.Mapping
+
+| Champ | Type |
+| --- | --- |
+| `dir` | string |
+| `enable` | boolean |
+| `script` | string |
+
+### storage.Mount
+
+| Champ | Type |
+| --- | --- |
+| `enable` | boolean |
+| `key` | string |
+| `name` | string |
+| `password` | string |
+| `path` | string |
+| `readOnly` | boolean |
+| `remark` | string |
+| `skipVerify` | boolean |
+| `type` | string |
+| `url` | string |
+| `username` | string |
+
+### storage.MountInfo
+
+| Champ | Type |
+| --- | --- |
+| `enable` | boolean |
+| `key` | string |
+| `name` | string |
+| `readOnly` | boolean |
+| `type` | string |
+
+### stun.Bind
+
+| Champ | Type |
+| --- | --- |
+| `interface` | string |
+| `ip` | string |
+| `mode` | string |
+| `regex` | string |
+
+### stun.Rule
+
+| Champ | Type |
+| --- | --- |
+| `autoRetry` | boolean |
+| `bind` | `stun.Bind` |
+| `disableCheck` | boolean |
+| `disableForward` | boolean |
+| `enable` | boolean |
+| `heartbeatInterval` | integer |
+| `keepAliveServers` | Tableau de string |
+| `key` | string |
+| `localPort` | integer |
+| `maxConnections` | integer |
+| `name` | string |
+| `natpmp` | boolean |
+| `natpmpGateway` | string |
+| `protocol` | string |
+| `remark` | string |
+| `retryInterval` | integer |
+| `script` | string |
+| `scriptEnable` | boolean |
+| `stunServers` | Tableau de string |
+| `stunTimeout` | integer |
+| `targetAddresses` | Tableau de string |
+| `targetPort` | integer |
+| `udpSessionTimeout` | integer |
+| `upnp` | boolean |
+| `upnpControlUrl` | string |
+| `upnpGateway` | string |
+| `upnpInternalPort` | integer |
+| `upnpLocalHost` | string |
+| `useGlobalServers` | boolean |
+| `useGlobalWebhook` | boolean |
+| `webhook` | `webhook.Config` |
+| `webhookOnlyOnChange` | boolean |
+
+### waf.Instance
+
+| Champ | Type |
+| --- | --- |
+| `enable` | boolean |
+| `inboundThreshold` | integer |
+| `key` | string |
+| `mode` | string |
+| `name` | string |
+| `outboundThreshold` | integer |
+| `paranoia` | integer |
+| `remark` | string |
+| `ruleSets` | Tableau de `waf.RuleSet` |
+
+### waf.RuleSet
+
+| Champ | Type |
+| --- | --- |
+| `enable` | boolean |
+| `param` | string |
+| `remark` | string |
+| `type` | string |
+
+### webhook.Config
+
+| Champ | Type |
+| --- | --- |
+| `body` | string |
+| `enable` | boolean |
+| `headers` | Tableau de string |
+| `insecureSkipVerify` | boolean |
+| `method` | string |
+| `successContent` | Tableau de string |
+| `timeout` | integer |
+| `url` | string |
+
+### webservice.BanInfo
+
+| Champ | Type |
+| --- | --- |
+| `key` | string |
+| `manual` | boolean |
+| `reason` | string |
+| `until` | Heure (RFC 3339) |
+
+### webservice.CacheConfig
+
+| Champ | Type |
+| --- | --- |
+| `enable` | boolean |
+| `maxMb` | integer |
+| `ttl` | integer |
+
+### webservice.HealthCheck
+
+| Champ | Type |
+| --- | --- |
+| `enable` | boolean |
+| `fails` | integer |
+| `interval` | integer |
+| `mode` | string |
+| `passes` | integer |
+| `path` | string |
+| `timeout` | integer |
+
+### webservice.Listener
+
+| Champ | Type |
+| --- | --- |
+| `acceptProxyProtocol` | boolean |
+| `default` | `webservice.Site` |
+| `enable` | boolean |
+| `key` | string |
+| `listenIp` | string |
+| `minTls` | string |
+| `name` | string |
+| `network` | string |
+| `port` | integer |
+| `remark` | string |
+| `sites` | Tableau de `webservice.Site` |
+| `tls` | boolean |
+
+### webservice.PathRule
+
+| Champ | Type |
+| --- | --- |
+| `auth` | string |
+| `ipList` | Tableau de string |
+| `ipMode` | string |
+| `prefix` | string |
+
+### webservice.Point
+
+| Champ | Type |
+| --- | --- |
+| `bytes` | integer |
+| `requests` | integer |
+| `s4xx` | integer |
+| `s5xx` | integer |
+| `t` | integer |
+
+### webservice.RateLimit
+
+| Champ | Type |
+| --- | --- |
+| `burst` | integer |
+| `enable` | boolean |
+| `maxConns` | integer |
+| `rate` | number |
+
+### webservice.Rewrite
+
+| Champ | Type |
+| --- | --- |
+| `code` | integer |
+| `pattern` | string |
+| `redirect` | boolean |
+| `to` | string |
+
+### webservice.ShareLink
+
+| Champ | Type |
+| --- | --- |
+| `expiresAt` | Heure (RFC 3339) |
+| `key` | string |
+| `maxUses` | integer |
+| `name` | string |
+| `pathPrefix` | string |
+| `token` | string |
+
+### webservice.Site
+
+| Champ | Type |
+| --- | --- |
+| `accessLog` | boolean |
+| `authOptional` | boolean |
+| `basicAuth` | boolean |
+| `cache` | `webservice.CacheConfig` |
+| `compress` | boolean |
+| `contentType` | string |
+| `cors` | boolean |
+| `countries` | Tableau de string |
+| `countryMode` | string |
+| `disableKeepAlives` | boolean |
+| `domains` | Tableau de string |
+| `enable` | boolean |
+| `forwardedHeaders` | boolean |
+| `health` | `webservice.HealthCheck` |
+| `insecureSkipVerify` | boolean |
+| `ipList` | Tableau de string |
+| `ipMode` | string |
+| `keepPath` | boolean |
+| `key` | string |
+| `lbPolicy` | string |
+| `listDir` | boolean |
+| `name` | string |
+| `oauthUsers` | Tableau de string |
+| `rateLimit` | `webservice.RateLimit` |
+| `redirectCode` | integer |
+| `redirectTo` | string |
+| `remark` | string |
+| `requestHeaders` | Tableau de string |
+| `responseHeaders` | Tableau de string |
+| `rewrites` | Tableau de `webservice.Rewrite` |
+| `root` | string |
+| `rules` | Tableau de `webservice.PathRule` |
+| `sendProxyProtocol` | boolean |
+| `shareLinks` | Tableau de `webservice.ShareLink` |
+| `statusCode` | integer |
+| `targets` | Tableau de string |
+| `text` | string |
+| `type` | string |
+| `useTargetHost` | boolean |
+| `users` | Tableau de string |
+| `waf` | string |
+| `webAuth` | boolean |
+
+### webservice.SiteStatsView
+
+| Champ | Type |
+| --- | --- |
+| `bytesOut` | integer |
+| `series` | Tableau de `webservice.Point` |
+| `status` | Table de correspondance de integer |
+| `topCountries` | Tableau de `webservice.TopItem` |
+| `topIps` | Tableau de `webservice.TopItem` |
+| `upstreams` | Tableau de `webservice.UpstreamStatus` |
+
+### webservice.TopItem
+
+| Champ | Type |
+| --- | --- |
+| `count` | integer |
+| `key` | string |
+
+### webservice.UpstreamStatus
+
+| Champ | Type |
+| --- | --- |
+| `backup` | boolean |
+| `conns` | integer |
+| `healthy` | boolean |
+| `url` | string |
+| `weight` | integer |
+
+### webservice.banRequest
+
+| Champ | Type |
+| --- | --- |
+| `key` | string |
+| `seconds` | integer |
+
+### webservice.geoipDownload
+
+| Champ | Type |
+| --- | --- |
+| `url` | string |
+
+### webterminal.Connection
+
+| Champ | Type |
+| --- | --- |
+| `enable` | boolean |
+| `key` | string |
+| `local` | `webterminal.LocalConfig` |
+| `name` | string |
+| `quickAccessDirs` | Tableau de string |
+| `remark` | string |
+| `ssh` | `webterminal.SSHConfig` |
+| `telnet` | `webterminal.TelnetConfig` |
+| `type` | string |
+
+### webterminal.LocalConfig
+
+| Champ | Type |
+| --- | --- |
+| `env` | Table de correspondance de string |
+| `shell` | string |
+| `workDir` | string |
+
+### webterminal.Proxy
+
+| Champ | Type |
+| --- | --- |
+| `enabled` | boolean |
+| `host` | string |
+| `password` | string |
+| `port` | integer |
+| `type` | string |
+| `username` | string |
+
+### webterminal.SSHConfig
+
+| Champ | Type |
+| --- | --- |
+| `authType` | string |
+| `host` | string |
+| `hostKey` | string |
+| `keepAlive` | integer |
+| `keyFile` | string |
+| `passphrase` | string |
+| `password` | string |
+| `port` | integer |
+| `privateKey` | string |
+| `proxy` | `webterminal.Proxy` |
+| `timeout` | integer |
+| `username` | string |
+| `workDir` | string |
+
+### webterminal.TelnetConfig
+
+| Champ | Type |
+| --- | --- |
+| `host` | string |
+| `password` | string |
+| `port` | integer |
+| `proxy` | `webterminal.Proxy` |
+| `timeout` | integer |
+| `username` | string |
+
+### wol.Device
+
+| Champ | Type |
+| --- | --- |
+| `broadcastIps` | Tableau de string |
+| `checkAddr` | string |
+| `enable` | boolean |
+| `key` | string |
+| `macs` | Tableau de string |
+| `name` | string |
+| `port` | integer |
+| `remark` | string |
+| `repeat` | integer |
+

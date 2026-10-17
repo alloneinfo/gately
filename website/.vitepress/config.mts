@@ -67,6 +67,7 @@ function buildThemeConfig(loc: SiteLocale, pack: any): DefaultTheme.Config & Rec
       copyright: `© 2026 Gately Contributors · <a href="${REPO}" target="_blank" rel="noreferrer">GitHub</a>`
     },
     // 首页与下载页组件使用的文案
+    aiNotice: ui.aiNotice,
     home: pack.home,
     download: pack.download
   }
@@ -125,7 +126,7 @@ for(var a=0;a<langs.length&&!hit;a++){var s=String(langs[a]).toLowerCase();
 if(!hit){ hit=L.filter(function(l){return l.code===F})[0]||L[0] }
 if(cur!==hit.dir && cur===''){
   var target=(hit.dir?'/'+hit.dir:'')+p;
-  if(hit.dir && /^\\/docs\\/reference\\/(api-reference|docker-api|webterminal-api)/.test(p) && hit.code!=='en'){ target='/en'+p }
+  if(hit.dir && /^\\/docs\\/reference\\/(docker-api|webterminal-api)/.test(p) && hit.code!=='en'){ target='/en'+p }
   location.replace(target+location.search+location.hash);
 }
 }catch(e){}})();`

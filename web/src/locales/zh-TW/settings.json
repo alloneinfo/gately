@@ -124,7 +124,10 @@
       "losAngeles": "洛杉磯",
       "sydney": "雪梨",
       "utc": "世界協調時間"
-    }
+    },
+    "serverLanguage": "伺服器語言",
+    "serverLanguageAuto": "跟隨系統",
+    "serverLanguageHelp": "記錄檔、通知等沒有頁面情境的輸出所使用的語言；留空時依系統環境變數（GATELY_LANG、LANG）自動選擇。"
   },
   "runtime": {
     "title": "執行參數",

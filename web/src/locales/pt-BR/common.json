@@ -51,5 +51,6 @@
   "notLoggedIn": "Sem login",
   "durationDaysHours": "{d}d {h}h",
   "durationHoursMinutes": "{h}h {m}min",
-  "durationMinutes": "{m} min"
+  "durationMinutes": "{m} min",
+  "aiTranslated": "A interface foi traduzida com IA e pode conter imprecisões. Ajude a melhorar no GitHub."
 }

@@ -70,7 +70,8 @@
     "langMenuLabel": "語言",
     "lightModeSwitchTitle": "切換至淺色模式",
     "darkModeSwitchTitle": "切換至深色模式",
-    "footerMessage": "以 Apache-2.0 授權條款開源發布。Gately 與 Lucky 專案方無任何隸屬關係。"
+    "footerMessage": "以 Apache-2.0 授權條款開源發布。Gately 與 Lucky 專案方無任何隸屬關係。",
+    "aiNotice": "此頁面由 AI 翻譯，內容可能有疏漏。歡迎到 GitHub 協助改進。"
   },
   "home": {
     "pill": "開源 · 可稽核 · 可從 Lucky 一鍵遷移",
@@ -81,49 +82,151 @@
     "ctaDownload": "下載",
     "mockTitle": "gately · 總覽",
     "mockRows": [
-      ["動態網域", "75 筆記錄已同步", "ok"],
-      ["STUN 穿透", "18 條規則執行中", "ok"],
-      ["連接埠轉發", "25 條規則執行中", "ok"],
-      ["Web 服務", "27 個站台 · HTTPS", "ok"],
-      ["SSL 憑證", "5 張憑證 · 自動續期", "ok"],
-      ["WAF 防火牆", "CRS v4 · 攔截模式", "warn"]
+      [
+        "動態網域",
+        "75 筆記錄已同步",
+        "ok"
+      ],
+      [
+        "STUN 穿透",
+        "18 條規則執行中",
+        "ok"
+      ],
+      [
+        "連接埠轉發",
+        "25 條規則執行中",
+        "ok"
+      ],
+      [
+        "Web 服務",
+        "27 個站台 · HTTPS",
+        "ok"
+      ],
+      [
+        "SSL 憑證",
+        "5 張憑證 · 自動續期",
+        "ok"
+      ],
+      [
+        "WAF 防火牆",
+        "CRS v4 · 攔截模式",
+        "warn"
+      ]
     ],
     "stats": [
-      { "value": "~22 MB", "label": "單一檔案，內嵌管理介面" },
-      { "value": "0", "label": "預設連線專案方伺服器的次數" },
-      { "value": "全平台", "label": "Linux / macOS / Windows / FreeBSD，含 ARM、MIPS、RISC-V" },
-      { "value": "Apache-2.0", "label": "開源授權，原始碼可稽核" }
+      {
+        "value": "~22 MB",
+        "label": "單一檔案，內嵌管理介面"
+      },
+      {
+        "value": "0",
+        "label": "預設連線專案方伺服器的次數"
+      },
+      {
+        "value": "全平台",
+        "label": "Linux / macOS / Windows / FreeBSD，含 ARM、MIPS、RISC-V"
+      },
+      {
+        "value": "Apache-2.0",
+        "label": "開源授權，原始碼可稽核"
+      }
     ],
     "featuresTitle": "常用網路能力，一處管理",
     "featuresDesc": "涵蓋家用網路與伺服器維運最常用的功能，每個模組都可單獨啟停。",
     "features": [
-      { "title": "動態網域", "text": "阿里雲、Cloudflare、騰訊雲、DNSPod、華為雲、GoDaddy 等 11 家服務商；透過 URL / 網卡 / 命令取得 IP，支援 IPv4 與 IPv6，並有 Webhook 通知。" },
-      { "title": "STUN 穿透", "text": "TCP / UDP 打洞與保活，UPnP / NAT-PMP，內建轉發；公網位址變更時觸發 Webhook 與指令碼。" },
-      { "title": "連接埠轉發", "text": "TCP / UDP、IPv4 / IPv6、連接埠範圍、多目標容錯移轉、連線數限制與流量統計。" },
-      { "title": "SSL 憑證", "text": "ACME DNS-01 自動簽發與續期，支援萬用字元與 EAB，可對應到目錄並在變更後執行指令碼。" },
-      { "title": "Web 服務", "text": "依網域反向代理、重新導向、靜態檔案；HTTPS、WebSocket、PROXY 協定；多後端權重與策略、健康檢查、壓縮、限流與回應快取。" },
-      { "title": "WAF 防火牆", "text": "內建 Coraza 與 OWASP CRS v4，依檔案啟用規則，支援自訂 SecLang，可攔截或僅偵測。" },
-      { "title": "組網與穿透", "text": "以行程託管方式整合 Tailscale、frp（frpc / frps）與 cloudflared 通道，一律使用上游最新版本。" },
-      { "title": "Docker 管理", "text": "容器建立與編輯、日誌與終端機、Compose、映像檔更新與一鍵升級（失敗自動回復）、網路與磁碟區管理。" },
-      { "title": "Web 終端機", "text": "SSH、Telnet 與本機 Shell（預設關閉），支援代理、持久工作階段、SFTP 檔案管理與分割畫面。" },
-      { "title": "檔案服務", "text": "WebDAV、FTP 服務與儲存管理，支援本機與遠端 WebDAV 掛載及線上檔案管理。" },
-      { "title": "排程工作與喚醒", "text": "cron 定時執行命令或 HTTP 請求並保留記錄；網路喚醒魔術封包廣播與上線偵測。" },
-      { "title": "安全強化", "text": "兩步驟驗證、登入失敗限流、安全入口、僅限內網存取、管理介面 HTTPS、API 權杖。" },
-      { "title": "存取控制", "text": "站台路徑規則、臨時分享連結、驗證失敗自動封鎖、GeoIP 國家過濾與 IP 黑白名單。" },
-      { "title": "存取統計與監控", "text": "分鐘級存取與流量統計，並以 Prometheus 指標公開，方便接入既有監控。" },
-      { "title": "通知中心", "text": "Webhook、Telegram、Bark、企業微信、釘釘、飛書與電子郵件；依等級與事件規則推送，支援靜默去重。" },
-      { "title": "設定備份", "text": "加密備份（scrypt + AES-GCM）、保留策略與排程備份，可寫入本機目錄或儲存掛載點。" },
-      { "title": "網路診斷", "text": "Ping、路由追蹤、連接埠探測、DNS 查詢、測速與區域網路掃描，以背景工作方式執行。" },
-      { "title": "API、命令列與 MCP", "text": "多權杖依模組授權，自動產生 OpenAPI 文件；gately ctl 呼叫實例，gately mcp 接入 AI 助理。" }
+      {
+        "title": "動態網域",
+        "text": "阿里雲、Cloudflare、騰訊雲、DNSPod、華為雲、GoDaddy 等 11 家服務商；透過 URL / 網卡 / 命令取得 IP，支援 IPv4 與 IPv6，並有 Webhook 通知。"
+      },
+      {
+        "title": "STUN 穿透",
+        "text": "TCP / UDP 打洞與保活，UPnP / NAT-PMP，內建轉發；公網位址變更時觸發 Webhook 與指令碼。"
+      },
+      {
+        "title": "連接埠轉發",
+        "text": "TCP / UDP、IPv4 / IPv6、連接埠範圍、多目標容錯移轉、連線數限制與流量統計。"
+      },
+      {
+        "title": "SSL 憑證",
+        "text": "ACME DNS-01 自動簽發與續期，支援萬用字元與 EAB，可對應到目錄並在變更後執行指令碼。"
+      },
+      {
+        "title": "Web 服務",
+        "text": "依網域反向代理、重新導向、靜態檔案；HTTPS、WebSocket、PROXY 協定；多後端權重與策略、健康檢查、壓縮、限流與回應快取。"
+      },
+      {
+        "title": "WAF 防火牆",
+        "text": "內建 Coraza 與 OWASP CRS v4，依檔案啟用規則，支援自訂 SecLang，可攔截或僅偵測。"
+      },
+      {
+        "title": "組網與穿透",
+        "text": "以行程託管方式整合 Tailscale、frp（frpc / frps）與 cloudflared 通道，一律使用上游最新版本。"
+      },
+      {
+        "title": "Docker 管理",
+        "text": "容器建立與編輯、日誌與終端機、Compose、映像檔更新與一鍵升級（失敗自動回復）、網路與磁碟區管理。"
+      },
+      {
+        "title": "Web 終端機",
+        "text": "SSH、Telnet 與本機 Shell（預設關閉），支援代理、持久工作階段、SFTP 檔案管理與分割畫面。"
+      },
+      {
+        "title": "檔案服務",
+        "text": "WebDAV、FTP 服務與儲存管理，支援本機與遠端 WebDAV 掛載及線上檔案管理。"
+      },
+      {
+        "title": "排程工作與喚醒",
+        "text": "cron 定時執行命令或 HTTP 請求並保留記錄；網路喚醒魔術封包廣播與上線偵測。"
+      },
+      {
+        "title": "安全強化",
+        "text": "兩步驟驗證、登入失敗限流、安全入口、僅限內網存取、管理介面 HTTPS、API 權杖。"
+      },
+      {
+        "title": "存取控制",
+        "text": "站台路徑規則、臨時分享連結、驗證失敗自動封鎖、GeoIP 國家過濾與 IP 黑白名單。"
+      },
+      {
+        "title": "存取統計與監控",
+        "text": "分鐘級存取與流量統計，並以 Prometheus 指標公開，方便接入既有監控。"
+      },
+      {
+        "title": "通知中心",
+        "text": "Webhook、Telegram、Bark、企業微信、釘釘、飛書與電子郵件；依等級與事件規則推送，支援靜默去重。"
+      },
+      {
+        "title": "設定備份",
+        "text": "加密備份（scrypt + AES-GCM）、保留策略與排程備份，可寫入本機目錄或儲存掛載點。"
+      },
+      {
+        "title": "網路診斷",
+        "text": "Ping、路由追蹤、連接埠探測、DNS 查詢、測速與區域網路掃描，以背景工作方式執行。"
+      },
+      {
+        "title": "API、命令列與 MCP",
+        "text": "多權杖依模組授權，自動產生 OpenAPI 文件；gately ctl 呼叫實例，gately mcp 接入 AI 助理。"
+      }
     ],
     "moreModules": "查看全部模組 →",
     "promisesTitle": "執行在網路邊界的軟體，應該讓你看得清楚",
     "promisesDesc": "它掌握 DNS 金鑰與憑證私鑰，所以每一個行為都應該能被檢視。",
     "promises": [
-      { "title": "透明", "text": "預設不連線任何專案方伺服器，不回報裝置資訊。公網 IP 查詢、STUN 伺服器等所有對外位址都看得見、改得了、關得掉。" },
-      { "title": "可稽核", "text": "設定是純文字 JSON，權限 0600，可直接納入 git 做 diff 與回復。敏感欄位在 API 輸出中會遮蔽。" },
-      { "title": "自主可控", "text": "第三方登入使用你自己申請的 OAuth 應用程式，不經過任何中轉；不內建自動更新，升級由 Docker 或套件管理員負責。" },
-      { "title": "單一檔案部署", "text": "一個靜態執行檔內嵌前端，支援 Docker、systemd、OpenWrt，涵蓋 NAS、軟路由與雲端主機。" }
+      {
+        "title": "透明",
+        "text": "預設不連線任何專案方伺服器，不回報裝置資訊。公網 IP 查詢、STUN 伺服器等所有對外位址都看得見、改得了、關得掉。"
+      },
+      {
+        "title": "可稽核",
+        "text": "設定是純文字 JSON，權限 0600，可直接納入 git 做 diff 與回復。敏感欄位在 API 輸出中會遮蔽。"
+      },
+      {
+        "title": "自主可控",
+        "text": "第三方登入使用你自己申請的 OAuth 應用程式，不經過任何中轉；不內建自動更新，升級由 Docker 或套件管理員負責。"
+      },
+      {
+        "title": "單一檔案部署",
+        "text": "一個靜態執行檔內嵌前端，支援 Docker、systemd、OpenWrt，涵蓋 NAS、軟路由與雲端主機。"
+      }
     ],
     "installTitle": "一分鐘跑起來",
     "installDesc": "映像檔支援 amd64、arm64、arm/v7。啟動後造訪 <code>http://裝置IP:16680</code>，以 <code>admin</code> 與日誌中的初始密碼登入。",
@@ -136,22 +239,65 @@
     "compareTitle": "與 Lucky 對照",
     "compareDesc": "Gately 受 Lucky 啟發，涵蓋常用情境，並可一鍵匯入既有設定。Lucky 的功能更豐富，兩者可以並存使用。",
     "compareRows": [
-      ["原始碼", "開源（Apache-2.0）", "閉源"],
-      ["設定檔", "純文字 JSON，可用 git 管理", "專有格式（.lkcf）"],
-      ["官方服務", "預設無，對外位址可改可關", "提供線上更新、第三方登入中轉等官方服務"],
-      ["第三方登入", "使用自己的 OAuth 應用程式", "經官方中轉服務"],
-      ["從 Lucky 遷移", "一鍵匯入 .lkcf / 整站 zip", "—"],
-      ["升級方式", "Docker / 套件管理員", "內建線上自動更新"],
-      ["功能廣度", "涵蓋常用核心能力", "更豐富，如 DLNA、網路硬碟掛載等"]
+      [
+        "原始碼",
+        "開源（Apache-2.0）",
+        "閉源"
+      ],
+      [
+        "設定檔",
+        "純文字 JSON，可用 git 管理",
+        "專有格式（.lkcf）"
+      ],
+      [
+        "官方服務",
+        "預設無，對外位址可改可關",
+        "提供線上更新、第三方登入中轉等官方服務"
+      ],
+      [
+        "第三方登入",
+        "使用自己的 OAuth 應用程式",
+        "經官方中轉服務"
+      ],
+      [
+        "從 Lucky 遷移",
+        "一鍵匯入 .lkcf / 整站 zip",
+        "—"
+      ],
+      [
+        "升級方式",
+        "Docker / 套件管理員",
+        "內建線上自動更新"
+      ],
+      [
+        "功能廣度",
+        "涵蓋常用核心能力",
+        "更豐富，如 DLNA、網路硬碟掛載等"
+      ]
     ],
     "migrationGuide": "閱讀遷移指南 →",
     "faqTitle": "常見問題",
     "faqs": [
-      { "q": "Gately 與 Lucky 是什麼關係？", "a": "Gately 是獨立實作的開源專案，與 Lucky 專案方沒有隸屬關係，產品思路來自 Lucky，感謝其作者與社群的貢獻。相容性建立在公開可觀察的行為、介面與設定格式上，不包含從 Lucky 執行檔或前端產物複製的程式碼。" },
-      { "q": "可以直接遷移現有的 Lucky 設定嗎？", "a": "可以。在「設定 → 備份與遷移」選擇 .lkcf 檔案或整站設定 zip，預覽後匯入。匯入的規則預設停用，可與 Lucky 並存，逐個模組切換，也隨時可以退回。" },
-      { "q": "需要連線到你們的伺服器嗎？", "a": "不需要。Gately 預設不連線任何專案方伺服器，也不會回報資訊。" },
-      { "q": "適合在哪些裝置上執行？", "a": "家用 NAS、軟路由、雲端主機與各類伺服器都可以，提供 Linux（amd64 / arm64 / arm / mips / mipsle / riscv64）、macOS、Windows、FreeBSD 執行檔，以及 amd64 / arm64 / arm/v7 的 Docker 映像檔。" },
-      { "q": "連接埠轉發、STUN 為什麼建議使用 host 網路？", "a": "這些模組需要直接監聽主機的連接埠。不需要 Docker 管理時，可以移除 docker.sock 掛載。" }
+      {
+        "q": "Gately 與 Lucky 是什麼關係？",
+        "a": "Gately 是獨立實作的開源專案，與 Lucky 專案方沒有隸屬關係，產品思路來自 Lucky，感謝其作者與社群的貢獻。相容性建立在公開可觀察的行為、介面與設定格式上，不包含從 Lucky 執行檔或前端產物複製的程式碼。"
+      },
+      {
+        "q": "可以直接遷移現有的 Lucky 設定嗎？",
+        "a": "可以。在「設定 → 備份與遷移」選擇 .lkcf 檔案或整站設定 zip，預覽後匯入。匯入的規則預設停用，可與 Lucky 並存，逐個模組切換，也隨時可以退回。"
+      },
+      {
+        "q": "需要連線到你們的伺服器嗎？",
+        "a": "不需要。Gately 預設不連線任何專案方伺服器，也不會回報資訊。"
+      },
+      {
+        "q": "適合在哪些裝置上執行？",
+        "a": "家用 NAS、軟路由、雲端主機與各類伺服器都可以，提供 Linux（amd64 / arm64 / arm / mips / mipsle / riscv64）、macOS、Windows、FreeBSD 執行檔，以及 amd64 / arm64 / arm/v7 的 Docker 映像檔。"
+      },
+      {
+        "q": "連接埠轉發、STUN 為什麼建議使用 host 網路？",
+        "a": "這些模組需要直接監聽主機的連接埠。不需要 Docker 管理時，可以移除 docker.sock 掛載。"
+      }
     ],
     "moreFaq": "更多問題 →",
     "finalTitle": "把網路邊界的控制權拿回來",

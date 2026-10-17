@@ -70,7 +70,8 @@
     "langMenuLabel": "Language",
     "lightModeSwitchTitle": "Switch to light theme",
     "darkModeSwitchTitle": "Switch to dark theme",
-    "footerMessage": "Released under the Apache-2.0 license. Gately is not affiliated with the Lucky project."
+    "footerMessage": "Released under the Apache-2.0 license. Gately is not affiliated with the Lucky project.",
+    "aiNotice": "This page was translated with AI and may contain inaccuracies. Help improve it on GitHub."
   },
   "home": {
     "pill": "Open source · Auditable · One-click migration from Lucky",
@@ -81,49 +82,151 @@
     "ctaDownload": "Download",
     "mockTitle": "gately · Overview",
     "mockRows": [
-      ["Dynamic DNS", "75 records in sync", "ok"],
-      ["STUN Traversal", "18 rules running", "ok"],
-      ["Port Forwarding", "25 rules running", "ok"],
-      ["Web Services", "27 sites · HTTPS", "ok"],
-      ["SSL Certificates", "5 certificates · auto-renewal", "ok"],
-      ["WAF Firewall", "CRS v4 · blocking mode", "warn"]
+      [
+        "Dynamic DNS",
+        "75 records in sync",
+        "ok"
+      ],
+      [
+        "STUN Traversal",
+        "18 rules running",
+        "ok"
+      ],
+      [
+        "Port Forwarding",
+        "25 rules running",
+        "ok"
+      ],
+      [
+        "Web Services",
+        "27 sites · HTTPS",
+        "ok"
+      ],
+      [
+        "SSL Certificates",
+        "5 certificates · auto-renewal",
+        "ok"
+      ],
+      [
+        "WAF Firewall",
+        "CRS v4 · blocking mode",
+        "warn"
+      ]
     ],
     "stats": [
-      { "value": "~22 MB", "label": "Single binary with the admin UI embedded" },
-      { "value": "0", "label": "Connections to project servers by default" },
-      { "value": "Cross-platform", "label": "Linux / macOS / Windows / FreeBSD, including ARM, MIPS and RISC-V" },
-      { "value": "Apache-2.0", "label": "Open-source license, auditable source" }
+      {
+        "value": "~22 MB",
+        "label": "Single binary with the admin UI embedded"
+      },
+      {
+        "value": "0",
+        "label": "Connections to project servers by default"
+      },
+      {
+        "value": "Cross-platform",
+        "label": "Linux / macOS / Windows / FreeBSD, including ARM, MIPS and RISC-V"
+      },
+      {
+        "value": "Apache-2.0",
+        "label": "Open-source license, auditable source"
+      }
     ],
     "featuresTitle": "The everyday network toolbox, managed in one place",
     "featuresDesc": "Covers the features home networks and server ops rely on most. Every module can be enabled or disabled on its own.",
     "features": [
-      { "title": "Dynamic DNS", "text": "11 providers including Alibaba Cloud, Cloudflare, Tencent Cloud, DNSPod, Huawei Cloud and GoDaddy; detect your IP by URL, network interface or command, IPv4 and IPv6, webhook notifications." },
-      { "title": "STUN Traversal", "text": "TCP / UDP hole punching and keep-alive, UPnP / NAT-PMP, built-in forwarding; triggers webhooks and scripts when the public address changes." },
-      { "title": "Port Forwarding", "text": "TCP / UDP, IPv4 / IPv6, port ranges, multi-target failover, connection limits and traffic statistics." },
-      { "title": "SSL Certificates", "text": "Automatic ACME DNS-01 issuance and renewal with wildcard and EAB support; map certificates to a directory and run a script after changes." },
-      { "title": "Web Services", "text": "Per-domain reverse proxy, redirects and static files; HTTPS, WebSocket and PROXY protocol; weighted multi-backend policies, health checks, compression, rate limiting and response caching." },
-      { "title": "WAF Firewall", "text": "Built-in Coraza and OWASP CRS v4, rules enabled per file, custom SecLang support, block or detect-only mode." },
-      { "title": "Networking & Tunnels", "text": "Supervises Tailscale, frp (frpc / frps) and cloudflared tunnels as managed processes, always using the latest upstream release." },
-      { "title": "Docker Management", "text": "Create and edit containers, logs and terminals, Compose, image updates with one-click upgrade (automatic rollback on failure), networks and volumes." },
-      { "title": "Web Terminal", "text": "SSH, Telnet and a local shell (disabled by default) with proxy support, persistent sessions, SFTP file management and split panes." },
-      { "title": "File Services", "text": "WebDAV and FTP services plus storage management, with local and remote WebDAV mounts and online file management." },
-      { "title": "Scheduled Tasks & Wake-on-LAN", "text": "Cron jobs that run commands or HTTP requests and keep run history; Wake-on-LAN magic packet broadcast and online probing." },
-      { "title": "Security Hardening", "text": "Two-factor authentication, login rate limiting, secure entrance path, LAN-only access, HTTPS for the admin UI and API tokens." },
-      { "title": "Access Control", "text": "Per-site path rules, temporary share links, automatic bans on repeated auth failures, GeoIP country filtering and IP allow/block lists." },
-      { "title": "Traffic Stats & Monitoring", "text": "Per-minute access and traffic statistics, exposed as Prometheus metrics for your existing monitoring stack." },
-      { "title": "Notification Center", "text": "Webhook, Telegram, Bark, WeCom, DingTalk, Feishu and email; push by severity and event rules, with silencing and de-duplication." },
-      { "title": "Configuration Backup", "text": "Encrypted backups (scrypt + AES-GCM), retention policies and scheduled backups to a local directory or a storage mount." },
-      { "title": "Network Diagnostics", "text": "Ping, traceroute, port probing, DNS lookup, speed test and LAN scan, all run as background tasks." },
-      { "title": "API, CLI & MCP", "text": "Multiple tokens with per-module permissions and auto-generated OpenAPI docs; use gately ctl to drive an instance and gately mcp to connect AI assistants." }
+      {
+        "title": "Dynamic DNS",
+        "text": "11 providers including Alibaba Cloud, Cloudflare, Tencent Cloud, DNSPod, Huawei Cloud and GoDaddy; detect your IP by URL, network interface or command, IPv4 and IPv6, webhook notifications."
+      },
+      {
+        "title": "STUN Traversal",
+        "text": "TCP / UDP hole punching and keep-alive, UPnP / NAT-PMP, built-in forwarding; triggers webhooks and scripts when the public address changes."
+      },
+      {
+        "title": "Port Forwarding",
+        "text": "TCP / UDP, IPv4 / IPv6, port ranges, multi-target failover, connection limits and traffic statistics."
+      },
+      {
+        "title": "SSL Certificates",
+        "text": "Automatic ACME DNS-01 issuance and renewal with wildcard and EAB support; map certificates to a directory and run a script after changes."
+      },
+      {
+        "title": "Web Services",
+        "text": "Per-domain reverse proxy, redirects and static files; HTTPS, WebSocket and PROXY protocol; weighted multi-backend policies, health checks, compression, rate limiting and response caching."
+      },
+      {
+        "title": "WAF Firewall",
+        "text": "Built-in Coraza and OWASP CRS v4, rules enabled per file, custom SecLang support, block or detect-only mode."
+      },
+      {
+        "title": "Networking & Tunnels",
+        "text": "Supervises Tailscale, frp (frpc / frps) and cloudflared tunnels as managed processes, always using the latest upstream release."
+      },
+      {
+        "title": "Docker Management",
+        "text": "Create and edit containers, logs and terminals, Compose, image updates with one-click upgrade (automatic rollback on failure), networks and volumes."
+      },
+      {
+        "title": "Web Terminal",
+        "text": "SSH, Telnet and a local shell (disabled by default) with proxy support, persistent sessions, SFTP file management and split panes."
+      },
+      {
+        "title": "File Services",
+        "text": "WebDAV and FTP services plus storage management, with local and remote WebDAV mounts and online file management."
+      },
+      {
+        "title": "Scheduled Tasks & Wake-on-LAN",
+        "text": "Cron jobs that run commands or HTTP requests and keep run history; Wake-on-LAN magic packet broadcast and online probing."
+      },
+      {
+        "title": "Security Hardening",
+        "text": "Two-factor authentication, login rate limiting, secure entrance path, LAN-only access, HTTPS for the admin UI and API tokens."
+      },
+      {
+        "title": "Access Control",
+        "text": "Per-site path rules, temporary share links, automatic bans on repeated auth failures, GeoIP country filtering and IP allow/block lists."
+      },
+      {
+        "title": "Traffic Stats & Monitoring",
+        "text": "Per-minute access and traffic statistics, exposed as Prometheus metrics for your existing monitoring stack."
+      },
+      {
+        "title": "Notification Center",
+        "text": "Webhook, Telegram, Bark, WeCom, DingTalk, Feishu and email; push by severity and event rules, with silencing and de-duplication."
+      },
+      {
+        "title": "Configuration Backup",
+        "text": "Encrypted backups (scrypt + AES-GCM), retention policies and scheduled backups to a local directory or a storage mount."
+      },
+      {
+        "title": "Network Diagnostics",
+        "text": "Ping, traceroute, port probing, DNS lookup, speed test and LAN scan, all run as background tasks."
+      },
+      {
+        "title": "API, CLI & MCP",
+        "text": "Multiple tokens with per-module permissions and auto-generated OpenAPI docs; use gately ctl to drive an instance and gately mcp to connect AI assistants."
+      }
     ],
     "moreModules": "See all modules →",
     "promisesTitle": "Software on your network edge should be easy to see through",
     "promisesDesc": "It holds your DNS keys and certificate private keys, so every behavior should be open to inspection.",
     "promises": [
-      { "title": "Transparent", "text": "No connections to project servers and no device reporting by default. Every outbound address, such as public IP lookup and STUN servers, is visible, editable and can be turned off." },
-      { "title": "Auditable", "text": "Configuration is plain JSON with 0600 permissions, ready for git diffs and rollbacks. Sensitive fields are masked in API output." },
-      { "title": "In your control", "text": "Third-party sign-in uses OAuth apps you register yourself, with no relay in between. There is no built-in self-update; upgrades come from Docker or your package manager." },
-      { "title": "Single-file deployment", "text": "One static binary with the frontend embedded. Runs under Docker, systemd and OpenWrt, covering NAS, soft routers and cloud hosts." }
+      {
+        "title": "Transparent",
+        "text": "No connections to project servers and no device reporting by default. Every outbound address, such as public IP lookup and STUN servers, is visible, editable and can be turned off."
+      },
+      {
+        "title": "Auditable",
+        "text": "Configuration is plain JSON with 0600 permissions, ready for git diffs and rollbacks. Sensitive fields are masked in API output."
+      },
+      {
+        "title": "In your control",
+        "text": "Third-party sign-in uses OAuth apps you register yourself, with no relay in between. There is no built-in self-update; upgrades come from Docker or your package manager."
+      },
+      {
+        "title": "Single-file deployment",
+        "text": "One static binary with the frontend embedded. Runs under Docker, systemd and OpenWrt, covering NAS, soft routers and cloud hosts."
+      }
     ],
     "installTitle": "Up and running in a minute",
     "installDesc": "Images are available for amd64, arm64 and arm/v7. After starting, open <code>http://DEVICE_IP:16680</code> and sign in as <code>admin</code> with the initial password from the logs.",
@@ -136,22 +239,65 @@
     "compareTitle": "Compared with Lucky",
     "compareDesc": "Gately is inspired by Lucky, covers the common use cases and can import your existing configuration in one click. Lucky offers more features, and the two can run side by side.",
     "compareRows": [
-      ["Source code", "Open source (Apache-2.0)", "Closed source"],
-      ["Config file", "Plain JSON, git-friendly", "Proprietary format (.lkcf)"],
-      ["Official services", "None by default; outbound addresses are editable and can be turned off", "Online updates, third-party sign-in relay and other official services"],
-      ["Third-party sign-in", "Your own OAuth apps", "Through the official relay service"],
-      ["Migrating from Lucky", "One-click import of .lkcf / whole-site zip", "—"],
-      ["Upgrades", "Docker / package manager", "Built-in online self-update"],
-      ["Feature breadth", "Covers the common core features", "Broader, e.g. DLNA and cloud-drive mounts"]
+      [
+        "Source code",
+        "Open source (Apache-2.0)",
+        "Closed source"
+      ],
+      [
+        "Config file",
+        "Plain JSON, git-friendly",
+        "Proprietary format (.lkcf)"
+      ],
+      [
+        "Official services",
+        "None by default; outbound addresses are editable and can be turned off",
+        "Online updates, third-party sign-in relay and other official services"
+      ],
+      [
+        "Third-party sign-in",
+        "Your own OAuth apps",
+        "Through the official relay service"
+      ],
+      [
+        "Migrating from Lucky",
+        "One-click import of .lkcf / whole-site zip",
+        "—"
+      ],
+      [
+        "Upgrades",
+        "Docker / package manager",
+        "Built-in online self-update"
+      ],
+      [
+        "Feature breadth",
+        "Covers the common core features",
+        "Broader, e.g. DLNA and cloud-drive mounts"
+      ]
     ],
     "migrationGuide": "Read the migration guide →",
     "faqTitle": "FAQ",
     "faqs": [
-      { "q": "How is Gately related to Lucky?", "a": "Gately is an independent open-source implementation with no affiliation to the Lucky project. The product idea comes from Lucky, and we are grateful to its author and community. Compatibility is based on publicly observable behavior, interfaces and configuration formats, and no code is copied from Lucky binaries or frontend artifacts." },
-      { "q": "Can I migrate my existing Lucky configuration directly?", "a": "Yes. Under Settings → Backup & Migration, choose a .lkcf file or a whole-site config zip, preview it, then import. Imported rules are disabled by default, so you can run alongside Lucky, switch over module by module and roll back at any time." },
-      { "q": "Does it need to connect to your servers?", "a": "No. Gately does not connect to any project servers by default and reports nothing." },
-      { "q": "Which devices can it run on?", "a": "Home NAS, soft routers, cloud hosts and servers of all kinds. Binaries are provided for Linux (amd64 / arm64 / arm / mips / mipsle / riscv64), macOS, Windows and FreeBSD, plus Docker images for amd64 / arm64 / arm/v7." },
-      { "q": "Why is host networking recommended for port forwarding and STUN?", "a": "These modules listen directly on host ports. If you do not need Docker management, you can drop the docker.sock mount." }
+      {
+        "q": "How is Gately related to Lucky?",
+        "a": "Gately is an independent open-source implementation with no affiliation to the Lucky project. The product idea comes from Lucky, and we are grateful to its author and community. Compatibility is based on publicly observable behavior, interfaces and configuration formats, and no code is copied from Lucky binaries or frontend artifacts."
+      },
+      {
+        "q": "Can I migrate my existing Lucky configuration directly?",
+        "a": "Yes. Under Settings → Backup & Migration, choose a .lkcf file or a whole-site config zip, preview it, then import. Imported rules are disabled by default, so you can run alongside Lucky, switch over module by module and roll back at any time."
+      },
+      {
+        "q": "Does it need to connect to your servers?",
+        "a": "No. Gately does not connect to any project servers by default and reports nothing."
+      },
+      {
+        "q": "Which devices can it run on?",
+        "a": "Home NAS, soft routers, cloud hosts and servers of all kinds. Binaries are provided for Linux (amd64 / arm64 / arm / mips / mipsle / riscv64), macOS, Windows and FreeBSD, plus Docker images for amd64 / arm64 / arm/v7."
+      },
+      {
+        "q": "Why is host networking recommended for port forwarding and STUN?",
+        "a": "These modules listen directly on host ports. If you do not need Docker management, you can drop the docker.sock mount."
+      }
     ],
     "moreFaq": "More questions →",
     "finalTitle": "Take back control of your network edge",

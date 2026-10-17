@@ -1,11 +1,13 @@
 import DefaultTheme from 'vitepress/theme'
 import type { Theme } from 'vitepress'
+import Layout from './Layout.vue'
 import HomeLanding from './components/HomeLanding.vue'
 import DownloadList from './components/DownloadList.vue'
 import './custom.css'
 
 export default {
   extends: DefaultTheme,
+  Layout,
   enhanceApp({ app }) {
     // 用户在语言菜单里手动切换语言后记住选择，之后不再按浏览器语言自动跳转
     if (typeof document !== 'undefined') {

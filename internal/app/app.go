@@ -25,6 +25,7 @@ import (
 	"github.com/wangwanjie/gately/internal/config"
 	"github.com/wangwanjie/gately/internal/events"
 	"github.com/wangwanjie/gately/internal/httpx"
+	"github.com/wangwanjie/gately/internal/i18n"
 	"github.com/wangwanjie/gately/internal/logbuf"
 	"github.com/wangwanjie/gately/internal/luckyimport"
 	"github.com/wangwanjie/gately/internal/module"
@@ -95,7 +96,8 @@ func New(opts Options) (*App, error) {
 	if err != nil {
 		return nil, err
 	}
-	logger := log.New(os.Stderr, "", log.LstdFlags)
+	// 标准日志按服务端语言翻译后输出
+	logger := log.New(i18n.NewWriter(os.Stderr), "", log.LstdFlags)
 	a := &App{
 		opts:      opts,
 		store:     store,
@@ -199,7 +201,7 @@ func (a *App) Handler() http.Handler {
 	a.routeDocs = rec.docs
 	mux.Handle("/api/", a.requireAuth(protected))
 	mux.Handle("/", a.staticHandler())
-	return securityHeaders(a.accessControl(httpx.SameOrigin(mux)))
+	return securityHeaders(i18n.Middleware(a.accessControl(httpx.SameOrigin(mux))))
 }
 
 // Run 启动所有模块和管理服务，阻塞直到 ctx 取消。收到重启请求时停止全部服务后重新执行自身。

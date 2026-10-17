@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
-	"html/template"
 	"net"
 	"net/http"
 	"net/http/httputil"
@@ -17,6 +16,7 @@ import (
 	proxyproto "github.com/pires/go-proxyproto"
 
 	"github.com/wangwanjie/gately/internal/geoip"
+	"github.com/wangwanjie/gately/internal/i18n"
 	"github.com/wangwanjie/gately/internal/logbuf"
 )
 
@@ -427,7 +427,7 @@ func (h *siteHandler) String() string {
 	return fmt.Sprintf("%s %v", h.site.Type, h.site.Domains)
 }
 
-var errorPageTmpl = template.Must(template.New("err").Parse(`<!doctype html>
+const errorPageSrc = `<!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{{.Code}} {{.Title}}</title>
 <style>
@@ -436,7 +436,7 @@ body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:c
 .code{font-size:44px;font-weight:600;color:#0e7c66;margin:0}h1{font-size:18px;margin:8px 0}p{color:#777;font-size:14px;line-height:1.6;margin:0}
 .host{margin-top:16px;font-size:12px;color:#aaa;word-break:break-all}
 @media (prefers-color-scheme:dark){body{background:#141817;color:#ddd}.box{background:#1d2221;box-shadow:none}p{color:#999}}
-</style></head><body><div class="box"><p class="code">{{.Code}}</p><h1>{{.Title}}</h1><p>{{.Detail}}</p><div class="host">{{.Host}} · Gately</div></div></body></html>`))
+</style></head><body><div class="box"><p class="code">{{.Code}}</p><h1>{{.Title}}</h1><p>{{.Detail}}</p><div class="host">{{.Host}} · Gately</div></div></body></html>`
 
 // writeErrorPage 浏览器访问时输出简洁的错误页，其他客户端输出纯文本。
 func writeErrorPage(w http.ResponseWriter, r *http.Request, code int, title, detail string) {
@@ -447,5 +447,6 @@ func writeErrorPage(w http.ResponseWriter, r *http.Request, code int, title, det
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.Header().Set("Cache-Control", "no-store")
 	w.WriteHeader(code)
-	_ = errorPageTmpl.Execute(w, map[string]any{"Code": code, "Title": title, "Detail": detail, "Host": r.Host})
+	lang := visitorLang(r)
+	_ = executeLocalized(w, "err", errorPageSrc, lang, map[string]any{"Code": code, "Title": i18n.Tr(lang, title), "Detail": i18n.Tr(lang, detail), "Host": r.Host})
 }

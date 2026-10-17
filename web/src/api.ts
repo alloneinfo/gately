@@ -1,6 +1,6 @@
 // 管理 API 封装：会话通过 HttpOnly Cookie 维持，401 时跳转登录页。
 import router from './router'
-import { t } from './i18n'
+import { i18n, t } from './i18n'
 
 export class ApiError extends Error {
   constructor(
@@ -13,7 +13,8 @@ export class ApiError extends Error {
 }
 
 async function request<T>(method: string, url: string, body?: unknown): Promise<T> {
-  const init: RequestInit = { method, credentials: 'same-origin', headers: {} }
+  // 带上界面语言，后端据此翻译错误说明与状态文案
+  const init: RequestInit = { method, credentials: 'same-origin', headers: { 'Accept-Language': i18n.global.locale.value } }
   if (body instanceof FormData) {
     init.body = body
   } else if (body !== undefined) {
@@ -155,6 +156,7 @@ export interface SystemSettings {
   maxLoginFailures: number
   lockMinutes: number
   timeZone: string
+  language: string
   dnsServers: string[] | null
   logLines: number
   gcPercent: number

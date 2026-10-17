@@ -51,5 +51,6 @@
   "notLoggedIn": "Nicht angemeldet",
   "durationDaysHours": "{d} T {h} Std.",
   "durationHoursMinutes": "{h} Std. {m} Min.",
-  "durationMinutes": "{m} Min."
+  "durationMinutes": "{m} Min.",
+  "aiTranslated": "Die Oberfläche wurde mit KI übersetzt und kann Ungenauigkeiten enthalten. Hilf mit, sie auf GitHub zu verbessern."
 }

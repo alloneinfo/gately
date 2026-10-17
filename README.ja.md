@@ -76,7 +76,7 @@ docker logs gately 2>&1 | grep -i "initial password"
 curl -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns/tasks
 ```
 
-アカウント、2 段階認証、トークン管理、およびバックアップ、復元、再起動、システム設定の API はログインセッションでのみ利用できます。すべての API、必要な権限、データ構造は管理コンソールの「API ドキュメント」ページで確認できます。`make api-docs` で [docs/api](docs/api)（`openapi.json` と `API.md`）にエクスポートすることもでき、公式サイト https://gately.cn の公開時にそのまま参照されます。
+アカウント、2 段階認証、トークン管理、およびバックアップ、復元、再起動、システム設定の API はログインセッションでのみ利用できます。すべての API、必要な権限、データ構造は管理コンソールの「API ドキュメント」ページで確認できます。`make api-docs` で [docs/api](docs/api/ja)（`openapi.json` と `API.md`）にエクスポートすることもでき、公式サイト https://gately.cn の公開時にそのまま参照されます。
 
 旧バージョンからアップグレードすると、従来のグローバル API トークンは自動的に「レガシートークン」になります（値は同じで、全モジュールの権限を持ちます）。API トークンページで権限を絞るか、新しいトークンに切り替えることを推奨します。
 

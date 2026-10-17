@@ -233,6 +233,13 @@
                 </el-select>
                 <div class="form-help">{{ t('settings.network.timeZoneHelp', { zone: info?.timeZone || '-' }) }}</div>
               </el-form-item>
+              <el-form-item :label="t('settings.network.serverLanguage')">
+                <el-select v-model="form.language" class="w-280">
+                  <el-option value="" :label="t('settings.network.serverLanguageAuto')" />
+                  <el-option v-for="l in locales" :key="l.code" :value="l.code" :label="l.name" />
+                </el-select>
+                <div class="form-help">{{ t('settings.network.serverLanguageHelp') }}</div>
+              </el-form-item>
             </el-form>
           </div>
         </div>
@@ -415,6 +422,7 @@ import StatusBadge from '../components/StatusBadge.vue'
 import SaveBar from '../components/SaveBar.vue'
 import RestartOverlay from '../components/RestartOverlay.vue'
 import { useFormLayout } from '../composables/useIsMobile'
+import { locales } from '../i18n/locales'
 
 const { t } = useI18n()
 const route = useRoute()

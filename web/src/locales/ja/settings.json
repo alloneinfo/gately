@@ -124,7 +124,10 @@
       "losAngeles": "ロサンゼルス",
       "sydney": "シドニー",
       "utc": "協定世界時"
-    }
+    },
+    "serverLanguage": "サーバーの言語",
+    "serverLanguageAuto": "システムに従う",
+    "serverLanguageHelp": "ログや通知など、画面を伴わない出力に使う言語です。空の場合はシステムの環境変数（GATELY_LANG、LANG）から自動で選びます。"
   },
   "runtime": {
     "title": "実行パラメーター",
