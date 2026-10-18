@@ -471,6 +471,7 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | GET | `/api/system/info` | `status:read` | Consulter les informations système |
 | GET | `/api/system/update` | `status:read` | Rechercher une nouvelle version |
 | GET | `/api/system/backup` | Session connectée uniquement | Télécharger la sauvegarde de configuration |
+| GET | `/api/system/diagnostics` | Session connectée uniquement | Exporter le paquet de diagnostic anonymisé |
 | POST | `/api/system/restore` | Session connectée uniquement | Restaurer la configuration depuis une sauvegarde |
 | POST | `/api/system/restart` | Session connectée uniquement | Redémarrer Gately |
 | GET | `/api/openapi.json` | Tout jeton valide | Obtenir la description OpenAPI de cette API |

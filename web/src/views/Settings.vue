@@ -395,6 +395,8 @@
         </div>
 
         <BackupSchedule />
+
+        <DiagnosticsCard />
       </el-tab-pane>
 
     </el-tabs>
@@ -406,6 +408,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
 import BackupSchedule from '../components/BackupSchedule.vue'
+import DiagnosticsCard from '../components/DiagnosticsCard.vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import QRCode from 'qrcode'

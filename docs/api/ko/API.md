@@ -471,6 +471,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | GET | `/api/system/info` | `status:read` | 시스템 정보 보기 |
 | GET | `/api/system/update` | `status:read` | 새 버전 확인 |
 | GET | `/api/system/backup` | 로그인 세션 전용 | 설정 백업 다운로드 |
+| GET | `/api/system/diagnostics` | 로그인 세션 전용 | 마스킹된 진단 패키지 내보내기 |
 | POST | `/api/system/restore` | 로그인 세션 전용 | 백업에서 설정 복원 |
 | POST | `/api/system/restart` | 로그인 세션 전용 | Gately 재시작 |
 | GET | `/api/openapi.json` | 유효한 모든 토큰 | 이 API의 OpenAPI 설명 가져오기 |

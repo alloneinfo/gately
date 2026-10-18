@@ -1,0 +1,23 @@
+{
+  "title": "Exportar pacote de diagnóstico",
+  "desc": "Ao encontrar um problema, exporte um pacote de diagnóstico e anexe-o ao seu issue no GitHub para localizarmos a causa mais rápido. O pacote é gerado localmente e não é enviado a lugar nenhum. Você pode visualizar tudo antes de baixar e abrir cada arquivo em um editor de texto depois de descompactar.",
+  "includeTitle": "O que é exportado",
+  "in1": "Versão, sistema e arquitetura, capacidade de CPU / memória / disco, tempo de atividade",
+  "in2": "Resumo do estado de cada módulo",
+  "in3": "Estrutura da configuração: nomes de campos, números, chaves liga/desliga e valores enumerados como protocolo e modo",
+  "in4": "Logs recentes (opcional), com IPs, domínios, e-mails e URLs mascarados",
+  "excludeTitle": "O que nunca é exportado",
+  "ex1": "Senhas, tokens, chaves, certificados e chaves privadas (incluindo senhas e chaves SSH)",
+  "ex2": "Domínios, nomes de host, IPs e endereços MAC reais (apenas categorias como privado / público são mantidas)",
+  "ex3": "Conta de administrador, tokens de API, variáveis de ambiente de contêineres Docker, conteúdo de arquivos e sessões de terminal",
+  "ex4": "Nomes, observações e outros textos que você digitou (substituídos por {tag} na configuração)",
+  "withLogs": "Incluir logs recentes",
+  "logsHint": "Os logs são o que mais ajuda com erros em tempo de execução, então recomendamos incluí-los.",
+  "note": "Um nome digitado por você pode aparecer nos logs; visualize antes de publicar.",
+  "preview": "Visualizar conteúdo",
+  "download": "Baixar pacote",
+  "openIssue": "Abrir um issue",
+  "previewTitle": "Visualização do pacote de diagnóstico",
+  "previewHint": "Isto é tudo o que será exportado. Não há arquivos ocultos.",
+  "downloadFailed": "Falha na exportação ({status})"
+}

@@ -1,0 +1,23 @@
+{
+  "title": "Diagnosepaket exportieren",
+  "desc": "Bei Problemen exportieren Sie ein Diagnosepaket und hängen es an Ihr GitHub-Issue an, damit wir die Ursache schneller finden. Das Paket wird lokal erzeugt und nirgendwohin hochgeladen. Vor dem Download können Sie alles in der Vorschau prüfen und nach dem Entpacken jede Datei in einem Texteditor öffnen.",
+  "includeTitle": "Was exportiert wird",
+  "in1": "Version, Betriebssystem und Architektur, CPU-/Speicher-/Festplattenkapazität, Laufzeit",
+  "in2": "Statusübersicht jedes Moduls",
+  "in3": "Konfigurationsstruktur: Feldnamen, Zahlen, Schalter und Aufzählungswerte wie Protokoll und Modus",
+  "in4": "Aktuelle Laufzeitprotokolle (optional), in denen IPs, Domains, E-Mail-Adressen und URLs maskiert sind",
+  "excludeTitle": "Was nie exportiert wird",
+  "ex1": "Passwörter, Token, Schlüssel, Zertifikate und private Schlüssel (einschließlich SSH-Passwörter und -Schlüssel)",
+  "ex2": "Domainnamen, Hostnamen, echte IP- und MAC-Adressen (nur Kategorien wie privat / öffentlich bleiben erhalten)",
+  "ex3": "Administratorkonto, API-Token, Umgebungsvariablen von Docker-Containern, Dateiinhalte und Terminalsitzungen",
+  "ex4": "Von Ihnen eingegebene Namen, Bemerkungen und andere Texte (in der Konfiguration stets durch {tag} ersetzt)",
+  "withLogs": "Aktuelle Protokolle einbeziehen",
+  "logsHint": "Protokolle helfen bei Laufzeitfehlern am meisten, daher wird empfohlen, sie einzubeziehen.",
+  "note": "Ein von Ihnen eingegebener Name kann in Protokollen auftauchen; prüfen Sie die Vorschau vor dem Veröffentlichen.",
+  "preview": "Inhalt ansehen",
+  "download": "Paket herunterladen",
+  "openIssue": "Issue erstellen",
+  "previewTitle": "Vorschau des Diagnosepakets",
+  "previewHint": "Das ist alles, was exportiert wird. Es gibt keine versteckten Dateien.",
+  "downloadFailed": "Export fehlgeschlagen ({status})"
+}

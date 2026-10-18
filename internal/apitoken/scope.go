@@ -31,6 +31,7 @@ var forbiddenPrefixes = []string{
 	"/api/system/settings",
 	"/api/system/token",
 	"/api/system/backup",
+	"/api/system/diagnostics",
 	"/api/system/restore",
 	"/api/system/restart",
 	// Web 终端的安全设置（两步验证、协议确认）等同于账号安全，只允许会话修改

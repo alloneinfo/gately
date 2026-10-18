@@ -127,7 +127,7 @@ The website ([gately.cn](https://gately.cn)) source lives in `website/` and is b
 
 ## Community
 
-Questions, feedback and usage tips are welcome in the Telegram group: [t.me/gately_chat](https://t.me/gately_chat). Please report bugs in [GitHub Issues](https://github.com/wangwanjie/gately/issues).
+Questions, feedback and usage tips are welcome in the Telegram group: [t.me/gately_chat](https://t.me/gately_chat). Please report bugs in [GitHub Issues](https://github.com/wangwanjie/gately/issues) and attach a [diagnostics bundle](docs/en/DIAGNOSTICS.md) (Settings → Backup & Migration); it is generated locally and contains no passwords, tokens, domains or real IPs.
 
 ## Star History
 

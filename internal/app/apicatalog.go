@@ -186,6 +186,7 @@ var apiCatalog = map[string]epDoc{
 	"GET /api/system/info":                               {Summary: "查看系统信息"},
 	"GET /api/system/update":                             {Summary: "检查新版本"},
 	"GET /api/system/backup":                             {Summary: "下载配置备份", Desc: "备份含全部密钥。"},
+	"GET /api/system/diagnostics":                        {Summary: "导出脱敏诊断包", Desc: "`logs=0` 不含日志，`preview=1` 返回各文件内容的 JSON。"},
 	"POST /api/system/restore":                           {Summary: "从备份恢复配置"},
 	"POST /api/system/restart":                           {Summary: "重启 Gately"},
 	"GET /api/openapi.json":                              {Summary: "获取本 API 的 OpenAPI 描述"},

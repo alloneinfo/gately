@@ -1,0 +1,23 @@
+{
+  "title": "Export diagnostics bundle",
+  "desc": "When you hit a problem, export a diagnostics bundle and attach it to your GitHub issue so we can locate the cause faster. The bundle is generated locally and never uploaded anywhere. You can preview everything before downloading, and open each file in a text editor after unzipping.",
+  "includeTitle": "What is exported",
+  "in1": "Version, OS and architecture, CPU / memory / disk totals, uptime",
+  "in2": "Status summary of each module",
+  "in3": "Configuration structure: field names, numbers, switches, and enums such as protocol and mode",
+  "in4": "Recent runtime logs (optional), with IPs, domains, e-mails and URLs masked",
+  "excludeTitle": "Never exported",
+  "ex1": "Passwords, tokens, keys, certificates and private keys (including SSH passwords and keys)",
+  "ex2": "Domain names, host names, real IP and MAC addresses (only categories such as private / public are kept)",
+  "ex3": "Admin account, API tokens, Docker container environment variables, file contents and terminal sessions",
+  "ex4": "Names, remarks and other text you typed (replaced by {tag} in the configuration)",
+  "withLogs": "Include recent logs",
+  "logsHint": "Logs are the most useful for runtime errors, so keeping them is recommended.",
+  "note": "A name you typed may occasionally show up in logs, so preview before posting.",
+  "preview": "Preview content",
+  "download": "Download bundle",
+  "openIssue": "Open an issue",
+  "previewTitle": "Diagnostics bundle preview",
+  "previewHint": "This is everything that will be exported. There are no hidden files.",
+  "downloadFailed": "Export failed ({status})"
+}

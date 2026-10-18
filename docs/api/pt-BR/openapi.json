@@ -14949,6 +14949,52 @@
         "x-token-allowed": false
       }
     },
+    "/api/system/diagnostics": {
+      "get": {
+        "description": "`logs=0` exclui os logs; `preview=1` retorna o conteúdo de cada arquivo em JSON.\n\n**Disponível apenas para sessões de login; tokens de API não podem acessar este endpoint.**",
+        "responses": {
+          "200": {
+            "description": "Sucesso"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parâmetros da requisição inválidos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token inválido, expirado ou sem login"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "O token não tem a permissão necessária"
+          }
+        },
+        "summary": "Exportar pacote de diagnóstico anonimizado",
+        "tags": [
+          "Sistema"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
+      }
+    },
     "/api/system/info": {
       "get": {
         "description": "Permissão necessária: `status:read`.",

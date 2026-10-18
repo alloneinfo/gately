@@ -471,6 +471,7 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | GET | `/api/system/info` | `status:read` | Systeminformationen anzeigen |
 | GET | `/api/system/update` | `status:read` | Nach neuer Version suchen |
 | GET | `/api/system/backup` | Nur Anmeldesitzung | Konfigurations-Backup herunterladen |
+| GET | `/api/system/diagnostics` | Nur Anmeldesitzung | Anonymisiertes Diagnosepaket exportieren |
 | POST | `/api/system/restore` | Nur Anmeldesitzung | Konfiguration aus Backup wiederherstellen |
 | POST | `/api/system/restart` | Nur Anmeldesitzung | Gately neu starten |
 | GET | `/api/openapi.json` | Beliebiges gültiges Token | OpenAPI-Beschreibung dieser API abrufen |

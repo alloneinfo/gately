@@ -471,6 +471,7 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | GET | `/api/system/info` | `status:read` | View system information |
 | GET | `/api/system/update` | `status:read` | Check for a new version |
 | GET | `/api/system/backup` | Login sessions only | Download a configuration backup |
+| GET | `/api/system/diagnostics` | Login sessions only | Export redacted diagnostics bundle |
 | POST | `/api/system/restore` | Login sessions only | Restore configuration from a backup |
 | POST | `/api/system/restart` | Login sessions only | Restart Gately |
 | GET | `/api/openapi.json` | Any valid token | Get the OpenAPI description of this API |

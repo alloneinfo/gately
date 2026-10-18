@@ -14949,6 +14949,52 @@
         "x-token-allowed": false
       }
     },
+    "/api/system/diagnostics": {
+      "get": {
+        "description": "`logs=0` исключает журналы; `preview=1` возвращает содержимое каждого файла в JSON.\n\n**Доступно только для сессий входа; API-токены не имеют доступа к этому эндпоинту.**",
+        "responses": {
+          "200": {
+            "description": "Успешно"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка параметров запроса"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Токен недействителен, истёк или вход не выполнен"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "У токена нет необходимого права"
+          }
+        },
+        "summary": "Экспорт обезличенного диагностического пакета",
+        "tags": [
+          "Система"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
+      }
+    },
     "/api/system/info": {
       "get": {
         "description": "Требуемое разрешение: `status:read`.",

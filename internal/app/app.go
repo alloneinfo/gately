@@ -179,6 +179,7 @@ func (a *App) Handler() http.Handler {
 	rec.add("GET /api/system/info", a.handleSystemInfo, "")
 	rec.add("GET /api/system/update", a.handleCheckUpdate, "")
 	rec.add("GET /api/system/backup", a.handleBackup, "")
+	rec.add("GET /api/system/diagnostics", a.handleDiagnostics, "")
 	rec.add("POST /api/system/restore", a.handleRestore, "")
 	rec.add("POST /api/system/restart", a.handleRestart, "")
 	for _, e := range a.modules {

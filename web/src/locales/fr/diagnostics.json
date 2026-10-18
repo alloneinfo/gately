@@ -1,0 +1,23 @@
+{
+  "title": "Exporter le paquet de diagnostic",
+  "desc": "En cas de problème, exportez un paquet de diagnostic et joignez-le à votre issue GitHub pour nous aider à trouver la cause plus vite. Le paquet est généré localement et n'est envoyé nulle part. Vous pouvez tout prévisualiser avant le téléchargement, puis ouvrir chaque fichier dans un éditeur de texte après décompression.",
+  "includeTitle": "Ce qui est exporté",
+  "in1": "Version, système et architecture, capacités CPU / mémoire / disque, durée de fonctionnement",
+  "in2": "Résumé de l'état de chaque module",
+  "in3": "Structure de la configuration : noms de champs, nombres, interrupteurs et valeurs énumérées (protocole, mode, etc.)",
+  "in4": "Journaux récents (facultatif), avec IP, domaines, e-mails et URL masqués",
+  "excludeTitle": "Ce qui n'est jamais exporté",
+  "ex1": "Mots de passe, jetons, clés, certificats et clés privées (y compris mots de passe et clés SSH)",
+  "ex2": "Noms de domaine, noms d'hôte, adresses IP et MAC réelles (seules des catégories comme privée / publique sont conservées)",
+  "ex3": "Compte administrateur, jetons d'API, variables d'environnement des conteneurs Docker, contenu des fichiers et sessions de terminal",
+  "ex4": "Noms, remarques et autres textes saisis (remplacés par {tag} dans la configuration)",
+  "withLogs": "Inclure les journaux récents",
+  "logsHint": "Les journaux sont les plus utiles pour les erreurs d'exécution ; il est recommandé de les inclure.",
+  "note": "Un nom que vous avez saisi peut apparaître dans les journaux ; prévisualisez avant de publier.",
+  "preview": "Prévisualiser le contenu",
+  "download": "Télécharger le paquet",
+  "openIssue": "Ouvrir une issue",
+  "previewTitle": "Aperçu du paquet de diagnostic",
+  "previewHint": "Voici tout ce qui sera exporté. Il n'y a aucun fichier caché.",
+  "downloadFailed": "Échec de l'export ({status})"
+}

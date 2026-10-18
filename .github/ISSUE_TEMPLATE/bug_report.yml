@@ -1,0 +1,26 @@
+name: Bug report / 问题反馈
+description: Report a problem with Gately / 反馈 Gately 使用中遇到的问题
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened? / 发生了什么？
+      description: What you did, what you expected, and what you saw instead. / 你做了什么、期望什么、实际看到什么。
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version and install method / 版本与安装方式
+      placeholder: "v0.1.0, Docker (host network) / binary on OpenWrt"
+    validations:
+      required: true
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Diagnostics bundle / 诊断包
+      description: |
+        Settings → Backup & Migration → Export diagnostics bundle, then drag the zip here. It is generated locally, contains no passwords, tokens, domains or real IP addresses, and you can preview it before downloading. Details: [DIAGNOSTICS.md](https://github.com/wangwanjie/gately/blob/main/docs/en/DIAGNOSTICS.md)
+        设置 → 备份与迁移 → 导出诊断包，然后把 zip 拖到这里。诊断包在本机生成，不含密码、令牌、域名和真实 IP，下载前可预览。详见 [DIAGNOSTICS.md](https://github.com/wangwanjie/gately/blob/main/docs/DIAGNOSTICS.md)
+      placeholder: Drag the zip file here / 把 zip 文件拖到这里

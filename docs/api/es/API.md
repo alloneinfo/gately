@@ -471,6 +471,7 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | GET | `/api/system/info` | `status:read` | Ver la información del sistema |
 | GET | `/api/system/update` | `status:read` | Buscar nueva versión |
 | GET | `/api/system/backup` | Solo sesión iniciada | Descargar la copia de seguridad de la configuración |
+| GET | `/api/system/diagnostics` | Solo sesión iniciada | Exportar paquete de diagnóstico anonimizado |
 | POST | `/api/system/restore` | Solo sesión iniciada | Restaurar la configuración desde una copia de seguridad |
 | POST | `/api/system/restart` | Solo sesión iniciada | Reiniciar Gately |
 | GET | `/api/openapi.json` | Cualquier token válido | Obtener la descripción OpenAPI de esta API |

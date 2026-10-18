@@ -471,6 +471,7 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | GET | `/api/system/info` | `status:read` | Ver informações do sistema |
 | GET | `/api/system/update` | `status:read` | Verificar nova versão |
 | GET | `/api/system/backup` | Somente sessão de login | Baixar backup da configuração |
+| GET | `/api/system/diagnostics` | Somente sessão de login | Exportar pacote de diagnóstico anonimizado |
 | POST | `/api/system/restore` | Somente sessão de login | Restaurar a configuração a partir do backup |
 | POST | `/api/system/restart` | Somente sessão de login | Reiniciar o Gately |
 | GET | `/api/openapi.json` | Qualquer token válido | Obter a descrição OpenAPI desta API |

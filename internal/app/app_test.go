@@ -482,3 +482,69 @@ func TestRestoreEncryptedBackup(t *testing.T) {
 		t.Fatal("恢复后应请求重启")
 	}
 }
+
+func TestDiagnosticsBundle(t *testing.T) {
+	a, srv, c := loginApp(t)
+	rule := map[string]any{"name": "家里的NAS-secret-name", "enable": false, "protocols": []string{"tcp4"}, "listenAddress": "127.0.0.1",
+		"listenPorts": strconv.Itoa(freeTCPPort(t)), "targetAddresses": []string{"192.168.77.88"}, "targetPorts": "80"}
+	if code, body := doJSON(t, c, "POST", srv.URL+"/api/portforward/rules", rule); code != 200 {
+		t.Fatalf("%d %s", code, body)
+	}
+	a.sysLogs.Add("warn", "ddns", "更新 nas.myhome-secret.com 到 203.0.113.9 失败 password=hunter2")
+
+	resp, err := c.Get(srv.URL + "/api/system/diagnostics")
+	if err != nil {
+		t.Fatal(err)
+	}
+	data, _ := io.ReadAll(resp.Body)
+	resp.Body.Close()
+	if resp.StatusCode != 200 || !strings.Contains(resp.Header.Get("Content-Disposition"), "gately-diagnostics-") {
+		t.Fatalf("下载诊断包失败 %d", resp.StatusCode)
+	}
+	zr, err := zip.NewReader(bytes.NewReader(data), int64(len(data)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	names := map[string]bool{}
+	var all strings.Builder
+	for _, f := range zr.File {
+		names[f.Name] = true
+		rc, _ := f.Open()
+		b, _ := io.ReadAll(rc)
+		rc.Close()
+		all.Write(b)
+	}
+	for _, want := range []string{"README.txt", "summary.json", "modules.json", "config/portforward.json", "logs/system.log", "logs/portforward.log"} {
+		if !names[want] {
+			t.Errorf("诊断包缺少 %s: %v", want, names)
+		}
+	}
+	for name := range names {
+		if strings.Contains(name, "account") || strings.Contains(name, "tokens") {
+			t.Errorf("诊断包不应包含 %s", name)
+		}
+	}
+	content := all.String()
+	for _, leak := range []string{"secret-name", "myhome-secret", "203.0.113.9", "192.168.77.88", "hunter2", "test-password", "authSecret\": \"a", a.opts.ConfigDir, "$2a$"} {
+		if strings.Contains(content, leak) {
+			t.Errorf("诊断包泄露了 %q", leak)
+		}
+	}
+
+	// 不含日志
+	resp, _ = c.Get(srv.URL + "/api/system/diagnostics?logs=0")
+	data, _ = io.ReadAll(resp.Body)
+	resp.Body.Close()
+	zr, _ = zip.NewReader(bytes.NewReader(data), int64(len(data)))
+	for _, f := range zr.File {
+		if strings.HasPrefix(f.Name, "logs/") {
+			t.Errorf("logs=0 时不应包含 %s", f.Name)
+		}
+	}
+
+	// 预览
+	code, body := doJSON(t, c, "GET", srv.URL+"/api/system/diagnostics?preview=1", nil)
+	if code != 200 || !bytes.Contains(body, []byte(`"summary.json"`)) {
+		t.Fatalf("预览失败 %d %s", code, body)
+	}
+}
