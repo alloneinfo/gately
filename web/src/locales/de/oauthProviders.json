@@ -4,6 +4,8 @@
   "clientIdPlaceholder": "Client-ID (bei QQ: APP ID)",
   "clientSecretPlaceholder": "Client Secret (bei QQ: APP Key)",
   "issuerPlaceholder": "Issuer, z. B. https://login.example.com",
+  "proxyPlaceholder": "Proxy (optional), z. B. http://127.0.0.1:7890 oder socks5://127.0.0.1:7890",
+  "proxyHint": "Der Server greift beim Tokentausch und Abrufen der Benutzerinformationen über diesen Proxy auf den Anbieter zu – für Server, die Google oder ähnliche Dienste nicht direkt erreichen. Gilt nur für diese Anmeldemethode; leer lassen für eine direkte Verbindung. Unter Docker ist 127.0.0.1 der Container selbst, daher die Adresse des Hosts angeben.",
   "addProvider": "Anmeldemethode hinzufügen",
   "oidc": "Generisches OIDC",
   "hints": {

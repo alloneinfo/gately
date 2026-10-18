@@ -4,6 +4,8 @@
   "clientIdPlaceholder": "Client ID (APP ID for QQ)",
   "clientSecretPlaceholder": "Client Secret (APP Key for QQ)",
   "issuerPlaceholder": "Issuer, e.g. https://login.example.com",
+  "proxyPlaceholder": "Proxy (optional), e.g. http://127.0.0.1:7890 or socks5://127.0.0.1:7890",
+  "proxyHint": "The server reaches the provider through this proxy when exchanging tokens and fetching user info, for servers that cannot connect to Google and similar services directly. Applies only to this sign-in method; leave empty to connect directly. In Docker, 127.0.0.1 is the container itself, so use the host's address.",
   "addProvider": "Add sign-in method",
   "oidc": "Generic OIDC",
   "hints": {

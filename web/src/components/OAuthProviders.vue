@@ -17,6 +17,10 @@
       <div v-if="p.type === 'oidc'" class="provider-row">
         <el-input v-model="p.issuer" :placeholder="t('oauthProviders.issuerPlaceholder')" />
       </div>
+      <div class="provider-row">
+        <el-input v-model="p.proxy" clearable :placeholder="t('oauthProviders.proxyPlaceholder')" />
+      </div>
+      <div class="form-help">{{ t('oauthProviders.proxyHint') }}</div>
     </div>
     <el-button size="small" :icon="Plus" @click="add">{{ t('oauthProviders.addProvider') }}</el-button>
   </div>
@@ -61,7 +65,7 @@ function onType(p: OAuthProvider) {
 function add() {
   const used = new Set(model.value.map((p) => p.key))
   const type = ['github', 'google', 'qq'].find((k) => !used.has(k)) ?? 'oidc'
-  model.value.push({ key: type === 'oidc' ? '' : type, name: names[type], type, clientId: '', clientSecret: '', issuer: '' })
+  model.value.push({ key: type === 'oidc' ? '' : type, name: names[type], type, clientId: '', clientSecret: '', issuer: '', proxy: '' })
 }
 </script>
 

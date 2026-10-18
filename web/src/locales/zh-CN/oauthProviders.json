@@ -4,6 +4,8 @@
   "clientIdPlaceholder": "Client ID（QQ 为 APP ID）",
   "clientSecretPlaceholder": "Client Secret（QQ 为 APP Key）",
   "issuerPlaceholder": "Issuer，如 https://login.example.com",
+  "proxyPlaceholder": "代理（可选），如 http://127.0.0.1:7890 或 socks5://127.0.0.1:7890",
+  "proxyHint": "服务器换取令牌、查询用户信息时经此代理访问提供方，适用于服务器无法直连 Google 等服务的情况；只作用于该登录方式，留空直连。Docker 部署时 127.0.0.1 指容器自身，请填写宿主机地址。",
   "addProvider": "添加登录方式",
   "oidc": "通用 OIDC",
   "hints": {

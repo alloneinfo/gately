@@ -37,6 +37,9 @@ type Provider struct {
 	ClientSecret string `json:"clientSecret"`
 	// Issuer 为 OIDC 签发者地址，例如 https://accounts.google.com（Google 类型自动填充）
 	Issuer string `json:"issuer"`
+	// Proxy 为服务器访问该提供方（换取令牌、查询用户信息、读取发现文档）时使用的代理，
+	// 支持 http://、https://、socks5://，留空直连。只作用于本登录方式，不影响 Gately 其他功能
+	Proxy string `json:"proxy"`
 }
 
 // Endpoints 是各提供方的固定端点，测试时可替换。
@@ -81,6 +84,13 @@ func (p *Provider) Validate() error {
 	if p.ClientID == "" || p.ClientSecret == "" {
 		return fmt.Errorf("第三方登录 %s 缺少 Client ID 或 Secret", p.Key)
 	}
+	p.Proxy = strings.TrimSpace(p.Proxy)
+	if p.Proxy != "" {
+		u, err := url.Parse(p.Proxy)
+		if err != nil || u.Host == "" || (u.Scheme != "http" && u.Scheme != "https" && u.Scheme != "socks5" && u.Scheme != "socks5h") {
+			return fmt.Errorf("第三方登录 %s 的代理地址需为 http://、https:// 或 socks5:// 开头的地址，例如 http://127.0.0.1:7890", p.Key)
+		}
+	}
 	switch p.Type {
 	case TypeGitHub, TypeQQ:
 	case TypeGoogle:
@@ -101,6 +111,21 @@ func (p Provider) DisplayName() string {
 		return p.Name
 	}
 	return p.Key
+}
+
+// client 返回访问提供方使用的 HTTP 客户端：配置了代理时走代理，否则沿用默认客户端。
+func (p Provider) client() *http.Client {
+	if p.Proxy == "" {
+		return http.DefaultClient
+	}
+	u, err := url.Parse(p.Proxy)
+	if err != nil {
+		// Validate 已校验过地址，这里仅防御异常配置
+		return http.DefaultClient
+	}
+	tr := http.DefaultTransport.(*http.Transport).Clone()
+	tr.Proxy = http.ProxyURL(u)
+	return &http.Client{Transport: tr}
 }
 
 func (p Provider) isOIDC() bool {
@@ -134,18 +159,19 @@ var googleConfig = oidcConfig{
 	UserinfoEndpoint:      "https://openidconnect.googleapis.com/v1/userinfo",
 }
 
-// oidcEndpoints 返回提供方的 OIDC 端点：默认 Google 使用内置端点，其余走发现文档。
+// oidcEndpoints 返回提供方的 OIDC 端点：Google 类型始终使用内置端点，其余走发现文档。
+// Validate 会把 Google 的 Issuer 固定填为 accounts.google.com，因此这里只按类型判断，不能依赖 Issuer 是否为空。
 func (p Provider) oidcEndpoints(ctx context.Context) (oidcConfig, error) {
-	if p.Type == TypeGoogle && p.Issuer == "" {
+	if p.Type == TypeGoogle {
 		return googleConfig, nil
 	}
-	return discoverOIDC(ctx, p.issuer())
+	return discoverOIDC(ctx, p.client(), p.issuer())
 }
 
 // discoveryTimeout 是读取发现文档的超时，避免身份提供方不可达时登录请求一直挂起。
 const discoveryTimeout = 10 * time.Second
 
-func discoverOIDC(ctx context.Context, issuer string) (oidcConfig, error) {
+func discoverOIDC(ctx context.Context, hc *http.Client, issuer string) (oidcConfig, error) {
 	ctx, cancel := context.WithTimeout(ctx, discoveryTimeout)
 	defer cancel()
 	oidcCacheMu.Lock()
@@ -155,7 +181,7 @@ func discoverOIDC(ctx context.Context, issuer string) (oidcConfig, error) {
 		return c, nil
 	}
 	req, _ := http.NewRequestWithContext(ctx, http.MethodGet, strings.TrimRight(issuer, "/")+"/.well-known/openid-configuration", nil)
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := hc.Do(req)
 	if err != nil {
 		return c, err
 	}
@@ -190,6 +216,10 @@ func (p Provider) AuthorizeURL(ctx context.Context, redirect, state string) (str
 		}
 		v.Set("response_type", "code")
 		v.Set("scope", "openid email profile")
+		if p.Type == TypeGoogle {
+			// 每次都弹出 Google 账号选择页，便于在多个账号间切换
+			v.Set("prompt", "select_account")
+		}
 		return c.AuthorizationEndpoint + "?" + v.Encode(), nil
 	}
 }
@@ -224,7 +254,7 @@ func (p Provider) fetchToken(ctx context.Context, tokenURL, code, redirect strin
 	req, _ := http.NewRequestWithContext(ctx, http.MethodPost, tokenURL, strings.NewReader(form.Encode()))
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Set("Accept", "application/json")
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := p.client().Do(req)
 	if err != nil {
 		return "", err
 	}
@@ -245,13 +275,13 @@ func (p Provider) fetchToken(ctx context.Context, tokenURL, code, redirect strin
 }
 
 // getJSON 以 Bearer 令牌（可为空）请求并解析 JSON。
-func getJSON(ctx context.Context, target, bearer string, out any) error {
+func getJSON(ctx context.Context, hc *http.Client, target, bearer string, out any) error {
 	req, _ := http.NewRequestWithContext(ctx, http.MethodGet, target, nil)
 	if bearer != "" {
 		req.Header.Set("Authorization", "Bearer "+bearer)
 	}
 	req.Header.Set("Accept", "application/json")
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := hc.Do(req)
 	if err != nil {
 		return err
 	}
@@ -264,7 +294,7 @@ func (p Provider) githubIdentity(ctx context.Context, token string) (Identity, e
 		Login string `json:"login"`
 		ID    int64  `json:"id"`
 	}
-	if err := getJSON(ctx, Endpoints.GitHub.User, token, &u); err != nil {
+	if err := getJSON(ctx, p.client(), Endpoints.GitHub.User, token, &u); err != nil {
 		return Identity{}, fmt.Errorf("解析用户信息失败: %w", err)
 	}
 	if u.Login == "" {
@@ -283,7 +313,7 @@ func (p Provider) oidcIdentity(ctx context.Context, userinfo, token string) (Ide
 		EmailVerified json.RawMessage `json:"email_verified"`
 		Sub           string          `json:"sub"`
 	}
-	if err := getJSON(ctx, userinfo, token, &u); err != nil {
+	if err := getJSON(ctx, p.client(), userinfo, token, &u); err != nil {
 		return Identity{}, fmt.Errorf("解析用户信息失败: %w", err)
 	}
 	if u.Sub == "" && u.Email == "" {
@@ -314,7 +344,7 @@ func (p Provider) exchangeQQ(ctx context.Context, code, redirect string) (Identi
 		Error       int    `json:"error"`
 		Desc        string `json:"error_description"`
 	}
-	if err := getJSON(ctx, Endpoints.QQ.Token+"?"+q.Encode(), "", &tok); err != nil {
+	if err := getJSON(ctx, p.client(), Endpoints.QQ.Token+"?"+q.Encode(), "", &tok); err != nil {
 		return Identity{}, fmt.Errorf("解析令牌响应失败: %w", err)
 	}
 	if tok.AccessToken == "" {
@@ -325,7 +355,7 @@ func (p Provider) exchangeQQ(ctx context.Context, code, redirect string) (Identi
 		Error  int    `json:"error"`
 		Desc   string `json:"error_description"`
 	}
-	if err := getJSON(ctx, Endpoints.QQ.Me+"?"+url.Values{"access_token": {tok.AccessToken}, "fmt": {"json"}}.Encode(), "", &me); err != nil {
+	if err := getJSON(ctx, p.client(), Endpoints.QQ.Me+"?"+url.Values{"access_token": {tok.AccessToken}, "fmt": {"json"}}.Encode(), "", &me); err != nil {
 		return Identity{}, fmt.Errorf("解析用户信息失败: %w", err)
 	}
 	if me.OpenID == "" {

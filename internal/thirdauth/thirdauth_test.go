@@ -103,3 +103,47 @@ func TestGoogleDefaultsIssuer(t *testing.T) {
 		t.Errorf("Google 应自动使用固定 Issuer: %v %q", err, p.Issuer)
 	}
 }
+
+func TestGoogleUsesBuiltinEndpoints(t *testing.T) {
+	p := Provider{Key: "google", Type: TypeGoogle, ClientID: "i", ClientSecret: "s"}
+	if err := p.Validate(); err != nil {
+		t.Fatal(err)
+	}
+	// 校验后 Issuer 已被填充，仍应使用内置端点而不访问发现文档
+	u, err := p.AuthorizeURL(context.Background(), "https://g.example.com/cb", "st")
+	if err != nil || !strings.HasPrefix(u, googleConfig.AuthorizationEndpoint+"?") || !strings.Contains(u, "prompt=select_account") {
+		t.Errorf("Google 应使用内置授权端点: %v %q", err, u)
+	}
+}
+
+func TestProviderProxy(t *testing.T) {
+	// 代理服务器直接应答：提供方地址使用不可解析的域名，只有经过代理才能成功
+	var proxied []string
+	proxy := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		proxied = append(proxied, r.URL.Host+r.URL.Path)
+		switch r.URL.Path {
+		case "/token":
+			_ = json.NewEncoder(w).Encode(map[string]any{"access_token": "AT"})
+		case "/me":
+			_ = json.NewEncoder(w).Encode(map[string]string{"openid": "UID_P"})
+		}
+	}))
+	defer proxy.Close()
+	old := Endpoints
+	Endpoints.QQ.Token, Endpoints.QQ.Me = "http://qq.invalid/token", "http://qq.invalid/me"
+	defer func() { Endpoints = old }()
+
+	p := Provider{Key: "qq", Type: TypeQQ, ClientID: "id", ClientSecret: "sec", Proxy: " " + proxy.URL + " "}
+	if err := p.Validate(); err != nil {
+		t.Fatal(err)
+	}
+	id, err := p.Exchange(context.Background(), "c1", "https://x/cb")
+	if err != nil || id.String() != "qq:UID_P" || strings.Join(proxied, ",") != "qq.invalid/token,qq.invalid/me" {
+		t.Fatalf("应经代理换取身份: %+v %v %q", id, err, proxied)
+	}
+
+	bad := Provider{Key: "qq", Type: TypeQQ, ClientID: "id", ClientSecret: "sec", Proxy: "127.0.0.1:7890"}
+	if err := bad.Validate(); err == nil {
+		t.Error("缺少协议的代理地址应校验失败")
+	}
+}

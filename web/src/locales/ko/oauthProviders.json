@@ -4,6 +4,8 @@
   "clientIdPlaceholder": "Client ID (QQ는 APP ID)",
   "clientSecretPlaceholder": "Client Secret (QQ는 APP Key)",
   "issuerPlaceholder": "Issuer, 예: https://login.example.com",
+  "proxyPlaceholder": "프록시(선택), 예: http://127.0.0.1:7890 또는 socks5://127.0.0.1:7890",
+  "proxyHint": "서버가 토큰을 교환하고 사용자 정보를 조회할 때 이 프록시를 통해 제공자에 접속합니다. 서버가 Google 등에 직접 연결할 수 없을 때 사용합니다. 이 로그인 방식에만 적용되며, 비워 두면 직접 연결합니다. Docker에서는 127.0.0.1이 컨테이너 자신이므로 호스트 주소를 입력하세요.",
   "addProvider": "로그인 방식 추가",
   "oidc": "범용 OIDC",
   "hints": {

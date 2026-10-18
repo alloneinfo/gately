@@ -136,6 +136,8 @@ export interface OAuthProvider {
   clientId: string
   clientSecret: string
   issuer: string
+  // 服务器访问该提供方时使用的代理，留空直连
+  proxy?: string
 }
 
 // ThirdLogin 是管理界面的第三方登录设置。

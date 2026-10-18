@@ -4,6 +4,8 @@
   "clientIdPlaceholder": "Client ID (APP ID для QQ)",
   "clientSecretPlaceholder": "Client Secret (APP Key для QQ)",
   "issuerPlaceholder": "Issuer, например https://login.example.com",
+  "proxyPlaceholder": "Прокси (необязательно), например http://127.0.0.1:7890 или socks5://127.0.0.1:7890",
+  "proxyHint": "Сервер обращается к провайдеру через этот прокси при обмене токенов и получении данных пользователя — для серверов без прямого доступа к Google и подобным сервисам. Действует только для этого способа входа; оставьте пустым для прямого подключения. В Docker 127.0.0.1 — это сам контейнер, укажите адрес хоста.",
   "addProvider": "Добавить способ входа",
   "oidc": "Универсальный OIDC",
   "hints": {

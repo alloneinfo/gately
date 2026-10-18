@@ -4,6 +4,8 @@
   "clientIdPlaceholder": "Client ID (APP ID pour QQ)",
   "clientSecretPlaceholder": "Client Secret (APP Key pour QQ)",
   "issuerPlaceholder": "Émetteur, p. ex. https://login.example.com",
+  "proxyPlaceholder": "Proxy (facultatif), par ex. http://127.0.0.1:7890 ou socks5://127.0.0.1:7890",
+  "proxyHint": "Le serveur passe par ce proxy pour échanger les jetons et récupérer les informations utilisateur, utile lorsque le serveur ne peut pas joindre directement Google ou d'autres services. S'applique uniquement à cette méthode de connexion ; laissez vide pour une connexion directe. Sous Docker, 127.0.0.1 désigne le conteneur lui-même : indiquez l'adresse de l'hôte.",
   "addProvider": "Ajouter une méthode de connexion",
   "oidc": "OIDC générique",
   "hints": {
