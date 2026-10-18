@@ -55,7 +55,16 @@
     "needName": "Please enter a connection name",
     "needSshHost": "Please enter the SSH host",
     "needTelnetHost": "Please enter the Telnet host",
-    "testOk": "Connected successfully"
+    "testOk": "Connected successfully",
+    "authCredential": "Preset",
+    "credential": "Credential preset",
+    "credentialPlaceholder": "Select a credential preset",
+    "credentialEmpty": "No presets yet. Click \"Manage presets\" to add one",
+    "credentialManage": "Manage presets",
+    "credentialHelp": "Passwords and private keys are maintained under \"Credential presets\" in Web terminal settings. Changes to a preset apply to every connection that uses it.",
+    "usernameFromCredential": "Leave empty to use the preset's username: {name}",
+    "needCredential": "Select a credential preset",
+    "needUsername": "Enter a username, or set a default username in the selected preset"
   },
   "list": {
     "title": "Connections",
@@ -105,5 +114,17 @@
     "remarkPlaceholder": "e.g. Deployment job",
     "killConfirm": "End session \"{name}\"? Programs running in it will be terminated.",
     "confirmTitle": "Confirm"
+  },
+  "credential": {
+    "title": "Credential presets",
+    "tip": "Save frequently used passwords or private keys here. When adding or editing an SSH connection, choose \"Preset\" as the authentication method to reuse them without typing them again.",
+    "usernameMeta": "Username: {name}",
+    "empty": "No credential presets",
+    "add": "Add preset",
+    "titleEdit": "Edit credential preset",
+    "titleAdd": "Add credential preset",
+    "namePlaceholder": "e.g. LAN servers root key",
+    "usernamePlaceholder": "Optional, used when a connection has no username",
+    "deleteConfirm": "Delete credential preset \"{name}\"?"
   }
 }

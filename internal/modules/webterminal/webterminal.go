@@ -127,6 +127,8 @@ type fileConfig struct {
 	// SplitLayout 为前端自定义的分屏布局，原样存取
 	SplitLayout json.RawMessage `json:"splitLayout"`
 	Security    Security        `json:"security"`
+	// Credentials 为 SSH 认证预设
+	Credentials []Credential `json:"credentials"`
 }
 
 // cleanDirs 去除空白与重复的目录。
@@ -201,7 +203,12 @@ func clampTimeout(v int) int {
 func (c *Connection) validateSSH() error {
 	s := &c.SSH
 	s.Host = strings.TrimSpace(s.Host)
-	if s.Host == "" || s.Username == "" {
+	s.Username = strings.TrimSpace(s.Username)
+	if s.Host == "" {
+		return errors.New("请填写主机")
+	}
+	// 使用认证预设时用户名可留空，连接时取预设中的默认用户名
+	if s.Username == "" && s.AuthType != AuthCredential {
 		return errors.New("请填写主机与用户名")
 	}
 	if s.Port == 0 {
@@ -212,9 +219,18 @@ func (c *Connection) validateSSH() error {
 	}
 	s.Timeout = clampTimeout(s.Timeout)
 	s.KeyFile = strings.TrimSpace(s.KeyFile)
+	if s.AuthType != AuthCredential {
+		s.CredentialKey = ""
+	}
 	switch s.AuthType {
 	case "", "password":
 		s.AuthType = "password"
+	case AuthCredential:
+		if s.CredentialKey == "" {
+			return errors.New("请选择认证预设")
+		}
+		// 凭据由预设统一保存，连接内不再保留单独的密码或私钥
+		s.Password, s.PrivateKey, s.KeyFile, s.Passphrase = "", "", "", ""
 	case "key":
 		if s.PrivateKey == "" && s.KeyFile == "" {
 			return errors.New("请填写私钥或私钥文件路径")
@@ -283,6 +299,9 @@ func (m *Module) Init(env module.Env) error {
 	if m.cfg.Shortcuts == nil {
 		m.cfg.Shortcuts = []Shortcut{}
 	}
+	if m.cfg.Credentials == nil {
+		m.cfg.Credentials = []Credential{}
+	}
 	return err
 }
 
@@ -344,6 +363,7 @@ func (m *Module) Routes(r module.Router) {
 	r.HandleFunc("POST /connections/{key}/test", m.handleTestSaved)
 	r.HandleFunc("POST /connections/test", m.handleTestDraft)
 	r.HandleFunc("PUT /connections/{key}/quickaccess", m.handleQuickAccess)
+	m.registerCredentials(r)
 	m.registerSessionRoutes(r)
 	m.registerSecurity(r)
 	m.registerSFTP(r)

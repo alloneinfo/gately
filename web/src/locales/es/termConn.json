@@ -55,7 +55,16 @@
     "needName": "Introduce un nombre para la conexión",
     "needSshHost": "Introduce el host SSH",
     "needTelnetHost": "Introduce el host Telnet",
-    "testOk": "Conexión correcta"
+    "testOk": "Conexión correcta",
+    "authCredential": "Predefinido",
+    "credential": "Credencial predefinida",
+    "credentialPlaceholder": "Seleccione una credencial predefinida",
+    "credentialEmpty": "Aún no hay predefinidos. Pulse «Gestionar predefinidos» para añadir uno",
+    "credentialManage": "Gestionar predefinidos",
+    "credentialHelp": "Las contraseñas y claves privadas se gestionan en «Credenciales predefinidas» de los ajustes del terminal web. Los cambios se aplican a todas las conexiones que las usan.",
+    "usernameFromCredential": "Déjelo vacío para usar el usuario del predefinido: {name}",
+    "needCredential": "Seleccione una credencial predefinida",
+    "needUsername": "Introduzca un usuario o defina uno predeterminado en el predefinido seleccionado"
   },
   "list": {
     "title": "Conexiones",
@@ -105,5 +114,17 @@
     "remarkPlaceholder": "p. ej. Tarea de despliegue",
     "killConfirm": "¿Finalizar la sesión \"{name}\"? Los programas que se ejecutan en ella se terminarán.",
     "confirmTitle": "Confirmar"
+  },
+  "credential": {
+    "title": "Credenciales predefinidas",
+    "tip": "Guarde aquí las contraseñas o claves privadas que usa con frecuencia. Al añadir o editar una conexión SSH, elija «Predefinido» como método de autenticación para reutilizarlas sin volver a escribirlas.",
+    "usernameMeta": "Usuario: {name}",
+    "empty": "No hay credenciales predefinidas",
+    "add": "Añadir predefinido",
+    "titleEdit": "Editar credencial predefinida",
+    "titleAdd": "Añadir credencial predefinida",
+    "namePlaceholder": "p. ej., clave root de servidores LAN",
+    "usernamePlaceholder": "Opcional, se usa cuando la conexión no tiene usuario",
+    "deleteConfirm": "¿Eliminar la credencial predefinida «{name}»?"
   }
 }

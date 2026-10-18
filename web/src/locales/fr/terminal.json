@@ -128,6 +128,9 @@
     "heartbeatHelp": "Fréquence des échanges de heartbeat entre le navigateur et le serveur, pour garder la connexion active et détecter rapidement les coupures",
     "keepAlive": "Rétention de session (min)",
     "keepAliveHelp": "Durée pendant laquelle une session continue de s'exécuter après la déconnexion du navigateur, période durant laquelle elle peut être rattachée à nouveau. 0 termine la session à la déconnexion. Définissez une valeur supérieure à 0 pour récupérer les sessions après une actualisation de la page.",
+    "credentials": "Préréglages d'identifiants",
+    "credentialsBtn": "Gérer les préréglages d'identifiants",
+    "credentialsHelp": "Enregistrez plusieurs mots de passe ou clés privées à choisir dans les connexions SSH",
     "security": "Sécurité",
     "securityBtn": "Contrat d'utilisation et authentification à deux facteurs",
     "activeSessions": "Sessions actives : {count}"

@@ -240,6 +240,12 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | POST | `/api/webterminal/connections/{key}/test` | `webterminal:write` | Gespeicherte Verbindung testen |
 | POST | `/api/webterminal/connections/test` | `webterminal:write` | Temporäre Verbindungsparameter testen |
 | PUT | `/api/webterminal/connections/{key}/quickaccess` | `webterminal:write` | Schnellzugriff für Verbindungen festlegen |
+| GET | `/api/webterminal/credentials` | `webterminal:read` | Einträge auflisten |
+| POST | `/api/webterminal/credentials` | `webterminal:write` | Einträge hinzufügen |
+| PUT | `/api/webterminal/credentials/{key}` | `webterminal:write` | Einträge ändern |
+| DELETE | `/api/webterminal/credentials/{key}` | `webterminal:write` | Einträge löschen |
+| PUT | `/api/webterminal/credentials/{key}/enable` | `webterminal:write` | Einträge aktivieren oder deaktivieren |
+| PUT | `/api/webterminal/credentials-order` | `webterminal:write` | Einträge neu anordnen |
 | GET | `/api/webterminal/connections/{key}/ws` | `webterminal:write` | Terminalsitzung öffnen (WebSocket) |
 | GET | `/api/webterminal/sessions/{id}/ws` | `webterminal:write` | An bestehende Terminalsitzung anbinden (WebSocket) |
 | GET | `/api/webterminal/sessions` | `webterminal:read` | Terminalsitzungen auflisten |
@@ -1171,6 +1177,21 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | `telnet` | `webterminal.TelnetConfig` |
 | `type` | string |
 
+### webterminal.Credential
+
+| Feld | Typ |
+| --- | --- |
+| `authType` | string |
+| `enable` | boolean |
+| `key` | string |
+| `keyFile` | string |
+| `name` | string |
+| `passphrase` | string |
+| `password` | string |
+| `privateKey` | string |
+| `remark` | string |
+| `username` | string |
+
 ### webterminal.LocalConfig
 
 | Feld | Typ |
@@ -1195,6 +1216,7 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | Feld | Typ |
 | --- | --- |
 | `authType` | string |
+| `credentialKey` | string |
 | `host` | string |
 | `hostKey` | string |
 | `keepAlive` | integer |

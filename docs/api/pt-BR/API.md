@@ -240,6 +240,12 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | POST | `/api/webterminal/connections/{key}/test` | `webterminal:write` | Testar conexão salva |
 | POST | `/api/webterminal/connections/test` | `webterminal:write` | Testar parâmetros de conexão temporários |
 | PUT | `/api/webterminal/connections/{key}/quickaccess` | `webterminal:write` | Atalhos de conexão |
+| GET | `/api/webterminal/credentials` | `webterminal:read` | Listar Entrada |
+| POST | `/api/webterminal/credentials` | `webterminal:write` | Adicionar Entrada |
+| PUT | `/api/webterminal/credentials/{key}` | `webterminal:write` | Modificar Entrada |
+| DELETE | `/api/webterminal/credentials/{key}` | `webterminal:write` | Excluir Entrada |
+| PUT | `/api/webterminal/credentials/{key}/enable` | `webterminal:write` | Ativar ou desativar Entrada |
+| PUT | `/api/webterminal/credentials-order` | `webterminal:write` | Reordenar Entrada |
 | GET | `/api/webterminal/connections/{key}/ws` | `webterminal:write` | Abrir sessão de terminal (WebSocket) |
 | GET | `/api/webterminal/sessions/{id}/ws` | `webterminal:write` | Anexar a uma sessão de terminal existente (WebSocket) |
 | GET | `/api/webterminal/sessions` | `webterminal:read` | Listar sessões de terminal |
@@ -1171,6 +1177,21 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | `telnet` | `webterminal.TelnetConfig` |
 | `type` | string |
 
+### webterminal.Credential
+
+| Campo | Tipo |
+| --- | --- |
+| `authType` | string |
+| `enable` | boolean |
+| `key` | string |
+| `keyFile` | string |
+| `name` | string |
+| `passphrase` | string |
+| `password` | string |
+| `privateKey` | string |
+| `remark` | string |
+| `username` | string |
+
 ### webterminal.LocalConfig
 
 | Campo | Tipo |
@@ -1195,6 +1216,7 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | Campo | Tipo |
 | --- | --- |
 | `authType` | string |
+| `credentialKey` | string |
 | `host` | string |
 | `hostKey` | string |
 | `keepAlive` | integer |

@@ -55,7 +55,16 @@
     "needName": "Saisissez un nom de connexion",
     "needSshHost": "Saisissez l'hôte SSH",
     "needTelnetHost": "Saisissez l'hôte Telnet",
-    "testOk": "Connexion réussie"
+    "testOk": "Connexion réussie",
+    "authCredential": "Préréglage",
+    "credential": "Préréglage d'identifiants",
+    "credentialPlaceholder": "Sélectionner un préréglage d'identifiants",
+    "credentialEmpty": "Aucun préréglage. Cliquez sur « Gérer les préréglages » pour en ajouter",
+    "credentialManage": "Gérer les préréglages",
+    "credentialHelp": "Les mots de passe et clés privées sont gérés dans « Préréglages d'identifiants » des paramètres du terminal web. Toute modification s'applique à toutes les connexions qui les utilisent.",
+    "usernameFromCredential": "Laisser vide pour utiliser l'utilisateur du préréglage : {name}",
+    "needCredential": "Sélectionnez un préréglage d'identifiants",
+    "needUsername": "Saisissez un nom d'utilisateur ou définissez-en un par défaut dans le préréglage sélectionné"
   },
   "list": {
     "title": "Connexions",
@@ -105,5 +114,17 @@
     "remarkPlaceholder": "p. ex. Tâche de déploiement",
     "killConfirm": "Terminer la session « {name} » ? Les programmes qui s'y exécutent seront arrêtés.",
     "confirmTitle": "Confirmer"
+  },
+  "credential": {
+    "title": "Préréglages d'identifiants",
+    "tip": "Enregistrez ici les mots de passe ou clés privées fréquemment utilisés. Lors de l'ajout ou de la modification d'une connexion SSH, choisissez « Préréglage » comme méthode d'authentification pour les réutiliser sans les ressaisir.",
+    "usernameMeta": "Utilisateur : {name}",
+    "empty": "Aucun préréglage d'identifiants",
+    "add": "Ajouter un préréglage",
+    "titleEdit": "Modifier le préréglage d'identifiants",
+    "titleAdd": "Ajouter un préréglage d'identifiants",
+    "namePlaceholder": "ex. clé root des serveurs LAN",
+    "usernamePlaceholder": "Facultatif, utilisé si la connexion n'a pas d'utilisateur",
+    "deleteConfirm": "Supprimer le préréglage d'identifiants « {name} » ?"
   }
 }

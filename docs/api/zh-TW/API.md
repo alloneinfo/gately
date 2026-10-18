@@ -240,6 +240,12 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | POST | `/api/webterminal/connections/{key}/test` | `webterminal:write` | 測試已儲存連線 |
 | POST | `/api/webterminal/connections/test` | `webterminal:write` | 測試暫時連線參數 |
 | PUT | `/api/webterminal/connections/{key}/quickaccess` | `webterminal:write` | 設定連線的快捷入口 |
+| GET | `/api/webterminal/credentials` | `webterminal:read` | 取得項目清單 |
+| POST | `/api/webterminal/credentials` | `webterminal:write` | 新增項目 |
+| PUT | `/api/webterminal/credentials/{key}` | `webterminal:write` | 修改項目 |
+| DELETE | `/api/webterminal/credentials/{key}` | `webterminal:write` | 刪除項目 |
+| PUT | `/api/webterminal/credentials/{key}/enable` | `webterminal:write` | 啟用或停用項目 |
+| PUT | `/api/webterminal/credentials-order` | `webterminal:write` | 調整項目排序 |
 | GET | `/api/webterminal/connections/{key}/ws` | `webterminal:write` | 開啟終端機工作階段（WebSocket） |
 | GET | `/api/webterminal/sessions/{id}/ws` | `webterminal:write` | 接入既有終端機工作階段（WebSocket） |
 | GET | `/api/webterminal/sessions` | `webterminal:read` | 列出終端機工作階段 |
@@ -1171,6 +1177,21 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `telnet` | `webterminal.TelnetConfig` |
 | `type` | string |
 
+### webterminal.Credential
+
+| 欄位 | 類型 |
+| --- | --- |
+| `authType` | string |
+| `enable` | boolean |
+| `key` | string |
+| `keyFile` | string |
+| `name` | string |
+| `passphrase` | string |
+| `password` | string |
+| `privateKey` | string |
+| `remark` | string |
+| `username` | string |
+
 ### webterminal.LocalConfig
 
 | 欄位 | 類型 |
@@ -1195,6 +1216,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | 欄位 | 類型 |
 | --- | --- |
 | `authType` | string |
+| `credentialKey` | string |
 | `host` | string |
 | `hostKey` | string |
 | `keepAlive` | integer |

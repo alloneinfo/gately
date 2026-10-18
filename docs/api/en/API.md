@@ -240,6 +240,12 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | POST | `/api/webterminal/connections/{key}/test` | `webterminal:write` | Test a saved connection |
 | POST | `/api/webterminal/connections/test` | `webterminal:write` | Test temporary connection parameters |
 | PUT | `/api/webterminal/connections/{key}/quickaccess` | `webterminal:write` | Set the quick access for a connection |
+| GET | `/api/webterminal/credentials` | `webterminal:read` | List Entry |
+| POST | `/api/webterminal/credentials` | `webterminal:write` | Create Entry |
+| PUT | `/api/webterminal/credentials/{key}` | `webterminal:write` | Update Entry |
+| DELETE | `/api/webterminal/credentials/{key}` | `webterminal:write` | Delete Entry |
+| PUT | `/api/webterminal/credentials/{key}/enable` | `webterminal:write` | Enable or disable Entry |
+| PUT | `/api/webterminal/credentials-order` | `webterminal:write` | Reorder Entry |
 | GET | `/api/webterminal/connections/{key}/ws` | `webterminal:write` | Open a terminal session (WebSocket) |
 | GET | `/api/webterminal/sessions/{id}/ws` | `webterminal:write` | Attach to an existing terminal session (WebSocket) |
 | GET | `/api/webterminal/sessions` | `webterminal:read` | List terminal sessions |
@@ -1171,6 +1177,21 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | `telnet` | `webterminal.TelnetConfig` |
 | `type` | string |
 
+### webterminal.Credential
+
+| Field | Type |
+| --- | --- |
+| `authType` | string |
+| `enable` | boolean |
+| `key` | string |
+| `keyFile` | string |
+| `name` | string |
+| `passphrase` | string |
+| `password` | string |
+| `privateKey` | string |
+| `remark` | string |
+| `username` | string |
+
 ### webterminal.LocalConfig
 
 | Field | Type |
@@ -1195,6 +1216,7 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | Field | Type |
 | --- | --- |
 | `authType` | string |
+| `credentialKey` | string |
 | `host` | string |
 | `hostKey` | string |
 | `keepAlive` | integer |

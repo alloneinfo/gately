@@ -240,6 +240,12 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | POST | `/api/webterminal/connections/{key}/test` | `webterminal:write` | Probar una conexión guardada |
 | POST | `/api/webterminal/connections/test` | `webterminal:write` | Probar parámetros de conexión temporales |
 | PUT | `/api/webterminal/connections/{key}/quickaccess` | `webterminal:write` | Accesos rápidos de conexión |
+| GET | `/api/webterminal/credentials` | `webterminal:read` | Listar Entrada |
+| POST | `/api/webterminal/credentials` | `webterminal:write` | Añadir Entrada |
+| PUT | `/api/webterminal/credentials/{key}` | `webterminal:write` | Modificar Entrada |
+| DELETE | `/api/webterminal/credentials/{key}` | `webterminal:write` | Eliminar Entrada |
+| PUT | `/api/webterminal/credentials/{key}/enable` | `webterminal:write` | Activar o desactivar Entrada |
+| PUT | `/api/webterminal/credentials-order` | `webterminal:write` | Reordenar Entrada |
 | GET | `/api/webterminal/connections/{key}/ws` | `webterminal:write` | Abrir una sesión de terminal (WebSocket) |
 | GET | `/api/webterminal/sessions/{id}/ws` | `webterminal:write` | Unirse a una sesión de terminal existente (WebSocket) |
 | GET | `/api/webterminal/sessions` | `webterminal:read` | Listar sesiones de terminal |
@@ -1171,6 +1177,21 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | `telnet` | `webterminal.TelnetConfig` |
 | `type` | string |
 
+### webterminal.Credential
+
+| Campo | Tipo |
+| --- | --- |
+| `authType` | string |
+| `enable` | boolean |
+| `key` | string |
+| `keyFile` | string |
+| `name` | string |
+| `passphrase` | string |
+| `password` | string |
+| `privateKey` | string |
+| `remark` | string |
+| `username` | string |
+
 ### webterminal.LocalConfig
 
 | Campo | Tipo |
@@ -1195,6 +1216,7 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | Campo | Tipo |
 | --- | --- |
 | `authType` | string |
+| `credentialKey` | string |
 | `host` | string |
 | `hostKey` | string |
 | `keepAlive` | integer |

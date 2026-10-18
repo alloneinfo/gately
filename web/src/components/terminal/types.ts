@@ -14,7 +14,9 @@ export interface SSHConf {
   host: string
   port: number
   username: string
-  authType: 'password' | 'key'
+  // credential 表示引用认证预设，凭据由 credentialKey 指向的预设提供
+  authType: 'password' | 'key' | 'credential'
+  credentialKey: string
   password: string
   privateKey: string
   keyFile: string
@@ -24,6 +26,21 @@ export interface SSHConf {
   workDir: string
   timeout: number
   proxy: ProxyConf
+}
+
+// Credential 是可被多个 SSH 连接复用的认证预设。
+export interface Credential {
+  key: string
+  name: string
+  authType: 'password' | 'key'
+  // username 为可选的默认用户名，连接未填写用户名时使用
+  username: string
+  password: string
+  privateKey: string
+  keyFile: string
+  passphrase: string
+  remark: string
+  enable: boolean
 }
 
 export interface TelnetConf {
@@ -144,6 +161,10 @@ export interface SftpList {
 
 export const MASK = '********'
 
+export function emptyCredential(): Credential {
+  return { key: '', name: '', authType: 'password', username: '', password: '', privateKey: '', keyFile: '', passphrase: '', remark: '', enable: true }
+}
+
 export function emptyProxy(): ProxyConf {
   return { enabled: false, type: 'socks5', host: '', port: 1080, username: '', password: '' }
 }
@@ -161,6 +182,7 @@ export function emptyConn(): Conn {
       port: 22,
       username: 'root',
       authType: 'password',
+      credentialKey: '',
       password: '',
       privateKey: '',
       keyFile: '',
@@ -198,7 +220,8 @@ export function connAddr(c: Conn): string {
   if (c.type === 'telnet') {
     return `${c.telnet.username ? c.telnet.username + '@' : ''}${c.telnet.host}:${c.telnet.port}`
   }
-  return `${c.ssh.username}@${c.ssh.host}:${c.ssh.port}`
+  // 使用认证预设时用户名可能留空，由预设提供
+  return `${c.ssh.username ? c.ssh.username + '@' : ''}${c.ssh.host}:${c.ssh.port}`
 }
 
 // local 使用 getter，在读取时才翻译，切换语言后即时生效。

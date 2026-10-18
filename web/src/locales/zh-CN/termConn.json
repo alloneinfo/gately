@@ -55,7 +55,16 @@
     "needName": "请填写连接名称",
     "needSshHost": "请填写 SSH 主机",
     "needTelnetHost": "请填写 Telnet 主机",
-    "testOk": "连接成功"
+    "testOk": "连接成功",
+    "authCredential": "预设",
+    "credential": "认证预设",
+    "credentialPlaceholder": "选择认证预设",
+    "credentialEmpty": "暂无预设，点击右侧「管理预设」添加",
+    "credentialManage": "管理预设",
+    "credentialHelp": "密码或私钥在 Web 终端设置的「认证预设」中统一维护，修改预设后所有引用它的连接同步生效。",
+    "usernameFromCredential": "留空使用预设中的用户名：{name}",
+    "needCredential": "请选择认证预设",
+    "needUsername": "请填写用户名，或在所选预设中设置默认用户名"
   },
   "list": {
     "title": "连接",
@@ -105,5 +114,17 @@
     "remarkPlaceholder": "例如：部署任务",
     "killConfirm": "结束会话「{name}」？会话中正在运行的程序会被终止。",
     "confirmTitle": "确认"
+  },
+  "credential": {
+    "title": "认证预设",
+    "tip": "预先保存常用的密码或私钥，新增或编辑 SSH 连接时将认证方式选为「预设」即可直接引用，无需重复输入。",
+    "usernameMeta": "用户名：{name}",
+    "empty": "暂无认证预设",
+    "add": "添加预设",
+    "titleEdit": "编辑认证预设",
+    "titleAdd": "添加认证预设",
+    "namePlaceholder": "例如：内网服务器 root 密钥",
+    "usernamePlaceholder": "可选，连接未填写用户名时使用",
+    "deleteConfirm": "删除认证预设「{name}」？"
   }
 }

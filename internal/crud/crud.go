@@ -40,6 +40,8 @@ type Collection[T any] struct {
 	Changed func(key string)
 	// Removed 在条目删除后调用
 	Removed func(key string)
+	// BeforeRemove 在删除前调用（持锁），返回错误时拒绝删除，例如条目仍被引用；可为 nil
+	BeforeRemove func(it *T) error
 }
 
 // NewKey 生成随机 key。
@@ -167,6 +169,12 @@ func (c *Collection[T]) remove(w http.ResponseWriter, r *http.Request) {
 	if i < 0 {
 		httpx.Error(w, http.StatusNotFound, "条目不存在")
 		return
+	}
+	if c.BeforeRemove != nil {
+		if err := c.BeforeRemove(&(*c.Items)[i]); err != nil {
+			httpx.Error(w, http.StatusConflict, "%v", err)
+			return
+		}
 	}
 	old := slices.Clone(*c.Items)
 	*c.Items = slices.Delete(*c.Items, i, i+1)

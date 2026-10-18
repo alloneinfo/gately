@@ -240,6 +240,12 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | POST | `/api/webterminal/connections/{key}/test` | `webterminal:write` | 测试已保存连接 |
 | POST | `/api/webterminal/connections/test` | `webterminal:write` | 测试临时连接参数 |
 | PUT | `/api/webterminal/connections/{key}/quickaccess` | `webterminal:write` | 设置连接的快捷入口 |
+| GET | `/api/webterminal/credentials` | `webterminal:read` | 获取条目列表 |
+| POST | `/api/webterminal/credentials` | `webterminal:write` | 新增条目 |
+| PUT | `/api/webterminal/credentials/{key}` | `webterminal:write` | 修改条目 |
+| DELETE | `/api/webterminal/credentials/{key}` | `webterminal:write` | 删除条目 |
+| PUT | `/api/webterminal/credentials/{key}/enable` | `webterminal:write` | 启用或停用条目 |
+| PUT | `/api/webterminal/credentials-order` | `webterminal:write` | 调整条目排序 |
 | GET | `/api/webterminal/connections/{key}/ws` | `webterminal:write` | 打开终端会话（WebSocket） |
 | GET | `/api/webterminal/sessions/{id}/ws` | `webterminal:write` | 接入已有终端会话（WebSocket） |
 | GET | `/api/webterminal/sessions` | `webterminal:read` | 列出终端会话 |
@@ -1171,6 +1177,21 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `telnet` | `webterminal.TelnetConfig` |
 | `type` | string |
 
+### webterminal.Credential
+
+| 字段 | 类型 |
+| --- | --- |
+| `authType` | string |
+| `enable` | boolean |
+| `key` | string |
+| `keyFile` | string |
+| `name` | string |
+| `passphrase` | string |
+| `password` | string |
+| `privateKey` | string |
+| `remark` | string |
+| `username` | string |
+
 ### webterminal.LocalConfig
 
 | 字段 | 类型 |
@@ -1195,6 +1216,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | 字段 | 类型 |
 | --- | --- |
 | `authType` | string |
+| `credentialKey` | string |
 | `host` | string |
 | `hostKey` | string |
 | `keepAlive` | integer |

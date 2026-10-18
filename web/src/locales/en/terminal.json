@@ -128,6 +128,9 @@
     "heartbeatHelp": "How often the browser and server exchange heartbeats, to keep the connection alive and detect drops early",
     "keepAlive": "Session retention (min)",
     "keepAliveHelp": "How long a session keeps running after the browser disconnects, during which it can be re-attached. 0 ends the session on disconnect. Set a value above 0 to recover sessions after a page refresh.",
+    "credentials": "Credential presets",
+    "credentialsBtn": "Manage credential presets",
+    "credentialsHelp": "Save several passwords or private keys for SSH connections to pick from",
     "security": "Security",
     "securityBtn": "User agreement & two-factor authentication",
     "activeSessions": "Active sessions: {count}"

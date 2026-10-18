@@ -114,7 +114,7 @@ func (m *Module) acquireSSH(ctx context.Context, key string) (client *ssh.Client
 		p.entries[key] = e
 		p.mu.Unlock()
 
-		c, fp, derr := connectSSH(ctx, &conn)
+		c, fp, derr := m.dialSSH(ctx, &conn)
 		if derr != nil {
 			e.err = derr
 			close(e.ready)

@@ -55,7 +55,16 @@
     "needName": "Bitte einen Verbindungsnamen eingeben",
     "needSshHost": "Bitte den SSH-Host eingeben",
     "needTelnetHost": "Bitte den Telnet-Host eingeben",
-    "testOk": "Verbindung erfolgreich"
+    "testOk": "Verbindung erfolgreich",
+    "authCredential": "Vorlage",
+    "credential": "Anmeldevorlage",
+    "credentialPlaceholder": "Anmeldevorlage auswählen",
+    "credentialEmpty": "Noch keine Vorlagen. Über „Vorlagen verwalten“ hinzufügen",
+    "credentialManage": "Vorlagen verwalten",
+    "credentialHelp": "Passwörter und private Schlüssel werden zentral unter „Anmeldevorlagen“ in den Web-Terminal-Einstellungen gepflegt. Änderungen gelten für alle Verbindungen, die die Vorlage nutzen.",
+    "usernameFromCredential": "Leer lassen, um den Benutzernamen der Vorlage zu verwenden: {name}",
+    "needCredential": "Anmeldevorlage auswählen",
+    "needUsername": "Benutzernamen eingeben oder in der gewählten Vorlage einen Standard-Benutzernamen festlegen"
   },
   "list": {
     "title": "Verbindungen",
@@ -105,5 +114,17 @@
     "remarkPlaceholder": "z. B. Deployment-Job",
     "killConfirm": "Sitzung „{name}“ beenden? Darin laufende Programme werden beendet.",
     "confirmTitle": "Bestätigen"
+  },
+  "credential": {
+    "title": "Anmeldevorlagen",
+    "tip": "Häufig genutzte Passwörter oder private Schlüssel hier vorab speichern. Beim Hinzufügen oder Bearbeiten einer SSH-Verbindung „Vorlage“ als Authentifizierung wählen, um sie ohne erneute Eingabe zu verwenden.",
+    "usernameMeta": "Benutzer: {name}",
+    "empty": "Keine Anmeldevorlagen",
+    "add": "Vorlage hinzufügen",
+    "titleEdit": "Anmeldevorlage bearbeiten",
+    "titleAdd": "Anmeldevorlage hinzufügen",
+    "namePlaceholder": "z. B. root-Schlüssel für LAN-Server",
+    "usernamePlaceholder": "Optional, wird verwendet, wenn die Verbindung keinen Benutzernamen hat",
+    "deleteConfirm": "Anmeldevorlage „{name}“ löschen?"
   }
 }

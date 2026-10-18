@@ -240,6 +240,12 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | POST | `/api/webterminal/connections/{key}/test` | `webterminal:write` | Проверить сохранённое подключение |
 | POST | `/api/webterminal/connections/test` | `webterminal:write` | Проверить временные параметры подключения |
 | PUT | `/api/webterminal/connections/{key}/quickaccess` | `webterminal:write` | Быстрый вход для настройки подключения |
+| GET | `/api/webterminal/credentials` | `webterminal:read` | Список: Элемент |
+| POST | `/api/webterminal/credentials` | `webterminal:write` | Добавить: Элемент |
+| PUT | `/api/webterminal/credentials/{key}` | `webterminal:write` | Изменить: Элемент |
+| DELETE | `/api/webterminal/credentials/{key}` | `webterminal:write` | Удалить: Элемент |
+| PUT | `/api/webterminal/credentials/{key}/enable` | `webterminal:write` | Включить или отключить: Элемент |
+| PUT | `/api/webterminal/credentials-order` | `webterminal:write` | Изменить порядок: Элемент |
 | GET | `/api/webterminal/connections/{key}/ws` | `webterminal:write` | Открыть сессию терминала (WebSocket) |
 | GET | `/api/webterminal/sessions/{id}/ws` | `webterminal:write` | Подключиться к существующей сессии терминала (WebSocket) |
 | GET | `/api/webterminal/sessions` | `webterminal:read` | Список сессий терминала |
@@ -1171,6 +1177,21 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `telnet` | `webterminal.TelnetConfig` |
 | `type` | string |
 
+### webterminal.Credential
+
+| Поле | Тип |
+| --- | --- |
+| `authType` | string |
+| `enable` | boolean |
+| `key` | string |
+| `keyFile` | string |
+| `name` | string |
+| `passphrase` | string |
+| `password` | string |
+| `privateKey` | string |
+| `remark` | string |
+| `username` | string |
+
 ### webterminal.LocalConfig
 
 | Поле | Тип |
@@ -1195,6 +1216,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | Поле | Тип |
 | --- | --- |
 | `authType` | string |
+| `credentialKey` | string |
 | `host` | string |
 | `hostKey` | string |
 | `keepAlive` | integer |

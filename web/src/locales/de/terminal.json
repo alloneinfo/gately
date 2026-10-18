@@ -128,6 +128,9 @@
     "heartbeatHelp": "Wie oft Browser und Server Heartbeats austauschen, um die Verbindung zu halten und Abbrüche früh zu erkennen",
     "keepAlive": "Sitzungsaufbewahrung (Min.)",
     "keepAliveHelp": "Wie lange eine Sitzung nach dem Trennen des Browsers weiterläuft und wieder angebunden werden kann. 0 beendet die Sitzung beim Trennen. Ein Wert über 0 ermöglicht die Wiederherstellung von Sitzungen nach einem Seiten-Refresh.",
+    "credentials": "Anmeldevorlagen",
+    "credentialsBtn": "Anmeldevorlagen verwalten",
+    "credentialsHelp": "Mehrere Passwörter oder private Schlüssel speichern und in SSH-Verbindungen auswählen",
     "security": "Sicherheit",
     "securityBtn": "Nutzungsvereinbarung & Zwei-Faktor-Authentifizierung",
     "activeSessions": "Aktive Sitzungen: {count}"

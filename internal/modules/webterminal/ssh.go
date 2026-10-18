@@ -26,10 +26,12 @@ type SSHConfig struct {
 	Host     string `json:"host"`
 	Port     int    `json:"port"`
 	Username string `json:"username"`
-	// AuthType 为 password 或 key
-	AuthType   string `json:"authType"`
-	Password   string `json:"password"`
-	PrivateKey string `json:"privateKey"`
+	// AuthType 为 password、key 或 credential（引用认证预设）
+	AuthType string `json:"authType"`
+	// CredentialKey 为 AuthType=credential 时引用的认证预设 key
+	CredentialKey string `json:"credentialKey"`
+	Password      string `json:"password"`
+	PrivateKey    string `json:"privateKey"`
 	// KeyFile 为服务器本机上的私钥文件路径，PrivateKey 为空时使用
 	KeyFile    string `json:"keyFile"`
 	Passphrase string `json:"passphrase"`
@@ -105,6 +107,7 @@ func (s *sshSession) Close() error {
 }
 
 // connectSSH 建立并认证 SSH 连接（可经代理）。newFingerprint 非空表示首次连接（尚未记录主机密钥）。
+// 调用前需先用 resolveCredential 把认证预设解析为实际凭据。
 func connectSSH(ctx context.Context, c *Connection) (client *ssh.Client, newFingerprint string, err error) {
 	s := c.SSH
 	var auth []ssh.AuthMethod
@@ -161,8 +164,17 @@ func shellQuote(s string) string {
 	return "'" + strings.ReplaceAll(s, "'", `'\''`) + "'"
 }
 
+// dialSSH 解析认证预设后建立 SSH 连接，不修改传入的连接配置。
+func (m *Module) dialSSH(ctx context.Context, c *Connection) (*ssh.Client, string, error) {
+	conn := *c
+	if err := m.resolveCredential(&conn.SSH); err != nil {
+		return nil, "", err
+	}
+	return connectSSH(ctx, &conn)
+}
+
 func (m *Module) startSSH(ctx context.Context, c *Connection, cols, rows int, notice func(string)) (session, error) {
-	client, newFingerprint, err := connectSSH(ctx, c)
+	client, newFingerprint, err := m.dialSSH(ctx, c)
 	if err != nil {
 		return nil, err
 	}
@@ -263,7 +275,7 @@ func (m *Module) runTest(w http.ResponseWriter, r *http.Request, conn *Connectio
 	start := time.Now()
 	switch conn.Type {
 	case TypeSSH:
-		client, fp, err := connectSSH(ctx, conn)
+		client, fp, err := m.dialSSH(ctx, conn)
 		if err != nil {
 			httpx.OK(w, map[string]any{"ok": false, "error": err.Error()})
 			return

@@ -55,7 +55,16 @@
     "needName": "請填寫連線名稱",
     "needSshHost": "請填寫 SSH 主機",
     "needTelnetHost": "請填寫 Telnet 主機",
-    "testOk": "連線成功"
+    "testOk": "連線成功",
+    "authCredential": "預設",
+    "credential": "認證預設",
+    "credentialPlaceholder": "選擇認證預設",
+    "credentialEmpty": "尚無預設，點選右側「管理預設」新增",
+    "credentialManage": "管理預設",
+    "credentialHelp": "密碼或私鑰在 Web 終端設定的「認證預設」中統一維護，修改預設後所有引用它的連線同步生效。",
+    "usernameFromCredential": "留空使用預設中的使用者名稱：{name}",
+    "needCredential": "請選擇認證預設",
+    "needUsername": "請填寫使用者名稱，或在所選預設中設定預設使用者名稱"
   },
   "list": {
     "title": "連線",
@@ -105,5 +114,17 @@
     "remarkPlaceholder": "例如：部署工作",
     "killConfirm": "結束工作階段「{name}」？工作階段中正在執行的程式會被終止。",
     "confirmTitle": "確認"
+  },
+  "credential": {
+    "title": "認證預設",
+    "tip": "預先儲存常用的密碼或私鑰，新增或編輯 SSH 連線時將認證方式選為「預設」即可直接引用，無需重複輸入。",
+    "usernameMeta": "使用者名稱：{name}",
+    "empty": "尚無認證預設",
+    "add": "新增預設",
+    "titleEdit": "編輯認證預設",
+    "titleAdd": "新增認證預設",
+    "namePlaceholder": "例如：內網伺服器 root 金鑰",
+    "usernamePlaceholder": "選填，連線未填寫使用者名稱時使用",
+    "deleteConfirm": "刪除認證預設「{name}」？"
   }
 }

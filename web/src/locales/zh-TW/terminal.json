@@ -128,6 +128,9 @@
     "heartbeatHelp": "瀏覽器與服務端互傳心跳的間隔，用於保持連線並及早發現斷線",
     "keepAlive": "工作階段保留(分鐘)",
     "keepAliveHelp": "瀏覽器中斷後工作階段繼續執行的時間，期間可重新附加；0 表示中斷即結束工作階段。要做到重新整理頁面後找回工作階段，請設定大於 0 的值",
+    "credentials": "認證預設",
+    "credentialsBtn": "管理認證預設",
+    "credentialsHelp": "儲存多組密碼或私鑰，SSH 連線可直接選擇使用",
     "security": "安全",
     "securityBtn": "使用者協議與二次驗證",
     "activeSessions": "目前活動工作階段：{count} 個"

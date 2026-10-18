@@ -1620,6 +1620,41 @@
         },
         "type": "object"
       },
+      "webterminal.Credential": {
+        "properties": {
+          "authType": {
+            "type": "string"
+          },
+          "enable": {
+            "type": "boolean"
+          },
+          "key": {
+            "type": "string"
+          },
+          "keyFile": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "passphrase": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          },
+          "privateKey": {
+            "type": "string"
+          },
+          "remark": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "webterminal.LocalConfig": {
         "properties": {
           "env": {
@@ -1663,6 +1698,9 @@
       "webterminal.SSHConfig": {
         "properties": {
           "authType": {
+            "type": "string"
+          },
+          "credentialKey": {
             "type": "string"
           },
           "host": {
@@ -14867,7 +14905,7 @@
     },
     "/api/system/backup": {
       "get": {
-        "description": "O backup contém todas as chaves secretas.\n\n**Disponível apenas para sessões de login; tokens de API não podem acessar esta interface.**",
+        "description": "O backup contém todas as chaves secretas.\n\n**Disponível apenas para sessões de login; tokens de API não podem acessar este endpoint.**",
         "responses": {
           "200": {
             "description": "Sucesso"
@@ -15578,7 +15616,7 @@
     },
     "/api/tokens": {
       "get": {
-        "description": "O texto simples do token não é retornado.\n\n**Disponível apenas para sessões de login; tokens de API não podem acessar esta interface.**",
+        "description": "O texto simples do token não é retornado.\n\n**Disponível apenas para sessões de login; tokens de API não podem acessar este endpoint.**",
         "responses": {
           "200": {
             "description": "Sucesso"
@@ -15622,7 +15660,7 @@
         "x-token-allowed": false
       },
       "post": {
-        "description": "O texto simples aparece apenas uma vez na resposta.\n\n**Disponível apenas para sessões de login; tokens de API não podem acessar esta interface.**",
+        "description": "O texto simples aparece apenas uma vez na resposta.\n\n**Disponível apenas para sessões de login; tokens de API não podem acessar este endpoint.**",
         "requestBody": {
           "content": {
             "application/json": {
@@ -15842,7 +15880,7 @@
     },
     "/api/tokens/{id}/regenerate": {
       "post": {
-        "description": "O texto simples antigo é invalidado imediatamente.\n\n**Disponível apenas para sessões de login; tokens de API não podem acessar esta interface.**",
+        "description": "O texto simples antigo é invalidado imediatamente.\n\n**Disponível apenas para sessões de login; tokens de API não podem acessar este endpoint.**",
         "parameters": [
           {
             "in": "path",
@@ -18549,6 +18587,398 @@
           }
         ],
         "summary": "Abrir sessão de terminal (WebSocket)",
+        "tags": [
+          "Terminal web"
+        ],
+        "x-required-scope": "webterminal:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/webterminal/credentials": {
+      "get": {
+        "description": "Permissão necessária: `webterminal:read`.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/webterminal.Credential"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Sucesso"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parâmetros da requisição inválidos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token inválido, expirado ou sem login"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "O token não tem a permissão necessária"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Listar Entrada",
+        "tags": [
+          "Terminal web"
+        ],
+        "x-required-scope": "webterminal:read",
+        "x-token-allowed": true
+      },
+      "post": {
+        "description": "Permissão necessária: `webterminal:write`.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/webterminal.Credential"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/webterminal.Credential"
+                }
+              }
+            },
+            "description": "Sucesso"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parâmetros da requisição inválidos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token inválido, expirado ou sem login"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "O token não tem a permissão necessária"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Adicionar Entrada",
+        "tags": [
+          "Terminal web"
+        ],
+        "x-required-scope": "webterminal:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/webterminal/credentials-order": {
+      "put": {
+        "description": "Permissão necessária: `webterminal:write`.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/crud.orderRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sucesso"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parâmetros da requisição inválidos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token inválido, expirado ou sem login"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "O token não tem a permissão necessária"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Reordenar Entrada",
+        "tags": [
+          "Terminal web"
+        ],
+        "x-required-scope": "webterminal:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/webterminal/credentials/{key}": {
+      "delete": {
+        "description": "Permissão necessária: `webterminal:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parâmetros da requisição inválidos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token inválido, expirado ou sem login"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "O token não tem a permissão necessária"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Excluir Entrada",
+        "tags": [
+          "Terminal web"
+        ],
+        "x-required-scope": "webterminal:write",
+        "x-token-allowed": true
+      },
+      "put": {
+        "description": "Permissão necessária: `webterminal:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/webterminal.Credential"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/webterminal.Credential"
+                }
+              }
+            },
+            "description": "Sucesso"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parâmetros da requisição inválidos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token inválido, expirado ou sem login"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "O token não tem a permissão necessária"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Modificar Entrada",
+        "tags": [
+          "Terminal web"
+        ],
+        "x-required-scope": "webterminal:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/webterminal/credentials/{key}/enable": {
+      "put": {
+        "description": "Permissão necessária: `webterminal:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/crud.enableRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sucesso"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parâmetros da requisição inválidos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token inválido, expirado ou sem login"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "O token não tem a permissão necessária"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Ativar ou desativar Entrada",
         "tags": [
           "Terminal web"
         ],

@@ -240,6 +240,12 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | POST | `/api/webterminal/connections/{key}/test` | `webterminal:write` | 保存済みの接続をテスト |
 | POST | `/api/webterminal/connections/test` | `webterminal:write` | 一時的な接続パラメーターをテスト |
 | PUT | `/api/webterminal/connections/{key}/quickaccess` | `webterminal:write` | 接続のクイックアクセスを設定 |
+| GET | `/api/webterminal/credentials` | `webterminal:read` | エントリ の一覧を取得 |
+| POST | `/api/webterminal/credentials` | `webterminal:write` | エントリ を追加 |
+| PUT | `/api/webterminal/credentials/{key}` | `webterminal:write` | エントリ を更新 |
+| DELETE | `/api/webterminal/credentials/{key}` | `webterminal:write` | エントリ を削除 |
+| PUT | `/api/webterminal/credentials/{key}/enable` | `webterminal:write` | エントリ の有効/無効を切り替え |
+| PUT | `/api/webterminal/credentials-order` | `webterminal:write` | エントリ の並び順を変更 |
 | GET | `/api/webterminal/connections/{key}/ws` | `webterminal:write` | ターミナルセッションを開く（WebSocket） |
 | GET | `/api/webterminal/sessions/{id}/ws` | `webterminal:write` | 既存のターミナルセッションに接続（WebSocket） |
 | GET | `/api/webterminal/sessions` | `webterminal:read` | ターミナルセッションを一覧表示 |
@@ -1171,6 +1177,21 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `telnet` | `webterminal.TelnetConfig` |
 | `type` | string |
 
+### webterminal.Credential
+
+| フィールド | 型 |
+| --- | --- |
+| `authType` | string |
+| `enable` | boolean |
+| `key` | string |
+| `keyFile` | string |
+| `name` | string |
+| `passphrase` | string |
+| `password` | string |
+| `privateKey` | string |
+| `remark` | string |
+| `username` | string |
+
 ### webterminal.LocalConfig
 
 | フィールド | 型 |
@@ -1195,6 +1216,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | フィールド | 型 |
 | --- | --- |
 | `authType` | string |
+| `credentialKey` | string |
 | `host` | string |
 | `hostKey` | string |
 | `keepAlive` | integer |

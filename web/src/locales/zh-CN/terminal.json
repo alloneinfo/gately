@@ -128,6 +128,9 @@
     "heartbeatHelp": "浏览器与服务端互发心跳的间隔，用于保持连接并及早发现断线",
     "keepAlive": "会话保留(分钟)",
     "keepAliveHelp": "浏览器断开后会话继续运行的时间，期间可重新附着；0 表示断开即结束会话。要做到刷新页面后找回会话，请设置大于 0 的值",
+    "credentials": "认证预设",
+    "credentialsBtn": "管理认证预设",
+    "credentialsHelp": "保存多组密码或私钥，SSH 连接可直接选择使用",
     "security": "安全",
     "securityBtn": "用户协议与二次验证",
     "activeSessions": "当前活动会话：{count} 个"

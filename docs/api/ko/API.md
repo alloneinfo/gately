@@ -240,6 +240,12 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | POST | `/api/webterminal/connections/{key}/test` | `webterminal:write` | 저장된 연결 테스트 |
 | POST | `/api/webterminal/connections/test` | `webterminal:write` | 임시 연결 매개변수 테스트 |
 | PUT | `/api/webterminal/connections/{key}/quickaccess` | `webterminal:write` | 연결 설정 바로가기 |
+| GET | `/api/webterminal/credentials` | `webterminal:read` | 항목 목록 조회 |
+| POST | `/api/webterminal/credentials` | `webterminal:write` | 항목 추가 |
+| PUT | `/api/webterminal/credentials/{key}` | `webterminal:write` | 항목 수정 |
+| DELETE | `/api/webterminal/credentials/{key}` | `webterminal:write` | 항목 삭제 |
+| PUT | `/api/webterminal/credentials/{key}/enable` | `webterminal:write` | 항목 사용 설정/해제 |
+| PUT | `/api/webterminal/credentials-order` | `webterminal:write` | 항목 순서 변경 |
 | GET | `/api/webterminal/connections/{key}/ws` | `webterminal:write` | 터미널 세션 열기 (WebSocket) |
 | GET | `/api/webterminal/sessions/{id}/ws` | `webterminal:write` | 기존 터미널 세션에 연결 (WebSocket) |
 | GET | `/api/webterminal/sessions` | `webterminal:read` | 터미널 세션 목록 조회 |
@@ -1171,6 +1177,21 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `telnet` | `webterminal.TelnetConfig` |
 | `type` | string |
 
+### webterminal.Credential
+
+| 필드 | 타입 |
+| --- | --- |
+| `authType` | string |
+| `enable` | boolean |
+| `key` | string |
+| `keyFile` | string |
+| `name` | string |
+| `passphrase` | string |
+| `password` | string |
+| `privateKey` | string |
+| `remark` | string |
+| `username` | string |
+
 ### webterminal.LocalConfig
 
 | 필드 | 타입 |
@@ -1195,6 +1216,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | 필드 | 타입 |
 | --- | --- |
 | `authType` | string |
+| `credentialKey` | string |
 | `host` | string |
 | `hostKey` | string |
 | `keepAlive` | integer |

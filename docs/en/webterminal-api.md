@@ -21,7 +21,8 @@ All endpoints are mounted under `/api/webterminal/` and require login. Errors ar
     "agreementAccepted": false,
     "twoFAEnable": false,
     "twoFAKey": ""             // TOTP secret; masked in API output
-  }
+  },
+  "credentials": [Credential]  // SSH credential presets
 }
 ```
 
@@ -31,7 +32,9 @@ Connection (`type` is `ssh` / `telnet` / `local`):
 {
   "key": "", "name": "", "type": "ssh", "remark": "", "enable": true,
   "quickAccessDirs": ["/etc", "/var/log"],      // SFTP quick-access directories
-  "ssh": { "host", "port", "username", "authType": "password|key", "password", "privateKey",
+  "ssh": { "host", "port", "username", "authType": "password|key|credential",
+           "credentialKey": "",  // credential preset key when authType=credential; username may then be empty and falls back to the preset's default
+           "password", "privateKey",
            "keyFile": "",        // path to a private key file on the server itself; used when authType=key and privateKey is empty
            "passphrase", "hostKey", "keepAlive", "workDir": "", "timeout": 15,
            "proxy": Proxy },
@@ -39,6 +42,13 @@ Connection (`type` is `ssh` / `telnet` / `local`):
   "local": { "shell", "workDir", "env": {"K":"V"} }
 }
 Proxy = { "enabled": false, "type": "socks5|http", "host", "port", "username", "password" }
+```
+
+Credential (credential preset, can be referenced by many SSH connections):
+
+```jsonc
+{ "key": "", "name": "", "authType": "password|key", "username": "", // optional, used when the connection has no username
+  "password", "privateKey", "keyFile", "passphrase", "remark": "", "enable": true }
 ```
 
 Passwords, private keys, private key passphrases, and proxy passwords are masked with `crud.Mask` in output and preserved with `crud.KeepSecret` on update.
@@ -54,12 +64,16 @@ Passwords, private keys, private key passphrases, and proxy passwords are masked
 | POST | `/connections/test` | Test an unsaved connection (the body is a Connection; saved secrets are merged in by pointing the `key` field at the original connection) |
 | DELETE | `/connections/{key}/hostkey` | Reset the host fingerprint |
 | PUT | `/connections/{key}/quickaccess` | Body `{"dirs":["/a","/b"]}` |
+| GET/POST | `/credentials` | List / create credential presets |
+| PUT/DELETE | `/credentials/{key}` | Update / delete (returns 409 listing connection names while still referenced) |
+| PUT | `/credentials-order` | Reorder presets `{"keys":[...]}` |
 | GET | `/shells` | List of shells available on this machine `["/bin/bash", ...]` (reads /etc/shells and filters to those that exist) |
 
 Additional notes (the implementation is authoritative):
 - `POST /connections/test` and `POST /connections/{key}/test` return 200 with `{ok, error?, serverVersion?, newHostKey?, latencyMs}`; the `local` type returns 400. For Telnet, only TCP reachability (including through the proxy) is verified.
 - `PUT /connections/{key}/quickaccess` returns `{ok, dirs}` (whitespace and duplicates removed). When editing a connection without `quickAccessDirs`, the old value is kept.
 - `ssh.timeout` / `telnet.timeout` accept 1 to 120 seconds, defaulting to 15. `ssh.workDir` is applied with `cd` after login.
+- Connections with `authType=credential` have their inline password, private key, key file and passphrase cleared on save; credentials are resolved from the preset at connect time. Updating a preset drops pooled SSH connections that reference it.
 - Telnet login auto-fill tries once each, and only when prompts such as `login:` / `username:` / `password:` are detected.
 
 ## 3. Terminal sessions (persistent sessions that can reconnect after a disconnect)

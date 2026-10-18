@@ -55,7 +55,16 @@
     "needName": "接続名を入力してください",
     "needSshHost": "SSH ホストを入力してください",
     "needTelnetHost": "Telnet ホストを入力してください",
-    "testOk": "接続に成功しました"
+    "testOk": "接続に成功しました",
+    "authCredential": "プリセット",
+    "credential": "認証プリセット",
+    "credentialPlaceholder": "認証プリセットを選択",
+    "credentialEmpty": "プリセットがありません。右の「プリセット管理」から追加してください",
+    "credentialManage": "プリセット管理",
+    "credentialHelp": "パスワードや秘密鍵は Web ターミナル設定の「認証プリセット」でまとめて管理します。プリセットを変更すると、参照しているすべての接続に反映されます。",
+    "usernameFromCredential": "空欄の場合はプリセットのユーザー名を使用：{name}",
+    "needCredential": "認証プリセットを選択してください",
+    "needUsername": "ユーザー名を入力するか、選択したプリセットに既定のユーザー名を設定してください"
   },
   "list": {
     "title": "接続",
@@ -105,5 +114,17 @@
     "remarkPlaceholder": "例: デプロイ作業",
     "killConfirm": "セッション「{name}」を終了しますか？セッション内で実行中のプログラムは停止されます。",
     "confirmTitle": "確認"
+  },
+  "credential": {
+    "title": "認証プリセット",
+    "tip": "よく使うパスワードや秘密鍵を事前に保存します。SSH 接続の追加・編集時に認証方式で「プリセット」を選ぶと、再入力せずに利用できます。",
+    "usernameMeta": "ユーザー名：{name}",
+    "empty": "認証プリセットはありません",
+    "add": "プリセットを追加",
+    "titleEdit": "認証プリセットを編集",
+    "titleAdd": "認証プリセットを追加",
+    "namePlaceholder": "例：社内サーバー root 鍵",
+    "usernamePlaceholder": "任意。接続にユーザー名がない場合に使用",
+    "deleteConfirm": "認証プリセット「{name}」を削除しますか？"
   }
 }

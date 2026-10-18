@@ -21,7 +21,8 @@
     "agreementAccepted": false,
     "twoFAEnable": false,
     "twoFAKey": ""             // TOTP 密钥，接口输出时脱敏
-  }
+  },
+  "credentials": [Credential]  // SSH 认证预设
 }
 ```
 
@@ -31,7 +32,9 @@ Connection（`type` 为 `ssh` / `telnet` / `local`）：
 {
   "key": "", "name": "", "type": "ssh", "remark": "", "enable": true,
   "quickAccessDirs": ["/etc", "/var/log"],      // SFTP 快速访问目录
-  "ssh": { "host", "port", "username", "authType": "password|key", "password", "privateKey",
+  "ssh": { "host", "port", "username", "authType": "password|key|credential",
+           "credentialKey": "",  // authType=credential 时引用的认证预设 key；此时 username 可留空，取预设的默认用户名
+           "password", "privateKey",
            "keyFile": "",        // 服务器本机上的私钥文件路径，authType=key 且 privateKey 为空时使用
            "passphrase", "hostKey", "keepAlive", "workDir": "", "timeout": 15,
            "proxy": Proxy },
@@ -39,6 +42,13 @@ Connection（`type` 为 `ssh` / `telnet` / `local`）：
   "local": { "shell", "workDir", "env": {"K":"V"} }
 }
 Proxy = { "enabled": false, "type": "socks5|http", "host", "port", "username", "password" }
+```
+
+Credential（认证预设，可被多个 SSH 连接引用）：
+
+```jsonc
+{ "key": "", "name": "", "authType": "password|key", "username": "", // username 可选，连接未填写用户名时使用
+  "password", "privateKey", "keyFile", "passphrase", "remark": "", "enable": true }
 ```
 
 密码、私钥、私钥口令、代理密码输出时用 `crud.Mask` 脱敏，修改时用 `crud.KeepSecret` 保留。
@@ -54,12 +64,16 @@ Proxy = { "enabled": false, "type": "socks5|http", "host", "port", "username", "
 | POST | `/connections/test` | 测试未保存的连接（body 为 Connection；已保存的密文用 `key` 字段指向原连接合并） |
 | DELETE | `/connections/{key}/hostkey` | 重置主机指纹 |
 | PUT | `/connections/{key}/quickaccess` | body `{"dirs":["/a","/b"]}` |
+| GET/POST | `/credentials` | 认证预设列表 / 新增 |
+| PUT/DELETE | `/credentials/{key}` | 修改 / 删除（仍被连接引用时返回 409 并列出连接名称） |
+| PUT | `/credentials-order` | 预设排序 `{"keys":[...]}` |
 | GET | `/shells` | 本机可用 Shell 列表 `["/bin/bash", ...]`（读取 /etc/shells 并过滤存在的） |
 
 补充说明（以实现为准）：
 - `POST /connections/test` 与 `POST /connections/{key}/test` 返回 200，`{ok, error?, serverVersion?, newHostKey?, latencyMs}`；`local` 类型返回 400。Telnet 仅验证 TCP（含代理）可达。
 - `PUT /connections/{key}/quickaccess` 返回 `{ok, dirs}`（去空白与重复）；编辑连接时若不带 `quickAccessDirs` 则沿用旧值。
 - 连接的 `ssh.timeout` / `telnet.timeout` 取值 1~120 秒，缺省 15。`ssh.workDir` 在登录后通过 `cd` 切换。
+- `authType=credential` 的连接保存时会清空连接内的密码、私钥、私钥文件与口令，连接时从预设解析凭据；修改预设会断开引用它的池化 SSH 连接。
 - Telnet 登录自动填充仅在检测到 `login:` / `username:` / `password:` 等提示时各尝试一次。
 
 ## 3. 终端会话（持久会话，可断线重连）

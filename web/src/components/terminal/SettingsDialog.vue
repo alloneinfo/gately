@@ -36,6 +36,10 @@
         <el-input-number v-model="form.sessionKeepAlive" :min="0" :max="100000" />
         <span class="help">{{ t('terminal.settings.keepAliveHelp') }}</span>
       </el-form-item>
+      <el-form-item :label="t('terminal.settings.credentials')">
+        <el-button :icon="KeyRound" @click="credVisible = true">{{ t('terminal.settings.credentialsBtn') }}</el-button>
+        <span class="help">{{ t('terminal.settings.credentialsHelp') }}</span>
+      </el-form-item>
       <el-form-item :label="t('terminal.settings.security')">
         <el-button :icon="ShieldCheck" @click="securityVisible = true">{{ t('terminal.settings.securityBtn') }}</el-button>
       </el-form-item>
@@ -47,6 +51,7 @@
       <el-button type="primary" :loading="saving" :disabled="!form" @click="save">{{ t('common.save') }}</el-button>
     </template>
     <SecurityDialog v-model="securityVisible" />
+    <CredentialManager v-model="credVisible" />
   </el-dialog>
 </template>
 
@@ -54,9 +59,10 @@
 import { ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useI18n } from 'vue-i18n'
-import { ShieldCheck } from 'lucide-vue-next'
+import { KeyRound, ShieldCheck } from 'lucide-vue-next'
 import { api } from '../../api'
 import { useFormLayout } from '../../composables/useIsMobile'
+import CredentialManager from './CredentialManager.vue'
 import SecurityDialog from './SecurityDialog.vue'
 import type { TermSettings } from './types'
 
@@ -69,6 +75,7 @@ const form = ref<TermSettings>()
 const active = ref<number | null>(null)
 const saving = ref(false)
 const securityVisible = ref(false)
+const credVisible = ref(false)
 
 async function load() {
   form.value = undefined

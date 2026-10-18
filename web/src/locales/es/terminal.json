@@ -128,6 +128,9 @@
     "heartbeatHelp": "Con qué frecuencia intercambian latidos el navegador y el servidor, para mantener viva la conexión y detectar caídas pronto",
     "keepAlive": "Retención de sesión (min)",
     "keepAliveHelp": "Cuánto tiempo sigue ejecutándose una sesión tras desconectarse el navegador, durante el cual se puede volver a conectar. 0 finaliza la sesión al desconectar. Establece un valor superior a 0 para recuperar sesiones tras actualizar la página.",
+    "credentials": "Credenciales predefinidas",
+    "credentialsBtn": "Gestionar credenciales predefinidas",
+    "credentialsHelp": "Guarde varias contraseñas o claves privadas para elegirlas en las conexiones SSH",
     "security": "Seguridad",
     "securityBtn": "Acuerdo de usuario y autenticación de dos factores",
     "activeSessions": "Sesiones activas: {count}"
