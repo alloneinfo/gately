@@ -4,7 +4,11 @@
 
 開源、可稽核的網路閘道工具集，家用網路、NAS、雲端主機與各類伺服器皆可使用，靈感來自 [Lucky](https://github.com/gdy666/lucky)，以完全開源的方式提供同類功能。DDNS、STUN 穿透、連接埠轉發、反向代理、憑證、WAF 等常用功能整合在一個約 22 MB 的單一檔案中，並可一鍵匯入 Lucky 設定。
 
-![Gately 概覽](docs/images/overview.png)
+![Gately 概覽](docs/images/overview.webp)
+
+![動態網域](docs/images/ddns.webp)
+
+![Docker](docs/images/docker.webp)
 
 ## 為什麼做 Gately
 

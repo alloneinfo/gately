@@ -4,7 +4,11 @@
 
 Boîte à outils de passerelle réseau open source et auditable, pour les réseaux domestiques, les NAS, les hôtes cloud et toutes sortes de serveurs. Inspirée de [Lucky](https://github.com/gdy666/lucky), elle offre des fonctionnalités équivalentes de manière entièrement open source. DDNS, traversée NAT STUN, redirection de ports, reverse proxy, certificats, WAF et autres fonctions courantes sont réunis dans un seul fichier d'environ 22 Mo, avec import de la configuration Lucky en un clic.
 
-![Aperçu de Gately](docs/images/overview.png)
+![Aperçu de Gately](docs/images/overview.webp)
+
+![DNS dynamique](docs/images/ddns.webp)
+
+![Docker](docs/images/docker.webp)
 
 ## Pourquoi Gately
 

@@ -4,7 +4,11 @@
 
 オープンソースで監査可能なネットワークゲートウェイツールセットです。家庭内ネットワーク、NAS、クラウドホスト、各種サーバーで利用できます。[Lucky](https://github.com/gdy666/lucky) にインスパイアされ、同種の機能を完全なオープンソースで提供します。DDNS、STUN 穿孔、ポート転送、リバースプロキシ、証明書、WAF など、よく使う機能を約 22 MB の単一ファイルにまとめ、Lucky の設定もワンクリックでインポートできます。
 
-![Gately 概要](docs/images/overview.png)
+![Gately 概要](docs/images/overview.webp)
+
+![ダイナミック DNS](docs/images/ddns.webp)
+
+![Docker](docs/images/docker.webp)
 
 ## なぜ Gately なのか
 

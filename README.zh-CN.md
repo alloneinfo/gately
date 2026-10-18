@@ -4,7 +4,11 @@
 
 开源、可审计的网络网关工具集，家庭网络、NAS、云主机与各类服务器均可使用，灵感来自 [Lucky](https://github.com/gdy666/lucky)，以完全开源的方式提供同类能力。DDNS、STUN 穿透、端口转发、反向代理、证书、WAF 等常用能力集成在一个约 22 MB 的单文件中，并可一键导入 Lucky 配置。
 
-![Gately 概览](docs/images/overview.png)
+![Gately 概览](docs/images/overview.webp)
+
+![动态域名](docs/images/ddns.webp)
+
+![Docker](docs/images/docker.webp)
 
 ## 为什么做 Gately
 

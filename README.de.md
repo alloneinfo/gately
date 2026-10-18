@@ -4,7 +4,11 @@
 
 Ein quelloffenes, prüfbares Toolkit für Netzwerk-Gateways – für Heimnetz, NAS, Cloud-Hosts und beliebige Server. Es ist von [Lucky](https://github.com/gdy666/lucky) inspiriert und bietet vergleichbare Funktionen vollständig als Open Source. DDNS, STUN-Traversal, Portweiterleitung, Reverse-Proxy, Zertifikate, WAF und weitere gängige Funktionen sind in einer einzigen Datei von etwa 22 MB vereint; Lucky-Konfigurationen lassen sich mit einem Klick importieren.
 
-![Gately-Übersicht](docs/images/overview.png)
+![Gately-Übersicht](docs/images/overview.webp)
+
+![Dynamisches DNS](docs/images/ddns.webp)
+
+![Docker](docs/images/docker.webp)
 
 ## Warum Gately
 

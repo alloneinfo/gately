@@ -4,7 +4,11 @@
 
 가정 네트워크, NAS, 클라우드 호스트, 각종 서버에서 사용할 수 있는 오픈소스 · 감사 가능한 네트워크 게이트웨이 도구 모음입니다. [Lucky](https://github.com/gdy666/lucky)에서 영감을 받아 같은 종류의 기능을 완전한 오픈소스로 제공합니다. DDNS, STUN 터널링, 포트 포워딩, 리버스 프록시, 인증서, WAF 등 자주 쓰는 기능을 약 22 MB의 단일 파일에 담았으며, Lucky 설정을 한 번에 가져올 수 있습니다.
 
-![Gately 개요](docs/images/overview.png)
+![Gately 개요](docs/images/overview.webp)
+
+![동적 DNS](docs/images/ddns.webp)
+
+![Docker](docs/images/docker.webp)
 
 ## Gately를 만든 이유
 
