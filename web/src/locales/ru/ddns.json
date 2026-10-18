@@ -55,5 +55,6 @@
   "taskDeactivated": "Задача отключена",
   "recordDeactivated": "Эта запись отключена",
   "savedChecking": "Сохранено; выполняется проверка",
-  "triggered": "Запущено"
+  "triggered": "Запущено",
+  "recordsCollapsed": "Скрыто записей: {count}, нажмите, чтобы развернуть"
 }

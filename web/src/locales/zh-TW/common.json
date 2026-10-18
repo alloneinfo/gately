@@ -54,5 +54,9 @@
   "durationMinutes": "{m} 分鐘",
   "aiTranslated": "介面由 AI 翻譯，內容可能有疏漏。歡迎到 GitHub 協助改進。",
   "viewCard": "卡片檢視",
-  "viewCompact": "精簡檢視"
+  "viewCompact": "精簡檢視",
+  "expand": "展開",
+  "collapse": "收合",
+  "expandAll": "全部展開",
+  "collapseAll": "全部收合"
 }

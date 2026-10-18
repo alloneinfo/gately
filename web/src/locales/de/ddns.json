@@ -55,5 +55,6 @@
   "taskDeactivated": "Die Aufgabe ist deaktiviert",
   "recordDeactivated": "Dieser Eintrag ist deaktiviert",
   "savedChecking": "Gespeichert; Prüfung läuft",
-  "triggered": "Ausgelöst"
+  "triggered": "Ausgelöst",
+  "recordsCollapsed": "{count} Einträge ausgeblendet, zum Ausklappen klicken"
 }

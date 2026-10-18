@@ -98,5 +98,6 @@
   "moduleOff": "Módulo desativado",
   "statusNotRunning": "Não está em execução",
   "savedReloaded": "Salvo. O listener foi recarregado",
-  "moduleEnabled": "Módulo de serviço Web ativado"
+  "moduleEnabled": "Módulo de serviço Web ativado",
+  "sitesCollapsed": "{count} sites ocultos, clique para expandir"
 }

@@ -98,5 +98,6 @@
   "moduleOff": "Модуль отключён",
   "statusNotRunning": "Не запущено",
   "savedReloaded": "Сохранено. Слушатель перезагружен",
-  "moduleEnabled": "Модуль веб-службы включён"
+  "moduleEnabled": "Модуль веб-службы включён",
+  "sitesCollapsed": "Скрыто сайтов: {count}, нажмите, чтобы развернуть"
 }

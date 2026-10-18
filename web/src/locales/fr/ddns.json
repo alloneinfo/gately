@@ -55,5 +55,6 @@
   "taskDeactivated": "La tâche est désactivée",
   "recordDeactivated": "Cet enregistrement est désactivé",
   "savedChecking": "Enregistré ; vérification en cours",
-  "triggered": "Déclenchée"
+  "triggered": "Déclenchée",
+  "recordsCollapsed": "{count} enregistrements masqués, cliquez pour développer"
 }

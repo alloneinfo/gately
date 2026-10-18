@@ -98,5 +98,6 @@
   "moduleOff": "模組已停用",
   "statusNotRunning": "未執行",
   "savedReloaded": "已儲存，監聽已重新載入",
-  "moduleEnabled": "Web 服務模組已啟用"
+  "moduleEnabled": "Web 服務模組已啟用",
+  "sitesCollapsed": "已收合 {count} 個站點，點擊展開"
 }

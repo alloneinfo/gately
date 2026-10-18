@@ -55,5 +55,6 @@
   "taskDeactivated": "The task is disabled",
   "recordDeactivated": "This record is disabled",
   "savedChecking": "Saved; checking now",
-  "triggered": "Triggered"
+  "triggered": "Triggered",
+  "recordsCollapsed": "{count} records hidden, click to expand"
 }

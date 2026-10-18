@@ -98,5 +98,6 @@
   "moduleOff": "Modul deaktiviert",
   "statusNotRunning": "Läuft nicht",
   "savedReloaded": "Gespeichert. Der Listener wurde neu geladen",
-  "moduleEnabled": "Modul Web-Dienst aktiviert"
+  "moduleEnabled": "Modul Web-Dienst aktiviert",
+  "sitesCollapsed": "{count} Sites ausgeblendet, zum Ausklappen klicken"
 }

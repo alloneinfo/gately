@@ -55,5 +55,6 @@
   "taskDeactivated": "所屬工作已停用",
   "recordDeactivated": "該記錄已停用",
   "savedChecking": "已儲存，正在檢查",
-  "triggered": "已觸發"
+  "triggered": "已觸發",
+  "recordsCollapsed": "已收合 {count} 筆解析記錄，點擊展開"
 }

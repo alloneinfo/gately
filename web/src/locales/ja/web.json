@@ -98,5 +98,6 @@
   "moduleOff": "モジュール無効",
   "statusNotRunning": "未実行",
   "savedReloaded": "保存しました。リスナーを再読み込みしました",
-  "moduleEnabled": "Web サービスモジュールを有効にしました"
+  "moduleEnabled": "Web サービスモジュールを有効にしました",
+  "sitesCollapsed": "{count} 件のサイトを非表示中（クリックで展開）"
 }

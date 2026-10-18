@@ -98,5 +98,6 @@
   "moduleOff": "모듈 사용 안 함",
   "statusNotRunning": "실행 중 아님",
   "savedReloaded": "저장되었으며 리스너를 다시 로드했습니다",
-  "moduleEnabled": "Web 서비스 모듈을 사용합니다"
+  "moduleEnabled": "Web 서비스 모듈을 사용합니다",
+  "sitesCollapsed": "사이트 {count}개 숨김, 클릭하여 펼치기"
 }

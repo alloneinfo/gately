@@ -2,6 +2,18 @@
   <!-- 列表项卡片：桌面与移动端共用一套模板，字段区按宽度自动换列 -->
   <div class="entity" :class="{ 'is-off': off, 'is-compact': compact }">
     <div class="entity-head">
+      <button
+        v-if="collapsible"
+        type="button"
+        class="entity-toggle"
+        :class="{ 'is-collapsed': collapsed }"
+        :aria-expanded="!collapsed"
+        :aria-label="collapsed ? t('common.expand') : t('common.collapse')"
+        :title="collapsed ? t('common.expand') : t('common.collapse')"
+        @click="emit('update:collapsed', !collapsed)"
+      >
+        <ChevronDown :size="16" />
+      </button>
       <div v-if="$slots.lead" class="entity-lead"><slot name="lead" /></div>
       <div class="entity-titles">
         <div class="entity-title"><slot name="title" /></div>
@@ -10,17 +22,27 @@
       <div v-if="$slots.status" class="entity-status"><slot name="status" /></div>
     </div>
     <div v-if="$slots.default" class="entity-body"><slot /></div>
-    <div v-if="$slots.extra" class="entity-extra"><slot name="extra" /></div>
-    <div v-if="$slots.actions || $slots.meta" class="entity-foot">
-      <div class="entity-meta"><slot name="meta" /></div>
+    <div v-if="$slots.extra && !(collapsible && collapsed)" class="entity-extra"><slot name="extra" /></div>
+    <div v-if="$slots.actions || $slots.meta || (collapsible && collapsed && collapsedHint)" class="entity-foot">
+      <div class="entity-meta">
+        <!-- 收起后在底部提示被隐藏的条目数，点击即可展开 -->
+        <span v-if="collapsible && collapsed && collapsedHint" class="entity-collapsed-hint" @click="emit('update:collapsed', false)">{{ collapsedHint }}</span>
+        <slot name="meta" />
+      </div>
       <div class="entity-actions"><slot name="actions" /></div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
+import { ChevronDown } from 'lucide-vue-next'
+
 // off 为 true 时整体置灰，表示该项已停用；compact 为 true 时压缩成单行（仅桌面宽度生效）
-defineProps<{ off?: boolean; compact?: boolean }>()
+// collapsible 为 true 时标题左侧显示展开/收起按钮，收起后隐藏 extra 区（组内列表），collapsedHint 为收起后底部的提示文字
+defineProps<{ off?: boolean; compact?: boolean; collapsible?: boolean; collapsed?: boolean; collapsedHint?: string }>()
+const emit = defineEmits<{ 'update:collapsed': [value: boolean] }>()
+const { t } = useI18n()
 </script>
 
 <style scoped>
@@ -39,6 +61,38 @@ defineProps<{ off?: boolean; compact?: boolean }>()
   align-items: center;
   gap: 12px;
   padding: 14px 16px 0;
+}
+.entity-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  margin-right: -4px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--el-text-color-secondary);
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+}
+.entity-toggle:hover {
+  background: var(--el-fill-color-light);
+  color: var(--el-text-color-primary);
+}
+.entity-toggle svg {
+  transition: transform 0.2s;
+}
+.entity-toggle.is-collapsed svg {
+  transform: rotate(-90deg);
+}
+.entity-collapsed-hint {
+  cursor: pointer;
+}
+.entity-collapsed-hint:hover {
+  color: var(--el-color-primary);
 }
 .entity-lead {
   display: flex;

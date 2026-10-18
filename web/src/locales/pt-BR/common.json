@@ -54,5 +54,9 @@
   "durationMinutes": "{m} min",
   "aiTranslated": "A interface foi traduzida com IA e pode conter imprecisões. Ajude a melhorar no GitHub.",
   "viewCard": "Visão em cartões",
-  "viewCompact": "Visão compacta"
+  "viewCompact": "Visão compacta",
+  "expand": "Expandir",
+  "collapse": "Recolher",
+  "expandAll": "Expandir tudo",
+  "collapseAll": "Recolher tudo"
 }

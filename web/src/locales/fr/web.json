@@ -98,5 +98,6 @@
   "moduleOff": "Module désactivé",
   "statusNotRunning": "Non démarré",
   "savedReloaded": "Enregistré. L'écouteur a été rechargé",
-  "moduleEnabled": "Module de service Web activé"
+  "moduleEnabled": "Module de service Web activé",
+  "sitesCollapsed": "{count} sites masqués, cliquez pour développer"
 }

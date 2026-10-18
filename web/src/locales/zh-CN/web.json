@@ -98,5 +98,6 @@
   "moduleOff": "模块已停用",
   "statusNotRunning": "未运行",
   "savedReloaded": "已保存，监听已重新加载",
-  "moduleEnabled": "Web 服务模块已启用"
+  "moduleEnabled": "Web 服务模块已启用",
+  "sitesCollapsed": "已收起 {count} 个站点，点击展开"
 }

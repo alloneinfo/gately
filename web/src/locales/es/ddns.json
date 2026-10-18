@@ -55,5 +55,6 @@
   "taskDeactivated": "La tarea está desactivada",
   "recordDeactivated": "Este registro está desactivado",
   "savedChecking": "Guardado; comprobando ahora",
-  "triggered": "Activada"
+  "triggered": "Activada",
+  "recordsCollapsed": "{count} registros ocultos, haz clic para expandir"
 }

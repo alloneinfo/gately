@@ -54,5 +54,9 @@
   "durationMinutes": "{m} Min.",
   "aiTranslated": "Die Oberfläche wurde mit KI übersetzt und kann Ungenauigkeiten enthalten. Hilf mit, sie auf GitHub zu verbessern.",
   "viewCard": "Kartenansicht",
-  "viewCompact": "Kompaktansicht"
+  "viewCompact": "Kompaktansicht",
+  "expand": "Ausklappen",
+  "collapse": "Einklappen",
+  "expandAll": "Alle ausklappen",
+  "collapseAll": "Alle einklappen"
 }

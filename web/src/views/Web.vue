@@ -1,6 +1,9 @@
 <template>
   <div>
     <PageHeader :title="t('web.title')" :desc="t('web.desc')" :icon="Server">
+      <el-button v-if="listeners.length" :icon="allListenersCollapsed ? ChevronsUpDown : ChevronsDownUp" @click="setAll(listeners.map((l) => l.key), !allListenersCollapsed)">
+        {{ allListenersCollapsed ? t('common.expandAll') : t('common.collapseAll') }}
+      </el-button>
       <CompactToggle v-model="compact" />
       <el-button :icon="SlidersHorizontal" @click="openSettings">{{ t('web.globalSettings') }}</el-button>
       <el-button type="primary" :icon="Plus" @click="openListener()">{{ t('web.addListener') }}</el-button>
@@ -10,7 +13,15 @@
 
     <div v-loading="loading" class="card-list">
       <el-empty v-if="!loading && !listeners.length" :description="t('web.empty')" />
-      <EntityCard v-for="l in listeners" :key="l.key" :off="!l.enable || moduleOff">
+      <EntityCard
+        v-for="l in listeners"
+        :key="l.key"
+        :off="!l.enable || moduleOff"
+        collapsible
+        :collapsed="isCollapsed(l.key)"
+        :collapsed-hint="t('web.sitesCollapsed', { count: siteRows(l).length })"
+        @update:collapsed="(v: boolean) => setCollapsed(l.key, v)"
+      >
         <template #lead>
           <el-switch :model-value="l.enable" @change="(v: string | number | boolean) => toggleListener(l, Boolean(v))" />
         </template>
@@ -254,13 +265,14 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
-import { BarChart3, Pencil, Plus, Server, SlidersHorizontal, Trash2 } from 'lucide-vue-next'
+import { BarChart3, ChevronsDownUp, ChevronsUpDown, Pencil, Plus, Server, SlidersHorizontal, Trash2 } from 'lucide-vue-next'
 import { api, type OAuthProvider } from '../api'
 import PageHeader from '../components/PageHeader.vue'
 import ModuleBanner from '../components/ModuleBanner.vue'
 import CompactToggle from '../components/CompactToggle.vue'
 import EntityCard from '../components/EntityCard.vue'
 import { useCompactView } from '../composables/useCompactView'
+import { useCollapsed } from '../composables/useCollapsed'
 import OAuthProviders from '../components/OAuthProviders.vue'
 import AccessSettings from '../components/AccessSettings.vue'
 import SiteTraffic, { type Rewrite } from '../components/SiteTraffic.vue'
@@ -347,6 +359,9 @@ interface SiteRow {
 const { t } = useI18n()
 const compact = useCompactView('web')
 const listeners = ref<ListenerView[]>([])
+// 每个监听下的站点列表可单独收起，状态按监听 key 持久化
+const { isCollapsed, setCollapsed, setAll, allCollapsed } = useCollapsed('web')
+const allListenersCollapsed = allCollapsed(() => listeners.value.map((l) => l.key))
 const wafInstances = ref<{ key: string; name: string }[]>([])
 const loading = ref(true)
 const saving = ref(false)
