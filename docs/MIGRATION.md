@@ -1,5 +1,7 @@
 # 从 Lucky 迁移到 Gately
 
+> Gately 是独立项目，与 Lucky 无任何隶属关系；兼容性基于公开可观察的格式。
+
 Gately 可以直接读取 Lucky 的 `.lkcf` 配置文件或 Lucky「备份配置」导出的整站 zip，把规则、任务、证书迁移过来。整个过程不需要卸载 Lucky，可以两边并存、逐个模块切换。
 
 ## 1. 准备
@@ -49,18 +51,7 @@ Lucky 的计划任务、IP 过滤、Docker 设置在常见配置中为空，暂�
 4. **Web 服务**：停用 Lucky 的监听规则 → 在 Gately 中启用。HTTPS 站点需要证书模块中已有覆盖该域名的启用证书。
 5. 全部确认无误后再停止 Lucky 容器。
 
-## 4. 已在真实配置上验证的行为
-
-以下结论来自一份包含数十条规则的真实 Lucky 2.27.2 配置，在同一台设备上让 Gately 与 Lucky 并行运行对比得出：
-
-- **DDNS**：阿里云任务用导入的密钥完成鉴权，全部记录与线上值一致，未产生任何写入。
-- **端口转发**：每条规则的转发结果与直连目标一致；目标离线的规则在两边表现相同。
-- **Web 服务**：每个站点经 Gately 与经 Lucky 返回相同的状态码、页面与证书；WAF 对路径穿越的拦截结果一致。
-- **证书映射**：写出的 `.crt/.key/.pem/_issuerCertificate.crt` 与 Lucky 写出的文件逐字节相同。
-- **Web 终端**：可达主机均认证成功；不可达或密钥失效的连接两边表现相同（可用「测试连接」快速检查）。
-- **STUN**：规则配置迁移正确。路由器 WAN 口为运营商级 NAT（100.64.0.0/10）时，外部无法访问穿透端口，这是网络本身的限制，Lucky 同样无法穿透。
-
-## 5. Docker 部署的挂载
+## 4. Docker 部署的挂载
 
 Lucky 的脚本与证书映射使用的是 Lucky 容器内的路径，Gately 容器需要把相同的宿主机目录挂载到相同的容器内路径。对照 Lucky 的 compose 逐条添加，例如：
 
@@ -76,7 +67,7 @@ volumes:
 
 Gately 镜像内置 `sh`、`bash` 与 `curl`，常见的通知脚本可以直接运行。
 
-## 6. 需要人工处理的项目
+## 5. 需要人工处理的项目
 
 - **第三方登录**：Lucky 的 GitHub/QQ/Google 登录经过 Lucky 官方中转服务器，Gately 改为使用你自己申请的 OAuth 应用。导入时请同时选择 `lucky_thirdPartyAuthManager.lkcf`（身份表）、`lucky_reverseproxy.lkcf` 与 `lucky_base.lkcf`：
   - 站点与管理后台引用的第三方身份会按身份表迁移为允许列表（GitHub 用数字 ID、Google 用 sub、QQ 用 openid，用户名与邮箱写在备注里）。
@@ -89,6 +80,6 @@ Gately 镜像内置 `sh`、`bash` 与 `curl`，常见的通知脚本可以直接
 - **尚未实现的 Lucky 功能**：DLNA、rclone 网盘挂载、阿里云盘、IP 库（`lucky_ipdb.lkcf`）等暂未迁移，导入时会跳过。
 - **Lucky 官方服务器**：Gately 不会连接 `66666.host`、`lucky666.cn` 等地址，迁移后公网 IP 查询使用第三方公共服务（可在 DDNS 任务中修改）。
 
-## 7. 回退
+## 6. 回退
 
 Gately 不修改 Lucky 的任何文件。如需回退，停用 Gately 中对应的规则，再在 Lucky 中重新启用即可。

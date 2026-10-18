@@ -14,7 +14,3 @@ Un pare-feu applicatif web basé sur [Coraza](https://coraza.io/) et OWASP CRS v
 1. Pour un nouveau site, commencez par « Détection seule » et surveillez les journaux pendant un certain temps pour vous assurer qu'il n'y a pas de faux positifs ;
 2. Ajustez les fichiers de règles ou ajoutez des exceptions personnalisées en cas de faux positifs ;
 3. Passez ensuite en « Blocage ».
-
-## Vérification
-
-Le WAF est testé avec de vraies charges d'attaque, et ses résultats de blocage face à des attaques telles que le parcours de chemin (path traversal) correspondent à ceux de Lucky.

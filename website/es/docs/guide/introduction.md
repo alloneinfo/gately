@@ -1,10 +1,10 @@
 # Introducción
 
-Gately es un conjunto de herramientas de pasarela de red de código abierto y auditable para redes domésticas, NAS, servidores en la nube y servidores de todo tipo. Está inspirado en [Lucky](https://github.com/gdy666/lucky) y ofrece capacidades similares en una forma totalmente abierta. DDNS, traversal NAT con STUN, reenvío de puertos, proxy inverso, certificados, WAF y mucho más se reúnen en un único binario de unos 22 MB, y las configuraciones de Lucky se pueden importar con un clic.
+Gately es un conjunto de herramientas de pasarela de red de código abierto y auditable para redes domésticas, NAS, servidores en la nube y servidores de todo tipo. DDNS, traversal NAT con STUN, reenvío de puertos, proxy inverso, certificados, WAF y mucho más se reúnen en un único binario de unos 22 MB, y las configuraciones de Lucky se pueden importar con un clic.
 
 ## Por qué Gately
 
-Lucky es una herramienta muy valorada entre los usuarios de NAS y redes domésticas, sobre todo en China. Reúne DDNS, traversal STUN, proxy inverso y más, y dio a Gately su rumbo como producto. Sin Lucky no existiría Gately. Lucky se distribuye gratis como software de código cerrado; Gately es totalmente de código abierto, de modo que los usuarios y la comunidad pueden revisar directamente el código y la configuración. En un software que vive en el borde de la red y guarda claves DNS y claves privadas de certificados, el código abierto permite ver exactamente qué hace. Los compromisos de Gately:
+Un software que vive en el borde de la red y guarda claves DNS y claves privadas de certificados debe ser transparente. Gately es totalmente de código abierto: los usuarios y la comunidad pueden revisar directamente el código y la configuración y ver exactamente qué hace. Los compromisos de Gately:
 
 - El código fuente es abierto bajo Apache-2.0 y acepta la revisión de la comunidad
 - Sin conexiones a servidores del proyecto ni envío de datos del dispositivo por defecto; el inicio de sesión de terceros usa tus propias aplicaciones OAuth, sin relé
@@ -14,7 +14,7 @@ Lucky es una herramienta muy valorada entre los usuarios de NAS y redes domésti
 ## Principios de diseño
 
 1. **Transparencia**: sin conexiones a servidores del proyecto por defecto; cada dirección saliente es visible, editable y se puede desactivar.
-2. **Migrable**: los campos de configuración se mantienen lo más cerca posible de los de Lucky, con importación de `.lkcf`.
+2. **Migrable**: admite la importación de configuraciones `.lkcf`.
 3. **Configuración auditable**: JSON plano (permisos 0600) que se puede llevar directamente a git para ver diferencias y revertir.
 4. **Despliegue en un solo archivo**: un binario estático con el frontend integrado, compatible con Docker, systemd y OpenWrt.
 

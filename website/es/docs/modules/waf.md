@@ -14,7 +14,3 @@ Un cortafuegos de aplicaciones web basado en [Coraza](https://coraza.io/) y OWAS
 1. En un sitio nuevo, empieza con «Solo detectar» y observa los registros durante un tiempo para confirmar que no hay falsos positivos;
 2. Ajusta los archivos de reglas o añade excepciones personalizadas para los falsos positivos;
 3. Después cambia a «Bloquear».
-
-## Verificación
-
-El WAF se prueba con cargas de ataque reales, y sus resultados de bloqueo ante ataques como el recorrido de rutas coinciden con los de Lucky.

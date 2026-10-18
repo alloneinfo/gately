@@ -1,10 +1,10 @@
 # Einführung
 
-Gately ist ein quelloffenes, prüfbares Toolkit für Netzwerk-Gateways, gedacht für Heimnetze, NAS, Cloud-Hosts und Server aller Art. Es ist von [Lucky](https://github.com/gdy666/lucky) inspiriert und bietet vergleichbare Funktionen als vollständig quelloffene Software. DDNS, STUN-NAT-Traversal, Portweiterleitung, Reverse Proxy, Zertifikate, WAF und mehr stecken in einer einzigen Binärdatei von rund 22 MB, und Lucky-Konfigurationen lassen sich mit einem Klick importieren.
+Gately ist ein quelloffenes, prüfbares Toolkit für Netzwerk-Gateways, gedacht für Heimnetze, NAS, Cloud-Hosts und Server aller Art. DDNS, STUN-NAT-Traversal, Portweiterleitung, Reverse Proxy, Zertifikate, WAF und mehr stecken in einer einzigen Binärdatei von rund 22 MB, und Lucky-Konfigurationen lassen sich importieren.
 
 ## Warum Gately
 
-Lucky ist bei NAS- und Heimnetz-Nutzern, vor allem in China, ein angesehenes Werkzeug. Es bündelt DDNS, STUN-Traversal, Reverse Proxy und mehr und hat Gately die Produktrichtung vorgegeben. Ohne Lucky gäbe es Gately nicht. Lucky wird kostenlos als Closed Source verteilt; Gately ist vollständig quelloffen, sodass Nutzer und Community Code und Konfiguration direkt prüfen können. Bei Software, die am Netzwerkrand sitzt und DNS-Schlüssel sowie private Zertifikatsschlüssel verwaltet, zeigt Open Source genau, was sie tut. Die Versprechen von Gately:
+Gately bündelt DDNS, STUN-Traversal, Reverse Proxy und mehr und ist vollständig quelloffen, sodass Nutzer und Community Code und Konfiguration direkt prüfen können. Bei Software, die am Netzwerkrand sitzt und DNS-Schlüssel sowie private Zertifikatsschlüssel verwaltet, zeigt Open Source genau, was sie tut. Die Versprechen von Gately:
 
 - Der Quellcode ist unter Apache-2.0 offen und für Reviews durch die Community gedacht
 - Standardmäßig keine Verbindungen zu Projektservern und keine Übermittlung von Geräteinformationen; die Anmeldung über Drittanbieter nutzt Ihre eigenen OAuth-Apps ohne Relay
@@ -14,7 +14,7 @@ Lucky ist bei NAS- und Heimnetz-Nutzern, vor allem in China, ein angesehenes Wer
 ## Designprinzipien
 
 1. **Transparenz**: standardmäßig keine Verbindungen zu Projektservern; jede ausgehende Adresse ist sichtbar, änderbar und abschaltbar.
-2. **Migrierbarkeit**: Die Konfigurationsfelder bleiben so nah an Lucky wie praktikabel, mit `.lkcf`-Import.
+2. **Migrierbarkeit**: Mit `.lkcf`-Import.
 3. **Prüfbare Konfiguration**: einfaches JSON (Dateirechte 0600), das sich direkt für Diffs und Rollbacks in Git ablegen lässt.
 4. **Bereitstellung als einzelne Datei**: eine statische Binärdatei mit eingebettetem Frontend, mit Unterstützung für Docker, systemd und OpenWrt.
 

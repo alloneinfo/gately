@@ -1,15 +1,14 @@
 {
   "label": "Deutsch",
   "lang": "de",
-  "description": "Quelloffenes, prüfbares Toolkit für Netzwerk-Gateways: DDNS, STUN-NAT-Traversal, Portweiterleitung, Reverse Proxy, Zertifikate, WAF, Tailscale und frp in einer einzigen Binärdatei. Eine quelloffene Umsetzung, inspiriert von Lucky.",
-  "keywords": "Gately,Lucky Alternative,DDNS,STUN,NAT-Traversal,Portweiterleitung,Reverse Proxy,ACME,WAF,Tailscale,frp,NAS,Homelab,Selfhosting",
+  "description": "Quelloffenes, prüfbares Toolkit für Netzwerk-Gateways: DDNS, STUN-NAT-Traversal, Portweiterleitung, Reverse Proxy, Zertifikate, WAF, Tailscale und frp in einer einzigen Binärdatei.",
+  "keywords": "Gately,DDNS,STUN,NAT-Traversal,Portweiterleitung,Reverse Proxy,ACME,WAF,Tailscale,frp,NAS,Homelab,Selfhosting",
   "ogTitle": "Gately - Quelloffenes, prüfbares Toolkit für Netzwerk-Gateways",
   "nav": {
     "home": "Start",
     "docs": "Doku",
     "modules": "Module",
     "download": "Download",
-    "comparison": "Vergleich mit Lucky",
     "changelog": "Änderungsprotokoll"
   },
   "sidebar": {
@@ -26,7 +25,6 @@
       "guide/configuration": "Konfiguration & Laufzeitoptionen",
       "guide/cli-mcp": "CLI & MCP",
       "guide/migration": "Migration von Lucky",
-      "guide/comparison": "Vergleich mit Lucky",
       "guide/faq": "FAQ",
       "modules/index": "Modulübersicht",
       "modules/ddns": "Dynamisches DNS (DDNS)",
@@ -70,11 +68,11 @@
     "langMenuLabel": "Sprache",
     "lightModeSwitchTitle": "Zum hellen Design wechseln",
     "darkModeSwitchTitle": "Zum dunklen Design wechseln",
-    "footerMessage": "Veröffentlicht unter der Apache-2.0-Lizenz. Gately steht in keiner Verbindung zum Lucky-Projekt.",
+    "footerMessage": "Veröffentlicht unter der Apache-2.0-Lizenz.",
     "aiNotice": "Diese Seite wurde mit KI übersetzt und kann Ungenauigkeiten enthalten. Hilf mit, sie auf GitHub zu verbessern."
   },
   "home": {
-    "pill": "Open Source · Prüfbar · Migration von Lucky mit einem Klick",
+    "pill": "Open Source · Prüfbar · Einzelne Binärdatei",
     "titleLine1": "Ein Toolkit für Netzwerk-Gateways,",
     "titleLine2": "das Sie durchschauen können",
     "lead": "DDNS, STUN-NAT-Traversal, Portweiterleitung, Reverse Proxy, Zertifikate, WAF, Tailscale und frp, alles in einer einzigen Binärdatei von rund 22 MB. Läuft im Heimnetz, auf NAS, Cloud-Hosts und Servern aller Art.",
@@ -236,52 +234,8 @@
     "copy": "Kopieren",
     "copied": "Kopiert",
     "fullInstall": "Vollständige Installationsanleitung →",
-    "compareTitle": "Vergleich mit Lucky",
-    "compareDesc": "Gately ist von Lucky inspiriert, deckt die gängigen Anwendungsfälle ab und übernimmt Ihre bestehende Konfiguration mit einem Klick. Lucky bietet mehr Funktionen, beide lassen sich parallel betreiben.",
-    "compareRows": [
-      [
-        "Quellcode",
-        "Open Source (Apache-2.0)",
-        "Closed Source"
-      ],
-      [
-        "Konfigurationsdatei",
-        "Einfaches JSON, Git-tauglich",
-        "Proprietäres Format (.lkcf)"
-      ],
-      [
-        "Offizielle Dienste",
-        "Standardmäßig keine; ausgehende Adressen sind änderbar und abschaltbar",
-        "Online-Updates, Relay für Anmeldung über Drittanbieter und weitere offizielle Dienste"
-      ],
-      [
-        "Anmeldung über Drittanbieter",
-        "Eigene OAuth-Apps",
-        "Über den offiziellen Relay-Dienst"
-      ],
-      [
-        "Migration von Lucky",
-        "Import von .lkcf / Zip der gesamten Site mit einem Klick",
-        "—"
-      ],
-      [
-        "Upgrades",
-        "Docker / Paketmanager",
-        "Eingebautes Online-Selbst-Update"
-      ],
-      [
-        "Funktionsumfang",
-        "Deckt die gängigen Kernfunktionen ab",
-        "Größer, z. B. DLNA und Cloud-Laufwerk-Einbindung"
-      ]
-    ],
-    "migrationGuide": "Migrationsanleitung lesen →",
     "faqTitle": "FAQ",
     "faqs": [
-      {
-        "q": "In welchem Verhältnis steht Gately zu Lucky?",
-        "a": "Gately ist eine eigenständige Open-Source-Implementierung ohne Verbindung zum Lucky-Projekt. Die Produktidee stammt von Lucky, wir danken dem Autor und der Community. Die Kompatibilität beruht auf öffentlich beobachtbarem Verhalten, Schnittstellen und Konfigurationsformaten; Code aus Lucky-Binärdateien oder Frontend-Artefakten wird nicht übernommen."
-      },
       {
         "q": "Kann ich meine bestehende Lucky-Konfiguration direkt übernehmen?",
         "a": "Ja. Wählen Sie unter Einstellungen → Sicherung & Migration eine .lkcf-Datei oder ein Zip der gesamten Site-Konfiguration, prüfen Sie die Vorschau und importieren Sie. Importierte Regeln sind standardmäßig deaktiviert, sodass Sie parallel zu Lucky arbeiten, Modul für Modul umschalten und jederzeit zurückwechseln können."

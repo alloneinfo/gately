@@ -11,7 +11,7 @@ Emita e renove certificados automaticamente para uso pelos [Serviços Web](/pt-B
 
 ## Mapeamento de certificados
 
-Com um certificado ativado, o Gately grava `.crt`, `.key`, `.pem` e `_issuerCertificate.crt` no diretório de mapeamento e executa o script de alteração. Os nomes de arquivo são os mesmos do Lucky, e o conteúdo gravado é idêntico, byte a byte, ao do Lucky.
+Com um certificado ativado, o Gately grava `.crt`, `.key`, `.pem` e `_issuerCertificate.crt` no diretório de mapeamento e executa o script de alteração.
 
 ## Nota de segurança
 

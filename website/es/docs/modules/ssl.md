@@ -11,7 +11,7 @@ Emite y renueva certificados automáticamente para que los usen los [Servicios w
 
 ## Mapeo de certificados
 
-Cuando un certificado está activado, Gately escribe `.crt`, `.key`, `.pem` y `_issuerCertificate.crt` en el directorio de mapeo y ejecuta el script de cambio. Los nombres de archivo coinciden con los de Lucky y el contenido escrito es idéntico byte a byte al de Lucky.
+Cuando un certificado está activado, Gately escribe `.crt`, `.key`, `.pem` y `_issuerCertificate.crt` en el directorio de mapeo y ejecuta el script de cambio.
 
 ## Nota de seguridad
 

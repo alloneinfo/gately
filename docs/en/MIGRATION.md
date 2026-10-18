@@ -1,5 +1,7 @@
 # Migrating from Lucky to Gately
 
+> Gately is an independent project and is not affiliated with Lucky; compatibility relies on publicly observable formats.
+
 Gately can read Lucky's `.lkcf` configuration files, or the whole-site zip exported by Lucky's "Back up configuration", and migrate your rules, tasks, and certificates. You do not need to uninstall Lucky. Both can run side by side while you switch over one module at a time.
 
 ## 1. Preparation
@@ -49,18 +51,7 @@ Switch one module at a time and verify each before moving on:
 4. **Web Services**: Disable Lucky's listener rule → enable it in Gately. HTTPS sites need an enabled certificate in the Certificates module that covers the domain.
 5. Stop the Lucky container only after everything checks out.
 
-## 4. Behavior verified against a real configuration
-
-The following conclusions come from a real Lucky 2.27.2 configuration with dozens of rules, comparing Gately and Lucky running in parallel on the same device:
-
-- **DDNS**: The Alibaba Cloud task authenticated with the imported keys, all records matched their live values, and no writes were made.
-- **Port Forwarding**: Each rule's forwarding result matched a direct connection to the target. Rules whose targets were offline behaved identically on both sides.
-- **Web Services**: Every site returned the same status code, page, and certificate through Gately and through Lucky. The WAF blocked path traversal identically.
-- **Certificate mapping**: The written `.crt/.key/.pem/_issuerCertificate.crt` files were byte-for-byte identical to the files Lucky wrote.
-- **Web Terminal**: Reachable hosts all authenticated successfully. Unreachable hosts and connections with invalid keys behaved the same on both sides (use "Test connection" for a quick check).
-- **STUN**: Rule configuration migrated correctly. When the router's WAN port is behind carrier-grade NAT (100.64.0.0/10), the traversed port is unreachable from outside. This is a limitation of the network itself, and Lucky cannot traverse it either.
-
-## 5. Mounts for Docker deployments
+## 4. Mounts for Docker deployments
 
 Lucky's script and certificate mappings use paths inside the Lucky container. The Gately container must mount the same host directories at the same in-container paths. Compare against Lucky's compose file and add them one by one, for example:
 
@@ -76,7 +67,7 @@ volumes:
 
 The Gately image ships with `sh`, `bash`, and `curl`, so common notification scripts run as-is.
 
-## 6. Items that need manual handling
+## 5. Items that need manual handling
 
 - **Third-party sign-in**: Lucky's GitHub/QQ/Google sign-in goes through Lucky's official relay server. Gately uses OAuth apps that you register yourself instead. When importing, also select `lucky_thirdPartyAuthManager.lkcf` (the identity table), `lucky_reverseproxy.lkcf`, and `lucky_base.lkcf`:
   - Third-party identities referenced by sites and the admin console are migrated from the identity table into allow lists (GitHub uses the numeric ID, Google uses `sub`, QQ uses `openid`, and the username and email go into the remark).
@@ -89,6 +80,6 @@ The Gately image ships with `sh`, `bash`, and `curl`, so common notification scr
 - **Lucky features not yet implemented**: DLNA, rclone cloud drive mounts, Alibaba Cloud Drive, and the IP database (`lucky_ipdb.lkcf`) are not migrated yet and are skipped during import.
 - **Lucky's official servers**: Gately never connects to addresses such as `66666.host` or `lucky666.cn`. After migration, public IP lookups use third-party public services (changeable in the DDNS task).
 
-## 7. Rolling back
+## 6. Rolling back
 
 Gately does not modify any of Lucky's files. To roll back, disable the corresponding rules in Gately and re-enable them in Lucky.

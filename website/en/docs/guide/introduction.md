@@ -1,10 +1,10 @@
 # Introduction
 
-Gately is an open-source, auditable network gateway toolkit for home networks, NAS boxes, cloud hosts and servers of all kinds. It is inspired by [Lucky](https://github.com/gdy666/lucky) and delivers similar capabilities in a fully open-source form. DDNS, STUN NAT traversal, port forwarding, reverse proxy, certificates, WAF and more are bundled into a single ~22 MB binary, and Lucky configurations can be imported in one click.
+Gately is an open-source, auditable network gateway toolkit for home networks, NAS boxes, cloud hosts and servers of all kinds. DDNS, STUN NAT traversal, port forwarding, reverse proxy, certificates, WAF and more are bundled into a single ~22 MB binary, and Lucky configurations can be imported in one click.
 
 ## Why Gately
 
-Lucky is a well-regarded tool among NAS and home-network users, especially in China. It brings DDNS, STUN traversal, reverse proxy and more together, and it gave Gately its product direction. Without Lucky there would be no Gately. Lucky is distributed free of charge as closed source; Gately is fully open source, so users and the community can review the code and configuration directly. For software that sits on the network edge and holds DNS keys and certificate private keys, open source lets you see exactly what it does. Gately's promises:
+Software that sits on the network edge and holds DNS keys and certificate private keys should be transparent. Gately is fully open source, so users and the community can review the code and configuration directly and see exactly what it does. Gately's promises:
 
 - Source code is open under Apache-2.0 and welcomes community review
 - No connections to project servers and no device reporting by default; third-party sign-in uses your own OAuth apps, with no relay
@@ -14,7 +14,7 @@ Lucky is a well-regarded tool among NAS and home-network users, especially in Ch
 ## Design principles
 
 1. **Transparency**: no connections to project servers by default; every outbound address is visible, editable and can be turned off.
-2. **Migratable**: configuration fields stay as close to Lucky's as practical, with `.lkcf` import.
+2. **Migratable**: `.lkcf` configuration import is supported.
 3. **Auditable configuration**: plain JSON (file mode 0600) that goes straight into git for diffs and rollbacks.
 4. **Single-file deployment**: one static binary with the frontend embedded, supporting Docker, systemd and OpenWrt.
 

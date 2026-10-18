@@ -49,7 +49,6 @@ function buildThemeConfig(loc: SiteLocale, pack: any): DefaultTheme.Config & Rec
       { text: pack.nav.docs, link: `${p}/docs/guide/introduction`, activeMatch: `${p}/docs/` },
       { text: pack.nav.modules, link: `${p}/docs/modules/`, activeMatch: `${p}/docs/modules/` },
       { text: pack.nav.download, link: `${p}/download` },
-      { text: pack.nav.comparison, link: `${p}/docs/guide/comparison` },
       { text: pack.nav.changelog, link: `${REPO}/releases` }
     ],
     sidebar: { [`${p}/docs/`]: buildSidebar(loc, pack) },

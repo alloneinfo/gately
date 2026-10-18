@@ -1,6 +1,6 @@
 {
   "tagline": "Ein quelloffenes, prüfbares Netzwerk-Gateway für Zuhause und Server",
-  "intro": "DDNS, STUN-Traversal, Portweiterleitung, Reverse-Proxy, SSL-Zertifikate, WAF und mehr in einer einzigen Binärdatei, mit Ein-Klick-Import von Lucky-Konfigurationen. Jede Codezeile ist öffentlich und jede ausgehende Adresse sichtbar.",
+  "intro": "DDNS, STUN-Traversal, Portweiterleitung, Reverse-Proxy, SSL-Zertifikate, WAF und mehr in einer einzigen Binärdatei. Jede Codezeile ist öffentlich und jede ausgehende Adresse sichtbar.",
   "repo": "GitHub-Repository",
   "releases": "Releases",
   "feedback": "Problem melden",
@@ -11,8 +11,6 @@
   "publishedAt": "Veröffentlicht {time}",
   "viewRelease": "Release-Seite ansehen",
   "updateHint": "api.github.com wird nur kontaktiert, wenn Sie auf „Nach Updates suchen“ klicken. Gately geht nie von selbst online.",
-  "whyTitle": "Warum Gately",
-  "whyBody": "Lucky ist ein hervorragendes Werkzeug, das NAS- und Heimnetz-Nutzern vertraut ist, und es hat das Produktdesign von Gately inspiriert; ohne Lucky gäbe es kein Gately. Lucky wird kostenlos verteilt, ist aber Closed Source, während Gately vollständig quelloffen ist: Bei Software am Netzwerkrand, die DNS-Schlüssel und private Zertifikatsschlüssel verwaltet, können Nutzer dank Open Source genau nachvollziehen, was sie tut. Gately setzt ähnliche Funktionen in offenem Code um und hält Konfigurationen portabel, sodass Sie eine prüfbare Alternative haben, ohne Ihre Arbeitsweise zu ändern.",
   "promiseTitle": "Unser Transparenzversprechen",
   "featuresTitle": "Funktionen",
   "quickStart": "Schnellstart",
@@ -27,7 +25,7 @@
   "stepSwitch": "Umstellen",
   "stepSwitchDesc": "Modul für Modul in Lucky deaktivieren und in Gately aktivieren. Beenden Sie Lucky, sobald alles passt.",
   "migrationGuide": "Vollständige Migrationsanleitung",
-  "footerNote": "Veröffentlicht unter {license} · Ohne {lucky} gäbe es kein Gately, danke für die Produktinspiration · Die Lucky-Kompatibilität beruht ausschließlich auf öffentlich beobachtbarem Verhalten und Konfigurationsformaten",
+  "footerNote": "Veröffentlicht unter {license}",
   "copyFailed": "Kopieren fehlgeschlagen, bitte Text manuell markieren",
   "stackEmbed": "go:embed Einzel-Binärdatei",
   "promises": {

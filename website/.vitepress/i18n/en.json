@@ -1,15 +1,14 @@
 {
   "label": "English",
   "lang": "en",
-  "description": "An open-source, auditable network gateway toolkit: DDNS, STUN NAT traversal, port forwarding, reverse proxy, certificates, WAF, Tailscale and frp in a single binary. An open-source take inspired by Lucky.",
-  "keywords": "Gately,Lucky alternative,DDNS,STUN,NAT traversal,port forwarding,reverse proxy,ACME,WAF,Tailscale,frp,NAS,homelab,self-hosted",
+  "description": "An open-source, auditable network gateway toolkit: DDNS, STUN NAT traversal, port forwarding, reverse proxy, certificates, WAF, Tailscale and frp in a single binary.",
+  "keywords": "Gately,DDNS,STUN,NAT traversal,port forwarding,reverse proxy,ACME,WAF,Tailscale,frp,NAS,homelab,self-hosted",
   "ogTitle": "Gately - Open-source, auditable network gateway toolkit",
   "nav": {
     "home": "Home",
     "docs": "Docs",
     "modules": "Modules",
     "download": "Download",
-    "comparison": "Compare with Lucky",
     "changelog": "Changelog"
   },
   "sidebar": {
@@ -26,7 +25,6 @@
       "guide/configuration": "Configuration & Runtime Options",
       "guide/cli-mcp": "CLI & MCP",
       "guide/migration": "Migrating from Lucky",
-      "guide/comparison": "Compared with Lucky",
       "guide/faq": "FAQ",
       "modules/index": "Modules Overview",
       "modules/ddns": "Dynamic DNS (DDNS)",
@@ -70,11 +68,11 @@
     "langMenuLabel": "Language",
     "lightModeSwitchTitle": "Switch to light theme",
     "darkModeSwitchTitle": "Switch to dark theme",
-    "footerMessage": "Released under the Apache-2.0 license. Gately is not affiliated with the Lucky project.",
+    "footerMessage": "Released under the Apache-2.0 license.",
     "aiNotice": "This page was translated with AI and may contain inaccuracies. Help improve it on GitHub."
   },
   "home": {
-    "pill": "Open source · Auditable · One-click migration from Lucky",
+    "pill": "Open source · Auditable · Single binary",
     "titleLine1": "A network gateway toolkit",
     "titleLine2": "you can see through",
     "lead": "DDNS, STUN NAT traversal, port forwarding, reverse proxy, certificates, WAF, Tailscale and frp, all in a single ~22 MB binary. Runs on home networks, NAS boxes, cloud hosts and servers of every kind.",
@@ -236,52 +234,8 @@
     "copy": "Copy",
     "copied": "Copied",
     "fullInstall": "Full installation guide →",
-    "compareTitle": "Compared with Lucky",
-    "compareDesc": "Gately is inspired by Lucky, covers the common use cases and can import your existing configuration in one click. Lucky offers more features, and the two can run side by side.",
-    "compareRows": [
-      [
-        "Source code",
-        "Open source (Apache-2.0)",
-        "Closed source"
-      ],
-      [
-        "Config file",
-        "Plain JSON, git-friendly",
-        "Proprietary format (.lkcf)"
-      ],
-      [
-        "Official services",
-        "None by default; outbound addresses are editable and can be turned off",
-        "Online updates, third-party sign-in relay and other official services"
-      ],
-      [
-        "Third-party sign-in",
-        "Your own OAuth apps",
-        "Through the official relay service"
-      ],
-      [
-        "Migrating from Lucky",
-        "One-click import of .lkcf / whole-site zip",
-        "—"
-      ],
-      [
-        "Upgrades",
-        "Docker / package manager",
-        "Built-in online self-update"
-      ],
-      [
-        "Feature breadth",
-        "Covers the common core features",
-        "Broader, e.g. DLNA and cloud-drive mounts"
-      ]
-    ],
-    "migrationGuide": "Read the migration guide →",
     "faqTitle": "FAQ",
     "faqs": [
-      {
-        "q": "How is Gately related to Lucky?",
-        "a": "Gately is an independent open-source implementation with no affiliation to the Lucky project. The product idea comes from Lucky, and we are grateful to its author and community. Compatibility is based on publicly observable behavior, interfaces and configuration formats, and no code is copied from Lucky binaries or frontend artifacts."
-      },
       {
         "q": "Can I migrate my existing Lucky configuration directly?",
         "a": "Yes. Under Settings → Backup & Migration, choose a .lkcf file or a whole-site config zip, preview it, then import. Imported rules are disabled by default, so you can run alongside Lucky, switch over module by module and roll back at any time."

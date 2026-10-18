@@ -1,4 +1,4 @@
-# Web Terminal API Conventions (targeting Lucky 2.27.2)
+# Web Terminal API Conventions
 
 All endpoints are mounted under `/api/webterminal/` and require login. Errors are always returned as `{"error": "..."}`.
 

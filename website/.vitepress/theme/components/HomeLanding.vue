@@ -158,31 +158,6 @@ const openFaq = ref(0)
       <p class="more"><a :href="link('/docs/guide/install')">{{ h.fullInstall }}</a></p>
     </section>
 
-    <!-- Compare -->
-    <section class="band">
-      <div class="wrap">
-        <header class="head">
-          <h2>{{ h.compareTitle }}</h2>
-          <p>{{ h.compareDesc }}</p>
-        </header>
-        <div class="tbl">
-          <table>
-            <thead>
-              <tr><th /><th>Gately</th><th>Lucky</th></tr>
-            </thead>
-            <tbody>
-              <tr v-for="row in h.compareRows" :key="row[0]">
-                <td>{{ row[0] }}</td>
-                <td class="hl">{{ row[1] }}</td>
-                <td>{{ row[2] }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <p class="more"><a :href="link('/docs/guide/migration')">{{ h.migrationGuide }}</a></p>
-      </div>
-    </section>
-
     <!-- FAQ -->
     <section class="wrap block narrow">
       <header class="head"><h2>{{ h.faqTitle }}</h2></header>
@@ -284,15 +259,6 @@ h1 { font-size: 54px; line-height: 1.15; font-weight: 800; letter-spacing: -0.02
 .tabs .copy:hover { color: #e6fffa; }
 .term pre { margin: 0; padding: 20px 22px; overflow-x: auto; }
 .term code { font-family: var(--vp-font-family-mono); font-size: 13.5px; line-height: 1.75; color: #c8f3e8; white-space: pre; }
-
-/* compare */
-.tbl { max-width: 860px; margin: 0 auto; border-radius: 14px; overflow: hidden; border: 1px solid var(--vp-c-divider); background: var(--vp-c-bg); }
-.tbl table { width: 100%; border-collapse: collapse; display: table; margin: 0; }
-.tbl th, .tbl td { padding: 13px 18px; text-align: left; font-size: 14px; border: 0; border-bottom: 1px solid var(--vp-c-divider); background: transparent !important; }
-.tbl tr:last-child td { border-bottom: 0; }
-.tbl th { color: var(--vp-c-text-2); font-weight: 600; }
-.tbl td:first-child { color: var(--vp-c-text-2); width: 22%; }
-.tbl td.hl { color: var(--vp-c-brand-1); font-weight: 600; }
 
 /* faq */
 .faq { border-top: 1px solid var(--vp-c-divider); }

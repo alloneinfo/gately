@@ -10,5 +10,5 @@
   "timeout": "Tempo limite (s)",
   "ignoreCertError": "Ignorar erros de certificado",
   "variables": "Variáveis disponíveis",
-  "varsTip": "{plain} ou, por compatibilidade com o Lucky, {lucky}"
+  "varsTip": "{plain} ou {lucky}"
 }

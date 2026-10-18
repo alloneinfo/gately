@@ -1,6 +1,6 @@
 {
   "tagline": "An open-source, auditable network gateway for homes and servers",
-  "intro": "DDNS, STUN traversal, port forwarding, reverse proxy, SSL certificates, WAF and more in a single binary, with one-click import of Lucky configs. Every line of code is public and every outbound address is visible.",
+  "intro": "DDNS, STUN traversal, port forwarding, reverse proxy, SSL certificates, WAF and more in a single binary. Every line of code is public and every outbound address is visible.",
   "repo": "GitHub Repository",
   "releases": "Releases",
   "feedback": "Report an Issue",
@@ -11,8 +11,6 @@
   "publishedAt": "Published {time}",
   "viewRelease": "View release page",
   "updateHint": "api.github.com is contacted only when you click Check for Updates. Gately never goes online on its own.",
-  "whyTitle": "Why Gately",
-  "whyBody": "Lucky is an excellent tool familiar to NAS and home network users, and it inspired Gately's product design; without Lucky there would be no Gately. Lucky is distributed free of charge but closed source, while Gately is fully open source: for software that sits on the network edge and holds DNS keys and certificate private keys, open source lets users see exactly what it does. Gately implements similar capabilities in open code and keeps configurations portable, giving you an auditable choice without changing how you work.",
   "promiseTitle": "Our Transparency Promise",
   "featuresTitle": "Features",
   "quickStart": "Quick Start",
@@ -27,7 +25,7 @@
   "stepSwitch": "Switch over",
   "stepSwitchDesc": "Module by module, disable it in Lucky and enable it in Gately. Stop Lucky once everything checks out.",
   "migrationGuide": "Full migration guide",
-  "footerNote": "Released under {license} · There would be no Gately without {lucky}, thanks for the product inspiration · Lucky compatibility relies only on publicly observable behavior and config formats",
+  "footerNote": "Released under {license}",
   "copyFailed": "Copy failed, please select the text manually",
   "stackEmbed": "go:embed single binary",
   "promises": {

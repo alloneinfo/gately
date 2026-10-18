@@ -17,8 +17,8 @@ For frontend development, run `cd web && pnpm dev`; `/api` is proxied to local `
 
 ## Conventions
 
-- Compatibility with Lucky is based on publicly observable behavior, interfaces and configuration formats. Do not submit code copied from Lucky binaries or frontend artifacts.
-- A new module needs: a config structure with validation, runtime start/stop, REST endpoints and unit tests. Modules that can be migrated from Lucky implement `luckyimport.Importer`, and modules that should show status on the overview page implement `module.Summarizer`.
+- Compatibility code must be based on publicly observable behavior, interfaces and configuration formats only. Do not submit code copied from binaries or frontend artifacts of third-party software.
+- A new module needs: a config structure with validation, runtime start/stop, REST endpoints and unit tests. Modules that support configuration import implement `luckyimport.Importer`, and modules that should show status on the overview page implement `module.Summarizer`.
 - Code comments are written in Chinese; control statements must use braces.
 
 ## Internationalization

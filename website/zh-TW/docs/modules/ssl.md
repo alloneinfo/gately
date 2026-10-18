@@ -11,7 +11,7 @@
 
 ## 憑證對應
 
-啟用憑證後，Gately 會把 `.crt`、`.key`、`.pem` 與 `_issuerCertificate.crt` 寫入對應目錄，並執行變更指令碼。檔名與 Lucky 一致，寫出內容與 Lucky 逐位元組相同。
+啟用憑證後，Gately 會把 `.crt`、`.key`、`.pem` 與 `_issuerCertificate.crt` 寫入對應目錄，並執行變更指令碼。
 
 ## 安全提示
 

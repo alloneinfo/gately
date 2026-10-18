@@ -24,11 +24,11 @@ RUN GOOS=$TARGETOS GOARCH=$TARGETARCH GOARM=${TARGETVARIANT#v} CGO_ENABLED=0 go 
     -o /out/gately ./cmd/gately
 
 FROM alpine:3.23
-# curl 与 bash 供用户脚本使用（证书变化脚本、STUN 通知脚本等，与 Lucky 镜像保持一致）
+# curl 与 bash 供用户脚本使用（证书变化脚本、STUN 通知脚本等）
 # docker-cli 与 docker-cli-compose 供 Docker 管理模块执行 docker compose up/pull/build
 RUN apk add --no-cache ca-certificates tzdata curl bash docker-cli docker-cli-compose
 COPY --from=build /out/gately /usr/local/bin/gately
-# 配置目录使用 /etc/gately，避免与迁移自 Lucky 的 /data/... 挂载路径冲突
+# 配置目录使用 /etc/gately，避免与迁移时沿用的 /data/... 挂载路径冲突
 ENV GATELY_CONFIG_DIR=/etc/gately
 VOLUME ["/etc/gately"]
 EXPOSE 16680

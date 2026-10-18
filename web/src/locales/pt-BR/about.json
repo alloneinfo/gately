@@ -1,6 +1,6 @@
 {
   "tagline": "Um gateway de rede de código aberto e auditável para casa e servidores",
-  "intro": "DDNS, travessia STUN, redirecionamento de portas, proxy reverso, certificados SSL, WAF e muito mais em um único binário, com importação de configurações do Lucky em um clique. Cada linha de código é pública e cada endereço de saída é visível.",
+  "intro": "DDNS, travessia STUN, redirecionamento de portas, proxy reverso, certificados SSL, WAF e muito mais em um único binário. Cada linha de código é pública e cada endereço de saída é visível.",
   "repo": "Repositório no GitHub",
   "releases": "Versões",
   "feedback": "Reportar um problema",
@@ -11,8 +11,6 @@
   "publishedAt": "Publicada {time}",
   "viewRelease": "Ver página da versão",
   "updateHint": "O api.github.com só é contatado quando você clica em Verificar atualizações. O Gately nunca se conecta à internet por conta própria.",
-  "whyTitle": "Por que o Gately",
-  "whyBody": "O Lucky é uma ferramenta excelente, familiar para usuários de NAS e redes domésticas, e inspirou o design do produto Gately; sem o Lucky não existiria o Gately. O Lucky é distribuído gratuitamente, mas com código fechado, enquanto o Gately é totalmente de código aberto: para um software que fica na borda da rede e guarda chaves de DNS e chaves privadas de certificados, o código aberto permite ver exatamente o que ele faz. O Gately implementa recursos semelhantes em código aberto e mantém as configurações portáteis, oferecendo uma opção auditável sem mudar a sua forma de trabalhar.",
   "promiseTitle": "Nosso compromisso de transparência",
   "featuresTitle": "Recursos",
   "quickStart": "Início rápido",
@@ -27,7 +25,7 @@
   "stepSwitch": "Migrar de fato",
   "stepSwitchDesc": "Módulo por módulo, desative no Lucky e ative no Gately. Pare o Lucky quando tudo estiver validado.",
   "migrationGuide": "Guia completo de migração",
-  "footerNote": "Distribuído sob {license} · Sem o {lucky} não existiria o Gately, obrigado pela inspiração do produto · A compatibilidade com o Lucky se baseia apenas em comportamentos e formatos de configuração publicamente observáveis",
+  "footerNote": "Distribuído sob {license}",
   "copyFailed": "Falha ao copiar, selecione o texto manualmente",
   "stackEmbed": "binário único com go:embed",
   "promises": {

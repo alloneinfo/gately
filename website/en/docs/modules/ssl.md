@@ -11,7 +11,7 @@ Issue and renew certificates automatically for use by [Web Services](/en/docs/mo
 
 ## Certificate mapping
 
-Once a certificate is enabled, Gately writes `.crt`, `.key`, `.pem` and `_issuerCertificate.crt` into the mapping directory and runs the change script. File names match Lucky's, and the written content is byte-for-byte identical to Lucky's.
+Once a certificate is enabled, Gately writes `.crt`, `.key`, `.pem` and `_issuerCertificate.crt` into the mapping directory and runs the change script.
 
 ## Security note
 

@@ -14,7 +14,3 @@ A web application firewall based on [Coraza](https://coraza.io/) and OWASP CRS v
 1. For a new site, start with "Detect only" and watch the logs for a while to confirm there are no false positives;
 2. Adjust rule files or add custom exceptions for any false positives;
 3. Then switch to "Block".
-
-## Verification
-
-The WAF is tested with real attack payloads, and its blocking results for attacks such as path traversal match Lucky's.

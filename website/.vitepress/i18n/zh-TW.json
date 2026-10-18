@@ -1,15 +1,14 @@
 {
   "label": "繁體中文",
   "lang": "zh-TW",
-  "description": "開源、可稽核的網路閘道工具集：DDNS、STUN 穿透、連接埠轉發、反向代理、憑證、WAF、Tailscale、frp 整合在單一檔案中，受 Lucky 啟發的開源實作。",
-  "keywords": "Gately,Lucky 替代,DDNS,STUN,內網穿透,連接埠轉發,反向代理,ACME,WAF,Tailscale,frp,NAS",
+  "description": "開源、可稽核的網路閘道工具集：DDNS、STUN 穿透、連接埠轉發、反向代理、憑證、WAF、Tailscale、frp 整合在單一檔案中。",
+  "keywords": "Gately,DDNS,STUN,內網穿透,連接埠轉發,反向代理,ACME,WAF,Tailscale,frp,NAS",
   "ogTitle": "Gately - 開源可稽核的網路閘道工具集",
   "nav": {
     "home": "首頁",
     "docs": "文件",
     "modules": "功能模組",
     "download": "下載",
-    "comparison": "與 Lucky 比較",
     "changelog": "更新日誌"
   },
   "sidebar": {
@@ -26,7 +25,6 @@
       "guide/configuration": "設定與執行參數",
       "guide/cli-mcp": "命令列與 MCP",
       "guide/migration": "從 Lucky 遷移",
-      "guide/comparison": "與 Lucky 比較",
       "guide/faq": "常見問題",
       "modules/index": "模組總覽",
       "modules/ddns": "動態網域 DDNS",
@@ -70,11 +68,11 @@
     "langMenuLabel": "語言",
     "lightModeSwitchTitle": "切換至淺色模式",
     "darkModeSwitchTitle": "切換至深色模式",
-    "footerMessage": "以 Apache-2.0 授權條款開源發布。Gately 與 Lucky 專案方無任何隸屬關係。",
+    "footerMessage": "以 Apache-2.0 授權條款開源發布。",
     "aiNotice": "此頁面由 AI 翻譯，內容可能有疏漏。歡迎到 GitHub 協助改進。"
   },
   "home": {
-    "pill": "開源 · 可稽核 · 可從 Lucky 一鍵遷移",
+    "pill": "開源 · 可稽核 · 單檔部署",
     "titleLine1": "看得見的",
     "titleLine2": "網路閘道工具集",
     "lead": "DDNS、STUN 穿透、連接埠轉發、反向代理、憑證、WAF、Tailscale、frp，整合在一個約 22 MB 的單一檔案裡。家用網路、NAS、雲端主機與各類伺服器都能使用。",
@@ -236,52 +234,8 @@
     "copy": "複製",
     "copied": "已複製",
     "fullInstall": "完整安裝文件 →",
-    "compareTitle": "與 Lucky 對照",
-    "compareDesc": "Gately 受 Lucky 啟發，涵蓋常用情境，並可一鍵匯入既有設定。Lucky 的功能更豐富，兩者可以並存使用。",
-    "compareRows": [
-      [
-        "原始碼",
-        "開源（Apache-2.0）",
-        "閉源"
-      ],
-      [
-        "設定檔",
-        "純文字 JSON，可用 git 管理",
-        "專有格式（.lkcf）"
-      ],
-      [
-        "官方服務",
-        "預設無，對外位址可改可關",
-        "提供線上更新、第三方登入中轉等官方服務"
-      ],
-      [
-        "第三方登入",
-        "使用自己的 OAuth 應用程式",
-        "經官方中轉服務"
-      ],
-      [
-        "從 Lucky 遷移",
-        "一鍵匯入 .lkcf / 整站 zip",
-        "—"
-      ],
-      [
-        "升級方式",
-        "Docker / 套件管理員",
-        "內建線上自動更新"
-      ],
-      [
-        "功能廣度",
-        "涵蓋常用核心能力",
-        "更豐富，如 DLNA、網路硬碟掛載等"
-      ]
-    ],
-    "migrationGuide": "閱讀遷移指南 →",
     "faqTitle": "常見問題",
     "faqs": [
-      {
-        "q": "Gately 與 Lucky 是什麼關係？",
-        "a": "Gately 是獨立實作的開源專案，與 Lucky 專案方沒有隸屬關係，產品思路來自 Lucky，感謝其作者與社群的貢獻。相容性建立在公開可觀察的行為、介面與設定格式上，不包含從 Lucky 執行檔或前端產物複製的程式碼。"
-      },
       {
         "q": "可以直接遷移現有的 Lucky 設定嗎？",
         "a": "可以。在「設定 → 備份與遷移」選擇 .lkcf 檔案或整站設定 zip，預覽後匯入。匯入的規則預設停用，可與 Lucky 並存，逐個模組切換，也隨時可以退回。"

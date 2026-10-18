@@ -2,7 +2,7 @@
 
 [English](README.md) | [简体中文](README.zh-CN.md) | [繁體中文](README.zh-TW.md) | [日本語](README.ja.md) | [한국어](README.ko.md) | **Español** | [Français](README.fr.md) | [Deutsch](README.de.md) | [Русский](README.ru.md) | [Português (Brasil)](README.pt-BR.md)
 
-Conjunto de herramientas de puerta de enlace de red, de código abierto y auditable, para redes domésticas, NAS, hosts en la nube y todo tipo de servidores. Está inspirado en [Lucky](https://github.com/gdy666/lucky) y ofrece capacidades equivalentes de forma totalmente abierta. DDNS, túneles STUN, reenvío de puertos, proxy inverso, certificados, WAF y otras funciones habituales se integran en un único archivo de unos 22 MB, y la configuración de Lucky se puede importar con un clic.
+Conjunto de herramientas de puerta de enlace de red, de código abierto y auditable, para redes domésticas, NAS, hosts en la nube y todo tipo de servidores. DDNS, túneles STUN, reenvío de puertos, proxy inverso, certificados, WAF y otras funciones habituales se integran en un único archivo de unos 22 MB, y es posible importar configuraciones existentes de Lucky.
 
 ![Resumen de Gately](docs/images/overview.webp)
 
@@ -12,7 +12,7 @@ Conjunto de herramientas de puerta de enlace de red, de código abierto y audita
 
 ## Por qué Gately
 
-Lucky es una excelente herramienta, muy conocida entre los usuarios chinos de NAS y redes domésticas, que reúne DDNS, túneles STUN, proxy inverso y más. También aportó la idea de producto de Gately: sin Lucky no existiría Gately. Lucky se distribuye gratis pero con código cerrado; Gately opta por ser totalmente abierto para que usuarios y comunidad puedan revisar directamente el código fuente y la configuración. Un software que se ejecuta en el borde de la red y maneja claves DNS y claves privadas de certificados debe permitir que los usuarios vean lo que hace. Los compromisos de Gately:
+Gately es totalmente abierto para que usuarios y comunidad puedan revisar directamente el código fuente y la configuración. Un software que se ejecuta en el borde de la red y maneja claves DNS y claves privadas de certificados debe permitir que los usuarios vean lo que hace. Los compromisos de Gately:
 
 - El código fuente es abierto bajo Apache-2.0 y acepta la revisión de la comunidad
 - Por defecto no se conecta a ningún servidor del proyecto ni reporta información del dispositivo; el inicio de sesión de terceros usa tu propia aplicación OAuth, sin intermediarios

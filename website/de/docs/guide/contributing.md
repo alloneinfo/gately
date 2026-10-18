@@ -17,7 +17,7 @@ Starten Sie für die Frontend-Entwicklung `cd web && pnpm dev`; `/api` wird an d
 
 ## Konventionen
 
-- Die Kompatibilität mit Lucky beruht auf öffentlich beobachtbarem Verhalten, Schnittstellen und Konfigurationsformaten. Reichen Sie keinen Code ein, der aus Lucky-Binärdateien oder Frontend-Artefakten kopiert wurde.
+- Code zur Kompatibilität darf nur auf öffentlich beobachtbarem Verhalten, Schnittstellen und Konfigurationsformaten beruhen. Reichen Sie keinen Code ein, der aus fremden Binärdateien oder Frontend-Artefakten kopiert wurde.
 - Ein neues Modul braucht: eine Konfigurationsstruktur mit Validierung, Start/Stopp zur Laufzeit, REST-Endpunkte und Unit-Tests. Module, die sich von Lucky migrieren lassen, implementieren `luckyimport.Importer`, und Module, die auf der Übersichtsseite einen Status anzeigen sollen, implementieren `module.Summarizer`.
 - Code-Kommentare werden auf Chinesisch geschrieben; Kontrollanweisungen müssen geschweifte Klammern verwenden.
 

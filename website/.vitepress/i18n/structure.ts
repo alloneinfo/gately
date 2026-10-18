@@ -43,7 +43,6 @@ export const sidebarGroups: SidebarGroup[] = [
       'guide/configuration',
       'guide/cli-mcp',
       'guide/migration',
-      'guide/comparison',
       'guide/faq'
     ]
   },

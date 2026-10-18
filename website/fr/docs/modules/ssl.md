@@ -11,7 +11,7 @@
 
 ## Mappage de certificat
 
-Une fois un certificat activé, Gately écrit `.crt`, `.key`, `.pem` et `_issuerCertificate.crt` dans le répertoire de mappage et exécute le script de changement. Les noms de fichiers sont identiques à ceux de Lucky, et le contenu écrit est strictement identique octet pour octet à celui de Lucky.
+Une fois un certificat activé, Gately écrit `.crt`, `.key`, `.pem` et `_issuerCertificate.crt` dans le répertoire de mappage et exécute le script de changement.
 
 ## Note de sécurité
 

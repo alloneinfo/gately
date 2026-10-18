@@ -17,8 +17,8 @@ Pour le développement du frontend, lancez `cd web && pnpm dev` ; `/api` est rel
 
 ## Conventions
 
-- La compatibilité avec Lucky repose sur des comportements, interfaces et formats de configuration observables publiquement. Ne soumettez pas de code copié des binaires ou du frontend de Lucky.
-- Un nouveau module requiert : une structure de configuration avec validation, un démarrage/arrêt à l'exécution, des points d'accès REST et des tests unitaires. Les modules migrables depuis Lucky implémentent `luckyimport.Importer`, et ceux qui doivent afficher leur état sur la page de vue d'ensemble implémentent `module.Summarizer`.
+- Le code de compatibilité doit reposer uniquement sur des comportements, interfaces et formats de configuration observables publiquement. Ne soumettez pas de code copié des binaires ou du frontend d'un logiciel tiers.
+- Un nouveau module requiert : une structure de configuration avec validation, un démarrage/arrêt à l'exécution, des points d'accès REST et des tests unitaires. Les modules qui prennent en charge l'import de configuration implémentent `luckyimport.Importer`, et ceux qui doivent afficher leur état sur la page de vue d'ensemble implémentent `module.Summarizer`.
 - Les commentaires du code sont rédigés en chinois ; les instructions de contrôle doivent utiliser des accolades.
 
 ## Tests supplémentaires

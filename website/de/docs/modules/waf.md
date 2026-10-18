@@ -17,4 +17,4 @@ Eine Web Application Firewall auf Basis von [Coraza](https://coraza.io/) und OWA
 
 ## Verifizierung
 
-Die WAF wird mit echten Angriffs-Payloads getestet, und ihre Blockierergebnisse bei Angriffen wie Path Traversal entsprechen denen von Lucky.
+Die WAF wird mit echten Angriffs-Payloads getestet und deckt die Blockierung von Angriffen wie Path Traversal ab.

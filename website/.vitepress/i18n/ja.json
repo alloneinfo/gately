@@ -1,15 +1,14 @@
 {
   "label": "日本語",
   "lang": "ja",
-  "description": "オープンソースで監査可能なネットワークゲートウェイツールキット。DDNS、STUN 穿孔、ポート転送、リバースプロキシ、証明書、WAF、Tailscale、frp を単一バイナリに統合した、Lucky にインスパイアされたオープンソース実装です。",
-  "keywords": "Gately,Lucky 代替,DDNS,ダイナミック DNS,STUN,NAT 越え,ポート転送,リバースプロキシ,ACME,WAF,Tailscale,frp,NAS,自宅サーバー",
+  "description": "オープンソースで監査可能なネットワークゲートウェイツールキット。DDNS、STUN 穿孔、ポート転送、リバースプロキシ、証明書、WAF、Tailscale、frp を単一バイナリに統合した。",
+  "keywords": "Gately,DDNS,ダイナミック DNS,STUN,NAT 越え,ポート転送,リバースプロキシ,ACME,WAF,Tailscale,frp,NAS,自宅サーバー",
   "ogTitle": "Gately - オープンソースで監査可能なネットワークゲートウェイツールキット",
   "nav": {
     "home": "ホーム",
     "docs": "ドキュメント",
     "modules": "機能モジュール",
     "download": "ダウンロード",
-    "comparison": "Lucky との比較",
     "changelog": "更新履歴"
   },
   "sidebar": {
@@ -26,7 +25,6 @@
       "guide/configuration": "設定と起動オプション",
       "guide/cli-mcp": "コマンドラインと MCP",
       "guide/migration": "Lucky からの移行",
-      "guide/comparison": "Lucky との比較",
       "guide/faq": "よくある質問",
       "modules/index": "モジュール一覧",
       "modules/ddns": "ダイナミック DNS（DDNS）",
@@ -70,11 +68,11 @@
     "langMenuLabel": "言語",
     "lightModeSwitchTitle": "ライトモードに切り替え",
     "darkModeSwitchTitle": "ダークモードに切り替え",
-    "footerMessage": "Apache-2.0 ライセンスで公開されています。Gately は Lucky プロジェクトとは一切関係がありません。",
+    "footerMessage": "Apache-2.0 ライセンスで公開されています。",
     "aiNotice": "このページは AI で翻訳されており、不正確な表現が含まれる場合があります。GitHub で改善にご協力ください。"
   },
   "home": {
-    "pill": "オープンソース · 監査可能 · Lucky からワンクリック移行",
+    "pill": "オープンソース · 監査可能 · 単一バイナリ",
     "titleLine1": "中身が見える",
     "titleLine2": "ネットワークゲートウェイツールキット",
     "lead": "DDNS、STUN 穿孔、ポート転送、リバースプロキシ、証明書、WAF、Tailscale、frp を、約 22 MB の単一ファイルに集約。自宅ネットワーク、NAS、クラウドホスト、各種サーバーで利用できます。",
@@ -236,52 +234,8 @@
     "copy": "コピー",
     "copied": "コピーしました",
     "fullInstall": "インストールガイド全文 →",
-    "compareTitle": "Lucky との比較",
-    "compareDesc": "Gately は Lucky にインスパイアされ、よく使うシナリオをカバーし、既存の設定をワンクリックでインポートできます。機能の豊富さでは Lucky が上で、両者は併用も可能です。",
-    "compareRows": [
-      [
-        "ソースコード",
-        "オープンソース（Apache-2.0）",
-        "クローズドソース"
-      ],
-      [
-        "設定ファイル",
-        "平文の JSON、git で管理可能",
-        "独自形式（.lkcf）"
-      ],
-      [
-        "公式サービス",
-        "デフォルトではなし。外部アドレスは変更・無効化可能",
-        "オンライン更新、外部ログイン中継などの公式サービスを提供"
-      ],
-      [
-        "外部ログイン",
-        "自分の OAuth アプリを使用",
-        "公式の中継サービス経由"
-      ],
-      [
-        "Lucky からの移行",
-        ".lkcf / サイト全体の zip をワンクリックでインポート",
-        "—"
-      ],
-      [
-        "アップグレード方法",
-        "Docker / パッケージマネージャー",
-        "内蔵のオンライン自動更新"
-      ],
-      [
-        "機能の幅",
-        "主要なコア機能をカバー",
-        "より豊富（DLNA、ネットワークドライブのマウントなど）"
-      ]
-    ],
-    "migrationGuide": "移行ガイドを読む →",
     "faqTitle": "よくある質問",
     "faqs": [
-      {
-        "q": "Gately と Lucky の関係は？",
-        "a": "Gately は独立して実装されたオープンソースプロジェクトで、Lucky のプロジェクトとは一切関係がありません。プロダクトの着想は Lucky から得ており、作者とコミュニティの貢献に感謝しています。互換性は公開されている観察可能な挙動、インターフェース、設定形式に基づいており、Lucky のバイナリやフロントエンド成果物から複製したコードは含まれていません。"
-      },
       {
         "q": "既存の Lucky の設定をそのまま移行できますか？",
         "a": "できます。「設定 → バックアップと移行」で .lkcf ファイルまたはサイト全体の設定 zip を選び、プレビュー後にインポートします。インポートしたルールはデフォルトで無効になるため、Lucky と併用しながらモジュール単位で切り替えられ、いつでも元に戻せます。"

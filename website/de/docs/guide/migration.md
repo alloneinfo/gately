@@ -1,12 +1,14 @@
 # Migration von Lucky zu Gately
 
+> Gately ist ein eigenständiges Projekt ohne Verbindung zum Lucky-Projekt. Die Kompatibilität beruht auf öffentlich beobachtbarem Verhalten, Schnittstellen und Konfigurationsformaten.
+
 Gately liest die `.lkcf`-Konfigurationsdateien von Lucky oder das Zip der gesamten Site, das Lucky über „Konfiguration sichern“ exportiert, und übernimmt Regeln, Aufgaben und Zertifikate. Lucky muss dafür nicht deinstalliert werden; beide lassen sich parallel betreiben und Modul für Modul umschalten.
 
 ## 1. Vorbereitung
 
 1. Suchen Sie das Konfigurationsverzeichnis von Lucky: Bei Docker-Bereitstellungen ist es meist das Host-Verzeichnis, das auf `/app/conf` im Container abgebildet ist; darin liegen Dateien wie `lucky_base.lkcf` und `lucky_ddns.lkcf`.
 2. Stellen Sie Gately bereit (siehe README). Empfehlungen:
-   - Verwenden Sie `--network host`, damit wie bei Lucky direkt auf Host-Ports gelauscht wird;
+   - Verwenden Sie `--network host`, damit direkt auf Host-Ports gelauscht wird;
    - Der Verwaltungsport ist standardmäßig 16680 und kollidiert nicht mit dem Port 16601 von Lucky;
    - Nutzen Skripte oder Zertifikatszuordnungen in Lucky Pfade innerhalb des Containers (z. B. `/etc/lucky/custom_scripts`, `/data/nginx/...`), binden Sie diese im Gately-Container unter **demselben Pfad** ein; nach dem Import ist dann keine Anpassung nötig.
 
@@ -43,24 +45,13 @@ Geplante Aufgaben, IP-Filter und Docker-Einstellungen von Lucky sind in gängige
 
 Wir empfehlen, Modul für Modul umzuschalten und jedes sofort zu prüfen:
 
-1. **Zertifikate**: Aktivieren Sie das Zertifikat in Gately. Danach werden die Zertifikate in das Zuordnungsverzeichnis geschrieben und das Änderungsskript ausgeführt (mit denselben Dateinamen wie bei Lucky); stellen Sie sicher, dass das Verzeichnis beschreibbar ist.
+1. **Zertifikate**: Aktivieren Sie das Zertifikat in Gately. Danach werden die Zertifikate in das Zuordnungsverzeichnis geschrieben und das Änderungsskript ausgeführt; stellen Sie sicher, dass das Verzeichnis beschreibbar ist.
 2. **DDNS**: Aufgabe in Lucky deaktivieren → entsprechende Aufgabe in Gately aktivieren → mit „Sync erzwingen“ prüfen, ob der Eintrag aktualisiert wurde.
 3. **Portweiterleitung / STUN**: Deaktivieren Sie die Regeln zuerst in Lucky (gibt Ports und UPnP-Zuordnungen frei) und aktivieren Sie sie dann in Gately. Nach dem Aktivieren einer STUN-Regel kann sich der öffentliche Port ändern; Skripte und Webhooks benachrichtigen automatisch.
 4. **Web-Dienste**: Listen-Regel in Lucky deaktivieren → in Gately aktivieren. HTTPS-Sites benötigen im Zertifikatsmodul ein aktiviertes Zertifikat, das die Domain abdeckt.
 5. Stoppen Sie den Lucky-Container erst, wenn alles geprüft ist.
 
-## 4. Auf echter Konfiguration geprüftes Verhalten
-
-Die folgenden Ergebnisse stammen aus einer echten Lucky-2.27.2-Konfiguration mit Dutzenden Regeln; Gately und Lucky liefen zum Vergleich parallel auf demselben Gerät:
-
-- **DDNS**: Die Alibaba-Cloud-Aufgabe authentifizierte sich mit dem importierten Schlüssel, alle Einträge stimmten mit den Online-Werten überein, es wurde nichts geschrieben.
-- **Portweiterleitung**: Das Weiterleitungsergebnis jeder Regel entspricht der direkten Verbindung zum Ziel; Regeln mit offline befindlichem Ziel verhalten sich auf beiden Seiten gleich.
-- **Web-Dienste**: Jede Site liefert über Gately und über Lucky denselben Statuscode, dieselbe Seite und dasselbe Zertifikat; die WAF blockiert Path-Traversal gleichermaßen.
-- **Zertifikatszuordnung**: Die geschriebenen Dateien `.crt/.key/.pem/_issuerCertificate.crt` sind Byte für Byte identisch mit den von Lucky geschriebenen.
-- **Web-Terminal**: Erreichbare Hosts authentifizierten sich erfolgreich; nicht erreichbare Hosts oder Verbindungen mit ungültigem Schlüssel verhalten sich auf beiden Seiten gleich (mit „Verbindung testen“ schnell prüfbar).
-- **STUN**: Die Regelkonfiguration wird korrekt migriert. Liegt der WAN-Anschluss des Routers hinter Carrier-Grade-NAT (100.64.0.0/10), ist der durchgereichte Port von außen nicht erreichbar; das ist eine Grenze des Netzwerks selbst, auch Lucky kann dann nicht durchdringen.
-
-## 5. Einbindungen bei Docker-Bereitstellung
+## 4. Einbindungen bei Docker-Bereitstellung
 
 Die Pfade für Skripte und Zertifikatszuordnungen in Lucky beziehen sich auf den Lucky-Container; im Gately-Container müssen dieselben Host-Verzeichnisse unter denselben Container-Pfaden eingebunden werden. Gehen Sie das Compose-File von Lucky Zeile für Zeile durch, zum Beispiel:
 
@@ -76,7 +67,7 @@ volumes:
 
 Das Gately-Image enthält `sh`, `bash` und `curl`, sodass gängige Benachrichtigungsskripte direkt laufen.
 
-## 6. Manuell zu behandelnde Punkte
+## 5. Manuell zu behandelnde Punkte
 
 - **Anmeldung über Drittanbieter**: Die Anmeldung über GitHub/QQ/Google läuft bei Lucky über den offiziellen Relay-Server von Lucky; Gately verwendet stattdessen Ihre selbst registrierte OAuth-App. Wählen Sie beim Import zusätzlich `lucky_thirdPartyAuthManager.lkcf` (Identitätstabelle), `lucky_reverseproxy.lkcf` und `lucky_base.lkcf`:
   - Die von Sites und der Verwaltungsoberfläche referenzierten Drittanbieter-Identitäten werden anhand der Identitätstabelle zu Allowlists migriert (GitHub mit numerischer ID, Google mit sub, QQ mit openid; Benutzername und E-Mail stehen in der Notiz).
@@ -89,6 +80,6 @@ Das Gately-Image enthält `sh`, `bash` und `curl`, sodass gängige Benachrichtig
 - **Noch nicht umgesetzte Lucky-Funktionen**: DLNA, rclone-Cloud-Laufwerk-Einbindung, Alibaba Cloud Drive, IP-Datenbank (`lucky_ipdb.lkcf`) und Ähnliches werden noch nicht migriert und beim Import übersprungen.
 - **Offizielle Lucky-Server**: Gately verbindet sich nie mit Adressen wie `66666.host` oder `lucky666.cn`; nach der Migration nutzt die Abfrage der öffentlichen IP öffentliche Drittanbieter-Dienste (in der DDNS-Aufgabe änderbar).
 
-## 7. Zurückwechseln
+## 6. Zurückwechseln
 
 Gately verändert keine Dateien von Lucky. Zum Zurückwechseln deaktivieren Sie die entsprechenden Regeln in Gately und aktivieren sie in Lucky wieder.

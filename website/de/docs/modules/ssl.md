@@ -11,7 +11,7 @@ Stellen Sie Zertifikate automatisch aus und erneuern Sie sie, damit die [Web-Die
 
 ## Zertifikatszuordnung
 
-Ist ein Zertifikat aktiviert, schreibt Gately `.crt`, `.key`, `.pem` und `_issuerCertificate.crt` in das Zuordnungsverzeichnis und führt das Änderungsskript aus. Die Dateinamen entsprechen denen von Lucky, und der geschriebene Inhalt ist Byte für Byte identisch mit dem von Lucky.
+Ist ein Zertifikat aktiviert, schreibt Gately `.crt`, `.key`, `.pem` und `_issuerCertificate.crt` in das Zuordnungsverzeichnis und führt das Änderungsskript aus.
 
 ## Sicherheitshinweis
 

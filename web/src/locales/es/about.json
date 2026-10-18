@@ -1,6 +1,6 @@
 {
   "tagline": "Una pasarela de red de código abierto y auditable para el hogar y servidores",
-  "intro": "DDNS, traversal STUN, reenvío de puertos, proxy inverso, certificados SSL, WAF y más en un único binario, con importación de configuraciones de Lucky en un clic. Cada línea de código es pública y cada dirección de salida es visible.",
+  "intro": "DDNS, traversal STUN, reenvío de puertos, proxy inverso, certificados SSL, WAF y más en un único binario. Cada línea de código es pública y cada dirección de salida es visible.",
   "repo": "Repositorio de GitHub",
   "releases": "Versiones",
   "feedback": "Informar de un problema",
@@ -11,8 +11,6 @@
   "publishedAt": "Publicada {time}",
   "viewRelease": "Ver página de la versión",
   "updateHint": "Solo se contacta con api.github.com cuando pulsas Buscar actualizaciones. Gately nunca se conecta por su cuenta.",
-  "whyTitle": "Por qué Gately",
-  "whyBody": "Lucky es una excelente herramienta, familiar para los usuarios de NAS y redes domésticas, y ha inspirado el diseño de Gately; sin Lucky no existiría Gately. Lucky se distribuye gratis pero es de código cerrado, mientras que Gately es totalmente de código abierto: en un software que está en el borde de la red y guarda claves DNS y claves privadas de certificados, el código abierto permite ver exactamente qué hace. Gately implementa capacidades similares con código abierto y mantiene las configuraciones portables, para que tengas una opción auditable sin cambiar tu forma de trabajar.",
   "promiseTitle": "Nuestra promesa de transparencia",
   "featuresTitle": "Funciones",
   "quickStart": "Inicio rápido",
@@ -27,7 +25,7 @@
   "stepSwitch": "Cambiar",
   "stepSwitchDesc": "Módulo a módulo, desactívalo en Lucky y actívalo en Gately. Detén Lucky cuando todo funcione correctamente.",
   "migrationGuide": "Guía completa de migración",
-  "footerNote": "Publicado bajo {license} · Sin {lucky} no existiría Gately, gracias por la inspiración del producto · La compatibilidad con Lucky se basa solo en comportamiento y formatos de configuración observables públicamente",
+  "footerNote": "Publicado bajo {license}",
   "copyFailed": "Error al copiar, selecciona el texto manualmente",
   "stackEmbed": "binario único con go:embed",
   "promises": {

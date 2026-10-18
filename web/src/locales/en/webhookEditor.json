@@ -10,5 +10,5 @@
   "timeout": "Timeout (s)",
   "ignoreCertError": "Ignore certificate errors",
   "variables": "Available variables",
-  "varsTip": "{plain} or, for Lucky compatibility, {lucky}"
+  "varsTip": "{plain} or {lucky}"
 }

@@ -1,5 +1,7 @@
 # Migrar de Lucky a Gately
 
+> Gately es un proyecto independiente, sin afiliación con Lucky. La compatibilidad se basa en formatos observables públicamente.
+
 Gately puede leer directamente los archivos de configuración `.lkcf` de Lucky o el zip del sitio completo que exporta la función «Copia de seguridad de la configuración» de Lucky, y migrar reglas, tareas y certificados. No hace falta desinstalar Lucky: ambos pueden funcionar en paralelo y puedes pasar módulo a módulo.
 
 ## 1. Preparación
@@ -49,18 +51,7 @@ Se recomienda cambiar módulo a módulo y verificar cada uno antes de pasar al s
 4. **Servicios web**: desactiva la regla de escucha de Lucky → actívala en Gately. Los sitios HTTPS necesitan que el módulo de certificados tenga un certificado activo que cubra el dominio.
 5. Detén el contenedor de Lucky solo cuando todo esté confirmado.
 
-## 4. Comportamientos verificados con configuraciones reales
-
-Las siguientes conclusiones proceden de una configuración real de Lucky 2.27.2 con decenas de reglas, comparando Gately y Lucky ejecutándose en paralelo en el mismo dispositivo:
-
-- **DDNS**: las tareas de Alibaba Cloud se autenticaron con las claves importadas, todos los registros coincidían con los valores en línea y no se produjo ninguna escritura.
-- **Reenvío de puertos**: el resultado del reenvío de cada regla coincidía con la conexión directa al destino; las reglas cuyo destino estaba desconectado se comportaron igual en ambos.
-- **Servicios web**: cada sitio devolvió el mismo código de estado, la misma página y el mismo certificado a través de Gately y de Lucky; el bloqueo del WAF ante recorridos de ruta fue idéntico.
-- **Mapeo de certificados**: los archivos `.crt/.key/.pem/_issuerCertificate.crt` escritos son idénticos byte a byte a los que escribe Lucky.
-- **Terminal web**: los hosts alcanzables se autenticaron correctamente; las conexiones inalcanzables o con claves no válidas se comportaron igual en ambos (puedes comprobarlo rápidamente con «Probar conexión»).
-- **STUN**: la configuración de las reglas se migra correctamente. Cuando la interfaz WAN del router está detrás de un NAT de operador (100.64.0.0/10), los equipos externos no pueden acceder al puerto traspasado; es una limitación de la propia red y Lucky tampoco puede atravesarla.
-
-## 5. Montajes en despliegues con Docker
+## 4. Montajes en despliegues con Docker
 
 Los mapeos de scripts y certificados de Lucky usan rutas del interior del contenedor de Lucky, así que el contenedor de Gately debe montar los mismos directorios del host en las mismas rutas del contenedor. Ve añadiéndolos uno a uno según el compose de Lucky, por ejemplo:
 
@@ -76,7 +67,7 @@ volumes:
 
 La imagen de Gately incluye `sh`, `bash` y `curl`, así que los scripts de notificación habituales funcionan sin cambios.
 
-## 6. Elementos que requieren intervención manual
+## 5. Elementos que requieren intervención manual
 
 - **Inicio de sesión de terceros**: el acceso con GitHub/QQ/Google de Lucky pasa por el servidor de relé oficial de Lucky; Gately usa en su lugar aplicaciones OAuth que registras tú mismo. Al importar, selecciona también `lucky_thirdPartyAuthManager.lkcf` (tabla de identidades), `lucky_reverseproxy.lkcf` y `lucky_base.lkcf`:
   - Las identidades de terceros a las que hacen referencia los sitios y el panel de administración se migran como lista de permitidos según la tabla de identidades (GitHub con ID numérico, Google con sub, QQ con openid; el nombre de usuario y el correo se guardan en las notas).
@@ -89,6 +80,6 @@ La imagen de Gately incluye `sh`, `bash` y `curl`, así que los scripts de notif
 - **Funciones de Lucky aún no implementadas**: DLNA, montaje de unidades en la nube con rclone, Alibaba Cloud Drive, la base de datos de IP (`lucky_ipdb.lkcf`) y otras aún no se migran y se omiten al importar.
 - **Servidores oficiales de Lucky**: Gately no se conecta a direcciones como `66666.host` o `lucky666.cn`; tras migrar, la consulta de IP pública usa servicios públicos de terceros (se puede cambiar en las tareas DDNS).
 
-## 7. Volver atrás
+## 6. Volver atrás
 
 Gately no modifica ningún archivo de Lucky. Para volver atrás, desactiva las reglas correspondientes en Gately y vuelve a activarlas en Lucky.

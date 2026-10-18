@@ -2,12 +2,12 @@
 
 ## 目标
 
-受 Lucky 启发，做一个开源、可审计、社区驱动的同类工具：覆盖家庭网络、NAS 与服务器用户最常用的 DDNS、STUN 穿透、端口转发、反向代理、证书管理，并能一键导入现有 Lucky 配置。
+做一个开源、可审计、社区驱动的网络网关工具：覆盖家庭网络、NAS 与服务器用户最常用的 DDNS、STUN 穿透、端口转发、反向代理、证书管理，并支持导入现有 Lucky 配置。
 
 设计原则：
 
 1. **透明**：默认不连接任何项目方服务器；所有对外地址可见、可改、可关。
-2. **可迁移**：配置字段尽量与 Lucky 对齐，提供 `.lkcf` 导入。
+2. **可迁移**：提供 Lucky `.lkcf` 配置导入。
 3. **可审计的配置**：配置为明文 JSON（文件权限 0600），可直接纳入 git 做 diff 和回滚。
 4. **单文件部署**：一个静态二进制内嵌前端，支持 Docker、systemd、OpenWrt。
 
@@ -15,12 +15,12 @@
 
 | 层 | 选型 | 理由 |
 | --- | --- | --- |
-| 后端 | Go 1.26+ | 与 Lucky 同生态，可直接复用 lego、pion/stun、frp、cloudflared、coraza、rclone 等成熟库；静态编译，交叉编译到 arm/arm64/mips/riscv 路由器和 NAS |
+| 后端 | Go 1.26+ | 可直接复用 lego、pion/stun、frp、cloudflared、coraza、rclone 等成熟库；静态编译，交叉编译到 arm/arm64/mips/riscv 路由器和 NAS |
 | HTTP | 标准库 `net/http`（Go 1.22 路由语法） | 依赖最少，便于审计 |
-| 存储 | 每模块一个明文 JSON 文件，原子写入 | 与 Lucky 的模块化配置对应，便于导入、备份和 git diff |
+| 存储 | 每模块一个明文 JSON 文件，原子写入 | 便于导入、备份和 git diff |
 | 认证 | bcrypt 密码 + HMAC 签名会话令牌，登录失败限流，后续支持 TOTP | 无外部依赖 |
-| 日志 | 每模块内存环形缓冲 + 增量拉取接口 | 对应 Lucky 的 `logs/lastlogs` 交互 |
-| 前端 | Vue 3 + TypeScript + Vite + Element Plus，`go:embed` 打包 | 与 Lucky 界面习惯一致，降低迁移成本 |
+| 日志 | 每模块内存环形缓冲 + 增量拉取接口 | 日志轮询接口简单，前端增量刷新 |
+| 前端 | Vue 3 + TypeScript + Vite + Element Plus，`go:embed` 打包 | 组件丰富，开发效率高 |
 | 发布 | GoReleaser 多架构二进制 + 多架构 Docker 镜像 | — |
 
 ## 目录结构
@@ -55,7 +55,7 @@ web/                   前端工程，构建产物由 web/embed.go 嵌入
 | ✅ M7.5 组网穿透 | Tailscale、frp（frpc + frps）、cloudflared，以进程托管方式集成官方二进制 | 配置生成、进程守护与日志采集有单元测试；不内置上游程序 |
 | M8 待定 | DLNA、阿里云盘等网盘挂载、rclone、全局 IP 过滤、HTTP/3、SFTP 文件管理 | 视社区需求排期 |
 
-## 与 Lucky 的差异（有意为之）
+## 设计取舍
 
 - 不内置在线自更新覆盖二进制，由包管理器/Docker 负责升级。
 - 不下发远程配置，不上报设备信息。

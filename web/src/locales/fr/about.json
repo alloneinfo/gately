@@ -1,6 +1,6 @@
 {
   "tagline": "Une passerelle réseau open source et auditable pour la maison et les serveurs",
-  "intro": "DDNS, traversée STUN, redirection de ports, proxy inverse, certificats SSL, WAF et plus encore dans un seul binaire, avec import en un clic des configurations Lucky. Chaque ligne de code est publique et chaque adresse sortante est visible.",
+  "intro": "DDNS, traversée STUN, redirection de ports, proxy inverse, certificats SSL, WAF et plus encore dans un seul binaire. Chaque ligne de code est publique et chaque adresse sortante est visible.",
   "repo": "Dépôt GitHub",
   "releases": "Versions",
   "feedback": "Signaler un problème",
@@ -11,8 +11,6 @@
   "publishedAt": "Publiée le {time}",
   "viewRelease": "Voir la page de la version",
   "updateHint": "api.github.com n'est contacté que lorsque vous cliquez sur Rechercher des mises à jour. Gately ne se connecte jamais à Internet de lui-même.",
-  "whyTitle": "Pourquoi Gately",
-  "whyBody": "Lucky est un excellent outil, bien connu des utilisateurs de NAS et de réseaux domestiques, et il a inspiré la conception de Gately ; sans Lucky, Gately n'existerait pas. Lucky est distribué gratuitement mais son code est fermé, tandis que Gately est entièrement open source : pour un logiciel placé à la périphérie du réseau et détenant des clés DNS et des clés privées de certificats, l'open source permet aux utilisateurs de voir exactement ce qu'il fait. Gately propose des fonctionnalités similaires avec un code ouvert et garde les configurations portables, pour vous offrir un choix auditable sans changer vos habitudes.",
   "promiseTitle": "Notre engagement de transparence",
   "featuresTitle": "Fonctionnalités",
   "quickStart": "Démarrage rapide",
@@ -27,7 +25,7 @@
   "stepSwitch": "Basculer",
   "stepSwitchDesc": "Module par module, désactivez-le dans Lucky et activez-le dans Gately. Arrêtez Lucky une fois que tout est validé.",
   "migrationGuide": "Guide de migration complet",
-  "footerNote": "Publié sous licence {license} · Gately n'existerait pas sans {lucky}, merci pour l'inspiration du produit · La compatibilité avec Lucky repose uniquement sur des comportements et des formats de configuration observables publiquement",
+  "footerNote": "Publié sous licence {license}",
   "copyFailed": "Échec de la copie, sélectionnez le texte manuellement",
   "stackEmbed": "binaire unique go:embed",
   "promises": {

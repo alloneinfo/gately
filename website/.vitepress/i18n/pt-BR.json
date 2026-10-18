@@ -1,15 +1,14 @@
 {
   "label": "Português (Brasil)",
   "lang": "pt-BR",
-  "description": "Um kit de ferramentas de gateway de rede de código aberto e auditável: DDNS, travessia de NAT com STUN, redirecionamento de portas, proxy reverso, certificados, WAF, Tailscale e frp em um único binário. Uma implementação open source inspirada no Lucky.",
-  "keywords": "Gately,alternativa ao Lucky,DDNS,STUN,travessia de NAT,redirecionamento de portas,proxy reverso,ACME,WAF,Tailscale,frp,NAS,homelab,self-hosted,autohospedado",
+  "description": "Um kit de ferramentas de gateway de rede de código aberto e auditável: DDNS, travessia de NAT com STUN, redirecionamento de portas, proxy reverso, certificados, WAF, Tailscale e frp em um único binário.",
+  "keywords": "Gately,DDNS,STUN,travessia de NAT,redirecionamento de portas,proxy reverso,ACME,WAF,Tailscale,frp,NAS,homelab,self-hosted,autohospedado",
   "ogTitle": "Gately - Kit de gateway de rede de código aberto e auditável",
   "nav": {
     "home": "Início",
     "docs": "Documentação",
     "modules": "Módulos",
     "download": "Download",
-    "comparison": "Comparação com o Lucky",
     "changelog": "Changelog"
   },
   "sidebar": {
@@ -26,7 +25,6 @@
       "guide/configuration": "Configuração e opções de execução",
       "guide/cli-mcp": "CLI e MCP",
       "guide/migration": "Migrar do Lucky",
-      "guide/comparison": "Comparação com o Lucky",
       "guide/faq": "Perguntas frequentes",
       "modules/index": "Visão geral dos módulos",
       "modules/ddns": "DNS dinâmico (DDNS)",
@@ -70,11 +68,11 @@
     "langMenuLabel": "Idioma",
     "lightModeSwitchTitle": "Mudar para o tema claro",
     "darkModeSwitchTitle": "Mudar para o tema escuro",
-    "footerMessage": "Distribuído sob a licença Apache-2.0. O Gately não tem nenhuma afiliação com o projeto Lucky.",
+    "footerMessage": "Distribuído sob a licença Apache-2.0.",
     "aiNotice": "Esta página foi traduzida com IA e pode conter imprecisões. Ajude a melhorar no GitHub."
   },
   "home": {
-    "pill": "Código aberto · Auditável · Migração do Lucky com um clique",
+    "pill": "Código aberto · Auditável · Binário único",
     "titleLine1": "Um kit de gateway de rede",
     "titleLine2": "que você enxerga por dentro",
     "lead": "DDNS, travessia de NAT com STUN, redirecionamento de portas, proxy reverso, certificados, WAF, Tailscale e frp, tudo em um único binário de cerca de 22 MB. Funciona em redes domésticas, NAS, servidores em nuvem e servidores de todo tipo.",
@@ -236,52 +234,8 @@
     "copy": "Copiar",
     "copied": "Copiado",
     "fullInstall": "Guia completo de instalação →",
-    "compareTitle": "Comparação com o Lucky",
-    "compareDesc": "O Gately é inspirado no Lucky, cobre os casos de uso mais comuns e importa a sua configuração atual com um clique. O Lucky oferece mais recursos, e os dois podem funcionar lado a lado.",
-    "compareRows": [
-      [
-        "Código-fonte",
-        "Código aberto (Apache-2.0)",
-        "Código fechado"
-      ],
-      [
-        "Arquivo de configuração",
-        "JSON em texto simples, compatível com git",
-        "Formato proprietário (.lkcf)"
-      ],
-      [
-        "Serviços oficiais",
-        "Nenhum por padrão; os endereços externos são editáveis e podem ser desativados",
-        "Atualização online, intermediário de login de terceiros e outros serviços oficiais"
-      ],
-      [
-        "Login de terceiros",
-        "Seus próprios aplicativos OAuth",
-        "Pelo serviço intermediário oficial"
-      ],
-      [
-        "Migração do Lucky",
-        "Importação com um clique de .lkcf / zip do site inteiro",
-        "—"
-      ],
-      [
-        "Atualizações",
-        "Docker / gerenciador de pacotes",
-        "Autoatualização online embutida"
-      ],
-      [
-        "Abrangência de recursos",
-        "Cobre os recursos centrais mais usados",
-        "Mais ampla, como DLNA e montagem de armazenamento em nuvem"
-      ]
-    ],
-    "migrationGuide": "Leia o guia de migração →",
     "faqTitle": "Perguntas frequentes",
     "faqs": [
-      {
-        "q": "Qual é a relação entre o Gately e o Lucky?",
-        "a": "O Gately é uma implementação open source independente, sem afiliação com o projeto Lucky. A ideia do produto vem do Lucky, e agradecemos ao seu autor e à comunidade. A compatibilidade se baseia em comportamentos, interfaces e formatos de configuração observáveis publicamente, e nenhum código foi copiado de binários ou artefatos de frontend do Lucky."
-      },
       {
         "q": "Posso migrar diretamente a minha configuração atual do Lucky?",
         "a": "Sim. Em Configurações → Backup e migração, escolha um arquivo .lkcf ou o zip de configuração do site inteiro, confira a prévia e importe. As regras importadas ficam desativadas por padrão, então você pode rodar junto com o Lucky, migrar módulo por módulo e voltar atrás a qualquer momento."

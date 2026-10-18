@@ -11,7 +11,7 @@
 
 ## 인증서 매핑
 
-인증서를 활성화하면 Gately가 `.crt`, `.key`, `.pem`, `_issuerCertificate.crt`를 매핑 디렉터리에 기록하고 변경 스크립트를 실행합니다. 파일 이름은 Lucky와 같고 기록되는 내용도 Lucky와 바이트 단위로 같습니다.
+인증서를 활성화하면 Gately가 `.crt`, `.key`, `.pem`, `_issuerCertificate.crt`를 매핑 디렉터리에 기록하고 변경 스크립트를 실행합니다.
 
 ## 보안 안내
 

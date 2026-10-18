@@ -11,7 +11,7 @@ services:
       - ./data:/etc/gately
       # Docker 管理（不需要可删除）
       - /var/run/docker.sock:/var/run/docker.sock
-      # 从 Lucky 迁移时，脚本与证书映射目录挂载到与 Lucky 相同的路径
+      # 从 Lucky 迁移时，脚本与证书映射目录挂载到与原环境相同的路径
       # - ./custom:/etc/lucky/custom
       # - ../nginx/config/ssl/lucky:/data/nginx/config/ssl/lucky
     environment:

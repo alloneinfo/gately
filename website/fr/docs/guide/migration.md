@@ -1,5 +1,7 @@
 # Migrer de Lucky vers Gately
 
+> Gately est un projet indépendant, sans affiliation avec Lucky. La compatibilité repose sur des formats observables publiquement.
+
 Gately lit directement les fichiers de configuration `.lkcf` de Lucky, ou le zip du site entier exporté par la « sauvegarde de configuration » de Lucky, et migre les règles, les tâches et les certificats. Vous n'avez pas besoin de désinstaller Lucky : les deux peuvent cohabiter et vous basculez module par module.
 
 ## 1. Préparation
@@ -49,18 +51,7 @@ Basculez module par module et vérifiez chaque étape :
 4. **Services Web** : désactivez la règle d'écoute de Lucky → activez-la dans Gately. Un site HTTPS exige un certificat activé du module de certificats couvrant le domaine.
 5. Arrêtez le conteneur Lucky seulement quand tout est confirmé.
 
-## 4. Comportements vérifiés sur une configuration réelle
-
-Les constats suivants proviennent d'une configuration Lucky 2.27.2 réelle comprenant plusieurs dizaines de règles, comparée en exécutant Gately et Lucky en parallèle sur le même appareil :
-
-- **DDNS** : les tâches Alibaba Cloud s'authentifient avec les clés importées, tous les enregistrements correspondent aux valeurs en ligne et aucune écriture n'a été effectuée.
-- **Redirection de ports** : le résultat de chaque règle est identique à une connexion directe à la cible ; une règle dont la cible est hors ligne se comporte de la même façon des deux côtés.
-- **Services Web** : chaque site renvoie les mêmes codes d'état, pages et certificats via Gately et via Lucky ; le blocage des traversées de chemin par le WAF est identique.
-- **Export des certificats** : les fichiers `.crt/.key/.pem/_issuerCertificate.crt` écrits sont identiques octet pour octet à ceux de Lucky.
-- **Terminal Web** : les hôtes joignables s'authentifient tous avec succès ; les connexions inaccessibles ou aux clés invalides se comportent de la même façon des deux côtés (« Tester la connexion » permet de vérifier rapidement).
-- **STUN** : la configuration des règles est migrée correctement. Lorsque l'interface WAN du routeur se trouve derrière un NAT de niveau opérateur (100.64.0.0/10), les hôtes extérieurs ne peuvent pas atteindre le port traversé ; c'est une limite du réseau lui-même, et Lucky ne peut pas la traverser non plus.
-
-## 5. Montages pour un déploiement Docker
+## 4. Montages pour un déploiement Docker
 
 Les scripts et les exports de certificats de Lucky utilisent des chemins internes au conteneur Lucky ; le conteneur Gately doit monter les mêmes dossiers de l'hôte sur les mêmes chemins. Reprenez le compose de Lucky ligne par ligne, par exemple :
 
@@ -76,7 +67,7 @@ volumes:
 
 L'image Gately embarque `sh`, `bash` et `curl` : les scripts de notification courants s'exécutent directement.
 
-## 6. Éléments à traiter manuellement
+## 5. Éléments à traiter manuellement
 
 - **Connexion via des tiers** : les connexions GitHub/QQ/Google de Lucky passent par le serveur de relais officiel de Lucky ; Gately utilise vos propres applications OAuth. Lors de l'import, sélectionnez aussi `lucky_thirdPartyAuthManager.lkcf` (table des identités), `lucky_reverseproxy.lkcf` et `lucky_base.lkcf` :
   - Les identités tierces référencées par les sites et la console d'administration sont migrées en liste d'autorisation d'après la table des identités (ID numérique pour GitHub, sub pour Google, openid pour QQ ; nom d'utilisateur et e-mail sont inscrits en remarque).
@@ -89,6 +80,6 @@ L'image Gately embarque `sh`, `bash` et `curl` : les scripts de notification cou
 - **Fonctions de Lucky pas encore implémentées** : DLNA, montage de disques cloud rclone, Aliyun Drive, base d'IP (`lucky_ipdb.lkcf`), etc. ne sont pas migrés et sont ignorés à l'import.
 - **Serveurs officiels de Lucky** : Gately ne se connecte jamais à des adresses comme `66666.host` ou `lucky666.cn` ; après la migration, la recherche de l'IP publique utilise des services publics tiers (modifiables dans les tâches DDNS).
 
-## 7. Retour arrière
+## 6. Retour arrière
 
 Gately ne modifie aucun fichier de Lucky. Pour revenir en arrière, désactivez les règles correspondantes dans Gately, puis réactivez-les dans Lucky.

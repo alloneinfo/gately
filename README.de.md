@@ -2,7 +2,7 @@
 
 [English](README.md) | [简体中文](README.zh-CN.md) | [繁體中文](README.zh-TW.md) | [日本語](README.ja.md) | [한국어](README.ko.md) | [Español](README.es.md) | [Français](README.fr.md) | **Deutsch** | [Русский](README.ru.md) | [Português (Brasil)](README.pt-BR.md)
 
-Ein quelloffenes, prüfbares Toolkit für Netzwerk-Gateways – für Heimnetz, NAS, Cloud-Hosts und beliebige Server. Es ist von [Lucky](https://github.com/gdy666/lucky) inspiriert und bietet vergleichbare Funktionen vollständig als Open Source. DDNS, STUN-Traversal, Portweiterleitung, Reverse-Proxy, Zertifikate, WAF und weitere gängige Funktionen sind in einer einzigen Datei von etwa 22 MB vereint; Lucky-Konfigurationen lassen sich mit einem Klick importieren.
+Ein quelloffenes, prüfbares Toolkit für Netzwerk-Gateways – für Heimnetz, NAS, Cloud-Hosts und beliebige Server. DDNS, STUN-Traversal, Portweiterleitung, Reverse-Proxy, Zertifikate, WAF und weitere gängige Funktionen sind in einer einzigen Datei von etwa 22 MB vereint; bestehende Lucky-Konfigurationen lassen sich importieren.
 
 ![Gately-Übersicht](docs/images/overview.webp)
 
@@ -12,7 +12,7 @@ Ein quelloffenes, prüfbares Toolkit für Netzwerk-Gateways – für Heimnetz, N
 
 ## Warum Gately
 
-Lucky ist in der chinesischen NAS- und Heimnetz-Community ein bekanntes, hervorragendes Werkzeug, das DDNS, STUN-Traversal, Reverse-Proxy und mehr bündelt. Es hat auch die Produktidee von Gately geprägt – ohne Lucky gäbe es Gately nicht. Lucky wird kostenlos, aber closed source verteilt; Gately ist vollständig quelloffen, sodass Nutzer und Community Quellcode und Konfiguration direkt prüfen können. Bei Software, die an der Netzwerkgrenze läuft und DNS-Schlüssel sowie private Zertifikatsschlüssel verwaltet, zeigt Open Source, was sie tatsächlich tut. Die Zusagen von Gately:
+Gately ist vollständig quelloffen, sodass Nutzer und Community Quellcode und Konfiguration direkt prüfen können. Bei Software, die an der Netzwerkgrenze läuft und DNS-Schlüssel sowie private Zertifikatsschlüssel verwaltet, zeigt Open Source, was sie tatsächlich tut. Die Zusagen von Gately:
 
 - Der Quellcode steht unter Apache-2.0 und kann von der Community geprüft werden
 - Standardmäßig keine Verbindung zu Servern des Projekts und keine Übermittlung von Geräteinformationen; die Anmeldung über Drittanbieter nutzt Ihre eigenen OAuth-Anwendungen ohne Zwischenstation

@@ -11,7 +11,7 @@
 
 ## 证书映射
 
-启用证书后，Gately 会把 `.crt`、`.key`、`.pem` 与 `_issuerCertificate.crt` 写入映射目录，并执行变化脚本。文件名与 Lucky 一致，写出内容与 Lucky 逐字节相同。
+启用证书后，Gately 会把 `.crt`、`.key`、`.pem` 与 `_issuerCertificate.crt` 写入映射目录，并执行变化脚本。
 
 ## 安全提示
 

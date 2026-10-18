@@ -1,6 +1,6 @@
 {
   "tagline": "开源、可审计的网络网关，家庭与服务器通用",
-  "intro": "DDNS、STUN 穿透、端口转发、反向代理、SSL 证书、WAF 等常用能力集成在一个单文件中，可一键导入 Lucky 配置。每一行代码都公开，每一个对外地址都可见。",
+  "intro": "DDNS、STUN 穿透、端口转发、反向代理、SSL 证书、WAF 等常用能力集成在一个单文件中。每一行代码都公开，每一个对外地址都可见。",
   "repo": "GitHub 仓库",
   "releases": "版本发布",
   "feedback": "反馈问题",
@@ -11,8 +11,6 @@
   "publishedAt": "发布于 {time}",
   "viewRelease": "查看发布页",
   "updateHint": "检查更新只在点击时访问 api.github.com，平时不会主动联网。",
-  "whyTitle": "为什么做 Gately",
-  "whyBody": "Lucky 是国内 NAS 与家庭网络用户熟悉的优秀工具，也为 Gately 提供了产品思路，没有 Lucky 就不会有 Gately。Lucky 以闭源方式免费分发，Gately 选择完全开源：对于运行在网络边界、手握 DNS 密钥和证书私钥的软件，开源让用户能够看到它在做什么。Gately 用开源代码实现同类能力，并保持配置可迁移，让你在不改变使用习惯的前提下，多一个可以审计的选择。",
   "promiseTitle": "透明度承诺",
   "featuresTitle": "功能一览",
   "quickStart": "快速开始",
@@ -27,7 +25,7 @@
   "stepSwitch": "切换",
   "stepSwitchDesc": "按模块逐个在 Lucky 中停用、在 Gately 中启用，确认无误后再停掉 Lucky。",
   "migrationGuide": "完整迁移指南",
-  "footerNote": "以 {license} 发布 · 没有 {lucky} 就没有 Gately，感谢其带来的产品灵感 · 与 Lucky 的兼容仅基于公开可观察的行为与配置格式",
+  "footerNote": "以 {license} 发布",
   "copyFailed": "复制失败，请手动选择",
   "stackEmbed": "go:embed 单文件",
   "promises": {

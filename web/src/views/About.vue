@@ -36,12 +36,6 @@
       <div class="hint">{{ t('about.updateHint') }}</div>
     </section>
 
-    <!-- ============ 为什么 ============ -->
-    <section class="block">
-      <h2><Sparkles :size="18" />{{ t('about.whyTitle') }}</h2>
-      <p class="lead">{{ t('about.whyBody') }}</p>
-    </section>
-
     <!-- ============ 透明度承诺 ============ -->
     <section class="block">
       <h2><ShieldCheck :size="18" />{{ t('about.promiseTitle') }}</h2>
@@ -124,7 +118,6 @@
       <div class="muted small">
         <i18n-t keypath="about.footerNote" tag="span">
           <template #license><a :href="`${REPO}/blob/main/LICENSE`" target="_blank" rel="noopener">Apache License 2.0</a></template>
-          <template #lucky><a href="https://github.com/gdy666/lucky" target="_blank" rel="noopener">Lucky</a></template>
         </i18n-t>
       </div>
       <div v-if="info" class="muted small mono">{{ info.version }} · {{ info.commit || 'none' }} · {{ info.buildDate || 'unknown' }}</div>
@@ -161,7 +154,6 @@ import {
   Server,
   ShieldCheck,
   ShieldHalf,
-  Sparkles,
   SquareTerminal,
   WifiOff,
 } from 'lucide-vue-next'
@@ -364,12 +356,6 @@ h2 {
 }
 h2 svg {
   color: var(--el-color-primary);
-}
-.lead {
-  margin: 0;
-  font-size: 14px;
-  line-height: 1.9;
-  color: var(--el-text-color-regular);
 }
 .small {
   font-size: 13px;

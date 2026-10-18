@@ -1,9 +1,5 @@
 # Perguntas frequentes
 
-## Qual é a relação entre o Gately e o Lucky?
-
-O Gately é uma implementação open source independente, sem afiliação com o projeto Lucky. A ideia do produto vem do Lucky; sem o Lucky não haveria o Gately, e agradecemos ao autor e à comunidade do Lucky. A compatibilidade se baseia em comportamentos, interfaces e formatos de configuração observáveis publicamente, e o repositório recusa código copiado de binários ou artefatos de frontend do Lucky.
-
 ## Ele precisa se conectar aos servidores do projeto?
 
 Não. Por padrão, o Gately não se conecta a nenhum servidor do projeto e não envia informações do dispositivo. Endereços externos, como a consulta do IP público, usam serviços públicos de terceiros e podem ser alterados na tarefa correspondente.

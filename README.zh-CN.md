@@ -2,7 +2,7 @@
 
 [English](README.md) | **简体中文** | [繁體中文](README.zh-TW.md) | [日本語](README.ja.md) | [한국어](README.ko.md) | [Español](README.es.md) | [Français](README.fr.md) | [Deutsch](README.de.md) | [Русский](README.ru.md) | [Português (Brasil)](README.pt-BR.md)
 
-开源、可审计的网络网关工具集，家庭网络、NAS、云主机与各类服务器均可使用，灵感来自 [Lucky](https://github.com/gdy666/lucky)，以完全开源的方式提供同类能力。DDNS、STUN 穿透、端口转发、反向代理、证书、WAF 等常用能力集成在一个约 22 MB 的单文件中，并可一键导入 Lucky 配置。
+开源、可审计的网络网关工具集，家庭网络、NAS、云主机与各类服务器均可使用。DDNS、STUN 穿透、端口转发、反向代理、证书、WAF 等常用能力集成在一个约 22 MB 的单文件中，并支持导入已有的 Lucky 配置。
 
 ![Gately 概览](docs/images/overview.webp)
 
@@ -12,7 +12,7 @@
 
 ## 为什么做 Gately
 
-Lucky 是国内 NAS 与家庭网络用户熟悉的优秀工具，把 DDNS、STUN 穿透、反向代理等能力整合在一起，也为 Gately 提供了产品思路，没有 Lucky 就不会有 Gately。Lucky 以闭源方式免费分发，Gately 选择完全开源，让用户和社区可以直接审阅源码与配置。对于运行在网络边界、手握 DNS 密钥和证书私钥的软件，开源让用户能够看到它在做什么。Gately 的承诺：
+Gately 完全开源，用户和社区可以直接审阅源码与配置。对于运行在网络边界、手握 DNS 密钥和证书私钥的软件，开源让用户能够看到它在做什么。Gately 的承诺：
 
 - 源码以 Apache-2.0 开源，接受社区审查
 - 默认不连接任何项目方服务器，不上报设备信息；第三方登录使用你自己的 OAuth 应用，不经过中转
