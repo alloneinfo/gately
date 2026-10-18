@@ -4,5 +4,8 @@
   "openMenu": "Ouvrir le menu",
   "changePassword": "Changer le mot de passe",
   "systemSettings": "Paramètres système",
-  "logout": "Se déconnecter"
+  "logout": "Se déconnecter",
+  "logoutTitle": "Déconnexion",
+  "logoutConfirm": "Voulez-vous vraiment vous déconnecter ?",
+  "logoutOk": "Se déconnecter"
 }

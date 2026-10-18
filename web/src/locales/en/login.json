@@ -17,6 +17,8 @@
   "totpTitle": "Two-factor authentication",
   "totpPrompt": "Open your authenticator app and enter the 6-digit code for {user}",
   "code": "Verification code",
-  "verify": "Verify and sign in",
-  "backToAccount": "Back to change account"
+  "backToAccount": "Back to change account",
+  "badge": "Open source · Self-hosted",
+  "verifying": "Verifying…",
+  "totpAuto": "The code is verified automatically once complete"
 }

@@ -17,6 +17,8 @@
   "totpTitle": "兩步驟驗證",
   "totpPrompt": "開啟驗證器 App，輸入 {user} 的 6 位數動態驗證碼",
   "code": "驗證碼",
-  "verify": "驗證並登入",
-  "backToAccount": "返回修改帳號"
+  "backToAccount": "返回修改帳號",
+  "badge": "開源 · 自架",
+  "verifying": "正在驗證…",
+  "totpAuto": "輸入完成後將自動驗證"
 }

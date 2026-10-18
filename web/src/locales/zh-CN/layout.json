@@ -4,5 +4,8 @@
   "openMenu": "打开菜单",
   "changePassword": "修改密码",
   "systemSettings": "系统设置",
-  "logout": "退出登录"
+  "logout": "退出登录",
+  "logoutTitle": "退出登录",
+  "logoutConfirm": "确定要退出当前账号吗？",
+  "logoutOk": "退出"
 }

@@ -17,6 +17,8 @@
   "totpTitle": "两步验证",
   "totpPrompt": "打开验证器 App，输入 {user} 的 6 位动态验证码",
   "code": "验证码",
-  "verify": "验证并登录",
-  "backToAccount": "返回修改账号"
+  "backToAccount": "返回修改账号",
+  "badge": "开源 · 自托管",
+  "verifying": "正在验证…",
+  "totpAuto": "输入完成后将自动验证"
 }

@@ -29,17 +29,20 @@
     "title": "两步验证",
     "enabledDesc": "登录时除密码外还需要输入验证器 App 中的 6 位动态验证码。",
     "code": "验证码",
-    "codePlaceholder": "验证器中的 6 位数字",
     "disable": "关闭两步验证",
     "scanDesc": "用 Google Authenticator、Microsoft Authenticator 等 App 扫描二维码，然后输入显示的验证码确认。",
     "qrAlt": "二维码",
     "manualHint": "无法扫码时手动输入密钥",
     "copySecret": "复制密钥",
-    "confirmEnable": "确认启用",
     "introDesc": "启用后登录需要额外输入验证器 App 生成的动态验证码，即使密码泄露也能保护管理界面。",
     "start": "开始设置",
     "enabledMsg": "两步验证已启用",
-    "disabledMsg": "两步验证已关闭"
+    "disabledMsg": "两步验证已关闭",
+    "enableTitle": "启用两步验证",
+    "disablePrompt": "输入当前密码与验证器中的 6 位验证码以关闭两步验证。",
+    "passwordRequired": "请先输入当前密码",
+    "verifying": "正在验证…",
+    "autoHint": "输入密码后填满 6 位验证码将自动提交"
   },
   "loginProtect": {
     "title": "登录保护",

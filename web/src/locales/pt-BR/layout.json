@@ -4,5 +4,8 @@
   "openMenu": "Abrir menu",
   "changePassword": "Alterar senha",
   "systemSettings": "Configurações do sistema",
-  "logout": "Sair"
+  "logout": "Sair",
+  "logoutTitle": "Sair",
+  "logoutConfirm": "Tem certeza de que deseja sair?",
+  "logoutOk": "Sair"
 }

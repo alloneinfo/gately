@@ -29,17 +29,20 @@
     "title": "兩步驟驗證",
     "enabledDesc": "登入時除密碼外，還需要輸入驗證器 App 中的 6 位數動態驗證碼。",
     "code": "驗證碼",
-    "codePlaceholder": "驗證器中的 6 位數字",
     "disable": "關閉兩步驟驗證",
     "scanDesc": "用 Google Authenticator、Microsoft Authenticator 等 App 掃描 QR Code，然後輸入顯示的驗證碼確認。",
     "qrAlt": "QR Code",
     "manualHint": "無法掃描時請手動輸入金鑰",
     "copySecret": "複製金鑰",
-    "confirmEnable": "確認啟用",
     "introDesc": "啟用後登入需要額外輸入驗證器 App 產生的動態驗證碼，即使密碼外洩也能保護管理介面。",
     "start": "開始設定",
     "enabledMsg": "兩步驟驗證已啟用",
-    "disabledMsg": "兩步驟驗證已關閉"
+    "disabledMsg": "兩步驟驗證已關閉",
+    "enableTitle": "啟用兩步驟驗證",
+    "disablePrompt": "輸入目前密碼與驗證器中的 6 位驗證碼以關閉兩步驟驗證。",
+    "passwordRequired": "請先輸入目前密碼",
+    "verifying": "正在驗證…",
+    "autoHint": "輸入密碼後填滿 6 位驗證碼將自動提交"
   },
   "loginProtect": {
     "title": "登入保護",

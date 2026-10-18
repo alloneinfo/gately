@@ -4,5 +4,8 @@
   "openMenu": "Open menu",
   "changePassword": "Change password",
   "systemSettings": "System settings",
-  "logout": "Log out"
+  "logout": "Log out",
+  "logoutTitle": "Sign out",
+  "logoutConfirm": "Are you sure you want to sign out?",
+  "logoutOk": "Sign out"
 }

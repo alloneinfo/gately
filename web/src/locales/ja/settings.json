@@ -29,17 +29,20 @@
     "title": "2 段階認証",
     "enabledDesc": "ログイン時にパスワードに加えて、認証アプリの 6 桁のコードが必要です。",
     "code": "認証コード",
-    "codePlaceholder": "認証アプリの 6 桁の数字",
     "disable": "2 段階認証を無効化",
     "scanDesc": "Google Authenticator や Microsoft Authenticator などのアプリで QR コードをスキャンし、表示されたコードを入力して確認します。",
     "qrAlt": "QR コード",
     "manualHint": "スキャンできない場合はキーを手動で入力",
     "copySecret": "キーをコピー",
-    "confirmEnable": "有効化を確定",
     "introDesc": "有効にすると、ログイン時に認証アプリが生成するコードの入力が必要になります。パスワードが漏えいしても管理画面を保護できます。",
     "start": "設定を開始",
     "enabledMsg": "2 段階認証を有効にしました",
-    "disabledMsg": "2 段階認証を無効にしました"
+    "disabledMsg": "2 段階認証を無効にしました",
+    "enableTitle": "2 段階認証を有効化",
+    "disablePrompt": "2 段階認証を無効にするには、現在のパスワードと認証アプリの 6 桁のコードを入力してください。",
+    "passwordRequired": "先に現在のパスワードを入力してください",
+    "verifying": "確認中…",
+    "autoHint": "パスワード入力後、6 桁のコードを入力すると自動で送信されます"
   },
   "loginProtect": {
     "title": "ログイン保護",

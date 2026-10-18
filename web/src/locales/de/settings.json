@@ -29,17 +29,20 @@
     "title": "Zwei-Faktor-Authentifizierung",
     "enabledDesc": "Für die Anmeldung wird zusätzlich zum Passwort ein 6-stelliger Code aus Ihrer Authenticator-App benötigt.",
     "code": "Bestätigungscode",
-    "codePlaceholder": "6-stelliger Code aus Ihrer Authenticator-App",
     "disable": "Zwei-Faktor-Authentifizierung deaktivieren",
     "scanDesc": "Scannen Sie den QR-Code mit einer App wie Google Authenticator oder Microsoft Authenticator und geben Sie zur Bestätigung den angezeigten Code ein.",
     "qrAlt": "QR-Code",
     "manualHint": "Geben Sie diesen Schlüssel manuell ein, wenn Sie nicht scannen können",
     "copySecret": "Schlüssel kopieren",
-    "confirmEnable": "Bestätigen und aktivieren",
     "introDesc": "Nach der Aktivierung ist bei der Anmeldung zusätzlich ein Einmalcode aus Ihrer Authenticator-App nötig, sodass die Konsole auch bei einem Passwortleck geschützt bleibt.",
     "start": "Los geht’s",
     "enabledMsg": "Zwei-Faktor-Authentifizierung aktiviert",
-    "disabledMsg": "Zwei-Faktor-Authentifizierung deaktiviert"
+    "disabledMsg": "Zwei-Faktor-Authentifizierung deaktiviert",
+    "enableTitle": "Zwei-Faktor-Authentifizierung aktivieren",
+    "disablePrompt": "Geben Sie Ihr aktuelles Passwort und den 6-stelligen Code aus der Authenticator-App ein, um die Zwei-Faktor-Authentifizierung zu deaktivieren.",
+    "passwordRequired": "Bitte zuerst das aktuelle Passwort eingeben",
+    "verifying": "Wird überprüft…",
+    "autoHint": "Wird nach Eingabe des Passworts und aller 6 Ziffern automatisch gesendet"
   },
   "loginProtect": {
     "title": "Anmeldeschutz",

@@ -4,5 +4,8 @@
   "openMenu": "メニューを開く",
   "changePassword": "パスワード変更",
   "systemSettings": "システム設定",
-  "logout": "ログアウト"
+  "logout": "ログアウト",
+  "logoutTitle": "ログアウト",
+  "logoutConfirm": "ログアウトしてもよろしいですか？",
+  "logoutOk": "ログアウト"
 }

@@ -4,5 +4,8 @@
   "openMenu": "Открыть меню",
   "changePassword": "Сменить пароль",
   "systemSettings": "Системные настройки",
-  "logout": "Выйти"
+  "logout": "Выйти",
+  "logoutTitle": "Выход",
+  "logoutConfirm": "Вы действительно хотите выйти?",
+  "logoutOk": "Выйти"
 }

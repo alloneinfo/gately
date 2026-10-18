@@ -4,5 +4,8 @@
   "openMenu": "Abrir menú",
   "changePassword": "Cambiar contraseña",
   "systemSettings": "Ajustes del sistema",
-  "logout": "Cerrar sesión"
+  "logout": "Cerrar sesión",
+  "logoutTitle": "Cerrar sesión",
+  "logoutConfirm": "¿Seguro que quieres cerrar sesión?",
+  "logoutOk": "Cerrar sesión"
 }

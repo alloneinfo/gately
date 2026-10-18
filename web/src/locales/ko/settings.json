@@ -29,17 +29,20 @@
     "title": "2단계 인증",
     "enabledDesc": "로그인할 때 비밀번호 외에 인증 앱의 6자리 인증 코드를 입력해야 합니다.",
     "code": "인증 코드",
-    "codePlaceholder": "인증 앱의 6자리 숫자",
     "disable": "2단계 인증 끄기",
     "scanDesc": "Google Authenticator, Microsoft Authenticator 등의 앱으로 QR 코드를 스캔한 뒤 표시된 인증 코드를 입력해 확인하세요.",
     "qrAlt": "QR 코드",
     "manualHint": "스캔할 수 없으면 키를 직접 입력하세요",
     "copySecret": "키 복사",
-    "confirmEnable": "사용 확인",
     "introDesc": "사용하면 로그인할 때 인증 앱이 생성한 인증 코드를 추가로 입력해야 하므로, 비밀번호가 유출되어도 관리 화면을 보호할 수 있습니다.",
     "start": "설정 시작",
     "enabledMsg": "2단계 인증을 사용합니다",
-    "disabledMsg": "2단계 인증을 껐습니다"
+    "disabledMsg": "2단계 인증을 껐습니다",
+    "enableTitle": "2단계 인증 사용",
+    "disablePrompt": "2단계 인증을 끄려면 현재 비밀번호와 인증 앱의 6자리 코드를 입력하세요.",
+    "passwordRequired": "먼저 현재 비밀번호를 입력하세요",
+    "verifying": "확인 중…",
+    "autoHint": "비밀번호 입력 후 6자리 코드를 모두 입력하면 자동으로 제출됩니다"
   },
   "loginProtect": {
     "title": "로그인 보호",

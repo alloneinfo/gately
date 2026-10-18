@@ -29,17 +29,20 @@
     "title": "Authentification à deux facteurs",
     "enabledDesc": "La connexion exige, en plus du mot de passe, un code à 6 chiffres de votre application d'authentification.",
     "code": "Code de vérification",
-    "codePlaceholder": "Code à 6 chiffres de votre application d'authentification",
     "disable": "Désactiver l'authentification à deux facteurs",
     "scanDesc": "Scannez le code QR avec une application comme Google Authenticator ou Microsoft Authenticator, puis saisissez le code affiché pour confirmer.",
     "qrAlt": "Code QR",
     "manualHint": "Saisissez cette clé manuellement si vous ne pouvez pas scanner",
     "copySecret": "Copier la clé",
-    "confirmEnable": "Confirmer et activer",
     "introDesc": "Une fois activée, la connexion exige aussi un code à usage unique de votre application d'authentification, ce qui protège la console même en cas de fuite du mot de passe.",
     "start": "Commencer",
     "enabledMsg": "Authentification à deux facteurs activée",
-    "disabledMsg": "Authentification à deux facteurs désactivée"
+    "disabledMsg": "Authentification à deux facteurs désactivée",
+    "enableTitle": "Activer l'authentification à deux facteurs",
+    "disablePrompt": "Saisissez votre mot de passe actuel et le code à 6 chiffres de l'authentificateur pour désactiver l'authentification à deux facteurs.",
+    "passwordRequired": "Saisissez d'abord votre mot de passe actuel",
+    "verifying": "Vérification…",
+    "autoHint": "Envoi automatique une fois le mot de passe et les 6 chiffres saisis"
   },
   "loginProtect": {
     "title": "Protection de la connexion",

@@ -17,6 +17,8 @@
   "totpTitle": "2 段階認証",
   "totpPrompt": "認証アプリを開き、{user} の 6 桁のコードを入力してください",
   "code": "認証コード",
-  "verify": "認証してログイン",
-  "backToAccount": "アカウント入力に戻る"
+  "backToAccount": "アカウント入力に戻る",
+  "badge": "オープンソース · セルフホスト",
+  "verifying": "確認中…",
+  "totpAuto": "入力が完了すると自動で確認されます"
 }

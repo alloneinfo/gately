@@ -17,6 +17,8 @@
   "totpTitle": "2단계 인증",
   "totpPrompt": "인증 앱을 열고 {user}의 6자리 인증 코드를 입력하세요",
   "code": "인증 코드",
-  "verify": "인증 후 로그인",
-  "backToAccount": "계정 수정으로 돌아가기"
+  "backToAccount": "계정 수정으로 돌아가기",
+  "badge": "오픈 소스 · 셀프 호스팅",
+  "verifying": "확인 중…",
+  "totpAuto": "입력이 완료되면 자동으로 확인됩니다"
 }

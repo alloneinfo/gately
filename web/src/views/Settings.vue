@@ -50,37 +50,59 @@
             <div class="g-card-body">
               <template v-if="totp.enabled">
                 <p class="desc">{{ t('settings.totp.enabledDesc') }}</p>
-                <el-form label-width="100px" :label-position="labelPosition" class="narrow">
-                  <el-form-item :label="t('settings.currentPassword')"><el-input v-model="totp.password" type="password" show-password /></el-form-item>
-                  <el-form-item :label="t('settings.totp.code')"><el-input v-model="totp.code" maxlength="6" inputmode="numeric" class="mono" :placeholder="t('settings.totp.codePlaceholder')" /></el-form-item>
-                  <el-form-item label=" "><el-button type="danger" plain @click="disableTOTP">{{ t('settings.totp.disable') }}</el-button></el-form-item>
-                </el-form>
-              </template>
-              <template v-else-if="totp.secret">
-                <p class="desc">{{ t('settings.totp.scanDesc') }}</p>
-                <div class="qr-wrap">
-                  <img v-if="totp.qr" :src="totp.qr" class="qr" :alt="t('settings.totp.qrAlt')" />
-                  <div class="secret-box">
-                    <div class="meta">{{ t('settings.totp.manualHint') }}</div>
-                    <div class="mono secret">{{ totp.secret }}</div>
-                    <el-button size="small" text :icon="Copy" @click="copy(totp.secret)">{{ t('settings.totp.copySecret') }}</el-button>
-                  </div>
-                </div>
-                <el-form label-width="100px" :label-position="labelPosition" class="narrow">
-                  <el-form-item :label="t('settings.totp.code')"><el-input v-model="totp.code" maxlength="6" inputmode="numeric" class="mono" /></el-form-item>
-                  <el-form-item :label="t('settings.currentPassword')"><el-input v-model="totp.password" type="password" show-password /></el-form-item>
-                  <el-form-item label=" ">
-                    <el-button type="primary" @click="enableTOTP">{{ t('settings.totp.confirmEnable') }}</el-button>
-                    <el-button @click="cancelTOTP">{{ t('common.cancel') }}</el-button>
-                  </el-form-item>
-                </el-form>
+                <el-button type="danger" plain :icon="ShieldOff" @click="openTOTP('disable')">{{ t('settings.totp.disable') }}</el-button>
               </template>
               <template v-else>
                 <p class="desc">{{ t('settings.totp.introDesc') }}</p>
-                <el-button type="primary" plain :icon="ShieldCheck" @click="setupTOTP">{{ t('settings.totp.start') }}</el-button>
+                <el-button type="primary" plain :icon="ShieldCheck" :loading="totp.preparing" @click="setupTOTP">{{ t('settings.totp.start') }}</el-button>
               </template>
             </div>
           </div>
+
+          <!-- 两步验证弹窗：启用时展示二维码，启用与关闭都需当前密码，验证码输满 6 位自动提交 -->
+          <el-dialog
+            v-model="totp.dialog"
+            :title="totp.mode === 'enable' ? t('settings.totp.enableTitle') : t('settings.totp.disable')"
+            width="440px"
+            class="totp-dialog"
+            align-center
+            :close-on-click-modal="false"
+            @opened="focusTOTP"
+            @closed="cancelTOTP"
+          >
+            <template v-if="totp.mode === 'enable'">
+              <p class="desc">{{ t('settings.totp.scanDesc') }}</p>
+              <div class="qr-wrap">
+                <img v-if="totp.qr" :src="totp.qr" class="qr" :alt="t('settings.totp.qrAlt')" />
+                <div class="secret-box">
+                  <div class="meta">{{ t('settings.totp.manualHint') }}</div>
+                  <div class="mono secret">{{ totp.secret }}</div>
+                  <el-button size="small" text :icon="Copy" @click="copy(totp.secret)">{{ t('settings.totp.copySecret') }}</el-button>
+                </div>
+              </div>
+            </template>
+            <p v-else class="desc">{{ t('settings.totp.disablePrompt') }}</p>
+            <div class="totp-field">
+              <div class="totp-label">{{ t('settings.currentPassword') }}</div>
+              <el-input
+                ref="totpPasswordInput"
+                v-model="totp.password"
+                type="password"
+                show-password
+                autocomplete="current-password"
+                :disabled="totp.submitting"
+                @keyup.enter="submitTOTP"
+              />
+            </div>
+            <div class="totp-field">
+              <div class="totp-label">{{ t('settings.totp.code') }}</div>
+              <OtpInput ref="totpCodeInput" v-model="totp.code" :disabled="totp.submitting" :aria-label="t('settings.totp.code')" @complete="submitTOTP" />
+            </div>
+            <div class="totp-status">
+              <template v-if="totp.submitting"><LoaderCircle :size="14" class="spin" />{{ t('settings.totp.verifying') }}</template>
+              <template v-else>{{ t('settings.totp.autoHint') }}</template>
+            </div>
+          </el-dialog>
         </div>
 
         <div v-if="form" class="g-card">
@@ -382,14 +404,16 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
 import BackupSchedule from '../components/BackupSchedule.vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import QRCode from 'qrcode'
-import { ElMessage, ElMessageBox, type UploadUserFile } from 'element-plus'
+import { ElMessage, ElMessageBox, type InputInstance, type UploadUserFile } from 'element-plus'
 import {
   BookOpen,
+  LoaderCircle,
+  ShieldOff,
   ArchiveRestore,
   CircleCheck,
   Code2,
@@ -417,6 +441,7 @@ import {
 } from 'lucide-vue-next'
 import { api, type ImportFileResult, type SystemInfo, type SystemSettings } from '../api'
 import PageHeader from '../components/PageHeader.vue'
+import OtpInput from '../components/OtpInput.vue'
 import OAuthProviders from '../components/OAuthProviders.vue'
 import StatusBadge from '../components/StatusBadge.vue'
 import SaveBar from '../components/SaveBar.vue'
@@ -466,14 +491,29 @@ function normalizedLogin(t?: SystemSettings['thirdLogin']): SystemSettings['thir
 // 第三方登录设置（模板中仅在表单加载后渲染）
 const login = computed(() => form.value?.thirdLogin ?? normalizedLogin())
 
+// 允许的身份：输入框保留用户原始文本（含空行、行尾换行），只把解析后的列表写回表单。
+// 若直接用 computed 往返 join/filter，回车产生的空行会被立即过滤掉，导致无法换行。
+const parseAllowed = (v: string) => v.split('\n').map((s) => s.trim()).filter(Boolean)
+const allowedRaw = ref('')
 const allowedText = computed({
-  get: () => login.value.allowed.join('\n'),
+  get: () => allowedRaw.value,
   set: (v: string) => {
+    allowedRaw.value = v
     if (form.value) {
-      form.value.thirdLogin.allowed = v.split('\n').map((s) => s.trim()).filter(Boolean)
+      form.value.thirdLogin.allowed = parseAllowed(v)
     }
   },
 })
+// 表单被外部替换（加载、重置）时，若列表与当前文本解析结果不一致，则同步文本
+watch(
+  () => login.value.allowed,
+  (list) => {
+    if (JSON.stringify(parseAllowed(allowedRaw.value)) !== JSON.stringify(list)) {
+      allowedRaw.value = list.join('\n')
+    }
+  },
+  { immediate: true },
+)
 
 const dnsServers = computed({
   get: () => form.value?.dnsServers ?? [],
@@ -596,45 +636,93 @@ async function saveAccount() {
 }
 
 // ---------- 两步验证 ----------
-const totp = reactive({ enabled: false, secret: '', qr: '', code: '', password: '' })
+const totp = reactive({
+  enabled: false,
+  secret: '',
+  qr: '',
+  code: '',
+  password: '',
+  // 弹窗状态：mode 区分启用与关闭
+  dialog: false,
+  mode: 'enable' as 'enable' | 'disable',
+  preparing: false,
+  submitting: false,
+})
+const totpPasswordInput = ref<InputInstance>()
+const totpCodeInput = ref<InstanceType<typeof OtpInput>>()
 
 async function loadTOTP() {
   const r = await api.get<{ enabled: boolean }>('/api/account/totp')
   totp.enabled = r.enabled
 }
 
+// 生成新密钥与二维码后弹出启用弹窗
 async function setupTOTP() {
+  totp.preparing = true
   try {
     const r = await api.post<{ secret: string; url: string }>('/api/account/totp/setup')
     totp.secret = r.secret
     totp.qr = await QRCode.toDataURL(r.url, { width: 180, margin: 1 })
+    openTOTP('enable')
   } catch (e) {
     ElMessage.error((e as Error).message)
+  } finally {
+    totp.preparing = false
   }
 }
 
+function openTOTP(mode: 'enable' | 'disable') {
+  totp.mode = mode
+  totp.code = ''
+  totp.password = ''
+  totp.dialog = true
+}
+
+// 弹窗关闭后清空敏感输入与未确认的密钥
 function cancelTOTP() {
-  Object.assign(totp, { secret: '', qr: '', code: '', password: '' })
+  Object.assign(totp, { secret: '', qr: '', code: '', password: '', submitting: false })
 }
 
-async function enableTOTP() {
-  try {
-    await api.post('/api/account/totp/enable', { password: totp.password, code: totp.code })
-    Object.assign(totp, { enabled: true, secret: '', qr: '', code: '', password: '' })
-    ElMessage.success(t('settings.totp.enabledMsg'))
-  } catch (e) {
-    ElMessage.error((e as Error).message)
+// 先填密码再输验证码；密码为空时聚焦密码框
+function focusTOTP() {
+  if (!totp.password) {
+    totpPasswordInput.value?.focus()
+  } else {
+    totpCodeInput.value?.focus()
   }
 }
 
-async function disableTOTP() {
+async function submitTOTP() {
+  if (totp.submitting) {
+    return
+  }
+  if (!totp.password) {
+    ElMessage.warning(t('settings.totp.passwordRequired'))
+    totpPasswordInput.value?.focus()
+    return
+  }
+  if (totp.code.length < 6) {
+    totpCodeInput.value?.focus()
+    return
+  }
+  totp.submitting = true
+  const enabling = totp.mode === 'enable'
   try {
-    // 关闭时后端要求同时校验密码与当前验证码
-    await api.post('/api/account/totp/disable', { password: totp.password, code: totp.code })
-    Object.assign(totp, { enabled: false, password: '', code: '' })
-    ElMessage.success(t('settings.totp.disabledMsg'))
+    // 启用与关闭时后端都要求同时校验密码与当前验证码
+    await api.post(enabling ? '/api/account/totp/enable' : '/api/account/totp/disable', { password: totp.password, code: totp.code })
+    totp.enabled = enabling
+    totp.dialog = false
+    ElMessage.success(t(enabling ? 'settings.totp.enabledMsg' : 'settings.totp.disabledMsg'))
   } catch (e) {
     ElMessage.error((e as Error).message)
+    // 验证失败：抖动并清空验证码，方便重新输入
+    totp.code = ''
+    totpCodeInput.value?.shake()
+    totp.submitting = false
+    await nextTick()
+    totpCodeInput.value?.focus()
+  } finally {
+    totp.submitting = false
   }
 }
 
@@ -904,6 +992,33 @@ onMounted(async () => {
   border: 1px solid var(--g-border);
   background: #fff;
   padding: 6px;
+}
+.totp-field {
+  margin-top: 16px;
+}
+.totp-label {
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--el-text-color-regular);
+}
+.totp-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 20px;
+  margin-top: 16px;
+  font-size: 12px;
+  color: var(--el-text-color-placeholder);
+}
+.totp-status .spin {
+  animation: totp-spin 1s linear infinite;
+}
+@keyframes totp-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 .secret-box {
   min-width: 0;

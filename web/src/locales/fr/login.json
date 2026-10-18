@@ -17,6 +17,8 @@
   "totpTitle": "Authentification à deux facteurs",
   "totpPrompt": "Ouvrez votre application d'authentification et saisissez le code à 6 chiffres de {user}",
   "code": "Code de vérification",
-  "verify": "Vérifier et se connecter",
-  "backToAccount": "Retour pour changer de compte"
+  "backToAccount": "Retour pour changer de compte",
+  "badge": "Open source · Auto-hébergé",
+  "verifying": "Vérification…",
+  "totpAuto": "Le code est vérifié automatiquement une fois saisi"
 }

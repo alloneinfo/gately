@@ -29,17 +29,20 @@
     "title": "Autenticación de dos factores",
     "enabledDesc": "Para iniciar sesión se necesita, además de la contraseña, un código de 6 dígitos de tu app de autenticación.",
     "code": "Código de verificación",
-    "codePlaceholder": "Código de 6 dígitos de tu app de autenticación",
     "disable": "Desactivar autenticación de dos factores",
     "scanDesc": "Escanea el código QR con una app como Google Authenticator o Microsoft Authenticator y luego introduce el código mostrado para confirmar.",
     "qrAlt": "Código QR",
     "manualHint": "Introduce esta clave manualmente si no puedes escanear",
     "copySecret": "Copiar clave",
-    "confirmEnable": "Confirmar y activar",
     "introDesc": "Una vez activada, para iniciar sesión también se necesita un código de un solo uso de tu app de autenticación, lo que protege la consola incluso si se filtra tu contraseña.",
     "start": "Empezar",
     "enabledMsg": "Autenticación de dos factores activada",
-    "disabledMsg": "Autenticación de dos factores desactivada"
+    "disabledMsg": "Autenticación de dos factores desactivada",
+    "enableTitle": "Activar autenticación de dos factores",
+    "disablePrompt": "Introduce tu contraseña actual y el código de 6 dígitos del autenticador para desactivar la autenticación de dos factores.",
+    "passwordRequired": "Introduce primero tu contraseña actual",
+    "verifying": "Verificando…",
+    "autoHint": "Se envía automáticamente al introducir la contraseña y los 6 dígitos"
   },
   "loginProtect": {
     "title": "Protección de inicio de sesión",

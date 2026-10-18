@@ -57,6 +57,7 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { ElMessageBox } from 'element-plus'
 import { ChevronDown, ChevronRight, KeyRound, LogOut, Menu, PanelLeftClose, PanelLeftOpen, Settings } from 'lucide-vue-next'
 import { api } from '../api'
 import SideNav from '../components/SideNav.vue'
@@ -90,6 +91,16 @@ watch(
 
 async function onCommand(cmd: string) {
   if (cmd === 'logout') {
+    // 退出前二次确认，避免误触
+    try {
+      await ElMessageBox.confirm(t('layout.logoutConfirm'), t('layout.logoutTitle'), {
+        type: 'warning',
+        confirmButtonText: t('layout.logoutOk'),
+        cancelButtonText: t('common.cancel'),
+      })
+    } catch {
+      return
+    }
     await api.post('/api/logout').catch(() => undefined)
     router.replace({ name: 'login' })
   } else if (cmd === 'password') {

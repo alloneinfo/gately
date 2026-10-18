@@ -17,6 +17,8 @@
   "totpTitle": "Autenticação em dois fatores",
   "totpPrompt": "Abra seu app autenticador e informe o código de 6 dígitos de {user}",
   "code": "Código de verificação",
-  "verify": "Verificar e entrar",
-  "backToAccount": "Voltar para trocar de conta"
+  "backToAccount": "Voltar para trocar de conta",
+  "badge": "Código aberto · Auto-hospedado",
+  "verifying": "Verificando…",
+  "totpAuto": "O código é verificado automaticamente ao ser concluído"
 }

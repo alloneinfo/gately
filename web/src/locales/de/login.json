@@ -17,6 +17,8 @@
   "totpTitle": "Zwei-Faktor-Authentifizierung",
   "totpPrompt": "Öffnen Sie Ihre Authenticator-App und geben Sie den 6-stelligen Code für {user} ein",
   "code": "Bestätigungscode",
-  "verify": "Bestätigen und anmelden",
-  "backToAccount": "Zurück zur Kontoauswahl"
+  "backToAccount": "Zurück zur Kontoauswahl",
+  "badge": "Open Source · Selbst gehostet",
+  "verifying": "Wird überprüft…",
+  "totpAuto": "Der Code wird nach vollständiger Eingabe automatisch überprüft"
 }

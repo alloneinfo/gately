@@ -29,17 +29,20 @@
     "title": "Two-factor authentication",
     "enabledDesc": "Signing in requires a 6-digit code from your authenticator app in addition to the password.",
     "code": "Verification code",
-    "codePlaceholder": "6-digit code from your authenticator",
     "disable": "Disable two-factor authentication",
     "scanDesc": "Scan the QR code with an app such as Google Authenticator or Microsoft Authenticator, then enter the displayed code to confirm.",
     "qrAlt": "QR code",
     "manualHint": "Enter this key manually if you cannot scan",
     "copySecret": "Copy key",
-    "confirmEnable": "Confirm and enable",
     "introDesc": "Once enabled, signing in also requires a one-time code from your authenticator app, protecting the console even if your password leaks.",
     "start": "Get started",
     "enabledMsg": "Two-factor authentication enabled",
-    "disabledMsg": "Two-factor authentication disabled"
+    "disabledMsg": "Two-factor authentication disabled",
+    "enableTitle": "Enable two-factor authentication",
+    "disablePrompt": "Enter your current password and the 6-digit code from your authenticator to turn off two-factor authentication.",
+    "passwordRequired": "Enter your current password first",
+    "verifying": "Verifying…",
+    "autoHint": "Submitted automatically once the password and all 6 digits are entered"
   },
   "loginProtect": {
     "title": "Login protection",

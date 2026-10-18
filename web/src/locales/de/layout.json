@@ -4,5 +4,8 @@
   "openMenu": "Menü öffnen",
   "changePassword": "Passwort ändern",
   "systemSettings": "Systemeinstellungen",
-  "logout": "Abmelden"
+  "logout": "Abmelden",
+  "logoutTitle": "Abmelden",
+  "logoutConfirm": "Möchten Sie sich wirklich abmelden?",
+  "logoutOk": "Abmelden"
 }

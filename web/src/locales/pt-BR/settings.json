@@ -29,17 +29,20 @@
     "title": "Autenticação em dois fatores",
     "enabledDesc": "Para entrar, além da senha, é necessário um código de 6 dígitos do seu app autenticador.",
     "code": "Código de verificação",
-    "codePlaceholder": "Código de 6 dígitos do seu autenticador",
     "disable": "Desativar autenticação em dois fatores",
     "scanDesc": "Escaneie o QR code com um app como Google Authenticator ou Microsoft Authenticator e informe o código exibido para confirmar.",
     "qrAlt": "QR code",
     "manualHint": "Informe esta chave manualmente se não conseguir escanear",
     "copySecret": "Copiar chave",
-    "confirmEnable": "Confirmar e ativar",
     "introDesc": "Depois de ativada, para entrar também será necessário um código de uso único do seu app autenticador, protegendo o console mesmo se a senha vazar.",
     "start": "Começar",
     "enabledMsg": "Autenticação em dois fatores ativada",
-    "disabledMsg": "Autenticação em dois fatores desativada"
+    "disabledMsg": "Autenticação em dois fatores desativada",
+    "enableTitle": "Ativar autenticação em dois fatores",
+    "disablePrompt": "Digite sua senha atual e o código de 6 dígitos do autenticador para desativar a autenticação em dois fatores.",
+    "passwordRequired": "Digite sua senha atual primeiro",
+    "verifying": "Verificando…",
+    "autoHint": "Enviado automaticamente após digitar a senha e os 6 dígitos"
   },
   "loginProtect": {
     "title": "Proteção de login",

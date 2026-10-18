@@ -4,5 +4,8 @@
   "openMenu": "開啟選單",
   "changePassword": "變更密碼",
   "systemSettings": "系統設定",
-  "logout": "登出"
+  "logout": "登出",
+  "logoutTitle": "登出",
+  "logoutConfirm": "確定要登出目前帳號嗎？",
+  "logoutOk": "登出"
 }
