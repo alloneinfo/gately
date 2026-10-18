@@ -353,6 +353,10 @@ onMounted(load)
 </script>
 
 <style scoped>
+/* 空状态占满整行网格，才能在页面中水平居中 */
+.empty {
+  grid-column: 1 / -1;
+}
 .toolbar {
   display: flex;
   gap: 8px;
