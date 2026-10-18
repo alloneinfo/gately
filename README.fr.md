@@ -125,6 +125,10 @@ Le code source du site web ([gately.cn](https://gately.cn)) se trouve dans `webs
 - Un nouveau module nécessite : une structure de configuration avec validation, un démarrage/arrêt à l'exécution, une interface REST et des tests unitaires ; les modules migrables depuis Lucky implémentent `luckyimport.Importer`, et ceux qui souhaitent afficher leur état sur la page de synthèse implémentent `module.Summarizer`.
 - Les commentaires de code sont rédigés en chinois ; les instructions de contrôle doivent toujours utiliser des accolades.
 
+## Communauté
+
+Questions, retours et astuces d’utilisation sont les bienvenus dans le groupe Telegram : [t.me/gately_chat](https://t.me/gately_chat). Les bugs se signalent dans [GitHub Issues](https://github.com/wangwanjie/gately/issues).
+
 ## Historique des étoiles
 
 [![Star History Chart](https://api.star-history.com/svg?repos=wangwanjie/gately&type=Date)](https://star-history.com/#wangwanjie/gately&Date)

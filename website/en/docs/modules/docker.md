@@ -20,6 +20,7 @@ Mounting `docker.sock` is equivalent to granting root-level access to the host. 
 
 - The list can be filtered by "All", "Running" and "Stopped". Cards show the image, network, ports, mounts and update status;
 - Actions: start, stop, restart, pause, resume, force kill, rename, delete (optionally with anonymous volumes), commit as image;
+- **Self-protection**: Gately recognizes its own container and Compose project, and rejects operations that would cut off access to itself: stopping, force-killing, pausing or deleting its container, and running `down` on its project.
 - **Create and edit**: the form covers name, image (can be pulled before creation), start after creation, command and Entrypoint, environment variables, port mappings (TCP/UDP, with an optional host IP), mounts (directory bind and volume, optionally read-only), primary network and extra networks, fixed IP, aliases, restart policy (`no`, `always`, `unless-stopped`, `on-failure` with a maximum retry count), privileged mode, adding or dropping capabilities, device mappings, user, working directory, hostname, DNS, labels, memory limit (MB), CPU count, TTY and keep stdin open. Editing recreates the container based on its original configuration; settings the form does not cover keep their original values, and a failed recreation rolls back automatically;
 - Detail page tabs:
   - Overview: status, exit code, restart count, health status, network details, mounts, and the Compose project and service it belongs to;

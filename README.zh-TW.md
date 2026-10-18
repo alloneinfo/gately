@@ -125,6 +125,10 @@ make lint     # gofmt、go vet、前端型別檢查
 - 新模組需要：設定結構與驗證、執行階段啟停、REST 介面、單元測試；能從 Lucky 遷移的模組實作 `luckyimport.Importer`，希望在總覽頁顯示狀態的模組實作 `module.Summarizer`。
 - 程式碼註解使用中文；控制語句必須使用大括號。
 
+## 交流群
+
+歡迎加入 Telegram 群交流使用問題、回饋建議：[t.me/gately_chat](https://t.me/gately_chat)。Bug 請提交到 [GitHub Issues](https://github.com/wangwanjie/gately/issues)。
+
 ## Star 趨勢
 
 [![Star History Chart](https://api.star-history.com/svg?repos=wangwanjie/gately&type=Date)](https://star-history.com/#wangwanjie/gately&Date)

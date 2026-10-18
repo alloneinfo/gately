@@ -12,6 +12,8 @@ Connect to SSH and Telnet servers or the local shell from your browser. Sessions
 
 Each connection can have a remark. The connection list supports drag-and-drop sorting and "Test connection": for SSH it returns the server version and latency, for Telnet it only verifies TCP reachability (including through the proxy), and local shell connections cannot be tested. When you edit a connection, the password, private key, key passphrase and proxy password are shown masked, and the original values are kept if left unchanged.
 
+Under "Settings" you can maintain "SSH credential presets" (a password or private key, optionally with a default username). Choose a credential preset when adding or editing an SSH connection to reuse it. Several connections can share one credential, and edits to the preset apply the next time those connections connect. A preset still referenced by a connection cannot be deleted.
+
 ### Proxy
 
 SSH and Telnet connections can each use their own outbound proxy of type `socks5` or `http`, with an optional proxy username and password.

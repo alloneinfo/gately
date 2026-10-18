@@ -125,6 +125,10 @@ make lint     # gofmt, go vet, проверка типов фронтенда
 - Новому модулю нужны: структура конфигурации и валидация, запуск и остановка во время работы, REST-интерфейс, модульные тесты; модули, которые можно перенести из Lucky, реализуют `luckyimport.Importer`, а модули, статус которых нужно показывать на странице обзора, — `module.Summarizer`.
 - Комментарии в коде пишутся на китайском языке; управляющие конструкции обязательно оформляются с фигурными скобками.
 
+## Сообщество
+
+Вопросы, отзывы и советы по использованию приветствуются в группе Telegram: [t.me/gately_chat](https://t.me/gately_chat). Об ошибках сообщайте в [GitHub Issues](https://github.com/wangwanjie/gately/issues).
+
 ## История звёзд
 
 [![Star History Chart](https://api.star-history.com/svg?repos=wangwanjie/gately&type=Date)](https://star-history.com/#wangwanjie/gately&Date)

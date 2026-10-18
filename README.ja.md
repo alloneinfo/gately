@@ -125,6 +125,10 @@ make lint     # gofmt、go vet、フロントエンドの型チェック
 - 新しいモジュールには、設定構造とバリデーション、実行時の起動・停止、REST API、ユニットテストが必要です。Lucky から移行できるモジュールは `luckyimport.Importer` を、概要ページにステータスを表示したいモジュールは `module.Summarizer` を実装してください。
 - コードコメントは中国語で記述し、制御文には必ず波括弧を使用します。
 
+## コミュニティ
+
+使い方の質問やフィードバックは Telegram グループへどうぞ：[t.me/gately_chat](https://t.me/gately_chat)。不具合は [GitHub Issues](https://github.com/wangwanjie/gately/issues) に報告してください。
+
 ## Star 履歴
 
 [![Star History Chart](https://api.star-history.com/svg?repos=wangwanjie/gately&type=Date)](https://star-history.com/#wangwanjie/gately&Date)

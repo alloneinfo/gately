@@ -125,6 +125,10 @@ The website ([gately.cn](https://gately.cn)) source lives in `website/` and is b
 - A new module needs a config schema with validation, runtime start/stop, REST endpoints, and unit tests. Modules that can be migrated from Lucky implement `luckyimport.Importer`; modules that want to show status on the overview page implement `module.Summarizer`.
 - Code comments are written in Chinese; control statements must use braces.
 
+## Community
+
+Questions, feedback and usage tips are welcome in the Telegram group: [t.me/gately_chat](https://t.me/gately_chat). Please report bugs in [GitHub Issues](https://github.com/wangwanjie/gately/issues).
+
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=wangwanjie/gately&type=Date)](https://star-history.com/#wangwanjie/gately&Date)

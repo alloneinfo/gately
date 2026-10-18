@@ -125,6 +125,10 @@ Der Quellcode der Website ([gately.cn](https://gately.cn)) liegt in `website/` u
 - Neue Module benötigen: Konfigurationsstruktur und Validierung, Start/Stopp zur Laufzeit, REST-Schnittstelle, Unit-Tests; Module, die sich von Lucky migrieren lassen, implementieren `luckyimport.Importer`, Module, die ihren Status auf der Übersichtsseite anzeigen sollen, implementieren `module.Summarizer`.
 - Code-Kommentare werden auf Chinesisch verfasst; Kontrollanweisungen müssen geschweifte Klammern verwenden.
 
+## Community
+
+Fragen, Feedback und Nutzungstipps sind in der Telegram-Gruppe willkommen: [t.me/gately_chat](https://t.me/gately_chat). Fehler bitte in den [GitHub Issues](https://github.com/wangwanjie/gately/issues) melden.
+
 ## Star-Verlauf
 
 [![Star History Chart](https://api.star-history.com/svg?repos=wangwanjie/gately&type=Date)](https://star-history.com/#wangwanjie/gately&Date)

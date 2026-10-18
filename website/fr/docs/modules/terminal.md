@@ -12,6 +12,8 @@ Connectez-vous à des serveurs SSH et Telnet ou au shell local depuis votre navi
 
 Chaque connexion peut avoir une remarque. La liste des connexions permet le tri par glisser-déposer et le « Test de connexion » : pour SSH, il renvoie la version du serveur et la latence ; pour Telnet, il vérifie uniquement l'accessibilité TCP (y compris via le proxy) ; les connexions de shell local ne peuvent pas être testées. Lorsque vous modifiez une connexion, le mot de passe, la clé privée, la phrase secrète de la clé et le mot de passe du proxy sont affichés masqués, et les valeurs d'origine sont conservées si vous ne les changez pas.
 
+Dans « Paramètres », vous pouvez gérer des « préréglages d’identifiants SSH » (mot de passe ou clé privée, avec un nom d’utilisateur par défaut facultatif). Choisissez un préréglage lors de l’ajout ou de la modification d’une connexion SSH pour le réutiliser : plusieurs connexions peuvent partager le même identifiant, et les modifications du préréglage s’appliquent à la prochaine connexion. Un préréglage encore référencé par une connexion ne peut pas être supprimé.
+
 ### Proxy
 
 Les connexions SSH et Telnet peuvent chacune utiliser leur propre proxy sortant de type `socks5` ou `http`, avec un nom d'utilisateur et un mot de passe de proxy facultatifs.

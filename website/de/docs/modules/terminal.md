@@ -12,6 +12,8 @@ Verbinden Sie sich aus dem Browser mit SSH- und Telnet-Servern oder der lokalen 
 
 Jede Verbindung kann eine Bemerkung haben. Die Verbindungsliste unterstützt Sortieren per Drag-and-drop und „Verbindung testen“: Bei SSH werden Serverversion und Latenz zurückgegeben, bei Telnet wird nur die TCP-Erreichbarkeit geprüft (auch über den Proxy), und Verbindungen zur lokalen Shell lassen sich nicht testen. Beim Bearbeiten einer Verbindung werden Passwort, privater Schlüssel, Schlüssel-Passphrase und Proxy-Passwort maskiert angezeigt, und die ursprünglichen Werte bleiben erhalten, wenn Sie sie nicht ändern.
 
+Unter „Einstellungen“ lassen sich „SSH-Zugangsdaten-Vorlagen“ verwalten (Passwort oder privater Schlüssel, optional mit Standard-Benutzername). Beim Hinzufügen oder Bearbeiten einer SSH-Verbindung wählen Sie eine Vorlage, um sie wiederzuverwenden. Mehrere Verbindungen können dieselben Zugangsdaten nutzen, Änderungen an der Vorlage gelten beim nächsten Verbindungsaufbau. Eine Vorlage, die noch von einer Verbindung verwendet wird, lässt sich nicht löschen.
+
 ### Proxy
 
 SSH- und Telnet-Verbindungen können jeweils einen eigenen ausgehenden Proxy vom Typ `socks5` oder `http` nutzen, mit optionalem Proxy-Benutzernamen und -Passwort.

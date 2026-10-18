@@ -125,6 +125,10 @@ O código do site ([gately.cn](https://gately.cn)) fica em `website/` e usa Vite
 - Novos módulos precisam de: estrutura de configuração e validação, início/parada em tempo de execução, interface REST, testes unitários; módulos migráveis do Lucky implementam `luckyimport.Importer`, e módulos que querem exibir seu status na página de visão geral implementam `module.Summarizer`.
 - Os comentários de código são escritos em chinês; instruções de controle devem usar chaves.
 
+## Comunidade
+
+Dúvidas, feedback e dicas de uso são bem-vindos no grupo do Telegram: [t.me/gately_chat](https://t.me/gately_chat). Relate bugs no [GitHub Issues](https://github.com/wangwanjie/gately/issues).
+
 ## Histórico de estrelas
 
 [![Star History Chart](https://api.star-history.com/svg?repos=wangwanjie/gately&type=Date)](https://star-history.com/#wangwanjie/gately&Date)

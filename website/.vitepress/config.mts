@@ -6,6 +6,7 @@ import { FALLBACK_CODE, SOURCE_CODE, englishOnlySlugs, sidebarGroups, siteLocale
 
 const SITE = 'https://gately.cn'
 const REPO = 'https://github.com/wangwanjie/gately'
+const TELEGRAM = 'https://t.me/gately_chat'
 const here = dirname(fileURLToPath(import.meta.url))
 
 // 读取语言包；尚未提供语言包的语言不会出现在站点中
@@ -64,7 +65,7 @@ function buildThemeConfig(loc: SiteLocale, pack: any): DefaultTheme.Config & Rec
     langMenuLabel: ui.langMenuLabel,
     footer: {
       message: ui.footerMessage,
-      copyright: `© 2026 Gately Contributors · <a href="${REPO}" target="_blank" rel="noreferrer">GitHub</a>`
+      copyright: `© 2026 Gately Contributors · <a href="${REPO}" target="_blank" rel="noreferrer">GitHub</a> · <a href="${TELEGRAM}" target="_blank" rel="noreferrer">Telegram</a>`
     },
     // 首页与下载页组件使用的文案
     aiNotice: ui.aiNotice,
@@ -148,7 +149,10 @@ export default defineConfig({
   themeConfig: {
     logo: '/favicon.svg',
     siteTitle: 'Gately',
-    socialLinks: [{ icon: 'github', link: REPO }],
+    socialLinks: [
+      { icon: 'github', link: REPO },
+      { icon: 'telegram', link: TELEGRAM }
+    ],
     search: { provider: 'local', options: { locales: searchLocales } }
   },
   // 为每个页面输出多语言互链，便于搜索引擎按语言展示

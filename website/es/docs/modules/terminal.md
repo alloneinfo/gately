@@ -12,6 +12,8 @@ Conéctate desde el navegador a servidores SSH y Telnet o al shell local. Las se
 
 Cada conexión puede tener una nota. La lista de conexiones admite ordenar arrastrando y «Probar conexión»: para SSH devuelve la versión del servidor y la latencia, para Telnet solo verifica la accesibilidad TCP (también a través del proxy), y las conexiones de shell local no se pueden probar. Al editar una conexión, la contraseña, la clave privada, la frase de contraseña de la clave y la contraseña del proxy se muestran enmascaradas, y se conservan los valores originales si no se modifican.
 
+En «Ajustes» puedes gestionar los «preajustes de credenciales SSH» (contraseña o clave privada, con nombre de usuario predeterminado opcional). Al añadir o editar una conexión SSH, elige un preajuste para reutilizarlo: varias conexiones pueden compartir la misma credencial y los cambios del preajuste se aplican en la siguiente conexión. Un preajuste que aún usa alguna conexión no se puede eliminar.
+
 ### Proxy
 
 Las conexiones SSH y Telnet pueden usar cada una su propio proxy de salida de tipo `socks5` o `http`, con usuario y contraseña de proxy opcionales.

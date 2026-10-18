@@ -125,6 +125,10 @@ make lint     # gofmt, go vet, 프런트엔드 타입 검사
 - 새 모듈에는 설정 구조와 검증, 런타임 시작/중지, REST 인터페이스, 단위 테스트가 필요합니다. Lucky에서 마이그레이션할 수 있는 모듈은 `luckyimport.Importer`를 구현하고, 개요 페이지에 상태를 표시하려는 모듈은 `module.Summarizer`를 구현합니다.
 - 코드 주석은 중국어로 작성하며, 제어문에는 반드시 중괄호를 사용해야 합니다.
 
+## 커뮤니티
+
+사용 문의와 의견은 Telegram 그룹에서 나눠 주세요: [t.me/gately_chat](https://t.me/gately_chat). 버그는 [GitHub Issues](https://github.com/wangwanjie/gately/issues)에 등록해 주세요.
+
 ## Star 추이
 
 [![Star History Chart](https://api.star-history.com/svg?repos=wangwanjie/gately&type=Date)](https://star-history.com/#wangwanjie/gately&Date)
