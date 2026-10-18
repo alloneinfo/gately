@@ -403,6 +403,46 @@ function onTouchEnd(e: TouchEvent) {
   }
 }
 
+let lastDataAt = 0
+let lastData = ''
+
+// iOS 第三方键盘（如搜狗英文模式）常以 keyCode=229 且无 composition 事件的方式提交字符，
+// xterm 自身的 textarea 差值检测可能漏掉它们。这里监听 input 事件，
+// 若 xterm 在短时间内没有通过 onData 发出该字符，则手动补发，避免丢字也避免重复。
+function setupIOSImeFallback() {
+  const ta = term?.textarea
+  if (!ta) {
+    return
+  }
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+  let composing = false
+  let lastKeyCode = 0
+  ta.addEventListener('keydown', (e) => {
+    lastKeyCode = e.keyCode
+  }, true)
+  ta.addEventListener('compositionstart', () => {
+    composing = true
+  }, true)
+  ta.addEventListener('compositionend', () => {
+    composing = false
+  }, true)
+  ta.addEventListener('input', (e) => {
+    const ie = e as InputEvent
+    if (!isIOS || composing || lastKeyCode !== 229 || ie.inputType !== 'insertText' || !ie.data) {
+      return
+    }
+    const data = ie.data
+    const t0 = Date.now()
+    setTimeout(() => {
+      // xterm 已经在此期间发出同样的数据，无需补发
+      if (lastDataAt >= t0 && lastData.includes(data)) {
+        return
+      }
+      term?.input(data, true)
+    }, 60)
+  }, true)
+}
+
 onMounted(() => {
   const el = host.value!
   term = new Terminal({
@@ -421,7 +461,12 @@ onMounted(() => {
   term.open(el)
   fit.fit()
 
-  term.onData((d) => sendInput(applyModifiers(d)))
+  term.onData((d) => {
+    lastDataAt = Date.now()
+    lastData = d
+    sendInput(applyModifiers(d))
+  })
+  setupIOSImeFallback()
   term.onResize(({ cols, rows }) => sendJSON({ t: 'r', c: cols, r: rows }))
 
   observer = new ResizeObserver(() => doFit())
