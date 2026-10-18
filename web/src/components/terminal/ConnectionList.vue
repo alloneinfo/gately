@@ -352,7 +352,7 @@ async function onCommand(c: Conn, cmd: string) {
     margin-right: 0;
   }
   .is-compact .conn-addr {
-    flex: 0 1 45%;
+    flex: 0 1 38%;
     min-width: 0;
     margin-top: 0;
     text-align: right;

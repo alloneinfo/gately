@@ -133,7 +133,8 @@ defineProps<{ off?: boolean; compact?: boolean }>()
     min-height: 40px;
   }
   .is-compact .entity-head {
-    flex: 0 0 300px;
+    /* 名称、标签、状态同占一列，随卡片宽度加宽，避免名称被挤成省略号 */
+    flex: 0 0 clamp(340px, 40%, 480px);
     min-width: 0;
     padding: 0;
     gap: 10px;
@@ -143,7 +144,7 @@ defineProps<{ off?: boolean; compact?: boolean }>()
     font-size: 14px;
   }
   .is-compact .entity-title :deep(> span:first-child) {
-    min-width: 4em;
+    min-width: 8em;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
