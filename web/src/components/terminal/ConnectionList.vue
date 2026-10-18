@@ -3,18 +3,20 @@
     <div class="g-card-head">
       <div class="g-card-title"><Cable :size="16" />{{ t('termConn.list.title') }} <span class="meta">{{ t('termConn.list.count', { count: conns.length }) }}</span></div>
       <div class="head-ops">
+        <CompactToggle v-model="compact" />
         <el-button v-if="conns.length > 1" size="small" :type="sortMode ? 'primary' : 'default'" :icon="ArrowUpDown" @click="sortMode = !sortMode">
           {{ sortMode ? t('termConn.list.done') : t('termConn.list.sort') }}
         </el-button>
       </div>
     </div>
     <el-empty v-if="!conns.length" :description="t('termConn.list.empty')" :image-size="60" />
-    <div class="list">
+    <div class="list" :class="{ 'is-compact': compact }">
       <div
         v-for="(c, i) in conns"
         :key="c.key"
         class="conn"
         :class="{ disabled: !c.enable, dragging: dragKey === c.key, over: overKey === c.key && dragKey !== c.key }"
+        :title="compact ? c.remark : undefined"
         :draggable="sortMode && !isMobile"
         @click="onTap(c)"
         @dblclick="onDblClick(c)"
@@ -28,8 +30,8 @@
         <div class="conn-main">
           <div class="conn-name">
             <span class="ellipsis">{{ c.name }}</span>
-            <el-tag size="small" effect="plain">{{ t(`termConn.type.${c.type}`) }}</el-tag>
-            <el-tag v-if="!c.enable" size="small" type="info">{{ t('termConn.list.disabledTag') }}</el-tag>
+            <el-tag class="tag-type" size="small" effect="plain">{{ t(`termConn.type.${c.type}`) }}</el-tag>
+            <el-tag v-if="!c.enable" class="tag-off" size="small" type="info">{{ t('termConn.list.disabledTag') }}</el-tag>
             <span v-if="openCount(c.key)" class="open-dot" :title="t('termConn.list.openSessions', { count: openCount(c.key) })">{{ openCount(c.key) }}</span>
           </div>
           <div class="conn-addr mono">{{ connAddr(c) }}</div>
@@ -42,7 +44,7 @@
             <el-button class="op" text :icon="ChevronDown" :disabled="i === conns.length - 1" :aria-label="t('termConn.list.moveDown')" @click="move(i, 1)" />
           </template>
           <template v-else>
-            <el-button v-if="!isMobile" size="small" type="primary" plain :icon="Play" :disabled="!c.enable" @click="$emit('connect', c)">{{ t('termConn.list.connect') }}</el-button>
+            <el-button v-if="!isMobile" size="small" type="primary" plain :icon="Play" :disabled="!c.enable" @click="$emit('connect', c)"><span class="btn-text">{{ t('termConn.list.connect') }}</span></el-button>
             <el-dropdown trigger="click" @command="(cmd: string) => onCommand(c, cmd)">
               <el-button class="op" text :icon="Ellipsis" :aria-label="t('termConn.list.more')" />
               <template #dropdown>
@@ -72,6 +74,8 @@ import {
   ArrowUpDown, Cable, ChevronDown, ChevronUp, Copy, Ellipsis, FolderOpen, GripVertical, KeyRound, Network, Pencil, Play, Plug, Server, Star, Terminal as TerminalIcon, Trash2,
 } from 'lucide-vue-next'
 import { api } from '../../api'
+import CompactToggle from '../CompactToggle.vue'
+import { useCompactView } from '../../composables/useCompactView'
 import { MASK, connAddr, normalizeConn, type Conn } from './types'
 
 const props = defineProps<{ conns: Conn[]; isMobile: boolean; openCounts: Record<string, number> }>()
@@ -85,6 +89,7 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 const sortMode = ref(false)
+const compact = useCompactView('terminal.connections')
 const dragKey = ref('')
 const overKey = ref('')
 
@@ -303,6 +308,58 @@ async function onCommand(c: Conn, cmd: string) {
 }
 .op {
   padding: 8px;
+}
+/* 紧凑视图：图标缩小，名称与地址同行，备注收进悬停提示（仅桌面宽度） */
+@media (min-width: 768px) {
+  .is-compact .conn {
+    gap: 8px;
+    padding: 4px 10px;
+  }
+  .is-compact .conn-icon {
+    width: 26px;
+    height: 26px;
+    border-radius: 7px;
+  }
+  .is-compact .conn-icon :deep(svg) {
+    width: 15px;
+    height: 15px;
+  }
+  .is-compact .conn-main {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .is-compact .conn-name {
+    flex: 0 1 auto;
+    min-width: 0;
+    max-width: 60%;
+    font-size: 13px;
+  }
+  /* 侧栏较窄：类型由图标颜色区分，标签和按钮文字收起，把空间留给名称与地址 */
+  .is-compact .conn-name {
+    flex: 1 1 0;
+    max-width: none;
+  }
+  .is-compact .tag-type,
+  .is-compact .tag-off,
+  .is-compact .btn-text {
+    display: none;
+  }
+  .is-compact .conn-ops :deep(.el-button--small) {
+    padding: 5px 8px;
+  }
+  .is-compact .conn-ops :deep(.el-button--small .el-icon) {
+    margin-right: 0;
+  }
+  .is-compact .conn-addr {
+    flex: 0 1 45%;
+    min-width: 0;
+    margin-top: 0;
+    text-align: right;
+  }
+  .is-compact .conn-remark {
+    display: none;
+  }
 }
 @media (max-width: 767.98px) {
   .conn {

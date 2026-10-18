@@ -8,9 +8,9 @@
 
     <ModuleBanner v-if="moduleOff" :title="t('web.moduleOffTitle')" :desc="t('web.moduleOffDesc')" :loading="enabling" @enable="enableModule" />
 
-    <div v-loading="loading" class="card-list" :class="{ 'is-compact': compact }">
+    <div v-loading="loading" class="card-list">
       <el-empty v-if="!loading && !listeners.length" :description="t('web.empty')" />
-      <EntityCard :compact="compact" v-for="l in listeners" :key="l.key" :off="!l.enable || moduleOff">
+      <EntityCard v-for="l in listeners" :key="l.key" :off="!l.enable || moduleOff">
         <template #lead>
           <el-switch :model-value="l.enable" @change="(v: string | number | boolean) => toggleListener(l, Boolean(v))" />
         </template>
@@ -27,7 +27,7 @@
           <StatusBadge v-bind="listenerStatus(l)" />
         </template>
         <template #extra>
-          <div class="sites">
+          <div class="sites" :class="{ 'is-compact': compact }">
             <div v-for="row in siteRows(l)" :key="row.isDefault ? '__default' : row.index" class="site" :class="{ 'is-off': !row.site.enable }">
               <div class="site-switch">
                 <el-switch :model-value="row.site.enable" size="small" @change="(v: string | number | boolean) => toggleSite(l, row, Boolean(v))" />
@@ -767,6 +767,45 @@ onBeforeUnmount(() => window.clearInterval(timer))
   white-space: normal;
   height: auto;
   min-height: 32px;
+}
+/* 紧凑视图：站点行压成单行，域名与说明同行，超长内容省略（仅桌面宽度） */
+@media (min-width: 768px) {
+  .sites.is-compact .site {
+    gap: 4px 12px;
+    padding: 3px 8px 3px 12px;
+    font-size: 12px;
+  }
+  .sites.is-compact .site-main {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .sites.is-compact .site-domains,
+  .sites.is-compact .site-main .meta,
+  .sites.is-compact .site-target {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    word-break: normal;
+  }
+  /* 域名优先完整显示，名称说明只占剩余空间 */
+  .sites.is-compact .site {
+    grid-template-columns: 40px minmax(0, 1.9fr) minmax(0, 1.6fr) minmax(0, 1fr) 100px auto;
+  }
+  .sites.is-compact .site-main .site-domains {
+    flex: 0 1 auto;
+  }
+  .sites.is-compact .site-main .meta {
+    flex: 1 1 0;
+  }
+  .sites.is-compact .site-opts {
+    flex-wrap: nowrap;
+    overflow: hidden;
+  }
+  .sites.is-compact .site-opts :deep(.el-tag) {
+    flex-shrink: 0;
+  }
 }
 @media (max-width: 767.98px) {
   .site {
