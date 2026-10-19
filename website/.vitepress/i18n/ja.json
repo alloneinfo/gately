@@ -42,11 +42,13 @@
       "modules/tools": "ファイルと運用ツール",
       "guide/security": "セキュリティモデルとプライバシーの約束",
       "guide/hardening": "ハードニングの推奨事項",
+      "guide/verify": "リリースの検証",
       "reference/api": "API トークンと OpenAPI",
       "reference/api-reference": "エンドポイント一覧",
       "reference/docker-api": "Docker API",
       "reference/webterminal-api": "Web ターミナル API",
       "reference/diagnostics": "診断パッケージ",
+      "reference/monitoring": "監視メトリクス",
       "guide/contributing": "コントリビュート"
     },
     "englishOnly": "（English）"

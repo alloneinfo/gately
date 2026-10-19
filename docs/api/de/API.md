@@ -50,6 +50,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `backup` | Konfigurations-Backup | `backup:read`、`backup:write` |
 | `status` | Systemstatus | `status:read` |
 | `logs` | Systemprotokolle | `logs:read` |
+| `metrics` | Metriken (Prometheus) | `metrics:read` |
 | `import` | Lucky-Konfigurationsimport | `import:write` |
 
 Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` oder `*` bedeutet Lese- und Schreibzugriff auf alle Module.
@@ -472,8 +473,16 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | GET | `/api/system/update` | `status:read` | Nach neuer Version suchen |
 | GET | `/api/system/backup` | Nur Anmeldesitzung | Konfigurations-Backup herunterladen |
 | GET | `/api/system/diagnostics` | Nur Anmeldesitzung | Anonymisiertes Diagnosepaket exportieren |
+| GET | `/api/audit` | Nur Anmeldesitzung | Audit-Protokoll abfragen |
+| GET | `/api/metrics` | `metrics:read` | Globale Prometheus-Metriken |
+| GET | `/api/history` | Nur Anmeldesitzung | Verlaufsversionen der Konfiguration auflisten |
+| GET | `/api/history/{name}/{id}/diff` | Nur Anmeldesitzung | Verlaufsversion mit der aktuellen Konfiguration vergleichen |
+| POST | `/api/history/{name}/{id}/restore` | Nur Anmeldesitzung | Konfiguration auf eine Verlaufsversion zurücksetzen |
 | POST | `/api/system/restore` | Nur Anmeldesitzung | Konfiguration aus Backup wiederherstellen |
 | POST | `/api/system/restart` | Nur Anmeldesitzung | Gately neu starten |
+| POST | `/api/system/selfcheck` | Nur Anmeldesitzung | Selbsttest von Netzwerk und Konfiguration |
+| GET | `/api/system/onboarding` | Nur Anmeldesitzung | Ob die Ersteinrichtung aussteht |
+| POST | `/api/system/onboarding/dismiss` | Nur Anmeldesitzung | Ersteinrichtung abschließen oder überspringen |
 | GET | `/api/openapi.json` | Beliebiges gültiges Token | OpenAPI-Beschreibung dieser API abrufen |
 
 ## Konfigurationsimport
@@ -498,6 +507,14 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | Methode | Pfad | Erforderliche Berechtigung | Beschreibung |
 | --- | --- | --- | --- |
 | PUT | `/api/account` | Nur Anmeldesitzung | Administrator-Benutzername und -Passwort ändern |
+| GET | `/api/account/passkeys` | Nur Anmeldesitzung | Registrierte Passkeys auflisten |
+| POST | `/api/account/passkeys/begin` | Nur Anmeldesitzung | Passkey-Registrierung starten |
+| POST | `/api/account/passkeys` | Nur Anmeldesitzung | Passkey-Registrierung abschließen |
+| DELETE | `/api/account/passkeys/{id}` | Nur Anmeldesitzung | Passkey löschen |
+| GET | `/api/account/users` | Nur Anmeldesitzung | Schreibgeschützte Konten auflisten |
+| POST | `/api/account/users` | Nur Anmeldesitzung | Schreibgeschütztes Konto erstellen |
+| PUT | `/api/account/users/{name}` | Nur Anmeldesitzung | Passwort eines schreibgeschützten Kontos zurücksetzen |
+| DELETE | `/api/account/users/{name}` | Nur Anmeldesitzung | Schreibgeschütztes Konto löschen |
 | GET | `/api/account/totp` | Nur Anmeldesitzung | Status der Zwei-Faktor-Authentifizierung anzeigen |
 | POST | `/api/account/totp/setup` | Nur Anmeldesitzung | Schlüssel für Zwei-Faktor-Authentifizierung erzeugen |
 | POST | `/api/account/totp/enable` | Nur Anmeldesitzung | Zwei-Faktor-Authentifizierung aktivieren |
@@ -825,6 +842,7 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | `maxConnections` | integer |
 | `name` | string |
 | `protocols` | Array von string |
+| `proxyProtocol` | string |
 | `remark` | string |
 | `targetAddresses` | Array von string |
 | `targetPorts` | string |
@@ -835,6 +853,7 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | Feld | Typ |
 | --- | --- |
 | `ca` | string |
+| `challenge` | string |
 | `credentials` | `dnsprovider.Credentials` |
 | `directoryUrl` | string |
 | `disableAuthoritativeCheck` | boolean |
@@ -842,6 +861,7 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | `eabHmac` | string |
 | `eabKid` | string |
 | `email` | string |
+| `httpPort` | integer |
 | `keyType` | string |
 | `propagationTimeout` | integer |
 | `provider` | string |
@@ -1018,6 +1038,7 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | `acceptProxyProtocol` | boolean |
 | `default` | `webservice.Site` |
 | `enable` | boolean |
+| `http3` | boolean |
 | `key` | string |
 | `listenIp` | string |
 | `minTls` | string |

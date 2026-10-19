@@ -37,5 +37,8 @@
   "statusOff": "Deaktiviert",
   "statusNotRunning": "Läuft nicht",
   "savedRestarted": "Gespeichert. Regeln wurden mit den neuen Einstellungen neu gestartet",
-  "moduleEnabled": "Modul Portweiterleitung aktiviert"
+  "moduleEnabled": "Modul Portweiterleitung aktiviert",
+  "proxyProtocol": "PROXY-Protokoll",
+  "proxyProtocolOff": "Nicht senden",
+  "proxyProtocolHelp": "Nur TCP. Sendet nach dem Verbindungsaufbau einen PROXY-Header, damit nachgelagerte Dienste die echte Client-Adresse kennen (haproxy accept-proxy, nginx proxy_protocol oder „PROXY-Protokoll annehmen“ im Gately-Webdienst). Unterstützt das Ziel es nicht, schlägt die Verbindung fehl."
 }

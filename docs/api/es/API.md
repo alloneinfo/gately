@@ -50,6 +50,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `backup` | Copia de seguridad de la configuración | `backup:read`、`backup:write` |
 | `status` | Estado del sistema | `status:read` |
 | `logs` | Registros del sistema | `logs:read` |
+| `metrics` | Métricas (Prometheus) | `metrics:read` |
 | `import` | Importación de configuración de Lucky | `import:write` |
 
 Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `*` equivale a lectura y escritura en todos los módulos.
@@ -472,8 +473,16 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | GET | `/api/system/update` | `status:read` | Buscar nueva versión |
 | GET | `/api/system/backup` | Solo sesión iniciada | Descargar la copia de seguridad de la configuración |
 | GET | `/api/system/diagnostics` | Solo sesión iniciada | Exportar paquete de diagnóstico anonimizado |
+| GET | `/api/audit` | Solo sesión iniciada | Consultar el registro de auditoría |
+| GET | `/api/metrics` | `metrics:read` | Métricas globales de Prometheus |
+| GET | `/api/history` | Solo sesión iniciada | Listar las versiones del historial de configuración |
+| GET | `/api/history/{name}/{id}/diff` | Solo sesión iniciada | Comparar una versión del historial con la configuración actual |
+| POST | `/api/history/{name}/{id}/restore` | Solo sesión iniciada | Revertir una configuración a una versión del historial |
 | POST | `/api/system/restore` | Solo sesión iniciada | Restaurar la configuración desde una copia de seguridad |
 | POST | `/api/system/restart` | Solo sesión iniciada | Reiniciar Gately |
+| POST | `/api/system/selfcheck` | Solo sesión iniciada | Autodiagnóstico de red y configuración |
+| GET | `/api/system/onboarding` | Solo sesión iniciada | Si la configuración inicial está pendiente |
+| POST | `/api/system/onboarding/dismiss` | Solo sesión iniciada | Completar u omitir la configuración inicial |
 | GET | `/api/openapi.json` | Cualquier token válido | Obtener la descripción OpenAPI de esta API |
 
 ## Importación de configuración
@@ -498,6 +507,14 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | Método | Ruta | Permiso requerido | Descripción |
 | --- | --- | --- | --- |
 | PUT | `/api/account` | Solo sesión iniciada | Modificar el usuario y la contraseña del administrador |
+| GET | `/api/account/passkeys` | Solo sesión iniciada | Listar las Passkeys registradas |
+| POST | `/api/account/passkeys/begin` | Solo sesión iniciada | Iniciar el registro de una Passkey |
+| POST | `/api/account/passkeys` | Solo sesión iniciada | Finalizar el registro de una Passkey |
+| DELETE | `/api/account/passkeys/{id}` | Solo sesión iniciada | Eliminar una Passkey |
+| GET | `/api/account/users` | Solo sesión iniciada | Listar cuentas de solo lectura |
+| POST | `/api/account/users` | Solo sesión iniciada | Crear una cuenta de solo lectura |
+| PUT | `/api/account/users/{name}` | Solo sesión iniciada | Restablecer la contraseña de una cuenta de solo lectura |
+| DELETE | `/api/account/users/{name}` | Solo sesión iniciada | Eliminar una cuenta de solo lectura |
 | GET | `/api/account/totp` | Solo sesión iniciada | Ver el estado de la verificación en dos pasos |
 | POST | `/api/account/totp/setup` | Solo sesión iniciada | Generar la clave de verificación en dos pasos |
 | POST | `/api/account/totp/enable` | Solo sesión iniciada | Activar la verificación en dos pasos |
@@ -825,6 +842,7 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | `maxConnections` | integer |
 | `name` | string |
 | `protocols` | Lista de string |
+| `proxyProtocol` | string |
 | `remark` | string |
 | `targetAddresses` | Lista de string |
 | `targetPorts` | string |
@@ -835,6 +853,7 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | Campo | Tipo |
 | --- | --- |
 | `ca` | string |
+| `challenge` | string |
 | `credentials` | `dnsprovider.Credentials` |
 | `directoryUrl` | string |
 | `disableAuthoritativeCheck` | boolean |
@@ -842,6 +861,7 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | `eabHmac` | string |
 | `eabKid` | string |
 | `email` | string |
+| `httpPort` | integer |
 | `keyType` | string |
 | `propagationTimeout` | integer |
 | `provider` | string |
@@ -1018,6 +1038,7 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | `acceptProxyProtocol` | boolean |
 | `default` | `webservice.Site` |
 | `enable` | boolean |
+| `http3` | boolean |
 | `key` | string |
 | `listenIp` | string |
 | `minTls` | string |

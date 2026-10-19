@@ -7,5 +7,6 @@
   "logout": "ログアウト",
   "logoutTitle": "ログアウト",
   "logoutConfirm": "ログアウトしてもよろしいですか？",
-  "logoutOk": "ログアウト"
+  "logoutOk": "ログアウト",
+  "readonlyBadge": "読み取り専用"
 }

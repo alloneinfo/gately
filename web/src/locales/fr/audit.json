@@ -1,0 +1,18 @@
+{
+  "title": "Journal d'audit",
+  "desc": "Qui a fait quoi et quand : connexions, modifications de configuration et accès à des contenus sensibles. Les corps de requêtes et les secrets ne sont jamais enregistrés.",
+  "category": "Catégorie",
+  "search": "Rechercher chemin, utilisateur ou IP",
+  "total": "{count} entrées",
+  "time": "Heure",
+  "actor": "Utilisateur / IP",
+  "action": "Action",
+  "status": "Statut",
+  "empty": "Aucune entrée pour l'instant",
+  "categories": {
+    "login": "Connexion",
+    "change": "Modification",
+    "access": "Accès sensible"
+  },
+  "via": "via {ip}"
+}

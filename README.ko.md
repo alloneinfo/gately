@@ -23,19 +23,19 @@ Gately는 완전한 오픈소스로, 사용자와 커뮤니티가 소스 코드�
 
 | 모듈 | 기능 |
 | --- | --- |
-| 동적 도메인 | Alibaba Cloud, Cloudflare, Tencent Cloud, DNSPod, Huawei Cloud, GoDaddy, Porkbun, dynv6, DuckDNS, 사용자 지정 콜백. URL/네트워크 카드/명령으로 IP 조회. IPv4/IPv6. Webhook |
+| 동적 도메인 | Alibaba Cloud, Cloudflare, Tencent Cloud, DNSPod, Huawei Cloud, GoDaddy, Porkbun, dynv6, DuckDNS, Amazon Route 53, OVHcloud, Gandi, NS1, Bunny DNS, Namecheap, DynDNS2(No-IP, Dynu 등), 사용자 지정 콜백. URL/네트워크 카드/명령으로 IP 조회. IPv4/IPv6. Webhook |
 | STUN 터널링 | TCP/UDP, keep-alive, UPnP/NAT-PMP, 내장 포워딩, 주소 변경 시 Webhook 및 스크립트 실행 |
-| 포트 포워딩 | TCP/UDP, IPv4/IPv6, 포트 범위, 다중 대상 장애 조치, 연결 수 제한, 트래픽 통계 |
-| SSL 인증서 | ACME DNS-01 자동 발급 및 갱신(와일드카드, EAB), 업로드, 파일 읽기, 디렉터리 매핑 및 스크립트 실행 |
+| 포트 포워딩 | TCP/UDP, IPv4/IPv6, 포트 범위, 다중 대상 장애 조치, 연결 수 제한, 트래픽 통계, PROXY 프로토콜(v1/v2) |
+| SSL 인증서 | DNS-01(와일드카드) 또는 HTTP-01(DNS 제공업체 불필요) 방식의 ACME 자동 발급 및 갱신, EAB, 업로드, 파일 읽기, 디렉터리 매핑 및 스크립트 실행 |
 | Tailscale | tailscaled 관리(유저스페이스 네트워킹, 컨테이너 친화적) 또는 시스템에 이미 있는 데몬에 연결. 인증 키/로그인 링크, Headscale, 서브넷 라우트, 출구 노드, 노드 목록과 SOCKS5 프록시, 고정 포트, tailscaled 추가 인수 및 환경 변수 |
 | frp | frpc 클라이언트(tcp/udp/http/https/stcp/xtcp 프록시, 추가·삭제 즉시 적용)와 frps 서버(포트 허용 목록, 서브도메인, 대시보드). 기존 ini / 신규 toml 설정을 한 번에 가져올 수 있음 |
 | Cloudflare 터널 | cloudflared 토큰 터널과 trycloudflare 임시 터널, 다중 터널, 자동 재시작, 공개 주소 표시 |
-| 웹 서비스 | 도메인별 리버스 프록시/리디렉션/정적 파일/고정 텍스트. HTTPS. WebSocket. PROXY 프로토콜 송수신. 기본 인증, 웹 인증, GitHub/Google/QQ/OIDC 로그인. IP 허용/차단 목록, 경로 규칙, 임시 공유 링크, 인증 실패 시 자동 차단, GeoIP 국가 필터링. 백엔드 가중치/백업/로드 밸런싱 정책, 능동·수동 헬스 체크, 압축, 속도 제한, 응답 캐시, 경로 재작성. 분 단위 접속 통계와 Prometheus 메트릭 |
+| 웹 서비스 | 도메인별 리버스 프록시/리디렉션/정적 파일/고정 텍스트. HTTPS 및 HTTP/3(QUIC). WebSocket. PROXY 프로토콜 송수신. 기본 인증, 웹 인증, GitHub/Google/QQ/OIDC 로그인. IP 허용/차단 목록, 경로 규칙, 임시 공유 링크, 인증 실패 시 자동 차단, GeoIP 국가 필터링. 백엔드 가중치/백업/로드 밸런싱 정책, 능동·수동 헬스 체크, 압축, 속도 제한, 응답 캐시, 경로 재작성. 분 단위 접속 통계와 Prometheus 메트릭 |
 | WAF 방화벽 | Coraza + OWASP CRS v4, 파일 단위 규칙 활성화, 사용자 지정 SecLang, 차단/탐지 전용 |
 | Docker 관리 | 컨테이너 생성 및 편집, 로그와 터미널, Compose, 이미지 업데이트 확인 및 원클릭 업그레이드(실패 시 자동 롤백), 네트워크와 볼륨 |
 | 웹 터미널 | SSH(호스트 키 최초 신뢰), Telnet, 로컬 셸(기본 비활성). 프록시, 지속 세션, SFTP 파일 관리, 2FA 및 프로토콜 확인, 빠른 명령, 화면 분할 |
 | 네트워크 진단 | Ping, 경로 추적, 포트 탐색, DNS 조회, 속도 측정, LAN 스캔 |
-| 알림 센터 | Webhook, Telegram, Bark, WeCom, DingTalk, Feishu, 이메일. 수준, 와일드카드, 무음 및 중복 제거 규칙 |
+| 알림 센터 | Webhook, Telegram, Bark, ntfy, Gotify, Pushover, Discord, Slack, ServerChan, PushPlus, WeCom, DingTalk, Feishu, 이메일. 수준, 와일드카드, 무음 및 중복 제거 규칙. 기본 제공 규칙 템플릿(심각한 장애, 인증서 만료, 주소 변경, 로그인, 설정 변경) |
 | 설정 백업 | 암호화 백업(scrypt + AES-GCM), 보존 정책, 로컬 디렉터리 또는 스토리지 마운트 지점으로 예약 백업 |
 | 명령줄 및 MCP | `gately ctl`로 실행 중인 인스턴스를 호출하고, `gately mcp`로 stdio MCP 서비스를 제공(기본 읽기 전용) |
 | Wake-on-LAN | 매직 패킷 브로드캐스트, 온라인 탐지 |
@@ -43,7 +43,9 @@ Gately는 완전한 오픈소스로, 사용자와 커뮤니티가 소스 코드�
 | FTP | 다중 사용자, 사용자별 디렉터리, 읽기 전용. FTPS 및 패시브 포트 범위 지원 |
 | 스토리지 관리 | 로컬 디렉터리와 원격 WebDAV 마운트, 온라인 파일 관리 |
 | 예약 작업 | cron 표현식, 명령 또는 HTTP 요청, 실행 기록 |
-| 보안 및 설정 | 2단계 인증(TOTP), 로그인 실패 속도 제한, 보안 진입점, 내부망 전용 접속, 관리 UI의 HTTPS, 다중 API 토큰(모듈별 읽기/쓰기 권한), 사용자 지정 DNS(DoH 지원), 시간대, 설정 백업 및 복원 |
+| 보안 및 설정 | 패스키(WebAuthn) 로그인, 2단계 인증(TOTP), 읽기 전용 계정, 로그인 실패 속도 제한, 보안 진입점, 내부망 전용 접속, 관리 UI의 HTTPS, 다중 API 토큰(모듈별 읽기/쓰기 권한), 사용자 지정 DNS(DoH 지원), 시간대, 설정 백업 및 복원, 로컬 리버스 프록시가 전달한 실제 클라이언트 주소 신뢰 |
+| 감사 및 이력 | 로그인, 설정 변경, 민감한 콘텐츠 접근을 기록하는 감사 로그(요청 본문과 비밀 값은 기록하지 않음). 덮어쓴 설정 파일마다 이전 버전을 보관하며 차이 비교와 원클릭 롤백 지원. GitOps용 선언적 설정 디렉터리(`-apply`) |
+| 모니터링 및 자가 점검 | 전역 Prometheus 엔드포인트 `/api/metrics`(인증서, DDNS, STUN, 포트 포워딩, 웹 서비스)와 바로 쓸 수 있는 Grafana 대시보드. 원클릭 네트워크 자가 점검(공인 IP, CGNAT, 시스템 시간, 80/443 포트, DDNS 해석, 인증서 만료) |
 | 마이그레이션 | Lucky의 `.lkcf` 또는 전체 사이트 설정 zip 가져오기: 포트 포워딩, DDNS, STUN, 인증서, 리버스 프록시, WAF, Wake-on-LAN, 웹 터미널, WebDAV, 기본 설정 |
 
 ## 빠른 시작
@@ -72,7 +74,13 @@ docker logs gately 2>&1 | grep -i "initial password"
 ./gately -c /etc/gately
 ```
 
-인수: `-c` 설정 디렉터리(환경 변수 `GATELY_CONFIG_DIR`로도 지정 가능), `-listen` 관리 UI 수신 주소 덮어쓰기, `-version` 버전 출력.
+인수: `-c` 설정 디렉터리(환경 변수 `GATELY_CONFIG_DIR`로도 지정 가능), `-listen` 관리 UI 수신 주소 덮어쓰기, `-apply` 시작할 때마다 디렉터리의 `<name>.json` 파일을 설정 디렉터리에 적용(`GATELY_APPLY_DIR`, GitOps와 Kubernetes에 유용. 계정 및 토큰 파일은 덮어쓸 수 없음), `-version` 버전 출력. 무인 설치 시 `GATELY_INITIAL_PASSWORD`를 설정하면 로그에서 무작위 비밀번호를 읽는 대신 관리자 초기 비밀번호를 지정할 수 있습니다.
+
+서비스 템플릿: [systemd](deploy/systemd/gately.service), [OpenWrt procd](deploy/openwrt/gately.init). 다운로드한 압축 파일과 이미지 검증(cosign 서명, 빌드 출처 증명, SBOM)은 [릴리스 산출물 검증](docs/en/VERIFY.md)을 참고하세요.
+
+### 모니터링
+
+`metrics:read` 권한만 있는 API 토큰을 만들고 Prometheus가 `/api/metrics`를 수집하도록 설정하세요. 메트릭, 알림 예시, Grafana 대시보드는 [모니터링](docs/en/MONITORING.md)에서 설명합니다.
 
 ### API 호출
 

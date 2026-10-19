@@ -67,5 +67,38 @@
   "kindSmtp": "邮件 SMTP",
   "secretSet": "已设置，留空保持不变",
   "deleted": "（已删除）",
-  "testSent": "测试通知已发送"
+  "testSent": "测试通知已发送",
+  "ntfyUrlPlaceholder": "留空使用 https://ntfy.sh",
+  "topic": "主题",
+  "accessToken": "访问令牌（可选）",
+  "appToken": "应用令牌",
+  "userKey": "用户 Key",
+  "webhookUrl": "Webhook 地址",
+  "template": "模板",
+  "tpl": {
+    "critical": {
+      "name": "关键故障",
+      "desc": "DDNS、证书续期、上游、子进程、备份与容器的失败"
+    },
+    "cert": {
+      "name": "证书到期",
+      "desc": "证书即将到期或续期失败"
+    },
+    "address": {
+      "name": "地址变化",
+      "desc": "公网 IP 或 STUN 映射地址发生变化"
+    },
+    "health": {
+      "name": "服务健康",
+      "desc": "上游上线/下线、容器退出与进程退出"
+    },
+    "security": {
+      "name": "安全与登录",
+      "desc": "登录成功与失败、IP 封禁、访问敏感内容"
+    },
+    "changes": {
+      "name": "配置变更",
+      "desc": "管理后台中的每一次配置变更"
+    }
+  }
 }

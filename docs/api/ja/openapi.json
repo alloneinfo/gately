@@ -734,6 +734,9 @@
             },
             "type": "array"
           },
+          "proxyProtocol": {
+            "type": "string"
+          },
           "remark": {
             "type": "string"
           },
@@ -755,6 +758,9 @@
       "ssl.ACMEConfig": {
         "properties": {
           "ca": {
+            "type": "string"
+          },
+          "challenge": {
             "type": "string"
           },
           "credentials": {
@@ -780,6 +786,9 @@
           },
           "email": {
             "type": "string"
+          },
+          "httpPort": {
+            "type": "integer"
           },
           "keyType": {
             "type": "string"
@@ -1200,6 +1209,9 @@
             "$ref": "#/components/schemas/webservice.Site"
           },
           "enable": {
+            "type": "boolean"
+          },
+          "http3": {
             "type": "boolean"
           },
           "key": {
@@ -1878,6 +1890,216 @@
         "x-token-allowed": false
       }
     },
+    "/api/account/passkeys": {
+      "get": {
+        "description": "ログインセッションでのみ利用できます。\n\n**ログインセッションでのみ利用できます。API トークンではこのエンドポイントにアクセスできません。**",
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "リクエストパラメーターが不正です"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンが無効、期限切れ、または未ログインです"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンに必要な権限がありません"
+          }
+        },
+        "summary": "登録済みの Passkey を一覧表示",
+        "tags": [
+          "アカウント"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
+      },
+      "post": {
+        "description": "ブラウザーが返した認証情報と現在のパスワードを送信します。\n\n**ログインセッションでのみ利用できます。API トークンではこのエンドポイントにアクセスできません。**",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "リクエストパラメーターが不正です"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンが無効、期限切れ、または未ログインです"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンに必要な権限がありません"
+          }
+        },
+        "summary": "Passkey の登録を完了",
+        "tags": [
+          "アカウント"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
+      }
+    },
+    "/api/account/passkeys/begin": {
+      "post": {
+        "description": "WebAuthn の登録オプションとワンタイムチャレンジを返します。\n\n**ログインセッションでのみ利用できます。API トークンではこのエンドポイントにアクセスできません。**",
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "リクエストパラメーターが不正です"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンが無効、期限切れ、または未ログインです"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンに必要な権限がありません"
+          }
+        },
+        "summary": "Passkey の登録を開始",
+        "tags": [
+          "アカウント"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
+      }
+    },
+    "/api/account/passkeys/{id}": {
+      "delete": {
+        "description": "現在のパスワードが必要です。\n\n**ログインセッションでのみ利用できます。API トークンではこのエンドポイントにアクセスできません。**",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "リクエストパラメーターが不正です"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンが無効、期限切れ、または未ログインです"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンに必要な権限がありません"
+          }
+        },
+        "summary": "Passkey を削除",
+        "tags": [
+          "アカウント"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
+      }
+    },
     "/api/account/totp": {
       "get": {
         "description": "**ログインセッションでのみ利用できます。API トークンではこのエンドポイントにアクセスできません。**",
@@ -2075,6 +2297,270 @@
         "summary": "2 要素認証のシークレットを生成",
         "tags": [
           "アカウント"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
+      }
+    },
+    "/api/account/users": {
+      "get": {
+        "description": "ログインセッション（管理者）でのみ利用できます。\n\n**ログインセッションでのみ利用できます。API トークンではこのエンドポイントにアクセスできません。**",
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "リクエストパラメーターが不正です"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンが無効、期限切れ、または未ログインです"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンに必要な権限がありません"
+          }
+        },
+        "summary": "読み取り専用アカウントを一覧表示",
+        "tags": [
+          "アカウント"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
+      },
+      "post": {
+        "description": "只读账号可查看状态与配置，不能、下载备份或读取密钥。\n\n**ログインセッションでのみ利用できます。API トークンではこのエンドポイントにアクセスできません。** を更新",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "リクエストパラメーターが不正です"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンが無効、期限切れ、または未ログインです"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンに必要な権限がありません"
+          }
+        },
+        "summary": "読み取り専用アカウントを作成",
+        "tags": [
+          "アカウント"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
+      }
+    },
+    "/api/account/users/{name}": {
+      "delete": {
+        "description": "**ログインセッションでのみ利用できます。API トークンではこのエンドポイントにアクセスできません。**",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "リクエストパラメーターが不正です"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンが無効、期限切れ、または未ログインです"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンに必要な権限がありません"
+          }
+        },
+        "summary": "読み取り専用アカウントを削除",
+        "tags": [
+          "アカウント"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
+      },
+      "put": {
+        "description": "このアカウントの既存セッションは無効になります。\n\n**ログインセッションでのみ利用できます。API トークンではこのエンドポイントにアクセスできません。**",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "リクエストパラメーターが不正です"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンが無効、期限切れ、または未ログインです"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンに必要な権限がありません"
+          }
+        },
+        "summary": "読み取り専用アカウントのパスワードをリセット",
+        "tags": [
+          "アカウント"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
+      }
+    },
+    "/api/audit": {
+      "get": {
+        "description": "ログインセッションでのみ利用できます。`category`（login/change/access）、`module`、`actor`、`q`、`limit`、`offset` パラメーターに対応し、新しい順に返します。\n\n**ログインセッションでのみ利用できます。API トークンではこのエンドポイントにアクセスできません。**",
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "リクエストパラメーターが不正です"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンが無効、期限切れ、または未ログインです"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンに必要な権限がありません"
+          }
+        },
+        "summary": "操作監査ログを検索",
+        "tags": [
+          "システム"
         ],
         "x-required-scope": "!denied",
         "x-token-allowed": false
@@ -10028,6 +10514,180 @@
         "x-token-allowed": true
       }
     },
+    "/api/history": {
+      "get": {
+        "description": "ログインセッションでのみ利用できます。設定を上書きするたびに旧バージョンが自動保存され、設定ごとに最新 30 件が保持されます。\n\n**ログインセッションでのみ利用できます。API トークンではこのエンドポイントにアクセスできません。**",
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "リクエストパラメーターが不正です"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンが無効、期限切れ、または未ログインです"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンに必要な権限がありません"
+          }
+        },
+        "summary": "設定の履歴バージョンを一覧表示",
+        "tags": [
+          "システム"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
+      }
+    },
+    "/api/history/{name}/{id}/diff": {
+      "get": {
+        "description": "ログインセッションでのみ利用できます。\n\n**ログインセッションでのみ利用できます。API トークンではこのエンドポイントにアクセスできません。**",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "リクエストパラメーターが不正です"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンが無効、期限切れ、または未ログインです"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンに必要な権限がありません"
+          }
+        },
+        "summary": "履歴バージョンと現在の設定を比較",
+        "tags": [
+          "システム"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
+      }
+    },
+    "/api/history/{name}/{id}/restore": {
+      "post": {
+        "description": "ログインセッションでのみ利用できます。ロールバック後に自動的に再起動します。ロールバック前の内容は新しい履歴バージョンとして保存されます。\n\n**ログインセッションでのみ利用できます。API トークンではこのエンドポイントにアクセスできません。**",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "リクエストパラメーターが不正です"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンが無効、期限切れ、または未ログインです"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンに必要な権限がありません"
+          }
+        },
+        "summary": "設定を履歴バージョンにロールバック",
+        "tags": [
+          "システム"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
+      }
+    },
     "/api/import/lucky": {
       "post": {
         "description": "multipart/form-data でアップロードします。フィールド名は `files`。`dryRun=1` はプレビューのみ、`enable=1` は有効状態を維持します。\n\n必要な権限: `import:write`。",
@@ -10137,6 +10797,57 @@
           "システム"
         ],
         "x-required-scope": "logs:read",
+        "x-token-allowed": true
+      }
+    },
+    "/api/metrics": {
+      "get": {
+        "description": "テキスト形式（0.0.4）。プロセスの状態と、ポートフォワード、STUN、DDNS、証明書、Web サービスのメトリクスを含みます。Prometheus でスクレイプする場合は、`metrics:read` 権限を持つ API トークンを `authorization.credentials` に設定してください。\n\n必要な権限: `metrics:read`。",
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "リクエストパラメーターが不正です"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンが無効、期限切れ、または未ログインです"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンに必要な権限がありません"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Prometheus グローバルメトリクス",
+        "tags": [
+          "システム"
+        ],
+        "x-required-scope": "metrics:read",
         "x-token-allowed": true
       }
     },
@@ -15046,6 +15757,98 @@
         "x-token-allowed": true
       }
     },
+    "/api/system/onboarding": {
+      "get": {
+        "description": "ログインセッションでのみ利用できます。新規インストールで初回セットアップが完了するまで `pending` は true です。\n\n**ログインセッションでのみ利用できます。API トークンではこのエンドポイントにアクセスできません。**",
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "リクエストパラメーターが不正です"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンが無効、期限切れ、または未ログインです"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンに必要な権限がありません"
+          }
+        },
+        "summary": "初回起動セットアップが必要かどうか",
+        "tags": [
+          "システム"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
+      }
+    },
+    "/api/system/onboarding/dismiss": {
+      "post": {
+        "description": "ログインセッションでのみ利用できます。\n\n**ログインセッションでのみ利用できます。API トークンではこのエンドポイントにアクセスできません。**",
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "リクエストパラメーターが不正です"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンが無効、期限切れ、または未ログインです"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンに必要な権限がありません"
+          }
+        },
+        "summary": "初回起動セットアップを完了またはスキップ",
+        "tags": [
+          "システム"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
+      }
+    },
     "/api/system/restart": {
       "post": {
         "description": "**ログインセッションでのみ利用できます。API トークンではこのエンドポイントにアクセスできません。**",
@@ -15131,6 +15934,52 @@
           }
         },
         "summary": "バックアップから設定を復元",
+        "tags": [
+          "システム"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
+      }
+    },
+    "/api/system/selfcheck": {
+      "post": {
+        "description": "パブリック IP、キャリアグレード NAT の有無、ローカル時刻、80/443 ポート、DDNS の名前解決、証明書の有効期限などを確認します。設定されたパブリック IP 照会サービスにアクセスします。ログインセッション（管理者）でのみ利用できます。\n\n**ログインセッションでのみ利用できます。API トークンではこのエンドポイントにアクセスできません。**",
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "リクエストパラメーターが不正です"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンが無効、期限切れ、または未ログインです"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンに必要な権限がありません"
+          }
+        },
+        "summary": "ネットワークと設定のセルフチェック",
         "tags": [
           "システム"
         ],
@@ -21869,6 +22718,7 @@
     "backup",
     "status",
     "logs",
+    "metrics",
     "import"
   ]
 }

@@ -1,0 +1,17 @@
+{
+  "title": "Passkeys",
+  "desc": "Entre com impressão digital, rosto ou PIN do dispositivo em vez de senha. As passkeys incluem verificação do usuário, então não é preciso código de autenticação. Aqui só a chave pública é armazenada.",
+  "count": "{count} registrada(s)",
+  "unsupported": "Este navegador não suporta passkeys. Elas também exigem HTTPS ou localhost e um nome de domínio (navegadores não aceitam endereços IP).",
+  "createdAt": "Registrada",
+  "lastUsed": "Último uso",
+  "add": "Adicionar passkey",
+  "deviceName": "Nome do dispositivo",
+  "deviceNamePlaceholder": "ex.: MacBook Touch ID",
+  "needPassword": "Informe a senha atual",
+  "addHint": "Ao continuar, o navegador ou dispositivo pedirá confirmação por impressão digital, rosto ou PIN.",
+  "added": "Passkey adicionada",
+  "deleteTitle": "Excluir passkey",
+  "deleteConfirm": "Excluir \"{name}\"? Informe a senha atual para confirmar.",
+  "continue": "Continuar"
+}

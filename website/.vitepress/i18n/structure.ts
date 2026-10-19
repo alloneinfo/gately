@@ -26,7 +26,7 @@ export const siteLocales: SiteLocale[] = [
 ]
 
 // 仅提供英文（及简体中文）的参考类页面：其余语言的侧边栏直接链到英文版
-export const englishOnlySlugs = ['reference/docker-api', 'reference/webterminal-api', 'reference/diagnostics']
+export const englishOnlySlugs = ['reference/docker-api', 'reference/webterminal-api', 'reference/diagnostics', 'reference/monitoring', 'guide/verify']
 
 export interface SidebarGroup {
   id: string
@@ -65,7 +65,7 @@ export const sidebarGroups: SidebarGroup[] = [
       'modules/tools'
     ]
   },
-  { id: 'security', slugs: ['guide/security', 'guide/hardening'] },
+  { id: 'security', slugs: ['guide/security', 'guide/hardening', 'guide/verify'] },
   {
     id: 'reference',
     slugs: [
@@ -74,6 +74,7 @@ export const sidebarGroups: SidebarGroup[] = [
       'reference/docker-api',
       'reference/webterminal-api',
       'reference/diagnostics',
+      'reference/monitoring',
       'guide/contributing'
     ]
   }

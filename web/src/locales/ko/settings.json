@@ -94,7 +94,12 @@
     "urlPrefix": "http://IP:포트",
     "entryName": "진입 경로",
     "lanOnly": "내부망 접근만 허용",
-    "lanOnlyHelp": "내부망 주소(Tailscale 등 100.64.0.0/10 주소 포함)에서만 관리 화면에 접속할 수 있습니다"
+    "lanOnlyHelp": "내부망 주소(Tailscale 등 100.64.0.0/10 주소 포함)에서만 관리 화면에 접속할 수 있습니다",
+    "trustProxy": "로컬 프록시 신뢰",
+    "trustProxyHelp": "관리 화면이 이 호스트의 nginx, haproxy 또는 Gately 웹 서비스 뒤에 있을 때, 이들이 설정한 X-Real-IP / X-Forwarded-For에서 실제 클라이언트 주소를 가져와 내부망 전용 접근, 로그인 제한, 감사 로그에 사용합니다. 이 호스트 주소에서 온 헤더만 신뢰합니다.",
+    "trustedProxies": "추가 신뢰 프록시",
+    "trustedProxiesPlaceholder": "IP 또는 CIDR, 예: 172.17.0.1",
+    "trustedProxiesHelp": "이 호스트 외부의 프록시 주소(예: Docker 브리지 게이트웨이, 다른 리버스 프록시 서버)."
   },
   "network": {
     "title": "네트워크",

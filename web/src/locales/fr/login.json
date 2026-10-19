@@ -22,5 +22,7 @@
   "backToAccount": "Retour pour changer de compte",
   "badge": "Open source · Auto-hébergé",
   "verifying": "Vérification…",
-  "totpAuto": "Le code est vérifié automatiquement une fois saisi"
+  "totpAuto": "Le code est vérifié automatiquement une fois saisi",
+  "or": "ou",
+  "passkey": "Se connecter avec une passkey"
 }

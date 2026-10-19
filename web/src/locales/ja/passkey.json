@@ -1,0 +1,17 @@
+{
+  "title": "パスキー",
+  "desc": "パスワードの代わりに指紋・顔・デバイスの PIN でログインできます。パスキーにはユーザー確認が含まれるため、認証コードは不要です。ここには公開鍵のみ保存されます。",
+  "count": "{count} 件登録済み",
+  "unsupported": "このブラウザはパスキーに対応していません。パスキーには HTTPS または localhost と、ドメイン名でのアクセスが必要です（IP アドレスは使えません）。",
+  "createdAt": "登録日時",
+  "lastUsed": "最終使用",
+  "add": "パスキーを追加",
+  "deviceName": "デバイス名",
+  "deviceNamePlaceholder": "例：MacBook Touch ID",
+  "needPassword": "現在のパスワードを入力してください",
+  "addHint": "続行すると、ブラウザまたはデバイスが指紋・顔・PIN での確認を求めます。",
+  "added": "パスキーを追加しました",
+  "deleteTitle": "パスキーの削除",
+  "deleteConfirm": "「{name}」を削除しますか？確認のため現在のパスワードを入力してください。",
+  "continue": "続行"
+}

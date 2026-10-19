@@ -87,6 +87,12 @@
     "logs": {
       "title": "System Logs"
     },
+    "audit": {
+      "title": "Audit Log"
+    },
+    "history": {
+      "title": "Config History"
+    },
     "apiTokens": {
       "title": "API Tokens"
     },

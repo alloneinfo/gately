@@ -42,11 +42,13 @@
       "modules/tools": "Datei- und Betriebstools",
       "guide/security": "Sicherheitsmodell & Datenschutzversprechen",
       "guide/hardening": "Härtungsleitfaden",
+      "guide/verify": "Releases verifizieren",
       "reference/api": "API-Token & OpenAPI",
       "reference/api-reference": "API-Referenz",
       "reference/docker-api": "Docker-API",
       "reference/webterminal-api": "Web-Terminal-API",
       "reference/diagnostics": "Diagnosepaket",
+      "reference/monitoring": "Monitoring",
       "guide/contributing": "Mitwirken"
     },
     "englishOnly": " (Englisch)"

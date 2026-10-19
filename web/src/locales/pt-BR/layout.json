@@ -7,5 +7,6 @@
   "logout": "Sair",
   "logoutTitle": "Sair",
   "logoutConfirm": "Tem certeza de que deseja sair?",
-  "logoutOk": "Sair"
+  "logoutOk": "Sair",
+  "readonlyBadge": "Somente leitura"
 }

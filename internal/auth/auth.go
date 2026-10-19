@@ -20,6 +20,8 @@ import (
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
+
+	"github.com/wangwanjie/gately/internal/webauthn"
 )
 
 // CookieName 是会话 Cookie 名称。
@@ -49,6 +51,33 @@ type Account struct {
 	TokenTTLHours int    `json:"tokenTTLHours"`
 	// TOTPSecret 非空表示已启用两步验证
 	TOTPSecret string `json:"totpSecret,omitempty"`
+	// Users 是管理员创建的附加账号（目前只有只读角色），主账号之外使用
+	Users []User `json:"users,omitempty"`
+	// Passkeys 是管理员注册的 Passkey（仅公钥）
+	Passkeys []webauthn.Credential `json:"passkeys,omitempty"`
+	// OnboardingPending 在全新安装（首次生成初始密码）时置位，完成或跳过首次引导后清除
+	OnboardingPending bool `json:"onboardingPending,omitempty"`
+}
+
+// 角色
+const (
+	// RoleAdmin 拥有全部权限（主账号与第三方登录）
+	RoleAdmin = "admin"
+	// RoleReadonly 只能查看，不能修改配置、读取密钥或进行任何写操作
+	RoleReadonly = "readonly"
+)
+
+// User 是附加账号。
+type User struct {
+	Username     string `json:"username"`
+	PasswordHash string `json:"passwordHash"`
+	Role         string `json:"role"`
+}
+
+// Identity 是令牌验证通过后的身份。
+type Identity struct {
+	User string
+	Role string
 }
 
 type failState struct {
@@ -90,6 +119,19 @@ type Manager struct {
 	// maxFail / lockDur 为当前生效的限流参数
 	maxFail int
 	lockDur time.Duration
+	// bootstrapPassword 非空时，首次启动用它作为初始密码而不是随机生成
+	bootstrapPassword string
+}
+
+// SetBootstrapPassword 指定首次启动时的初始密码（用于自动化部署）。账号已存在时不起作用。
+func (m *Manager) SetBootstrapPassword(p string) error {
+	if p != "" && len(p) < 8 {
+		return errors.New("初始密码至少 8 位")
+	}
+	m.mu.Lock()
+	m.bootstrapPassword = p
+	m.mu.Unlock()
+	return nil
 }
 
 // SetLimits 设置连续失败上限与锁定时长，非正数表示使用默认值。
@@ -151,13 +193,18 @@ func (m *Manager) EnsureInitialized() (generated string, err error) {
 		changed = true
 	}
 	if m.acc.Username == "" || m.acc.PasswordHash == "" {
-		generated = randomString(12)
-		hash, err := bcrypt.GenerateFromPassword([]byte(generated), bcrypt.DefaultCost)
+		password := m.bootstrapPassword
+		if password == "" {
+			generated = randomString(12)
+			password = generated
+		}
+		hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 		if err != nil {
 			return "", err
 		}
 		m.acc.Username = "admin"
 		m.acc.PasswordHash = string(hash)
+		m.acc.OnboardingPending = true
 		changed = true
 	}
 	if changed {
@@ -189,10 +236,26 @@ func (m *Manager) Login(ip, username, password string, code ...string) (string, 
 	m.mu.RUnlock()
 
 	userOK := subtle.ConstantTimeCompare([]byte(username), []byte(acc.Username)) == 1
+	hash, role := acc.PasswordHash, RoleAdmin
+	if !userOK {
+		// 不是主账号时查找附加账号；找不到则仍用主账号哈希执行一次 bcrypt，避免通过耗时判断用户名是否存在
+		for _, u := range acc.Users {
+			if subtle.ConstantTimeCompare([]byte(username), []byte(u.Username)) == 1 {
+				hash, role, userOK = u.PasswordHash, u.Role, true
+				break
+			}
+		}
+	}
 	// 无论用户名是否正确都执行一次 bcrypt，避免通过耗时判断用户名
-	passErr := checkPassword(acc.PasswordHash, password)
+	passErr := checkPassword(hash, password)
 	if !userOK || passErr != nil {
 		return "", time.Time{}, ErrInvalidCredentials
+	}
+	// 两步验证只作用于主账号
+	if role != RoleAdmin {
+		ok = true
+		exp := m.now().Add(time.Duration(acc.TokenTTLHours) * time.Hour)
+		return m.sign(acc, exp, username, role, hash), exp, nil
 	}
 	if acc.TOTPSecret != "" {
 		c := ""
@@ -210,7 +273,7 @@ func (m *Manager) Login(ip, username, password string, code ...string) (string, 
 	}
 	ok = true
 	exp := m.now().Add(time.Duration(acc.TokenTTLHours) * time.Hour)
-	return m.sign(acc, exp), exp, nil
+	return m.sign(acc, exp, acc.Username, RoleAdmin, acc.PasswordHash), exp, nil
 }
 
 // Issue 为已通过其他方式（如第三方登录）验证的管理员直接签发会话令牌。
@@ -219,7 +282,7 @@ func (m *Manager) Issue() (string, time.Time) {
 	acc := m.acc
 	m.mu.RUnlock()
 	exp := m.now().Add(time.Duration(acc.TokenTTLHours) * time.Hour)
-	return m.sign(acc, exp), exp
+	return m.sign(acc, exp, acc.Username, RoleAdmin, acc.PasswordHash), exp
 }
 
 // checkPassword 在全局并发上限内执行 bcrypt 比较。
@@ -258,6 +321,11 @@ func (m *Manager) ChangeCredentials(oldPassword, newUsername, newPassword string
 	}
 	m.mu.Lock()
 	defer m.mu.Unlock()
+	for _, u := range m.acc.Users {
+		if u.Username == newUsername {
+			return errors.New("用户名与附加账号重复")
+		}
+	}
 	hash, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost)
 	if err != nil {
 		return err
@@ -276,10 +344,24 @@ func (m *Manager) ChangeCredentials(oldPassword, newUsername, newPassword string
 type payload struct {
 	User string `json:"u"`
 	Exp  int64  `json:"e"`
+	// Role 缺省表示管理员，兼容旧令牌
+	Role string `json:"r,omitempty"`
+	// Ver 是账号密码哈希的摘要，修改密码或删除账号后旧令牌随之失效
+	Ver string `json:"v,omitempty"`
 }
 
-func (m *Manager) sign(acc Account, exp time.Time) string {
-	body, _ := json.Marshal(payload{User: acc.Username, Exp: exp.Unix()})
+// hashVersion 返回密码哈希的短摘要，用于把令牌绑定到账号当前的密码。
+func hashVersion(hash string) string {
+	sum := sha256.Sum256([]byte(hash))
+	return base64.RawURLEncoding.EncodeToString(sum[:6])
+}
+
+func (m *Manager) sign(acc Account, exp time.Time, user, role, hash string) string {
+	pl := payload{User: user, Exp: exp.Unix(), Ver: hashVersion(hash)}
+	if role != RoleAdmin {
+		pl.Role = role
+	}
+	body, _ := json.Marshal(pl)
 	p := base64.RawURLEncoding.EncodeToString(body)
 	mac := hmac.New(sha256.New, []byte(acc.SessionSecret))
 	mac.Write([]byte(p))
@@ -288,9 +370,15 @@ func (m *Manager) sign(acc Account, exp time.Time) string {
 
 // Verify 校验令牌，返回用户名。
 func (m *Manager) Verify(token string) (string, bool) {
+	id, ok := m.Identify(token)
+	return id.User, ok
+}
+
+// Identify 校验令牌并返回身份（用户名与角色）。
+func (m *Manager) Identify(token string) (Identity, bool) {
 	p, sig, found := strings.Cut(token, ".")
 	if !found {
-		return "", false
+		return Identity{}, false
 	}
 	m.mu.RLock()
 	acc := m.acc
@@ -300,20 +388,32 @@ func (m *Manager) Verify(token string) (string, bool) {
 	want := mac.Sum(nil)
 	got, err := base64.RawURLEncoding.DecodeString(sig)
 	if err != nil || !hmac.Equal(got, want) {
-		return "", false
+		return Identity{}, false
 	}
 	raw, err := base64.RawURLEncoding.DecodeString(p)
 	if err != nil {
-		return "", false
+		return Identity{}, false
 	}
 	var pl payload
 	if err := json.Unmarshal(raw, &pl); err != nil {
-		return "", false
+		return Identity{}, false
 	}
-	if pl.User != acc.Username || m.now().Unix() > pl.Exp {
-		return "", false
+	if m.now().Unix() > pl.Exp {
+		return Identity{}, false
 	}
-	return pl.User, true
+	if pl.Role == "" {
+		// 管理员令牌：用户名须与主账号一致；带版本号的令牌还须与当前密码匹配
+		if pl.User != acc.Username || (pl.Ver != "" && pl.Ver != hashVersion(acc.PasswordHash)) {
+			return Identity{}, false
+		}
+		return Identity{User: pl.User, Role: RoleAdmin}, true
+	}
+	for _, u := range acc.Users {
+		if u.Username == pl.User && u.Role == pl.Role && pl.Ver == hashVersion(u.PasswordHash) {
+			return Identity{User: u.Username, Role: u.Role}, true
+		}
+	}
+	return Identity{}, false
 }
 
 // TokenFromRequest 从 Authorization 头或 Cookie 中取令牌。
@@ -328,6 +428,14 @@ func TokenFromRequest(r *http.Request) string {
 }
 
 type ctxKey struct{}
+
+type roleKey struct{}
+
+// RoleFromContext 返回中间件写入的角色；未写入（如 API 令牌，自带权限范围）时为空。
+func RoleFromContext(ctx context.Context) string {
+	r, _ := ctx.Value(roleKey{}).(string)
+	return r
+}
 
 // WithUser 把用户名写入上下文（API 令牌等其他认证方式使用）。
 func WithUser(ctx context.Context, user string) context.Context {
@@ -350,14 +458,17 @@ func UserFromContext(ctx context.Context) string {
 // Require 是要求登录的中间件。
 func (m *Manager) Require(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		user, ok := m.Verify(TokenFromRequest(r))
+		id, ok := m.Identify(TokenFromRequest(r))
+		user := id.User
 		if !ok {
 			w.Header().Set("Content-Type", "application/json; charset=utf-8")
 			w.WriteHeader(http.StatusUnauthorized)
 			_ = json.NewEncoder(w).Encode(map[string]string{"error": "未登录或登录已过期"})
 			return
 		}
-		next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), ctxKey{}, user)))
+		ctx := context.WithValue(r.Context(), ctxKey{}, user)
+		ctx = context.WithValue(ctx, roleKey{}, id.Role)
+		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
 
@@ -459,6 +570,278 @@ func (m *Manager) SetTOTP(password, code, secret string) error {
 	next := m.acc
 	next.TOTPSecret = secret
 	next.SessionSecret = randomString(32)
+	if err := m.save(next); err != nil {
+		return err
+	}
+	m.acc = next
+	return nil
+}
+
+// ---- 附加账号 ----
+
+// ErrUserNotFound 表示附加账号不存在。
+var ErrUserNotFound = errors.New("账号不存在")
+
+// maxUsers 限制附加账号数量。
+const maxUsers = 20
+
+// UserView 是附加账号的对外信息（不含密码哈希）。
+type UserView struct {
+	Username string `json:"username"`
+	Role     string `json:"role"`
+}
+
+// Users 返回全部附加账号。
+func (m *Manager) Users() []UserView {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	out := make([]UserView, 0, len(m.acc.Users))
+	for _, u := range m.acc.Users {
+		out = append(out, UserView{Username: u.Username, Role: u.Role})
+	}
+	return out
+}
+
+// AddUser 创建只读账号。
+func (m *Manager) AddUser(username, password string) error {
+	username = strings.TrimSpace(username)
+	if username == "" || len(username) > 64 || strings.ContainsAny(username, "\r\n\t") {
+		return errors.New("用户名无效")
+	}
+	if len(password) < 8 {
+		return errors.New("密码至少 8 位")
+	}
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if username == m.acc.Username {
+		return errors.New("用户名与管理员重复")
+	}
+	for _, u := range m.acc.Users {
+		if u.Username == username {
+			return errors.New("用户名已存在")
+		}
+	}
+	if len(m.acc.Users) >= maxUsers {
+		return errors.New("附加账号数量已达上限")
+	}
+	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+	next := m.acc
+	next.Users = append(append([]User{}, m.acc.Users...), User{Username: username, PasswordHash: string(hash), Role: RoleReadonly})
+	if err := m.save(next); err != nil {
+		return err
+	}
+	m.acc = next
+	return nil
+}
+
+// SetUserPassword 重置附加账号密码，该账号已有的会话随之失效。
+func (m *Manager) SetUserPassword(username, password string) error {
+	if len(password) < 8 {
+		return errors.New("密码至少 8 位")
+	}
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+	next := m.acc
+	next.Users = append([]User{}, m.acc.Users...)
+	for i := range next.Users {
+		if next.Users[i].Username == username {
+			next.Users[i].PasswordHash = string(hash)
+			if err := m.save(next); err != nil {
+				return err
+			}
+			m.acc = next
+			return nil
+		}
+	}
+	return ErrUserNotFound
+}
+
+// DeleteUser 删除附加账号，其会话随之失效。
+func (m *Manager) DeleteUser(username string) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	next := m.acc
+	next.Users = nil
+	found := false
+	for _, u := range m.acc.Users {
+		if u.Username == username {
+			found = true
+			continue
+		}
+		next.Users = append(next.Users, u)
+	}
+	if !found {
+		return ErrUserNotFound
+	}
+	if err := m.save(next); err != nil {
+		return err
+	}
+	m.acc = next
+	return nil
+}
+
+// ---- Passkey ----
+
+// ErrPasskeyNotFound 表示 Passkey 不存在。
+var ErrPasskeyNotFound = errors.New("Passkey 不存在")
+
+// maxPasskeys 限制注册的 Passkey 数量。
+const maxPasskeys = 10
+
+// PasskeyView 是 Passkey 的对外信息。
+type PasskeyView struct {
+	ID        string    `json:"id"`
+	Name      string    `json:"name"`
+	CreatedAt time.Time `json:"createdAt"`
+	LastUsed  time.Time `json:"lastUsed,omitzero"`
+}
+
+// Passkeys 返回已注册的 Passkey。
+func (m *Manager) Passkeys() []PasskeyView {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	out := make([]PasskeyView, 0, len(m.acc.Passkeys))
+	for _, c := range m.acc.Passkeys {
+		out = append(out, PasskeyView{ID: c.ID, Name: c.Name, CreatedAt: c.CreatedAt, LastUsed: c.LastUsed})
+	}
+	return out
+}
+
+// PasskeyIDs 返回全部凭据 ID，注册时用于排除已有的验证器。
+func (m *Manager) PasskeyIDs() []string {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	ids := make([]string, 0, len(m.acc.Passkeys))
+	for _, c := range m.acc.Passkeys {
+		ids = append(ids, c.ID)
+	}
+	return ids
+}
+
+// AddPasskey 校验当前密码后保存新的 Passkey。
+func (m *Manager) AddPasskey(password string, c *webauthn.Credential) error {
+	if err := m.verifyAccountPassword(password); err != nil {
+		return err
+	}
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if len(m.acc.Passkeys) >= maxPasskeys {
+		return errors.New("Passkey 数量已达上限")
+	}
+	for _, e := range m.acc.Passkeys {
+		if e.ID == c.ID {
+			return errors.New("该 Passkey 已注册")
+		}
+	}
+	next := m.acc
+	next.Passkeys = append(append([]webauthn.Credential{}, m.acc.Passkeys...), *c)
+	if err := m.save(next); err != nil {
+		return err
+	}
+	m.acc = next
+	return nil
+}
+
+// RemovePasskey 校验当前密码后删除 Passkey。
+func (m *Manager) RemovePasskey(password, id string) error {
+	if err := m.verifyAccountPassword(password); err != nil {
+		return err
+	}
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	next := m.acc
+	next.Passkeys = nil
+	found := false
+	for _, c := range m.acc.Passkeys {
+		if c.ID == id {
+			found = true
+			continue
+		}
+		next.Passkeys = append(next.Passkeys, c)
+	}
+	if !found {
+		return ErrPasskeyNotFound
+	}
+	if err := m.save(next); err != nil {
+		return err
+	}
+	m.acc = next
+	return nil
+}
+
+// LoginPasskey 使用 Passkey 登录。verify 校验断言并返回新的签名计数；
+// 失败与密码登录一样计入 IP 限流。Passkey 登录强制用户验证，因此无需再输入两步验证码。
+func (m *Manager) LoginPasskey(ip, credID string, verify func(webauthn.Credential) (uint32, error)) (string, time.Time, error) {
+	key := limitKey(ip)
+	if !m.reserve(key) {
+		return "", time.Time{}, ErrLocked
+	}
+	ok := false
+	defer func() { m.release(key, ok) }()
+
+	m.mu.RLock()
+	var cred *webauthn.Credential
+	for i := range m.acc.Passkeys {
+		if m.acc.Passkeys[i].ID == credID {
+			c := m.acc.Passkeys[i]
+			cred = &c
+			break
+		}
+	}
+	m.mu.RUnlock()
+	if cred == nil {
+		return "", time.Time{}, ErrInvalidCredentials
+	}
+	count, err := verify(*cred)
+	if err != nil {
+		return "", time.Time{}, err
+	}
+
+	m.mu.Lock()
+	next := m.acc
+	next.Passkeys = append([]webauthn.Credential{}, m.acc.Passkeys...)
+	for i := range next.Passkeys {
+		if next.Passkeys[i].ID == credID {
+			next.Passkeys[i].SignCount = count
+			next.Passkeys[i].LastUsed = m.now()
+		}
+	}
+	if err := m.save(next); err != nil {
+		m.mu.Unlock()
+		return "", time.Time{}, err
+	}
+	m.acc = next
+	acc := m.acc
+	m.mu.Unlock()
+
+	ok = true
+	exp := m.now().Add(time.Duration(acc.TokenTTLHours) * time.Hour)
+	return m.sign(acc, exp, acc.Username, RoleAdmin, acc.PasswordHash), exp, nil
+}
+
+// OnboardingPending 返回是否需要展示首次启动引导。
+func (m *Manager) OnboardingPending() bool {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	return m.acc.OnboardingPending
+}
+
+// DismissOnboarding 标记首次启动引导已完成或被跳过。
+func (m *Manager) DismissOnboarding() error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if !m.acc.OnboardingPending {
+		return nil
+	}
+	next := m.acc
+	next.OnboardingPending = false
 	if err := m.save(next); err != nil {
 		return err
 	}

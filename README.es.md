@@ -23,19 +23,19 @@ Gately es totalmente abierto para que usuarios y comunidad puedan revisar direct
 
 | Módulo | Capacidades |
 | --- | --- |
-| DNS dinámico | Alibaba Cloud, Cloudflare, Tencent Cloud, DNSPod, Huawei Cloud, GoDaddy, Porkbun, dynv6, DuckDNS, callback personalizado; obtención de IP por URL/interfaz de red/comando; IPv4/IPv6; Webhook |
+| DNS dinámico | Alibaba Cloud, Cloudflare, Tencent Cloud, DNSPod, Huawei Cloud, GoDaddy, Porkbun, dynv6, DuckDNS, Amazon Route 53, OVHcloud, Gandi, NS1, Bunny DNS, Namecheap, DynDNS2 (No-IP, Dynu, …), callback personalizado; obtención de IP por URL/interfaz de red/comando; IPv4/IPv6; Webhook |
 | Túnel STUN | TCP/UDP, keep-alive, UPnP/NAT-PMP, reenvío integrado, activación de Webhook y scripts al cambiar la dirección |
-| Reenvío de puertos | TCP/UDP, IPv4/IPv6, rangos de puertos, conmutación por error con varios destinos, límite de conexiones, estadísticas de tráfico |
-| Certificados SSL | Emisión y renovación automáticas con ACME DNS-01 (comodín, EAB), carga manual, lectura desde archivo, mapeo a un directorio y ejecución de scripts |
+| Reenvío de puertos | TCP/UDP, IPv4/IPv6, rangos de puertos, conmutación por error con varios destinos, límite de conexiones, estadísticas de tráfico, protocolo PROXY v1/v2 |
+| Certificados SSL | Emisión y renovación automáticas con ACME mediante DNS-01 (comodín) o HTTP-01 (sin proveedor DNS), EAB, carga manual, lectura desde archivo, mapeo a un directorio y ejecución de scripts |
 | Tailscale | Gestiona tailscaled (red en espacio de usuario, apta para contenedores) o se conecta a un demonio existente del sistema; clave de autenticación/enlace de inicio de sesión, Headscale, rutas de subred, nodo de salida, lista de nodos y proxy SOCKS5, puerto fijo, argumentos adicionales y variables de entorno de tailscaled |
 | frp | Cliente frpc (proxies tcp/udp/http/https/stcp/xtcp, los cambios se aplican al añadir o eliminar) y servidor frps (lista blanca de puertos, subdominios, panel de control); importación con un clic de configuraciones ini antiguas y toml nuevas |
 | Túnel Cloudflare | Túnel con token de cloudflared y túnel temporal de trycloudflare, varios túneles, reinicio automático, visualización de la dirección pública |
-| Servicio web | Proxy inverso/redirección/archivos estáticos/texto fijo por dominio; HTTPS; WebSocket; envío y recepción del protocolo PROXY; autenticación básica, autenticación web, inicio de sesión con GitHub/Google/QQ/OIDC; listas blancas y negras de IP, reglas por ruta, enlaces temporales para compartir, bloqueo automático tras fallos de autenticación, filtrado de países con GeoIP; pesos de backend/respaldo/balanceo de carga, comprobaciones de salud activas y pasivas, compresión, limitación de tasa, caché de respuestas, reescritura de rutas; estadísticas de acceso por minuto y métricas de Prometheus |
+| Servicio web | Proxy inverso/redirección/archivos estáticos/texto fijo por dominio; HTTPS y HTTP/3 (QUIC); WebSocket; envío y recepción del protocolo PROXY; autenticación básica, autenticación web, inicio de sesión con GitHub/Google/QQ/OIDC; listas blancas y negras de IP, reglas por ruta, enlaces temporales para compartir, bloqueo automático tras fallos de autenticación, filtrado de países con GeoIP; pesos de backend/respaldo/balanceo de carga, comprobaciones de salud activas y pasivas, compresión, limitación de tasa, caché de respuestas, reescritura de rutas; estadísticas de acceso por minuto y métricas de Prometheus |
 | Cortafuegos WAF | Coraza + OWASP CRS v4, activación de reglas por archivo, SecLang personalizado, bloqueo/solo detección |
 | Gestión de Docker | Creación y edición de contenedores, registros y terminal, Compose, comprobación de actualizaciones de imágenes y actualización con un clic (reversión automática si falla), redes y volúmenes |
 | Terminal web | SSH (confianza en la clave del host en el primer uso), Telnet, shell local (desactivado por defecto); proxy, sesiones persistentes, gestión de archivos SFTP, 2FA y confirmación de protocolo, comandos rápidos, paneles divididos |
 | Diagnóstico de red | Ping, traceroute, sondeo de puertos, consultas DNS, prueba de velocidad, escaneo de la red local |
-| Centro de notificaciones | Webhook, Telegram, Bark, WeCom, DingTalk, Feishu, correo electrónico; niveles, comodines y reglas de silencio y deduplicación |
+| Centro de notificaciones | Webhook, Telegram, Bark, ntfy, Gotify, Pushover, Discord, Slack, ServerChan, PushPlus, WeCom, DingTalk, Feishu, correo electrónico; niveles, comodines y reglas de silencio y deduplicación; plantillas de reglas integradas (fallos críticos, vencimiento de certificados, cambios de dirección, inicios de sesión, cambios de configuración) |
 | Copia de seguridad de la configuración | Copias cifradas (scrypt + AES-GCM), política de retención, copias programadas a un directorio local o a un punto de montaje de almacenamiento |
 | Línea de comandos y MCP | `gately ctl` invoca una instancia en ejecución; `gately mcp` ofrece un servicio MCP por stdio (solo lectura por defecto) |
 | Wake-on-LAN | Difusión de paquetes mágicos, detección de estado en línea |
@@ -43,7 +43,9 @@ Gately es totalmente abierto para que usuarios y comunidad puedan revisar direct
 | FTP | Multiusuario, directorio independiente por usuario, solo lectura, compatible con FTPS y rango de puertos pasivos |
 | Gestión de almacenamiento | Directorios locales y montajes WebDAV remotos, gestión de archivos en línea |
 | Tareas programadas | Expresiones cron, comandos o solicitudes HTTP, historial de ejecuciones |
-| Seguridad y ajustes | Verificación en dos pasos (TOTP), limitación de intentos de inicio de sesión, entrada de seguridad, acceso solo desde la red interna, HTTPS para la interfaz de administración, varios tokens de API (permisos de lectura/escritura por módulo), DNS personalizado (compatible con DoH), zona horaria, copia de seguridad y restauración de la configuración |
+| Seguridad y ajustes | Inicio de sesión con passkey (WebAuthn), verificación en dos pasos (TOTP), cuentas de solo lectura, limitación de intentos de inicio de sesión, entrada de seguridad, acceso solo desde la red interna, HTTPS para la interfaz de administración, varios tokens de API (permisos de lectura/escritura por módulo), DNS personalizado (compatible con DoH), zona horaria, copia de seguridad y restauración de la configuración, dirección real del cliente desde proxies inversos locales de confianza |
+| Auditoría e historial | Registro de auditoría de inicios de sesión, cambios de configuración y accesos a contenido sensible (nunca registra cuerpos de petición ni secretos); cada archivo de configuración sobrescrito conserva sus versiones anteriores con comparación de diferencias y reversión con un clic; directorio de configuración declarativa (`-apply`) para GitOps |
+| Monitorización y autodiagnóstico | Endpoint global de Prometheus `/api/metrics` (certificados, DDNS, STUN, reenvío de puertos, servicios web) con un panel de Grafana listo para usar; autodiagnóstico de red con un clic (IP pública, CGNAT, reloj, puertos 80/443, resolución DDNS, vencimiento de certificados) |
 | Migración | Importa `.lkcf` de Lucky o el zip de configuración completa: reenvío de puertos, DDNS, STUN, certificados, proxy inverso, WAF, Wake-on-LAN, terminal web, WebDAV, ajustes básicos |
 
 ## Inicio rápido
@@ -72,7 +74,13 @@ Descarga el paquete de tu plataforma desde [Releases](https://github.com/wangwan
 ./gately -c /etc/gately
 ```
 
-Parámetros: `-c` directorio de configuración (también se puede usar la variable de entorno `GATELY_CONFIG_DIR`), `-listen` sobrescribe la dirección de escucha de la interfaz de administración, `-version` muestra la versión.
+Parámetros: `-c` directorio de configuración (también se puede usar la variable de entorno `GATELY_CONFIG_DIR`), `-listen` sobrescribe la dirección de escucha de la interfaz de administración, `-apply` aplica en cada arranque los archivos `<nombre>.json` de un directorio al directorio de configuración (`GATELY_APPLY_DIR`, útil para GitOps y Kubernetes; los archivos de cuentas y tokens no se pueden sobrescribir), `-version` muestra la versión. En instalaciones desatendidas, define `GATELY_INITIAL_PASSWORD` para elegir la contraseña inicial del administrador en lugar de leer una aleatoria del registro.
+
+Plantillas de servicio: [systemd](deploy/systemd/gately.service) y [OpenWrt procd](deploy/openwrt/gately.init). Para verificar los archivos e imágenes descargados (firmas cosign, procedencia de compilación, SBOM), consulta [Verificar los artefactos publicados](docs/en/VERIFY.md).
+
+### Monitorización
+
+Crea un token de API con solo el permiso `metrics:read` y apunta Prometheus a `/api/metrics`. Las métricas, los ejemplos de alertas y el panel de Grafana se describen en [Monitorización](docs/en/MONITORING.md).
 
 ### Uso de la API
 

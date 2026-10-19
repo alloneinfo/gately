@@ -37,5 +37,8 @@
   "statusOff": "Disabled",
   "statusNotRunning": "Not running",
   "savedRestarted": "Saved. Rules restarted with the new settings",
-  "moduleEnabled": "Port forwarding module enabled"
+  "moduleEnabled": "Port forwarding module enabled",
+  "proxyProtocol": "PROXY protocol",
+  "proxyProtocolOff": "Off",
+  "proxyProtocolHelp": "TCP only. Sends a PROXY protocol header after connecting to the target so the downstream learns the real client address (haproxy accept-proxy, nginx proxy_protocol, or \"Accept PROXY protocol\" in Gately Web Services). Connections fail if the target does not support it."
 }

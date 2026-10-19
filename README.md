@@ -23,19 +23,19 @@ Gately is fully open source, so users and the community can read the source and 
 
 | Module | Capabilities |
 | --- | --- |
-| Dynamic DNS | Alibaba Cloud, Cloudflare, Tencent Cloud, DNSPod, Huawei Cloud, GoDaddy, Porkbun, dynv6, DuckDNS, custom callbacks; IP discovery via URL, network interface, or command; IPv4/IPv6; webhooks |
+| Dynamic DNS | Alibaba Cloud, Cloudflare, Tencent Cloud, DNSPod, Huawei Cloud, GoDaddy, Porkbun, dynv6, DuckDNS, Amazon Route 53, OVHcloud, Gandi, NS1, Bunny DNS, Namecheap, DynDNS2 (No-IP, Dynu, …), custom callbacks; IP discovery via URL, network interface, or command; IPv4/IPv6; webhooks |
 | STUN traversal | TCP/UDP, keep-alive, UPnP/NAT-PMP, built-in forwarding, webhooks and scripts triggered on address change |
-| Port forwarding | TCP/UDP, IPv4/IPv6, port ranges, multi-target failover, connection limits, traffic statistics |
-| SSL certificates | Automatic ACME DNS-01 issuance and renewal (wildcard, EAB), upload, read from file, map to a directory and run a script |
+| Port forwarding | TCP/UDP, IPv4/IPv6, port ranges, multi-target failover, connection limits, traffic statistics, PROXY protocol v1/v2 |
+| SSL certificates | Automatic ACME issuance and renewal via DNS-01 (wildcard) or HTTP-01 (no DNS provider needed), EAB, upload, read from file, map to a directory and run a script |
 | Tailscale | Managed tailscaled (userspace networking, container-friendly) or attach to an existing system daemon; auth keys / login links, Headscale, subnet routes, exit nodes, peer list and SOCKS5 proxy, fixed port, extra tailscaled arguments and environment variables |
 | frp | frpc client (tcp/udp/http/https/stcp/xtcp proxies, changes apply instantly) and frps server (port allowlist, subdomains, dashboard); one-click import of legacy ini and new toml configs |
 | Cloudflare Tunnel | cloudflared token tunnels and trycloudflare quick tunnels, multiple tunnels, automatic restart, public address display |
-| Web services | Per-domain reverse proxy / redirect / static files / fixed text; HTTPS; WebSocket; PROXY protocol in and out; basic auth, web auth, GitHub/Google/QQ/OIDC sign-in; IP allow/deny lists, path rules, temporary share links, automatic ban on failed auth, GeoIP country filtering; backend weights / standby / load-balancing policies, active and passive health checks, compression, rate limiting, response caching, path rewriting; per-minute access statistics and Prometheus metrics |
+| Web services | Per-domain reverse proxy / redirect / static files / fixed text; HTTPS and HTTP/3 (QUIC); WebSocket; PROXY protocol in and out; basic auth, web auth, GitHub/Google/QQ/OIDC sign-in; IP allow/deny lists, path rules, temporary share links, automatic ban on failed auth, GeoIP country filtering; backend weights / standby / load-balancing policies, active and passive health checks, compression, rate limiting, response caching, path rewriting; per-minute access statistics and Prometheus metrics |
 | WAF | Coraza + OWASP CRS v4, per-file rule toggles, custom SecLang, block or detection-only mode |
 | Docker management | Create and edit containers, logs and terminal, Compose, image update checks with one-click upgrade (automatic rollback on failure), networks and volumes |
 | Web terminal | SSH (trust host key on first use), Telnet, local shell (off by default); proxies, persistent sessions, SFTP file manager, 2FA and protocol confirmation, quick commands, split panes |
 | Network diagnostics | Ping, traceroute, port probe, DNS lookup, speed test, LAN scan |
-| Notification center | Webhook, Telegram, Bark, WeCom, DingTalk, Feishu, email; severity levels, wildcard, and silencing / dedup rules |
+| Notification center | Webhook, Telegram, Bark, ntfy, Gotify, Pushover, Discord, Slack, ServerChan, PushPlus, WeCom, DingTalk, Feishu, email; severity levels, wildcard, and silencing / dedup rules; built-in rule templates (critical failures, certificate expiry, address changes, sign-ins, configuration changes) |
 | Config backup | Encrypted backups (scrypt + AES-GCM), retention policy, scheduled backups to a local directory or storage mount |
 | CLI and MCP | `gately ctl` talks to a running instance; `gately mcp` serves MCP over stdio (read-only by default) |
 | Wake-on-LAN | Magic packet broadcast, online detection |
@@ -43,7 +43,9 @@ Gately is fully open source, so users and the community can read the source and 
 | FTP | Multiple users, per-user directories, read-only mode, FTPS and passive port ranges |
 | Storage management | Local directories and remote WebDAV mounts, online file manager |
 | Scheduled tasks | Cron expressions, commands or HTTP requests, run history |
-| Security and settings | Two-factor authentication (TOTP), login rate limiting, secure entry path, LAN-only access, HTTPS for the admin UI, multiple API tokens (per-module read/write grants), custom DNS (DoH supported), time zone, config backup and restore |
+| Security and settings | Passkey (WebAuthn) sign-in, two-factor authentication (TOTP), read-only accounts, login rate limiting, secure entry path, LAN-only access, HTTPS for the admin UI, multiple API tokens (per-module read/write grants), custom DNS (DoH supported), time zone, config backup and restore, real client address from trusted local reverse proxies |
+| Audit and history | Audit log of sign-ins, configuration changes and access to sensitive content (never records request bodies or secrets); every overwritten config file keeps its previous versions with diff and one-click rollback; declarative config directory (`-apply`) for GitOps |
+| Monitoring and self-check | Global Prometheus endpoint `/api/metrics` (certificates, DDNS, STUN, port forwarding, web services) with a ready-made Grafana dashboard; one-click network self-check (public IP, CGNAT, clock, ports 80/443, DDNS resolution, certificate expiry) |
 | Migration | Import a Lucky `.lkcf` file or a full-site config zip: port forwarding, DDNS, STUN, certificates, reverse proxy, WAF, Wake-on-LAN, web terminal, WebDAV, basic settings |
 
 ## Quick Start
@@ -72,7 +74,13 @@ Download the archive for your platform from [Releases](https://github.com/wangwa
 ./gately -c /etc/gately
 ```
 
-Flags: `-c` sets the config directory (the `GATELY_CONFIG_DIR` environment variable also works), `-listen` overrides the admin UI listen address, and `-version` prints the version.
+Flags: `-c` sets the config directory (the `GATELY_CONFIG_DIR` environment variable also works), `-listen` overrides the admin UI listen address, `-apply` applies `<name>.json` files from a directory to the config directory on every start (`GATELY_APPLY_DIR`, handy for GitOps and Kubernetes; the account and token files cannot be overwritten), and `-version` prints the version. For unattended installs, set `GATELY_INITIAL_PASSWORD` to choose the initial admin password instead of reading a random one from the log.
+
+Service templates: [systemd](deploy/systemd/gately.service) and [OpenWrt procd](deploy/openwrt/gately.init). To verify downloaded archives and images (cosign signatures, build provenance, SBOM), see [Verifying release artifacts](docs/en/VERIFY.md).
+
+### Monitoring
+
+Create an API token with only the `metrics:read` permission and point Prometheus at `/api/metrics`. Metrics, alert examples and the Grafana dashboard are described in [Monitoring](docs/en/MONITORING.md).
 
 ### API usage
 

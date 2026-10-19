@@ -50,6 +50,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `backup` | 設定バックアップ | `backup:read`、`backup:write` |
 | `status` | システムステータス | `status:read` |
 | `logs` | システムログ | `logs:read` |
+| `metrics` | 監視メトリクス（Prometheus） | `metrics:read` |
 | `import` | Lucky 設定のインポート | `import:write` |
 
 ワイルドカード：`*:read` は全モジュールの読み取り専用、`*:write` または `*` は全モジュールの読み書きを表します。
@@ -472,8 +473,16 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | GET | `/api/system/update` | `status:read` | 新しいバージョンを確認 |
 | GET | `/api/system/backup` | ログインセッションのみ | 設定バックアップをダウンロード |
 | GET | `/api/system/diagnostics` | ログインセッションのみ | マスク済み診断パッケージをエクスポート |
+| GET | `/api/audit` | ログインセッションのみ | 操作監査ログを検索 |
+| GET | `/api/metrics` | `metrics:read` | Prometheus グローバルメトリクス |
+| GET | `/api/history` | ログインセッションのみ | 設定の履歴バージョンを一覧表示 |
+| GET | `/api/history/{name}/{id}/diff` | ログインセッションのみ | 履歴バージョンと現在の設定を比較 |
+| POST | `/api/history/{name}/{id}/restore` | ログインセッションのみ | 設定を履歴バージョンにロールバック |
 | POST | `/api/system/restore` | ログインセッションのみ | バックアップから設定を復元 |
 | POST | `/api/system/restart` | ログインセッションのみ | Gately を再起動 |
+| POST | `/api/system/selfcheck` | ログインセッションのみ | ネットワークと設定のセルフチェック |
+| GET | `/api/system/onboarding` | ログインセッションのみ | 初回起動セットアップが必要かどうか |
+| POST | `/api/system/onboarding/dismiss` | ログインセッションのみ | 初回起動セットアップを完了またはスキップ |
 | GET | `/api/openapi.json` | 任意の有効なトークン | この API の OpenAPI 定義を取得 |
 
 ## 設定のインポート
@@ -498,6 +507,14 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | メソッド | パス | 必要な権限 | 説明 |
 | --- | --- | --- | --- |
 | PUT | `/api/account` | ログインセッションのみ | 管理者のユーザー名とパスワードを変更 |
+| GET | `/api/account/passkeys` | ログインセッションのみ | 登録済みの Passkey を一覧表示 |
+| POST | `/api/account/passkeys/begin` | ログインセッションのみ | Passkey の登録を開始 |
+| POST | `/api/account/passkeys` | ログインセッションのみ | Passkey の登録を完了 |
+| DELETE | `/api/account/passkeys/{id}` | ログインセッションのみ | Passkey を削除 |
+| GET | `/api/account/users` | ログインセッションのみ | 読み取り専用アカウントを一覧表示 |
+| POST | `/api/account/users` | ログインセッションのみ | 読み取り専用アカウントを作成 |
+| PUT | `/api/account/users/{name}` | ログインセッションのみ | 読み取り専用アカウントのパスワードをリセット |
+| DELETE | `/api/account/users/{name}` | ログインセッションのみ | 読み取り専用アカウントを削除 |
 | GET | `/api/account/totp` | ログインセッションのみ | 2 要素認証の状態を表示 |
 | POST | `/api/account/totp/setup` | ログインセッションのみ | 2 要素認証のシークレットを生成 |
 | POST | `/api/account/totp/enable` | ログインセッションのみ | 2 要素認証を有効化 |
@@ -825,6 +842,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `maxConnections` | integer |
 | `name` | string |
 | `protocols` | 配列 of string |
+| `proxyProtocol` | string |
 | `remark` | string |
 | `targetAddresses` | 配列 of string |
 | `targetPorts` | string |
@@ -835,6 +853,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | フィールド | 型 |
 | --- | --- |
 | `ca` | string |
+| `challenge` | string |
 | `credentials` | `dnsprovider.Credentials` |
 | `directoryUrl` | string |
 | `disableAuthoritativeCheck` | boolean |
@@ -842,6 +861,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `eabHmac` | string |
 | `eabKid` | string |
 | `email` | string |
+| `httpPort` | integer |
 | `keyType` | string |
 | `propagationTimeout` | integer |
 | `provider` | string |
@@ -1018,6 +1038,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `acceptProxyProtocol` | boolean |
 | `default` | `webservice.Site` |
 | `enable` | boolean |
+| `http3` | boolean |
 | `key` | string |
 | `listenIp` | string |
 | `minTls` | string |

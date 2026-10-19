@@ -50,6 +50,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `backup` | 설정 백업 | `backup:read`、`backup:write` |
 | `status` | 시스템 상태 | `status:read` |
 | `logs` | 시스템 로그 | `logs:read` |
+| `metrics` | 모니터링 지표 (Prometheus) | `metrics:read` |
 | `import` | Lucky 설정 가져오기 | `import:write` |
 
 와일드카드: `*:read`는 모든 모듈 읽기 전용, `*:write` 또는 `*`는 모든 모듈 읽기/쓰기를 의미합니다.
@@ -472,8 +473,16 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | GET | `/api/system/update` | `status:read` | 새 버전 확인 |
 | GET | `/api/system/backup` | 로그인 세션 전용 | 설정 백업 다운로드 |
 | GET | `/api/system/diagnostics` | 로그인 세션 전용 | 마스킹된 진단 패키지 내보내기 |
+| GET | `/api/audit` | 로그인 세션 전용 | 작업 감사 로그 조회 |
+| GET | `/api/metrics` | `metrics:read` | Prometheus 전역 지표 |
+| GET | `/api/history` | 로그인 세션 전용 | 설정 기록 버전 목록 조회 |
+| GET | `/api/history/{name}/{id}/diff` | 로그인 세션 전용 | 기록 버전과 현재 설정 비교 |
+| POST | `/api/history/{name}/{id}/restore` | 로그인 세션 전용 | 설정을 기록 버전으로 롤백 |
 | POST | `/api/system/restore` | 로그인 세션 전용 | 백업에서 설정 복원 |
 | POST | `/api/system/restart` | 로그인 세션 전용 | Gately 재시작 |
+| POST | `/api/system/selfcheck` | 로그인 세션 전용 | 네트워크 및 설정 자가 점검 |
+| GET | `/api/system/onboarding` | 로그인 세션 전용 | 최초 실행 온보딩 필요 여부 |
+| POST | `/api/system/onboarding/dismiss` | 로그인 세션 전용 | 최초 실행 온보딩 완료 또는 건너뛰기 |
 | GET | `/api/openapi.json` | 유효한 모든 토큰 | 이 API의 OpenAPI 설명 가져오기 |
 
 ## 설정 가져오기
@@ -498,6 +507,14 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | 메서드 | 경로 | 필요 권한 | 설명 |
 | --- | --- | --- | --- |
 | PUT | `/api/account` | 로그인 세션 전용 | 관리자 사용자 이름과 비밀번호 수정 |
+| GET | `/api/account/passkeys` | 로그인 세션 전용 | 등록된 Passkey 목록 조회 |
+| POST | `/api/account/passkeys/begin` | 로그인 세션 전용 | Passkey 등록 시작 |
+| POST | `/api/account/passkeys` | 로그인 세션 전용 | Passkey 등록 완료 |
+| DELETE | `/api/account/passkeys/{id}` | 로그인 세션 전용 | Passkey 삭제 |
+| GET | `/api/account/users` | 로그인 세션 전용 | 읽기 전용 계정 목록 조회 |
+| POST | `/api/account/users` | 로그인 세션 전용 | 읽기 전용 계정 생성 |
+| PUT | `/api/account/users/{name}` | 로그인 세션 전용 | 읽기 전용 계정 비밀번호 재설정 |
+| DELETE | `/api/account/users/{name}` | 로그인 세션 전용 | 읽기 전용 계정 삭제 |
 | GET | `/api/account/totp` | 로그인 세션 전용 | 2단계 인증 상태 보기 |
 | POST | `/api/account/totp/setup` | 로그인 세션 전용 | 2단계 인증 키 생성 |
 | POST | `/api/account/totp/enable` | 로그인 세션 전용 | 2단계 인증 켜기 |
@@ -825,6 +842,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `maxConnections` | integer |
 | `name` | string |
 | `protocols` | Array of string |
+| `proxyProtocol` | string |
 | `remark` | string |
 | `targetAddresses` | Array of string |
 | `targetPorts` | string |
@@ -835,6 +853,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | 필드 | 타입 |
 | --- | --- |
 | `ca` | string |
+| `challenge` | string |
 | `credentials` | `dnsprovider.Credentials` |
 | `directoryUrl` | string |
 | `disableAuthoritativeCheck` | boolean |
@@ -842,6 +861,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `eabHmac` | string |
 | `eabKid` | string |
 | `email` | string |
+| `httpPort` | integer |
 | `keyType` | string |
 | `propagationTimeout` | integer |
 | `provider` | string |
@@ -1018,6 +1038,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `acceptProxyProtocol` | boolean |
 | `default` | `webservice.Site` |
 | `enable` | boolean |
+| `http3` | boolean |
 | `key` | string |
 | `listenIp` | string |
 | `minTls` | string |

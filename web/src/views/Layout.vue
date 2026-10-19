@@ -34,6 +34,7 @@
             <button class="user-btn">
               <span class="avatar">{{ (username || 'A').slice(0, 1).toUpperCase() }}</span>
               <span v-if="!isMobile" class="user-name">{{ username }}</span>
+              <el-tag v-if="role === 'readonly'" size="small" type="info" effect="light">{{ t('layout.readonlyBadge') }}</el-tag>
               <ChevronDown :size="14" class="muted" />
             </button>
             <template #dropdown>
@@ -50,10 +51,12 @@
         <router-view />
       </main>
     </div>
+    <Onboarding />
   </div>
 </template>
 
 <script setup lang="ts">
+import Onboarding from '../components/Onboarding.vue'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
@@ -72,6 +75,7 @@ const { t } = useI18n()
 const router = useRouter()
 const isMobile = useIsMobile()
 const username = ref('')
+const role = ref('admin')
 const drawer = ref(false)
 const collapsed = ref(localStorage.getItem('gately-collapsed') === '1')
 const group = computed(() => groupByPath(route.path))
@@ -111,8 +115,9 @@ async function onCommand(cmd: string) {
 }
 
 onMounted(async () => {
-  const s = await api.get<{ username: string }>('/api/session')
+  const s = await api.get<{ username: string; role?: string }>('/api/session')
   username.value = s.username
+  role.value = s.role ?? 'admin'
 })
 </script>
 

@@ -87,6 +87,12 @@
     "logs": {
       "title": "システムログ"
     },
+    "audit": {
+      "title": "監査ログ"
+    },
+    "history": {
+      "title": "設定履歴"
+    },
     "apiTokens": {
       "title": "API トークン"
     },

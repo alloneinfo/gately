@@ -94,7 +94,12 @@
     "urlPrefix": "http://IP:port",
     "entryName": "entry",
     "lanOnly": "LAN access only",
-    "lanOnlyHelp": "Allow only LAN addresses (including Tailscale 100.64.0.0/10 addresses) to access the console"
+    "lanOnlyHelp": "Allow only LAN addresses (including Tailscale 100.64.0.0/10 addresses) to access the console",
+    "trustProxy": "Trust local proxies",
+    "trustProxyHelp": "When the admin UI sits behind nginx, haproxy or Gately Web Services on this host, take the real client address from the X-Real-IP / X-Forwarded-For headers they set. Used for LAN-only access, sign-in rate limiting and the audit log. Headers are only trusted from addresses of this host.",
+    "trustedProxies": "Additional trusted proxies",
+    "trustedProxiesPlaceholder": "IP or CIDR, e.g. 172.17.0.1",
+    "trustedProxiesHelp": "Proxy addresses outside this host, such as a Docker bridge gateway or another reverse proxy server."
   },
   "network": {
     "title": "Network",

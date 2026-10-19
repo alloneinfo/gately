@@ -74,5 +74,12 @@
   "notLoaded": "Não carregado",
   "savedAcme": "Salvo; a emissão é executada em segundo plano quando necessário",
   "renewStarted": "Emissão iniciada; veja o log para acompanhar o progresso",
-  "renewEnabled": "Renovação automática ligada"
+  "renewEnabled": "Renovação automática ligada",
+  "verifyMethod": "Método de validação",
+  "challenge": "Método",
+  "challengeDns": "DNS-01 (suporta curingas)",
+  "challengeHttp": "HTTP-01 (sem provedor DNS)",
+  "httpTip": "A CA se conecta à porta 80 de cada domínio pela internet. Domínios curinga não são suportados. Se um serviço Web escutar na porta 80, ele responde automaticamente; caso contrário, o Gately escuta temporariamente na porta abaixo.",
+  "httpPort": "Porta temporária",
+  "httpPortHelp": "0 significa 80. Use se o roteador encaminhar a porta pública 80 para outra porta local."
 }

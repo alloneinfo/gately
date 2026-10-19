@@ -1,0 +1,18 @@
+{
+  "title": "操作稽核",
+  "desc": "記錄誰在何時做了什麼：登入、設定變更、存取敏感內容。不記錄請求內容與任何金鑰。",
+  "category": "類別",
+  "search": "搜尋路徑、使用者或 IP",
+  "total": "共 {count} 筆",
+  "time": "時間",
+  "actor": "使用者 / IP",
+  "action": "操作",
+  "status": "狀態",
+  "empty": "尚無記錄",
+  "categories": {
+    "login": "登入",
+    "change": "變更",
+    "access": "敏感存取"
+  },
+  "via": "經代理 {ip}"
+}

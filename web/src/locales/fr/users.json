@@ -1,0 +1,14 @@
+{
+  "title": "Comptes en lecture seule",
+  "desc": "Créez des comptes qui peuvent consulter l’état, les journaux et la configuration, mais ne peuvent rien modifier, télécharger de sauvegardes ni lire de secrets. Pratique pour des proches ou des collègues. Ces comptes n’ont pas de vérification en deux étapes : donnez-leur des mots de passe uniques.",
+  "count": "{count} comptes",
+  "username": "Nom d’utilisateur",
+  "role": "Rôle",
+  "readonly": "Lecture seule",
+  "password": "Mot de passe",
+  "passwordHint": "Au moins 8 caractères.",
+  "add": "Ajouter un compte en lecture seule",
+  "resetPassword": "Réinitialiser le mot de passe",
+  "resetPrompt": "Nouveau mot de passe pour {name} (8 caractères minimum). Les sessions actuelles de ce compte seront fermées.",
+  "deleteConfirm": "Supprimer le compte « {name} » ? Ses sessions seront fermées immédiatement."
+}

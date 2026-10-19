@@ -50,6 +50,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `backup` | Резервная копия конфигурации | `backup:read`、`backup:write` |
 | `status` | Состояние системы | `status:read` |
 | `logs` | Системный журнал | `logs:read` |
+| `metrics` | Метрики (Prometheus) | `metrics:read` |
 | `import` | Импорт конфигурации Lucky | `import:write` |
 
 Шаблоны: `*:read` означает доступ только на чтение ко всем модулям, `*:write` или `*` означает чтение и запись для всех модулей.
@@ -472,8 +473,16 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | GET | `/api/system/update` | `status:read` | Проверить наличие новой версии |
 | GET | `/api/system/backup` | Только сессия входа | Скачать резервную копию конфигурации |
 | GET | `/api/system/diagnostics` | Только сессия входа | Экспорт обезличенного диагностического пакета |
+| GET | `/api/audit` | Только сессия входа | Запросить журнал аудита |
+| GET | `/api/metrics` | `metrics:read` | Глобальные метрики Prometheus |
+| GET | `/api/history` | Только сессия входа | Список версий истории конфигурации |
+| GET | `/api/history/{name}/{id}/diff` | Только сессия входа | Сравнить версию из истории с текущей конфигурацией |
+| POST | `/api/history/{name}/{id}/restore` | Только сессия входа | Откатить конфигурацию к версии из истории |
 | POST | `/api/system/restore` | Только сессия входа | Восстановить конфигурацию из резервной копии |
 | POST | `/api/system/restart` | Только сессия входа | Перезапустить Gately |
+| POST | `/api/system/selfcheck` | Только сессия входа | Самопроверка сети и конфигурации |
+| GET | `/api/system/onboarding` | Только сессия входа | Требуется ли начальная настройка |
+| POST | `/api/system/onboarding/dismiss` | Только сессия входа | Завершить или пропустить начальную настройку |
 | GET | `/api/openapi.json` | Любой действующий токен | Получить описание OpenAPI этого API |
 
 ## Импорт конфигурации
@@ -498,6 +507,14 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | Метод | Путь | Необходимое право | Описание |
 | --- | --- | --- | --- |
 | PUT | `/api/account` | Только сессия входа | Изменить имя пользователя и пароль администратора |
+| GET | `/api/account/passkeys` | Только сессия входа | Список зарегистрированных Passkey |
+| POST | `/api/account/passkeys/begin` | Только сессия входа | Начать регистрацию Passkey |
+| POST | `/api/account/passkeys` | Только сессия входа | Завершить регистрацию Passkey |
+| DELETE | `/api/account/passkeys/{id}` | Только сессия входа | Удалить Passkey |
+| GET | `/api/account/users` | Только сессия входа | Список учётных записей только для чтения |
+| POST | `/api/account/users` | Только сессия входа | Создать учётную запись только для чтения |
+| PUT | `/api/account/users/{name}` | Только сессия входа | Сбросить пароль учётной записи только для чтения |
+| DELETE | `/api/account/users/{name}` | Только сессия входа | Удалить учётную запись только для чтения |
 | GET | `/api/account/totp` | Только сессия входа | Просмотр состояния двухфакторной аутентификации |
 | POST | `/api/account/totp/setup` | Только сессия входа | Сгенерировать ключ двухфакторной аутентификации |
 | POST | `/api/account/totp/enable` | Только сессия входа | Включить двухфакторную аутентификацию |
@@ -825,6 +842,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `maxConnections` | integer |
 | `name` | string |
 | `protocols` | Массив из string |
+| `proxyProtocol` | string |
 | `remark` | string |
 | `targetAddresses` | Массив из string |
 | `targetPorts` | string |
@@ -835,6 +853,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | Поле | Тип |
 | --- | --- |
 | `ca` | string |
+| `challenge` | string |
 | `credentials` | `dnsprovider.Credentials` |
 | `directoryUrl` | string |
 | `disableAuthoritativeCheck` | boolean |
@@ -842,6 +861,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `eabHmac` | string |
 | `eabKid` | string |
 | `email` | string |
+| `httpPort` | integer |
 | `keyType` | string |
 | `propagationTimeout` | integer |
 | `provider` | string |
@@ -1018,6 +1038,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `acceptProxyProtocol` | boolean |
 | `default` | `webservice.Site` |
 | `enable` | boolean |
+| `http3` | boolean |
 | `key` | string |
 | `listenIp` | string |
 | `minTls` | string |

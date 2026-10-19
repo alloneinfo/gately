@@ -67,5 +67,38 @@
   "kindSmtp": "メール SMTP",
   "secretSet": "設定済み。空欄で変更しません",
   "deleted": "（削除済み）",
-  "testSent": "テスト通知を送信しました"
+  "testSent": "テスト通知を送信しました",
+  "ntfyUrlPlaceholder": "空欄の場合は https://ntfy.sh を使用",
+  "topic": "トピック",
+  "accessToken": "アクセストークン（任意）",
+  "appToken": "アプリトークン",
+  "userKey": "ユーザーキー",
+  "webhookUrl": "Webhook URL",
+  "template": "テンプレート",
+  "tpl": {
+    "critical": {
+      "name": "重大な障害",
+      "desc": "DDNS・証明書更新・アップストリーム・プロセス・バックアップ・コンテナの失敗"
+    },
+    "cert": {
+      "name": "証明書の期限",
+      "desc": "期限が近い、または更新に失敗した証明書"
+    },
+    "address": {
+      "name": "アドレス変更",
+      "desc": "公開 IP または STUN マッピングアドレスの変更"
+    },
+    "health": {
+      "name": "サービスの状態",
+      "desc": "アップストリームの up/down、コンテナとプロセスの終了"
+    },
+    "security": {
+      "name": "セキュリティとログイン",
+      "desc": "ログインの成功・失敗、BAN、機密情報へのアクセス"
+    },
+    "changes": {
+      "name": "設定変更",
+      "desc": "管理画面で行われたすべての設定変更"
+    }
+  }
 }

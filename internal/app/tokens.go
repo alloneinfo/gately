@@ -17,6 +17,7 @@ import (
 var builtinDomains = []scopeDomain{
 	{ID: apitoken.DomainStatus, Title: "系统状态", Builtin: true, ReadOnly: true},
 	{ID: apitoken.DomainLogs, Title: "系统日志", Builtin: true, ReadOnly: true},
+	{ID: apitoken.DomainMetrics, Title: "监控指标（Prometheus）", Builtin: true, ReadOnly: true},
 	{ID: apitoken.DomainImport, Title: "Lucky 配置导入", Builtin: true, WriteOnly: true},
 }
 

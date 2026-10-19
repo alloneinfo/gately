@@ -126,6 +126,10 @@
             <el-option v-for="v in ['1.0', '1.1', '1.2', '1.3']" :key="v" :label="'TLS ' + v" :value="v" />
           </el-select>
         </el-form-item>
+        <el-form-item v-if="editingListener.tls" label="HTTP/3">
+          <el-switch v-model="editingListener.http3" />
+          <span class="help">{{ t('web.http3Help') }}</span>
+        </el-form-item>
         <el-form-item :label="t('web.acceptProxy')">
           <el-switch v-model="editingListener.acceptProxyProtocol" />
           <span class="help">{{ t('web.acceptProxyHelp') }}</span>
@@ -336,6 +340,7 @@ interface Listener {
   port: number
   tls: boolean
   minTls: string
+  http3: boolean
   acceptProxyProtocol: boolean
   sites: Site[] | null
   default: Site
@@ -452,6 +457,7 @@ function emptyListener(): Listener {
     port: 443,
     tls: true,
     minTls: '1.2',
+    http3: false,
     acceptProxyProtocol: false,
     sites: [],
     default: { ...emptySite(), enable: false },

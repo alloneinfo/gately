@@ -99,5 +99,6 @@
   "statusNotRunning": "실행 중 아님",
   "savedReloaded": "저장되었으며 리스너를 다시 로드했습니다",
   "moduleEnabled": "Web 서비스 모듈을 사용합니다",
-  "sitesCollapsed": "사이트 {count}개 숨김, 클릭하여 펼치기"
+  "sitesCollapsed": "사이트 {count}개 숨김, 클릭하여 펼치기",
+  "http3Help": "같은 포트 번호의 UDP로 HTTP/3(QUIC)도 제공합니다. 방화벽과 포트 포워딩에서 해당 UDP 포트를 허용하세요."
 }

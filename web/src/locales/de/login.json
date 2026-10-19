@@ -22,5 +22,7 @@
   "backToAccount": "Zurück zur Kontoauswahl",
   "badge": "Open Source · Selbst gehostet",
   "verifying": "Wird überprüft…",
-  "totpAuto": "Der Code wird nach vollständiger Eingabe automatisch überprüft"
+  "totpAuto": "Der Code wird nach vollständiger Eingabe automatisch überprüft",
+  "or": "oder",
+  "passkey": "Mit Passkey anmelden"
 }

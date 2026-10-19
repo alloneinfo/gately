@@ -74,5 +74,12 @@
   "notLoaded": "로드되지 않음",
   "savedAcme": "저장되었으며 발급이 필요하면 백그라운드에서 진행됩니다",
   "renewStarted": "발급을 시작했습니다. 진행 상황은 로그에서 확인하세요",
-  "renewEnabled": "자동 갱신을 켰습니다"
+  "renewEnabled": "자동 갱신을 켰습니다",
+  "verifyMethod": "검증 방식",
+  "challenge": "방식",
+  "challengeDns": "DNS-01 (와일드카드 지원)",
+  "challengeHttp": "HTTP-01 (DNS 서비스 불필요)",
+  "httpTip": "CA가 인터넷에서 각 도메인의 80번 포트로 접속해 검증합니다. 와일드카드 도메인은 지원하지 않습니다. 웹 서비스가 80번 포트를 사용 중이면 자동으로 응답하고, 그렇지 않으면 Gately가 아래 포트에서 임시로 대기합니다.",
+  "httpPort": "임시 대기 포트",
+  "httpPortHelp": "0은 80을 의미합니다. 공유기가 공용 80번 포트를 다른 로컬 포트로 전달할 때 지정하세요."
 }

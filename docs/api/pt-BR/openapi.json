@@ -734,6 +734,9 @@
             },
             "type": "array"
           },
+          "proxyProtocol": {
+            "type": "string"
+          },
           "remark": {
             "type": "string"
           },
@@ -755,6 +758,9 @@
       "ssl.ACMEConfig": {
         "properties": {
           "ca": {
+            "type": "string"
+          },
+          "challenge": {
             "type": "string"
           },
           "credentials": {
@@ -780,6 +786,9 @@
           },
           "email": {
             "type": "string"
+          },
+          "httpPort": {
+            "type": "integer"
           },
           "keyType": {
             "type": "string"
@@ -1200,6 +1209,9 @@
             "$ref": "#/components/schemas/webservice.Site"
           },
           "enable": {
+            "type": "boolean"
+          },
+          "http3": {
             "type": "boolean"
           },
           "key": {
@@ -1878,6 +1890,216 @@
         "x-token-allowed": false
       }
     },
+    "/api/account/passkeys": {
+      "get": {
+        "description": "Disponível apenas para sessões de login.\n\n**Disponível apenas para sessões de login; tokens de API não podem acessar este endpoint.**",
+        "responses": {
+          "200": {
+            "description": "Sucesso"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parâmetros da requisição inválidos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token inválido, expirado ou sem login"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "O token não tem a permissão necessária"
+          }
+        },
+        "summary": "Listar Passkeys registradas",
+        "tags": [
+          "Conta"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
+      },
+      "post": {
+        "description": "Envie a credencial retornada pelo navegador junto com a senha atual.\n\n**Disponível apenas para sessões de login; tokens de API não podem acessar este endpoint.**",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sucesso"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parâmetros da requisição inválidos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token inválido, expirado ou sem login"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "O token não tem a permissão necessária"
+          }
+        },
+        "summary": "Concluir o registro da Passkey",
+        "tags": [
+          "Conta"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
+      }
+    },
+    "/api/account/passkeys/begin": {
+      "post": {
+        "description": "Retorna as opções de registro WebAuthn e um desafio de uso único.\n\n**Disponível apenas para sessões de login; tokens de API não podem acessar este endpoint.**",
+        "responses": {
+          "200": {
+            "description": "Sucesso"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parâmetros da requisição inválidos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token inválido, expirado ou sem login"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "O token não tem a permissão necessária"
+          }
+        },
+        "summary": "Iniciar o registro de uma Passkey",
+        "tags": [
+          "Conta"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
+      }
+    },
+    "/api/account/passkeys/{id}": {
+      "delete": {
+        "description": "A senha atual é obrigatória.\n\n**Disponível apenas para sessões de login; tokens de API não podem acessar este endpoint.**",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sucesso"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parâmetros da requisição inválidos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token inválido, expirado ou sem login"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "O token não tem a permissão necessária"
+          }
+        },
+        "summary": "Excluir uma Passkey",
+        "tags": [
+          "Conta"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
+      }
+    },
     "/api/account/totp": {
       "get": {
         "description": "**Disponível apenas para sessões de login; tokens de API não podem acessar este endpoint.**",
@@ -2075,6 +2297,270 @@
         "summary": "Gerar chave de verificação em duas etapas",
         "tags": [
           "Conta"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
+      }
+    },
+    "/api/account/users": {
+      "get": {
+        "description": "Disponível apenas para sessões de login (administrador).\n\n**Disponível apenas para sessões de login; tokens de API não podem acessar este endpoint.**",
+        "responses": {
+          "200": {
+            "description": "Sucesso"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parâmetros da requisição inválidos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token inválido, expirado ou sem login"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "O token não tem a permissão necessária"
+          }
+        },
+        "summary": "Listar contas somente leitura",
+        "tags": [
+          "Conta"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
+      },
+      "post": {
+        "description": "只读账号可查看状态与配置，不能Modificar 、下载备份或读取密钥。\n\n**Disponível apenas para sessões de login; tokens de API não podem acessar este endpoint.**",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sucesso"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parâmetros da requisição inválidos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token inválido, expirado ou sem login"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "O token não tem a permissão necessária"
+          }
+        },
+        "summary": "Criar uma conta somente leitura",
+        "tags": [
+          "Conta"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
+      }
+    },
+    "/api/account/users/{name}": {
+      "delete": {
+        "description": "**Disponível apenas para sessões de login; tokens de API não podem acessar este endpoint.**",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parâmetros da requisição inválidos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token inválido, expirado ou sem login"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "O token não tem a permissão necessária"
+          }
+        },
+        "summary": "Excluir uma conta somente leitura",
+        "tags": [
+          "Conta"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
+      },
+      "put": {
+        "description": "As sessões existentes desta conta são encerradas.\n\n**Disponível apenas para sessões de login; tokens de API não podem acessar este endpoint.**",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sucesso"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parâmetros da requisição inválidos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token inválido, expirado ou sem login"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "O token não tem a permissão necessária"
+          }
+        },
+        "summary": "Redefinir a senha de uma conta somente leitura",
+        "tags": [
+          "Conta"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
+      }
+    },
+    "/api/audit": {
+      "get": {
+        "description": "Disponível apenas para sessões de login. Suporta os parâmetros `category` (login/change/access), `module`, `actor`, `q`, `limit` e `offset`; os resultados mais recentes vêm primeiro.\n\n**Disponível apenas para sessões de login; tokens de API não podem acessar este endpoint.**",
+        "responses": {
+          "200": {
+            "description": "Sucesso"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parâmetros da requisição inválidos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token inválido, expirado ou sem login"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "O token não tem a permissão necessária"
+          }
+        },
+        "summary": "Consultar o log de auditoria",
+        "tags": [
+          "Sistema"
         ],
         "x-required-scope": "!denied",
         "x-token-allowed": false
@@ -10028,6 +10514,180 @@
         "x-token-allowed": true
       }
     },
+    "/api/history": {
+      "get": {
+        "description": "Disponível apenas para sessões de login. A versão anterior é salva automaticamente sempre que uma configuração é sobrescrita; as 30 mais recentes são mantidas por configuração.\n\n**Disponível apenas para sessões de login; tokens de API não podem acessar este endpoint.**",
+        "responses": {
+          "200": {
+            "description": "Sucesso"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parâmetros da requisição inválidos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token inválido, expirado ou sem login"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "O token não tem a permissão necessária"
+          }
+        },
+        "summary": "Listar versões do histórico de configuração",
+        "tags": [
+          "Sistema"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
+      }
+    },
+    "/api/history/{name}/{id}/diff": {
+      "get": {
+        "description": "Disponível apenas para sessões de login.\n\n**Disponível apenas para sessões de login; tokens de API não podem acessar este endpoint.**",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parâmetros da requisição inválidos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token inválido, expirado ou sem login"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "O token não tem a permissão necessária"
+          }
+        },
+        "summary": "Comparar uma versão do histórico com a configuração atual",
+        "tags": [
+          "Sistema"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
+      }
+    },
+    "/api/history/{name}/{id}/restore": {
+      "post": {
+        "description": "Disponível apenas para sessões de login. O Gately reinicia após a reversão; o conteúdo anterior é salvo como uma nova versão do histórico.\n\n**Disponível apenas para sessões de login; tokens de API não podem acessar este endpoint.**",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parâmetros da requisição inválidos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token inválido, expirado ou sem login"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "O token não tem a permissão necessária"
+          }
+        },
+        "summary": "Reverter uma configuração para uma versão do histórico",
+        "tags": [
+          "Sistema"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
+      }
+    },
     "/api/import/lucky": {
       "post": {
         "description": "Envio como multipart/form-data, com o campo `files`; `dryRun=1` apenas pré-visualiza, `enable=1` mantém o estado ativado.\n\nPermissão necessária: `import:write`.",
@@ -10137,6 +10797,57 @@
           "Sistema"
         ],
         "x-required-scope": "logs:read",
+        "x-token-allowed": true
+      }
+    },
+    "/api/metrics": {
+      "get": {
+        "description": "Formato de texto (0.0.4). Inclui o status do processo e métricas de encaminhamento de portas, STUN, DDNS, certificados e serviços web. Para o Prometheus, coloque um token de API com a permissão `metrics:read` em `authorization.credentials`.\n\nPermissão necessária: `metrics:read`.",
+        "responses": {
+          "200": {
+            "description": "Sucesso"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parâmetros da requisição inválidos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token inválido, expirado ou sem login"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "O token não tem a permissão necessária"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Métricas globais do Prometheus",
+        "tags": [
+          "Sistema"
+        ],
+        "x-required-scope": "metrics:read",
         "x-token-allowed": true
       }
     },
@@ -15046,6 +15757,98 @@
         "x-token-allowed": true
       }
     },
+    "/api/system/onboarding": {
+      "get": {
+        "description": "Disponível apenas para sessões de login. `pending` é true em uma instalação nova até a configuração inicial ser concluída.\n\n**Disponível apenas para sessões de login; tokens de API não podem acessar este endpoint.**",
+        "responses": {
+          "200": {
+            "description": "Sucesso"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parâmetros da requisição inválidos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token inválido, expirado ou sem login"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "O token não tem a permissão necessária"
+          }
+        },
+        "summary": "Se a configuração inicial está pendente",
+        "tags": [
+          "Sistema"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
+      }
+    },
+    "/api/system/onboarding/dismiss": {
+      "post": {
+        "description": "Disponível apenas para sessões de login.\n\n**Disponível apenas para sessões de login; tokens de API não podem acessar este endpoint.**",
+        "responses": {
+          "200": {
+            "description": "Sucesso"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parâmetros da requisição inválidos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token inválido, expirado ou sem login"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "O token não tem a permissão necessária"
+          }
+        },
+        "summary": "Concluir ou pular a configuração inicial",
+        "tags": [
+          "Sistema"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
+      }
+    },
     "/api/system/restart": {
       "post": {
         "description": "**Disponível apenas para sessões de login; tokens de API não podem acessar este endpoint.**",
@@ -15131,6 +15934,52 @@
           }
         },
         "summary": "Restaurar a configuração a partir do backup",
+        "tags": [
+          "Sistema"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
+      }
+    },
+    "/api/system/selfcheck": {
+      "post": {
+        "description": "Verifica o IP público, NAT da operadora (CGNAT), o relógio local, as portas 80/443, a resolução DDNS, a validade dos certificados e mais. Consulta os serviços de IP público configurados. Disponível apenas para sessões de login (administrador).\n\n**Disponível apenas para sessões de login; tokens de API não podem acessar este endpoint.**",
+        "responses": {
+          "200": {
+            "description": "Sucesso"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parâmetros da requisição inválidos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token inválido, expirado ou sem login"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "O token não tem a permissão necessária"
+          }
+        },
+        "summary": "Autoverificação de rede e configuração",
         "tags": [
           "Sistema"
         ],
@@ -21869,6 +22718,7 @@
     "backup",
     "status",
     "logs",
+    "metrics",
     "import"
   ]
 }

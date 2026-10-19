@@ -67,5 +67,38 @@
   "kindSmtp": "E-Mail (SMTP)",
   "secretSet": "Bereits festgelegt; leer lassen, um es beizubehalten",
   "deleted": "(gelöscht)",
-  "testSent": "Testbenachrichtigung gesendet"
+  "testSent": "Testbenachrichtigung gesendet",
+  "ntfyUrlPlaceholder": "Leer lassen, um https://ntfy.sh zu verwenden",
+  "topic": "Thema",
+  "accessToken": "Zugriffstoken (optional)",
+  "appToken": "App-Token",
+  "userKey": "Benutzerschlüssel",
+  "webhookUrl": "Webhook-URL",
+  "template": "Vorlage",
+  "tpl": {
+    "critical": {
+      "name": "Kritische Ausfälle",
+      "desc": "Fehler bei DDNS, Zertifikatserneuerung, Upstream, Prozessen, Backups und Containern"
+    },
+    "cert": {
+      "name": "Zertifikatsablauf",
+      "desc": "Zertifikate kurz vor Ablauf oder mit fehlgeschlagener Erneuerung"
+    },
+    "address": {
+      "name": "Adressänderungen",
+      "desc": "Änderungen der öffentlichen IP oder der STUN-Adresse"
+    },
+    "health": {
+      "name": "Dienstzustand",
+      "desc": "Upstream up/down, Container- und Prozessbeendigungen"
+    },
+    "security": {
+      "name": "Sicherheit & Anmeldungen",
+      "desc": "Erfolgreiche und fehlgeschlagene Anmeldungen, Sperren und Zugriff auf sensible Inhalte"
+    },
+    "changes": {
+      "name": "Konfigurationsänderungen",
+      "desc": "Jede in der Verwaltungsoberfläche vorgenommene Konfigurationsänderung"
+    }
+  }
 }

@@ -1,0 +1,19 @@
+{
+  "title": "配置历史",
+  "desc": "每次覆盖配置文件前自动保存旧版本，可与当前配置对比差异并一键回滚。",
+  "pickConfig": "选择配置",
+  "keepHint": "每个配置最多保留 30 个版本，账号与令牌文件不记录。",
+  "savedAt": "保存时间",
+  "size": "大小",
+  "diff": "对比",
+  "restore": "回滚",
+  "empty": "暂无历史版本，配置发生变更后会出现在这里。",
+  "diffTitle": "{name}：历史版本与当前对比",
+  "legendOld": "所选历史版本",
+  "legendNew": "当前",
+  "noDiff": "与当前配置完全一致",
+  "skipped": "… 省略 {count} 行未变更内容 …",
+  "restoreTitle": "回滚配置",
+  "restoreConfirm": "确定把 {name} 回滚到 {time} 保存的版本吗？回滚后 Gately 会重启以生效。当前内容会保存为新的历史版本，可再次回滚撤销。",
+  "restored": "已回滚，Gately 正在重启…"
+}

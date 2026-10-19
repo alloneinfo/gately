@@ -13,6 +13,8 @@ import (
 	"net/http"
 	"net/http/cookiejar"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"testing"
@@ -22,6 +24,8 @@ import (
 	"github.com/wangwanjie/gately/internal/module"
 	"github.com/wangwanjie/gately/internal/modules/portforward"
 	"github.com/wangwanjie/gately/internal/modules/ssl"
+	"github.com/wangwanjie/gately/internal/webauthn"
+	"github.com/wangwanjie/gately/internal/webauthn/webauthntest"
 )
 
 // newTestServer 启动带端口转发模块的测试实例，并以已知密码登录。
@@ -546,5 +550,309 @@ func TestDiagnosticsBundle(t *testing.T) {
 	code, body := doJSON(t, c, "GET", srv.URL+"/api/system/diagnostics?preview=1", nil)
 	if code != 200 || !bytes.Contains(body, []byte(`"summary.json"`)) {
 		t.Fatalf("预览失败 %d %s", code, body)
+	}
+}
+
+// 审计日志记录登录与变更，配置历史支持比较与回滚
+func TestAuditAndHistory(t *testing.T) {
+	a, srv, c := loginApp(t)
+	mk := func(name string) map[string]any {
+		return map[string]any{"name": name, "enable": false, "protocols": []string{"tcp4"}, "listenAddress": "127.0.0.1",
+			"listenPorts": strconv.Itoa(freeTCPPort(t)), "targetAddresses": []string{"127.0.0.1"}, "targetPorts": "80"}
+	}
+	for _, n := range []string{"rule-a", "rule-b"} {
+		if code, body := doJSON(t, c, "POST", srv.URL+"/api/portforward/rules", mk(n)); code != 200 {
+			t.Fatalf("%d %s", code, body)
+		}
+	}
+
+	code, body := doJSON(t, c, "GET", srv.URL+"/api/audit", nil)
+	if code != 200 {
+		t.Fatalf("%d %s", code, body)
+	}
+	var res struct {
+		Entries []struct {
+			Category, Module, Method, Actor string
+		}
+		Total int
+	}
+	if err := json.Unmarshal(body, &res); err != nil {
+		t.Fatal(err)
+	}
+	var logins, changes int
+	for _, e := range res.Entries {
+		switch {
+		case e.Category == "login":
+			logins++
+		case e.Category == "change" && e.Module == "portforward" && e.Method == "POST":
+			changes++
+		}
+	}
+	if logins < 1 || changes != 2 {
+		t.Fatalf("审计记录不符: logins=%d changes=%d %s", logins, changes, body)
+	}
+
+	// 两次保存之间产生了一个历史版本（只含 rule-a）
+	code, body = doJSON(t, c, "GET", srv.URL+"/api/history", nil)
+	var files []struct {
+		Name     string
+		Versions []struct{ ID string }
+	}
+	if err := json.Unmarshal(body, &files); err != nil || code != 200 {
+		t.Fatalf("%d %s", code, body)
+	}
+	var id string
+	for _, f := range files {
+		if f.Name == "portforward" && len(f.Versions) > 0 {
+			id = f.Versions[0].ID
+		}
+	}
+	if id == "" {
+		t.Fatalf("应有 portforward 的历史版本: %s", body)
+	}
+	code, body = doJSON(t, c, "GET", srv.URL+"/api/history/portforward/"+id+"/diff", nil)
+	if code != 200 || !bytes.Contains(body, []byte("rule-b")) {
+		t.Fatalf("差异应包含新增的 rule-b: %d %s", code, body)
+	}
+	if code, _ = doJSON(t, c, "GET", srv.URL+"/api/history/portforward/bad-id/diff", nil); code != 404 {
+		t.Fatalf("非法版本应返回 404，实际 %d", code)
+	}
+	if code, body = doJSON(t, c, "POST", srv.URL+"/api/history/portforward/"+id+"/restore", nil); code != 200 {
+		t.Fatalf("%d %s", code, body)
+	}
+	cur, _ := a.store.ReadRaw("portforward")
+	if bytes.Contains(cur, []byte("rule-b")) {
+		t.Fatal("回滚后不应再包含 rule-b")
+	}
+	select {
+	case <-a.restartCh:
+	case <-time.After(3 * time.Second):
+		t.Fatal("回滚后应请求重启")
+	}
+}
+
+// 全局指标接口返回进程状态，并可通过 metrics:read 令牌访问
+func TestGlobalMetrics(t *testing.T) {
+	_, srv, c := loginApp(t)
+	resp, err := c.Get(srv.URL + "/api/metrics")
+	if err != nil {
+		t.Fatal(err)
+	}
+	data, _ := io.ReadAll(resp.Body)
+	resp.Body.Close()
+	text := string(data)
+	if resp.StatusCode != 200 || !strings.HasPrefix(resp.Header.Get("Content-Type"), "text/plain") {
+		t.Fatalf("状态 %d %s", resp.StatusCode, resp.Header.Get("Content-Type"))
+	}
+	for _, want := range []string{"gately_build_info{", "gately_uptime_seconds ", "# TYPE gately_goroutines gauge"} {
+		if !strings.Contains(text, want) {
+			t.Errorf("指标缺少 %q:\n%s", want, text)
+		}
+	}
+	// 令牌只需 metrics:read 权限
+	code, body := doJSON(t, c, "POST", srv.URL+"/api/tokens", map[string]any{"name": "prom", "scopes": []string{"metrics:read"}})
+	if code != 200 {
+		t.Fatalf("创建令牌失败 %d %s", code, body)
+	}
+	var created struct{ Secret string }
+	_ = json.Unmarshal(body, &created)
+	req, _ := http.NewRequest("GET", srv.URL+"/api/metrics", nil)
+	req.Header.Set("Authorization", "Bearer "+created.Secret)
+	r2, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	r2.Body.Close()
+	if r2.StatusCode != 200 {
+		t.Fatalf("metrics:read 令牌应能抓取指标，实际 %d", r2.StatusCode)
+	}
+	req, _ = http.NewRequest("GET", srv.URL+"/api/portforward/rules", nil)
+	req.Header.Set("Authorization", "Bearer "+created.Secret)
+	r3, _ := http.DefaultClient.Do(req)
+	r3.Body.Close()
+	if r3.StatusCode != 403 {
+		t.Fatalf("metrics:read 令牌不应访问其他模块，实际 %d", r3.StatusCode)
+	}
+}
+
+// 只读账号可查看但不能修改，也不能访问高危接口；重置密码或删除后会话失效
+func TestReadonlyUser(t *testing.T) {
+	_, srv, admin := loginApp(t)
+	if code, body := doJSON(t, admin, "POST", srv.URL+"/api/account/users", map[string]string{"username": "viewer", "password": "viewer-pass-1"}); code != 200 {
+		t.Fatalf("创建只读账号失败 %d %s", code, body)
+	}
+	if code, _ := doJSON(t, admin, "POST", srv.URL+"/api/account/users", map[string]string{"username": "viewer", "password": "viewer-pass-1"}); code != 400 {
+		t.Fatalf("重复用户名应被拒绝，实际 %d", code)
+	}
+	jar, _ := cookiejar.New(nil)
+	ro := &http.Client{Jar: jar, CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}
+	if code, body := doJSON(t, ro, "POST", srv.URL+"/api/login", map[string]string{"username": "viewer", "password": "viewer-pass-1"}); code != 200 {
+		t.Fatalf("只读账号登录失败 %d %s", code, body)
+	}
+	if code, body := doJSON(t, ro, "GET", srv.URL+"/api/session", nil); code != 200 || !bytes.Contains(body, []byte(`"readonly"`)) {
+		t.Fatalf("会话应返回只读角色: %d %s", code, body)
+	}
+	if code, _ := doJSON(t, ro, "GET", srv.URL+"/api/portforward/rules", nil); code != 200 {
+		t.Fatalf("只读账号应能查看规则，实际 %d", code)
+	}
+	rule := map[string]any{"name": "x", "enable": false, "protocols": []string{"tcp4"}, "listenAddress": "127.0.0.1",
+		"listenPorts": strconv.Itoa(freeTCPPort(t)), "targetAddresses": []string{"127.0.0.1"}, "targetPorts": "80"}
+	for _, c := range []struct{ method, path string }{
+		{"POST", "/api/portforward/rules"},
+		{"GET", "/api/audit"},
+		{"GET", "/api/system/backup"},
+		{"GET", "/api/account/users"},
+		{"GET", "/api/tokens"},
+		{"POST", "/api/system/restart"},
+	} {
+		var body any
+		if c.method == "POST" {
+			body = rule
+		}
+		if code, _ := doJSON(t, ro, c.method, srv.URL+c.path, body); code != 403 {
+			t.Errorf("只读账号访问 %s %s 应返回 403，实际 %d", c.method, c.path, code)
+		}
+	}
+	// 重置密码后，旧会话立即失效
+	if code, _ := doJSON(t, admin, "PUT", srv.URL+"/api/account/users/viewer", map[string]string{"password": "viewer-pass-2"}); code != 200 {
+		t.Fatalf("重置密码失败 %d", code)
+	}
+	if code, _ := doJSON(t, ro, "GET", srv.URL+"/api/session", nil); code != 401 {
+		t.Fatalf("重置密码后旧会话应失效，实际 %d", code)
+	}
+	if code, _ := doJSON(t, ro, "POST", srv.URL+"/api/login", map[string]string{"username": "viewer", "password": "viewer-pass-2"}); code != 200 {
+		t.Fatalf("新密码登录失败 %d", code)
+	}
+	if code, _ := doJSON(t, admin, "DELETE", srv.URL+"/api/account/users/viewer", nil); code != 200 {
+		t.Fatalf("删除失败 %d", code)
+	}
+	if code, _ := doJSON(t, ro, "GET", srv.URL+"/api/session", nil); code != 401 {
+		t.Fatalf("删除账号后会话应失效，实际 %d", code)
+	}
+	if code, _ := doJSON(t, admin, "GET", srv.URL+"/api/session", nil); code != 200 {
+		t.Fatalf("管理员会话不应受影响，实际 %d", code)
+	}
+}
+
+// Passkey：注册需要当前密码，登录无需密码，挑战只能使用一次，删除后不能再登录
+func TestPasskeyLifecycle(t *testing.T) {
+	_, srv, admin := loginApp(t)
+	host := strings.TrimPrefix(srv.URL, "http://")
+	origin := srv.URL
+	rpID := webauthn.RPID(host)
+	key := webauthntest.New()
+
+	// 未注册时不能开始登录
+	if code, _ := doJSON(t, http.DefaultClient, "POST", srv.URL+"/api/login/passkey/begin", map[string]string{}); code != 400 {
+		t.Fatalf("未注册 Passkey 时应返回 400，实际 %d", code)
+	}
+
+	code, body := doJSON(t, admin, "POST", srv.URL+"/api/account/passkeys/begin", map[string]string{})
+	if code != 200 {
+		t.Fatalf("%d %s", code, body)
+	}
+	var opts struct{ Challenge string }
+	_ = json.Unmarshal(body, &opts)
+	reg := map[string]any{"name": "测试设备", "password": "wrong-password", "challenge": opts.Challenge, "credential": key.Register(rpID, opts.Challenge, origin)}
+	if code, _ := doJSON(t, admin, "POST", srv.URL+"/api/account/passkeys", reg); code != 400 {
+		t.Fatalf("密码错误时注册应失败，实际 %d", code)
+	}
+	// 挑战已被消耗，需重新开始
+	_, body = doJSON(t, admin, "POST", srv.URL+"/api/account/passkeys/begin", map[string]string{})
+	_ = json.Unmarshal(body, &opts)
+	reg = map[string]any{"name": "测试设备", "password": "test-password", "challenge": opts.Challenge, "credential": key.Register(rpID, opts.Challenge, origin)}
+	if code, body := doJSON(t, admin, "POST", srv.URL+"/api/account/passkeys", reg); code != 200 {
+		t.Fatalf("注册失败 %d %s", code, body)
+	}
+
+	login := func(c *http.Client) int {
+		code, body := doJSON(t, c, "POST", srv.URL+"/api/login/passkey/begin", map[string]string{})
+		if code != 200 {
+			t.Fatalf("开始登录失败 %d %s", code, body)
+		}
+		var lo struct{ Challenge string }
+		_ = json.Unmarshal(body, &lo)
+		finish := map[string]any{"challenge": lo.Challenge, "credential": key.Assert(rpID, lo.Challenge, origin)}
+		code, _ = doJSON(t, c, "POST", srv.URL+"/api/login/passkey/finish", finish)
+		if code == 200 {
+			// 同一个挑战不能重放
+			if code2, _ := doJSON(t, c, "POST", srv.URL+"/api/login/passkey/finish", finish); code2 != 400 {
+				t.Errorf("挑战重放应被拒绝，实际 %d", code2)
+			}
+		}
+		return code
+	}
+	jar, _ := cookiejar.New(nil)
+	fresh := &http.Client{Jar: jar, CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}
+	if code := login(fresh); code != 200 {
+		t.Fatalf("Passkey 登录失败 %d", code)
+	}
+	if code, body := doJSON(t, fresh, "GET", srv.URL+"/api/session", nil); code != 200 || !bytes.Contains(body, []byte(`"admin"`)) {
+		t.Fatalf("Passkey 登录后会话无效 %d %s", code, body)
+	}
+
+	// 删除后不能再登录
+	_, body = doJSON(t, admin, "GET", srv.URL+"/api/account/passkeys", nil)
+	var list []struct{ ID string }
+	_ = json.Unmarshal(body, &list)
+	if len(list) != 1 {
+		t.Fatalf("应有 1 个 Passkey: %s", body)
+	}
+	if code, _ := doJSON(t, admin, "DELETE", srv.URL+"/api/account/passkeys/"+list[0].ID, map[string]string{"password": "test-password"}); code != 200 {
+		t.Fatalf("删除失败 %d", code)
+	}
+	if code, _ := doJSON(t, http.DefaultClient, "POST", srv.URL+"/api/login/passkey/begin", map[string]string{}); code != 400 {
+		t.Fatalf("删除后不应再能开始登录，实际 %d", code)
+	}
+}
+
+// 全新安装需要首次引导，完成后不再提示
+func TestOnboarding(t *testing.T) {
+	_, srv, c := loginApp(t)
+	code, body := doJSON(t, c, "GET", srv.URL+"/api/system/onboarding", nil)
+	if code != 200 || !bytes.Contains(body, []byte(`"pending":true`)) {
+		t.Fatalf("全新安装应提示引导: %d %s", code, body)
+	}
+	if code, _ := doJSON(t, c, "POST", srv.URL+"/api/system/onboarding/dismiss", map[string]string{}); code != 200 {
+		t.Fatalf("完成引导失败 %d", code)
+	}
+	_, body = doJSON(t, c, "GET", srv.URL+"/api/system/onboarding", nil)
+	if !bytes.Contains(body, []byte(`"pending":false`)) {
+		t.Fatalf("完成后不应再提示: %s", body)
+	}
+}
+
+// 声明式配置：启动时覆盖配置目录，旧内容进入历史；禁止覆盖账号文件；可指定初始密码
+func TestApplyDirAndInitialPassword(t *testing.T) {
+	dir := t.TempDir()
+	applyDir := t.TempDir()
+	rule := `{"settings":{},"rules":[{"key":"r1","name":"from-git","enable":false,"protocols":["tcp4"],"listenAddress":"127.0.0.1","listenPorts":"` + strconv.Itoa(freeTCPPort(t)) + `","targetAddresses":["127.0.0.1"],"targetPorts":"80"}]}`
+	if err := os.WriteFile(filepath.Join(applyDir, "portforward.json"), []byte(rule), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	a, err := New(Options{ConfigDir: dir, ApplyDir: applyDir, InitialPassword: "bootstrap-pass", Modules: []module.Module{portforward.New()}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	a.logger = log.New(io.Discard, "", 0)
+	if _, _, err := a.auth.Login("127.0.0.1", "admin", "bootstrap-pass"); err != nil {
+		t.Fatalf("应能用指定的初始密码登录: %v", err)
+	}
+	cur, _ := a.store.ReadRaw("portforward")
+	if !bytes.Contains(cur, []byte("from-git")) {
+		t.Fatalf("声明式配置未生效: %s", cur)
+	}
+	if err := os.WriteFile(filepath.Join(applyDir, "account.json"), []byte(`{}`), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := New(Options{ConfigDir: dir, ApplyDir: applyDir}); err == nil {
+		t.Fatal("不应允许覆盖 account.json")
+	}
+	_ = os.Remove(filepath.Join(applyDir, "account.json"))
+	if err := os.WriteFile(filepath.Join(applyDir, "bad.json"), []byte(`{`), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := New(Options{ConfigDir: dir, ApplyDir: applyDir}); err == nil {
+		t.Fatal("非法 JSON 应报错")
 	}
 }

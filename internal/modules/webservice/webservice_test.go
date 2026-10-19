@@ -27,6 +27,7 @@ import (
 	"time"
 
 	proxyproto "github.com/pires/go-proxyproto"
+	"github.com/quic-go/quic-go/http3"
 
 	"github.com/wangwanjie/gately/internal/config"
 	"github.com/wangwanjie/gately/internal/logbuf"
@@ -640,5 +641,41 @@ func TestCORSWithAuthRestricted(t *testing.T) {
 	h.site.WebAuth = false
 	if !h.corsAllowed("https://evil.com") {
 		t.Fatal("未开启认证时保持原行为")
+	}
+}
+
+func TestHTTP3Listener(t *testing.T) {
+	bad := Listener{Port: 8443, HTTP3: true}
+	if err := bad.Validate(); err == nil {
+		t.Fatal("未开启 HTTPS 时不应允许 HTTP/3")
+	}
+	addr, _ := startRunner(t, Listener{TLS: true, HTTP3: true, Sites: []Site{{Enable: true, Domains: []string{"secure.test"}, Type: TypeText, Text: "h3 ok"}}},
+		fakeCerts{selfSigned(t, "secure.test")}, nil)
+	tlsCfg := &tls.Config{InsecureSkipVerify: true, ServerName: "secure.test"}
+
+	// TCP 响应通告 HTTP/3
+	tcp := &http.Client{Transport: &http.Transport{TLSClientConfig: tlsCfg}}
+	resp, err := tcp.Get("https://" + addr + "/")
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp.Body.Close()
+	if alt := resp.Header.Get("Alt-Svc"); !strings.HasPrefix(alt, `h3=":`) {
+		t.Fatalf("缺少 Alt-Svc: %q", alt)
+	}
+
+	// UDP 上可以用 HTTP/3 访问
+	tr := &http3.Transport{TLSClientConfig: tlsCfg}
+	defer tr.Close()
+	req, _ := http.NewRequest("GET", "https://"+addr+"/", nil)
+	req.Host = "secure.test"
+	resp, err = (&http.Client{Transport: tr, Timeout: 5 * time.Second}).Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	body, _ := io.ReadAll(resp.Body)
+	resp.Body.Close()
+	if string(body) != "h3 ok" || resp.ProtoMajor != 3 {
+		t.Fatalf("HTTP/3 访问异常: proto=%d body=%q", resp.ProtoMajor, body)
 	}
 }

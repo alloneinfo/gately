@@ -1,0 +1,19 @@
+{
+  "title": "設定歷史",
+  "desc": "每次覆寫設定檔前自動保存舊版本，可與目前設定比較差異並一鍵還原。",
+  "pickConfig": "選擇設定",
+  "keepHint": "每個設定最多保留 30 個版本，帳號與權杖檔案不記錄。",
+  "savedAt": "保存時間",
+  "size": "大小",
+  "diff": "比較",
+  "restore": "還原",
+  "empty": "尚無歷史版本，設定變更後會顯示在這裡。",
+  "diffTitle": "{name}：歷史版本與目前比較",
+  "legendOld": "所選歷史版本",
+  "legendNew": "目前",
+  "noDiff": "與目前設定完全相同",
+  "skipped": "… 省略 {count} 行未變更內容 …",
+  "restoreTitle": "還原設定",
+  "restoreConfirm": "確定要把 {name} 還原到 {time} 保存的版本嗎？還原後 Gately 會重新啟動以生效。目前內容會保存為新的歷史版本，可再次還原以復原。",
+  "restored": "已還原，Gately 正在重新啟動…"
+}

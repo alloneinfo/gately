@@ -42,11 +42,13 @@
       "modules/tools": "檔案與維運工具",
       "guide/security": "安全模型與隱私承諾",
       "guide/hardening": "強化建議",
+      "guide/verify": "驗證發佈檔案",
       "reference/api": "API 權杖與 OpenAPI",
       "reference/api-reference": "介面清單",
       "reference/docker-api": "Docker API",
       "reference/webterminal-api": "Web 終端機 API",
       "reference/diagnostics": "診斷包",
+      "reference/monitoring": "監控指標",
       "guide/contributing": "參與貢獻"
     },
     "englishOnly": "（English）"

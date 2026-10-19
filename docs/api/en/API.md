@@ -50,6 +50,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `backup` | Configuration backup | `backup:read`、`backup:write` |
 | `status` | System status | `status:read` |
 | `logs` | System logs | `logs:read` |
+| `metrics` | Metrics (Prometheus) | `metrics:read` |
 | `import` | Lucky configuration import | `import:write` |
 
 Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` means read-write access to all modules.
@@ -472,8 +473,16 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | GET | `/api/system/update` | `status:read` | Check for a new version |
 | GET | `/api/system/backup` | Login sessions only | Download a configuration backup |
 | GET | `/api/system/diagnostics` | Login sessions only | Export redacted diagnostics bundle |
+| GET | `/api/audit` | Login sessions only | Query the audit log |
+| GET | `/api/metrics` | `metrics:read` | Global Prometheus metrics |
+| GET | `/api/history` | Login sessions only | List configuration history versions |
+| GET | `/api/history/{name}/{id}/diff` | Login sessions only | Compare a history version with the current configuration |
+| POST | `/api/history/{name}/{id}/restore` | Login sessions only | Roll a configuration back to a history version |
 | POST | `/api/system/restore` | Login sessions only | Restore configuration from a backup |
 | POST | `/api/system/restart` | Login sessions only | Restart Gately |
+| POST | `/api/system/selfcheck` | Login sessions only | Network and configuration self-check |
+| GET | `/api/system/onboarding` | Login sessions only | Whether first-run onboarding is pending |
+| POST | `/api/system/onboarding/dismiss` | Login sessions only | Complete or skip first-run onboarding |
 | GET | `/api/openapi.json` | Any valid token | Get the OpenAPI description of this API |
 
 ## Configuration import
@@ -498,6 +507,14 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | Method | Path | Required permission | Description |
 | --- | --- | --- | --- |
 | PUT | `/api/account` | Login sessions only | Change the administrator username and password |
+| GET | `/api/account/passkeys` | Login sessions only | List registered Passkeys |
+| POST | `/api/account/passkeys/begin` | Login sessions only | Start Passkey registration |
+| POST | `/api/account/passkeys` | Login sessions only | Finish Passkey registration |
+| DELETE | `/api/account/passkeys/{id}` | Login sessions only | Delete a Passkey |
+| GET | `/api/account/users` | Login sessions only | List read-only accounts |
+| POST | `/api/account/users` | Login sessions only | Create a read-only account |
+| PUT | `/api/account/users/{name}` | Login sessions only | Reset a read-only account's password |
+| DELETE | `/api/account/users/{name}` | Login sessions only | Delete a read-only account |
 | GET | `/api/account/totp` | Login sessions only | View two-factor authentication status |
 | POST | `/api/account/totp/setup` | Login sessions only | Generate a two-factor secret |
 | POST | `/api/account/totp/enable` | Login sessions only | Enable two-factor authentication |
@@ -825,6 +842,7 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | `maxConnections` | integer |
 | `name` | string |
 | `protocols` | Array of string |
+| `proxyProtocol` | string |
 | `remark` | string |
 | `targetAddresses` | Array of string |
 | `targetPorts` | string |
@@ -835,6 +853,7 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | Field | Type |
 | --- | --- |
 | `ca` | string |
+| `challenge` | string |
 | `credentials` | `dnsprovider.Credentials` |
 | `directoryUrl` | string |
 | `disableAuthoritativeCheck` | boolean |
@@ -842,6 +861,7 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | `eabHmac` | string |
 | `eabKid` | string |
 | `email` | string |
+| `httpPort` | integer |
 | `keyType` | string |
 | `propagationTimeout` | integer |
 | `provider` | string |
@@ -1018,6 +1038,7 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | `acceptProxyProtocol` | boolean |
 | `default` | `webservice.Site` |
 | `enable` | boolean |
+| `http3` | boolean |
 | `key` | string |
 | `listenIp` | string |
 | `minTls` | string |

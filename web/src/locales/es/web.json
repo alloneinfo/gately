@@ -99,5 +99,6 @@
   "statusNotRunning": "Detenido",
   "savedReloaded": "Guardado. El listener se ha recargado",
   "moduleEnabled": "Módulo de Servicios web activado",
-  "sitesCollapsed": "{count} sitios ocultos, haz clic para expandir"
+  "sitesCollapsed": "{count} sitios ocultos, haz clic para expandir",
+  "http3Help": "Sirve también HTTP/3 (QUIC) en el mismo número de puerto por UDP. Permite ese puerto UDP en el cortafuegos y en el reenvío de puertos."
 }

@@ -103,6 +103,21 @@
               <el-option label="RSA 4096" value="4096" />
             </el-select>
           </el-form-item>
+          <el-divider content-position="left">{{ t('ssl.verifyMethod') }}</el-divider>
+          <el-form-item :label="t('ssl.challenge')">
+            <el-radio-group v-model="editing.acme.challenge">
+              <el-radio-button value="dns">{{ t('ssl.challengeDns') }}</el-radio-button>
+              <el-radio-button value="http">{{ t('ssl.challengeHttp') }}</el-radio-button>
+            </el-radio-group>
+          </el-form-item>
+          <template v-if="editing.acme.challenge === 'http'">
+            <el-alert type="info" :closable="false" show-icon class="http-tip" :title="t('ssl.httpTip')" />
+            <el-form-item :label="t('ssl.httpPort')">
+              <el-input-number v-model="editing.acme.httpPort" :min="0" :max="65535" />
+              <span class="help">{{ t('ssl.httpPortHelp') }}</span>
+            </el-form-item>
+          </template>
+          <template v-else>
           <el-divider content-position="left">{{ t('ssl.dnsVerify') }}</el-divider>
           <el-form-item :label="t('ssl.dnsProvider')">
             <el-select v-model="editing.acme.provider" class="w-260" @change="extra = {}">
@@ -125,6 +140,7 @@
             <el-checkbox v-model="editing.acme.disableAuthoritativeCheck">{{ t('ssl.disableAuthCheck') }}</el-checkbox>
             <el-checkbox v-model="editing.acme.skipPropagationCheck">{{ t('ssl.skipCheck') }}</el-checkbox>
           </el-form-item>
+          </template>
         </template>
 
         <template v-if="editing.source === 'upload'">
@@ -213,6 +229,8 @@ interface Cert {
     eabKid: string
     eabHmac: string
     keyType: string
+    challenge: string
+    httpPort: number
     provider: string
     credentials: { id: string; secret: string; extra?: Record<string, string> }
     zone: string
@@ -283,6 +301,8 @@ function emptyCert(): Cert {
       eabKid: '',
       eabHmac: '',
       keyType: 'P256',
+      challenge: 'dns',
+      httpPort: 0,
       provider: 'alidns',
       credentials: { id: '', secret: '' },
       zone: '',
@@ -344,6 +364,8 @@ function openEditor(row?: CertView) {
   if (row) {
     const { info: _i, state: _s, ...cert } = row
     editing.value = JSON.parse(JSON.stringify(cert))
+    // 旧配置没有验证方式字段，视为 DNS 验证
+    editing.value.acme.challenge ||= 'dns'
   } else {
     editing.value = emptyCert()
   }
@@ -457,6 +479,9 @@ onBeforeUnmount(() => window.clearInterval(timer))
 </script>
 
 <style scoped>
+.http-tip {
+  margin-bottom: 14px;
+}
 .err-line {
   font-size: 12px;
   color: var(--el-color-danger);

@@ -5,20 +5,23 @@ go 1.26.0
 require golang.org/x/crypto v0.58.0
 
 require (
+	github.com/andybalholm/brotli v1.2.6
 	github.com/coder/websocket v1.8.15
 	github.com/corazawaf/coraza-coreruleset/v4 v4.25.0
 	github.com/corazawaf/coraza/v3 v3.8.1
 	github.com/creack/pty v1.1.24
 	github.com/fclairamb/ftpserverlib v0.32.4
+	github.com/maxmind/mmdbwriter v1.2.0
+	github.com/oschwald/maxminddb-golang/v2 v2.8.0
 	github.com/pires/go-proxyproto v0.15.0
 	github.com/pkg/sftp v1.13.11
+	github.com/quic-go/quic-go v0.64.0
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/spf13/afero v1.15.0
 	golang.org/x/sys v0.49.0
 )
 
 require (
-	github.com/andybalholm/brotli v1.2.6 // indirect
 	github.com/corazawaf/libinjection-go v0.3.3 // indirect
 	github.com/goccy/go-json v0.10.5 // indirect
 	github.com/goccy/go-yaml v1.19.2 // indirect
@@ -28,9 +31,8 @@ require (
 	github.com/kaptinlin/jsonschema v0.4.6 // indirect
 	github.com/kr/fs v0.1.0 // indirect
 	github.com/magefile/mage v1.17.0 // indirect
-	github.com/maxmind/mmdbwriter v1.2.0 // indirect
-	github.com/oschwald/maxminddb-golang/v2 v2.8.0 // indirect
 	github.com/petar-dambovaliev/aho-corasick v0.0.0-20250424160509-463d218d4745 // indirect
+	github.com/quic-go/qpack v0.6.0 // indirect
 	github.com/tidwall/gjson v1.18.0 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.1 // indirect

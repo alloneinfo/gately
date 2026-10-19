@@ -99,5 +99,6 @@
   "statusNotRunning": "Non démarré",
   "savedReloaded": "Enregistré. L'écouteur a été rechargé",
   "moduleEnabled": "Module de service Web activé",
-  "sitesCollapsed": "{count} sites masqués, cliquez pour développer"
+  "sitesCollapsed": "{count} sites masqués, cliquez pour développer",
+  "http3Help": "Sert aussi HTTP/3 (QUIC) sur le même numéro de port en UDP. Autorisez ce port UDP dans le pare-feu et la redirection de ports."
 }

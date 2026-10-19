@@ -12,6 +12,8 @@ import (
 	"sync/atomic"
 	"time"
 
+	proxyproto "github.com/pires/go-proxyproto"
+
 	"github.com/wangwanjie/gately/internal/logbuf"
 	"github.com/wangwanjie/gately/internal/netpipe"
 )
@@ -214,6 +216,17 @@ func (r *runner) handleTCP(ctx context.Context, client net.Conn, targetPort int)
 		return
 	}
 	defer target.Close()
+	if v := r.rule.ProxyProtocol; v != "" {
+		// 源地址为真实客户端，目的地址为本规则的监听地址
+		version := byte(2)
+		if v == "v1" {
+			version = 1
+		}
+		if _, err := proxyproto.HeaderProxyFromAddrs(version, client.RemoteAddr(), client.LocalAddr()).WriteTo(target); err != nil {
+			r.log.Warnf("%s 发送 PROXY 协议头失败: %v", client.RemoteAddr(), err)
+			return
+		}
+	}
 	r.log.Debugf("%s -> %s 已连接", client.RemoteAddr(), target.RemoteAddr())
 
 	in, out := netpipe.Join(ctx, client, target)

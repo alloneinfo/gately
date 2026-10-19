@@ -7,5 +7,6 @@
   "logout": "Log out",
   "logoutTitle": "Sign out",
   "logoutConfirm": "Are you sure you want to sign out?",
-  "logoutOk": "Sign out"
+  "logoutOk": "Sign out",
+  "readonlyBadge": "Read-only"
 }

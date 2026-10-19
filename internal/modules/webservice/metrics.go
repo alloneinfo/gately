@@ -1,17 +1,16 @@
 package webservice
 
 import (
-	"fmt"
 	"net/http"
 	"net/netip"
 	"sort"
 	"strconv"
-	"strings"
 	"sync"
 	"time"
 
 	"github.com/wangwanjie/gately/internal/geoip"
 	"github.com/wangwanjie/gately/internal/httpx"
+	"github.com/wangwanjie/gately/internal/module"
 )
 
 const (
@@ -189,18 +188,13 @@ func (m *Module) handleStats(w http.ResponseWriter, r *http.Request) {
 	httpx.OK(w, v)
 }
 
-func escapeLabel(s string) string {
-	return strings.NewReplacer(`\`, `\\`, `"`, `\"`, "\n", `\n`).Replace(s)
-}
-
-// handleMetrics 以 Prometheus 文本格式导出各站点指标。
-func (m *Module) handleMetrics(w http.ResponseWriter, _ *http.Request) {
-	var b strings.Builder
-	b.WriteString("# HELP gately_site_requests_total 站点累计请求数\n# TYPE gately_site_requests_total counter\n")
-	var rows []struct {
-		labels string
+// Metrics 实现 module.Metricer：导出各站点的请求、流量与后端健康指标。
+func (m *Module) Metrics() []module.Sample {
+	type row struct {
+		labels map[string]string
 		h      *siteHandler
 	}
+	var rows []row
 	m.mu.Lock()
 	for lk, run := range m.runners {
 		all := append([]*siteHandler{}, run.sites...)
@@ -208,47 +202,61 @@ func (m *Module) handleMetrics(w http.ResponseWriter, _ *http.Request) {
 			all = append(all, run.deflt)
 		}
 		for _, s := range all {
-			rows = append(rows, struct {
-				labels string
-				h      *siteHandler
-			}{fmt.Sprintf(`listener="%s",site="%s"`, escapeLabel(run.cfg.Name+"#"+lk), escapeLabel(siteLabel(s.site))), s})
+			rows = append(rows, row{map[string]string{"listener": run.cfg.Name + "#" + lk, "site": siteLabel(s.site)}, s})
 		}
 	}
 	m.mu.Unlock()
-	sort.Slice(rows, func(i, j int) bool { return rows[i].labels < rows[j].labels })
-	for _, row := range rows {
-		fmt.Fprintf(&b, "gately_site_requests_total{%s} %d\n", row.labels, row.h.stats.Requests.Load())
+	sort.Slice(rows, func(i, j int) bool {
+		if rows[i].labels["listener"] != rows[j].labels["listener"] {
+			return rows[i].labels["listener"] < rows[j].labels["listener"]
+		}
+		return rows[i].labels["site"] < rows[j].labels["site"]
+	})
+	with := func(base map[string]string, k, v string) map[string]string {
+		out := make(map[string]string, len(base)+1)
+		for bk, bv := range base {
+			out[bk] = bv
+		}
+		out[k] = v
+		return out
 	}
-	b.WriteString("# HELP gately_site_errors_total 站点后端错误数\n# TYPE gately_site_errors_total counter\n")
-	for _, row := range rows {
-		fmt.Fprintf(&b, "gately_site_errors_total{%s} %d\n", row.labels, row.h.stats.Errors.Load())
+	var out []module.Sample
+	add := func(name, help, typ string, labels map[string]string, v float64) {
+		out = append(out, module.Sample{Name: name, Help: help, Type: typ, Labels: labels, Value: v})
 	}
-	b.WriteString("# HELP gately_site_active_requests 站点进行中的请求数\n# TYPE gately_site_active_requests gauge\n")
-	for _, row := range rows {
-		fmt.Fprintf(&b, "gately_site_active_requests{%s} %d\n", row.labels, row.h.stats.Active.Load())
+	for _, r := range rows {
+		add("gately_site_requests_total", "Total requests handled by the site", module.MetricCounter, r.labels, float64(r.h.stats.Requests.Load()))
 	}
-	b.WriteString("# HELP gately_site_response_bytes_total 站点累计响应字节数\n# TYPE gately_site_response_bytes_total counter\n")
-	for _, row := range rows {
-		bytes, _ := row.h.metrics.totals()
-		fmt.Fprintf(&b, "gately_site_response_bytes_total{%s} %d\n", row.labels, bytes)
+	for _, r := range rows {
+		add("gately_site_errors_total", "Backend errors of the site", module.MetricCounter, r.labels, float64(r.h.stats.Errors.Load()))
 	}
-	b.WriteString("# HELP gately_site_responses_total 按状态类别统计的响应数\n# TYPE gately_site_responses_total counter\n")
-	for _, row := range rows {
-		_, st := row.h.metrics.totals()
+	for _, r := range rows {
+		add("gately_site_active_requests", "Requests currently in flight for the site", module.MetricGauge, r.labels, float64(r.h.stats.Active.Load()))
+	}
+	for _, r := range rows {
+		bytes, _ := r.h.metrics.totals()
+		add("gately_site_response_bytes_total", "Total response bytes of the site", module.MetricCounter, r.labels, float64(bytes))
+	}
+	for _, r := range rows {
+		_, st := r.h.metrics.totals()
 		for c := 2; c <= 5; c++ {
-			fmt.Fprintf(&b, "gately_site_responses_total{%s,class=\"%dxx\"} %d\n", row.labels, c, st[c])
+			add("gately_site_responses_total", "Responses of the site by status class", module.MetricCounter, with(r.labels, "class", strconv.Itoa(c)+"xx"), float64(st[c]))
 		}
 	}
-	b.WriteString("# HELP gately_upstream_up 后端是否健康（1 健康，0 不可用）\n# TYPE gately_upstream_up gauge\n")
-	for _, row := range rows {
-		for _, u := range row.h.upstreamStatus() {
-			v := 0
+	for _, r := range rows {
+		for _, u := range r.h.upstreamStatus() {
+			v := 0.0
 			if u.Healthy {
 				v = 1
 			}
-			fmt.Fprintf(&b, "gately_upstream_up{%s,upstream=\"%s\"} %d\n", row.labels, escapeLabel(u.URL), v)
+			add("gately_upstream_up", "Whether the upstream is healthy (1) or down (0)", module.MetricGauge, with(r.labels, "upstream", u.URL), v)
 		}
 	}
+	return out
+}
+
+// handleMetrics 以 Prometheus 文本格式导出各站点指标。
+func (m *Module) handleMetrics(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "text/plain; version=0.0.4; charset=utf-8")
-	_, _ = w.Write([]byte(b.String()))
+	_ = module.WriteSamples(w, m.Metrics())
 }

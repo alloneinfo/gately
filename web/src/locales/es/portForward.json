@@ -37,5 +37,8 @@
   "statusOff": "Desactivado",
   "statusNotRunning": "Detenido",
   "savedRestarted": "Guardado. Las reglas se reiniciaron con los nuevos ajustes",
-  "moduleEnabled": "Módulo de reenvío de puertos activado"
+  "moduleEnabled": "Módulo de reenvío de puertos activado",
+  "proxyProtocol": "Protocolo PROXY",
+  "proxyProtocolOff": "No enviar",
+  "proxyProtocolHelp": "Solo TCP. Envía una cabecera PROXY tras conectar con el destino para que el siguiente salto conozca la dirección real del cliente (accept-proxy de haproxy, proxy_protocol de nginx o \"Aceptar protocolo PROXY\" en el servicio web de Gately). La conexión falla si el destino no lo admite."
 }

@@ -87,6 +87,12 @@
     "logs": {
       "title": "시스템 로그"
     },
+    "audit": {
+      "title": "감사 로그"
+    },
+    "history": {
+      "title": "설정 기록"
+    },
     "apiTokens": {
       "title": "API 토큰"
     },

@@ -94,7 +94,12 @@
     "urlPrefix": "http://IP:端口",
     "entryName": "入口",
     "lanOnly": "仅允许内网访问",
-    "lanOnlyHelp": "只允许内网地址（含 Tailscale 等 100.64.0.0/10 地址）访问管理界面"
+    "lanOnlyHelp": "只允许内网地址（含 Tailscale 等 100.64.0.0/10 地址）访问管理界面",
+    "trustProxy": "信任本机代理",
+    "trustProxyHelp": "管理界面放在本机的 nginx、haproxy 或 Gately Web 服务之后时，从代理写入的 X-Real-IP / X-Forwarded-For 取真实客户端地址，用于仅内网访问、登录限流与审计日志。只信任本机地址发来的请求头。",
+    "trustedProxies": "额外可信代理",
+    "trustedProxiesPlaceholder": "IP 或 CIDR，例如 172.17.0.1",
+    "trustedProxiesHelp": "本机之外的代理地址，例如 Docker 网桥网关或另一台反向代理服务器。"
   },
   "network": {
     "title": "网络",

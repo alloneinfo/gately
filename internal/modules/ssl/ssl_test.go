@@ -469,3 +469,22 @@ func TestPebbleEndToEnd(t *testing.T) {
 func encodeB64(s string) string {
 	return base64.StdEncoding.EncodeToString([]byte(s))
 }
+
+func TestValidateHTTPChallenge(t *testing.T) {
+	ok := ACMEConfig{Domains: []string{"a.example.com"}, Email: "a@example.com", Challenge: ChallengeHTTP}
+	if err := ok.validate(Settings{}); err != nil {
+		t.Fatalf("HTTP-01 不应要求 DNS 服务商: %v", err)
+	}
+	wild := ACMEConfig{Domains: []string{"*.example.com"}, Email: "a@example.com", Challenge: ChallengeHTTP}
+	if err := wild.validate(Settings{}); err == nil {
+		t.Fatal("HTTP-01 应拒绝通配符域名")
+	}
+	bad := ACMEConfig{Domains: []string{"a.example.com"}, Email: "a@example.com", Challenge: "tls"}
+	if err := bad.validate(Settings{}); err == nil {
+		t.Fatal("应拒绝未知验证方式")
+	}
+	dns := ACMEConfig{Domains: []string{"a.example.com"}, Email: "a@example.com"}
+	if err := dns.validate(Settings{}); err == nil {
+		t.Fatal("默认 DNS 验证仍需要受支持的服务商")
+	}
+}

@@ -23,19 +23,19 @@ Gately は完全なオープンソースで、ユーザーとコミュニティ�
 
 | モジュール | 機能 |
 | --- | --- |
-| ダイナミック DNS | Alibaba Cloud、Cloudflare、Tencent Cloud、DNSPod、Huawei Cloud、GoDaddy、Porkbun、dynv6、DuckDNS、カスタムコールバック。URL／ネットワークインターフェース／コマンドによる IP 取得、IPv4/IPv6、Webhook |
+| ダイナミック DNS | Alibaba Cloud、Cloudflare、Tencent Cloud、DNSPod、Huawei Cloud、GoDaddy、Porkbun、dynv6、DuckDNS、Amazon Route 53、OVHcloud、Gandi、NS1、Bunny DNS、Namecheap、DynDNS2（No-IP、Dynu など）、カスタムコールバック。URL／ネットワークインターフェース／コマンドによる IP 取得、IPv4/IPv6、Webhook |
 | STUN 穿孔 | TCP/UDP、キープアライブ、UPnP/NAT-PMP、内蔵フォワーディング、アドレス変更時の Webhook・スクリプト実行 |
-| ポート転送 | TCP/UDP、IPv4/IPv6、ポート範囲、複数ターゲットのフェイルオーバー、接続数制限、トラフィック統計 |
-| SSL 証明書 | ACME DNS-01 による自動発行・更新（ワイルドカード、EAB）、アップロード、ファイル読み込み、ディレクトリへのマッピングとスクリプト実行 |
+| ポート転送 | TCP/UDP、IPv4/IPv6、ポート範囲、複数ターゲットのフェイルオーバー、接続数制限、トラフィック統計、PROXY プロトコル（v1/v2） |
+| SSL 証明書 | ACME による自動発行・更新（DNS-01 はワイルドカード対応、HTTP-01 は DNS プロバイダー不要）、EAB、アップロード、ファイル読み込み、ディレクトリへのマッピングとスクリプト実行 |
 | Tailscale | tailscaled の管理（ユーザー空間ネットワーク、コンテナ対応）またはシステム既存のデーモンへの接続。認証キー／ログインリンク、Headscale、サブネットルート、出口ノード、ノード一覧と SOCKS5 プロキシ、固定ポート、tailscaled の追加引数と環境変数 |
 | frp | frpc クライアント（tcp/udp/http/https/stcp/xtcp プロキシ、追加・削除は即時反映）と frps サーバー（ポート許可リスト、サブドメイン、ダッシュボード）。旧形式の ini／新形式の toml 設定をワンクリックでインポート |
 | Cloudflare トンネル | cloudflared のトークントンネルと trycloudflare の一時トンネル、複数トンネル、自動再起動、パブリックアドレス表示 |
-| Web サービス | ドメインごとのリバースプロキシ／リダイレクト／静的ファイル／固定テキスト、HTTPS、WebSocket、PROXY プロトコルの送受信、Basic 認証、Web 認証、GitHub/Google/QQ/OIDC ログイン、IP 許可・拒否リスト、パスルール、一時共有リンク、認証失敗時の自動ブロック、GeoIP による国別フィルタ、バックエンドの重み／スタンバイ／負荷分散ポリシー、アクティブ／パッシブヘルスチェック、圧縮、レート制限、レスポンスキャッシュ、パス書き換え、1 分単位のアクセス統計と Prometheus メトリクス |
+| Web サービス | ドメインごとのリバースプロキシ／リダイレクト／静的ファイル／固定テキスト、HTTPS と HTTP/3（QUIC）、WebSocket、PROXY プロトコルの送受信、Basic 認証、Web 認証、GitHub/Google/QQ/OIDC ログイン、IP 許可・拒否リスト、パスルール、一時共有リンク、認証失敗時の自動ブロック、GeoIP による国別フィルタ、バックエンドの重み／スタンバイ／負荷分散ポリシー、アクティブ／パッシブヘルスチェック、圧縮、レート制限、レスポンスキャッシュ、パス書き換え、1 分単位のアクセス統計と Prometheus メトリクス |
 | WAF ファイアウォール | Coraza + OWASP CRS v4、ファイル単位のルール有効化、カスタム SecLang、ブロック／検知のみ |
 | Docker 管理 | コンテナの作成と編集、ログとターミナル、Compose、イメージ更新チェックとワンクリックアップグレード（失敗時は自動ロールバック）、ネットワークとボリューム |
 | Web ターミナル | SSH（ホストキーは初回接続時に信頼）、Telnet、ローカルシェル（既定は無効）。プロキシ、永続セッション、SFTP ファイル管理、2FA とプロトコル確認、クイックコマンド、画面分割 |
 | ネットワーク診断 | Ping、トレースルート、ポート探査、DNS 照会、速度測定、LAN スキャン |
-| 通知センター | Webhook、Telegram、Bark、WeCom、DingTalk、Feishu、メール。レベル、ワイルドカード、サイレント・重複排除ルール |
+| 通知センター | Webhook、Telegram、Bark、ntfy、Gotify、Pushover、Discord、Slack、ServerChan、PushPlus、WeCom、DingTalk、Feishu、メール。レベル、ワイルドカード、サイレント・重複排除ルール。組み込みルールテンプレート（重大な障害、証明書の期限、アドレス変更、ログイン、設定変更） |
 | 設定バックアップ | 暗号化バックアップ（scrypt + AES-GCM）、保持ポリシー、ローカルディレクトリやストレージのマウントポイントへの定期バックアップ |
 | コマンドラインと MCP | `gately ctl` で稼働中のインスタンスを操作、`gately mcp` で stdio 経由の MCP サービスを提供（既定は読み取り専用） |
 | Wake-on-LAN | マジックパケットのブロードキャスト、オンライン検出 |
@@ -43,7 +43,9 @@ Gately は完全なオープンソースで、ユーザーとコミュニティ�
 | FTP | 複数ユーザー、ユーザーごとのディレクトリ、読み取り専用、FTPS とパッシブポート範囲に対応 |
 | ストレージ管理 | ローカルディレクトリとリモート WebDAV のマウント、オンラインファイル管理 |
 | スケジュールタスク | cron 式、コマンドまたは HTTP リクエスト、実行履歴 |
-| セキュリティと設定 | 2 段階認証（TOTP）、ログイン失敗のレート制限、セキュアエントリー、内部ネットワークのみのアクセス、管理画面の HTTPS、複数の API トークン（モジュール単位の読み書き権限）、カスタム DNS（DoH 対応）、タイムゾーン、設定のバックアップと復元 |
+| セキュリティと設定 | パスキー（WebAuthn）ログイン、2 段階認証（TOTP）、読み取り専用アカウント、ログイン失敗のレート制限、セキュアエントリー、内部ネットワークのみのアクセス、管理画面の HTTPS、複数の API トークン（モジュール単位の読み書き権限）、カスタム DNS（DoH 対応）、タイムゾーン、設定のバックアップと復元、ローカルのリバースプロキシから実際のクライアントアドレスを取得 |
+| 監査と履歴 | ログイン、設定変更、機密情報へのアクセスを記録する監査ログ（リクエスト本文やシークレットは一切記録しません）。上書きされた設定ファイルは以前のバージョンを保持し、差分表示とワンクリックでのロールバックが可能。GitOps 向けの宣言的設定ディレクトリ（`-apply`） |
+| 監視とセルフチェック | グローバルな Prometheus エンドポイント `/api/metrics`（証明書、DDNS、STUN、ポート転送、Web サービス）とすぐに使える Grafana ダッシュボード。ワンクリックのネットワークセルフチェック（グローバル IP、CGNAT、時刻、80/443 ポート、DDNS の名前解決、証明書の期限） |
 | 移行 | Lucky の `.lkcf` またはサイト全体の設定 zip をインポート: ポート転送、DDNS、STUN、証明書、リバースプロキシ、WAF、Wake-on-LAN、Web ターミナル、WebDAV、基本設定 |
 
 ## クイックスタート
@@ -72,7 +74,13 @@ docker logs gately 2>&1 | grep -i "initial password"
 ./gately -c /etc/gately
 ```
 
-オプション: `-c` は設定ディレクトリ（環境変数 `GATELY_CONFIG_DIR` でも指定可能）、`-listen` は管理画面の待ち受けアドレスの上書き、`-version` はバージョン表示です。
+オプション: `-c` は設定ディレクトリ（環境変数 `GATELY_CONFIG_DIR` でも指定可能）、`-listen` は管理画面の待ち受けアドレスの上書き、`-apply` は起動のたびにディレクトリ内の `<name>.json` を設定ディレクトリに適用（`GATELY_APPLY_DIR`、GitOps や Kubernetes に便利。アカウントとトークンのファイルは上書き不可）、`-version` はバージョン表示です。無人インストールでは `GATELY_INITIAL_PASSWORD` を設定すると、ログからランダムなパスワードを読む代わりに管理者の初期パスワードを指定できます。
+
+サービステンプレート: [systemd](deploy/systemd/gately.service)、[OpenWrt procd](deploy/openwrt/gately.init)。ダウンロードしたアーカイブやイメージの検証（cosign 署名、ビルド来歴、SBOM）は[リリース成果物の検証](docs/en/VERIFY.md)を参照してください。
+
+### 監視
+
+`metrics:read` 権限だけを持つ API トークンを作成し、Prometheus から `/api/metrics` をスクレイプします。メトリクス、アラート例、Grafana ダッシュボードは[監視](docs/en/MONITORING.md)で説明しています。
 
 ### API の利用
 

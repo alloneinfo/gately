@@ -99,5 +99,6 @@
   "statusNotRunning": "Läuft nicht",
   "savedReloaded": "Gespeichert. Der Listener wurde neu geladen",
   "moduleEnabled": "Modul Web-Dienst aktiviert",
-  "sitesCollapsed": "{count} Sites ausgeblendet, zum Ausklappen klicken"
+  "sitesCollapsed": "{count} Sites ausgeblendet, zum Ausklappen klicken",
+  "http3Help": "Stellt zusätzlich HTTP/3 (QUIC) auf derselben Portnummer per UDP bereit. Der UDP-Port muss in Firewall und Portweiterleitung freigegeben sein."
 }

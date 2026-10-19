@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"github.com/wangwanjie/gately/internal/i18n"
 	"io"
+	"mime"
 	"net"
 	"net/http"
 	"net/smtp"
@@ -33,6 +34,14 @@ const (
 	KindDingTalk = "dingtalk"
 	KindFeishu   = "feishu"
 	KindSMTP     = "smtp"
+	KindNtfy     = "ntfy"
+	KindGotify   = "gotify"
+	KindPushover = "pushover"
+	KindDiscord  = "discord"
+	KindSlack    = "slack"
+	// KindServerChan 为 Server酱（Turbo 版）
+	KindServerChan = "serverchan"
+	KindPushPlus   = "pushplus"
 )
 
 // Message 是投递给渠道的内容。
@@ -122,6 +131,20 @@ func send(ctx context.Context, ch Channel, msg Message) error {
 		return sendFeishu(ctx, ch, msg)
 	case KindSMTP:
 		return sendSMTP(ctx, ch, msg)
+	case KindNtfy:
+		return sendNtfy(ctx, ch, msg)
+	case KindGotify:
+		return sendGotify(ctx, ch, msg)
+	case KindPushover:
+		return sendPushover(ctx, ch, msg)
+	case KindDiscord:
+		return postJSON(ctx, ch.URL, map[string]any{"content": truncate(msg.Title+"\n"+msg.Text, 2000)}, "", 0)
+	case KindSlack:
+		return postJSON(ctx, ch.URL, map[string]any{"text": msg.Title + "\n" + msg.Text}, "", 0)
+	case KindServerChan:
+		return sendServerChan(ctx, ch, msg)
+	case KindPushPlus:
+		return sendPushPlus(ctx, ch, msg)
 	}
 	return fmt.Errorf("不支持的渠道类型 %q", ch.Kind)
 }
@@ -311,4 +334,149 @@ func sendSMTP(ctx context.Context, ch Channel, msg Message) error {
 		return err
 	}
 	return c.Quit()
+}
+
+// truncate 按字符数截断，超出时追加省略号。
+func truncate(s string, n int) string {
+	r := []rune(s)
+	if len(r) <= n {
+		return s
+	}
+	return string(r[:n-1]) + "…"
+}
+
+// levelPriority 把事件级别映射为 1（最低）到 5（最高）的优先级，供 ntfy、Gotify 等使用。
+func levelPriority(level string) int {
+	switch level {
+	case events.LevelError:
+		return 5
+	case events.LevelWarn:
+		return 4
+	}
+	return 3
+}
+
+// doRequest 发送请求并按 HTTP 状态码判断成败，返回响应体。
+func doRequest(req *http.Request) ([]byte, error) {
+	resp, err := httpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	raw, _ := io.ReadAll(io.LimitReader(resp.Body, 64<<10))
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return raw, fmt.Errorf("HTTP %d: %s", resp.StatusCode, shorten(string(raw)))
+	}
+	return raw, nil
+}
+
+// sendNtfy 向 ntfy 主题发布消息；Secret 非空时作为访问令牌。
+func sendNtfy(ctx context.Context, ch Channel, msg Message) error {
+	base := strings.TrimRight(ch.URL, "/")
+	if base == "" {
+		base = "https://ntfy.sh"
+	}
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, base+"/"+url.PathEscape(ch.Target), strings.NewReader(msg.Text))
+	if err != nil {
+		return err
+	}
+	// 标题可能含非 ASCII 字符，使用 RFC 2047 编码，ntfy 会自动解码
+	req.Header.Set("Title", mime.QEncoding.Encode("utf-8", msg.Title))
+	req.Header.Set("Priority", strconv.Itoa(levelPriority(msg.Event.Level)))
+	if ch.Secret != "" {
+		req.Header.Set("Authorization", "Bearer "+ch.Secret)
+	}
+	_, err = doRequest(req)
+	return err
+}
+
+// sendGotify 通过应用令牌推送消息。
+func sendGotify(ctx context.Context, ch Channel, msg Message) error {
+	target := strings.TrimRight(ch.URL, "/") + "/message"
+	data, err := json.Marshal(map[string]any{"title": msg.Title, "message": msg.Text, "priority": levelPriority(msg.Event.Level)*2 - 2})
+	if err != nil {
+		return err
+	}
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, target, bytes.NewReader(data))
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	// 令牌放在请求头而不是查询串，避免出现在代理或服务端访问日志里
+	req.Header.Set("X-Gotify-Key", ch.Secret)
+	_, err = doRequest(req)
+	return err
+}
+
+// sendPushover 使用应用令牌（Secret）向用户（Target）推送。
+func sendPushover(ctx context.Context, ch Channel, msg Message) error {
+	target := ch.URL
+	if target == "" {
+		target = "https://api.pushover.net/1/messages.json"
+	}
+	form := url.Values{
+		"token":    {ch.Secret},
+		"user":     {ch.Target},
+		"title":    {msg.Title},
+		"message":  {truncate(msg.Text, 1024)},
+		"priority": {strconv.Itoa(pushoverPriority(msg.Event.Level))},
+	}
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, target, strings.NewReader(form.Encode()))
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	_, err = doRequest(req)
+	return err
+}
+
+// pushoverPriority 的取值范围为 -2 到 2；错误使用 1（高优先级），避免要求确认的紧急级别 2。
+func pushoverPriority(level string) int {
+	switch level {
+	case events.LevelError:
+		return 1
+	case events.LevelWarn:
+		return 0
+	}
+	return -1
+}
+
+// sendServerChan 通过 Server酱 Turbo 版推送，Secret 为 SendKey。
+func sendServerChan(ctx context.Context, ch Channel, msg Message) error {
+	target := ch.URL
+	if target == "" {
+		target = "https://sctapi.ftqq.com/" + url.PathEscape(ch.Secret) + ".send"
+	}
+	form := url.Values{"title": {msg.Title}, "desp": {msg.Text}}
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, target, strings.NewReader(form.Encode()))
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	raw, err := doRequest(req)
+	if err != nil {
+		return err
+	}
+	var parsed struct {
+		Code    int    `json:"code"`
+		Message string `json:"message"`
+	}
+	if json.Unmarshal(raw, &parsed) == nil && parsed.Code != 0 {
+		return fmt.Errorf("渠道返回错误: %s", shorten(string(raw)))
+	}
+	return nil
+}
+
+// sendPushPlus 通过 PushPlus 推送，Secret 为 token；业务成功码为 200。
+func sendPushPlus(ctx context.Context, ch Channel, msg Message) error {
+	target := ch.URL
+	if target == "" {
+		target = "https://www.pushplus.plus/send"
+	}
+	return postJSON(ctx, target, map[string]any{
+		"token":    ch.Secret,
+		"title":    msg.Title,
+		"content":  strings.ReplaceAll(msg.Text, "\n", "<br/>"),
+		"template": "html",
+	}, "code", 200)
 }

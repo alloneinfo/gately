@@ -37,5 +37,8 @@
   "statusOff": "Desativado",
   "statusNotRunning": "Não está em execução",
   "savedRestarted": "Salvo. As regras foram reiniciadas com as novas configurações",
-  "moduleEnabled": "Módulo de redirecionamento de portas ativado"
+  "moduleEnabled": "Módulo de redirecionamento de portas ativado",
+  "proxyProtocol": "Protocolo PROXY",
+  "proxyProtocolOff": "Não enviar",
+  "proxyProtocolHelp": "Somente TCP. Envia um cabeçalho PROXY após conectar ao destino para que o próximo salto saiba o endereço real do cliente (accept-proxy do haproxy, proxy_protocol do nginx ou \"Aceitar protocolo PROXY\" no serviço Web do Gately). A conexão falha se o destino não suportar."
 }

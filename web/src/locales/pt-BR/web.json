@@ -99,5 +99,6 @@
   "statusNotRunning": "Não está em execução",
   "savedReloaded": "Salvo. O listener foi recarregado",
   "moduleEnabled": "Módulo de serviço Web ativado",
-  "sitesCollapsed": "{count} sites ocultos, clique para expandir"
+  "sitesCollapsed": "{count} sites ocultos, clique para expandir",
+  "http3Help": "Também serve HTTP/3 (QUIC) no mesmo número de porta via UDP. Libere essa porta UDP no firewall e no redirecionamento de portas."
 }

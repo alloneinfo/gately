@@ -21,6 +21,8 @@ var validName = regexp.MustCompile(`^[a-z0-9][a-z0-9_-]*$`)
 type Store struct {
 	dir string
 	mu  sync.Mutex
+	// history 非空时，覆盖配置前保存旧版本
+	history *historyConfig
 }
 
 // Open 打开（必要时创建）配置目录。
@@ -106,5 +108,7 @@ func (s *Store) WriteRaw(name string, data []byte) error {
 	if err := tmp.Close(); err != nil {
 		return err
 	}
+	// 新内容已安全落盘，覆盖前保存旧版本
+	s.snapshotLocked(name, p, data)
 	return os.Rename(tmpName, p)
 }

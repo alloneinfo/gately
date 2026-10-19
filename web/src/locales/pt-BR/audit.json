@@ -1,0 +1,18 @@
+{
+  "title": "Log de auditoria",
+  "desc": "Quem fez o quê e quando: logins, alterações de configuração e acessos a conteúdo sensível. Corpos de requisição e segredos nunca são registrados.",
+  "category": "Categoria",
+  "search": "Buscar caminho, usuário ou IP",
+  "total": "{count} registros",
+  "time": "Hora",
+  "actor": "Usuário / IP",
+  "action": "Ação",
+  "status": "Status",
+  "empty": "Nenhum registro ainda",
+  "categories": {
+    "login": "Login",
+    "change": "Alteração",
+    "access": "Acesso sensível"
+  },
+  "via": "via {ip}"
+}

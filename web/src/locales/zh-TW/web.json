@@ -99,5 +99,6 @@
   "statusNotRunning": "未執行",
   "savedReloaded": "已儲存，監聽已重新載入",
   "moduleEnabled": "Web 服務模組已啟用",
-  "sitesCollapsed": "已收合 {count} 個站點，點擊展開"
+  "sitesCollapsed": "已收合 {count} 個站點，點擊展開",
+  "http3Help": "在相同埠號的 UDP 上同時提供 HTTP/3（QUIC）。需要在防火牆與連接埠轉發中放行該 UDP 埠。"
 }

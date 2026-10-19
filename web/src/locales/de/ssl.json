@@ -74,5 +74,12 @@
   "notLoaded": "Nicht geladen",
   "savedAcme": "Gespeichert; die Ausstellung läuft bei Bedarf im Hintergrund",
   "renewStarted": "Ausstellung gestartet; Fortschritt im Protokoll",
-  "renewEnabled": "Automatische Erneuerung eingeschaltet"
+  "renewEnabled": "Automatische Erneuerung eingeschaltet",
+  "verifyMethod": "Validierungsmethode",
+  "challenge": "Methode",
+  "challengeDns": "DNS-01 (Wildcards möglich)",
+  "challengeHttp": "HTTP-01 (kein DNS-Anbieter nötig)",
+  "httpTip": "Die CA verbindet sich aus dem Internet mit Port 80 jeder Domain. Wildcard-Domains werden nicht unterstützt. Lauscht ein Webdienst auf Port 80, beantwortet er die Validierung automatisch; andernfalls lauscht Gately vorübergehend auf dem unten angegebenen Port.",
+  "httpPort": "Temporärer Port",
+  "httpPortHelp": "0 bedeutet 80. Nutzen, wenn der Router den öffentlichen Port 80 auf einen anderen lokalen Port weiterleitet."
 }

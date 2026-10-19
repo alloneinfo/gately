@@ -1,0 +1,18 @@
+{
+  "title": "Audit Log",
+  "desc": "Who did what and when: sign-ins, configuration changes and access to sensitive content. Request bodies and secrets are never recorded.",
+  "category": "Category",
+  "search": "Search path, user or IP",
+  "total": "{count} records",
+  "time": "Time",
+  "actor": "User / IP",
+  "action": "Action",
+  "status": "Status",
+  "empty": "No records yet",
+  "categories": {
+    "login": "Sign-in",
+    "change": "Change",
+    "access": "Sensitive access"
+  },
+  "via": "via {ip}"
+}

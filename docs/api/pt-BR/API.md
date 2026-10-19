@@ -50,6 +50,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `backup` | Backup de configuração | `backup:read`、`backup:write` |
 | `status` | Estado do sistema | `status:read` |
 | `logs` | Log do sistema | `logs:read` |
+| `metrics` | Métricas (Prometheus) | `metrics:read` |
 | `import` | Importação de configuração do Lucky | `import:write` |
 
 Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou `*` significa leitura e escrita em todos os módulos.
@@ -472,8 +473,16 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | GET | `/api/system/update` | `status:read` | Verificar nova versão |
 | GET | `/api/system/backup` | Somente sessão de login | Baixar backup da configuração |
 | GET | `/api/system/diagnostics` | Somente sessão de login | Exportar pacote de diagnóstico anonimizado |
+| GET | `/api/audit` | Somente sessão de login | Consultar o log de auditoria |
+| GET | `/api/metrics` | `metrics:read` | Métricas globais do Prometheus |
+| GET | `/api/history` | Somente sessão de login | Listar versões do histórico de configuração |
+| GET | `/api/history/{name}/{id}/diff` | Somente sessão de login | Comparar uma versão do histórico com a configuração atual |
+| POST | `/api/history/{name}/{id}/restore` | Somente sessão de login | Reverter uma configuração para uma versão do histórico |
 | POST | `/api/system/restore` | Somente sessão de login | Restaurar a configuração a partir do backup |
 | POST | `/api/system/restart` | Somente sessão de login | Reiniciar o Gately |
+| POST | `/api/system/selfcheck` | Somente sessão de login | Autoverificação de rede e configuração |
+| GET | `/api/system/onboarding` | Somente sessão de login | Se a configuração inicial está pendente |
+| POST | `/api/system/onboarding/dismiss` | Somente sessão de login | Concluir ou pular a configuração inicial |
 | GET | `/api/openapi.json` | Qualquer token válido | Obter a descrição OpenAPI desta API |
 
 ## Importação de configuração
@@ -498,6 +507,14 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | Método | Caminho | Permissão necessária | Descrição |
 | --- | --- | --- | --- |
 | PUT | `/api/account` | Somente sessão de login | Modificar usuário e senha do administrador |
+| GET | `/api/account/passkeys` | Somente sessão de login | Listar Passkeys registradas |
+| POST | `/api/account/passkeys/begin` | Somente sessão de login | Iniciar o registro de uma Passkey |
+| POST | `/api/account/passkeys` | Somente sessão de login | Concluir o registro da Passkey |
+| DELETE | `/api/account/passkeys/{id}` | Somente sessão de login | Excluir uma Passkey |
+| GET | `/api/account/users` | Somente sessão de login | Listar contas somente leitura |
+| POST | `/api/account/users` | Somente sessão de login | Criar uma conta somente leitura |
+| PUT | `/api/account/users/{name}` | Somente sessão de login | Redefinir a senha de uma conta somente leitura |
+| DELETE | `/api/account/users/{name}` | Somente sessão de login | Excluir uma conta somente leitura |
 | GET | `/api/account/totp` | Somente sessão de login | Ver o estado da verificação em duas etapas |
 | POST | `/api/account/totp/setup` | Somente sessão de login | Gerar chave de verificação em duas etapas |
 | POST | `/api/account/totp/enable` | Somente sessão de login | Ativar verificação em duas etapas |
@@ -825,6 +842,7 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | `maxConnections` | integer |
 | `name` | string |
 | `protocols` | Array de string |
+| `proxyProtocol` | string |
 | `remark` | string |
 | `targetAddresses` | Array de string |
 | `targetPorts` | string |
@@ -835,6 +853,7 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | Campo | Tipo |
 | --- | --- |
 | `ca` | string |
+| `challenge` | string |
 | `credentials` | `dnsprovider.Credentials` |
 | `directoryUrl` | string |
 | `disableAuthoritativeCheck` | boolean |
@@ -842,6 +861,7 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | `eabHmac` | string |
 | `eabKid` | string |
 | `email` | string |
+| `httpPort` | integer |
 | `keyType` | string |
 | `propagationTimeout` | integer |
 | `provider` | string |
@@ -1018,6 +1038,7 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | `acceptProxyProtocol` | boolean |
 | `default` | `webservice.Site` |
 | `enable` | boolean |
+| `http3` | boolean |
 | `key` | string |
 | `listenIp` | string |
 | `minTls` | string |

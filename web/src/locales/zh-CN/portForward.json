@@ -37,5 +37,8 @@
   "statusOff": "已停用",
   "statusNotRunning": "未运行",
   "savedRestarted": "已保存，规则已按新设置重启",
-  "moduleEnabled": "端口转发模块已启用"
+  "moduleEnabled": "端口转发模块已启用",
+  "proxyProtocol": "PROXY 协议",
+  "proxyProtocolOff": "不发送",
+  "proxyProtocolHelp": "仅 TCP。连接目标后先发送 PROXY 协议头，把真实客户端地址告诉下游（haproxy 的 accept-proxy、nginx 的 proxy_protocol、Gately Web 服务的“接收 PROXY 协议”）。目标不支持时连接会失败。"
 }

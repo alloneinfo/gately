@@ -1,0 +1,17 @@
+{
+  "title": "Passkeys",
+  "desc": "Sign in with your fingerprint, face or device PIN instead of a password. Passkeys include user verification, so no authenticator code is needed. Only the public key is stored here.",
+  "count": "{count} registered",
+  "unsupported": "This browser does not support Passkeys. Passkeys also require HTTPS or localhost and a domain name (IP addresses are not accepted by browsers).",
+  "createdAt": "Registered",
+  "lastUsed": "Last used",
+  "add": "Add Passkey",
+  "deviceName": "Device name",
+  "deviceNamePlaceholder": "e.g. MacBook Touch ID",
+  "needPassword": "Enter your current password",
+  "addHint": "After you continue, your browser or device will ask you to confirm with a fingerprint, face or PIN.",
+  "added": "Passkey added",
+  "deleteTitle": "Delete Passkey",
+  "deleteConfirm": "Delete \"{name}\"? Enter your current password to confirm.",
+  "continue": "Continue"
+}

@@ -11,6 +11,8 @@ import (
 	"time"
 
 	"github.com/wangwanjie/gately/internal/logbuf"
+
+	proxyproto "github.com/pires/go-proxyproto"
 )
 
 func TestParsePorts(t *testing.T) {
@@ -338,5 +340,61 @@ func TestPartialListenFailure(t *testing.T) {
 	defer r.stop()
 	if len(r.listenErrors) != 1 {
 		t.Fatalf("应记录 1 个监听失败，实际 %v", r.listenErrors)
+	}
+}
+
+// 开启 PROXY 协议后，下游能拿到真实客户端地址，且数据照常转发
+func TestTCPSendProxyProtocol(t *testing.T) {
+	for _, v := range []string{"v1", "v2"} {
+		t.Run(v, func(t *testing.T) {
+			raw, err := net.Listen("tcp4", "127.0.0.1:0")
+			if err != nil {
+				t.Fatal(err)
+			}
+			ln := &proxyproto.Listener{Listener: raw}
+			defer ln.Close()
+			seen := make(chan string, 1)
+			go func() {
+				c, err := ln.Accept()
+				if err != nil {
+					return
+				}
+				defer c.Close()
+				// 读取数据时才会解析 PROXY 头
+				buf := make([]byte, 5)
+				_, _ = io.ReadFull(c, buf)
+				seen <- c.RemoteAddr().String()
+				_, _ = c.Write(buf)
+			}()
+			listenPort := freePort(t, "tcp")
+			rule := Rule{Protocols: []string{"tcp4"}, ListenAddress: "127.0.0.1", ListenPorts: strconv.Itoa(listenPort),
+				TargetAddresses: []string{"127.0.0.1"}, TargetPorts: strconv.Itoa(raw.Addr().(*net.TCPAddr).Port), ProxyProtocol: v}
+			if err := rule.Validate(); err != nil {
+				t.Fatal(err)
+			}
+			r := testRunner(rule)
+			if err := r.start(context.Background()); err != nil {
+				t.Fatal(err)
+			}
+			defer r.stop()
+			conn, err := net.Dial("tcp4", net.JoinHostPort("127.0.0.1", strconv.Itoa(listenPort)))
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer conn.Close()
+			_, _ = conn.Write([]byte("hello"))
+			buf := make([]byte, 5)
+			_ = conn.SetReadDeadline(time.Now().Add(3 * time.Second))
+			if _, err := io.ReadFull(conn, buf); err != nil || string(buf) != "hello" {
+				t.Fatalf("数据转发失败: %q %v", buf, err)
+			}
+			if got := <-seen; got != conn.LocalAddr().String() {
+				t.Fatalf("下游看到的客户端地址 = %s，期望 %s", got, conn.LocalAddr())
+			}
+		})
+	}
+	bad := Rule{Protocols: []string{"tcp4"}, ListenPorts: "1", TargetAddresses: []string{"x"}, TargetPorts: "1", ProxyProtocol: "v3"}
+	if bad.Validate() == nil {
+		t.Fatal("应拒绝未知 PROXY 协议版本")
 	}
 }

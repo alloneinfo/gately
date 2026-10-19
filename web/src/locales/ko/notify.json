@@ -67,5 +67,38 @@
   "kindSmtp": "이메일 SMTP",
   "secretSet": "설정됨, 비워 두면 유지",
   "deleted": "(삭제됨)",
-  "testSent": "테스트 알림을 보냈습니다"
+  "testSent": "테스트 알림을 보냈습니다",
+  "ntfyUrlPlaceholder": "비워 두면 https://ntfy.sh 사용",
+  "topic": "토픽",
+  "accessToken": "액세스 토큰(선택)",
+  "appToken": "앱 토큰",
+  "userKey": "사용자 키",
+  "webhookUrl": "Webhook URL",
+  "template": "템플릿",
+  "tpl": {
+    "critical": {
+      "name": "주요 장애",
+      "desc": "DDNS, 인증서 갱신, 업스트림, 프로세스, 백업, 컨테이너 실패"
+    },
+    "cert": {
+      "name": "인증서 만료",
+      "desc": "만료가 임박했거나 갱신에 실패한 인증서"
+    },
+    "address": {
+      "name": "주소 변경",
+      "desc": "공인 IP 또는 STUN 매핑 주소 변경"
+    },
+    "health": {
+      "name": "서비스 상태",
+      "desc": "업스트림 up/down, 컨테이너 및 프로세스 종료"
+    },
+    "security": {
+      "name": "보안 및 로그인",
+      "desc": "로그인 성공/실패, 차단, 민감한 콘텐츠 접근"
+    },
+    "changes": {
+      "name": "설정 변경",
+      "desc": "관리 콘솔에서 이루어진 모든 설정 변경"
+    }
+  }
 }

@@ -37,5 +37,8 @@
   "statusOff": "Отключено",
   "statusNotRunning": "Не запущено",
   "savedRestarted": "Сохранено. Правила перезапущены с новыми настройками",
-  "moduleEnabled": "Модуль проброса портов включён"
+  "moduleEnabled": "Модуль проброса портов включён",
+  "proxyProtocol": "Протокол PROXY",
+  "proxyProtocolOff": "Не отправлять",
+  "proxyProtocolHelp": "Только TCP. После подключения к цели отправляет заголовок PROXY, чтобы следующий узел узнал реальный адрес клиента (accept-proxy в haproxy, proxy_protocol в nginx или «Принимать протокол PROXY» в веб-службе Gately). Если цель его не поддерживает, соединение не установится."
 }

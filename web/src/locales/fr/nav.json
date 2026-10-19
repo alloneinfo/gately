@@ -87,6 +87,12 @@
     "logs": {
       "title": "Journaux système"
     },
+    "audit": {
+      "title": "Journal d'audit"
+    },
+    "history": {
+      "title": "Historique de configuration"
+    },
     "apiTokens": {
       "title": "Jetons d'API"
     },

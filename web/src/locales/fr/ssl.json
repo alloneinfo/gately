@@ -74,5 +74,12 @@
   "notLoaded": "Non chargé",
   "savedAcme": "Enregistré ; l'émission s'exécute en arrière-plan si nécessaire",
   "renewStarted": "Émission lancée ; consultez le journal pour suivre la progression",
-  "renewEnabled": "Renouvellement automatique activé"
+  "renewEnabled": "Renouvellement automatique activé",
+  "verifyMethod": "Méthode de validation",
+  "challenge": "Méthode",
+  "challengeDns": "DNS-01 (jokers pris en charge)",
+  "challengeHttp": "HTTP-01 (sans fournisseur DNS)",
+  "httpTip": "L'AC se connecte au port 80 de chaque domaine depuis Internet. Les domaines génériques ne sont pas pris en charge. Si un service Web écoute sur le port 80, il répond automatiquement ; sinon Gately écoute temporairement sur le port ci-dessous.",
+  "httpPort": "Port temporaire",
+  "httpPortHelp": "0 signifie 80. À utiliser si le routeur redirige le port public 80 vers un autre port local."
 }

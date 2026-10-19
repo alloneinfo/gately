@@ -22,5 +22,7 @@
   "backToAccount": "返回修改账号",
   "badge": "开源 · 自托管",
   "verifying": "正在验证…",
-  "totpAuto": "输入完成后将自动验证"
+  "totpAuto": "输入完成后将自动验证",
+  "or": "或",
+  "passkey": "使用 Passkey 登录"
 }

@@ -67,5 +67,38 @@
   "kindSmtp": "E-mail (SMTP)",
   "secretSet": "Déjà défini ; laisser vide pour le conserver",
   "deleted": "(supprimé)",
-  "testSent": "Notification de test envoyée"
+  "testSent": "Notification de test envoyée",
+  "ntfyUrlPlaceholder": "Laisser vide pour utiliser https://ntfy.sh",
+  "topic": "Sujet",
+  "accessToken": "Jeton d'accès (facultatif)",
+  "appToken": "Jeton d'application",
+  "userKey": "Clé utilisateur",
+  "webhookUrl": "URL du webhook",
+  "template": "Modèle",
+  "tpl": {
+    "critical": {
+      "name": "Pannes critiques",
+      "desc": "Échecs DDNS, renouvellement de certificats, amont, processus, sauvegardes et conteneurs"
+    },
+    "cert": {
+      "name": "Expiration des certificats",
+      "desc": "Certificats proches de l’expiration ou dont le renouvellement échoue"
+    },
+    "address": {
+      "name": "Changements d’adresse",
+      "desc": "Changements d’IP publique ou d’adresse mappée STUN"
+    },
+    "health": {
+      "name": "Santé des services",
+      "desc": "Amont actif/inactif, arrêts de conteneurs et de processus"
+    },
+    "security": {
+      "name": "Sécurité et connexions",
+      "desc": "Connexions réussies et échouées, bannissements et accès à des contenus sensibles"
+    },
+    "changes": {
+      "name": "Modifications de configuration",
+      "desc": "Chaque modification de configuration faite dans la console d’administration"
+    }
+  }
 }

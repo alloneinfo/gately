@@ -1,0 +1,19 @@
+{
+  "title": "Konfigurationsverlauf",
+  "desc": "Beim Überschreiben einer Konfigurationsdatei wird die vorherige Version automatisch gespeichert. Jede Version lässt sich mit der aktuellen vergleichen und mit einem Klick wiederherstellen.",
+  "pickConfig": "Konfiguration auswählen",
+  "keepHint": "Pro Konfiguration werden bis zu 30 Versionen aufbewahrt. Konto- und Token-Dateien sind ausgenommen.",
+  "savedAt": "Gespeichert am",
+  "size": "Größe",
+  "diff": "Vergleichen",
+  "restore": "Zurücksetzen",
+  "empty": "Noch kein Verlauf. Versionen erscheinen nach der ersten Änderung.",
+  "diffTitle": "{name}: Version im Vergleich zur aktuellen",
+  "legendOld": "Gewählte Version",
+  "legendNew": "Aktuell",
+  "noDiff": "Identisch mit der aktuellen Konfiguration",
+  "skipped": "… {count} unveränderte Zeilen …",
+  "restoreTitle": "Konfiguration zurücksetzen",
+  "restoreConfirm": "{name} auf die am {time} gespeicherte Version zurücksetzen? Gately startet dafür neu. Der aktuelle Inhalt bleibt als neue Version erhalten, das Zurücksetzen lässt sich also rückgängig machen.",
+  "restored": "Zurückgesetzt. Gately startet neu…"
+}

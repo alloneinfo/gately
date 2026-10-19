@@ -25,8 +25,11 @@ type Rule struct {
 	// MaxConnections 是该规则每个 TCP 端口的最大并发连接数，0 表示使用全局默认值
 	MaxConnections int `json:"maxConnections"`
 	// UDPSessionTimeout 是 UDP 会话空闲超时（秒），0 表示使用全局默认值
-	UDPSessionTimeout int    `json:"udpSessionTimeout"`
-	Remark            string `json:"remark"`
+	UDPSessionTimeout int `json:"udpSessionTimeout"`
+	// ProxyProtocol 非空时，TCP 连接目标后先发送 PROXY 协议头（v1 或 v2），把真实客户端地址告诉下游
+	// （haproxy accept-proxy、nginx proxy_protocol、Gately Web 服务"接收 PROXY 协议"）。目标必须支持，否则连接会被拒绝。
+	ProxyProtocol string `json:"proxyProtocol"`
+	Remark        string `json:"remark"`
 }
 
 // Settings 是模块级配置。
@@ -107,6 +110,11 @@ func (r *Rule) Validate() error {
 		return fmt.Errorf("至少填写一个目标地址")
 	}
 	r.TargetAddresses = targets
+	switch r.ProxyProtocol {
+	case "", "v1", "v2":
+	default:
+		return fmt.Errorf("不支持的 PROXY 协议版本 %q", r.ProxyProtocol)
+	}
 	if r.MaxConnections < 0 || r.UDPSessionTimeout < 0 {
 		return fmt.Errorf("连接数与超时不能为负数")
 	}

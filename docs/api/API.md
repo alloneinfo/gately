@@ -50,6 +50,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `backup` | 配置备份 | `backup:read`、`backup:write` |
 | `status` | 系统状态 | `status:read` |
 | `logs` | 系统日志 | `logs:read` |
+| `metrics` | 监控指标（Prometheus） | `metrics:read` |
 | `import` | Lucky 配置导入 | `import:write` |
 
 通配写法：`*:read` 表示全部模块只读，`*:write` 或 `*` 表示全部模块读写。
@@ -472,8 +473,16 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | GET | `/api/system/update` | `status:read` | 检查新版本 |
 | GET | `/api/system/backup` | 仅登录会话 | 下载配置备份 |
 | GET | `/api/system/diagnostics` | 仅登录会话 | 导出脱敏诊断包 |
+| GET | `/api/audit` | 仅登录会话 | 查询操作审计日志 |
+| GET | `/api/metrics` | `metrics:read` | Prometheus 全局指标 |
+| GET | `/api/history` | 仅登录会话 | 列出配置历史版本 |
+| GET | `/api/history/{name}/{id}/diff` | 仅登录会话 | 比较历史版本与当前配置 |
+| POST | `/api/history/{name}/{id}/restore` | 仅登录会话 | 回滚配置到历史版本 |
 | POST | `/api/system/restore` | 仅登录会话 | 从备份恢复配置 |
 | POST | `/api/system/restart` | 仅登录会话 | 重启 Gately |
+| POST | `/api/system/selfcheck` | 仅登录会话 | 网络与配置自检 |
+| GET | `/api/system/onboarding` | 仅登录会话 | 是否需要首次启动引导 |
+| POST | `/api/system/onboarding/dismiss` | 仅登录会话 | 完成或跳过首次启动引导 |
 | GET | `/api/openapi.json` | 任意有效令牌 | 获取本 API 的 OpenAPI 描述 |
 
 ## 配置导入
@@ -498,6 +507,14 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | 方法 | 路径 | 所需权限 | 说明 |
 | --- | --- | --- | --- |
 | PUT | `/api/account` | 仅登录会话 | 修改管理员用户名与密码 |
+| GET | `/api/account/passkeys` | 仅登录会话 | 列出已注册的 Passkey |
+| POST | `/api/account/passkeys/begin` | 仅登录会话 | 开始注册 Passkey |
+| POST | `/api/account/passkeys` | 仅登录会话 | 完成注册 Passkey |
+| DELETE | `/api/account/passkeys/{id}` | 仅登录会话 | 删除 Passkey |
+| GET | `/api/account/users` | 仅登录会话 | 列出只读账号 |
+| POST | `/api/account/users` | 仅登录会话 | 创建只读账号 |
+| PUT | `/api/account/users/{name}` | 仅登录会话 | 重置只读账号密码 |
+| DELETE | `/api/account/users/{name}` | 仅登录会话 | 删除只读账号 |
 | GET | `/api/account/totp` | 仅登录会话 | 查看两步验证状态 |
 | POST | `/api/account/totp/setup` | 仅登录会话 | 生成两步验证密钥 |
 | POST | `/api/account/totp/enable` | 仅登录会话 | 启用两步验证 |
@@ -825,6 +842,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `maxConnections` | integer |
 | `name` | string |
 | `protocols` | 数组 of string |
+| `proxyProtocol` | string |
 | `remark` | string |
 | `targetAddresses` | 数组 of string |
 | `targetPorts` | string |
@@ -835,6 +853,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | 字段 | 类型 |
 | --- | --- |
 | `ca` | string |
+| `challenge` | string |
 | `credentials` | `dnsprovider.Credentials` |
 | `directoryUrl` | string |
 | `disableAuthoritativeCheck` | boolean |
@@ -842,6 +861,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `eabHmac` | string |
 | `eabKid` | string |
 | `email` | string |
+| `httpPort` | integer |
 | `keyType` | string |
 | `propagationTimeout` | integer |
 | `provider` | string |
@@ -1018,6 +1038,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `acceptProxyProtocol` | boolean |
 | `default` | `webservice.Site` |
 | `enable` | boolean |
+| `http3` | boolean |
 | `key` | string |
 | `listenIp` | string |
 | `minTls` | string |

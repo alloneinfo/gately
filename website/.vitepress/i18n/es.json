@@ -42,11 +42,13 @@
       "modules/tools": "Archivos y herramientas de operación",
       "guide/security": "Modelo de seguridad y compromiso de privacidad",
       "guide/hardening": "Guía de refuerzo",
+      "guide/verify": "Verificar versiones",
       "reference/api": "Tokens de API y OpenAPI",
       "reference/api-reference": "Referencia de la API",
       "reference/docker-api": "API de Docker",
       "reference/webterminal-api": "API del terminal web",
       "reference/diagnostics": "Paquete de diagnóstico",
+      "reference/monitoring": "Monitorización",
       "guide/contributing": "Cómo contribuir"
     },
     "englishOnly": " (en inglés)"

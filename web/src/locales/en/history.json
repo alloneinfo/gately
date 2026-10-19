@@ -1,0 +1,19 @@
+{
+  "title": "Config History",
+  "desc": "Each time a configuration file is overwritten, the previous version is saved automatically. Compare any version with the current one and roll back in one click.",
+  "pickConfig": "Select a configuration",
+  "keepHint": "Up to 30 versions are kept per configuration. Account and token files are excluded.",
+  "savedAt": "Saved at",
+  "size": "Size",
+  "diff": "Compare",
+  "restore": "Roll back",
+  "empty": "No history yet. Versions appear after the first change.",
+  "diffTitle": "{name}: version vs. current",
+  "legendOld": "Selected version",
+  "legendNew": "Current",
+  "noDiff": "Identical to the current configuration",
+  "skipped": "… {count} unchanged lines …",
+  "restoreTitle": "Roll back configuration",
+  "restoreConfirm": "Roll {name} back to the version saved at {time}? Gately will restart to apply it. The current content is kept as a new version, so you can undo the rollback.",
+  "restored": "Rolled back. Gately is restarting…"
+}

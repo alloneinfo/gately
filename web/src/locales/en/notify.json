@@ -67,5 +67,38 @@
   "kindSmtp": "Email (SMTP)",
   "secretSet": "Already set; leave empty to keep it",
   "deleted": "(deleted)",
-  "testSent": "Test notification sent"
+  "testSent": "Test notification sent",
+  "ntfyUrlPlaceholder": "Leave empty to use https://ntfy.sh",
+  "topic": "Topic",
+  "accessToken": "Access token (optional)",
+  "appToken": "App token",
+  "userKey": "User key",
+  "webhookUrl": "Webhook URL",
+  "template": "Template",
+  "tpl": {
+    "critical": {
+      "name": "Critical failures",
+      "desc": "DDNS, certificate renewal, upstream, process, backup and container failures"
+    },
+    "cert": {
+      "name": "Certificate expiry",
+      "desc": "Certificate nearing expiry or failing to renew"
+    },
+    "address": {
+      "name": "Address changes",
+      "desc": "Public IP or STUN mapped address changes"
+    },
+    "health": {
+      "name": "Service health",
+      "desc": "Upstream up/down, container exits and process exits"
+    },
+    "security": {
+      "name": "Security & sign-ins",
+      "desc": "Failed and successful sign-ins, bans and access to sensitive content"
+    },
+    "changes": {
+      "name": "Configuration changes",
+      "desc": "Every configuration change made in the admin console"
+    }
+  }
 }

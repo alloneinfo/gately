@@ -50,6 +50,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `backup` | Sauvegarde de configuration | `backup:read`、`backup:write` |
 | `status` | État du système | `status:read` |
 | `logs` | Journaux système | `logs:read` |
+| `metrics` | Métriques (Prometheus) | `metrics:read` |
 | `import` | Import de configuration Lucky | `import:write` |
 
 Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `*:write` ou `*` la lecture et l'écriture sur tous les modules.
@@ -472,8 +473,16 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | GET | `/api/system/update` | `status:read` | Rechercher une nouvelle version |
 | GET | `/api/system/backup` | Session connectée uniquement | Télécharger la sauvegarde de configuration |
 | GET | `/api/system/diagnostics` | Session connectée uniquement | Exporter le paquet de diagnostic anonymisé |
+| GET | `/api/audit` | Session connectée uniquement | Consulter le journal d'audit |
+| GET | `/api/metrics` | `metrics:read` | Métriques Prometheus globales |
+| GET | `/api/history` | Session connectée uniquement | Lister les versions de l'historique de configuration |
+| GET | `/api/history/{name}/{id}/diff` | Session connectée uniquement | Comparer une version de l'historique avec la configuration actuelle |
+| POST | `/api/history/{name}/{id}/restore` | Session connectée uniquement | Restaurer une configuration à une version de l'historique |
 | POST | `/api/system/restore` | Session connectée uniquement | Restaurer la configuration depuis une sauvegarde |
 | POST | `/api/system/restart` | Session connectée uniquement | Redémarrer Gately |
+| POST | `/api/system/selfcheck` | Session connectée uniquement | Autodiagnostic du réseau et de la configuration |
+| GET | `/api/system/onboarding` | Session connectée uniquement | Indique si l'assistant de premier démarrage est en attente |
+| POST | `/api/system/onboarding/dismiss` | Session connectée uniquement | Terminer ou ignorer l'assistant de premier démarrage |
 | GET | `/api/openapi.json` | Tout jeton valide | Obtenir la description OpenAPI de cette API |
 
 ## Import de configuration
@@ -498,6 +507,14 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | Méthode | Chemin | Permission requise | Description |
 | --- | --- | --- | --- |
 | PUT | `/api/account` | Session connectée uniquement | Modifier le nom d'utilisateur et le mot de passe de l'administrateur |
+| GET | `/api/account/passkeys` | Session connectée uniquement | Lister les Passkeys enregistrées |
+| POST | `/api/account/passkeys/begin` | Session connectée uniquement | Commencer l'enregistrement d'une Passkey |
+| POST | `/api/account/passkeys` | Session connectée uniquement | Terminer l'enregistrement de la Passkey |
+| DELETE | `/api/account/passkeys/{id}` | Session connectée uniquement | Supprimer une Passkey |
+| GET | `/api/account/users` | Session connectée uniquement | Lister les comptes en lecture seule |
+| POST | `/api/account/users` | Session connectée uniquement | Créer un compte en lecture seule |
+| PUT | `/api/account/users/{name}` | Session connectée uniquement | Réinitialiser le mot de passe d'un compte en lecture seule |
+| DELETE | `/api/account/users/{name}` | Session connectée uniquement | Supprimer un compte en lecture seule |
 | GET | `/api/account/totp` | Session connectée uniquement | Consulter l'état de l'authentification à deux facteurs |
 | POST | `/api/account/totp/setup` | Session connectée uniquement | Générer une clé d'authentification à deux facteurs |
 | POST | `/api/account/totp/enable` | Session connectée uniquement | Activer l'authentification à deux facteurs |
@@ -825,6 +842,7 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | `maxConnections` | integer |
 | `name` | string |
 | `protocols` | Tableau de string |
+| `proxyProtocol` | string |
 | `remark` | string |
 | `targetAddresses` | Tableau de string |
 | `targetPorts` | string |
@@ -835,6 +853,7 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | Champ | Type |
 | --- | --- |
 | `ca` | string |
+| `challenge` | string |
 | `credentials` | `dnsprovider.Credentials` |
 | `directoryUrl` | string |
 | `disableAuthoritativeCheck` | boolean |
@@ -842,6 +861,7 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | `eabHmac` | string |
 | `eabKid` | string |
 | `email` | string |
+| `httpPort` | integer |
 | `keyType` | string |
 | `propagationTimeout` | integer |
 | `provider` | string |
@@ -1018,6 +1038,7 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | `acceptProxyProtocol` | boolean |
 | `default` | `webservice.Site` |
 | `enable` | boolean |
+| `http3` | boolean |
 | `key` | string |
 | `listenIp` | string |
 | `minTls` | string |

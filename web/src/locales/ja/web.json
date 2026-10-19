@@ -99,5 +99,6 @@
   "statusNotRunning": "未実行",
   "savedReloaded": "保存しました。リスナーを再読み込みしました",
   "moduleEnabled": "Web サービスモジュールを有効にしました",
-  "sitesCollapsed": "{count} 件のサイトを非表示中（クリックで展開）"
+  "sitesCollapsed": "{count} 件のサイトを非表示中（クリックで展開）",
+  "http3Help": "同じポート番号の UDP で HTTP/3（QUIC）も提供します。ファイアウォールとポート転送でその UDP ポートを許可してください。"
 }

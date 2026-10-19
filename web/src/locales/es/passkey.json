@@ -1,0 +1,17 @@
+{
+  "title": "Passkeys",
+  "desc": "Inicia sesión con tu huella, rostro o PIN del dispositivo en lugar de una contraseña. Las passkeys incluyen verificación del usuario, así que no hace falta código de autenticación. Aquí solo se guarda la clave pública.",
+  "count": "{count} registradas",
+  "unsupported": "Este navegador no admite passkeys. Además requieren HTTPS o localhost y un nombre de dominio (los navegadores no aceptan direcciones IP).",
+  "createdAt": "Registrada",
+  "lastUsed": "Último uso",
+  "add": "Añadir passkey",
+  "deviceName": "Nombre del dispositivo",
+  "deviceNamePlaceholder": "p. ej. MacBook Touch ID",
+  "needPassword": "Introduce tu contraseña actual",
+  "addHint": "Al continuar, tu navegador o dispositivo te pedirá confirmar con huella, rostro o PIN.",
+  "added": "Passkey añadida",
+  "deleteTitle": "Eliminar passkey",
+  "deleteConfirm": "¿Eliminar «{name}»? Introduce tu contraseña actual para confirmar.",
+  "continue": "Continuar"
+}

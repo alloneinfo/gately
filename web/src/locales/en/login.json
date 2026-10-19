@@ -22,5 +22,7 @@
   "backToAccount": "Back to change account",
   "badge": "Open source · Self-hosted",
   "verifying": "Verifying…",
-  "totpAuto": "The code is verified automatically once complete"
+  "totpAuto": "The code is verified automatically once complete",
+  "or": "or",
+  "passkey": "Sign in with a Passkey"
 }

@@ -21,6 +21,7 @@ import (
 	"time"
 
 	"github.com/wangwanjie/gately/internal/apitoken"
+	"github.com/wangwanjie/gately/internal/audit"
 	"github.com/wangwanjie/gately/internal/auth"
 	"github.com/wangwanjie/gately/internal/config"
 	"github.com/wangwanjie/gately/internal/events"
@@ -54,6 +55,10 @@ type Options struct {
 	Modules []module.Module
 	// Certs 为管理界面 HTTPS 提供证书，可为 nil
 	Certs CertProvider
+	// ApplyDir 非空时，每次启动把该目录下的 <名称>.json 覆盖到配置目录（声明式配置，适合 GitOps、Docker 与 Kubernetes）
+	ApplyDir string
+	// InitialPassword 非空时作为首次启动的管理员初始密码，不再随机生成也不写入日志
+	InitialPassword string
 }
 
 type moduleEntry struct {
@@ -75,6 +80,8 @@ type App struct {
 	restartCh      chan struct{}
 	auth           *auth.Manager
 	tokens         *apitoken.Manager
+	// audit 记录管理后台的操作审计日志
+	audit *audit.Log
 	// routes 为最近一次构建处理器时登记的全部接口，用于生成 API 文档
 	routes    []routeInfo
 	routeDocs map[string]module.Doc
@@ -85,9 +92,11 @@ type App struct {
 	hostStats *sysstat.Collector
 	logger    *log.Logger
 	// pendingTOTP 是生成后尚未确认的两步验证密钥
-	loginUsed   usedStates
-	pendingMu   sync.Mutex
-	pendingTOTP string
+	loginUsed usedStates
+	// passkeyChallenges 保存已下发的 WebAuthn 挑战
+	passkeyChallenges challengeStore
+	pendingMu         sync.Mutex
+	pendingTOTP       string
 }
 
 // New 加载配置并初始化所有模块，但不启动网络服务。
@@ -95,6 +104,14 @@ func New(opts Options) (*App, error) {
 	store, err := config.Open(opts.ConfigDir)
 	if err != nil {
 		return nil, err
+	}
+	store.EnableHistory(historyKeep, historySkip...)
+	if opts.ApplyDir != "" {
+		n, err := applyConfigDir(store, opts.ApplyDir)
+		if err != nil {
+			return nil, fmt.Errorf("应用声明式配置失败: %w", err)
+		}
+		log.Printf("已从 %s 应用 %d 个配置文件", opts.ApplyDir, n)
 	}
 	// 标准日志按服务端语言翻译后输出
 	logger := log.New(i18n.NewWriter(os.Stderr), "", log.LstdFlags)
@@ -107,6 +124,7 @@ func New(opts Options) (*App, error) {
 		hostStats: sysstat.New(opts.ConfigDir),
 		logger:    logger,
 		restartCh: make(chan struct{}, 1),
+		audit:     audit.New(opts.ConfigDir),
 	}
 	if _, err := store.Load(settingsName, &a.settings); err != nil {
 		return nil, err
@@ -124,6 +142,9 @@ func New(opts Options) (*App, error) {
 	a.auth = auth.NewManager(acc, func(acc auth.Account) error {
 		return store.Save(accountName, acc)
 	})
+	if err := a.auth.SetBootstrapPassword(opts.InitialPassword); err != nil {
+		return nil, err
+	}
 	generated, err := a.auth.EnsureInitialized()
 	if err != nil {
 		return nil, fmt.Errorf("初始化管理员账号失败: %w", err)
@@ -149,6 +170,7 @@ func New(opts Options) (*App, error) {
 	if err := a.initTokens(); err != nil {
 		return nil, err
 	}
+	a.audit.SetHook(publishAudit)
 	a.applyRuntime()
 	return a, nil
 }
@@ -161,6 +183,8 @@ func (a *App) Handler() http.Handler {
 
 	mux.HandleFunc("POST /api/login", a.handleLogin)
 	mux.HandleFunc("POST /api/logout", a.handleLogout)
+	mux.HandleFunc("POST /api/login/passkey/begin", a.handlePasskeyLoginBegin)
+	mux.HandleFunc("POST /api/login/passkey/finish", a.handlePasskeyLoginFinish)
 	mux.HandleFunc("GET /api/login/providers", a.handleThirdProviders)
 	mux.HandleFunc("GET "+thirdauth.StartPath, a.handleThirdStart)
 	mux.HandleFunc("GET "+thirdauth.CallbackPath, a.handleThirdCallback)
@@ -168,6 +192,14 @@ func (a *App) Handler() http.Handler {
 	rec.add("GET /api/session", a.handleSession, "")
 	rec.add("GET /api/status", a.handleStatus, "")
 	rec.add("PUT /api/account", a.handleAccount, "")
+	rec.add("GET /api/account/passkeys", a.handlePasskeyList, "")
+	rec.add("POST /api/account/passkeys/begin", a.handlePasskeyBegin, "")
+	rec.add("POST /api/account/passkeys", a.handlePasskeyRegister, "")
+	rec.add("DELETE /api/account/passkeys/{id}", a.handlePasskeyDelete, "")
+	rec.add("GET /api/account/users", a.handleUserList, "")
+	rec.add("POST /api/account/users", a.handleUserCreate, "")
+	rec.add("PUT /api/account/users/{name}", a.handleUserPassword, "")
+	rec.add("DELETE /api/account/users/{name}", a.handleUserDelete, "")
 	rec.add("GET /api/account/totp", a.handleTOTPStatus, "")
 	rec.add("POST /api/account/totp/setup", a.handleTOTPSetup, "")
 	rec.add("POST /api/account/totp/enable", a.handleTOTPEnable, "")
@@ -180,8 +212,16 @@ func (a *App) Handler() http.Handler {
 	rec.add("GET /api/system/update", a.handleCheckUpdate, "")
 	rec.add("GET /api/system/backup", a.handleBackup, "")
 	rec.add("GET /api/system/diagnostics", a.handleDiagnostics, "")
+	rec.add("GET /api/audit", a.handleAudit, "")
+	rec.add("GET /api/metrics", a.handleMetrics, "")
+	rec.add("GET /api/history", a.handleHistoryList, "")
+	rec.add("GET /api/history/{name}/{id}/diff", a.handleHistoryDiff, "")
+	rec.add("POST /api/history/{name}/{id}/restore", a.handleHistoryRestore, "")
 	rec.add("POST /api/system/restore", a.handleRestore, "")
 	rec.add("POST /api/system/restart", a.handleRestart, "")
+	rec.add("POST /api/system/selfcheck", a.handleSelfCheck, "")
+	rec.add("GET /api/system/onboarding", a.handleOnboarding, "")
+	rec.add("POST /api/system/onboarding/dismiss", a.handleOnboardingDismiss, "")
 	for _, e := range a.modules {
 		prefix := "/api/" + e.mod.ID()
 		rec.add("GET "+prefix+"/logs", a.logsHandler(e.logs), e.mod.ID())
@@ -200,7 +240,7 @@ func (a *App) Handler() http.Handler {
 	rec.add("GET /api/openapi.json", a.handleOpenAPI, "")
 	a.routes = rec.routes
 	a.routeDocs = rec.docs
-	mux.Handle("/api/", a.requireAuth(protected))
+	mux.Handle("/api/", a.requireAuth(a.roleGuard(a.audit.Middleware(protected))))
 	mux.Handle("/", a.staticHandler())
 	return securityHeaders(i18n.Middleware(a.accessControl(httpx.SameOrigin(mux))))
 }
@@ -307,6 +347,7 @@ func (a *App) handleLogin(w http.ResponseWriter, r *http.Request) {
 	}
 	if err != nil {
 		a.sysLogs.Add(logbuf.LevelWarn, "auth", fmt.Sprintf("来自 %s 的登录失败: %v", ip, err))
+		a.audit.Record(audit.Entry{Actor: req.Username, IP: ip, Via: audit.Via(r), Category: audit.CategoryLogin, Method: "POST", Path: "/api/login", Status: http.StatusUnauthorized, Detail: err.Error()})
 		events.Publish(events.Event{Type: events.AuthFailed, Source: "管理后台", Level: events.LevelWarn,
 			Title: "管理后台登录失败", Message: fmt.Sprintf("来自 %s 的登录失败：%v", ip, err), Fields: map[string]string{"ip": ip}})
 		status := http.StatusUnauthorized
@@ -317,6 +358,7 @@ func (a *App) handleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	a.sysLogs.Add(logbuf.LevelInfo, "auth", fmt.Sprintf("%s 从 %s 登录", req.Username, ip))
+	a.audit.Record(audit.Entry{Actor: req.Username, IP: ip, Via: audit.Via(r), Category: audit.CategoryLogin, Method: "POST", Path: "/api/login", Status: http.StatusOK, Detail: "密码登录"})
 	events.Publish(events.Event{Type: events.LoginSuccessful, Source: "管理后台", Level: events.LevelInfo,
 		Title: "管理后台登录成功", Message: fmt.Sprintf("%s 从 %s 登录", req.Username, ip), Fields: map[string]string{"ip": ip, "user": req.Username}})
 	http.SetCookie(w, &http.Cookie{
@@ -332,12 +374,19 @@ func (a *App) handleLogin(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) handleLogout(w http.ResponseWriter, r *http.Request) {
+	if user, ok := a.auth.Verify(auth.TokenFromRequest(r)); ok {
+		a.audit.Record(audit.Entry{Actor: user, IP: httpx.ClientIP(r), Via: audit.Via(r), Category: audit.CategoryLogin, Method: "POST", Path: "/api/logout", Status: http.StatusOK, Detail: "退出登录"})
+	}
 	http.SetCookie(w, &http.Cookie{Name: auth.CookieName, Value: "", Path: "/", MaxAge: -1, HttpOnly: true, SameSite: http.SameSiteStrictMode})
 	httpx.OK(w, map[string]bool{"ok": true})
 }
 
 func (a *App) handleSession(w http.ResponseWriter, r *http.Request) {
-	httpx.OK(w, map[string]string{"username": auth.UserFromContext(r.Context())})
+	role := auth.RoleFromContext(r.Context())
+	if role == "" {
+		role = auth.RoleAdmin
+	}
+	httpx.OK(w, map[string]string{"username": auth.UserFromContext(r.Context()), "role": role})
 }
 
 type moduleInfo struct {

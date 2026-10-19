@@ -7,5 +7,6 @@
   "logout": "Abmelden",
   "logoutTitle": "Abmelden",
   "logoutConfirm": "Möchten Sie sich wirklich abmelden?",
-  "logoutOk": "Abmelden"
+  "logoutOk": "Abmelden",
+  "readonlyBadge": "Nur lesen"
 }

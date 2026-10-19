@@ -23,6 +23,7 @@ import (
 	"github.com/go-acme/lego/v4/lego"
 	"github.com/go-acme/lego/v4/registration"
 
+	"github.com/wangwanjie/gately/internal/acmehttp"
 	"github.com/wangwanjie/gately/internal/dnsprovider"
 	"github.com/wangwanjie/gately/internal/logbuf"
 )
@@ -168,27 +169,13 @@ func obtain(cfg ACMEConfig, acc *Account, log *logbuf.Logger) (*obtainResult, er
 		}
 	}
 
-	p, err := dnsprovider.New(cfg.Provider, cfg.Credentials, &http.Client{Timeout: 30 * time.Second})
-	if err != nil {
-		return nil, err
-	}
-	txt, err := dnsprovider.AsTXT(p)
-	if err != nil {
-		return nil, err
-	}
-	solver := &dnsSolver{txt: txt, zone: strings.Trim(cfg.Zone, "."), timeout: time.Duration(cfg.PropagationTimeout) * time.Second, log: log}
-	opts := []dns01.ChallengeOption{}
-	if len(cfg.Resolvers) > 0 {
-		opts = append(opts, dns01.AddRecursiveNameservers(dns01.ParseNameservers(cfg.Resolvers)))
-	}
-	if cfg.DisableAuthoritativeCheck {
-		opts = append(opts, dns01.DisableAuthoritativeNssPropagationRequirement())
-	}
-	if cfg.SkipPropagationCheck {
-		// 跳过本地检查，留出固定时间让 TXT 生效后再交给 CA 验证
-		opts = append(opts, dns01.PropagationWait(skipPropagationWait, true))
-	}
-	if err := client.Challenge.SetDNS01Provider(solver, opts...); err != nil {
+	if cfg.Challenge == ChallengeHTTP {
+		// HTTP-01：由 Web 服务模块或临时监听应答，无需 DNS 服务商
+		prov := &acmehttp.Provider{Port: cfg.HTTPPort, Logf: log.Infof}
+		if err := client.Challenge.SetHTTP01Provider(prov); err != nil {
+			return nil, err
+		}
+	} else if err := setupDNS01(client, cfg, log); err != nil {
 		return nil, err
 	}
 
@@ -204,4 +191,29 @@ func obtain(cfg ACMEConfig, acc *Account, log *logbuf.Logger) (*obtainResult, er
 	res.KeyPEM = string(cert.PrivateKey)
 	res.IssuerPEM = string(cert.IssuerCertificate)
 	return res, nil
+}
+
+// setupDNS01 为客户端配置 DNS-01 验证。
+func setupDNS01(client *lego.Client, cfg ACMEConfig, log *logbuf.Logger) error {
+	p, err := dnsprovider.New(cfg.Provider, cfg.Credentials, &http.Client{Timeout: 30 * time.Second})
+	if err != nil {
+		return err
+	}
+	txt, err := dnsprovider.AsTXT(p)
+	if err != nil {
+		return err
+	}
+	solver := &dnsSolver{txt: txt, zone: strings.Trim(cfg.Zone, "."), timeout: time.Duration(cfg.PropagationTimeout) * time.Second, log: log}
+	opts := []dns01.ChallengeOption{}
+	if len(cfg.Resolvers) > 0 {
+		opts = append(opts, dns01.AddRecursiveNameservers(dns01.ParseNameservers(cfg.Resolvers)))
+	}
+	if cfg.DisableAuthoritativeCheck {
+		opts = append(opts, dns01.DisableAuthoritativeNssPropagationRequirement())
+	}
+	if cfg.SkipPropagationCheck {
+		// 跳过本地检查，留出固定时间让 TXT 生效后再交给 CA 验证
+		opts = append(opts, dns01.PropagationWait(skipPropagationWait, true))
+	}
+	return client.Challenge.SetDNS01Provider(solver, opts...)
 }

@@ -22,5 +22,7 @@
   "backToAccount": "返回修改帳號",
   "badge": "開源 · 自架",
   "verifying": "正在驗證…",
-  "totpAuto": "輸入完成後將自動驗證"
+  "totpAuto": "輸入完成後將自動驗證",
+  "or": "或",
+  "passkey": "使用 Passkey 登入"
 }

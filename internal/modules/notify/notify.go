@@ -35,6 +35,11 @@ const historySize = 200
 //	wecom     URL=机器人地址
 //	dingtalk  URL=机器人地址，Secret=加签密钥（可选）
 //	feishu    URL=机器人地址，Secret=签名校验密钥（可选）
+//	ntfy      URL 可选（默认 ntfy.sh），Target=主题，Secret=访问令牌（可选）
+//	gotify    URL=服务地址，Secret=应用令牌
+//	pushover  Secret=应用令牌，Target=用户 Key，URL 可选
+//	discord / slack  URL=Webhook 地址
+//	serverchan / pushplus  Secret=SendKey / token，URL 可选
 //	smtp      Host/Port/Security/User/Secret=密码/From，Target=收件人（逗号分隔）
 type Channel struct {
 	Key    string `json:"key"`
@@ -114,8 +119,33 @@ func (c *Channel) Validate() error {
 			return errors.New("Bark 需要填写设备 Key")
 		}
 		return validateOptionalURL(c.URL)
-	case KindWeCom, KindDingTalk, KindFeishu:
+	case KindWeCom, KindDingTalk, KindFeishu, KindDiscord, KindSlack:
 		return validateRequiredURL(c.URL)
+	case KindNtfy:
+		if c.Target == "" {
+			return errors.New("ntfy 需要填写主题")
+		}
+		return validateOptionalURL(c.URL)
+	case KindGotify:
+		if c.Secret == "" {
+			return errors.New("Gotify 需要填写应用令牌")
+		}
+		return validateRequiredURL(c.URL)
+	case KindPushover:
+		if c.Secret == "" || c.Target == "" {
+			return errors.New("Pushover 需要填写应用令牌与用户 Key")
+		}
+		return validateOptionalURL(c.URL)
+	case KindServerChan:
+		if c.Secret == "" {
+			return errors.New("Server酱 需要填写 SendKey")
+		}
+		return validateOptionalURL(c.URL)
+	case KindPushPlus:
+		if c.Secret == "" {
+			return errors.New("PushPlus 需要填写 token")
+		}
+		return validateOptionalURL(c.URL)
 	case KindSMTP:
 		c.Host = strings.TrimSpace(c.Host)
 		if c.Host == "" || c.Target == "" {

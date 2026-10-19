@@ -6,6 +6,10 @@ docs/guide/migration.md
 docs/reference/docker-api.md
 docs/reference/webterminal-api.md
 docs/reference/diagnostics.md
+docs/reference/monitoring.md
+docs/guide/verify.md
+en/docs/reference/monitoring.md
+en/docs/guide/verify.md
 docs/reference/api-reference.md
 public/openapi.json
 en/docs/guide/migration.md

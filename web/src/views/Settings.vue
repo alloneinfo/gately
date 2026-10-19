@@ -105,6 +105,10 @@
           </el-dialog>
         </div>
 
+        <PasskeyManager />
+
+        <ReadonlyUsers />
+
         <div v-if="form" class="g-card">
           <div class="g-card-head">
             <div class="g-card-title"><LockKeyhole :size="16" />{{ t('settings.loginProtect.title') }}</div>
@@ -218,6 +222,14 @@
               <el-form-item :label="t('settings.restrict.lanOnly')">
                 <el-switch v-model="form.lanOnly" />
                 <span class="help">{{ t('settings.restrict.lanOnlyHelp') }}</span>
+              </el-form-item>
+              <el-form-item :label="t('settings.restrict.trustProxy')">
+                <el-switch v-model="trustProxy" />
+                <span class="help">{{ t('settings.restrict.trustProxyHelp') }}</span>
+              </el-form-item>
+              <el-form-item v-if="trustProxy" :label="t('settings.restrict.trustedProxies')">
+                <el-select v-model="trustedProxies" multiple filterable allow-create default-first-option :reserve-keyword="false" :placeholder="t('settings.restrict.trustedProxiesPlaceholder')" class="w-480" />
+                <div class="help">{{ t('settings.restrict.trustedProxiesHelp') }}</div>
               </el-form-item>
             </el-form>
           </div>
@@ -450,6 +462,8 @@ import {
 import { api, type ImportFileResult, type SystemInfo, type SystemSettings } from '../api'
 import PageHeader from '../components/PageHeader.vue'
 import OtpInput from '../components/OtpInput.vue'
+import PasskeyManager from '../components/PasskeyManager.vue'
+import ReadonlyUsers from '../components/ReadonlyUsers.vue'
 import OAuthProviders from '../components/OAuthProviders.vue'
 import StatusBadge from '../components/StatusBadge.vue'
 import SaveBar from '../components/SaveBar.vue'
@@ -482,7 +496,7 @@ const saving = ref(false)
 const dirty = computed(() => !!form.value && JSON.stringify(normalized(form.value)) !== savedJSON.value)
 
 function normalized(s: SystemSettings) {
-  return { ...s, dnsServers: s.dnsServers ?? [], thirdLogin: normalizedLogin(s.thirdLogin), restartRequired: false }
+  return { ...s, dnsServers: s.dnsServers ?? [], trustedProxies: s.trustedProxies ?? [], thirdLogin: normalizedLogin(s.thirdLogin), restartRequired: false }
 }
 
 // 后端的空列表会序列化为 null，统一成数组便于编辑与比较
@@ -528,6 +542,25 @@ const dnsServers = computed({
   set: (v: string[]) => {
     if (form.value) {
       form.value.dnsServers = v.map((s) => s.trim()).filter(Boolean)
+    }
+  },
+})
+
+// 界面上用"信任"开关，配置中存的是关闭标志（默认信任）
+const trustProxy = computed({
+  get: () => !form.value?.disableProxyHeaders,
+  set: (v: boolean) => {
+    if (form.value) {
+      form.value.disableProxyHeaders = !v
+    }
+  },
+})
+
+const trustedProxies = computed({
+  get: () => form.value?.trustedProxies ?? [],
+  set: (v: string[]) => {
+    if (form.value) {
+      form.value.trustedProxies = v.map((s) => s.trim()).filter(Boolean)
     }
   },
 })

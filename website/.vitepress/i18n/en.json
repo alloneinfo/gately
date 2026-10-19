@@ -42,11 +42,13 @@
       "modules/tools": "Files & Ops Tools",
       "guide/security": "Security Model & Privacy Promise",
       "guide/hardening": "Hardening Guide",
+      "guide/verify": "Verifying Releases",
       "reference/api": "API Tokens & OpenAPI",
       "reference/api-reference": "API Reference",
       "reference/docker-api": "Docker API",
       "reference/webterminal-api": "Web Terminal API",
       "reference/diagnostics": "Diagnostics Bundle",
+      "reference/monitoring": "Monitoring",
       "guide/contributing": "Contributing"
     },
     "englishOnly": ""

@@ -155,6 +155,9 @@ export interface SystemSettings {
   forceHTTPS: boolean
   safePath: string
   lanOnly: boolean
+  // 为 true 时不信任本机反向代理传来的客户端地址
+  disableProxyHeaders: boolean
+  trustedProxies: string[] | null
   maxLoginFailures: number
   lockMinutes: number
   timeZone: string

@@ -76,6 +76,15 @@
           </el-button>
         </el-form>
 
+        <div v-if="canPasskey" class="third">
+          <div class="third-title"><span>{{ t('login.or') }}</span></div>
+          <button type="button" class="third-btn passkey-btn" :disabled="loading" @click="loginWithPasskey">
+            <LoaderCircle v-if="passkeyBusy" :size="16" class="spin" />
+            <Fingerprint v-else :size="16" />
+            <span class="third-name">{{ t('login.passkey') }}</span>
+          </button>
+        </div>
+
         <div v-if="providers.length" class="third">
           <div class="third-title"><span>{{ t('login.thirdParty') }}</span></div>
           <div class="third-list" :class="{ single: providers.length === 1 }">
@@ -145,12 +154,13 @@ import { nextTick, onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
-import { LoaderCircle, ArrowLeft, ArrowLeftRight, ArrowRight, Info, KeyRound, LockKeyhole, Server, ShieldCheck, UserRound } from 'lucide-vue-next'
+import { LoaderCircle, ArrowLeft, Fingerprint, ArrowLeftRight, ArrowRight, Info, KeyRound, LockKeyhole, Server, ShieldCheck, UserRound } from 'lucide-vue-next'
 import { api, ApiError } from '../api'
 import AppLogo from '../components/AppLogo.vue'
 import ThemePicker from '../components/ThemePicker.vue'
 import LocaleSwitcher from '../components/LocaleSwitcher.vue'
 import OtpInput from '../components/OtpInput.vue'
+import { getPasskey, passkeySupported, type GetOptions } from '../composables/passkey'
 
 const { t } = useI18n()
 const router = useRouter()
@@ -159,6 +169,9 @@ const form = reactive({ username: '', password: '', code: '' })
 const loading = ref(false)
 const needCode = ref(false)
 const codeInput = ref<InstanceType<typeof OtpInput>>()
+// 浏览器支持 WebAuthn 时显示 Passkey 登录；服务端尚未注册 Passkey 时点击会提示
+const canPasskey = passkeySupported()
+const passkeyBusy = ref(false)
 const providers = ref<{ key: string; name: string; type: string; url: string }[]>([])
 
 // 正在跳转的第三方登录方式；非空时按钮显示进度并禁止重复点击
@@ -221,6 +234,28 @@ async function submit() {
       await nextTick()
       focusCode()
     }
+  }
+}
+
+// 使用 Passkey 登录：由验证器完成用户验证，无需密码与验证码
+async function loginWithPasskey() {
+  if (loading.value || passkeyBusy.value) {
+    return
+  }
+  passkeyBusy.value = true
+  try {
+    const opts = await api.post<GetOptions>('/api/login/passkey/begin', {})
+    const credential = await getPasskey(opts)
+    await api.post('/api/login/passkey/finish', { challenge: opts.challenge, credential })
+    const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : '/overview'
+    router.replace(redirect)
+  } catch (e) {
+    // 用户在系统弹窗中取消时不提示
+    if ((e as Error).name !== 'NotAllowedError') {
+      ElMessage.error((e as Error).message)
+    }
+  } finally {
+    passkeyBusy.value = false
   }
 }
 
@@ -558,6 +593,15 @@ h2 {
   width: 17px;
   height: 17px;
   flex-shrink: 0;
+}
+.passkey-btn {
+  width: 100%;
+  cursor: pointer;
+  font-family: inherit;
+}
+.passkey-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 .third-btn.busy {
   opacity: 0.8;

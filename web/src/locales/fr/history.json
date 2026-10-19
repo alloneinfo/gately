@@ -1,0 +1,19 @@
+{
+  "title": "Historique de configuration",
+  "desc": "À chaque écrasement d'un fichier de configuration, la version précédente est enregistrée automatiquement. Comparez n'importe quelle version à la version actuelle et revenez en arrière en un clic.",
+  "pickConfig": "Choisir une configuration",
+  "keepHint": "Jusqu'à 30 versions conservées par configuration. Les fichiers de compte et de jetons sont exclus.",
+  "savedAt": "Enregistré le",
+  "size": "Taille",
+  "diff": "Comparer",
+  "restore": "Restaurer",
+  "empty": "Aucun historique pour l'instant. Les versions apparaissent après la première modification.",
+  "diffTitle": "{name} : version et version actuelle",
+  "legendOld": "Version sélectionnée",
+  "legendNew": "Actuelle",
+  "noDiff": "Identique à la configuration actuelle",
+  "skipped": "… {count} lignes inchangées …",
+  "restoreTitle": "Restaurer la configuration",
+  "restoreConfirm": "Restaurer {name} à la version enregistrée le {time} ? Gately redémarrera pour l'appliquer. Le contenu actuel est conservé comme nouvelle version : la restauration est donc annulable.",
+  "restored": "Restauré. Gately redémarre…"
+}

@@ -80,6 +80,14 @@
           <el-input-number v-model="editing.udpSessionTimeout" :min="0" :max="3600" />
           <span class="help">{{ t('portForward.useGlobalDefault') }}</span>
         </el-form-item>
+        <el-form-item :label="t('portForward.proxyProtocol')">
+          <el-select v-model="editing.proxyProtocol" style="width: 160px">
+            <el-option :label="t('portForward.proxyProtocolOff')" value="" />
+            <el-option label="PROXY v1" value="v1" />
+            <el-option label="PROXY v2" value="v2" />
+          </el-select>
+          <div class="help">{{ t('portForward.proxyProtocolHelp') }}</div>
+        </el-form-item>
         <el-form-item :label="t('common.remark')">
           <el-input v-model="editing.remark" />
         </el-form-item>
@@ -136,6 +144,8 @@ interface Rule {
   targetPorts: string
   maxConnections: number
   udpSessionTimeout: number
+  // 发送给目标的 PROXY 协议版本，空为不发送（仅 TCP）
+  proxyProtocol: string
   remark: string
 }
 
@@ -191,6 +201,7 @@ function emptyRule(): Rule {
     targetPorts: '',
     maxConnections: 0,
     udpSessionTimeout: 0,
+    proxyProtocol: '',
     remark: '',
   }
 }

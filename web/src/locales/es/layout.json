@@ -7,5 +7,6 @@
   "logout": "Cerrar sesión",
   "logoutTitle": "Cerrar sesión",
   "logoutConfirm": "¿Seguro que quieres cerrar sesión?",
-  "logoutOk": "Cerrar sesión"
+  "logoutOk": "Cerrar sesión",
+  "readonlyBadge": "Solo lectura"
 }

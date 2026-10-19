@@ -94,7 +94,12 @@
     "urlPrefix": "http://IP:porta",
     "entryName": "entrada",
     "lanOnly": "Acesso somente pela rede local",
-    "lanOnlyHelp": "Permite que apenas endereços da rede local (incluindo endereços Tailscale 100.64.0.0/10) acessem o console"
+    "lanOnlyHelp": "Permite que apenas endereços da rede local (incluindo endereços Tailscale 100.64.0.0/10) acessem o console",
+    "trustProxy": "Confiar em proxies locais",
+    "trustProxyHelp": "Quando a interface de administração fica atrás de nginx, haproxy ou do serviço Web do Gately neste host, o endereço real do cliente é lido dos cabeçalhos X-Real-IP / X-Forwarded-For que eles definem. Usado no acesso somente LAN, no limite de logins e no log de auditoria. Só são aceitos cabeçalhos vindos de endereços deste host.",
+    "trustedProxies": "Proxies confiáveis adicionais",
+    "trustedProxiesPlaceholder": "IP ou CIDR, ex.: 172.17.0.1",
+    "trustedProxiesHelp": "Endereços de proxy fora deste host, como o gateway da bridge do Docker ou outro proxy reverso."
   },
   "network": {
     "title": "Rede",

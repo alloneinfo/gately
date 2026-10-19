@@ -33,6 +33,8 @@ const (
 	NotifyTest      = "notify.test"
 	STUNChanged     = "stun.changed"
 	LoginSuccessful = "login.success"
+	AuditChange     = "audit.change"
+	AuditAccess     = "audit.access"
 )
 
 // Event 是一次可通知的事件。
@@ -71,6 +73,8 @@ var Catalog = []TypeInfo{
 	{AuthFailed, "认证：连续失败", LevelWarn},
 	{AuthBanned, "认证：IP 已被封禁", LevelWarn},
 	{LoginSuccessful, "管理后台：登录成功", LevelInfo},
+	{AuditChange, "管理后台：配置变更", LevelInfo},
+	{AuditAccess, "管理后台：访问敏感内容", LevelWarn},
 	{NotifyTest, "测试通知", LevelInfo},
 }
 

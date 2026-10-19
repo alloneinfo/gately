@@ -94,7 +94,12 @@
     "urlPrefix": "http://IP:Port",
     "entryName": "einstieg",
     "lanOnly": "Nur LAN-Zugriff",
-    "lanOnlyHelp": "Nur LAN-Adressen (einschließlich Tailscale-Adressen aus 100.64.0.0/10) dürfen auf die Konsole zugreifen"
+    "lanOnlyHelp": "Nur LAN-Adressen (einschließlich Tailscale-Adressen aus 100.64.0.0/10) dürfen auf die Konsole zugreifen",
+    "trustProxy": "Lokalen Proxys vertrauen",
+    "trustProxyHelp": "Liegt die Verwaltungsoberfläche hinter nginx, haproxy oder dem Gately-Webdienst auf diesem Host, wird die echte Client-Adresse aus deren X-Real-IP- / X-Forwarded-For-Headern übernommen – für den Nur-LAN-Zugriff, die Anmeldebegrenzung und das Audit-Protokoll. Header werden nur von Adressen dieses Hosts akzeptiert.",
+    "trustedProxies": "Weitere vertrauenswürdige Proxys",
+    "trustedProxiesPlaceholder": "IP oder CIDR, z. B. 172.17.0.1",
+    "trustedProxiesHelp": "Proxy-Adressen außerhalb dieses Hosts, etwa das Docker-Bridge-Gateway oder ein weiterer Reverse-Proxy."
   },
   "network": {
     "title": "Netzwerk",

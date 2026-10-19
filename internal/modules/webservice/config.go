@@ -115,6 +115,8 @@ type Listener struct {
 	TLS      bool   `json:"tls"`
 	// MinTLS 为 1.0 / 1.1 / 1.2 / 1.3
 	MinTLS string `json:"minTls"`
+	// HTTP3 在同一端口号的 UDP 上同时提供 HTTP/3（QUIC），需要开启 HTTPS
+	HTTP3 bool `json:"http3"`
 	// AcceptProxyProtocol 接收上游（如 haproxy、frp）发送的 PROXY 协议头，仅信任全局设置中的来源
 	AcceptProxyProtocol bool   `json:"acceptProxyProtocol"`
 	Sites               []Site `json:"sites"`
@@ -194,6 +196,9 @@ func (l *Listener) Validate() error {
 	}
 	if l.Port < 1 || l.Port > 65535 {
 		return errors.New("监听端口无效")
+	}
+	if l.HTTP3 && !l.TLS {
+		return errors.New("HTTP/3 需要同时开启 HTTPS")
 	}
 	switch l.MinTLS {
 	case "", "1.0", "1.1", "1.2", "1.3":

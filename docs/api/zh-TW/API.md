@@ -50,6 +50,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `backup` | 設定備份 | `backup:read`、`backup:write` |
 | `status` | 系統狀態 | `status:read` |
 | `logs` | 系統日誌 | `logs:read` |
+| `metrics` | 監控指標（Prometheus） | `metrics:read` |
 | `import` | Lucky 設定匯入 | `import:write` |
 
 萬用寫法：`*:read` 表示全部模組唯讀，`*:write` 或 `*` 表示全部模組讀寫。
@@ -472,8 +473,16 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | GET | `/api/system/update` | `status:read` | 檢查新版本 |
 | GET | `/api/system/backup` | 僅登入工作階段 | 下載設定備份 |
 | GET | `/api/system/diagnostics` | 僅登入工作階段 | 匯出已去識別化的診斷包 |
+| GET | `/api/audit` | 僅登入工作階段 | 查詢操作稽核日誌 |
+| GET | `/api/metrics` | `metrics:read` | Prometheus 全域指標 |
+| GET | `/api/history` | 僅登入工作階段 | 列出設定歷史版本 |
+| GET | `/api/history/{name}/{id}/diff` | 僅登入工作階段 | 比較歷史版本與目前設定 |
+| POST | `/api/history/{name}/{id}/restore` | 僅登入工作階段 | 將設定還原到歷史版本 |
 | POST | `/api/system/restore` | 僅登入工作階段 | 從備份還原設定 |
 | POST | `/api/system/restart` | 僅登入工作階段 | 重新啟動 Gately |
+| POST | `/api/system/selfcheck` | 僅登入工作階段 | 網路與設定自我檢查 |
+| GET | `/api/system/onboarding` | 僅登入工作階段 | 是否需要首次啟動引導 |
+| POST | `/api/system/onboarding/dismiss` | 僅登入工作階段 | 完成或略過首次啟動引導 |
 | GET | `/api/openapi.json` | 任意有效權杖 | 取得本 API 的 OpenAPI 描述 |
 
 ## 設定匯入
@@ -498,6 +507,14 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | 方法 | 路徑 | 所需權限 | 說明 |
 | --- | --- | --- | --- |
 | PUT | `/api/account` | 僅登入工作階段 | 修改管理員使用者名稱與密碼 |
+| GET | `/api/account/passkeys` | 僅登入工作階段 | 列出已註冊的 Passkey |
+| POST | `/api/account/passkeys/begin` | 僅登入工作階段 | 開始註冊 Passkey |
+| POST | `/api/account/passkeys` | 僅登入工作階段 | 完成註冊 Passkey |
+| DELETE | `/api/account/passkeys/{id}` | 僅登入工作階段 | 刪除 Passkey |
+| GET | `/api/account/users` | 僅登入工作階段 | 列出唯讀帳號 |
+| POST | `/api/account/users` | 僅登入工作階段 | 建立唯讀帳號 |
+| PUT | `/api/account/users/{name}` | 僅登入工作階段 | 重設唯讀帳號密碼 |
+| DELETE | `/api/account/users/{name}` | 僅登入工作階段 | 刪除唯讀帳號 |
 | GET | `/api/account/totp` | 僅登入工作階段 | 檢視兩步驟驗證狀態 |
 | POST | `/api/account/totp/setup` | 僅登入工作階段 | 產生兩步驟驗證金鑰 |
 | POST | `/api/account/totp/enable` | 僅登入工作階段 | 啟用兩步驟驗證 |
@@ -825,6 +842,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `maxConnections` | integer |
 | `name` | string |
 | `protocols` | 陣列 of string |
+| `proxyProtocol` | string |
 | `remark` | string |
 | `targetAddresses` | 陣列 of string |
 | `targetPorts` | string |
@@ -835,6 +853,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | 欄位 | 類型 |
 | --- | --- |
 | `ca` | string |
+| `challenge` | string |
 | `credentials` | `dnsprovider.Credentials` |
 | `directoryUrl` | string |
 | `disableAuthoritativeCheck` | boolean |
@@ -842,6 +861,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `eabHmac` | string |
 | `eabKid` | string |
 | `email` | string |
+| `httpPort` | integer |
 | `keyType` | string |
 | `propagationTimeout` | integer |
 | `provider` | string |
@@ -1018,6 +1038,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `acceptProxyProtocol` | boolean |
 | `default` | `webservice.Site` |
 | `enable` | boolean |
+| `http3` | boolean |
 | `key` | string |
 | `listenIp` | string |
 | `minTls` | string |

@@ -82,3 +82,81 @@ func TestWebhookChannelUsesVars(t *testing.T) {
 		t.Fatalf("模板渲染结果不符: %s", got)
 	}
 }
+
+func TestNewChannels(t *testing.T) {
+	type got struct {
+		path, ctype, auth, title, gkey string
+		body                           string
+	}
+	var g got
+	respond := `{}`
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		data, _ := io.ReadAll(r.Body)
+		g = got{path: r.URL.RequestURI(), ctype: r.Header.Get("Content-Type"), auth: r.Header.Get("Authorization"), title: r.Header.Get("Title"), gkey: r.Header.Get("X-Gotify-Key"), body: string(data)}
+		_, _ = w.Write([]byte(respond))
+	}))
+	defer srv.Close()
+	msg := testMsg()
+
+	if err := send(context.Background(), Channel{Kind: KindNtfy, URL: srv.URL, Target: "alerts", Secret: "tk_1"}, msg); err != nil {
+		t.Fatal(err)
+	}
+	if g.path != "/alerts" || g.auth != "Bearer tk_1" || g.title == "" || !strings.Contains(g.body, "1.2.3.4") {
+		t.Fatalf("ntfy 请求不符: %+v", g)
+	}
+
+	if err := send(context.Background(), Channel{Kind: KindGotify, URL: srv.URL, Secret: "APPTOKEN"}, msg); err != nil {
+		t.Fatal(err)
+	}
+	if g.path != "/message" || g.gkey != "APPTOKEN" || strings.Contains(g.path, "APPTOKEN") {
+		t.Fatalf("Gotify 令牌应放在请求头: %+v", g)
+	}
+
+	if err := send(context.Background(), Channel{Kind: KindPushover, URL: srv.URL, Secret: "app", Target: "usr"}, msg); err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(g.body, "token=app") || !strings.Contains(g.body, "user=usr") {
+		t.Fatalf("Pushover 表单不符: %+v", g)
+	}
+
+	for _, k := range []string{KindDiscord, KindSlack} {
+		if err := send(context.Background(), Channel{Kind: k, URL: srv.URL}, msg); err != nil {
+			t.Fatal(err)
+		}
+		if !strings.Contains(g.body, "解析已更新") {
+			t.Fatalf("%s 正文缺少标题: %s", k, g.body)
+		}
+	}
+
+	respond = `{"code":40001,"message":"bad key"}`
+	if err := send(context.Background(), Channel{Kind: KindServerChan, URL: srv.URL, Secret: "k"}, msg); err == nil {
+		t.Fatal("Server酱业务码非 0 应视为失败")
+	}
+	respond = `{"code":999,"msg":"bad"}`
+	if err := send(context.Background(), Channel{Kind: KindPushPlus, URL: srv.URL, Secret: "k"}, msg); err == nil {
+		t.Fatal("PushPlus 业务码非 200 应视为失败")
+	}
+	respond = `{"code":200}`
+	if err := send(context.Background(), Channel{Kind: KindPushPlus, URL: srv.URL, Secret: "k"}, msg); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestNewChannelValidation(t *testing.T) {
+	bad := []Channel{
+		{Name: "a", Kind: KindNtfy},
+		{Name: "a", Kind: KindGotify, Secret: "x"},
+		{Name: "a", Kind: KindPushover, Secret: "x"},
+		{Name: "a", Kind: KindDiscord},
+		{Name: "a", Kind: KindServerChan},
+	}
+	for _, c := range bad {
+		if c.Validate() == nil {
+			t.Errorf("%s 缺少必填项应校验失败", c.Kind)
+		}
+	}
+	ok := Channel{Name: "a", Kind: KindNtfy, Target: "t"}
+	if err := ok.Validate(); err != nil {
+		t.Fatal(err)
+	}
+}

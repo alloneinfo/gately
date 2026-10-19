@@ -1,0 +1,17 @@
+{
+  "title": "Clés d’accès (passkeys)",
+  "desc": "Connectez-vous avec votre empreinte, votre visage ou le code PIN de l’appareil au lieu d’un mot de passe. Les passkeys incluent la vérification de l’utilisateur : aucun code d’authentification n’est nécessaire. Seule la clé publique est stockée ici.",
+  "count": "{count} enregistrée(s)",
+  "unsupported": "Ce navigateur ne prend pas en charge les passkeys. Elles exigent aussi HTTPS ou localhost et un nom de domaine (les navigateurs refusent les adresses IP).",
+  "createdAt": "Enregistrée",
+  "lastUsed": "Dernière utilisation",
+  "add": "Ajouter une passkey",
+  "deviceName": "Nom de l’appareil",
+  "deviceNamePlaceholder": "ex. MacBook Touch ID",
+  "needPassword": "Saisissez votre mot de passe actuel",
+  "addHint": "Après avoir continué, votre navigateur ou appareil vous demandera de confirmer par empreinte, visage ou PIN.",
+  "added": "Passkey ajoutée",
+  "deleteTitle": "Supprimer la passkey",
+  "deleteConfirm": "Supprimer « {name} » ? Saisissez votre mot de passe actuel pour confirmer.",
+  "continue": "Continuer"
+}

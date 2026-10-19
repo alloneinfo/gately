@@ -42,11 +42,13 @@
       "modules/tools": "파일 및 운영 도구",
       "guide/security": "보안 모델 및 개인정보 약속",
       "guide/hardening": "보안 강화 가이드",
+      "guide/verify": "릴리스 검증",
       "reference/api": "API 토큰 및 OpenAPI",
       "reference/api-reference": "API 레퍼런스",
       "reference/docker-api": "Docker API",
       "reference/webterminal-api": "웹 터미널 API",
       "reference/diagnostics": "진단 패키지",
+      "reference/monitoring": "모니터링 지표",
       "guide/contributing": "기여 가이드"
     },
     "englishOnly": " (English)"

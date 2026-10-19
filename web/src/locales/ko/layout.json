@@ -7,5 +7,6 @@
   "logout": "로그아웃",
   "logoutTitle": "로그아웃",
   "logoutConfirm": "로그아웃하시겠습니까?",
-  "logoutOk": "로그아웃"
+  "logoutOk": "로그아웃",
+  "readonlyBadge": "읽기 전용"
 }

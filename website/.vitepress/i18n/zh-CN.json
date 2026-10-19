@@ -42,11 +42,13 @@
       "modules/tools": "文件与运维工具",
       "guide/security": "安全模型与隐私承诺",
       "guide/hardening": "加固建议",
+      "guide/verify": "校验发布产物",
       "reference/api": "API 令牌与 OpenAPI",
       "reference/api-reference": "接口清单",
       "reference/docker-api": "Docker API",
       "reference/webterminal-api": "Web 终端 API",
       "reference/diagnostics": "诊断包",
+      "reference/monitoring": "监控指标",
       "guide/contributing": "参与贡献"
     },
     "englishOnly": "（英文）"

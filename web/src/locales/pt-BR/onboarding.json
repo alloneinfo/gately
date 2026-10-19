@@ -1,0 +1,27 @@
+{
+  "title": "Bem-vindo ao Gately",
+  "subtitle": "Alguns passos rápidos deixam seu gateway mais seguro e fácil de operar.",
+  "go": "Abrir",
+  "later": "Lembrar depois",
+  "done": "Concluído, não mostrar mais",
+  "password": {
+    "title": "Altere a senha inicial",
+    "desc": "A senha inicial foi impressa no log de inicialização. Troque pela sua."
+  },
+  "security": {
+    "title": "Adicione um segundo fator",
+    "desc": "Ative a verificação em duas etapas ou registre uma passkey para um acesso mais seguro."
+  },
+  "check": {
+    "title": "Execute o autodiagnóstico de rede",
+    "desc": "Descubra problemas de NAT, portas, relógio e DNS antes que causem dor de cabeça."
+  },
+  "import": {
+    "title": "Importe do Lucky",
+    "desc": "Traga sua configuração do Lucky (.lkcf) e migre passo a passo."
+  },
+  "notify": {
+    "title": "Configure notificações",
+    "desc": "Receba alertas de falhas de atualização, certificados prestes a expirar e logins com modelos prontos."
+  }
+}

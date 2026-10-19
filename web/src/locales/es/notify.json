@@ -67,5 +67,38 @@
   "kindSmtp": "Correo (SMTP)",
   "secretSet": "Ya establecido; déjalo vacío para conservarlo",
   "deleted": "(eliminado)",
-  "testSent": "Notificación de prueba enviada"
+  "testSent": "Notificación de prueba enviada",
+  "ntfyUrlPlaceholder": "Déjalo vacío para usar https://ntfy.sh",
+  "topic": "Tema",
+  "accessToken": "Token de acceso (opcional)",
+  "appToken": "Token de la aplicación",
+  "userKey": "Clave de usuario",
+  "webhookUrl": "URL del webhook",
+  "template": "Plantilla",
+  "tpl": {
+    "critical": {
+      "name": "Fallos críticos",
+      "desc": "Fallos de DDNS, renovación de certificados, upstream, procesos, copias de seguridad y contenedores"
+    },
+    "cert": {
+      "name": "Caducidad de certificados",
+      "desc": "Certificados a punto de caducar o que no se renuevan"
+    },
+    "address": {
+      "name": "Cambios de dirección",
+      "desc": "Cambios de la IP pública o de la dirección mapeada por STUN"
+    },
+    "health": {
+      "name": "Estado de servicios",
+      "desc": "Upstream activo/caído, salidas de contenedores y procesos"
+    },
+    "security": {
+      "name": "Seguridad e inicios de sesión",
+      "desc": "Inicios de sesión correctos y fallidos, bloqueos y acceso a contenido sensible"
+    },
+    "changes": {
+      "name": "Cambios de configuración",
+      "desc": "Cada cambio de configuración hecho en la consola de administración"
+    }
+  }
 }

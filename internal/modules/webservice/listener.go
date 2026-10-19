@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"errors"
+	"fmt"
 	"net"
 	"net/http"
 	"net/url"
@@ -11,7 +12,9 @@ import (
 	"time"
 
 	proxyproto "github.com/pires/go-proxyproto"
+	"github.com/quic-go/quic-go/http3"
 
+	"github.com/wangwanjie/gately/internal/acmehttp"
 	"github.com/wangwanjie/gately/internal/logbuf"
 )
 
@@ -30,6 +33,10 @@ type listenerRunner struct {
 	auth *authenticator
 	log  *logbuf.Logger
 	srv  *http.Server
+	// h3 为 HTTP/3（QUIC）服务，仅在监听器开启 HTTP3 时存在
+	h3 *http3.Server
+	// altSvc 为通告 HTTP/3 的响应头值，未开启时为空
+	altSvc string
 	// cancel 结束所有请求上下文，用于关闭已升级（WebSocket）的连接
 	cancel  context.CancelFunc
 	sites   []*siteHandler
@@ -61,6 +68,14 @@ func (l *listenerRunner) route(host string) *siteHandler {
 }
 
 func (l *listenerRunner) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	// 通过 TCP 访问时告知浏览器可改用 HTTP/3；HTTP/3 请求本身无需再通告
+	if l.altSvc != "" && r.ProtoMajor < 3 {
+		w.Header().Set("Alt-Svc", l.altSvc)
+	}
+	// ACME HTTP-01 验证请求优先应答（仅在签发进行中登记过 token 时命中）
+	if r.TLS == nil && acmehttp.Serve(w, r) {
+		return
+	}
 	// 第三方登录回调只在配置的认证域名上处理，与站点路由无关
 	if r.URL.Path == oauthCallback && l.auth != nil {
 		env := l.auth.oauthEnv()
@@ -143,6 +158,12 @@ func (l *listenerRunner) start(certs CertSource, trusted []string) error {
 		}
 		l.srv.TLSConfig = &tls.Config{GetCertificate: certs.GetCertificate, MinVersion: min, NextProtos: []string{"h2", "http/1.1"}}
 		ln = tls.NewListener(ln, l.srv.TLSConfig)
+		if l.cfg.HTTP3 {
+			if err := l.startHTTP3(addr); err != nil {
+				// HTTP/3 失败不影响 HTTP/1.1 与 HTTP/2 服务
+				l.log.Errorf("HTTP/3 监听 %s 失败: %v", addr, err)
+			}
+		}
 	}
 	l.startAt = time.Now()
 	for _, s := range l.sites {
@@ -164,9 +185,34 @@ func (l *listenerRunner) start(certs CertSource, trusted []string) error {
 	return nil
 }
 
+// startHTTP3 在与 TCP 相同的地址与端口号上启动 UDP（QUIC）监听。
+func (l *listenerRunner) startHTTP3(addr string) error {
+	network := map[string]string{"tcp": "udp", "tcp4": "udp4", "tcp6": "udp6"}[l.cfg.Network]
+	pc, err := net.ListenPacket(network, addr)
+	if err != nil {
+		return err
+	}
+	l.h3 = &http3.Server{
+		Handler:     l,
+		TLSConfig:   http3.ConfigureTLSConfig(l.srv.TLSConfig),
+		IdleTimeout: 120 * time.Second,
+	}
+	l.altSvc = fmt.Sprintf(`h3=":%d"; ma=86400`, l.cfg.Port)
+	go func() {
+		if err := l.h3.Serve(pc); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			l.log.Errorf("HTTP/3 监听 %s 退出: %v", addr, err)
+		}
+	}()
+	l.log.Infof("HTTP/3 监听 %s（UDP）", addr)
+	return nil
+}
+
 func (l *listenerRunner) stop() {
 	if l.srv == nil {
 		return
+	}
+	if l.h3 != nil {
+		_ = l.h3.Close()
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()

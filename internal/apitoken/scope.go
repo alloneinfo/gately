@@ -19,6 +19,8 @@ const (
 	DomainStatus = "status"
 	DomainLogs   = "logs"
 	DomainImport = "import"
+	// DomainMetrics 对应全局 Prometheus 指标接口 /api/metrics
+	DomainMetrics = "metrics"
 )
 
 // Denied 表示接口永远禁止令牌访问，只能使用登录会话。
@@ -27,6 +29,8 @@ const Denied = "!denied"
 // forbiddenPrefixes 是禁止令牌访问的路径前缀：账号、两步验证、令牌管理、系统级高危操作。
 var forbiddenPrefixes = []string{
 	"/api/account",
+	"/api/audit",
+	"/api/history",
 	"/api/tokens",
 	"/api/system/settings",
 	"/api/system/token",
@@ -34,6 +38,8 @@ var forbiddenPrefixes = []string{
 	"/api/system/diagnostics",
 	"/api/system/restore",
 	"/api/system/restart",
+	"/api/system/selfcheck",
+	"/api/system/onboarding",
 	// Web 终端的安全设置（两步验证、协议确认）等同于账号安全，只允许会话修改
 	"/api/webterminal/security",
 	// 本地备份文件含全部密钥，只允许会话下载

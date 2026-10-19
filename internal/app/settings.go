@@ -34,6 +34,11 @@ type Settings struct {
 	SafePath string `json:"safePath"`
 	// LANOnly 只允许内网地址（含 Tailscale 等 CGNAT 地址）访问管理界面
 	LANOnly bool `json:"lanOnly"`
+	// DisableProxyHeaders 为 true 时不再信任本机反向代理传来的 X-Real-IP / X-Forwarded-For，一律以 TCP 对端为客户端地址。
+	// 默认信任：管理界面放在 nginx、haproxy 或 Gately Web 服务之后时，仅内网访问、登录限流与审计日志才能看到真实来源。
+	DisableProxyHeaders bool `json:"disableProxyHeaders"`
+	// TrustedProxies 为本机之外额外信任的代理地址（IP 或 CIDR），例如 Docker 网桥网关 172.17.0.1
+	TrustedProxies []string `json:"trustedProxies"`
 	// MaxLoginFailures / LockMinutes 为登录限流参数
 	MaxLoginFailures int `json:"maxLoginFailures"`
 	LockMinutes      int `json:"lockMinutes"`
@@ -74,6 +79,13 @@ func (s *Settings) normalize() {
 		s.SafePath = "/" + s.SafePath
 	}
 	s.SafePath = strings.TrimRight(s.SafePath, "/")
+	var proxies []string
+	for _, p := range s.TrustedProxies {
+		if p = strings.TrimSpace(p); p != "" {
+			proxies = append(proxies, p)
+		}
+	}
+	s.TrustedProxies = proxies
 	var dns []string
 	for _, d := range s.DNSServers {
 		if d = strings.TrimSpace(d); d != "" {
@@ -98,6 +110,9 @@ func (s *Settings) Validate() error {
 	}
 	if s.HTTPSListen != "" && s.HTTPSListen == s.Listen {
 		return errors.New("HTTPS 监听地址不能与 HTTP 相同")
+	}
+	if _, err := httpx.ParsePrefixes(s.TrustedProxies); err != nil {
+		return fmt.Errorf("可信代理地址无效: %w", err)
 	}
 	if s.ForceHTTPS && s.HTTPSListen == "" {
 		return errors.New("强制 HTTPS 需要先设置 HTTPS 监听地址")
@@ -143,6 +158,9 @@ func (a *App) applyRuntime() {
 	s := a.settingsSnapshot()
 	i18n.SetServerLang(s.Language)
 	a.auth.SetLimits(s.MaxLoginFailures, time.Duration(s.LockMinutes)*time.Minute)
+	// 已通过 Validate，解析不会失败
+	extra, _ := httpx.ParsePrefixes(s.TrustedProxies)
+	httpx.SetProxyTrust(!s.DisableProxyHeaders, extra)
 	if s.TimeZone != "" {
 		if loc, err := time.LoadLocation(s.TimeZone); err == nil {
 			time.Local = loc

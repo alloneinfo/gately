@@ -12,6 +12,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/wangwanjie/gately/internal/audit"
 	"github.com/wangwanjie/gately/internal/auth"
 	"github.com/wangwanjie/gately/internal/httpx"
 	"github.com/wangwanjie/gately/internal/logbuf"
@@ -159,6 +160,7 @@ func (a *App) handleThirdCallback(w http.ResponseWriter, r *http.Request) {
 	}
 	if !thirdauth.Allowed(cfg.Allowed, id) {
 		a.sysLogs.Add(logbuf.LevelWarn, "auth", "来自 "+ip+" 的第三方登录被拒绝，账号 "+id.String())
+		a.audit.Record(audit.Entry{Actor: id.String(), IP: ip, Via: audit.Via(r), Category: audit.CategoryLogin, Method: "GET", Path: thirdauth.CallbackPath, Status: http.StatusForbidden, Detail: "第三方登录被拒绝"})
 		// 提示完整标识，方便把它加入允许列表（例如 QQ 的 openid 对每个应用不同）
 		loginFailure(w, r, "账号 "+id.String()+" 不在允许登录的身份列表中")
 		return
@@ -169,6 +171,7 @@ func (a *App) handleThirdCallback(w http.ResponseWriter, r *http.Request) {
 	}
 	token, exp := a.auth.Issue()
 	a.sysLogs.Add(logbuf.LevelInfo, "auth", "通过第三方登录 "+id.String()+" 从 "+ip+" 登录")
+	a.audit.Record(audit.Entry{Actor: id.String(), IP: ip, Via: audit.Via(r), Category: audit.CategoryLogin, Method: "GET", Path: thirdauth.CallbackPath, Status: http.StatusFound, Detail: "第三方登录"})
 	http.SetCookie(w, &http.Cookie{
 		Name: auth.CookieName, Value: token, Path: "/", Expires: exp,
 		HttpOnly: true, SameSite: http.SameSiteStrictMode, Secure: r.TLS != nil || strings.HasPrefix(cfg.CallbackBase, "https://"),

@@ -74,5 +74,12 @@
   "notLoaded": "未加载",
   "savedAcme": "已保存，需要签发时会在后台进行",
   "renewStarted": "已开始签发，进度见日志",
-  "renewEnabled": "已开启自动续签"
+  "renewEnabled": "已开启自动续签",
+  "verifyMethod": "验证方式",
+  "challenge": "方式",
+  "challengeDns": "DNS-01（支持通配符）",
+  "challengeHttp": "HTTP-01（无需 DNS 服务商）",
+  "httpTip": "CA 会从公网访问各域名的 80 端口完成验证，不支持通配符域名。Web 服务已监听 80 端口时由它自动应答，否则 Gately 会在下方端口临时监听。",
+  "httpPort": "临时监听端口",
+  "httpPortHelp": "0 表示 80。路由器把公网 80 端口转发到本机其他端口时填写该端口。"
 }

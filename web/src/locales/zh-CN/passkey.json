@@ -1,0 +1,17 @@
+{
+  "title": "Passkey",
+  "desc": "用指纹、面容或设备 PIN 代替密码登录。Passkey 自带用户验证，无需再输入两步验证码；这里只保存公钥。",
+  "count": "已注册 {count} 个",
+  "unsupported": "当前浏览器不支持 Passkey。Passkey 还要求使用 HTTPS 或 localhost，并通过域名访问（浏览器不接受 IP 地址）。",
+  "createdAt": "注册时间",
+  "lastUsed": "最近使用",
+  "add": "添加 Passkey",
+  "deviceName": "设备名称",
+  "deviceNamePlaceholder": "例如：MacBook 触控 ID",
+  "needPassword": "请输入当前密码",
+  "addHint": "继续后，浏览器或设备会要求你用指纹、面容或 PIN 确认。",
+  "added": "已添加 Passkey",
+  "deleteTitle": "删除 Passkey",
+  "deleteConfirm": "确定删除“{name}”吗？请输入当前密码确认。",
+  "continue": "继续"
+}

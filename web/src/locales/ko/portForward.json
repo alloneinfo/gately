@@ -37,5 +37,8 @@
   "statusOff": "사용 안 함",
   "statusNotRunning": "실행 중 아님",
   "savedRestarted": "저장되었으며 규칙을 새 설정으로 다시 시작했습니다",
-  "moduleEnabled": "포트 포워딩 모듈을 사용합니다"
+  "moduleEnabled": "포트 포워딩 모듈을 사용합니다",
+  "proxyProtocol": "PROXY 프로토콜",
+  "proxyProtocolOff": "보내지 않음",
+  "proxyProtocolHelp": "TCP 전용. 대상에 연결한 뒤 PROXY 프로토콜 헤더를 먼저 보내 실제 클라이언트 주소를 하위 단계에 알립니다(haproxy accept-proxy, nginx proxy_protocol, Gately 웹 서비스의 \"PROXY 프로토콜 수신\"). 대상이 지원하지 않으면 연결이 실패합니다."
 }

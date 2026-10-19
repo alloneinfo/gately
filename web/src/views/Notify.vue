@@ -108,6 +108,34 @@
           <el-form-item :label="t('notify.serviceUrl')"><el-input v-model="editingChannel.url" :placeholder="t('notify.barkUrlPlaceholder')" /></el-form-item>
         </template>
 
+        <template v-else-if="editingChannel.kind === 'ntfy'">
+          <el-form-item :label="t('notify.serviceUrl')"><el-input v-model="editingChannel.url" :placeholder="t('notify.ntfyUrlPlaceholder')" /></el-form-item>
+          <el-form-item :label="t('notify.topic')"><el-input v-model="editingChannel.target" /></el-form-item>
+          <el-form-item :label="t('notify.accessToken')"><el-input v-model="editingChannel.secret" show-password :placeholder="secretHint" /></el-form-item>
+        </template>
+
+        <template v-else-if="editingChannel.kind === 'gotify'">
+          <el-form-item :label="t('notify.serviceUrl')"><el-input v-model="editingChannel.url" placeholder="https://gotify.example.com" /></el-form-item>
+          <el-form-item :label="t('notify.appToken')"><el-input v-model="editingChannel.secret" show-password :placeholder="secretHint" /></el-form-item>
+        </template>
+
+        <template v-else-if="editingChannel.kind === 'pushover'">
+          <el-form-item :label="t('notify.appToken')"><el-input v-model="editingChannel.secret" show-password :placeholder="secretHint" /></el-form-item>
+          <el-form-item :label="t('notify.userKey')"><el-input v-model="editingChannel.target" /></el-form-item>
+        </template>
+
+        <template v-else-if="editingChannel.kind === 'discord' || editingChannel.kind === 'slack'">
+          <el-form-item :label="t('notify.webhookUrl')"><el-input v-model="editingChannel.url" placeholder="https://..." /></el-form-item>
+        </template>
+
+        <template v-else-if="editingChannel.kind === 'serverchan'">
+          <el-form-item label="SendKey"><el-input v-model="editingChannel.secret" show-password :placeholder="secretHint" /></el-form-item>
+        </template>
+
+        <template v-else-if="editingChannel.kind === 'pushplus'">
+          <el-form-item label="Token"><el-input v-model="editingChannel.secret" show-password :placeholder="secretHint" /></el-form-item>
+        </template>
+
         <template v-else-if="editingChannel.kind === 'smtp'">
           <el-form-item :label="t('notify.server')"><el-input v-model="editingChannel.host" placeholder="smtp.example.com" /></el-form-item>
           <el-form-item :label="t('notify.security')">
@@ -143,6 +171,13 @@
 
     <el-dialog v-model="ruleVisible" :title="editingRule.key ? t('notify.editRule') : t('notify.addRule')" width="560px" :fullscreen="isMobile">
       <el-form :model="editingRule" label-width="100px" :label-position="labelPosition">
+        <el-form-item v-if="!editingRule.key" :label="t('notify.template')">
+          <div class="tpl-list">
+            <el-tooltip v-for="tpl in ruleTemplates" :key="tpl.id" :content="tpl.desc" placement="top">
+              <el-button size="small" round @click="applyTemplate(tpl)">{{ tpl.name }}</el-button>
+            </el-tooltip>
+          </div>
+        </el-form-item>
         <el-form-item :label="t('common.name')"><el-input v-model="editingRule.name" /></el-form-item>
         <el-form-item :label="t('notify.events')">
           <el-select v-model="editingRule.events" multiple filterable allow-create default-first-option style="width: 100%" :placeholder="t('notify.eventsPlaceholder')">
@@ -254,7 +289,31 @@ const kinds = computed(() => [
   { value: 'dingtalk', label: t('notify.kindDingtalk') },
   { value: 'feishu', label: t('notify.kindFeishu') },
   { value: 'smtp', label: t('notify.kindSmtp') },
+  { value: 'ntfy', label: 'ntfy' },
+  { value: 'gotify', label: 'Gotify' },
+  { value: 'pushover', label: 'Pushover' },
+  { value: 'discord', label: 'Discord' },
+  { value: 'slack', label: 'Slack' },
+  { value: 'serverchan', label: 'Server酱' },
+  { value: 'pushplus', label: 'PushPlus' },
 ])
+
+// 内置规则模板：点击后预填表单，仍需选择渠道后保存
+const ruleTemplates = computed(() => [
+  { id: 'critical', name: t('notify.tpl.critical.name'), desc: t('notify.tpl.critical.desc'), events: ['ddns.failed', 'ssl.renew_failed', 'upstream.down', 'process.exited', 'backup.failed', 'docker.exited'], minLevel: 'warn', silence: 600 },
+  { id: 'cert', name: t('notify.tpl.cert.name'), desc: t('notify.tpl.cert.desc'), events: ['ssl.expiring', 'ssl.renew_failed'], minLevel: 'warn', silence: 86400 },
+  { id: 'address', name: t('notify.tpl.address.name'), desc: t('notify.tpl.address.desc'), events: ['ddns.changed', 'stun.changed'], minLevel: 'info', silence: 0 },
+  { id: 'health', name: t('notify.tpl.health.name'), desc: t('notify.tpl.health.desc'), events: ['upstream.down', 'upstream.up', 'docker.exited', 'process.exited'], minLevel: 'info', silence: 300 },
+  { id: 'security', name: t('notify.tpl.security.name'), desc: t('notify.tpl.security.desc'), events: ['auth.failed', 'auth.banned', 'login.success', 'audit.access'], minLevel: 'info', silence: 0 },
+  { id: 'changes', name: t('notify.tpl.changes.name'), desc: t('notify.tpl.changes.desc'), events: ['audit.change'], minLevel: 'info', silence: 0 },
+])
+
+function applyTemplate(tpl: { name: string; events: string[]; minLevel: string; silence: number }) {
+  editingRule.value.name = tpl.name
+  editingRule.value.events = [...tpl.events]
+  editingRule.value.minLevel = tpl.minLevel
+  editingRule.value.silence = tpl.silence
+}
 
 const { isMobile, labelPosition } = useFormLayout()
 const channels = ref<Channel[]>([])
@@ -325,6 +384,12 @@ function channelTarget(c: Channel) {
       return c.url || 'api.day.app'
     case 'smtp':
       return `${c.target} via ${c.host}:${c.port}`
+    case 'ntfy':
+      return `${c.url || 'ntfy.sh'}/${c.target}`
+    case 'pushover':
+    case 'serverchan':
+    case 'pushplus':
+      return kindLabel(c.kind)
     default:
       return c.url
   }
@@ -440,6 +505,11 @@ onBeforeUnmount(() => window.clearInterval(timer))
 </script>
 
 <style scoped>
+.tpl-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
 .section {
   margin: 22px 0 10px;
   font-size: 15px;

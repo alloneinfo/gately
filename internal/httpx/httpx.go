@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"net"
 	"net/http"
 	"net/url"
 	"strings"
@@ -57,15 +56,6 @@ func ReadJSON(r *http.Request, v any) error {
 		return fmt.Errorf("请求体格式错误: %w", err)
 	}
 	return nil
-}
-
-// ClientIP 返回请求的对端 IP（不信任转发头，管理端口直接面向用户）。
-func ClientIP(r *http.Request) string {
-	host, _, err := net.SplitHostPort(r.RemoteAddr)
-	if err != nil {
-		return r.RemoteAddr
-	}
-	return strings.Trim(host, "[]")
 }
 
 // SameOrigin 拒绝来自其他源的状态变更请求（同站不同端口、兄弟子域同样被拒绝）。

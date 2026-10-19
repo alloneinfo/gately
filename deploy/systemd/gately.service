@@ -1,0 +1,29 @@
+# Gately systemd 服务。安装：
+#   sudo install -m 0755 gately /usr/local/bin/gately
+#   sudo install -m 0644 gately.service /etc/systemd/system/gately.service
+#   sudo systemctl daemon-reload && sudo systemctl enable --now gately
+#   journalctl -u gately | grep -i "initial password"
+[Unit]
+Description=Gately network gateway toolkit
+Documentation=https://gately.cn
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/gately -c /etc/gately
+# 管理界面“重启”会以相同参数重新执行自身；失败时退出，由 systemd 拉起
+Restart=on-failure
+RestartSec=3
+# 配置目录由 systemd 创建，权限 0700
+ConfigurationDirectory=gately
+ConfigurationDirectoryMode=0700
+# 监听 80/443 等低位端口
+AmbientCapabilities=CAP_NET_BIND_SERVICE CAP_NET_RAW CAP_NET_ADMIN
+LimitNOFILE=1048576
+# 可选：自动化部署时指定首次启动的初始密码，或启用声明式配置目录
+#Environment=GATELY_INITIAL_PASSWORD=change-me-now
+#Environment=GATELY_APPLY_DIR=/etc/gately.d
+
+[Install]
+WantedBy=multi-user.target

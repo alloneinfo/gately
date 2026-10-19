@@ -1,0 +1,18 @@
+{
+  "title": "操作审计",
+  "desc": "记录谁在何时做了什么：登录、配置变更、访问敏感内容。不记录请求体与任何密钥。",
+  "category": "类别",
+  "search": "搜索路径、用户或 IP",
+  "total": "共 {count} 条",
+  "time": "时间",
+  "actor": "用户 / IP",
+  "action": "操作",
+  "status": "状态",
+  "empty": "暂无记录",
+  "categories": {
+    "login": "登录",
+    "change": "变更",
+    "access": "敏感访问"
+  },
+  "via": "经代理 {ip}"
+}

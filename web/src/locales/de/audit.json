@@ -1,0 +1,18 @@
+{
+  "title": "Audit-Protokoll",
+  "desc": "Wer hat wann was getan: Anmeldungen, Konfigurationsänderungen und Zugriffe auf sensible Inhalte. Anfrageinhalte und Geheimnisse werden nie aufgezeichnet.",
+  "category": "Kategorie",
+  "search": "Pfad, Benutzer oder IP suchen",
+  "total": "{count} Einträge",
+  "time": "Zeit",
+  "actor": "Benutzer / IP",
+  "action": "Aktion",
+  "status": "Status",
+  "empty": "Noch keine Einträge",
+  "categories": {
+    "login": "Anmeldung",
+    "change": "Änderung",
+    "access": "Sensibler Zugriff"
+  },
+  "via": "über {ip}"
+}

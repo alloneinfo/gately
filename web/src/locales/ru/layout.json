@@ -7,5 +7,6 @@
   "logout": "Выйти",
   "logoutTitle": "Выход",
   "logoutConfirm": "Вы действительно хотите выйти?",
-  "logoutOk": "Выйти"
+  "logoutOk": "Выйти",
+  "readonlyBadge": "Только чтение"
 }

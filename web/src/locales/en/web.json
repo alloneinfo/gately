@@ -99,5 +99,6 @@
   "statusNotRunning": "Not running",
   "savedReloaded": "Saved. The listener has been reloaded",
   "moduleEnabled": "Web service module enabled",
-  "sitesCollapsed": "{count} sites hidden, click to expand"
+  "sitesCollapsed": "{count} sites hidden, click to expand",
+  "http3Help": "Also serve HTTP/3 (QUIC) on the same port number over UDP. Allow that UDP port in your firewall and port forwarding."
 }

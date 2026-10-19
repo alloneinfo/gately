@@ -22,5 +22,7 @@
   "backToAccount": "Volver para cambiar de cuenta",
   "badge": "Código abierto · Autoalojado",
   "verifying": "Verificando…",
-  "totpAuto": "El código se verifica automáticamente al completarlo"
+  "totpAuto": "El código se verifica automáticamente al completarlo",
+  "or": "o",
+  "passkey": "Iniciar sesión con passkey"
 }

@@ -74,5 +74,12 @@
   "notLoaded": "No cargado",
   "savedAcme": "Guardado; la emisión se ejecuta en segundo plano cuando hace falta",
   "renewStarted": "Emisión iniciada; consulta el registro para ver el progreso",
-  "renewEnabled": "Renovación automática activada"
+  "renewEnabled": "Renovación automática activada",
+  "verifyMethod": "Método de validación",
+  "challenge": "Método",
+  "challengeDns": "DNS-01 (admite comodines)",
+  "challengeHttp": "HTTP-01 (sin proveedor DNS)",
+  "httpTip": "La CA se conecta al puerto 80 de cada dominio desde Internet. No se admiten dominios comodín. Si un servicio web escucha en el puerto 80, responde automáticamente; si no, Gately escucha temporalmente en el puerto indicado abajo.",
+  "httpPort": "Puerto temporal",
+  "httpPortHelp": "0 equivale a 80. Úsalo si el router reenvía el puerto público 80 a otro puerto local."
 }

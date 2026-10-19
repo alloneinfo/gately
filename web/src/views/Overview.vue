@@ -31,6 +31,7 @@
           <span class="k">{{ t('overview.service') }}</span>
           <StatusBadge :type="health.type" :text="health.text" />
         </div>
+        <el-button size="small" round :icon="Stethoscope" @click="selfCheck?.open()">{{ t('selfcheck.run') }}</el-button>
       </div>
     </section>
 
@@ -191,6 +192,8 @@
         </div>
       </div>
     </section>
+
+    <SelfCheck ref="selfCheck" />
   </div>
 </template>
 
@@ -214,9 +217,11 @@ import {
   Power,
   RefreshCw,
   Server,
+  Stethoscope,
 } from 'lucide-vue-next'
 import { api, formatBytes, formatDuration, formatRate, type Status } from '../api'
 import RingGauge from '../components/RingGauge.vue'
+import SelfCheck from '../components/SelfCheck.vue'
 import Sparkline from '../components/Sparkline.vue'
 import StatusBadge, { type StatusType } from '../components/StatusBadge.vue'
 import { navByModule } from '../nav'
@@ -227,6 +232,7 @@ const { t } = useI18n()
 const INTERVAL = 3000
 const HISTORY = 60
 
+const selfCheck = ref<InstanceType<typeof SelfCheck>>()
 const status = ref<Status>()
 const now = ref(Date.now())
 const hist = reactive({ cpu: [] as number[], mem: [] as number[], rx: [] as number[], tx: [] as number[] })

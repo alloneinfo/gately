@@ -99,5 +99,6 @@
   "statusNotRunning": "未运行",
   "savedReloaded": "已保存，监听已重新加载",
   "moduleEnabled": "Web 服务模块已启用",
-  "sitesCollapsed": "已收起 {count} 个站点，点击展开"
+  "sitesCollapsed": "已收起 {count} 个站点，点击展开",
+  "http3Help": "在相同端口号的 UDP 上同时提供 HTTP/3（QUIC）。需要在防火墙与端口映射中放行该 UDP 端口。"
 }

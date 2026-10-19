@@ -1,0 +1,19 @@
+{
+  "title": "Historial de configuración",
+  "desc": "Cada vez que se sobrescribe un archivo de configuración se guarda automáticamente la versión anterior. Compara cualquier versión con la actual y revierte con un clic.",
+  "pickConfig": "Selecciona una configuración",
+  "keepHint": "Se conservan hasta 30 versiones por configuración. Se excluyen los archivos de cuenta y de tokens.",
+  "savedAt": "Guardado",
+  "size": "Tamaño",
+  "diff": "Comparar",
+  "restore": "Revertir",
+  "empty": "Aún no hay historial. Las versiones aparecen tras el primer cambio.",
+  "diffTitle": "{name}: versión frente a actual",
+  "legendOld": "Versión seleccionada",
+  "legendNew": "Actual",
+  "noDiff": "Idéntica a la configuración actual",
+  "skipped": "… {count} líneas sin cambios …",
+  "restoreTitle": "Revertir configuración",
+  "restoreConfirm": "¿Revertir {name} a la versión guardada el {time}? Gately se reiniciará para aplicarla. El contenido actual se conserva como una nueva versión, por lo que podrás deshacer la reversión.",
+  "restored": "Revertido. Gately se está reiniciando…"
+}

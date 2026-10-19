@@ -31,9 +31,15 @@ var caDirectories = map[string]string{
 	"google":              "https://dv.acme-v02.api.pki.goog/directory",
 }
 
+// 验证方式
+const (
+	ChallengeDNS  = "dns"
+	ChallengeHTTP = "http"
+)
+
 var validKeyTypes = map[string]bool{"P256": true, "P384": true, "2048": true, "4096": true}
 
-// ACMEConfig 是 ACME 自动签发参数，验证方式为 DNS-01。
+// ACMEConfig 是 ACME 自动签发参数，验证方式为 DNS-01 或 HTTP-01。
 type ACMEConfig struct {
 	Domains []string `json:"domains"`
 	Email   string   `json:"email"`
@@ -44,6 +50,10 @@ type ACMEConfig struct {
 	EABKid  string `json:"eabKid"`
 	EABHMAC string `json:"eabHmac"`
 	KeyType string `json:"keyType"`
+	// Challenge 为验证方式：dns（默认，支持通配符）或 http（HTTP-01，无需 DNS 服务商，要求 80 端口可从公网访问）
+	Challenge string `json:"challenge"`
+	// HTTPPort 为 HTTP-01 临时监听端口，默认 80（80 端口已被 Web 服务占用时由 Web 服务应答）
+	HTTPPort int `json:"httpPort"`
 	// Provider 与 Credentials 为 DNS 服务商，用于写入 _acme-challenge TXT 记录
 	Provider    string                  `json:"provider"`
 	Credentials dnsprovider.Credentials `json:"credentials"`
@@ -227,8 +237,23 @@ func (a *ACMEConfig) validate(settings Settings) error {
 	if !validKeyTypes[a.KeyType] {
 		return fmt.Errorf("不支持的密钥类型 %q", a.KeyType)
 	}
-	if !dnsprovider.SupportsTXT(a.Provider) {
-		return fmt.Errorf("DNS 服务商 %q 不支持 ACME DNS 验证", a.Provider)
+	switch a.Challenge {
+	case "", ChallengeDNS:
+		a.Challenge = ChallengeDNS
+		if !dnsprovider.SupportsTXT(a.Provider) {
+			return fmt.Errorf("DNS 服务商 %q 不支持 ACME DNS 验证", a.Provider)
+		}
+	case ChallengeHTTP:
+		for _, d := range a.Domains {
+			if strings.HasPrefix(d, "*.") {
+				return fmt.Errorf("HTTP-01 验证不支持通配符域名 %q，请改用 DNS 验证", d)
+			}
+		}
+		if a.HTTPPort < 0 || a.HTTPPort > 65535 {
+			return errors.New("HTTP-01 监听端口无效")
+		}
+	default:
+		return fmt.Errorf("未知的验证方式 %q", a.Challenge)
 	}
 	if a.PropagationTimeout <= 0 {
 		a.PropagationTimeout = 300

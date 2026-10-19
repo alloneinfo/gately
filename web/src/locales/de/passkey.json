@@ -1,0 +1,17 @@
+{
+  "title": "Passkeys",
+  "desc": "Melden Sie sich per Fingerabdruck, Gesicht oder Geräte-PIN statt mit einem Passwort an. Passkeys enthalten die Benutzerverifizierung, ein Authenticator-Code ist daher nicht nötig. Hier wird nur der öffentliche Schlüssel gespeichert.",
+  "count": "{count} registriert",
+  "unsupported": "Dieser Browser unterstützt keine Passkeys. Außerdem sind HTTPS oder localhost sowie ein Domainname erforderlich (IP-Adressen akzeptieren Browser nicht).",
+  "createdAt": "Registriert",
+  "lastUsed": "Zuletzt verwendet",
+  "add": "Passkey hinzufügen",
+  "deviceName": "Gerätename",
+  "deviceNamePlaceholder": "z. B. MacBook Touch ID",
+  "needPassword": "Aktuelles Passwort eingeben",
+  "addHint": "Nach dem Fortfahren verlangt Ihr Browser oder Gerät eine Bestätigung per Fingerabdruck, Gesicht oder PIN.",
+  "added": "Passkey hinzugefügt",
+  "deleteTitle": "Passkey löschen",
+  "deleteConfirm": "„{name}“ löschen? Geben Sie zur Bestätigung Ihr aktuelles Passwort ein.",
+  "continue": "Weiter"
+}

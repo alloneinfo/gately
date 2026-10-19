@@ -23,19 +23,19 @@ Gately ist vollständig quelloffen, sodass Nutzer und Community Quellcode und Ko
 
 | Modul | Funktionen |
 | --- | --- |
-| Dynamisches DNS | Alibaba Cloud, Cloudflare, Tencent Cloud, DNSPod, Huawei Cloud, GoDaddy, Porkbun, dynv6, DuckDNS, benutzerdefinierter Callback; IP per URL/Netzwerkschnittstelle/Befehl ermitteln; IPv4/IPv6; Webhook |
+| Dynamisches DNS | Alibaba Cloud, Cloudflare, Tencent Cloud, DNSPod, Huawei Cloud, GoDaddy, Porkbun, dynv6, DuckDNS, Amazon Route 53, OVHcloud, Gandi, NS1, Bunny DNS, Namecheap, DynDNS2 (No-IP, Dynu, …), benutzerdefinierter Callback; IP per URL/Netzwerkschnittstelle/Befehl ermitteln; IPv4/IPv6; Webhook |
 | STUN-Traversal | TCP/UDP, Keepalive, UPnP/NAT-PMP, integrierte Weiterleitung, Webhook und Skript bei Adressänderung |
-| Portweiterleitung | TCP/UDP, IPv4/IPv6, Portbereiche, Failover mit mehreren Zielen, Verbindungslimit, Traffic-Statistik |
-| SSL-Zertifikate | Automatische Ausstellung und Erneuerung per ACME DNS-01 (Wildcard, EAB), Upload, Dateien einlesen, in ein Verzeichnis abbilden und Skript ausführen |
+| Portweiterleitung | TCP/UDP, IPv4/IPv6, Portbereiche, Failover mit mehreren Zielen, Verbindungslimit, Traffic-Statistik, PROXY-Protokoll v1/v2 |
+| SSL-Zertifikate | Automatische Ausstellung und Erneuerung per ACME über DNS-01 (Wildcard) oder HTTP-01 (ohne DNS-Anbieter), EAB, Upload, Dateien einlesen, in ein Verzeichnis abbilden und Skript ausführen |
 | Tailscale | Verwaltet tailscaled (Userspace-Netzwerk, container-freundlich) oder nutzt einen vorhandenen System-Daemon; Auth-Key/Login-Link, Headscale, Subnetz-Routen, Exit-Node, Knotenliste und SOCKS5-Proxy, fester Port, zusätzliche tailscaled-Argumente und Umgebungsvariablen |
 | frp | frpc-Client (tcp/udp/http/https/stcp/xtcp-Proxys, Änderungen wirken sofort) und frps-Server (Port-Whitelist, Subdomains, Dashboard); Konfigurationen im alten ini- und im neuen toml-Format lassen sich mit einem Klick importieren |
 | Cloudflare Tunnel | cloudflared-Token-Tunnel und temporäre trycloudflare-Tunnel, mehrere Tunnel, automatischer Neustart, Anzeige der öffentlichen Adresse |
-| Web-Dienste | Reverse-Proxy/Weiterleitung/statische Dateien/Festtext je Domain; HTTPS; WebSocket; PROXY-Protokoll senden und empfangen; Basic-Authentifizierung, Web-Authentifizierung, Anmeldung über GitHub/Google/QQ/OIDC; IP-Black-/Whitelist, Pfadregeln, temporäre Freigabelinks, automatische Sperre nach fehlgeschlagenen Anmeldungen, GeoIP-Länderfilter; Backend-Gewichtung/Backup/Lastverteilungsstrategien, aktive und passive Health-Checks, Kompression, Ratenbegrenzung, Antwort-Cache, Pfad-Rewrite; minutengenaue Zugriffsstatistik und Prometheus-Metriken |
+| Web-Dienste | Reverse-Proxy/Weiterleitung/statische Dateien/Festtext je Domain; HTTPS und HTTP/3 (QUIC); WebSocket; PROXY-Protokoll senden und empfangen; Basic-Authentifizierung, Web-Authentifizierung, Anmeldung über GitHub/Google/QQ/OIDC; IP-Black-/Whitelist, Pfadregeln, temporäre Freigabelinks, automatische Sperre nach fehlgeschlagenen Anmeldungen, GeoIP-Länderfilter; Backend-Gewichtung/Backup/Lastverteilungsstrategien, aktive und passive Health-Checks, Kompression, Ratenbegrenzung, Antwort-Cache, Pfad-Rewrite; minutengenaue Zugriffsstatistik und Prometheus-Metriken |
 | WAF-Firewall | Coraza + OWASP CRS v4, Regeln dateiweise aktivierbar, eigenes SecLang, Blockieren/nur Erkennen |
 | Docker-Verwaltung | Container erstellen und bearbeiten, Logs und Terminal, Compose, Prüfung auf Image-Updates und Upgrade per Klick (bei Fehlern automatischer Rollback), Netzwerke und Volumes |
 | Web-Terminal | SSH (Hostschlüssel beim ersten Mal bestätigen), Telnet, lokale Shell (standardmäßig deaktiviert); Proxy, persistente Sitzungen, SFTP-Dateiverwaltung, 2FA und Protokollbestätigung, Schnellbefehle, geteilte Ansicht |
 | Netzwerkdiagnose | Ping, Traceroute, Portprüfung, DNS-Abfrage, Geschwindigkeitstest, LAN-Scan |
-| Benachrichtigungszentrale | Webhook, Telegram, Bark, WeCom, DingTalk, Feishu, E-Mail; Stufen sowie Regeln für Wildcards und Stummschaltung/Deduplizierung |
+| Benachrichtigungszentrale | Webhook, Telegram, Bark, ntfy, Gotify, Pushover, Discord, Slack, ServerChan, PushPlus, WeCom, DingTalk, Feishu, E-Mail; Stufen sowie Regeln für Wildcards und Stummschaltung/Deduplizierung; integrierte Regelvorlagen (kritische Ausfälle, Zertifikatsablauf, Adressänderungen, Anmeldungen, Konfigurationsänderungen) |
 | Konfigurationsbackup | Verschlüsselte Backups (scrypt + AES-GCM), Aufbewahrungsrichtlinie, zeitgesteuerte Backups in ein lokales Verzeichnis oder einen Speicher-Mountpunkt |
 | Kommandozeile und MCP | `gately ctl` steuert die laufende Instanz, `gately mcp` stellt einen MCP-Dienst über stdio bereit (standardmäßig schreibgeschützt) |
 | Wake-on-LAN | Magic-Packet-Broadcast, Online-Erkennung |
@@ -43,7 +43,9 @@ Gately ist vollständig quelloffen, sodass Nutzer und Community Quellcode und Ko
 | FTP | Mehrere Benutzer, eigene Verzeichnisse, schreibgeschützt, mit FTPS und passivem Portbereich |
 | Speicherverwaltung | Lokale Verzeichnisse und entfernte WebDAV-Mounts, Dateiverwaltung online |
 | Geplante Aufgaben | cron-Ausdrücke, Befehle oder HTTP-Anfragen, Ausführungsprotokoll |
-| Sicherheit und Einstellungen | Zwei-Faktor-Authentifizierung (TOTP), Ratenbegrenzung bei fehlgeschlagenen Anmeldungen, Sicherheitseinstieg, Zugriff nur aus dem internen Netz, HTTPS für die Verwaltungsoberfläche, mehrere API-Tokens (Lese-/Schreibrechte je Modul), benutzerdefiniertes DNS (mit DoH-Unterstützung), Zeitzone, Konfigurationsbackup und -wiederherstellung |
+| Sicherheit und Einstellungen | Anmeldung per Passkey (WebAuthn), Zwei-Faktor-Authentifizierung (TOTP), schreibgeschützte Konten, Ratenbegrenzung bei fehlgeschlagenen Anmeldungen, Sicherheitseinstieg, Zugriff nur aus dem internen Netz, HTTPS für die Verwaltungsoberfläche, mehrere API-Tokens (Lese-/Schreibrechte je Modul), benutzerdefiniertes DNS (mit DoH-Unterstützung), Zeitzone, Konfigurationsbackup und -wiederherstellung, echte Client-Adresse von vertrauenswürdigen lokalen Reverse-Proxys |
+| Audit und Verlauf | Audit-Log für Anmeldungen, Konfigurationsänderungen und Zugriffe auf sensible Inhalte (Request-Bodys und Geheimnisse werden nie protokolliert); jede überschriebene Konfigurationsdatei behält ihre früheren Versionen mit Diff und Rollback per Klick; deklaratives Konfigurationsverzeichnis (`-apply`) für GitOps |
+| Monitoring und Selbsttest | Globaler Prometheus-Endpunkt `/api/metrics` (Zertifikate, DDNS, STUN, Portweiterleitung, Web-Dienste) mit fertigem Grafana-Dashboard; Netzwerk-Selbsttest per Klick (öffentliche IP, CGNAT, Uhrzeit, Ports 80/443, DDNS-Auflösung, Zertifikatsablauf) |
 | Migration | Import von Lucky-`.lkcf`-Dateien oder Konfigurations-ZIPs der gesamten Instanz: Portweiterleitung, DDNS, STUN, Zertifikate, Reverse-Proxy, WAF, Wake-on-LAN, Web-Terminal, WebDAV, Grundeinstellungen |
 
 ## Schnellstart
@@ -72,7 +74,13 @@ Laden Sie von [Releases](https://github.com/wangwanjie/gately/releases) das Arch
 ./gately -c /etc/gately
 ```
 
-Parameter: `-c` Konfigurationsverzeichnis (alternativ die Umgebungsvariable `GATELY_CONFIG_DIR`), `-listen` überschreibt die Listen-Adresse der Verwaltungsoberfläche, `-version` gibt die Version aus.
+Parameter: `-c` Konfigurationsverzeichnis (alternativ die Umgebungsvariable `GATELY_CONFIG_DIR`), `-listen` überschreibt die Listen-Adresse der Verwaltungsoberfläche, `-apply` wendet bei jedem Start die `<name>.json`-Dateien eines Verzeichnisses auf das Konfigurationsverzeichnis an (`GATELY_APPLY_DIR`, praktisch für GitOps und Kubernetes; Konto- und Token-Dateien können nicht überschrieben werden), `-version` gibt die Version aus. Für unbeaufsichtigte Installationen legen Sie mit `GATELY_INITIAL_PASSWORD` das initiale Admin-Passwort fest, statt ein zufälliges Passwort aus dem Log zu lesen.
+
+Dienstvorlagen: [systemd](deploy/systemd/gately.service) und [OpenWrt procd](deploy/openwrt/gately.init). Wie Sie heruntergeladene Archive und Images prüfen (cosign-Signaturen, Build-Provenienz, SBOM), beschreibt [Release-Artefakte verifizieren](docs/en/VERIFY.md).
+
+### Monitoring
+
+Erstellen Sie ein API-Token nur mit der Berechtigung `metrics:read` und lassen Sie Prometheus `/api/metrics` abfragen. Metriken, Alarmbeispiele und das Grafana-Dashboard beschreibt [Monitoring](docs/en/MONITORING.md).
 
 ### API-Aufrufe
 

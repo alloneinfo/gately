@@ -87,6 +87,12 @@
     "logs": {
       "title": "系统日志"
     },
+    "audit": {
+      "title": "操作审计"
+    },
+    "history": {
+      "title": "配置历史"
+    },
     "apiTokens": {
       "title": "API 令牌"
     },

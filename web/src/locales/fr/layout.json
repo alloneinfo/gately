@@ -7,5 +7,6 @@
   "logout": "Se déconnecter",
   "logoutTitle": "Déconnexion",
   "logoutConfirm": "Voulez-vous vraiment vous déconnecter ?",
-  "logoutOk": "Se déconnecter"
+  "logoutOk": "Se déconnecter",
+  "readonlyBadge": "Lecture seule"
 }

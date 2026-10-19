@@ -53,7 +53,8 @@ web/                   前端工程，构建产物由 web/embed.go 嵌入
 | ✅ M6 运维 | 网络唤醒、Web 终端（SSH/本机 Shell）、计划任务、管理员两步验证 | WOL 3/3、终端连接 14/14 导入；TOTP 通过 RFC 6238 测试向量 |
 | ✅ M7 生态（部分） | Coraza WAF、GitHub/Google/QQ/OIDC 第三方登录（站点认证与管理后台登录，可迁移 Lucky 身份表）、Docker 管理、WebDAV、FTP 服务、存储管理（本地/远程 WebDAV 挂载与在线文件管理） | WAF 用真实攻击载荷测试；Docker 在真实环境只读验证 |
 | ✅ M7.5 组网穿透 | Tailscale、frp（frpc + frps）、cloudflared，以进程托管方式集成官方二进制 | 配置生成、进程守护与日志采集有单元测试；不内置上游程序 |
-| M8 待定 | DLNA、阿里云盘等网盘挂载、rclone、全局 IP 过滤、HTTP/3、SFTP 文件管理 | 视社区需求排期 |
+| ✅ M8 可信与运维 | 操作审计日志、配置历史与回滚、声明式配置目录；Passkey 登录与只读账号；ACME HTTP-01；HTTP/3；全局 Prometheus 指标与 Grafana 面板；网络自检与首次启动引导；DDNS 新增 Route 53、OVH、Gandi、NS1、Bunny、Namecheap、DynDNS2；通知新增 ntfy、Gotify、Pushover、Discord、Slack、Server酱、PushPlus 与规则模板；发布产物 cosign 签名、构建来源证明与 SBOM；systemd 与 OpenWrt 服务模板 | WebAuthn 用软件验证器端到端测试；Route 53 签名经 AWS 官方 SigV4 测试向量校验；HTTP/3 用 quic-go 客户端实测 |
+| M9 待定 | 全局 IP 过滤、多管理员与细粒度角色、OpenWrt ipk 打包 | 视社区需求排期 |
 
 ## 设计取舍
 

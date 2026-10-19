@@ -1,0 +1,17 @@
+{
+  "title": "Passkey",
+  "desc": "用指紋、臉部或裝置 PIN 取代密碼登入。Passkey 內建使用者驗證，不需再輸入兩步驟驗證碼；這裡只保存公鑰。",
+  "count": "已註冊 {count} 個",
+  "unsupported": "目前的瀏覽器不支援 Passkey。Passkey 還要求使用 HTTPS 或 localhost，並透過網域名稱存取（瀏覽器不接受 IP 位址）。",
+  "createdAt": "註冊時間",
+  "lastUsed": "最近使用",
+  "add": "新增 Passkey",
+  "deviceName": "裝置名稱",
+  "deviceNamePlaceholder": "例如：MacBook Touch ID",
+  "needPassword": "請輸入目前密碼",
+  "addHint": "繼續後，瀏覽器或裝置會要求你用指紋、臉部或 PIN 確認。",
+  "added": "已新增 Passkey",
+  "deleteTitle": "刪除 Passkey",
+  "deleteConfirm": "確定刪除「{name}」嗎？請輸入目前密碼確認。",
+  "continue": "繼續"
+}

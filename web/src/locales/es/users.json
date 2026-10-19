@@ -1,0 +1,14 @@
+{
+  "title": "Cuentas de solo lectura",
+  "desc": "Crea cuentas que pueden ver estado, registros y configuración, pero no cambiar nada, descargar copias de seguridad ni leer secretos. Útil para familiares o compañeros. Las cuentas de solo lectura no tienen verificación en dos pasos, así que usa contraseñas únicas.",
+  "count": "{count} cuentas",
+  "username": "Usuario",
+  "role": "Rol",
+  "readonly": "Solo lectura",
+  "password": "Contraseña",
+  "passwordHint": "Al menos 8 caracteres.",
+  "add": "Añadir cuenta de solo lectura",
+  "resetPassword": "Restablecer contraseña",
+  "resetPrompt": "Nueva contraseña para {name} (mínimo 8 caracteres). Se cerrarán las sesiones actuales de esta cuenta.",
+  "deleteConfirm": "¿Eliminar la cuenta «{name}»? Sus sesiones se cerrarán de inmediato."
+}

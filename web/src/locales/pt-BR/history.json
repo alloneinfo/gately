@@ -1,0 +1,19 @@
+{
+  "title": "Histórico de configuração",
+  "desc": "Sempre que um arquivo de configuração é sobrescrito, a versão anterior é salva automaticamente. Compare qualquer versão com a atual e reverta com um clique.",
+  "pickConfig": "Selecione uma configuração",
+  "keepHint": "Até 30 versões são mantidas por configuração. Arquivos de conta e de tokens ficam de fora.",
+  "savedAt": "Salvo em",
+  "size": "Tamanho",
+  "diff": "Comparar",
+  "restore": "Reverter",
+  "empty": "Ainda não há histórico. As versões aparecem após a primeira alteração.",
+  "diffTitle": "{name}: versão x atual",
+  "legendOld": "Versão selecionada",
+  "legendNew": "Atual",
+  "noDiff": "Idêntica à configuração atual",
+  "skipped": "… {count} linhas sem alteração …",
+  "restoreTitle": "Reverter configuração",
+  "restoreConfirm": "Reverter {name} para a versão salva em {time}? O Gately será reiniciado para aplicar. O conteúdo atual é mantido como uma nova versão, então a reversão pode ser desfeita.",
+  "restored": "Revertido. O Gately está reiniciando…"
+}

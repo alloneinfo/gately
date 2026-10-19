@@ -1,0 +1,18 @@
+{
+  "title": "Registro de auditoría",
+  "desc": "Quién hizo qué y cuándo: inicios de sesión, cambios de configuración y accesos a contenido sensible. Nunca se registran cuerpos de petición ni secretos.",
+  "category": "Categoría",
+  "search": "Buscar ruta, usuario o IP",
+  "total": "{count} registros",
+  "time": "Hora",
+  "actor": "Usuario / IP",
+  "action": "Acción",
+  "status": "Estado",
+  "empty": "Aún no hay registros",
+  "categories": {
+    "login": "Inicio de sesión",
+    "change": "Cambio",
+    "access": "Acceso sensible"
+  },
+  "via": "vía {ip}"
+}
