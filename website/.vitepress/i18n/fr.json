@@ -77,6 +77,10 @@
   },
   "home": {
     "pill": "Open source · Auditable · Binaire unique",
+    "announce": {
+      "text": "v0.5.0 est disponible : journal d’audit, passkeys, HTTP/3… →",
+      "link": "/en/news/v0.5.0"
+    },
     "titleLine1": "Une boîte à outils de passerelle réseau",
     "titleLine2": "où tout est visible",
     "lead": "DDNS, traversée NAT STUN, redirection de ports, proxy inverse, certificats, WAF, Tailscale et frp, réunis dans un seul binaire d'environ 32 Mo. Pour les réseaux domestiques, les NAS, les serveurs cloud et tous types de serveurs.",

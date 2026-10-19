@@ -77,6 +77,10 @@
   },
   "home": {
     "pill": "开源 · 可审计 · 单文件部署",
+    "announce": {
+      "text": "v0.5.0 发布：操作审计、Passkey、HTTP/3 等 →",
+      "link": "/news/v0.5.0"
+    },
     "titleLine1": "看得见的",
     "titleLine2": "网络网关工具集",
     "lead": "DDNS、STUN 穿透、端口转发、反向代理、证书、WAF、Tailscale、frp，集成在一个约 32 MB 的单文件里。家庭网络、NAS、云主机与各类服务器均可使用。",

@@ -69,7 +69,11 @@ const openFaq = ref(0)
     <section class="hero">
       <div class="wrap hero-grid">
         <div class="hero-text">
-          <a class="pill" href="https://github.com/wangwanjie/gately/releases" target="_blank" rel="noreferrer">
+          <!-- 有版本公告时链接到公告页，否则显示标语并链接到 GitHub Releases -->
+          <a v-if="h.announce" class="pill" :href="h.announce.link">
+            <span class="dot" />{{ h.announce.text }}
+          </a>
+          <a v-else class="pill" href="https://github.com/wangwanjie/gately/releases" target="_blank" rel="noreferrer">
             <span class="dot" />{{ h.pill }}
           </a>
           <h1>{{ h.titleLine1 }}<br /><span class="grad">{{ h.titleLine2 }}</span></h1>

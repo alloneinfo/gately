@@ -77,6 +77,10 @@
   },
   "home": {
     "pill": "Código abierto · Auditable · Binario único",
+    "announce": {
+      "text": "Ya está v0.5.0: auditoría, passkeys, HTTP/3 y más →",
+      "link": "/en/news/v0.5.0"
+    },
     "titleLine1": "Una pasarela de red",
     "titleLine2": "que puedes ver por dentro",
     "lead": "DDNS, traversal NAT con STUN, reenvío de puertos, proxy inverso, certificados, WAF, Tailscale y frp, todo en un único binario de unos 32 MB. Funciona en redes domésticas, NAS, servidores en la nube y servidores de todo tipo.",

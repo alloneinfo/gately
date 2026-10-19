@@ -77,6 +77,10 @@
   },
   "home": {
     "pill": "Open source · Auditable · Single binary",
+    "announce": {
+      "text": "v0.5.0 is out: audit log, Passkey, HTTP/3 and more →",
+      "link": "/en/news/v0.5.0"
+    },
     "titleLine1": "A network gateway toolkit",
     "titleLine2": "you can see through",
     "lead": "DDNS, STUN NAT traversal, port forwarding, reverse proxy, certificates, WAF, Tailscale and frp, all in a single ~32 MB binary. Runs on home networks, NAS boxes, cloud hosts and servers of every kind.",

@@ -77,6 +77,10 @@
   },
   "home": {
     "pill": "Open Source · Prüfbar · Einzelne Binärdatei",
+    "announce": {
+      "text": "v0.5.0 ist da: Audit-Protokoll, Passkeys, HTTP/3 und mehr →",
+      "link": "/en/news/v0.5.0"
+    },
     "titleLine1": "Ein Toolkit für Netzwerk-Gateways,",
     "titleLine2": "das Sie durchschauen können",
     "lead": "DDNS, STUN-NAT-Traversal, Portweiterleitung, Reverse Proxy, Zertifikate, WAF, Tailscale und frp, alles in einer einzigen Binärdatei von rund 32 MB. Läuft im Heimnetz, auf NAS, Cloud-Hosts und Servern aller Art.",

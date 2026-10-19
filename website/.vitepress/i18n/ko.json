@@ -77,6 +77,10 @@
   },
   "home": {
     "pill": "오픈소스 · 감사 가능 · 단일 파일",
+    "announce": {
+      "text": "v0.5.0 출시: 감사 로그, 패스키, HTTP/3 등 →",
+      "link": "/en/news/v0.5.0"
+    },
     "titleLine1": "속까지 들여다볼 수 있는",
     "titleLine2": "네트워크 게이트웨이 도구 모음",
     "lead": "DDNS, STUN NAT 통과, 포트 포워딩, 리버스 프록시, 인증서, WAF, Tailscale, frp를 약 32 MB 단일 파일 하나에 담았습니다. 가정 네트워크, NAS, 클라우드 호스트 등 어떤 서버에서도 동작합니다.",

@@ -77,6 +77,10 @@
   },
   "home": {
     "pill": "Código aberto · Auditável · Binário único",
+    "announce": {
+      "text": "Saiu a v0.5.0: auditoria, passkeys, HTTP/3 e mais →",
+      "link": "/en/news/v0.5.0"
+    },
     "titleLine1": "Um kit de gateway de rede",
     "titleLine2": "que você enxerga por dentro",
     "lead": "DDNS, travessia de NAT com STUN, redirecionamento de portas, proxy reverso, certificados, WAF, Tailscale e frp, tudo em um único binário de cerca de 32 MB. Funciona em redes domésticas, NAS, servidores em nuvem e servidores de todo tipo.",
