@@ -21,6 +21,7 @@ import (
 	"time"
 
 	"github.com/wangwanjie/gately/internal/auth"
+	"github.com/wangwanjie/gately/internal/luckyimport"
 	"github.com/wangwanjie/gately/internal/module"
 	"github.com/wangwanjie/gately/internal/modules/portforward"
 	"github.com/wangwanjie/gately/internal/modules/ssl"
@@ -854,5 +855,28 @@ func TestApplyDirAndInitialPassword(t *testing.T) {
 	}
 	if _, err := New(Options{ConfigDir: dir, ApplyDir: applyDir}); err == nil {
 		t.Fatal("非法 JSON 应报错")
+	}
+}
+
+// Lucky 3.0 的默认 DNS 列表含 default 与 doh3@，前者应忽略，后者按 doh@ 导入
+func TestImportLuckyBaseDNSFormats(t *testing.T) {
+	a, err := New(Options{ConfigDir: t.TempDir(), Modules: []module.Module{}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	a.logger = log.New(io.Discard, "", 0)
+	doc := luckyimport.Document{"AdminWebListenPort": json.RawMessage(`16601`), "CustomDNSList": json.RawMessage(`"114.114.114.114\ndefault\ndoh3@223.5.5.5"`)}
+	rep := a.importLuckyBase(doc, luckyimport.Options{})
+	if rep == nil {
+		t.Fatal("应识别为基础设置")
+	}
+	for _, w := range rep.Warnings {
+		if strings.Contains(w, "DNS") {
+			t.Fatalf("不应有 DNS 警告: %s", w)
+		}
+	}
+	got := a.settingsSnapshot().DNSServers
+	if len(got) != 2 || got[0] != "114.114.114.114" || got[1] != "doh@223.5.5.5" {
+		t.Fatalf("DNS 导入结果错误: %v", got)
 	}
 }

@@ -73,7 +73,7 @@
       "desc": "Ping, Traceroute, Portprüfung, DNS und LAN-Scan"
     },
     "docker": {
-      "title": "Docker",
+      "title": "Docker-Verwaltung",
       "desc": "Container-Verwaltung und Image-Updates"
     },
     "cron": {

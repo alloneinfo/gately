@@ -1,6 +1,8 @@
 // Package luckyimport 解析 Lucky 的 .lkcf 配置文件，用于迁移到 Gately。
 //
-// 文件格式（针对 Lucky 2.27.2 导出的配置）：
+// Lucky 3.0 的新格式（以 "LKCF" 开头）见 lkcf_v2.go。
+//
+// 2.x 文件格式（针对 Lucky 2.27.2 导出的配置）：
 //
 //	[0]      版本号，固定为 0x01
 //	[1:33]   AES-256 密钥
@@ -33,6 +35,16 @@ func Decrypt(data []byte) ([]byte, error) {
 	trimmed := bytes.TrimSpace(data)
 	if len(trimmed) > 0 && trimmed[0] == '{' {
 		return trimmed, nil
+	}
+	if isV2(data) {
+		plain, err := decryptV2(data)
+		if err != nil {
+			return nil, err
+		}
+		if !json.Valid(plain) {
+			return nil, errors.New("解密结果不是 JSON，文件可能已损坏")
+		}
+		return plain, nil
 	}
 	if len(data) < headerLen+aes.BlockSize {
 		return nil, errors.New("文件太短，不是有效的 lkcf")

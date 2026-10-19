@@ -73,7 +73,7 @@
       "desc": "Ping, traceroute, teste de porta, DNS e varredura da rede local"
     },
     "docker": {
-      "title": "Docker",
+      "title": "Gerenciamento do Docker",
       "desc": "Gerenciamento de contêineres e atualização de imagens"
     },
     "cron": {

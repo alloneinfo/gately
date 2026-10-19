@@ -11,6 +11,7 @@ require (
 	github.com/corazawaf/coraza/v3 v3.8.1
 	github.com/creack/pty v1.1.24
 	github.com/fclairamb/ftpserverlib v0.32.4
+	github.com/klauspost/compress v1.18.0
 	github.com/maxmind/mmdbwriter v1.2.0
 	github.com/oschwald/maxminddb-golang/v2 v2.8.0
 	github.com/pires/go-proxyproto v0.15.0

@@ -97,7 +97,9 @@ func (m *Module) ImportLucky(doc luckyimport.Document, opts luckyimport.Options)
 	rawSession, hasSession := doc["sessionConfig"]
 	rawShortcuts, hasShortcuts := doc["globalShortcuts"]
 	rawSecurity, hasSecurity := doc["securityConfig"]
-	if !hasConns && !hasSession && !hasShortcuts && !hasSecurity {
+	// Lucky 3.0 的每个模块文件都带 securityConfig（各模块自己的二次验证设置），
+	// 不能单凭它判断是 Web 终端的文件，否则会把其他模块的 2FA 密钥导入到这里
+	if !hasConns && !hasSession && !hasShortcuts {
 		return nil, nil
 	}
 	var src []luckyConn

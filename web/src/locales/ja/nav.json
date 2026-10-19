@@ -73,7 +73,7 @@
       "desc": "Ping、トレースルート、ポート確認、DNS、LAN スキャン"
     },
     "docker": {
-      "title": "Docker",
+      "title": "Docker 管理",
       "desc": "コンテナ管理とイメージ更新"
     },
     "cron": {

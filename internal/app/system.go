@@ -256,6 +256,14 @@ func (a *App) importLuckyBase(doc luckyimport.Document, opts luckyimport.Options
 	)
 	seen := map[string]bool{}
 	for _, d := range dns {
+		// Lucky 的 default 表示使用系统 DNS，Gately 未配置自定义服务器时即走系统 DNS，无需导入
+		if strings.EqualFold(d, "default") {
+			continue
+		}
+		// Lucky 3.0 新增的 doh3@ 是走 HTTP/3 的 DoH，Gately 统一按 doh@ 导入
+		if len(d) > 5 && strings.EqualFold(d[:5], "doh3@") {
+			d = "doh@" + d[5:]
+		}
 		if seen[d] {
 			continue
 		}

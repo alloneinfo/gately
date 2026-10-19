@@ -73,7 +73,7 @@
       "desc": "Ping, traceroute, port probe, DNS and LAN scan"
     },
     "docker": {
-      "title": "Docker",
+      "title": "Docker Management",
       "desc": "Container management and image updates"
     },
     "cron": {

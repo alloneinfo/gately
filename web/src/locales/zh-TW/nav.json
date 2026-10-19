@@ -73,7 +73,7 @@
       "desc": "Ping、路由追蹤、連接埠探測、DNS 與區域網路掃描"
     },
     "docker": {
-      "title": "Docker",
+      "title": "Docker 管理",
       "desc": "容器管理與映像檔更新"
     },
     "cron": {

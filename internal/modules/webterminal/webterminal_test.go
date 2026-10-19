@@ -255,6 +255,19 @@ func TestImportLucky(t *testing.T) {
 	}
 }
 
+// Lucky 3.0 的每个模块文件都带 securityConfig，其他模块的文件不应被识别为 Web 终端配置
+func TestImportLuckyIgnoresOtherModuleSecurityConfig(t *testing.T) {
+	m, _ := newModule(t)
+	doc := luckyimport.Document{"securityConfig": json.RawMessage(`{"twoFAEnable":true,"twoFAKey":"ABCDEFGH"}`), "DDNSTaskList": json.RawMessage(`[]`)}
+	rep, err := m.ImportLucky(doc, luckyimport.Options{})
+	if err != nil || rep != nil {
+		t.Fatalf("其他模块文件应被忽略: %+v %v", rep, err)
+	}
+	if m.cfg.Security.TwoFAEnable {
+		t.Fatal("不应导入其他模块的二次验证密钥")
+	}
+}
+
 func TestConnectionTest(t *testing.T) {
 	keyPEM, pub := newKey(t)
 	addr, hostPub := startSSHServer(t, pub)
