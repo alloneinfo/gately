@@ -65,10 +65,10 @@
 
         <el-form :model="form" label-position="top" size="large" class="login-form" @submit.prevent="submit">
           <el-form-item :label="t('login.username')">
-            <el-input v-model="form.username" autocomplete="username" :prefix-icon="UserRound" />
+            <el-input v-model="form.username" autocomplete="username" :placeholder="t('login.usernamePlaceholder')" :prefix-icon="UserRound" />
           </el-form-item>
           <el-form-item :label="t('login.password')">
-            <el-input v-model="form.password" type="password" show-password autocomplete="current-password" :prefix-icon="LockKeyhole" />
+            <el-input v-model="form.password" type="password" show-password autocomplete="current-password" :placeholder="t('login.passwordPlaceholder')" :prefix-icon="LockKeyhole" />
           </el-form-item>
           <el-button type="primary" native-type="submit" :loading="loading && !needCode" class="submit">
             {{ t('login.submit') }}
@@ -155,7 +155,7 @@ import OtpInput from '../components/OtpInput.vue'
 const { t } = useI18n()
 const router = useRouter()
 const route = useRoute()
-const form = reactive({ username: 'admin', password: '', code: '' })
+const form = reactive({ username: '', password: '', code: '' })
 const loading = ref(false)
 const needCode = ref(false)
 const codeInput = ref<InstanceType<typeof OtpInput>>()
