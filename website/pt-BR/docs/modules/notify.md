@@ -1,6 +1,6 @@
 # Central de notificações
 
-A Central de notificações assina o barramento interno de eventos do Gately e, de acordo com as suas regras, envia eventos como mudanças de DDNS, expiração de certificados, bloqueios do WAF e falhas de processos para Webhook, Telegram, Bark, WeCom, DingTalk, Feishu e e-mail. A interface de administração fica no grupo "Sistema" da barra lateral → "Notificações".
+A Central de notificações assina o barramento interno de eventos do Gately e, de acordo com as suas regras, envia eventos como mudanças de DDNS, expiração de certificados, bloqueios do WAF e falhas de processos para Webhook, Telegram, Bark, ntfy, Gotify, Pushover, Discord, Slack, ServerChan, PushPlus, WeCom, DingTalk, Feishu e e-mail. A interface de administração fica no grupo "Sistema" da barra lateral → "Notificações".
 
 ## Como funciona
 
@@ -24,6 +24,13 @@ Clique em "Adicionar canal", escolha um tipo e preencha os campos. Todo canal te
 | DingTalk | URL do bot | Segredo de assinatura (preencha quando o bot tem "assinatura" ativada) |
 | Feishu | URL do bot | Segredo de assinatura (preencha quando o bot tem "verificação de assinatura" ativada) |
 | E-mail | Servidor, destinatários e pelo menos um entre remetente ou usuário | Criptografia, porta, usuário, senha |
+| ntfy | Tópico | URL do servidor (em branco usa `https://ntfy.sh`), token de acesso |
+| Gotify | URL do servidor, token do aplicativo | Nenhum |
+| Pushover | Token do aplicativo, User Key | Nenhum |
+| Discord | URL do webhook | Nenhum |
+| Slack | URL do webhook | Nenhum |
+| ServerChan | SendKey | Nenhum |
+| PushPlus | Token | Nenhum |
 
 Os campos de URL exigem um endereço completo começando com `http://` ou `https://`.
 
@@ -76,6 +83,19 @@ Clique em "Adicionar regra":
 Bloqueios do WAF e mudanças de estado de upstream podem ocorrer com frequência. Nas regras que os cobrem, defina um tempo de silêncio de 300 segundos ou mais.
 :::
 
+## Modelos de regra
+
+Ao criar uma regra, clique em um modelo para preencher eventos, nível e tempo de silêncio; depois escolha os canais e salve:
+
+| Modelo | Eventos |
+| --- | --- |
+| Falhas críticas | Falha na atualização de DDNS, falha na renovação de certificado, upstream indisponível, subprocesso encerrado de forma anormal, falha de backup, contêiner encerrado |
+| Expiração de certificados | Certificado prestes a expirar, falha na renovação (silêncio de 24 horas) |
+| Mudanças de endereço | Registro DDNS atualizado, endereço STUN alterado |
+| Saúde dos serviços | Upstream indisponível e recuperado, contêiner encerrado, subprocesso encerrado |
+| Segurança e logins | Falha de login, IP banido, login bem-sucedido, acesso a conteúdo sensível |
+| Alterações de configuração | Cada alteração de configuração na interface de administração |
+
 ## Tipos de evento
 
 | Tipo de evento | Nome | Nível | Gatilho |
@@ -95,6 +115,8 @@ Bloqueios do WAF e mudanças de estado de upstream podem ocorrer com frequência
 | `auth.failed` | Autenticação: falhas repetidas | Aviso | Um login na interface de administração falhou, com o campo `ip` |
 | `auth.banned` | Autenticação: IP banido | Aviso | Falhas repetidas de autenticação em serviços Web dispararam um banimento automático |
 | `login.success` | Interface de administração: login bem-sucedido | Info | Um login na interface de administração foi bem-sucedido, com os campos `ip` e `user` |
+| `audit.change` | Interface de administração: alteração de configuração | Info | Qualquer operação de alteração na interface de administração, com os campos `actor`, `ip`, `method` e `path`; veja [Auditoria e histórico de configuração](/pt-BR/docs/guide/audit) |
+| `audit.access` | Interface de administração: acesso a conteúdo sensível | Aviso | Download de backup, pacote de diagnóstico ou chave privada de certificado, abertura de terminal etc.; mesmos campos |
 | `notify.test` | Notificação de teste | Info | Gerada pelo botão "Testar" do canal; não participa da correspondência de regras |
 
 ## Enviar um teste

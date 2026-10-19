@@ -31,6 +31,7 @@ Sites de qualquer tipo podem definir um log de acesso, cross-origin (CORS), cabe
 ## Transporte e protocolos
 
 - HTTPS: usa um certificado do módulo de [Certificados SSL](/pt-BR/docs/modules/ssl) que cubra o domínio;
+- HTTP/3 (QUIC): ativado em um listener com HTTPS; o HTTP/3 passa a ser servido também via UDP no mesmo número de porta e anunciado aos navegadores pelo cabeçalho de resposta `Alt-Svc`. Libere essa porta UDP no firewall e no redirecionamento de portas;
 - WebSocket: compatível automaticamente com o proxy reverso;
 - Protocolo PROXY: um listener pode aceitar cabeçalhos PROXY enviados por componentes upstream (como haproxy e frp). Ele confia apenas nos IPs ou sub-redes listados em "Configurações globais → Origens PROXY confiáveis"; deixar vazio não confia em nenhuma origem. O proxy reverso pode enviar cabeçalhos PROXY ao backend.
 
@@ -217,6 +218,8 @@ Para um listener em execução, clique em "Estatísticas" na linha de um site pa
 As estatísticas ficam em memória e voltam a contar do zero depois de uma reinicialização ou de uma modificação do listener. Os rankings acompanham no máximo 5000 origens distintas.
 
 ### Métricas Prometheus
+
+O endpoint global de métricas `GET /api/metrics` reúne as métricas de todos os módulos; veja [Monitoramento](/en/docs/reference/monitoring). O endpoint do módulo abaixo contém apenas as métricas dos Serviços Web.
 
 O endpoint de métricas é `GET /api/webservice/metrics`, em formato de texto Prometheus, e exige credenciais de login ou um [token de API](/en/docs/reference/api-reference).
 

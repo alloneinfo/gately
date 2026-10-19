@@ -1,6 +1,6 @@
 # Introduction
 
-Gately is an open-source, auditable network gateway toolkit for home networks, NAS boxes, cloud hosts and servers of all kinds. DDNS, STUN NAT traversal, port forwarding, reverse proxy, certificates, WAF and more are bundled into a single ~22 MB binary, and Lucky configurations can be imported in one click.
+Gately is an open-source, auditable network gateway toolkit for home networks, NAS boxes, cloud hosts and servers of all kinds. DDNS, STUN NAT traversal, port forwarding, reverse proxy, certificates, WAF and more are bundled into a single ~32 MB binary, and Lucky configurations can be imported in one click.
 
 ## Why Gately
 

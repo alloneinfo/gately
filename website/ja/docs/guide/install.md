@@ -41,25 +41,32 @@ services:
 ./gately -c /etc/gately
 ```
 
-### systemd の例
+### systemd
 
-```ini
-[Unit]
-Description=Gately
-After=network-online.target
-Wants=network-online.target
+リポジトリには完全なサービスファイル [deploy/systemd/gately.service](https://github.com/wangwanjie/gately/blob/main/deploy/systemd/gately.service) が用意されており、低い番号のポートで待ち受けるために必要なケーパビリティも付与済みです。
 
-[Service]
-ExecStart=/usr/local/bin/gately -c /etc/gately
-Restart=on-failure
+```bash
+sudo install -m 0755 gately /usr/local/bin/gately
+sudo install -m 0644 gately.service /etc/systemd/system/gately.service
+sudo systemctl daemon-reload && sudo systemctl enable --now gately
+journalctl -u gately | grep -i "initial password"
+```
 
-[Install]
-WantedBy=multi-user.target
+### OpenWrt
+
+procd 用の起動スクリプト [deploy/openwrt/gately.init](https://github.com/wangwanjie/gately/blob/main/deploy/openwrt/gately.init) を使います。
+
+```bash
+cp gately /usr/bin/gately && chmod +x /usr/bin/gately
+cp gately.init /etc/init.d/gately && chmod +x /etc/init.d/gately
+/etc/init.d/gately enable && /etc/init.d/gately start
 ```
 
 ## 初回ログイン
 
-管理画面はデフォルトで `16680` ポートを待ち受けます。ユーザー名は `admin`、初期パスワードは初回起動時にログへ出力されます。初回ログイン後はパスワードを変更し、2 段階認証を有効にしてください。
+管理画面はデフォルトで `16680` ポートを待ち受けます。ユーザー名は `admin`、初期パスワードは初回起動時にログへ出力されます。自動デプロイでは環境変数 `GATELY_INITIAL_PASSWORD` で初期パスワードを指定でき、その場合はランダムなパスワードは生成されません。
+
+初回ログイン時には初期設定ガイドが表示され、パスワードの変更、2 段階認証または Passkey の有効化、ネットワーク自己診断の実行、Lucky からのインポート、通知の設定を順に案内します。
 
 ## アップグレード
 
@@ -68,4 +75,4 @@ Gately はオンライン自動更新を内蔵していません。アップグ�
 - Docker：新しいイメージを `docker pull` してからコンテナを再作成します（設定ディレクトリをマウントしたままにしておけば問題ありません）。
 - バイナリ：実行ファイルを置き換えて、サービスを再起動します。
 
-アップグレード前に設定のバックアップをエクスポートするか、設定ディレクトリごと git に入れておくことをおすすめします。
+アップグレード前に設定のバックアップをエクスポートするか、設定ディレクトリごと git に入れておくことをおすすめします。ダウンロードしたアーカイブやイメージは、[リリースの検証](/en/docs/guide/verify) に従って署名を確認できます。

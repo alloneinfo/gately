@@ -5,13 +5,16 @@ La interfaz de administración controla el DNS, los certificados y los puertos. 
 ## Interfaz de administración
 
 - [ ] Cambia la contraseña del administrador tras el primer inicio de sesión
-- [ ] Activa la autenticación de dos factores (TOTP)
+- [ ] Activa la autenticación de dos factores (TOTP) o registra una passkey
+- [ ] Si familiares o compañeros solo necesitan consultar, crea para ellos una cuenta de solo lectura en lugar de compartir la contraseña del administrador
 - [ ] Define una ruta de acceso segura para que la interfaz de administración solo sea accesible mediante una ruta personalizada
 - [ ] Activa «Acceso solo desde la red local» y usa una VPN (como [Tailscale](/es/docs/modules/tunnels)) cuando necesites administrar de forma remota
 - [ ] Activa HTTPS en la interfaz de administración cuando accedas a través de redes no confiables
 - [ ] Da a los scripts de automatización y a la [CLI / MCP](/es/docs/guide/cli-mcp) [tokens de API](/es/docs/reference/api) con los mínimos privilegios y fecha de caducidad, y evita compartir la contraseña del administrador
 - [ ] Define una contraseña de cifrado para las [copias de seguridad de la configuración](/es/docs/modules/backup) y activa las copias programadas
-- [ ] Configura avisos en el [Centro de notificaciones](/es/docs/modules/notify) para eventos como inicios de sesión, certificados y fallos de copia de seguridad
+- [ ] Configura avisos en el [Centro de notificaciones](/es/docs/modules/notify) con las plantillas «Seguridad e inicios de sesión», «Cambios de configuración» y «Fallos críticos»
+- [ ] Si expones la interfaz de administración a través de un proxy inverso local, comprueba que el [registro de auditoría](/es/docs/guide/audit) muestra el origen real; en las entradas de reenvío de puertos, activa el [protocolo PROXY](/es/docs/modules/portforward#protocolo-proxy)
+- [ ] Tras descargar una nueva versión, comprueba su firma según [Verificar versiones](/en/docs/guide/verify)
 
 ## Servicios expuestos a Internet
 

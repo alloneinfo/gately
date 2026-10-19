@@ -5,13 +5,16 @@ L'interface d'administration contrôle le DNS, les certificats et les ports. Par
 ## Interface d'administration
 
 - [ ] Changer le mot de passe de l'administrateur après la première connexion
-- [ ] Activer l'authentification à deux facteurs (TOTP)
+- [ ] Activer l'authentification à deux facteurs (TOTP), ou enregistrer une passkey
+- [ ] Créer un compte en lecture seule pour les proches ou collègues qui n'ont besoin que de consulter, au lieu de partager le mot de passe administrateur
 - [ ] Définir un chemin d'accès secret pour que l'interface ne soit joignable que par un chemin personnalisé
 - [ ] Activer « l'accès limité au réseau local » et utiliser un VPN (comme [Tailscale](/fr/docs/modules/tunnels)) pour l'administration à distance
 - [ ] Activer le HTTPS de l'interface d'administration pour un accès via des réseaux non fiables
 - [ ] Donner aux scripts d'automatisation et à la [CLI / MCP](/fr/docs/guide/cli-mcp) des [jetons d'API](/fr/docs/reference/api) aux privilèges minimaux, avec une date d'expiration, et éviter de partager le mot de passe administrateur
 - [ ] Définir une phrase secrète de chiffrement pour les [sauvegardes de configuration](/fr/docs/modules/backup) et activer les sauvegardes planifiées
-- [ ] Configurer des notifications dans le [centre de notifications](/fr/docs/modules/notify) pour les événements tels que les connexions, les certificats et les échecs de sauvegarde
+- [ ] Configurer des notifications dans le [centre de notifications](/fr/docs/modules/notify) avec les modèles « Sécurité et connexions », « Modifications de configuration » et « Pannes critiques »
+- [ ] Si l'interface d'administration est exposée via un proxy inverse local, vérifier que le [journal d'audit](/fr/docs/guide/audit) enregistre bien la source réelle ; pour les entrées de redirection de ports, activer le [protocole PROXY](/fr/docs/modules/portforward#protocole-proxy)
+- [ ] Après avoir téléchargé une nouvelle version, vérifier sa signature selon [Vérifier les versions](/en/docs/guide/verify)
 
 ## Services exposés sur Internet
 

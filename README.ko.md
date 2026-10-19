@@ -2,7 +2,7 @@
 
 [English](README.md) | [简体中文](README.zh-CN.md) | [繁體中文](README.zh-TW.md) | [日本語](README.ja.md) | **한국어** | [Español](README.es.md) | [Français](README.fr.md) | [Deutsch](README.de.md) | [Русский](README.ru.md) | [Português (Brasil)](README.pt-BR.md)
 
-가정 네트워크, NAS, 클라우드 호스트, 각종 서버에서 사용할 수 있는 오픈소스 · 감사 가능한 네트워크 게이트웨이 도구 모음입니다. DDNS, STUN 터널링, 포트 포워딩, 리버스 프록시, 인증서, WAF 등 자주 쓰는 기능을 약 22 MB의 단일 파일에 담았으며, 기존 Lucky 설정을 가져올 수 있습니다.
+가정 네트워크, NAS, 클라우드 호스트, 각종 서버에서 사용할 수 있는 오픈소스 · 감사 가능한 네트워크 게이트웨이 도구 모음입니다. DDNS, STUN 터널링, 포트 포워딩, 리버스 프록시, 인증서, WAF 등 자주 쓰는 기능을 약 32 MB의 단일 파일에 담았으며, 기존 Lucky 설정을 가져올 수 있습니다.
 
 ![Gately 개요](docs/images/overview.webp)
 

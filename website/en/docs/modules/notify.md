@@ -1,6 +1,6 @@
 # Notification Center
 
-The Notification Center subscribes to Gately's internal event bus and, according to your rules, pushes events such as DDNS changes, certificate expiry, WAF blocks and process failures to Webhook, Telegram, Bark, WeCom, DingTalk, Feishu and email. The management UI is under the sidebar "System" group → "Notifications".
+The Notification Center subscribes to Gately's internal event bus and, according to your rules, pushes events such as DDNS changes, certificate expiry, WAF blocks and process failures to Webhook, Telegram, Bark, ntfy, Gotify, Pushover, Discord, Slack, ServerChan, PushPlus, WeCom, DingTalk, Feishu and email. The management UI is under the sidebar "System" group → "Notifications".
 
 ## How it works
 
@@ -24,6 +24,13 @@ Click "Add channel", choose a type and fill in the fields. Every channel has a n
 | DingTalk | Bot URL | Signing secret (fill in when the bot has "signature" enabled) |
 | Feishu | Bot URL | Signing secret (fill in when the bot has "signature verification" enabled) |
 | Email | Server, recipients, and at least one of sender or username | Encryption, port, username, password |
+| ntfy | Topic | Server URL (leave empty to use `https://ntfy.sh`), access token |
+| Gotify | Server URL, application token | None |
+| Pushover | Application token, user key | None |
+| Discord | Webhook URL | None |
+| Slack | Webhook URL | None |
+| ServerChan | SendKey | None |
+| PushPlus | Token | None |
 
 URL fields need a full address starting with `http://` or `https://`.
 
@@ -76,6 +83,19 @@ Click "Add rule":
 WAF blocks and upstream state changes can happen frequently. For rules covering them, set a silence time of 300 seconds or more.
 :::
 
+## Rule templates
+
+When creating a rule, click a template to prefill the events, level and silence time, then pick channels and save:
+
+| Template | Events |
+| --- | --- |
+| Critical failures | DDNS update failed, certificate renewal failed, upstream down, child process exited abnormally, backup failed, container exited |
+| Certificate expiry | Certificate expiring soon, renewal failed (24-hour silence) |
+| Address changes | DDNS record updated, STUN address changed |
+| Service health | Upstream down and recovered, container exited, child process exited |
+| Security & sign-ins | Login failures, IP bans, successful logins, access to sensitive content |
+| Configuration changes | Every configuration change made in the management UI |
+
 ## Event types
 
 | Event type | Name | Level | Trigger |
@@ -95,6 +115,8 @@ WAF blocks and upstream state changes can happen frequently. For rules covering 
 | `auth.failed` | Authentication: repeated failures | Warning | A management UI login failed, with the `ip` field |
 | `auth.banned` | Authentication: IP banned | Warning | Repeated Web service authentication failures triggered an automatic ban |
 | `login.success` | Management UI: login succeeded | Info | A management UI login succeeded, with the `ip` and `user` fields |
+| `audit.change` | Management UI: configuration changed | Info | Any change made in the management UI, with the `actor`, `ip`, `method` and `path` fields; see [Audit Log & Config History](/en/docs/guide/audit) |
+| `audit.access` | Management UI: sensitive content accessed | Warning | Downloading a backup, diagnostics bundle or certificate private key, opening a terminal, and similar; same fields as above |
 | `notify.test` | Test notification | Info | Produced by the channel's "Test" button; it does not take part in rule matching |
 
 ## Sending a test

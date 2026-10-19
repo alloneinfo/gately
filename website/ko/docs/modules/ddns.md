@@ -4,7 +4,17 @@
 
 ## 지원하는 제공자
 
-Alibaba Cloud, Cloudflare, Tencent Cloud, DNSPod, Huawei Cloud, GoDaddy, Porkbun, dynv6, DuckDNS, 그리고 사용자 정의 콜백(내장되지 않은 제공자나 자체 구축한 API용)을 지원합니다.
+Alibaba Cloud, Cloudflare, Tencent Cloud, DNSPod, Huawei Cloud, GoDaddy, Porkbun, dynv6, DuckDNS, Amazon Route 53, OVHcloud, Gandi, NS1, Bunny DNS, Namecheap, DynDNS2, 그리고 사용자 정의 콜백(내장되지 않은 제공자나 자체 구축한 API용)을 지원합니다.
+
+| 제공자 | 자격 증명 | 인증서 DNS 검증에 사용 가능 |
+| --- | --- | --- |
+| Amazon Route 53 | Access Key ID / Secret Access Key, 선택적으로 호스팅 영역 ID | 예 |
+| OVHcloud | Application Key / Secret과 Consumer Key, 엔드포인트 ovh-eu / ovh-ca / ovh-us | 예 |
+| Gandi | Personal Access Token | 예 |
+| NS1 | API Key | 예 |
+| Bunny DNS | Account API Key | 예 |
+| Namecheap | 도메인의 Dynamic DNS 비밀번호(A 레코드만) | 아니요 |
+| DynDNS2 | 사용자 이름, 비밀번호, 업데이트 주소. No-IP, Dynu 등 dyndns2 프로토콜 호환 서비스에 사용 | 아니요 |
 
 ## IP를 가져오는 방법
 

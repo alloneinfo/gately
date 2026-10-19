@@ -18,12 +18,19 @@ O Gately roda na borda da rede e lida com chaves de provedores de DNS, chaves pr
 ## Autenticação e controle de acesso
 
 - Hash de senhas com bcrypt e tokens de sessão assinados com HMAC;
+- Login com passkey (WebAuthn): só a chave pública é armazenada, a verificação do usuário (digital, rosto ou PIN) é obrigatória e um contador de assinaturas impede clonagem; exige acesso por domínio com HTTPS (ou localhost);
 - Autenticação em dois fatores (TOTP, verificada com os vetores de teste da RFC 6238);
+- Contas somente leitura: podem ver o status e a configuração, mas não podem alterar nada, baixar backups, ler segredos ou abrir o terminal; ao redefinir a senha ou excluir a conta, as sessões são invalidadas na hora;
 - Limitação de tentativas de login;
+- Proxy reverso local: quando a interface de administração fica atrás de nginx, haproxy ou de um Serviço Web do Gately no mesmo host, os cabeçalhos `X-Real-IP` / `X-Forwarded-For` só são aceitos de endereços deste host. O acesso apenas pela rede local, a limitação de login e o log de auditoria obtêm a origem real a partir deles. Isso pode ser desativado, ou proxies confiáveis adicionais podem ser incluídos, em "Configurações → Restrições de acesso";
 - Caminho de entrada seguro, acesso apenas pela rede local e HTTPS na interface de administração;
 - API com vários tokens: cada token tem acesso de leitura e escrita apenas aos módulos selecionados na criação, pode ter data de expiração e registra o IP de origem do último uso. Os endpoints de conta, autenticação em dois fatores, gerenciamento de tokens, backup, restauração, reinício e configurações do sistema aceitam apenas sessões com login. Veja [Tokens de API e OpenAPI](/pt-BR/docs/reference/api);
 - Controle de acesso por site: banimento automático após falhas de autenticação, filtro de países por GeoIP e regras de caminho. Veja [Serviços Web](/pt-BR/docs/modules/web);
 - Os backups da configuração aceitam criptografia (scrypt + AES-GCM). Veja [Backup da configuração](/pt-BR/docs/modules/backup).
+
+## Auditoria e rastreabilidade
+
+O log de auditoria registra logins, alterações de configuração e acessos sensíveis, e o histórico de configuração guarda a versão anterior de cada arquivo de configuração antes de ser sobrescrito, com reversão em um clique. Veja [Auditoria e histórico de configuração](/pt-BR/docs/guide/audit). Os artefatos de cada versão vêm com assinaturas cosign, atestados de proveniência de build e SBOM; para conferi-los, veja [Verificar versões](/en/docs/guide/verify).
 
 ## Padrões dos recursos de alto risco
 

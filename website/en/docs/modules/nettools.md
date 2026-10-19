@@ -93,3 +93,19 @@ Limits and how it works:
 ::: tip
 The diagnostic tools run on the host or container where Gately runs, so results reflect the network of that environment. To limit what can be probed, add sensitive internal subnets to the probe blocklist.
 :::
+
+## Network self-check
+
+The "Self-check" button on the overview page (also offered in the first-start onboarding guide) checks common network and configuration problems in one go. Items that need attention are listed first, with suggestions:
+
+| Check | Description |
+| --- | --- |
+| Public address | Gets the outbound IPv4 / IPv6 through the public IP lookup URLs used by DDNS |
+| NAT | Whether this machine holds a public IPv4 / IPv6 address directly; a 100.64.0.0/10 address on a network interface suggests carrier-grade NAT (overlay interfaces such as Tailscale are excluded) |
+| System time | Estimates clock offset from the response time of the lookup services; more than 60 seconds breaks two-factor codes and certificate validation |
+| Ports 80 / 443 | Whether each port is free, already in use, or cannot be listened on due to missing permission |
+| DDNS resolution | For records that use a dynamic address, whether the domain currently resolves to this machine's outbound address |
+| Certificates | Certificates that have expired or expire within 14 days |
+| Module status | Modules in a warning or error state on the overview |
+
+The self-check queries the configured public IP lookup services and runs only when you click it. Read-only accounts and API tokens cannot use it.

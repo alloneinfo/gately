@@ -41,6 +41,7 @@
       "modules/backup": "Backup da configuração",
       "modules/tools": "Arquivos e ferramentas de operação",
       "guide/security": "Modelo de segurança e compromisso de privacidade",
+      "guide/audit": "Auditoria e histórico de configuração",
       "guide/hardening": "Guia de reforço de segurança",
       "guide/verify": "Verificar versões",
       "reference/api": "Tokens de API e OpenAPI",
@@ -78,7 +79,7 @@
     "pill": "Código aberto · Auditável · Binário único",
     "titleLine1": "Um kit de gateway de rede",
     "titleLine2": "que você enxerga por dentro",
-    "lead": "DDNS, travessia de NAT com STUN, redirecionamento de portas, proxy reverso, certificados, WAF, Tailscale e frp, tudo em um único binário de cerca de 22 MB. Funciona em redes domésticas, NAS, servidores em nuvem e servidores de todo tipo.",
+    "lead": "DDNS, travessia de NAT com STUN, redirecionamento de portas, proxy reverso, certificados, WAF, Tailscale e frp, tudo em um único binário de cerca de 32 MB. Funciona em redes domésticas, NAS, servidores em nuvem e servidores de todo tipo.",
     "ctaStart": "Início rápido",
     "ctaDownload": "Download",
     "mockTitle": "gately · Visão geral",
@@ -116,7 +117,7 @@
     ],
     "stats": [
       {
-        "value": "~22 MB",
+        "value": "~32 MB",
         "label": "Binário único, com a interface de administração embutida"
       },
       {
@@ -137,7 +138,7 @@
     "features": [
       {
         "title": "DNS dinâmico",
-        "text": "11 provedores, incluindo Alibaba Cloud, Cloudflare, Tencent Cloud, DNSPod, Huawei Cloud e GoDaddy; detecção de IP por URL, interface de rede ou comando, IPv4 e IPv6, notificações por webhook."
+        "text": "18 provedores, incluindo Alibaba Cloud, Cloudflare, Tencent Cloud, DNSPod, Huawei Cloud, Route 53, OVH, Gandi e Namecheap; detecção de IP por URL, interface de rede ou comando, IPv4 e IPv6, notificações por webhook."
       },
       {
         "title": "Travessia STUN",
@@ -145,15 +146,15 @@
       },
       {
         "title": "Redirecionamento de portas",
-        "text": "TCP / UDP, IPv4 / IPv6, intervalos de portas, failover entre vários destinos, limite de conexões e estatísticas de tráfego."
+        "text": "TCP / UDP, IPv4 / IPv6, intervalos de portas, failover entre vários destinos, limite de conexões e estatísticas de tráfego; pode enviar o protocolo PROXY ao destino para preservar o endereço real do cliente."
       },
       {
         "title": "Certificados SSL",
-        "text": "Emissão e renovação automáticas via ACME DNS-01, com suporte a wildcard e EAB; mapeie certificados para um diretório e execute um script após cada alteração."
+        "text": "Emissão e renovação automáticas via ACME, com DNS-01 (incluindo wildcard), HTTP-01 e EAB; mapeie certificados para um diretório e execute um script após cada alteração."
       },
       {
         "title": "Serviços Web",
-        "text": "Proxy reverso por domínio, redirecionamentos e arquivos estáticos; HTTPS, WebSocket e protocolo PROXY; políticas com vários backends e pesos, health checks, compressão, limitação de taxa e cache de respostas."
+        "text": "Proxy reverso por domínio, redirecionamentos e arquivos estáticos; HTTPS, HTTP/3, WebSocket e protocolo PROXY; políticas com vários backends e pesos, health checks, compressão, limitação de taxa e cache de respostas."
       },
       {
         "title": "Firewall WAF",
@@ -181,7 +182,7 @@
       },
       {
         "title": "Reforço de segurança",
-        "text": "Autenticação em dois fatores, limitação de tentativas de login, caminho de entrada seguro, acesso apenas pela rede local, HTTPS na interface de administração e tokens de API."
+        "text": "Passkey e autenticação em dois fatores, contas somente leitura, log de auditoria, histórico de configuração com reversão em um clique, limitação de tentativas de login, caminho de entrada seguro e acesso apenas pela rede local."
       },
       {
         "title": "Controle de acesso",
@@ -189,11 +190,11 @@
       },
       {
         "title": "Estatísticas e monitoramento",
-        "text": "Estatísticas de acessos e tráfego por minuto, expostas como métricas Prometheus para o seu monitoramento atual."
+        "text": "Métricas Prometheus globais e painel Grafana para certificados, DDNS, redirecionamento de portas e sites; autodiagnóstico de rede em um clique verifica NAT, portas, horário e resolução DNS."
       },
       {
         "title": "Central de notificações",
-        "text": "Webhook, Telegram, Bark, WeCom, DingTalk, Feishu e e-mail; envio por severidade e regras de eventos, com silenciamento e desduplicação."
+        "text": "Webhook, Telegram, Bark, ntfy, Gotify, Pushover, Discord, Slack, ServerChan, PushPlus, WeCom, DingTalk, Feishu e e-mail; modelos de regra embutidos e desduplicação por tempo de silêncio."
       },
       {
         "title": "Backup da configuração",

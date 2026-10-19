@@ -39,3 +39,5 @@ make build    # gera bin/gately
 ## Verificação
 
 Cada versão acompanha um arquivo de checksums. Confira o SHA-256 depois de baixar e antes de executar.
+
+Desde a v0.5.0, o arquivo de checksums e as imagens Docker têm assinatura sem chave do cosign, os arquivos trazem atestado de procedência e um SBOM é publicado. Veja [Verificar versões](/en/docs/guide/verify) (em inglês).

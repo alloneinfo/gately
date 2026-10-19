@@ -31,6 +31,7 @@ Los sitios de cualquier tipo pueden definir un registro de acceso, orígenes cru
 ## Transporte y protocolos
 
 - HTTPS: usa un certificado del módulo [Certificados SSL](/es/docs/modules/ssl) que cubra el dominio;
+- HTTP/3 (QUIC): actívalo en un listener con HTTPS para servir también HTTP/3 por UDP en el mismo número de puerto; se anuncia al navegador con la cabecera de respuesta `Alt-Svc`. Hay que permitir ese puerto UDP en el cortafuegos y en el reenvío de puertos;
 - WebSocket: el proxy inverso lo admite automáticamente;
 - Protocolo PROXY: un listener puede aceptar cabeceras PROXY enviadas por componentes situados antes (como haproxy y frp). Solo confía en las IP o subredes indicadas en «Ajustes globales → Orígenes PROXY de confianza»; si se deja vacío, no confía en ningún origen. El proxy inverso puede enviar cabeceras PROXY al backend.
 
@@ -217,6 +218,8 @@ En un listener en ejecución, pulsa «Estadísticas» en la fila de un sitio par
 Las estadísticas se guardan en memoria y vuelven a empezar a contarse tras un reinicio o tras modificar el listener. Las clasificaciones siguen como máximo 5000 orígenes distintos.
 
 ### Métricas de Prometheus
+
+El endpoint global `GET /api/metrics` reúne las métricas de todos los módulos; consulta [Métricas de monitorización](/en/docs/reference/monitoring). El endpoint del módulo que se describe a continuación solo incluye las métricas de los servicios web.
 
 El endpoint de métricas es `GET /api/webservice/metrics`, en formato de texto de Prometheus, y requiere credenciales de inicio de sesión o un [token de API](/en/docs/reference/api-reference).
 

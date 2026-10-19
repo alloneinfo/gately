@@ -1,6 +1,6 @@
 # Introdução
 
-O Gately é um kit de gateway de rede de código aberto e auditável, para redes domésticas, NAS, servidores em nuvem e servidores de todo tipo. DDNS, travessia de NAT com STUN, redirecionamento de portas, proxy reverso, certificados, WAF e mais vêm reunidos em um único binário de cerca de 22 MB, e as configurações do Lucky podem ser importadas.
+O Gately é um kit de gateway de rede de código aberto e auditável, para redes domésticas, NAS, servidores em nuvem e servidores de todo tipo. DDNS, travessia de NAT com STUN, redirecionamento de portas, proxy reverso, certificados, WAF e mais vêm reunidos em um único binário de cerca de 32 MB, e as configurações do Lucky podem ser importadas.
 
 ## Por que o Gately
 

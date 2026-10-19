@@ -31,6 +31,7 @@
 ## 전송 및 프로토콜
 
 - HTTPS: [SSL 인증서](/ko/docs/modules/ssl) 모듈에서 해당 도메인을 포함하는 인증서를 사용합니다.
+- HTTP/3(QUIC): HTTPS를 켠 리스너에서 활성화하면 같은 포트 번호의 UDP로 HTTP/3도 제공하고 `Alt-Svc` 응답 헤더로 브라우저에 알립니다. 방화벽과 포트 포워딩에서 해당 UDP 포트를 허용해야 합니다.
 - WebSocket: 리버스 프록시에서 자동으로 지원합니다.
 - PROXY 프로토콜: 리스너가 업스트림(haproxy, frp 등)이 보낸 PROXY 헤더를 받을 수 있으며 「전역 설정 → 신뢰할 PROXY 출처」에 나열된 IP 또는 대역만 신뢰합니다. 비워 두면 어떤 출처도 신뢰하지 않습니다. 리버스 프록시는 백엔드로 PROXY 헤더를 보낼 수 있습니다.
 
@@ -217,6 +218,8 @@ http://10.0.0.3:8080 backup
 통계는 메모리에 저장되며 재시작하거나 해당 리스너를 수정하면 다시 집계합니다. 순위표는 서로 다른 출처를 최대 5000개까지 집계합니다.
 
 ### Prometheus 메트릭
+
+전역 메트릭 엔드포인트 `GET /api/metrics`는 모든 모듈의 메트릭을 모아 제공합니다. [모니터링 메트릭](/en/docs/reference/monitoring)을 참고하세요. 아래 모듈 엔드포인트에는 웹 서비스 메트릭만 포함됩니다.
 
 메트릭 엔드포인트는 `GET /api/webservice/metrics`이며 Prometheus 텍스트 형식입니다. 로그인 자격 증명이나 [API 토큰](/en/docs/reference/api-reference)이 필요합니다.
 

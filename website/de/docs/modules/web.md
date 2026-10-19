@@ -31,6 +31,7 @@ Sites jedes Typs können ein Zugriffslog, Cross-Origin (CORS) sowie eigene Reque
 ## Transport und Protokolle
 
 - HTTPS: nutzt ein Zertifikat aus dem Modul [SSL-Zertifikate](/de/docs/modules/ssl), das die Domain abdeckt;
+- HTTP/3 (QUIC): wird in einem Listener mit aktiviertem HTTPS eingeschaltet; HTTP/3 wird dann zusätzlich per UDP auf derselben Portnummer bereitgestellt und Browsern über den Antwort-Header `Alt-Svc` angekündigt. Der UDP-Port muss in Firewall und Portweiterleitung freigegeben sein;
 - WebSocket: wird vom Reverse Proxy automatisch unterstützt;
 - PROXY-Protokoll: Ein Listener kann PROXY-Header akzeptieren, die vorgelagerte Komponenten (wie haproxy und frp) senden. Er vertraut nur den IPs oder Subnetzen unter „Globale Einstellungen → Vertrauenswürdige PROXY-Quellen“; bleibt die Liste leer, wird keiner Quelle vertraut. Der Reverse Proxy kann PROXY-Header an das Backend senden.
 
@@ -217,6 +218,8 @@ Klicken Sie bei einem laufenden Listener in der Site-Zeile auf „Statistik“, 
 Die Statistiken liegen im Arbeitsspeicher und beginnen nach einem Neustart oder nach einer Änderung des Listeners von vorn. Die Ranglisten verfolgen höchstens 5000 verschiedene Quellen.
 
 ### Prometheus-Metriken
+
+Der globale Metriken-Endpunkt `GET /api/metrics` fasst die Metriken aller Module zusammen, siehe [Monitoring](/en/docs/reference/monitoring). Der folgende Modul-Endpunkt enthält nur die Metriken der Web-Dienste.
 
 Der Metriken-Endpunkt ist `GET /api/webservice/metrics` im Prometheus-Textformat und erfordert Anmeldedaten oder ein [API-Token](/en/docs/reference/api-reference).
 

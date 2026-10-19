@@ -9,7 +9,20 @@ Encaminhe uma porta em que o Gately escuta para outro dispositivo ou serviço.
 - Intervalos de portas e várias portas;
 - Vários destinos com failover;
 - Limite de conexões;
-- Estatísticas de tráfego e logs de execução.
+- Estatísticas de tráfego e logs de execução;
+- Envio do protocolo PROXY (v1 / v2) ao destino, entregando ao serviço seguinte o endereço real do cliente.
+
+## Protocolo PROXY
+
+O redirecionamento de portas apenas repassa o TCP, então por padrão o serviço seguinte só vê o endereço do próprio Gately. Ao definir "Protocolo PROXY" como v1 ou v2 na regra, o Gately envia primeiro um cabeçalho PROXY depois de conectar ao destino, e o serviço seguinte obtém o endereço real do cliente para logs, limitação de taxa e controle de acesso.
+
+O destino precisa ter a opção de recebimento correspondente ativada, caso contrário a conexão é recusada. Por exemplo:
+
+- haproxy: `bind 192.168.1.8:4434 accept-proxy`;
+- nginx: `listen 4435 ssl proxy_protocol;`;
+- Serviço Web do Gately: ative "Aceitar protocolo PROXY" no listener e adicione a origem às origens PROXY confiáveis.
+
+A opção vale apenas para TCP; os redirecionamentos UDP não são afetados.
 
 ## Cenários típicos
 

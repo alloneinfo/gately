@@ -1,6 +1,6 @@
 # Benachrichtigungszentrale
 
-Die Benachrichtigungszentrale abonniert den internen Ereignisbus von Gately und sendet nach Ihren Regeln Ereignisse wie DDNS-Änderungen, ablaufende Zertifikate, WAF-Blockierungen und Prozessausfälle an Webhook, Telegram, Bark, WeCom, DingTalk, Feishu und E-Mail. Die Verwaltung finden Sie in der Seitenleiste unter der Gruppe „System“ → „Benachrichtigungen“.
+Die Benachrichtigungszentrale abonniert den internen Ereignisbus von Gately und sendet nach Ihren Regeln Ereignisse wie DDNS-Änderungen, ablaufende Zertifikate, WAF-Blockierungen und Prozessausfälle an Webhook, Telegram, Bark, ntfy, Gotify, Pushover, Discord, Slack, ServerChan, PushPlus, WeCom, DingTalk, Feishu und E-Mail. Die Verwaltung finden Sie in der Seitenleiste unter der Gruppe „System“ → „Benachrichtigungen“.
 
 ## Funktionsweise
 
@@ -24,6 +24,13 @@ Klicken Sie auf „Kanal hinzufügen“, wählen Sie einen Typ und füllen Sie d
 | DingTalk | Bot-URL | Signatur-Secret (eintragen, wenn beim Bot „Signatur“ aktiviert ist) |
 | Feishu | Bot-URL | Signatur-Secret (eintragen, wenn beim Bot „Signaturprüfung“ aktiviert ist) |
 | E-Mail | Server, Empfänger sowie mindestens eines von Absender oder Benutzername | Verschlüsselung, Port, Benutzername, Passwort |
+| ntfy | Topic | Server-URL (leer lassen für `https://ntfy.sh`), Zugriffstoken |
+| Gotify | Server-URL, App-Token | Keine |
+| Pushover | App-Token, User Key | Keine |
+| Discord | Webhook-URL | Keine |
+| Slack | Webhook-URL | Keine |
+| ServerChan | SendKey | Keine |
+| PushPlus | Token | Keine |
 
 URL-Felder brauchen eine vollständige Adresse, die mit `http://` oder `https://` beginnt.
 
@@ -76,6 +83,19 @@ Klicken Sie auf „Regel hinzufügen“:
 WAF-Blockierungen und Statusänderungen von Upstreams können häufig auftreten. Setzen Sie bei Regeln, die sie abdecken, eine Ruhezeit von 300 Sekunden oder mehr.
 :::
 
+## Regelvorlagen
+
+Beim Anlegen einer Regel können Sie eine Vorlage anklicken, die Ereignisse, Stufe und Ruhezeit vorbelegt; danach wählen Sie die Kanäle und speichern:
+
+| Vorlage | Ereignisse |
+| --- | --- |
+| Kritische Ausfälle | DDNS-Aktualisierung fehlgeschlagen, Zertifikatserneuerung fehlgeschlagen, Upstream ausgefallen, Kindprozess abnormal beendet, Sicherung fehlgeschlagen, Container beendet |
+| Zertifikatsablauf | Zertifikat läuft bald ab, Erneuerung fehlgeschlagen (Ruhezeit 24 Stunden) |
+| Adressänderungen | DDNS-Eintrag aktualisiert, STUN-Adresse geändert |
+| Dienstzustand | Upstream ausgefallen und wiederhergestellt, Container beendet, Kindprozess beendet |
+| Sicherheit & Anmeldungen | Anmeldung fehlgeschlagen, IP gesperrt, Anmeldung erfolgreich, Zugriff auf sensible Inhalte |
+| Konfigurationsänderungen | Jede Konfigurationsänderung in der Verwaltungsoberfläche |
+
 ## Ereignistypen
 
 | Ereignistyp | Name | Stufe | Auslöser |
@@ -95,6 +115,8 @@ WAF-Blockierungen und Statusänderungen von Upstreams können häufig auftreten.
 | `auth.failed` | Authentifizierung: wiederholte Fehlschläge | Warnung | Eine Anmeldung an der Verwaltungsoberfläche ist fehlgeschlagen, mit dem Feld `ip` |
 | `auth.banned` | Authentifizierung: IP gesperrt | Warnung | Wiederholte Authentifizierungsfehler bei Web-Diensten haben eine automatische Sperre ausgelöst |
 | `login.success` | Verwaltungsoberfläche: Anmeldung erfolgreich | Info | Eine Anmeldung an der Verwaltungsoberfläche war erfolgreich, mit den Feldern `ip` und `user` |
+| `audit.change` | Verwaltungsoberfläche: Konfiguration geändert | Info | Jede ändernde Aktion in der Verwaltungsoberfläche, mit den Feldern `actor`, `ip`, `method` und `path`; siehe [Audit und Konfigurationsverlauf](/de/docs/guide/audit) |
+| `audit.access` | Verwaltungsoberfläche: Zugriff auf sensible Inhalte | Warnung | Herunterladen von Sicherungen, Diagnosepaketen oder privaten Zertifikatsschlüsseln, Öffnen eines Terminals und Ähnliches; Felder wie oben |
 | `notify.test` | Testbenachrichtigung | Info | Wird von der Schaltfläche „Testen“ des Kanals erzeugt und nimmt nicht am Regelabgleich teil |
 
 ## Test senden

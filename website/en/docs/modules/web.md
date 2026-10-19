@@ -31,6 +31,7 @@ Sites of every type can set an access log, cross-origin (CORS), custom request a
 ## Transport and protocols
 
 - HTTPS: uses a certificate from the [SSL Certificates](/en/docs/modules/ssl) module that covers the domain;
+- HTTP/3 (QUIC): turn it on for a listener with HTTPS enabled. HTTP/3 is then also served over UDP on the same port number and advertised to browsers with the `Alt-Svc` response header; allow that UDP port in your firewall and port mapping;
 - WebSocket: supported automatically by reverse proxy;
 - PROXY protocol: a listener can accept PROXY headers sent by upstream components (such as haproxy and frp). It trusts only the IPs or subnets listed in "Global settings → Trusted PROXY sources"; leaving it empty trusts no source. Reverse proxy can send PROXY headers to the backend.
 
@@ -217,6 +218,8 @@ For a running listener, click "Stats" on a site row to open the statistics windo
 Statistics are kept in memory and start counting again after a restart or after the listener is modified. The rankings track at most 5000 distinct sources.
 
 ### Prometheus metrics
+
+The global metrics endpoint `GET /api/metrics` aggregates metrics from all modules; see [Monitoring](/en/docs/reference/monitoring). The module endpoint below covers Web Services metrics only.
 
 The metrics endpoint is `GET /api/webservice/metrics` in Prometheus text format, and it requires login credentials or an [API token](/en/docs/reference/api-reference).
 

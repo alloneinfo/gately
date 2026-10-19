@@ -93,3 +93,19 @@ Limites et fonctionnement :
 ::: tip Astuce
 Les outils de diagnostic s'exécutent sur l'hôte ou le conteneur où tourne Gately ; les résultats reflètent donc le réseau de cet environnement. Pour limiter ce qui peut être sondé, ajoutez les sous-réseaux internes sensibles à la liste de blocage des sondages.
 :::
+
+## Auto-diagnostic réseau
+
+Le bouton « Auto-diagnostic » de la page « Vue d'ensemble » (également accessible depuis le guide de premier démarrage) vérifie en une fois les problèmes courants de réseau et de configuration. Les éléments problématiques apparaissent en premier, accompagnés de conseils :
+
+| Vérification | Description |
+| --- | --- |
+| Adresse publique | Obtient l'IPv4 / IPv6 de sortie via les adresses de consultation d'IP publique utilisées par DDNS |
+| NAT | Indique si la machine détient directement une IPv4 / IPv6 publique ; une adresse en 100.64.0.0/10 sur une interface signale un possible NAT opérateur (les interfaces de réseaux superposés comme Tailscale sont exclues) |
+| Heure système | Estime le décalage d'horloge à partir de l'heure de réponse des services de consultation ; au-delà de 60 secondes, les codes à deux facteurs et la validation des certificats échouent |
+| Ports 80 / 443 | Libres, déjà utilisés ou sans permission d'écoute |
+| Résolution DDNS | Vérifie que le domaine de chaque enregistrement à adresse dynamique se résout actuellement vers l'adresse de sortie de la machine |
+| Certificats | Certificats expirés ou expirant dans les 14 jours |
+| État des modules | Modules en état d'avertissement ou d'erreur dans la vue d'ensemble |
+
+L'auto-diagnostic interroge les services d'IP publique configurés, ne s'exécute que lors d'un clic et n'est pas disponible pour les comptes en lecture seule ni les jetons d'API.

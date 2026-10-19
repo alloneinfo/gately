@@ -39,3 +39,5 @@ make build    # erzeugt bin/gately
 ## Verifizierung
 
 Jedes Release enthält eine Prüfsummendatei. Prüfen Sie nach dem Download und vor dem Start die SHA-256-Summe.
+
+Seit v0.5.0 tragen die Prüfsummendatei und die Docker-Images eine schlüssellose cosign-Signatur, die Archive einen Herkunftsnachweis, außerdem wird eine SBOM veröffentlicht. Siehe [Releases verifizieren](/en/docs/guide/verify) (Englisch).

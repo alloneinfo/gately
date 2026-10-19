@@ -18,12 +18,19 @@ Gately läuft am Netzwerkrand und verwaltet DNS-Anbieter-Schlüssel, private Zer
 ## Authentifizierung und Zugriffskontrolle
 
 - bcrypt-Passwort-Hashing und HMAC-signierte Sitzungstoken;
+- Anmeldung per Passkey (WebAuthn): Es wird nur der öffentliche Schlüssel gespeichert, eine Benutzerverifizierung (Fingerabdruck, Gesicht oder PIN) ist Pflicht, und ein Signaturzähler schützt vor geklonten Schlüsseln; erfordert den Zugriff über eine Domain mit HTTPS (oder localhost);
 - Zwei-Faktor-Authentifizierung (TOTP, gegen die Testvektoren aus RFC 6238 verifiziert);
+- Nur-Lese-Konten: können Status und Konfiguration einsehen, aber nichts ändern, keine Sicherungen herunterladen, keine Secrets lesen und kein Terminal öffnen; nach dem Zurücksetzen des Passworts oder dem Löschen werden ihre Sitzungen sofort ungültig;
 - Ratenbegrenzung bei der Anmeldung;
+- Lokaler Reverse Proxy: Steht die Verwaltungsoberfläche hinter nginx, haproxy oder einem Gately-Web-Dienst auf demselben Host, wird `X-Real-IP` / `X-Forwarded-For` nur von Adressen dieses Hosts vertraut. Zugriff nur aus dem LAN, Anmeldebegrenzung und Audit-Protokoll ermitteln daraus die echte Quelle. Unter „Einstellungen → Zugriffsbeschränkungen“ lässt sich das abschalten oder um weitere vertrauenswürdige Proxys ergänzen;
 - Sicherer Einstiegspfad, Zugriff nur aus dem LAN und HTTPS für die Verwaltungsoberfläche;
 - Multi-Token-API: Jedes Token hat Lese-/Schreibzugriff nur auf die bei der Erstellung gewählten Module, kann ein Ablaufdatum haben und speichert die Quell-IP seiner letzten Nutzung. Endpunkte für Konto, Zwei-Faktor-Authentifizierung, Token-Verwaltung sowie Sicherung, Wiederherstellung, Neustart und Systemeinstellungen akzeptieren nur Anmeldesitzungen. Siehe [API-Token & OpenAPI](/de/docs/reference/api);
 - Zugriffskontrolle für Sites: automatische Sperren bei Authentifizierungsfehlern, GeoIP-Länderfilter und Pfadregeln. Siehe [Web-Dienste](/de/docs/modules/web);
 - Konfigurationssicherungen unterstützen Verschlüsselung (scrypt + AES-GCM). Siehe [Konfigurationssicherung](/de/docs/modules/backup).
+
+## Audit und Nachvollziehbarkeit
+
+Das Audit-Protokoll erfasst Anmeldungen, Konfigurationsänderungen und sensible Zugriffe. Der Konfigurationsverlauf bewahrt jede Konfigurationsdatei in der Version vor dem Überschreiben auf und erlaubt das Zurücksetzen mit einem Klick. Siehe [Audit und Konfigurationsverlauf](/de/docs/guide/audit). Release-Artefakte werden mit cosign-Signaturen, Build-Provenienz-Nachweisen und SBOM ausgeliefert; wie Sie sie prüfen, steht unter [Releases verifizieren](/en/docs/guide/verify).
 
 ## Standardwerte für Funktionen mit hohem Risiko
 

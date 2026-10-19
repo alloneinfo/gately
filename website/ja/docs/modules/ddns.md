@@ -4,7 +4,17 @@
 
 ## 対応プロバイダー
 
-Alibaba Cloud、Cloudflare、Tencent Cloud、DNSPod、Huawei Cloud、GoDaddy、Porkbun、dynv6、DuckDNS、およびカスタムコールバック（未対応のプロバイダーや自前の API 用）。
+Alibaba Cloud、Cloudflare、Tencent Cloud、DNSPod、Huawei Cloud、GoDaddy、Porkbun、dynv6、DuckDNS、Amazon Route 53、OVHcloud、Gandi、NS1、Bunny DNS、Namecheap、DynDNS2、およびカスタムコールバック（未対応のプロバイダーや自前の API 用）。
+
+| プロバイダー | 認証情報 | 証明書の DNS 検証に利用 |
+| --- | --- | --- |
+| Amazon Route 53 | Access Key ID / Secret Access Key、任意でホストゾーン ID | 可 |
+| OVHcloud | Application Key / Secret と Consumer Key、エンドポイント ovh-eu / ovh-ca / ovh-us | 可 |
+| Gandi | Personal Access Token | 可 |
+| NS1 | API Key | 可 |
+| Bunny DNS | Account API Key | 可 |
+| Namecheap | ドメインの Dynamic DNS パスワード（A レコードのみ） | 不可 |
+| DynDNS2 | ユーザー名、パスワード、更新 URL。No-IP、Dynu など dyndns2 プロトコル互換のサービス向け | 不可 |
 
 ## IP の取得方法
 

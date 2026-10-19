@@ -6,7 +6,12 @@
 | --- | --- |
 | `-c` | Directorio de configuración; también se puede definir con la variable de entorno `GATELY_CONFIG_DIR` |
 | `-listen` | Sobrescribe la dirección de escucha de la interfaz de administración, p. ej. `:16680` |
+| `-apply` | Directorio de configuración declarativa; también se puede definir con la variable de entorno `GATELY_APPLY_DIR`. Consulta más abajo |
 | `-version` | Muestra la información de versión |
+
+| Variable de entorno | Descripción |
+| --- | --- |
+| `GATELY_INITIAL_PASSWORD` | Contraseña inicial del administrador en el primer arranque (8 caracteres como mínimo); no tiene efecto si la cuenta ya existe |
 
 ## Directorio de configuración
 
@@ -19,6 +24,14 @@ Toda la configuración vive en el directorio de configuración, con un archivo d
 ::: warning Nota
 `ssl.json` contiene claves privadas de certificados. Antes de subirlo al control de versiones, asegúrate de que el repositorio sea privado o añade el archivo a tu lista de ignorados.
 :::
+
+## Configuración declarativa
+
+Con `-apply <directorio>`, en cada arranque los archivos `<nombre>.json` de ese directorio se copian sobre el directorio de configuración; los archivos con contenido idéntico no se reescriben. Es útil para distribuir la configuración desde un repositorio git, un ConfigMap de Kubernetes o un script de despliegue.
+
+- Antes de escribir se comprueba que cada archivo sea JSON válido; si alguno no lo es, Gately se niega a arrancar;
+- `account.json` y `tokens.json` no se pueden sobrescribir: la cuenta y los tokens solo se gestionan desde la interfaz de administración;
+- El contenido sobrescrito se conserva en el [historial de configuración](/es/docs/guide/audit) y se puede revertir en cualquier momento.
 
 ## Directorio de programas externos
 

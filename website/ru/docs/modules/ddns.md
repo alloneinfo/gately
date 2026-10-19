@@ -4,7 +4,17 @@
 
 ## Поддерживаемые провайдеры
 
-Alibaba Cloud, Cloudflare, Tencent Cloud, DNSPod, Huawei Cloud, GoDaddy, Porkbun, dynv6, DuckDNS, а также пользовательский callback (для провайдеров без встроенной поддержки и собственных интерфейсов).
+Alibaba Cloud, Cloudflare, Tencent Cloud, DNSPod, Huawei Cloud, GoDaddy, Porkbun, dynv6, DuckDNS, Amazon Route 53, OVHcloud, Gandi, NS1, Bunny DNS, Namecheap, DynDNS2, а также пользовательский callback (для провайдеров без встроенной поддержки и собственных интерфейсов).
+
+| Провайдер | Учётные данные | Подходит для DNS-проверки сертификатов |
+| --- | --- | --- |
+| Amazon Route 53 | Access Key ID / Secret Access Key, необязательно ID размещённой зоны | Да |
+| OVHcloud | Application Key / Secret и Consumer Key, точка доступа ovh-eu / ovh-ca / ovh-us | Да |
+| Gandi | Personal Access Token | Да |
+| NS1 | API Key | Да |
+| Bunny DNS | Account API Key | Да |
+| Namecheap | Пароль Dynamic DNS для домена (только A-записи) | Нет |
+| DynDNS2 | Имя пользователя, пароль и адрес обновления; подходит для No-IP, Dynu и других сервисов, совместимых с протоколом dyndns2 | Нет |
 
 ## Способы получения IP
 

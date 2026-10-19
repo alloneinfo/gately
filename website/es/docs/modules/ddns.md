@@ -4,7 +4,17 @@ La IP pública de una conexión de banda ancha doméstica cambia con el tiempo. 
 
 ## Proveedores compatibles
 
-Alibaba Cloud, Cloudflare, Tencent Cloud, DNSPod, Huawei Cloud, GoDaddy, Porkbun, dynv6, DuckDNS y una devolución de llamada personalizada (para proveedores que no están integrados o para endpoints autoalojados).
+Alibaba Cloud, Cloudflare, Tencent Cloud, DNSPod, Huawei Cloud, GoDaddy, Porkbun, dynv6, DuckDNS, Amazon Route 53, OVHcloud, Gandi, NS1, Bunny DNS, Namecheap, DynDNS2 y una devolución de llamada personalizada (para proveedores que no están integrados o para endpoints autoalojados).
+
+| Proveedor | Credenciales | Válido para la validación DNS de certificados |
+| --- | --- | --- |
+| Amazon Route 53 | Access Key ID / Secret Access Key, ID de zona alojada opcional | Sí |
+| OVHcloud | Application Key / Secret y Consumer Key, endpoint ovh-eu / ovh-ca / ovh-us | Sí |
+| Gandi | Personal Access Token | Sí |
+| NS1 | API Key | Sí |
+| Bunny DNS | Account API Key | Sí |
+| Namecheap | Contraseña de Dynamic DNS del dominio (solo registros A) | No |
+| DynDNS2 | Usuario, contraseña y URL de actualización; para No-IP, Dynu y otros servicios compatibles con el protocolo dyndns2 | No |
 
 ## Cómo se obtiene la IP
 

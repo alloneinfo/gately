@@ -41,6 +41,7 @@
       "modules/backup": "設定バックアップ",
       "modules/tools": "ファイルと運用ツール",
       "guide/security": "セキュリティモデルとプライバシーの約束",
+      "guide/audit": "監査ログと設定履歴",
       "guide/hardening": "ハードニングの推奨事項",
       "guide/verify": "リリースの検証",
       "reference/api": "API トークンと OpenAPI",
@@ -78,7 +79,7 @@
     "pill": "オープンソース · 監査可能 · 単一バイナリ",
     "titleLine1": "中身が見える",
     "titleLine2": "ネットワークゲートウェイツールキット",
-    "lead": "DDNS、STUN 穿孔、ポート転送、リバースプロキシ、証明書、WAF、Tailscale、frp を、約 22 MB の単一ファイルに集約。自宅ネットワーク、NAS、クラウドホスト、各種サーバーで利用できます。",
+    "lead": "DDNS、STUN 穿孔、ポート転送、リバースプロキシ、証明書、WAF、Tailscale、frp を、約 32 MB の単一ファイルに集約。自宅ネットワーク、NAS、クラウドホスト、各種サーバーで利用できます。",
     "ctaStart": "クイックスタート",
     "ctaDownload": "ダウンロード",
     "mockTitle": "gately · 概要",
@@ -116,7 +117,7 @@
     ],
     "stats": [
       {
-        "value": "~22 MB",
+        "value": "~32 MB",
         "label": "単一ファイルで管理 UI を内蔵"
       },
       {
@@ -137,7 +138,7 @@
     "features": [
       {
         "title": "ダイナミック DNS",
-        "text": "Alibaba Cloud、Cloudflare、Tencent Cloud、DNSPod、Huawei Cloud、GoDaddy など 11 のプロバイダーに対応。URL / NIC / コマンドで IP を取得し、IPv4 と IPv6、Webhook 通知にも対応します。"
+        "text": "Alibaba Cloud、Cloudflare、Tencent Cloud、DNSPod、Huawei Cloud、Route 53、OVH、Gandi、Namecheap など 18 のプロバイダーに対応。URL / NIC / コマンドで IP を取得し、IPv4 と IPv6、Webhook 通知にも対応します。"
       },
       {
         "title": "STUN 穿孔",
@@ -145,15 +146,15 @@
       },
       {
         "title": "ポート転送",
-        "text": "TCP / UDP、IPv4 / IPv6、ポート範囲、複数ターゲットのフェイルオーバー、接続数制限とトラフィック統計。"
+        "text": "TCP / UDP、IPv4 / IPv6、ポート範囲、複数ターゲットのフェイルオーバー、接続数制限とトラフィック統計。下流へ PROXY プロトコルを送信し、実際のクライアントアドレスを保持できます。"
       },
       {
         "title": "SSL 証明書",
-        "text": "ACME DNS-01 による自動発行・更新。ワイルドカードと EAB に対応し、ディレクトリへのマッピングや変更後のスクリプト実行も可能です。"
+        "text": "ACME による自動発行・更新。DNS-01（ワイルドカード対応）と HTTP-01、EAB に対応し、ディレクトリへのマッピングや変更後のスクリプト実行も可能です。"
       },
       {
         "title": "Web サービス",
-        "text": "ドメイン別のリバースプロキシ、リダイレクト、静的ファイル配信。HTTPS、WebSocket、PROXY プロトコル、重み付き・ポリシー付きの複数バックエンド、ヘルスチェック、圧縮、レート制限、レスポンスキャッシュ。"
+        "text": "ドメイン別のリバースプロキシ、リダイレクト、静的ファイル配信。HTTPS、HTTP/3、WebSocket、PROXY プロトコル、重み付き・ポリシー付きの複数バックエンド、ヘルスチェック、圧縮、レート制限、レスポンスキャッシュ。"
       },
       {
         "title": "WAF ファイアウォール",
@@ -181,7 +182,7 @@
       },
       {
         "title": "セキュリティ強化",
-        "text": "2 段階認証、ログイン失敗のレート制限、セキュアエントリー、LAN 内からのみ許可、管理画面の HTTPS、API トークン。"
+        "text": "Passkey と 2 段階認証、読み取り専用アカウント、監査ログ、設定履歴とワンクリックのロールバック、ログイン失敗のレート制限、セキュアエントリー、LAN 内からのみ許可。"
       },
       {
         "title": "アクセス制御",
@@ -189,11 +190,11 @@
       },
       {
         "title": "アクセス統計とモニタリング",
-        "text": "分単位のアクセス・トラフィック統計を Prometheus メトリクスとして公開し、既存の監視環境に組み込めます。"
+        "text": "証明書、DDNS、ポート転送、サイトを網羅するグローバルな Prometheus メトリクスと Grafana ダッシュボード。ワンクリックのネットワーク自己診断で NAT、ポート、時刻、名前解決を確認できます。"
       },
       {
         "title": "通知センター",
-        "text": "Webhook、Telegram、Bark、WeCom、DingTalk、Feishu、メール。レベルとイベントのルールで通知し、サイレントと重複排除に対応します。"
+        "text": "Webhook、Telegram、Bark、ntfy、Gotify、Pushover、Discord、Slack、ServerChan、PushPlus、WeCom、DingTalk、Feishu、メール。ルールテンプレートを内蔵し、サイレントと重複排除に対応します。"
       },
       {
         "title": "設定バックアップ",

@@ -5,13 +5,16 @@ Die Verwaltungsoberfläche steuert DNS, Zertifikate und Ports. Arbeiten Sie die 
 ## Verwaltungsoberfläche
 
 - [ ] Administratorpasswort nach der ersten Anmeldung ändern
-- [ ] Zwei-Faktor-Authentifizierung (TOTP) aktivieren
+- [ ] Zwei-Faktor-Authentifizierung (TOTP) aktivieren oder einen Passkey registrieren
+- [ ] Familienmitgliedern oder Kollegen, die nur etwas einsehen müssen, ein Nur-Lese-Konto anlegen, statt das Administratorpasswort weiterzugeben
 - [ ] Einen sicheren Einstiegspfad festlegen, sodass die Verwaltungsoberfläche nur über einen eigenen Pfad erreichbar ist
 - [ ] „Zugriff nur aus dem LAN“ aktivieren und für die Fernverwaltung ein VPN (etwa [Tailscale](/de/docs/modules/tunnels)) verwenden
 - [ ] HTTPS für die Verwaltungsoberfläche aktivieren, wenn Sie über nicht vertrauenswürdige Netzwerke zugreifen
 - [ ] Automatisierungsskripten und der [CLI / MCP](/de/docs/guide/cli-mcp) [API-Token](/de/docs/reference/api) mit minimalen Rechten und Ablaufdatum geben und das Administratorpasswort nicht weitergeben
 - [ ] Eine Verschlüsselungs-Passphrase für [Konfigurationssicherungen](/de/docs/modules/backup) setzen und geplante Sicherungen aktivieren
-- [ ] In der [Benachrichtigungszentrale](/de/docs/modules/notify) Push-Benachrichtigungen für Ereignisse wie Anmeldungen, Zertifikate und fehlgeschlagene Sicherungen einrichten
+- [ ] In der [Benachrichtigungszentrale](/de/docs/modules/notify) Push-Benachrichtigungen mit den Vorlagen „Sicherheit & Anmeldungen“, „Konfigurationsänderungen“ und „Kritische Ausfälle“ einrichten
+- [ ] Wenn die Verwaltungsoberfläche über einen Reverse Proxy auf diesem Host erreichbar ist, prüfen, ob das [Audit-Protokoll](/de/docs/guide/audit) die echte Quelle erfasst; für Einstiegspunkte über die Portweiterleitung das [PROXY-Protokoll](/de/docs/modules/portforward#proxy-protokoll) aktivieren
+- [ ] Nach dem Download einer neuen Version die Signaturen gemäß [Releases verifizieren](/en/docs/guide/verify) prüfen
 
 ## Öffentlich erreichbare Dienste
 

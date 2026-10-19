@@ -41,25 +41,32 @@ A imagem inclui `sh`, `bash` e `curl`, então os scripts de notificação mais c
 ./gately -c /etc/gately
 ```
 
-### Exemplo de systemd
+### systemd
 
-```ini
-[Unit]
-Description=Gately
-After=network-online.target
-Wants=network-online.target
+O repositório traz um arquivo de serviço completo, [deploy/systemd/gately.service](https://github.com/wangwanjie/gately/blob/main/deploy/systemd/gately.service), que já concede as capabilities necessárias para escutar em portas baixas:
 
-[Service]
-ExecStart=/usr/local/bin/gately -c /etc/gately
-Restart=on-failure
+```bash
+sudo install -m 0755 gately /usr/local/bin/gately
+sudo install -m 0644 gately.service /etc/systemd/system/gately.service
+sudo systemctl daemon-reload && sudo systemctl enable --now gately
+journalctl -u gately | grep -i "initial password"
+```
 
-[Install]
-WantedBy=multi-user.target
+### OpenWrt
+
+Use o script de inicialização procd [deploy/openwrt/gately.init](https://github.com/wangwanjie/gately/blob/main/deploy/openwrt/gately.init):
+
+```bash
+cp gately /usr/bin/gately && chmod +x /usr/bin/gately
+cp gately.init /etc/init.d/gately && chmod +x /etc/init.d/gately
+/etc/init.d/gately enable && /etc/init.d/gately start
 ```
 
 ## Primeiro acesso
 
-A interface de administração escuta por padrão na porta `16680`. O usuário é `admin`, e a senha inicial é gravada no log na primeira inicialização. Depois do primeiro acesso, altere a senha e ative a autenticação em dois fatores.
+A interface de administração escuta por padrão na porta `16680`. O usuário é `admin`, e a senha inicial é gravada no log na primeira inicialização. Em implantações automatizadas, você pode definir a senha inicial com a variável de ambiente `GATELY_INITIAL_PASSWORD`; nesse caso nenhuma senha aleatória é gerada.
+
+No primeiro acesso aparece um assistente de configuração inicial que sugere, em sequência, alterar a senha, ativar a autenticação em dois fatores ou uma passkey, executar o autodiagnóstico de rede, importar do Lucky e configurar notificações.
 
 ## Atualização
 
@@ -68,4 +75,4 @@ O Gately não tem autoatualização online embutida; as atualizações dependem 
 - Docker: execute `docker pull` da nova imagem e recrie o contêiner (mantenha o diretório de configuração montado);
 - Binário: substitua o executável e reinicie o serviço.
 
-Antes de atualizar, exporte um backup da configuração ou mantenha o diretório de configuração no git.
+Antes de atualizar, exporte um backup da configuração ou mantenha o diretório de configuração no git. As assinaturas dos arquivos e imagens baixados podem ser conferidas conforme [Verificar versões](/en/docs/guide/verify).

@@ -39,3 +39,5 @@ make build    # 输出 bin/gately
 ## 校验
 
 每个版本附带校验和文件，下载后请核对 SHA-256，再运行。
+
+从 v0.5.0 起，校验和文件与 Docker 镜像都带有 cosign 无密钥签名，压缩包附带构建来源证明，并提供 SBOM。校验方法见[校验发布产物](/docs/guide/verify)。

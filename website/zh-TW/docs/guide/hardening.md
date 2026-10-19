@@ -5,13 +5,16 @@
 ## 管理介面
 
 - [ ] 首次登入後修改管理員密碼
-- [ ] 開啟兩步驟驗證（TOTP）
+- [ ] 開啟兩步驟驗證（TOTP），或註冊 Passkey
+- [ ] 家人或同事只需檢視時，為其建立唯讀帳號，不要共用管理員密碼
 - [ ] 設定安全入口，使管理介面只能透過自訂路徑存取
 - [ ] 開啟「僅限內網存取」，需要從外網管理時透過 VPN（如 [Tailscale](/zh-TW/docs/modules/tunnels)）進入
 - [ ] 在不可信的網路中存取時，啟用管理介面 HTTPS
 - [ ] 自動化指令碼與 [命令列 / MCP](/zh-TW/docs/guide/cli-mcp) 使用最小權限的 [API 權杖](/zh-TW/docs/reference/api)，設定到期時間，避免共用管理員密碼
 - [ ] 為 [設定備份](/zh-TW/docs/modules/backup) 設定加密密碼，並開啟排程備份
-- [ ] 在 [通知中心](/zh-TW/docs/modules/notify) 設定登入、憑證、備份失敗等事件的推送
+- [ ] 在 [通知中心](/zh-TW/docs/modules/notify) 用「安全與登入」「設定變更」「關鍵故障」範本設定推送
+- [ ] 管理介面經本機反向代理對外開放時，確認 [稽核日誌](/zh-TW/docs/guide/audit) 中記錄的是真實來源；連接埠轉發入口請開啟 [PROXY 協定](/zh-TW/docs/modules/portforward#proxy-協定)
+- [ ] 下載新版本後依 [驗證發佈檔案](/en/docs/guide/verify) 核對簽章
 
 ## 對外服務
 

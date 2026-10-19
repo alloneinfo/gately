@@ -4,7 +4,17 @@ L'IP publique d'une connexion internet domestique change avec le temps. Le DDNS 
 
 ## Fournisseurs pris en charge
 
-Alibaba Cloud, Cloudflare, Tencent Cloud, DNSPod, Huawei Cloud, GoDaddy, Porkbun, dynv6, DuckDNS, ainsi qu'un rappel personnalisé (pour les fournisseurs non intégrés ou les points de terminaison auto-hébergés).
+Alibaba Cloud, Cloudflare, Tencent Cloud, DNSPod, Huawei Cloud, GoDaddy, Porkbun, dynv6, DuckDNS, Amazon Route 53, OVHcloud, Gandi, NS1, Bunny DNS, Namecheap, DynDNS2, ainsi qu'un rappel personnalisé (pour les fournisseurs non intégrés ou les points de terminaison auto-hébergés).
+
+| Fournisseur | Identifiants | Utilisable pour la validation DNS des certificats |
+| --- | --- | --- |
+| Amazon Route 53 | Access Key ID / Secret Access Key, ID de zone hébergée facultatif | Oui |
+| OVHcloud | Application Key / Secret et Consumer Key, point d'accès ovh-eu / ovh-ca / ovh-us | Oui |
+| Gandi | Personal Access Token | Oui |
+| NS1 | API Key | Oui |
+| Bunny DNS | Account API Key | Oui |
+| Namecheap | Mot de passe Dynamic DNS du domaine (enregistrements A uniquement) | Non |
+| DynDNS2 | Nom d'utilisateur, mot de passe et URL de mise à jour, pour No-IP, Dynu et les autres services compatibles avec le protocole dyndns2 | Non |
 
 ## Obtention de l'IP
 

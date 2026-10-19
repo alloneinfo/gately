@@ -31,6 +31,7 @@ Les sites de tous types peuvent définir un journal d'accès, le cross-origin (C
 ## Transport et protocoles
 
 - HTTPS : utilise un certificat du module [Certificats SSL](/fr/docs/modules/ssl) qui couvre le domaine ;
+- HTTP/3 (QUIC) : à activer sur un écouteur HTTPS pour servir aussi HTTP/3 en UDP sur le même numéro de port, annoncé au navigateur par l'en-tête de réponse `Alt-Svc` ; ce port UDP doit être autorisé dans le pare-feu et la redirection de ports ;
 - WebSocket : pris en charge automatiquement par le proxy inverse ;
 - Protocole PROXY : un écouteur peut accepter les en-têtes PROXY envoyés par des composants en amont (comme haproxy et frp). Il ne fait confiance qu'aux IP ou sous-réseaux listés dans « Paramètres globaux → Sources PROXY de confiance » ; une liste vide ne fait confiance à aucune source. Le proxy inverse peut envoyer des en-têtes PROXY au backend.
 
@@ -217,6 +218,8 @@ Pour un écouteur en cours d'exécution, cliquez sur « Statistiques » sur la l
 Les statistiques sont conservées en mémoire et repartent de zéro après un redémarrage ou après la modification de l'écouteur. Les classements suivent au plus 5000 sources distinctes.
 
 ### Métriques Prometheus
+
+Le point de terminaison global `GET /api/metrics` regroupe les métriques de tous les modules ; voir [Métriques de supervision](/en/docs/reference/monitoring). Le point de terminaison du module décrit ci-dessous ne contient que les métriques des services Web.
 
 Le point de terminaison des métriques est `GET /api/webservice/metrics`, au format texte Prometheus, et il exige des identifiants de connexion ou un [jeton d'API](/en/docs/reference/api-reference).
 

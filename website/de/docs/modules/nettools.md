@@ -93,3 +93,19 @@ Grenzen und Funktionsweise:
 ::: tip
 Die Diagnosetools laufen auf dem Host oder Container, auf dem Gately läuft, daher spiegeln die Ergebnisse das Netzwerk dieser Umgebung wider. Um einzuschränken, was geprüft werden darf, nehmen Sie sensible interne Subnetze in die Sperrliste auf.
 :::
+
+## Netzwerk-Selbsttest
+
+Die Schaltfläche „Selbsttest“ auf der Übersichtsseite (auch im Einrichtungsassistenten beim ersten Start erreichbar) prüft gängige Netzwerk- und Konfigurationsprobleme in einem Durchgang. Probleme werden zuerst aufgeführt, jeweils mit einem Lösungsvorschlag:
+
+| Prüfung | Beschreibung |
+| --- | --- |
+| Öffentliche Adresse | Ermittelt die ausgehende IPv4 / IPv6 über die URLs zur Abfrage der öffentlichen IP, die auch DDNS verwendet |
+| NAT | Ob dieser Host direkt eine öffentliche IPv4 / IPv6 besitzt; trägt eine Netzwerkschnittstelle eine Adresse aus 100.64.0.0/10, wird auf ein mögliches Carrier-Grade-NAT hingewiesen (Schnittstellen von Overlay-Netzen wie Tailscale werden ausgenommen) |
+| Systemzeit | Schätzt die Uhrabweichung anhand der Antwortzeit des Abfragedienstes; mehr als 60 Sekunden lassen Zwei-Faktor-Codes und Zertifikatsprüfungen fehlschlagen |
+| Ports 80 / 443 | Ob sie frei, bereits belegt oder mangels Berechtigung nicht nutzbar sind |
+| DDNS-Auflösung | Ob die Domain von Einträgen mit dynamischer Adresse aktuell auf die ausgehende Adresse dieses Hosts auflöst |
+| Zertifikate | Abgelaufene oder innerhalb von 14 Tagen ablaufende Zertifikate |
+| Modulstatus | Module, die in der Übersicht im Status Warnung oder Fehler stehen |
+
+Der Selbsttest ruft die konfigurierten Dienste zur Abfrage der öffentlichen IP auf, läuft nur auf Klick und steht Nur-Lese-Konten und API-Token nicht zur Verfügung.

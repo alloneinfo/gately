@@ -2,7 +2,7 @@
 
 **English** | [简体中文](README.zh-CN.md) | [繁體中文](README.zh-TW.md) | [日本語](README.ja.md) | [한국어](README.ko.md) | [Español](README.es.md) | [Français](README.fr.md) | [Deutsch](README.de.md) | [Русский](README.ru.md) | [Português (Brasil)](README.pt-BR.md)
 
-An open-source, auditable network gateway toolkit for home networks, NAS boxes, cloud hosts, and servers of all kinds. DDNS, STUN traversal, port forwarding, reverse proxy, certificates, WAF, and more ship in a single ~22 MB file, and existing Lucky configurations can be imported.
+An open-source, auditable network gateway toolkit for home networks, NAS boxes, cloud hosts, and servers of all kinds. DDNS, STUN traversal, port forwarding, reverse proxy, certificates, WAF, and more ship in a single ~32 MB file, and existing Lucky configurations can be imported.
 
 ![Gately overview](docs/images/overview.webp)
 

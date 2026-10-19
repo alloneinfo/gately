@@ -9,7 +9,20 @@ Leiten Sie einen Port, auf dem Gately lauscht, an ein anderes Gerät oder einen 
 - Portbereiche und mehrere Ports;
 - Mehrere Ziele mit Failover;
 - Verbindungslimits;
-- Traffic-Statistiken und Laufzeit-Logs.
+- Traffic-Statistiken und Laufzeit-Logs;
+- Senden des PROXY-Protokolls (v1 / v2) an das Ziel, damit nachgelagerte Dienste die echte Client-Adresse erhalten.
+
+## PROXY-Protokoll
+
+Die Portweiterleitung leitet TCP nur weiter, daher sieht der nachgelagerte Dienst standardmäßig nur die Adresse von Gately selbst. Setzen Sie in der Regel „PROXY-Protokoll“ auf v1 oder v2, sendet Gately nach dem Verbindungsaufbau zum Ziel zuerst einen PROXY-Header. Der nachgelagerte Dienst erhält so die echte Client-Adresse für Logs, Ratenbegrenzung und Zugriffskontrolle.
+
+Das Ziel muss die passende Empfangsoption aktiviert haben, sonst wird die Verbindung abgelehnt, zum Beispiel:
+
+- haproxy: `bind 192.168.1.8:4434 accept-proxy`;
+- nginx: `listen 4435 ssl proxy_protocol;`;
+- Gately-Web-Dienst: im Listener „PROXY-Protokoll akzeptieren“ aktivieren und die Quelle zu den vertrauenswürdigen PROXY-Quellen hinzufügen.
+
+Die Option wirkt nur auf TCP; UDP-Weiterleitungen sind nicht betroffen.
 
 ## Typische Szenarien
 

@@ -41,6 +41,7 @@
       "modules/backup": "Configuration Backup",
       "modules/tools": "Files & Ops Tools",
       "guide/security": "Security Model & Privacy Promise",
+      "guide/audit": "Audit Log & Config History",
       "guide/hardening": "Hardening Guide",
       "guide/verify": "Verifying Releases",
       "reference/api": "API Tokens & OpenAPI",
@@ -78,7 +79,7 @@
     "pill": "Open source · Auditable · Single binary",
     "titleLine1": "A network gateway toolkit",
     "titleLine2": "you can see through",
-    "lead": "DDNS, STUN NAT traversal, port forwarding, reverse proxy, certificates, WAF, Tailscale and frp, all in a single ~22 MB binary. Runs on home networks, NAS boxes, cloud hosts and servers of every kind.",
+    "lead": "DDNS, STUN NAT traversal, port forwarding, reverse proxy, certificates, WAF, Tailscale and frp, all in a single ~32 MB binary. Runs on home networks, NAS boxes, cloud hosts and servers of every kind.",
     "ctaStart": "Quick Start",
     "ctaDownload": "Download",
     "mockTitle": "gately · Overview",
@@ -116,7 +117,7 @@
     ],
     "stats": [
       {
-        "value": "~22 MB",
+        "value": "~32 MB",
         "label": "Single binary with the admin UI embedded"
       },
       {
@@ -137,7 +138,7 @@
     "features": [
       {
         "title": "Dynamic DNS",
-        "text": "11 providers including Alibaba Cloud, Cloudflare, Tencent Cloud, DNSPod, Huawei Cloud and GoDaddy; detect your IP by URL, network interface or command, IPv4 and IPv6, webhook notifications."
+        "text": "18 providers including Alibaba Cloud, Cloudflare, Tencent Cloud, DNSPod, Huawei Cloud, Route 53, OVH, Gandi and Namecheap; detect your IP by URL, network interface or command, IPv4 and IPv6, webhook notifications."
       },
       {
         "title": "STUN Traversal",
@@ -145,15 +146,15 @@
       },
       {
         "title": "Port Forwarding",
-        "text": "TCP / UDP, IPv4 / IPv6, port ranges, multi-target failover, connection limits and traffic statistics."
+        "text": "TCP / UDP, IPv4 / IPv6, port ranges, multi-target failover, connection limits and traffic statistics; can send the PROXY protocol downstream to preserve the real client address."
       },
       {
         "title": "SSL Certificates",
-        "text": "Automatic ACME DNS-01 issuance and renewal with wildcard and EAB support; map certificates to a directory and run a script after changes."
+        "text": "Automatic ACME issuance and renewal with DNS-01 (including wildcards), HTTP-01 and EAB; map certificates to a directory and run a script after changes."
       },
       {
         "title": "Web Services",
-        "text": "Per-domain reverse proxy, redirects and static files; HTTPS, WebSocket and PROXY protocol; weighted multi-backend policies, health checks, compression, rate limiting and response caching."
+        "text": "Per-domain reverse proxy, redirects and static files; HTTPS, HTTP/3, WebSocket and PROXY protocol; weighted multi-backend policies, health checks, compression, rate limiting and response caching."
       },
       {
         "title": "WAF Firewall",
@@ -181,7 +182,7 @@
       },
       {
         "title": "Security Hardening",
-        "text": "Two-factor authentication, login rate limiting, secure entrance path, LAN-only access, HTTPS for the admin UI and API tokens."
+        "text": "Passkey and two-factor authentication, read-only accounts, audit log, config history with one-click rollback, login rate limiting, secure entrance path and LAN-only access."
       },
       {
         "title": "Access Control",
@@ -189,11 +190,11 @@
       },
       {
         "title": "Traffic Stats & Monitoring",
-        "text": "Per-minute access and traffic statistics, exposed as Prometheus metrics for your existing monitoring stack."
+        "text": "Global Prometheus metrics and a Grafana dashboard covering certificates, DDNS, port forwarding and sites; a one-click network self-check for NAT, ports, clock and DNS resolution."
       },
       {
         "title": "Notification Center",
-        "text": "Webhook, Telegram, Bark, WeCom, DingTalk, Feishu and email; push by severity and event rules, with silencing and de-duplication."
+        "text": "Webhook, Telegram, Bark, ntfy, Gotify, Pushover, Discord, Slack, ServerChan, PushPlus, WeCom, DingTalk, Feishu and email; built-in rule templates, with silencing and de-duplication."
       },
       {
         "title": "Configuration Backup",

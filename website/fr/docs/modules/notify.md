@@ -1,6 +1,6 @@
 # Centre de notifications
 
-Le Centre de notifications s'abonne au bus d'événements interne de Gately et, selon vos règles, envoie des événements tels que les changements DDNS, l'expiration des certificats, les blocages WAF et les défaillances de processus vers Webhook, Telegram, Bark, WeCom, DingTalk, Feishu et e-mail. L'interface d'administration se trouve dans le groupe « Système » de la barre latérale → « Notifications ».
+Le Centre de notifications s'abonne au bus d'événements interne de Gately et, selon vos règles, envoie des événements tels que les changements DDNS, l'expiration des certificats, les blocages WAF et les défaillances de processus vers Webhook, Telegram, Bark, ntfy, Gotify, Pushover, Discord, Slack, ServerChan, PushPlus, WeCom, DingTalk, Feishu et e-mail. L'interface d'administration se trouve dans le groupe « Système » de la barre latérale → « Notifications ».
 
 ## Fonctionnement
 
@@ -24,6 +24,13 @@ Cliquez sur « Ajouter un canal », choisissez un type et renseignez les champs.
 | DingTalk | URL du bot | Secret de signature (à renseigner lorsque le bot a la « signature » activée) |
 | Feishu | URL du bot | Secret de signature (à renseigner lorsque le bot a la « vérification de signature » activée) |
 | E-mail | Serveur, destinataires, et au moins l'un de l'expéditeur ou du nom d'utilisateur | Chiffrement, port, nom d'utilisateur, mot de passe |
+| ntfy | Sujet (topic) | URL du serveur (laissez vide pour utiliser `https://ntfy.sh`), jeton d'accès |
+| Gotify | URL du serveur, jeton d'application | Aucun |
+| Pushover | Jeton d'application, User Key | Aucun |
+| Discord | URL du webhook | Aucun |
+| Slack | URL du webhook | Aucun |
+| ServerChan | SendKey | Aucun |
+| PushPlus | Token | Aucun |
 
 Les champs d'URL nécessitent une adresse complète commençant par `http://` ou `https://`.
 
@@ -76,6 +83,19 @@ Cliquez sur « Ajouter une règle » :
 Les blocages WAF et les changements d'état des amonts peuvent être fréquents. Pour les règles qui les couvrent, définissez un temps de silence de 300 secondes ou plus.
 :::
 
+## Modèles de règles
+
+Lors de la création d'une règle, cliquez sur un modèle pour préremplir les événements, le niveau et le temps de silence, puis choisissez les canaux et enregistrez :
+
+| Modèle | Événements |
+| --- | --- |
+| Pannes critiques | Échec de mise à jour DDNS, échec de renouvellement de certificat, amont indisponible, arrêt anormal d'un sous-processus, échec de sauvegarde, arrêt de conteneur |
+| Expiration des certificats | Certificat bientôt expiré, échec de renouvellement (silence de 24 heures) |
+| Changements d'adresse | Mise à jour d'enregistrement DDNS, changement d'adresse STUN |
+| Santé des services | Amont indisponible puis rétabli, arrêt de conteneur, arrêt de sous-processus |
+| Sécurité et connexions | Échec de connexion, IP bannie, connexion réussie, accès à des contenus sensibles |
+| Modifications de configuration | Chaque modification de configuration faite dans l'interface d'administration |
+
 ## Types d'événements
 
 | Type d'événement | Nom | Niveau | Déclencheur |
@@ -95,6 +115,8 @@ Les blocages WAF et les changements d'état des amonts peuvent être fréquents.
 | `auth.failed` | Authentification : échecs répétés | Avertissement | Une connexion à l'interface d'administration a échoué, avec le champ `ip` |
 | `auth.banned` | Authentification : IP bannie | Avertissement | Des échecs d'authentification répétés sur un service Web ont déclenché un bannissement automatique |
 | `login.success` | Interface d'administration : connexion réussie | Info | Une connexion à l'interface d'administration a réussi, avec les champs `ip` et `user` |
+| `audit.change` | Interface d'administration : modification de configuration | Info | Toute opération de modification dans l'interface d'administration, avec les champs `actor`, `ip`, `method` et `path` ; voir [Audit et historique de configuration](/fr/docs/guide/audit) |
+| `audit.access` | Interface d'administration : accès à des contenus sensibles | Avertissement | Téléchargement d'une sauvegarde, d'un paquet de diagnostic ou d'une clé privée de certificat, ouverture d'un terminal, etc. ; mêmes champs que ci-dessus |
 | `notify.test` | Notification de test | Info | Produite par le bouton « Tester » du canal ; elle ne participe pas à la correspondance des règles |
 
 ## Envoyer un test

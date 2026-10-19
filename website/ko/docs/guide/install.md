@@ -41,25 +41,32 @@ services:
 ./gately -c /etc/gately
 ```
 
-### systemd 예시
+### systemd
 
-```ini
-[Unit]
-Description=Gately
-After=network-online.target
-Wants=network-online.target
+저장소에 완성된 서비스 파일 [deploy/systemd/gately.service](https://github.com/wangwanjie/gately/blob/main/deploy/systemd/gately.service)가 있으며, 낮은 번호의 포트를 수신하는 데 필요한 권한(capability)이 이미 부여되어 있습니다.
 
-[Service]
-ExecStart=/usr/local/bin/gately -c /etc/gately
-Restart=on-failure
+```bash
+sudo install -m 0755 gately /usr/local/bin/gately
+sudo install -m 0644 gately.service /etc/systemd/system/gately.service
+sudo systemctl daemon-reload && sudo systemctl enable --now gately
+journalctl -u gately | grep -i "initial password"
+```
 
-[Install]
-WantedBy=multi-user.target
+### OpenWrt
+
+procd 시작 스크립트 [deploy/openwrt/gately.init](https://github.com/wangwanjie/gately/blob/main/deploy/openwrt/gately.init)를 사용합니다.
+
+```bash
+cp gately /usr/bin/gately && chmod +x /usr/bin/gately
+cp gately.init /etc/init.d/gately && chmod +x /etc/init.d/gately
+/etc/init.d/gately enable && /etc/init.d/gately start
 ```
 
 ## 최초 로그인
 
-관리 UI는 기본적으로 `16680` 포트에서 대기하며 사용자 이름은 `admin`입니다. 초기 비밀번호는 최초 실행 시 로그에 출력됩니다. 처음 로그인한 뒤에는 비밀번호를 변경하고 2단계 인증을 켜세요.
+관리 UI는 기본적으로 `16680` 포트에서 대기하며 사용자 이름은 `admin`입니다. 초기 비밀번호는 최초 실행 시 로그에 출력됩니다. 자동화 배포에서는 환경 변수 `GATELY_INITIAL_PASSWORD`로 초기 비밀번호를 지정할 수 있으며, 이때는 무작위 비밀번호를 생성하지 않습니다.
+
+처음 로그인하면 시작 안내가 나타나 비밀번호 변경, 2단계 인증 또는 패스키 설정, 네트워크 자가 점검 실행, Lucky에서 가져오기, 알림 설정을 차례로 안내합니다.
 
 ## 업그레이드
 
@@ -68,4 +75,4 @@ Gately에는 온라인 자체 업데이트 기능이 없으며 업그레이드�
 - Docker: 새 이미지를 `docker pull`한 뒤 컨테이너를 다시 만듭니다(설정 디렉터리 마운트만 유지하면 됩니다).
 - 바이너리: 실행 파일을 교체하고 서비스를 재시작합니다.
 
-업그레이드 전에 설정 백업을 내보내거나 설정 디렉터리를 git으로 관리해 두는 것을 권장합니다.
+업그레이드 전에 설정 백업을 내보내거나 설정 디렉터리를 git으로 관리해 두는 것을 권장합니다. 내려받은 압축 파일과 이미지는 [릴리스 검증](/en/docs/guide/verify)에 따라 서명을 확인할 수 있습니다.

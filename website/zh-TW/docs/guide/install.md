@@ -41,25 +41,32 @@ services:
 ./gately -c /etc/gately
 ```
 
-### systemd 範例
+### systemd
 
-```ini
-[Unit]
-Description=Gately
-After=network-online.target
-Wants=network-online.target
+儲存庫提供完整的服務檔 [deploy/systemd/gately.service](https://github.com/wangwanjie/gately/blob/main/deploy/systemd/gately.service)，已授予監聽低位連接埠所需的能力：
 
-[Service]
-ExecStart=/usr/local/bin/gately -c /etc/gately
-Restart=on-failure
+```bash
+sudo install -m 0755 gately /usr/local/bin/gately
+sudo install -m 0644 gately.service /etc/systemd/system/gately.service
+sudo systemctl daemon-reload && sudo systemctl enable --now gately
+journalctl -u gately | grep -i "initial password"
+```
 
-[Install]
-WantedBy=multi-user.target
+### OpenWrt
+
+使用 procd 啟動指令碼 [deploy/openwrt/gately.init](https://github.com/wangwanjie/gately/blob/main/deploy/openwrt/gately.init)：
+
+```bash
+cp gately /usr/bin/gately && chmod +x /usr/bin/gately
+cp gately.init /etc/init.d/gately && chmod +x /etc/init.d/gately
+/etc/init.d/gately enable && /etc/init.d/gately start
 ```
 
 ## 初始登入
 
-管理介面預設監聽 `16680` 連接埠，使用者名稱 `admin`，初始密碼會在首次啟動時輸出到日誌。首次登入後請修改密碼並開啟兩步驟驗證。
+管理介面預設監聽 `16680` 連接埠，使用者名稱 `admin`，初始密碼會在首次啟動時輸出到日誌。自動化部署時可用環境變數 `GATELY_INITIAL_PASSWORD` 指定初始密碼，此時不會產生隨機密碼。
+
+首次登入會出現啟動引導，依序提示修改密碼、開啟兩步驟驗證或 Passkey、執行網路自檢、從 Lucky 匯入與設定通知。
 
 ## 升級
 
@@ -68,4 +75,4 @@ Gately 不內建線上自動更新，升級由部署方式負責：
 - Docker：`docker pull` 新映像檔後重建容器（設定目錄維持掛載即可）；
 - 執行檔：替換可執行檔並重新啟動服務。
 
-升級前建議匯出一份設定備份，或直接把設定目錄納入 git。
+升級前建議匯出一份設定備份，或直接把設定目錄納入 git。下載的壓縮檔與映像檔可依 [驗證發佈檔案](/en/docs/guide/verify) 核對簽章。

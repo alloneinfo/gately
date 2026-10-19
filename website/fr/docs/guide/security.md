@@ -18,12 +18,19 @@ Gately fonctionne à la frontière du réseau et manipule des clés de fournisse
 ## Authentification et contrôle d'accès
 
 - Hachage des mots de passe avec bcrypt et jetons de session signés HMAC ;
+- Connexion par passkey (WebAuthn) : seule la clé publique est stockée, la vérification de l'utilisateur (empreinte, visage ou code PIN) est obligatoire et le compteur de signatures empêche le clonage ; nécessite un accès par nom de domaine en HTTPS (ou localhost) ;
 - Authentification à deux facteurs (TOTP, vérifiée avec les vecteurs de test de la RFC 6238) ;
+- Comptes en lecture seule : ils voient l'état et la configuration, mais ne peuvent ni modifier, ni télécharger de sauvegarde, ni lire de secrets, ni ouvrir de terminal ; la réinitialisation de leur mot de passe ou leur suppression invalide immédiatement leurs sessions ;
 - Limitation des tentatives de connexion ;
+- Proxy inverse local : lorsque l'interface d'administration se trouve derrière nginx, haproxy ou un service Web Gately sur la même machine, seuls les en-têtes `X-Real-IP` / `X-Forwarded-For` provenant d'adresses locales sont pris en compte. L'accès limité au réseau local, la limitation des tentatives de connexion et le journal d'audit obtiennent ainsi la source réelle. Ce comportement peut être désactivé, ou complété par des proxys de confiance supplémentaires, dans « Paramètres → Contrôle d'accès » ;
 - Chemin d'accès secret, accès limité au réseau local et HTTPS pour l'interface d'administration ;
 - API multi-jetons : chaque jeton n'a un accès en lecture/écriture qu'aux modules choisis à sa création, peut avoir une date d'expiration et enregistre l'IP source de sa dernière utilisation. Les points d'accès du compte, de l'authentification à deux facteurs, de la gestion des jetons, ainsi que de la sauvegarde, de la restauration, du redémarrage et des paramètres système n'acceptent que les sessions de connexion. Consultez [Jetons d'API et OpenAPI](/fr/docs/reference/api) ;
 - Contrôle d'accès aux sites : bannissement automatique après échecs d'authentification, filtrage GeoIP par pays et règles de chemins. Consultez [Services Web](/fr/docs/modules/web) ;
 - Les sauvegardes de configuration peuvent être chiffrées (scrypt + AES-GCM). Consultez [Sauvegarde de la configuration](/fr/docs/modules/backup).
+
+## Audit et traçabilité
+
+Le journal d'audit enregistre les connexions, les modifications de configuration et les accès sensibles. L'historique de configuration conserve la version de chaque fichier de configuration avant écrasement et permet de la restaurer en un clic. Consultez [Audit et historique de configuration](/fr/docs/guide/audit). Les artefacts publiés sont accompagnés d'une signature cosign, d'une attestation de provenance de build et d'un SBOM ; la méthode de vérification est décrite dans [Vérifier les versions](/en/docs/guide/verify).
 
 ## Valeurs par défaut des fonctions à risque
 

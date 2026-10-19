@@ -41,6 +41,7 @@
       "modules/backup": "配置备份",
       "modules/tools": "文件与运维工具",
       "guide/security": "安全模型与隐私承诺",
+      "guide/audit": "审计与配置历史",
       "guide/hardening": "加固建议",
       "guide/verify": "校验发布产物",
       "reference/api": "API 令牌与 OpenAPI",
@@ -78,7 +79,7 @@
     "pill": "开源 · 可审计 · 单文件部署",
     "titleLine1": "看得见的",
     "titleLine2": "网络网关工具集",
-    "lead": "DDNS、STUN 穿透、端口转发、反向代理、证书、WAF、Tailscale、frp，集成在一个约 22 MB 的单文件里。家庭网络、NAS、云主机与各类服务器均可使用。",
+    "lead": "DDNS、STUN 穿透、端口转发、反向代理、证书、WAF、Tailscale、frp，集成在一个约 32 MB 的单文件里。家庭网络、NAS、云主机与各类服务器均可使用。",
     "ctaStart": "快速开始",
     "ctaDownload": "下载",
     "mockTitle": "gately · 总览",
@@ -116,7 +117,7 @@
     ],
     "stats": [
       {
-        "value": "~22 MB",
+        "value": "~32 MB",
         "label": "单文件，内嵌管理界面"
       },
       {
@@ -137,7 +138,7 @@
     "features": [
       {
         "title": "动态域名",
-        "text": "阿里云、Cloudflare、腾讯云、DNSPod、华为云、GoDaddy 等 11 家服务商；URL / 网卡 / 命令取 IP，IPv4 与 IPv6，Webhook 通知。"
+        "text": "阿里云、Cloudflare、腾讯云、DNSPod、华为云、Route 53、OVH、Gandi、Namecheap 等 18 家服务商；URL / 网卡 / 命令取 IP，IPv4 与 IPv6，Webhook 通知。"
       },
       {
         "title": "STUN 穿透",
@@ -145,15 +146,15 @@
       },
       {
         "title": "端口转发",
-        "text": "TCP / UDP、IPv4 / IPv6、端口段、多目标故障转移、连接数限制与流量统计。"
+        "text": "TCP / UDP、IPv4 / IPv6、端口段、多目标故障转移、连接数限制与流量统计；可向下游发送 PROXY 协议，保留真实客户端地址。"
       },
       {
         "title": "SSL 证书",
-        "text": "ACME DNS-01 自动签发与续期，支持通配符与 EAB，可映射到目录并在变化后执行脚本。"
+        "text": "ACME 自动签发与续期，支持 DNS-01（含通配符）与 HTTP-01、EAB，可映射到目录并在变化后执行脚本。"
       },
       {
         "title": "Web 服务",
-        "text": "按域名反向代理、重定向、静态文件；HTTPS、WebSocket、PROXY 协议；多后端权重与策略、健康检查、压缩、限流与响应缓存。"
+        "text": "按域名反向代理、重定向、静态文件；HTTPS、HTTP/3、WebSocket、PROXY 协议；多后端权重与策略、健康检查、压缩、限流与响应缓存。"
       },
       {
         "title": "WAF 防火墙",
@@ -181,7 +182,7 @@
       },
       {
         "title": "安全加固",
-        "text": "两步验证、登录失败限流、安全入口、仅内网访问、管理界面 HTTPS、API 令牌。"
+        "text": "Passkey 与两步验证、只读账号、操作审计、配置历史与一键回滚、登录失败限流、安全入口、仅内网访问。"
       },
       {
         "title": "访问控制",
@@ -189,11 +190,11 @@
       },
       {
         "title": "访问统计与监控",
-        "text": "分钟级访问与流量统计，并以 Prometheus 指标暴露，便于接入已有监控。"
+        "text": "全局 Prometheus 指标与 Grafana 面板，覆盖证书、DDNS、端口转发与站点；一键网络自检排查 NAT、端口、时间与解析。"
       },
       {
         "title": "通知中心",
-        "text": "Webhook、Telegram、Bark、企业微信、钉钉、飞书与邮件；按级别与事件规则推送，支持静默去重。"
+        "text": "Webhook、Telegram、Bark、ntfy、Gotify、Pushover、Discord、Slack、Server酱、PushPlus、企业微信、钉钉、飞书与邮件；内置规则模板，支持静默去重。"
       },
       {
         "title": "配置备份",

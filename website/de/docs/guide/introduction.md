@@ -1,6 +1,6 @@
 # Einführung
 
-Gately ist ein quelloffenes, prüfbares Toolkit für Netzwerk-Gateways, gedacht für Heimnetze, NAS, Cloud-Hosts und Server aller Art. DDNS, STUN-NAT-Traversal, Portweiterleitung, Reverse Proxy, Zertifikate, WAF und mehr stecken in einer einzigen Binärdatei von rund 22 MB, und Lucky-Konfigurationen lassen sich importieren.
+Gately ist ein quelloffenes, prüfbares Toolkit für Netzwerk-Gateways, gedacht für Heimnetze, NAS, Cloud-Hosts und Server aller Art. DDNS, STUN-NAT-Traversal, Portweiterleitung, Reverse Proxy, Zertifikate, WAF und mehr stecken in einer einzigen Binärdatei von rund 32 MB, und Lucky-Konfigurationen lassen sich importieren.
 
 ## Warum Gately
 

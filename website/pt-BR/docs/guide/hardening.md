@@ -5,13 +5,16 @@ A interface de administração controla DNS, certificados e portas. Percorra a l
 ## Interface de administração
 
 - [ ] Altere a senha do administrador após o primeiro acesso
-- [ ] Ative a autenticação em dois fatores (TOTP)
+- [ ] Ative a autenticação em dois fatores (TOTP) ou registre uma passkey
+- [ ] Quando familiares ou colegas só precisarem visualizar, crie para eles uma conta somente leitura em vez de compartilhar a senha do administrador
 - [ ] Defina um caminho de entrada seguro, para que a interface de administração só seja acessível por um caminho personalizado
 - [ ] Ative o "Acesso apenas pela rede local" e use uma VPN (como o [Tailscale](/pt-BR/docs/modules/tunnels)) quando precisar administrar remotamente
 - [ ] Ative o HTTPS na interface de administração ao acessá-la por redes não confiáveis
 - [ ] Dê aos scripts de automação e à [CLI / MCP](/pt-BR/docs/guide/cli-mcp) [tokens de API](/pt-BR/docs/reference/api) com privilégios mínimos e data de expiração, e evite compartilhar a senha do administrador
 - [ ] Defina uma senha de criptografia para os [backups da configuração](/pt-BR/docs/modules/backup) e ative os backups agendados
-- [ ] Configure notificações na [Central de notificações](/pt-BR/docs/modules/notify) para eventos como logins, certificados e falhas de backup
+- [ ] Configure notificações na [Central de notificações](/pt-BR/docs/modules/notify) com os modelos "Segurança e logins", "Alterações de configuração" e "Falhas críticas"
+- [ ] Se a interface de administração for exposta por um proxy reverso neste mesmo host, confirme que o [log de auditoria](/pt-BR/docs/guide/audit) registra a origem real; nas entradas de redirecionamento de portas, ative o [protocolo PROXY](/pt-BR/docs/modules/portforward#protocolo-proxy)
+- [ ] Depois de baixar uma nova versão, confira as assinaturas conforme [Verificar versões](/en/docs/guide/verify)
 
 ## Serviços expostos à internet
 

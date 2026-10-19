@@ -6,7 +6,12 @@
 | --- | --- |
 | `-c` | Dossier de configuration ; peut aussi être défini avec la variable d'environnement `GATELY_CONFIG_DIR` |
 | `-listen` | Remplace l'adresse d'écoute de l'interface d'administration, p. ex. `:16680` |
+| `-apply` | Dossier de configuration déclarative ; peut aussi être défini avec la variable d'environnement `GATELY_APPLY_DIR`, voir ci-dessous |
 | `-version` | Affiche les informations de version |
+
+| Variable d'environnement | Description |
+| --- | --- |
+| `GATELY_INITIAL_PASSWORD` | Mot de passe administrateur initial au premier démarrage (8 caractères minimum) ; sans effet si le compte existe déjà |
 
 ## Dossier de configuration
 
@@ -19,6 +24,14 @@ Toute la configuration réside dans le dossier de configuration, avec un fichier
 ::: warning Attention
 `ssl.json` contient les clés privées des certificats. Avant de le valider dans un gestionnaire de versions, assurez-vous que le dépôt est privé, ou ajoutez le fichier à votre liste d'exclusion.
 :::
+
+## Configuration déclarative
+
+Avec `-apply <dossier>`, chaque démarrage copie les fichiers `<nom>.json` de ce dossier par-dessus le dossier de configuration ; les fichiers au contenu identique ne sont pas réécrits. C'est pratique pour distribuer la configuration depuis un dépôt git, un ConfigMap Kubernetes ou un script de déploiement.
+
+- Chaque fichier est vérifié comme JSON valide avant l'écriture ; si un seul fichier est invalide, Gately refuse de démarrer ;
+- `account.json` et `tokens.json` ne peuvent pas être écrasés : le compte et les jetons se gèrent uniquement dans l'interface d'administration ;
+- L'ancien contenu écrasé est conservé dans l'[historique de configuration](/fr/docs/guide/audit) et peut être restauré à tout moment.
 
 ## Dossier des programmes externes
 

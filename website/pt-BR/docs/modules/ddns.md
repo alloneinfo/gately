@@ -4,7 +4,17 @@ O IP público de uma banda larga residencial muda com o tempo. O DDNS atualiza o
 
 ## Provedores compatíveis
 
-Alibaba Cloud, Cloudflare, Tencent Cloud, DNSPod, Huawei Cloud, GoDaddy, Porkbun, dynv6, DuckDNS e um callback personalizado (para provedores sem suporte embutido ou endpoints próprios).
+Alibaba Cloud, Cloudflare, Tencent Cloud, DNSPod, Huawei Cloud, GoDaddy, Porkbun, dynv6, DuckDNS, Amazon Route 53, OVHcloud, Gandi, NS1, Bunny DNS, Namecheap, DynDNS2 e um callback personalizado (para provedores sem suporte embutido ou endpoints próprios).
+
+| Provedor | Credenciais | Pode ser usado na validação DNS de certificados |
+| --- | --- | --- |
+| Amazon Route 53 | Access Key ID / Secret Access Key, ID da zona hospedada opcional | Sim |
+| OVHcloud | Application Key / Secret e Consumer Key, endpoint ovh-eu / ovh-ca / ovh-us | Sim |
+| Gandi | Personal Access Token | Sim |
+| NS1 | API Key | Sim |
+| Bunny DNS | Account API Key | Sim |
+| Namecheap | Senha de Dynamic DNS do domínio (somente registros A) | Não |
+| DynDNS2 | Usuário, senha e URL de atualização; para No-IP, Dynu e outros serviços compatíveis com o protocolo dyndns2 | Não |
 
 ## Como o IP é obtido
 

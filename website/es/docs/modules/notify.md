@@ -1,6 +1,6 @@
 # Centro de notificaciones
 
-El Centro de notificaciones se suscribe al bus de eventos interno de Gately y, según tus reglas, envía eventos como cambios de DDNS, caducidad de certificados, bloqueos del WAF y fallos de procesos a Webhook, Telegram, Bark, WeCom, DingTalk, Feishu y correo electrónico. La interfaz de administración está en el grupo «Sistema» de la barra lateral → «Notificaciones».
+El Centro de notificaciones se suscribe al bus de eventos interno de Gately y, según tus reglas, envía eventos como cambios de DDNS, caducidad de certificados, bloqueos del WAF y fallos de procesos a Webhook, Telegram, Bark, ntfy, Gotify, Pushover, Discord, Slack, ServerChan, PushPlus, WeCom, DingTalk, Feishu y correo electrónico. La interfaz de administración está en el grupo «Sistema» de la barra lateral → «Notificaciones».
 
 ## Cómo funciona
 
@@ -24,6 +24,13 @@ Pulsa «Añadir canal», elige un tipo y rellena los campos. Todos los canales t
 | DingTalk | URL del bot | Secreto de firma (rellénalo cuando el bot tenga activada la «firma») |
 | Feishu | URL del bot | Secreto de firma (rellénalo cuando el bot tenga activada la «verificación de firma») |
 | Correo | Servidor, destinatarios y al menos uno entre remitente o usuario | Cifrado, puerto, usuario, contraseña |
+| ntfy | Tema | URL del servidor (déjala vacía para usar `https://ntfy.sh`), token de acceso |
+| Gotify | URL del servidor, token de la aplicación | Ninguno |
+| Pushover | Token de la aplicación, User Key | Ninguno |
+| Discord | URL del webhook | Ninguno |
+| Slack | URL del webhook | Ninguno |
+| ServerChan | SendKey | Ninguno |
+| PushPlus | Token | Ninguno |
 
 Los campos de URL requieren una dirección completa que empiece por `http://` o `https://`.
 
@@ -76,6 +83,19 @@ Pulsa «Añadir regla»:
 Los bloqueos del WAF y los cambios de estado de los backends pueden ocurrir con mucha frecuencia. En las reglas que los cubran, define un tiempo de silenciamiento de 300 segundos o más.
 :::
 
+## Plantillas de reglas
+
+Al crear una regla, puedes pulsar una plantilla para rellenar los eventos, el nivel y el tiempo de silenciamiento, y luego elegir los canales y guardar:
+
+| Plantilla | Eventos |
+| --- | --- |
+| Fallos críticos | Fallo de actualización de DDNS, fallo de renovación de certificado, backend no disponible, salida anómala de un subproceso, fallo de copia de seguridad, salida de contenedor |
+| Caducidad de certificados | Certificado a punto de caducar, fallo de renovación (silenciamiento de 24 horas) |
+| Cambios de dirección | Actualización de registro DDNS, cambio de dirección STUN |
+| Estado de servicios | Backend no disponible y recuperado, salida de contenedor, salida de subproceso |
+| Seguridad e inicios de sesión | Inicio de sesión fallido, IP bloqueada, inicio de sesión correcto, acceso a contenido sensible |
+| Cambios de configuración | Cada cambio de configuración hecho en la interfaz de administración |
+
 ## Tipos de evento
 
 | Tipo de evento | Nombre | Nivel | Desencadenante |
@@ -95,6 +115,8 @@ Los bloqueos del WAF y los cambios de estado de los backends pueden ocurrir con 
 | `auth.failed` | Autenticación: fallos repetidos | Advertencia | Falló un inicio de sesión en la interfaz de administración, con el campo `ip` |
 | `auth.banned` | Autenticación: IP bloqueada | Advertencia | Los fallos repetidos de autenticación de un servicio web activaron un bloqueo automático |
 | `login.success` | Interfaz de administración: inicio de sesión correcto | Info | Un inicio de sesión en la interfaz de administración se realizó correctamente, con los campos `ip` y `user` |
+| `audit.change` | Interfaz de administración: cambio de configuración | Info | Cualquier operación de cambio en la interfaz de administración, con los campos `actor`, `ip`, `method` y `path`; consulta [Auditoría e historial de configuración](/es/docs/guide/audit) |
+| `audit.access` | Interfaz de administración: acceso a contenido sensible | Advertencia | Descarga de copias de seguridad, paquetes de diagnóstico o claves privadas de certificados, apertura de terminales, etc.; mismos campos que el anterior |
 | `notify.test` | Notificación de prueba | Info | Generada por el botón «Probar» del canal; no participa en la coincidencia con las reglas |
 
 ## Enviar una prueba

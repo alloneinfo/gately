@@ -31,6 +31,7 @@
 ## 傳輸與協定
 
 - HTTPS：使用 [SSL 憑證](/zh-TW/docs/modules/ssl) 模組中涵蓋該網域的憑證；
+- HTTP/3（QUIC）：在開啟 HTTPS 的監聽中啟用，相同埠號的 UDP 上同時提供 HTTP/3，並透過 `Alt-Svc` 回應標頭通告瀏覽器；需要在防火牆與連接埠映射中放行該 UDP 埠；
 - WebSocket：反向代理自動支援；
 - PROXY 協定：監聽可接收上游（如 haproxy、frp）送出的 PROXY 標頭，僅信任「全域設定 → 可信 PROXY 來源」中列出的 IP 或網段，留空表示不信任任何來源；反向代理可向後端送出 PROXY 標頭。
 
@@ -217,6 +218,8 @@ http://10.0.0.3:8080 backup
 統計保存在記憶體中，重新啟動或修改該監聽後重新計數。排行榜最多統計 5000 個不同來源。
 
 ### Prometheus 指標
+
+全域指標端點 `GET /api/metrics` 彙總了全部模組的指標，見 [監控指標](/en/docs/reference/monitoring)。下面的模組端點只包含 Web 服務的指標。
 
 指標端點為 `GET /api/webservice/metrics`，Prometheus 文字格式，需攜帶登入憑據或 [API 權杖](/en/docs/reference/api-reference)。
 

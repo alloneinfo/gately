@@ -2,7 +2,7 @@
 
 [English](README.md) | [简体中文](README.zh-CN.md) | **繁體中文** | [日本語](README.ja.md) | [한국어](README.ko.md) | [Español](README.es.md) | [Français](README.fr.md) | [Deutsch](README.de.md) | [Русский](README.ru.md) | [Português (Brasil)](README.pt-BR.md)
 
-開源、可稽核的網路閘道工具集，家用網路、NAS、雲端主機與各類伺服器皆可使用。DDNS、STUN 穿透、連接埠轉發、反向代理、憑證、WAF 等常用功能整合在一個約 22 MB 的單一檔案中，並支援匯入既有的 Lucky 設定。
+開源、可稽核的網路閘道工具集，家用網路、NAS、雲端主機與各類伺服器皆可使用。DDNS、STUN 穿透、連接埠轉發、反向代理、憑證、WAF 等常用功能整合在一個約 32 MB 的單一檔案中，並支援匯入既有的 Lucky 設定。
 
 ![Gately 概覽](docs/images/overview.webp)
 

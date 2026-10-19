@@ -65,7 +65,7 @@ export const sidebarGroups: SidebarGroup[] = [
       'modules/tools'
     ]
   },
-  { id: 'security', slugs: ['guide/security', 'guide/hardening', 'guide/verify'] },
+  { id: 'security', slugs: ['guide/security', 'guide/audit', 'guide/hardening', 'guide/verify'] },
   {
     id: 'reference',
     slugs: [

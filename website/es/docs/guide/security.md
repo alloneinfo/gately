@@ -18,12 +18,19 @@ Gately funciona en el borde de la red y maneja claves de proveedores DNS, claves
 ## Autenticación y control de acceso
 
 - Contraseñas con hash bcrypt y tokens de sesión firmados con HMAC;
+- Inicio de sesión con passkey (WebAuthn): solo se guarda la clave pública, se exige verificación del usuario (huella, rostro o PIN) y el contador de firmas impide la clonación; requiere acceder mediante un dominio con HTTPS (o localhost);
 - Autenticación de dos factores (TOTP, verificada con los vectores de prueba de la RFC 6238);
+- Cuentas de solo lectura: pueden ver el estado y la configuración, pero no modificarla, descargar copias de seguridad, leer secretos ni abrir terminales; al restablecer su contraseña o eliminarlas, sus sesiones dejan de ser válidas de inmediato;
 - Límite de intentos de inicio de sesión;
+- Proxy inverso local: cuando la interfaz de administración está detrás de nginx, haproxy o un servicio web de Gately en el mismo equipo, solo se confía en las cabeceras `X-Real-IP` / `X-Forwarded-For` que llegan desde direcciones locales. El acceso solo desde la red local, el límite de intentos de inicio de sesión y el registro de auditoría obtienen así el origen real. Puedes desactivarlo o añadir proxies de confianza adicionales en «Ajustes → Control de acceso»;
 - Ruta de acceso segura, acceso solo desde la red local y HTTPS para la interfaz de administración;
 - API con varios tokens: cada token tiene acceso de lectura y escritura únicamente a los módulos elegidos al crearlo, puede tener fecha de caducidad y registra la IP de origen de su último uso. Las operaciones de cuenta, autenticación de dos factores, gestión de tokens, copia de seguridad, restauración, reinicio y ajustes del sistema solo aceptan sesiones de inicio de sesión. Consulta [Tokens de API y OpenAPI](/es/docs/reference/api);
 - Control de acceso a sitios: bloqueo automático tras fallos de autenticación, filtrado por país con GeoIP y reglas por ruta. Consulta [Servicios web](/es/docs/modules/web);
 - Las copias de seguridad de la configuración admiten cifrado (scrypt + AES-GCM). Consulta [Copia de seguridad de la configuración](/es/docs/modules/backup).
+
+## Auditoría y trazabilidad
+
+El registro de auditoría guarda los inicios de sesión, los cambios de configuración y los accesos sensibles. El historial de configuración conserva la versión de cada archivo de configuración antes de sobrescribirlo y permite revertirla con un clic. Consulta [Auditoría e historial de configuración](/es/docs/guide/audit). Los artefactos publicados incluyen firma de cosign, atestación de procedencia de la compilación y SBOM; consulta cómo comprobarlos en [Verificar versiones](/en/docs/guide/verify).
 
 ## Valores por defecto de las funciones de alto riesgo
 

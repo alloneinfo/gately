@@ -31,6 +31,7 @@
 ## 传输与协议
 
 - HTTPS：使用 [SSL 证书](/docs/modules/ssl) 模块中覆盖该域名的证书；
+- HTTP/3（QUIC）：在开启 HTTPS 的监听中打开，同一端口号的 UDP 上同时提供 HTTP/3，并通过 `Alt-Svc` 响应头通告浏览器；需要在防火墙与端口映射中放行该 UDP 端口；
 - WebSocket：反向代理自动支持；
 - PROXY 协议：监听可接收上游（如 haproxy、frp）发送的 PROXY 头，仅信任「全局设置 → 可信 PROXY 来源」中列出的 IP 或网段，留空表示不信任任何来源；反向代理可向后端发送 PROXY 头。
 
@@ -217,6 +218,8 @@ http://10.0.0.3:8080 backup
 统计保存在内存中，重启或修改该监听后重新计数。排行榜最多统计 5000 个不同来源。
 
 ### Prometheus 指标
+
+全局指标端点 `GET /api/metrics` 汇总了全部模块的指标，见 [监控指标](/docs/reference/monitoring)。下面的模块端点只包含 Web 服务的指标。
 
 指标端点为 `GET /api/webservice/metrics`，Prometheus 文本格式，需携带登录凭据或 [API 令牌](/docs/reference/api-reference)。
 

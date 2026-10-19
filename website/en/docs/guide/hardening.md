@@ -5,13 +5,16 @@ The admin UI controls DNS, certificates and ports. Work through the following ch
 ## Admin UI
 
 - [ ] Change the administrator password after the first sign-in
-- [ ] Enable two-factor authentication (TOTP)
+- [ ] Enable two-factor authentication (TOTP), or register a Passkey
+- [ ] When family members or colleagues only need to view things, create read-only accounts for them instead of sharing the administrator password
 - [ ] Set a secure entrance path so the admin UI is reachable only through a custom path
 - [ ] Enable "LAN-only access", and use a VPN (such as [Tailscale](/en/docs/modules/tunnels)) when you need remote administration
 - [ ] Enable admin UI HTTPS when accessing it over untrusted networks
 - [ ] Give automation scripts and the [CLI / MCP](/en/docs/guide/cli-mcp) least-privilege [API tokens](/en/docs/reference/api) with an expiry time, and avoid sharing the administrator password
 - [ ] Set an encryption passphrase for [configuration backups](/en/docs/modules/backup) and enable scheduled backups
-- [ ] Configure push notifications in the [Notification Center](/en/docs/modules/notify) for events such as sign-ins, certificates and backup failures
+- [ ] Configure push notifications in the [Notification Center](/en/docs/modules/notify) with the "Security & sign-ins", "Configuration changes" and "Critical failures" templates
+- [ ] When the admin UI is exposed through a reverse proxy on the same host, confirm that the [audit log](/en/docs/guide/audit) records the real source; for port forwarding entry points, enable the [PROXY protocol](/en/docs/modules/portforward#proxy-protocol)
+- [ ] After downloading a new version, check its signature as described in [Verifying Releases](/en/docs/guide/verify)
 
 ## Public-facing services
 

@@ -4,7 +4,17 @@
 
 ## 支援的服務商
 
-阿里雲（Alibaba Cloud）、Cloudflare、騰訊雲、DNSPod、華為雲、GoDaddy、Porkbun、dynv6、DuckDNS，以及自訂回呼（用於未內建的服務商或自建介面）。
+阿里雲（Alibaba Cloud）、Cloudflare、騰訊雲、DNSPod、華為雲、GoDaddy、Porkbun、dynv6、DuckDNS、Amazon Route 53、OVHcloud、Gandi、NS1、Bunny DNS、Namecheap、DynDNS2，以及自訂回呼（用於未內建的服務商或自建介面）。
+
+| 服務商 | 憑據 | 可用於憑證 DNS 驗證 |
+| --- | --- | --- |
+| Amazon Route 53 | Access Key ID / Secret Access Key，可選託管區域 ID | 是 |
+| OVHcloud | Application Key / Secret 與 Consumer Key，接入點 ovh-eu / ovh-ca / ovh-us | 是 |
+| Gandi | Personal Access Token | 是 |
+| NS1 | API Key | 是 |
+| Bunny DNS | Account API Key | 是 |
+| Namecheap | 網域的 Dynamic DNS 密碼（僅 A 記錄） | 否 |
+| DynDNS2 | 使用者名稱、密碼與更新網址，適用於 No-IP、Dynu 等相容 dyndns2 協定的服務 | 否 |
 
 ## 取得 IP 的方式
 

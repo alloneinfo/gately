@@ -39,3 +39,5 @@ make build    # 輸出 bin/gately
 ## 校驗
 
 每個版本都附有校驗碼檔案，下載後請先核對 SHA-256 再執行。
+
+自 v0.5.0 起，校驗碼檔案與 Docker 映像都附有 cosign 無金鑰簽章，壓縮檔附帶建置來源證明，並提供 SBOM。驗證方法見[驗證發佈檔案](/en/docs/guide/verify)（英文）。

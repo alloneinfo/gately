@@ -4,7 +4,17 @@ Die öffentliche IP eines Heim-Breitbandanschlusses ändert sich mit der Zeit. D
 
 ## Unterstützte Anbieter
 
-Alibaba Cloud, Cloudflare, Tencent Cloud, DNSPod, Huawei Cloud, GoDaddy, Porkbun, dynv6, DuckDNS sowie ein eigener Callback (für Anbieter, die nicht eingebaut sind, oder für selbst gehostete Endpunkte).
+Alibaba Cloud, Cloudflare, Tencent Cloud, DNSPod, Huawei Cloud, GoDaddy, Porkbun, dynv6, DuckDNS, Amazon Route 53, OVHcloud, Gandi, NS1, Bunny DNS, Namecheap, DynDNS2 sowie ein eigener Callback (für Anbieter, die nicht eingebaut sind, oder für selbst gehostete Endpunkte).
+
+| Anbieter | Zugangsdaten | Für DNS-Validierung von Zertifikaten nutzbar |
+| --- | --- | --- |
+| Amazon Route 53 | Access Key ID / Secret Access Key, optional Hosted-Zone-ID | Ja |
+| OVHcloud | Application Key / Secret und Consumer Key, Endpunkt ovh-eu / ovh-ca / ovh-us | Ja |
+| Gandi | Personal Access Token | Ja |
+| NS1 | API Key | Ja |
+| Bunny DNS | Account API Key | Ja |
+| Namecheap | Dynamic-DNS-Passwort der Domain (nur A-Einträge) | Nein |
+| DynDNS2 | Benutzername, Passwort und Update-URL; für No-IP, Dynu und andere Dienste, die das dyndns2-Protokoll unterstützen | Nein |
 
 ## So wird die IP ermittelt
 

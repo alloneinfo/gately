@@ -93,3 +93,19 @@ Limites e funcionamento:
 ::: tip Dica
 As ferramentas de diagnóstico rodam no host ou contêiner em que o Gately está, então os resultados refletem a rede desse ambiente. Para limitar o que pode ser sondado, adicione sub-redes internas sensíveis à lista de bloqueio de sondagem.
 :::
+
+## Autodiagnóstico de rede
+
+O botão "Autodiagnóstico" na página de visão geral (também disponível no assistente de configuração inicial) verifica de uma só vez os problemas mais comuns de rede e de configuração. Os itens com problema aparecem primeiro, com sugestões de correção:
+
+| Verificação | Descrição |
+| --- | --- |
+| Endereço público | Obtém o IPv4 / IPv6 de saída pelas URLs de consulta de IP público usadas pelo DDNS |
+| NAT | Se o host tem diretamente um IPv4 / IPv6 público; quando uma interface de rede tem um endereço em 100.64.0.0/10, avisa que pode haver NAT da operadora (interfaces de redes overlay como o Tailscale são ignoradas) |
+| Hora do sistema | Estima o desvio do relógio pelo horário de resposta do serviço de consulta; mais de 60 segundos fazem falhar os códigos de dois fatores e a validação de certificados |
+| Portas 80 / 443 | Se estão livres, já ocupadas ou sem permissão para escutar |
+| Resolução DDNS | Se o domínio dos registros com endereço dinâmico resolve atualmente para o endereço de saída deste host |
+| Certificados | Certificados expirados ou que expiram em até 14 dias |
+| Estado dos módulos | Módulos em estado de aviso ou erro na visão geral |
+
+O autodiagnóstico acessa os serviços de consulta de IP público configurados, só roda quando você clica e não está disponível para contas somente leitura nem tokens de API.

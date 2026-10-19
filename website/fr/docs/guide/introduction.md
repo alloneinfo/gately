@@ -1,6 +1,6 @@
 # Introduction
 
-Gately est une boîte à outils de passerelle réseau open source et auditable, destinée aux réseaux domestiques, aux NAS, aux serveurs cloud et à tous types de serveurs. DDNS, traversée NAT STUN, redirection de ports, proxy inverse, certificats, WAF et bien plus sont réunis dans un seul binaire d'environ 22 Mo, et les configurations Lucky s'importent en un clic.
+Gately est une boîte à outils de passerelle réseau open source et auditable, destinée aux réseaux domestiques, aux NAS, aux serveurs cloud et à tous types de serveurs. DDNS, traversée NAT STUN, redirection de ports, proxy inverse, certificats, WAF et bien plus sont réunis dans un seul binaire d'environ 32 Mo, et les configurations Lucky s'importent en un clic.
 
 ## Pourquoi Gately
 

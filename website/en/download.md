@@ -39,3 +39,5 @@ make build    # outputs bin/gately
 ## Verification
 
 Every release ships with a checksum file. Verify the SHA-256 after downloading and before running.
+
+Since v0.5.0, the checksum file and Docker images carry cosign keyless signatures, archives come with build provenance, and an SBOM is published. See [Verifying release artifacts](/en/docs/guide/verify).

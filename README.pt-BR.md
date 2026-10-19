@@ -2,7 +2,7 @@
 
 [English](README.md) | [简体中文](README.zh-CN.md) | [繁體中文](README.zh-TW.md) | [日本語](README.ja.md) | [한국어](README.ko.md) | [Español](README.es.md) | [Français](README.fr.md) | [Deutsch](README.de.md) | [Русский](README.ru.md) | **Português (Brasil)**
 
-Um conjunto de ferramentas de gateway de rede, de código aberto e auditável, para redes domésticas, NAS, hosts em nuvem e servidores em geral. DDNS, travessia STUN, redirecionamento de portas, proxy reverso, certificados, WAF e outros recursos comuns reunidos em um único arquivo de cerca de 22 MB, com importação de configurações existentes do Lucky.
+Um conjunto de ferramentas de gateway de rede, de código aberto e auditável, para redes domésticas, NAS, hosts em nuvem e servidores em geral. DDNS, travessia STUN, redirecionamento de portas, proxy reverso, certificados, WAF e outros recursos comuns reunidos em um único arquivo de cerca de 32 MB, com importação de configurações existentes do Lucky.
 
 ![Visão geral do Gately](docs/images/overview.webp)
 

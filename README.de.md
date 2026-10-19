@@ -2,7 +2,7 @@
 
 [English](README.md) | [简体中文](README.zh-CN.md) | [繁體中文](README.zh-TW.md) | [日本語](README.ja.md) | [한국어](README.ko.md) | [Español](README.es.md) | [Français](README.fr.md) | **Deutsch** | [Русский](README.ru.md) | [Português (Brasil)](README.pt-BR.md)
 
-Ein quelloffenes, prüfbares Toolkit für Netzwerk-Gateways – für Heimnetz, NAS, Cloud-Hosts und beliebige Server. DDNS, STUN-Traversal, Portweiterleitung, Reverse-Proxy, Zertifikate, WAF und weitere gängige Funktionen sind in einer einzigen Datei von etwa 22 MB vereint; bestehende Lucky-Konfigurationen lassen sich importieren.
+Ein quelloffenes, prüfbares Toolkit für Netzwerk-Gateways – für Heimnetz, NAS, Cloud-Hosts und beliebige Server. DDNS, STUN-Traversal, Portweiterleitung, Reverse-Proxy, Zertifikate, WAF und weitere gängige Funktionen sind in einer einzigen Datei von etwa 32 MB vereint; bestehende Lucky-Konfigurationen lassen sich importieren.
 
 ![Gately-Übersicht](docs/images/overview.webp)
 

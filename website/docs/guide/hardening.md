@@ -5,13 +5,16 @@
 ## 管理界面
 
 - [ ] 首次登录后修改管理员密码
-- [ ] 开启两步验证（TOTP）
+- [ ] 开启两步验证（TOTP），或注册 Passkey
+- [ ] 家人或同事只需查看时，为其创建只读账号，不要共享管理员密码
 - [ ] 设置安全入口，使管理界面只能通过自定义路径访问
 - [ ] 开启「仅内网访问」，需要外网管理时通过 VPN（如 [Tailscale](/docs/modules/tunnels)）进入
 - [ ] 在不可信网络中访问时，启用管理界面 HTTPS
 - [ ] 自动化脚本与 [命令行 / MCP](/docs/guide/cli-mcp) 使用最小权限的 [API 令牌](/docs/reference/api)，设置过期时间，避免共享管理员密码
 - [ ] 为 [配置备份](/docs/modules/backup) 设置加密口令，并开启定时备份
-- [ ] 在 [通知中心](/docs/modules/notify) 配置登录、证书、备份失败等事件的推送
+- [ ] 在 [通知中心](/docs/modules/notify) 用「安全与登录」「配置变更」「关键故障」模板配置推送
+- [ ] 管理界面经本机反向代理暴露时，确认 [审计日志](/docs/guide/audit) 中记录的是真实来源；端口转发入口请开启 [PROXY 协议](/docs/modules/portforward#proxy-协议)
+- [ ] 下载新版本后按 [校验发布产物](/docs/guide/verify) 核对签名
 
 ## 对外服务
 

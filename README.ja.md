@@ -2,7 +2,7 @@
 
 [English](README.md) | [简体中文](README.zh-CN.md) | [繁體中文](README.zh-TW.md) | **日本語** | [한국어](README.ko.md) | [Español](README.es.md) | [Français](README.fr.md) | [Deutsch](README.de.md) | [Русский](README.ru.md) | [Português (Brasil)](README.pt-BR.md)
 
-オープンソースで監査可能なネットワークゲートウェイツールセットです。家庭内ネットワーク、NAS、クラウドホスト、各種サーバーで利用できます。DDNS、STUN 穿孔、ポート転送、リバースプロキシ、証明書、WAF など、よく使う機能を約 22 MB の単一ファイルにまとめ、既存の Lucky 設定のインポートにも対応しています。
+オープンソースで監査可能なネットワークゲートウェイツールセットです。家庭内ネットワーク、NAS、クラウドホスト、各種サーバーで利用できます。DDNS、STUN 穿孔、ポート転送、リバースプロキシ、証明書、WAF など、よく使う機能を約 32 MB の単一ファイルにまとめ、既存の Lucky 設定のインポートにも対応しています。
 
 ![Gately 概要](docs/images/overview.webp)
 

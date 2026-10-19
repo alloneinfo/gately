@@ -4,7 +4,17 @@
 
 ## 支持的服务商
 
-阿里云、Cloudflare、腾讯云、DNSPod、华为云、GoDaddy、Porkbun、dynv6、DuckDNS，以及自定义回调（用于未内置的服务商或自建接口）。
+阿里云、Cloudflare、腾讯云、DNSPod、华为云、GoDaddy、Porkbun、dynv6、DuckDNS、Amazon Route 53、OVHcloud、Gandi、NS1、Bunny DNS、Namecheap、DynDNS2，以及自定义回调（用于未内置的服务商或自建接口）。
+
+| 服务商 | 凭据 | 可用于证书 DNS 验证 |
+| --- | --- | --- |
+| Amazon Route 53 | Access Key ID / Secret Access Key，可选托管区域 ID | 是 |
+| OVHcloud | Application Key / Secret 与 Consumer Key，接入点 ovh-eu / ovh-ca / ovh-us | 是 |
+| Gandi | Personal Access Token | 是 |
+| NS1 | API Key | 是 |
+| Bunny DNS | Account API Key | 是 |
+| Namecheap | 域名的 Dynamic DNS 密码（仅 A 记录） | 否 |
+| DynDNS2 | 用户名、密码与更新地址，适用于 No-IP、Dynu 等兼容 dyndns2 协议的服务 | 否 |
 
 ## 获取 IP 的方式
 

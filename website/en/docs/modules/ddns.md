@@ -4,7 +4,17 @@ The public IP of a home broadband connection changes over time. DDNS updates you
 
 ## Supported providers
 
-Alibaba Cloud, Cloudflare, Tencent Cloud, DNSPod, Huawei Cloud, GoDaddy, Porkbun, dynv6, DuckDNS, and a custom callback (for providers that are not built in, or for self-hosted endpoints).
+Alibaba Cloud, Cloudflare, Tencent Cloud, DNSPod, Huawei Cloud, GoDaddy, Porkbun, dynv6, DuckDNS, Amazon Route 53, OVHcloud, Gandi, NS1, Bunny DNS, Namecheap, DynDNS2, and a custom callback (for providers that are not built in, or for self-hosted endpoints).
+
+| Provider | Credentials | Usable for certificate DNS validation |
+| --- | --- | --- |
+| Amazon Route 53 | Access Key ID / Secret Access Key, optional hosted zone ID | Yes |
+| OVHcloud | Application Key / Secret and Consumer Key; endpoint ovh-eu / ovh-ca / ovh-us | Yes |
+| Gandi | Personal Access Token | Yes |
+| NS1 | API Key | Yes |
+| Bunny DNS | Account API Key | Yes |
+| Namecheap | The domain's Dynamic DNS password (A records only) | No |
+| DynDNS2 | Username, password and update URL; for No-IP, Dynu and other services compatible with the dyndns2 protocol | No |
 
 ## How the IP is obtained
 
