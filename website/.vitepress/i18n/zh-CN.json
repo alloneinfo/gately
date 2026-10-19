@@ -46,6 +46,7 @@
       "reference/api-reference": "接口清单",
       "reference/docker-api": "Docker API",
       "reference/webterminal-api": "Web 终端 API",
+      "reference/diagnostics": "诊断包",
       "guide/contributing": "参与贡献"
     },
     "englishOnly": "（英文）"

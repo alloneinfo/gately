@@ -12,7 +12,8 @@
     "account": "账号与安全",
     "access": "访问控制",
     "runtime": "网络与运行",
-    "backup": "备份与迁移"
+    "backup": "备份与迁移",
+    "diagnostics": "诊断"
   },
   "admin": {
     "title": "管理员账号",

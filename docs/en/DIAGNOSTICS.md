@@ -1,6 +1,6 @@
 # Diagnostics bundle
 
-When Gately misbehaves, export a diagnostics bundle from **Settings → Backup & Migration → Export diagnostics bundle** and attach it to your [GitHub issue](https://github.com/wangwanjie/gately/issues/new). It helps maintainers find the cause without asking you for screenshots and copy-pasted logs.
+When Gately misbehaves, export a diagnostics bundle from **Settings → Diagnostics** and attach it to your [GitHub issue](https://github.com/wangwanjie/gately/issues/new). It helps maintainers find the cause without asking you for screenshots and copy-pasted logs.
 
 The bundle is generated on your own machine and is never uploaded anywhere. Click **Preview content** before downloading to see exactly what will be exported. The zip contains only plain text and JSON, so you can also unzip it and review every file.
 

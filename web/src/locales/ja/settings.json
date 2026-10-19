@@ -12,7 +12,8 @@
     "account": "アカウントとセキュリティ",
     "access": "アクセス制御",
     "runtime": "ネットワークと実行",
-    "backup": "バックアップと移行"
+    "backup": "バックアップと移行",
+    "diagnostics": "診断"
   },
   "admin": {
     "title": "管理者アカウント",

@@ -12,7 +12,8 @@
     "account": "帳號與安全",
     "access": "存取控制",
     "runtime": "網路與執行",
-    "backup": "備份與遷移"
+    "backup": "備份與遷移",
+    "diagnostics": "診斷"
   },
   "admin": {
     "title": "管理員帳號",

@@ -12,7 +12,8 @@
     "account": "Account & Security",
     "access": "Access Control",
     "runtime": "Network & Runtime",
-    "backup": "Backup & Migration"
+    "backup": "Backup & Migration",
+    "diagnostics": "Diagnostics"
   },
   "admin": {
     "title": "Administrator account",

@@ -1,6 +1,6 @@
 # 诊断包
 
-遇到问题时，在 **设置 → 备份与迁移 → 导出诊断包** 中导出诊断包，附在 [GitHub issue](https://github.com/wangwanjie/gately/issues/new) 里，维护者就能直接定位原因，不必再向你索要截图和日志。
+遇到问题时，在 **设置 → 诊断** 中导出诊断包，附在 [GitHub issue](https://github.com/wangwanjie/gately/issues/new) 里，维护者就能直接定位原因，不必再向你索要截图和日志。
 
 诊断包在你自己的机器上生成，不会上传到任何地方。下载前点击 **预览内容**，可以看到将要导出的全部文件；zip 内只有纯文本和 JSON，解压后也能逐个检查。
 

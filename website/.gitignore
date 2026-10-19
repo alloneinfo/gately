@@ -5,11 +5,14 @@ node_modules/
 docs/guide/migration.md
 docs/reference/docker-api.md
 docs/reference/webterminal-api.md
+docs/reference/diagnostics.md
 docs/reference/api-reference.md
 public/openapi.json
 en/docs/guide/migration.md
 en/docs/reference/docker-api.md
 en/docs/reference/webterminal-api.md
+en/docs/reference/diagnostics.md
+docs/reference/diagnostics.md
 en/docs/reference/api-reference.md
 zh-TW/docs/reference/api-reference.md
 ja/docs/reference/api-reference.md

@@ -12,7 +12,8 @@
     "account": "Cuenta y seguridad",
     "access": "Control de acceso",
     "runtime": "Red y ejecución",
-    "backup": "Copia de seguridad y migración"
+    "backup": "Copia de seguridad y migración",
+    "diagnostics": "Diagnóstico"
   },
   "admin": {
     "title": "Cuenta de administrador",

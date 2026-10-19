@@ -46,6 +46,7 @@
       "reference/api-reference": "Справочник API",
       "reference/docker-api": "Docker API",
       "reference/webterminal-api": "API веб-терминала",
+      "reference/diagnostics": "Диагностический пакет",
       "guide/contributing": "Участие в разработке"
     },
     "englishOnly": " (English)"

@@ -127,7 +127,7 @@ make lint     # gofmt、go vet、前端类型检查
 
 ## 交流群
 
-欢迎加入 Telegram 群交流使用问题、反馈建议：[t.me/gately_chat](https://t.me/gately_chat)。Bug 请提交到 [GitHub Issues](https://github.com/wangwanjie/gately/issues)，并附上[诊断包](docs/DIAGNOSTICS.md)（设置 → 备份与迁移）；诊断包在本机生成，不含密码、令牌、域名和真实 IP。
+欢迎加入 Telegram 群交流使用问题、反馈建议：[t.me/gately_chat](https://t.me/gately_chat)。Bug 请提交到 [GitHub Issues](https://github.com/wangwanjie/gately/issues)，并附上[诊断包](docs/DIAGNOSTICS.md)（设置 → 诊断）；诊断包在本机生成，不含密码、令牌、域名和真实 IP。
 
 ## Star 趋势
 

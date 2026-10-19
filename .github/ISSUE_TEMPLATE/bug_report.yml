@@ -21,6 +21,6 @@ body:
     attributes:
       label: Diagnostics bundle / 诊断包
       description: |
-        Settings → Backup & Migration → Export diagnostics bundle, then drag the zip here. It is generated locally, contains no passwords, tokens, domains or real IP addresses, and you can preview it before downloading. Details: [DIAGNOSTICS.md](https://github.com/wangwanjie/gately/blob/main/docs/en/DIAGNOSTICS.md)
-        设置 → 备份与迁移 → 导出诊断包，然后把 zip 拖到这里。诊断包在本机生成，不含密码、令牌、域名和真实 IP，下载前可预览。详见 [DIAGNOSTICS.md](https://github.com/wangwanjie/gately/blob/main/docs/DIAGNOSTICS.md)
+        Settings → Diagnostics, then drag the zip here. It is generated locally, contains no passwords, tokens, domains or real IP addresses, and you can preview it before downloading. Details: [DIAGNOSTICS.md](https://github.com/wangwanjie/gately/blob/main/docs/en/DIAGNOSTICS.md)
+        设置 → 诊断，然后把 zip 拖到这里。诊断包在本机生成，不含密码、令牌、域名和真实 IP，下载前可预览。详见 [DIAGNOSTICS.md](https://github.com/wangwanjie/gately/blob/main/docs/DIAGNOSTICS.md)
       placeholder: Drag the zip file here / 把 zip 文件拖到这里

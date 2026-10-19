@@ -46,6 +46,7 @@
       "reference/api-reference": "API 레퍼런스",
       "reference/docker-api": "Docker API",
       "reference/webterminal-api": "웹 터미널 API",
+      "reference/diagnostics": "진단 패키지",
       "guide/contributing": "기여 가이드"
     },
     "englishOnly": " (English)"

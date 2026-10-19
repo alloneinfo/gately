@@ -46,6 +46,7 @@
       "reference/api-reference": "Referência da API",
       "reference/docker-api": "API do Docker",
       "reference/webterminal-api": "API do Terminal Web",
+      "reference/diagnostics": "Pacote de diagnóstico",
       "guide/contributing": "Como contribuir"
     },
     "englishOnly": " (em inglês)"

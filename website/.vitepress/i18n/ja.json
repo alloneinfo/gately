@@ -46,6 +46,7 @@
       "reference/api-reference": "エンドポイント一覧",
       "reference/docker-api": "Docker API",
       "reference/webterminal-api": "Web ターミナル API",
+      "reference/diagnostics": "診断パッケージ",
       "guide/contributing": "コントリビュート"
     },
     "englishOnly": "（English）"

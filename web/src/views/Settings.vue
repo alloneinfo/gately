@@ -395,7 +395,11 @@
         </div>
 
         <BackupSchedule />
+      </el-tab-pane>
 
+      <!-- ============ 诊断 ============ -->
+      <el-tab-pane name="diagnostics">
+        <template #label><span class="tab-label"><Stethoscope :size="15" />{{ t('settings.tabs.diagnostics') }}</span></template>
         <DiagnosticsCard />
       </el-tab-pane>
 
@@ -439,6 +443,7 @@ import {
   ShieldCheck,
   Smartphone,
   Sparkles,
+  Stethoscope,
   UploadCloud,
   UserRound,
 } from 'lucide-vue-next'
@@ -456,7 +461,7 @@ const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const { labelPosition } = useFormLayout()
-const tabs = ['account', 'access', 'runtime', 'backup']
+const tabs = ['account', 'access', 'runtime', 'backup', 'diagnostics']
 const tab = ref(typeof route.query.tab === 'string' && tabs.includes(route.query.tab) ? route.query.tab : 'account')
 const overlay = ref<InstanceType<typeof RestartOverlay>>()
 

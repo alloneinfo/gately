@@ -46,6 +46,7 @@
       "reference/api-reference": "介面清單",
       "reference/docker-api": "Docker API",
       "reference/webterminal-api": "Web 終端機 API",
+      "reference/diagnostics": "診斷包",
       "guide/contributing": "參與貢獻"
     },
     "englishOnly": "（English）"
