@@ -284,11 +284,16 @@ func isPrivate(ip string) bool {
 }
 
 // accessControl 依次执行：内网限制、强制 HTTPS、安全入口。
+// 经统一网关访问时只做内网限制：网关已校验 NAS 登录态，入口地址固定，协议由网关决定。
 func (a *App) accessControl(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		s := a.settingsSnapshot()
 		if s.LANOnly && !isPrivate(httpx.ClientIP(r)) {
 			http.Error(w, "403 Forbidden", http.StatusForbidden)
+			return
+		}
+		if _, viaGateway := gatewayPrefix(r); viaGateway {
+			next.ServeHTTP(w, r)
 			return
 		}
 		if s.ForceHTTPS && r.TLS == nil && a.httpsReady.Load() && a.hasCert(r.Host) {

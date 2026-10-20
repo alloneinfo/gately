@@ -13,6 +13,8 @@ const keepGitkeep = {
 
 export default defineConfig({
   plugins: [vue(), keepGitkeep],
+  // 资源使用相对路径，页面位于子路径（如飞牛 fnOS 统一网关的 /app/gately/）时也能加载
+  base: './',
   build: {
     outDir: 'dist',
     emptyOutDir: true,

@@ -192,6 +192,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { useI18n } from 'vue-i18n'
 import { BookOpen, Check, Copy, KeyRound, Pencil, Plus, RefreshCw, ShieldCheck, Trash2 } from 'lucide-vue-next'
 import { api, type ScopeDomain, type TokenInput, type TokenSecret, type TokenView } from '../api'
+import { apiOrigin } from '../basePath'
 import PageHeader from '../components/PageHeader.vue'
 import ScopeTags from '../components/ScopeTags.vue'
 import { useFormLayout } from '../composables/useIsMobile'
@@ -511,7 +512,7 @@ const secretEl = ref<HTMLElement>()
 const curlEl = ref<HTMLElement>()
 
 // curl 示例使用当前访问地址，调用 /api/status
-const curlExample = computed(() => `curl -H "Authorization: Bearer ${secret.value}" ${window.location.origin}/api/status`)
+const curlExample = computed(() => `curl -H "Authorization: Bearer ${secret.value}" ${apiOrigin}/api/status`)
 
 function showSecret(r: TokenSecret) {
   secret.value = r.secret

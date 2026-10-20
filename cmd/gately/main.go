@@ -43,6 +43,8 @@ func main() {
 	showVersion := flag.Bool("version", false, "print version info and exit / 输出版本信息")
 	apiDocs := flag.String("api-docs", "", "export API docs (openapi.json and API.md) to the given directory and exit / 导出 API 文档到指定目录后退出")
 	applyDir := flag.String("apply", os.Getenv("GATELY_APPLY_DIR"), "apply <name>.json files from this directory to the config directory on every start (also GATELY_APPLY_DIR) / 每次启动把该目录下的配置文件覆盖到配置目录")
+	gatewaySocket := flag.String("gateway-socket", "", "also serve the admin UI on this Unix socket, e.g. for the fnOS unified gateway / 额外在该 Unix Socket 上提供管理界面（如飞牛 fnOS 统一网关）")
+	gatewayPrefix := flag.String("gateway-prefix", "", "path prefix used behind the gateway socket, e.g. /app/gately / 经网关访问时的路径前缀")
 	flag.Parse()
 
 	// 多余的位置参数不属于任何子命令，拒绝启动，避免误启动第二个服务实例去抢占端口
@@ -74,6 +76,8 @@ func main() {
 		ApplyDir:  *applyDir,
 		// 自动化部署时用环境变量指定初始密码，避免从日志中读取随机密码
 		InitialPassword: os.Getenv("GATELY_INITIAL_PASSWORD"),
+		GatewaySocket:   *gatewaySocket,
+		GatewayPrefix:   *gatewayPrefix,
 	})
 	if err != nil {
 		log.Fatalf("启动失败: %v", err)

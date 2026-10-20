@@ -59,6 +59,10 @@ type Options struct {
 	ApplyDir string
 	// InitialPassword 非空时作为首次启动的管理员初始密码，不再随机生成也不写入日志
 	InitialPassword string
+	// GatewaySocket 非空时额外在该 Unix Socket 上提供管理界面，供飞牛 fnOS 统一网关等反向代理接入
+	GatewaySocket string
+	// GatewayPrefix 是经网关访问时的路径前缀，例如 /app/gately；为空表示不加前缀
+	GatewayPrefix string
 }
 
 type moduleEntry struct {
@@ -101,6 +105,11 @@ type App struct {
 
 // New 加载配置并初始化所有模块，但不启动网络服务。
 func New(opts Options) (*App, error) {
+	prefix, err := normalizeGatewayPrefix(opts.GatewayPrefix)
+	if err != nil {
+		return nil, err
+	}
+	opts.GatewayPrefix = prefix
 	store, err := config.Open(opts.ConfigDir)
 	if err != nil {
 		return nil, err
@@ -280,6 +289,22 @@ func (a *App) Run(parent context.Context) error {
 			go func() {
 				if err := tlsSrv.ServeTLS(ln, "", ""); err != nil && !errors.Is(err, http.ErrServerClosed) {
 					a.sysLogs.Add(logbuf.LevelError, "", "HTTPS 管理界面退出: "+err.Error())
+				}
+			}()
+		}
+	}
+	if a.opts.GatewaySocket != "" {
+		// 统一网关监听失败只记录日志，不影响 TCP 管理界面
+		gwSrv := &http.Server{Handler: a.gatewayHandler(a.opts.GatewayPrefix, handler), ReadHeaderTimeout: 10 * time.Second}
+		ln, err := listenUnix(a.opts.GatewaySocket)
+		if err != nil {
+			a.sysLogs.Add(logbuf.LevelError, "", "统一网关 Socket 监听失败: "+err.Error())
+		} else {
+			servers = append(servers, gwSrv)
+			a.sysLogs.Add(logbuf.LevelInfo, "", fmt.Sprintf("统一网关监听 %s，路径前缀 %q", a.opts.GatewaySocket, a.opts.GatewayPrefix))
+			go func() {
+				if err := gwSrv.Serve(ln); err != nil && !errors.Is(err, http.ErrServerClosed) {
+					a.sysLogs.Add(logbuf.LevelError, "", "统一网关监听退出: "+err.Error())
 				}
 			}()
 		}
@@ -702,6 +727,13 @@ func (a *App) staticHandler() http.Handler {
 		if err != nil {
 			http.Error(w, "前端未构建：请在 web 目录执行 pnpm install && pnpm build 后重新编译", http.StatusNotFound)
 			return
+		}
+		// 前端资源以相对路径构建，这里改写成带前缀的绝对路径，任意路径回退到首页时资源都能加载；
+		// 经统一网关访问时同时告知前端路径前缀
+		prefix, _ := gatewayPrefix(r)
+		index = absolutizeAssets(index, prefix)
+		if prefix != "" {
+			index = injectBase(index, prefix)
 		}
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		w.Header().Set("Cache-Control", "no-cache")

@@ -1,3 +1,5 @@
+// 最先执行：经统一网关访问时给站内请求补上路径前缀
+import './basePath'
 import { createApp } from 'vue'
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'

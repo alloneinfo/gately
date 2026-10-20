@@ -135,6 +135,7 @@ import { ElMessage } from 'element-plus'
 import { useI18n } from 'vue-i18n'
 import { BookOpen, ChevronDown, Copy, Download, KeyRound, Search } from 'lucide-vue-next'
 import { api } from '../api'
+import { apiOrigin } from '../basePath'
 import PageHeader from '../components/PageHeader.vue'
 import { useIsMobile } from '../composables/useIsMobile'
 import { copyText, selectNode } from '../composables/useClipboard'
@@ -203,7 +204,8 @@ interface Group {
 
 const { t } = useI18n()
 const isMobile = useIsMobile()
-const origin = window.location.origin
+// 经统一网关访问时接口地址带路径前缀
+const origin = apiOrigin
 const doc = ref<OpenAPIDoc>()
 const loading = ref(false)
 const error = ref('')
