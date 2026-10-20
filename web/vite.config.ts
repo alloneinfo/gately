@@ -19,6 +19,21 @@ export default defineConfig({
     outDir: 'dist',
     emptyOutDir: true,
     chunkSizeWarningLimit: 1500,
+    rolldownOptions: {
+      output: {
+        codeSplitting: {
+          groups: [
+            {
+              // 每种语言的文案合并为一个文件，首屏少发约百个请求（经飞牛统一网关等反向代理时尤其明显）
+              name: (id) => {
+                const m = /[\\/]src[\\/]locales[\\/]([^\\/]+)[\\/][^\\/]+\.json$/.exec(id)
+                return m ? `locale-${m[1]}` : null
+              },
+            },
+          ],
+        },
+      },
+    },
   },
   server: {
     proxy: {

@@ -10,6 +10,17 @@ import { i18n, setupI18n } from './i18n'
 import { initTheme } from './composables/useTheme'
 import './style.css'
 
+// 页面模块或样式加载失败时（网络抖动、升级后旧文件已不存在）自动刷新一次；10 秒内不重复刷新，避免循环
+window.addEventListener('vite:preloadError', (e) => {
+  const key = 'gately.preloadReloadAt'
+  const last = Number(sessionStorage.getItem(key) || 0)
+  if (Date.now() - last > 10_000) {
+    sessionStorage.setItem(key, String(Date.now()))
+    e.preventDefault()
+    window.location.reload()
+  }
+})
+
 // 挂载前应用主题，避免首屏亮暗闪烁
 initTheme()
 
