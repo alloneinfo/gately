@@ -8,6 +8,8 @@ Permisos: cada token solo tiene los permisos marcados al crearlo, con el formato
 
 El cuerpo de la solicitud usa `Content-Type: application/json`; los errores se devuelven siempre como `{"error": "descripción"}`.
 
+Los módulos desactivados en «Ajustes → Módulos» no ofrecen API: sus endpoints devuelven 403 y dejan de aparecer en la documentación de la API de la instancia en ejecución.
+
 Sitio web: https://gately.cn
 
 La descripción legible por máquinas está en `openapi.json` (OpenAPI 3.0), en el mismo directorio.

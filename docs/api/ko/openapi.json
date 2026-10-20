@@ -1941,7 +1941,7 @@
     "url": "https://gately.cn"
   },
   "info": {
-    "description": "Gately 관리 API는 스크립트와 자동화를 통한 일괄 관리에 사용합니다.\n\n인증: 관리 콘솔의 \"API 토큰\" 페이지에서 토큰을 생성하고 요청 헤더에 `Authorization: Bearer gtl_xxxx`를 포함하세요.\n\n권한: 각 토큰은 생성 시 선택한 권한만 가지며 형식은 `\u003c모듈\u003e:read` 또는 `\u003c모듈\u003e:write`입니다. 쓰기 권한은 읽기 권한을 포함합니다. 계정, 2단계 인증, 토큰 관리, 백업, 복원, 재시작, 시스템 설정 인터페이스는 로그인 세션으로만 사용할 수 있습니다.\n\n요청 본문은 `Content-Type: application/json`을 사용하며, 오류는 `{\"error\": \"설명\"}` 형식으로 반환됩니다.",
+    "description": "Gately 관리 API는 스크립트와 자동화를 통한 일괄 관리에 사용합니다.\n\n인증: 관리 콘솔의 \"API 토큰\" 페이지에서 토큰을 생성하고 요청 헤더에 `Authorization: Bearer gtl_xxxx`를 포함하세요.\n\n권한: 각 토큰은 생성 시 선택한 권한만 가지며 형식은 `\u003c모듈\u003e:read` 또는 `\u003c모듈\u003e:write`입니다. 쓰기 권한은 읽기 권한을 포함합니다. 계정, 2단계 인증, 토큰 관리, 백업, 복원, 재시작, 시스템 설정 인터페이스는 로그인 세션으로만 사용할 수 있습니다.\n\n요청 본문은 `Content-Type: application/json`을 사용하며, 오류는 `{\"error\": \"설명\"}` 형식으로 반환됩니다.\n\n「설정 → 기능 모듈」에서 끈 모듈은 API를 제공하지 않으며, 해당 엔드포인트는 403을 반환하고 실행 중인 인스턴스의 API 문서에도 더 이상 표시되지 않습니다.",
     "title": "Gately 관리 API",
     "version": "dev"
   },
@@ -16101,7 +16101,7 @@
     },
     "/api/system/settings": {
       "get": {
-        "description": "**로그인 세션에서만 사용할 수 있으며, API 토큰으로는 이 엔드포인트에 접근할 수 없습니다.**",
+        "description": "로그인 세션 전용입니다. 읽기 전용 필드 `modules`는 모든 기능 모듈과 의존 관계를 나열하고, `gatewayAvailable`은 fnOS 통합 게이트웨이 방식으로 실행 중인지를 나타냅니다.\n\n**로그인 세션에서만 사용할 수 있으며, API 토큰으로는 이 엔드포인트에 접근할 수 없습니다.**",
         "responses": {
           "200": {
             "description": "성공"
@@ -16145,7 +16145,7 @@
         "x-token-allowed": false
       },
       "put": {
-        "description": "**로그인 세션에서만 사용할 수 있으며, API 토큰으로는 이 엔드포인트에 접근할 수 없습니다.**",
+        "description": "`disabledModules` 为关闭的功能模块 ID 列表，被其他模块依赖的模块不能关闭，后重启生效；`gatewaySSO` 开启fnOS 로그인 상태로 자동 로그인，仅飞牛安装包有效。\n\n**로그인 세션에서만 사용할 수 있으며, API 토큰으로는 이 엔드포인트에 접근할 수 없습니다.** 수정",
         "requestBody": {
           "content": {
             "application/json": {

@@ -1941,7 +1941,7 @@
     "url": "https://gately.cn"
   },
   "info": {
-    "description": "Gately 管理 API 用於指令碼與自動化批次管理。\n\n驗證：在管理後台的「API 權杖」頁建立權杖，請求標頭攜帶 `Authorization: Bearer gtl_xxxx`。\n\n權限：每個權杖只擁有建立時勾選的權限，格式為 `\u003c模組\u003e:read` 或 `\u003c模組\u003e:write`，寫入權限包含讀取權限。帳號、兩步驟驗證、權杖管理以及備份、還原、重新啟動、系統設定介面只能使用登入工作階段。\n\n請求本文使用 `Content-Type: application/json`，錯誤統一回傳 `{\"error\": \"說明\"}`。",
+    "description": "Gately 管理 API 用於指令碼與自動化批次管理。\n\n驗證：在管理後台的「API 權杖」頁建立權杖，請求標頭攜帶 `Authorization: Bearer gtl_xxxx`。\n\n權限：每個權杖只擁有建立時勾選的權限，格式為 `\u003c模組\u003e:read` 或 `\u003c模組\u003e:write`，寫入權限包含讀取權限。帳號、兩步驟驗證、權杖管理以及備份、還原、重新啟動、系統設定介面只能使用登入工作階段。\n\n請求本文使用 `Content-Type: application/json`，錯誤統一回傳 `{\"error\": \"說明\"}`。\n\n在「設定 → 功能模組」中關閉的模組不提供介面，請求其介面回傳 403，執行中執行個體的介面文件也不再列出這些介面。",
     "title": "Gately 管理 API",
     "version": "dev"
   },
@@ -16101,7 +16101,7 @@
     },
     "/api/system/settings": {
       "get": {
-        "description": "**僅限登入工作階段使用，API 權杖無法存取此介面。**",
+        "description": "僅限登入工作階段。唯讀欄位 `modules` 列出全部功能模組及相依關係，`gatewayAvailable` 表示以飛牛統一閘道方式執行。\n\n**僅限登入工作階段使用，API 權杖無法存取此介面。**",
         "responses": {
           "200": {
             "description": "成功"
@@ -16145,7 +16145,7 @@
         "x-token-allowed": false
       },
       "put": {
-        "description": "**僅限登入工作階段使用，API 權杖無法存取此介面。**",
+        "description": "`disabledModules` 为关闭的功能模块 ID 列表，被其他模块依赖的模块不能关闭，修改后重启生效；`gatewaySSO` 开启飛牛登入狀態自動登入，仅飞牛安装包有效。\n\n**僅限登入工作階段使用，API 權杖無法存取此介面。**",
         "requestBody": {
           "content": {
             "application/json": {

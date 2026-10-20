@@ -8,6 +8,8 @@ Permissions: each token has only the permissions selected at creation, in the fo
 
 Send the request body with `Content-Type: application/json`; errors are returned uniformly as `{"error": "message"}`.
 
+Modules turned off under "Settings → Modules" serve no API: their endpoints return 403 and no longer appear in the API docs of the running instance.
+
 Website: https://gately.cn
 
 A machine-readable description is available in `openapi.json` (OpenAPI 3.0) in the same directory.

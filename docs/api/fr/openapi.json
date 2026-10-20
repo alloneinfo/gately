@@ -1941,7 +1941,7 @@
     "url": "https://gately.cn"
   },
   "info": {
-    "description": "L'API d'administration de Gately permet la gestion en masse par scripts et automatisation.\n\nAuthentification : créez un jeton dans la page « Jetons API » de l'interface d'administration et ajoutez l'en-tête de requête `Authorization: Bearer gtl_xxxx`.\n\nPermissions : chaque jeton ne possède que les permissions cochées à sa création, au format `\u003cmodule\u003e:read` ou `\u003cmodule\u003e:write` ; l'écriture inclut la lecture. Les interfaces de compte, d'authentification à deux facteurs, de gestion des jetons, de sauvegarde, de restauration, de redémarrage et de paramètres système exigent une session connectée.\n\nLe corps de la requête utilise `Content-Type: application/json` ; les erreurs sont renvoyées au format `{\"error\": \"description\"}`.",
+    "description": "L'API d'administration de Gately permet la gestion en masse par scripts et automatisation.\n\nAuthentification : créez un jeton dans la page « Jetons API » de l'interface d'administration et ajoutez l'en-tête de requête `Authorization: Bearer gtl_xxxx`.\n\nPermissions : chaque jeton ne possède que les permissions cochées à sa création, au format `\u003cmodule\u003e:read` ou `\u003cmodule\u003e:write` ; l'écriture inclut la lecture. Les interfaces de compte, d'authentification à deux facteurs, de gestion des jetons, de sauvegarde, de restauration, de redémarrage et de paramètres système exigent une session connectée.\n\nLe corps de la requête utilise `Content-Type: application/json` ; les erreurs sont renvoyées au format `{\"error\": \"description\"}`.\n\nLes modules désactivés dans « Paramètres → Modules » n’exposent aucune API : leurs points de terminaison renvoient 403 et n’apparaissent plus dans la documentation de l’API de l’instance en cours d’exécution.",
     "title": "API d'administration de Gately",
     "version": "dev"
   },
@@ -16101,7 +16101,7 @@
     },
     "/api/system/settings": {
       "get": {
-        "description": "**Disponible uniquement pour les sessions de connexion ; les jetons d'API ne peuvent pas accéder à ce point d'accès.**",
+        "description": "Session connectée uniquement. Le champ en lecture seule `modules` liste tous les modules et leurs dépendances ; `gatewayAvailable` indique si Gately fonctionne derrière la passerelle unifiée de fnOS.\n\n**Disponible uniquement pour les sessions de connexion ; les jetons d'API ne peuvent pas accéder à ce point d'accès.**",
         "responses": {
           "200": {
             "description": "Succès"
@@ -16145,7 +16145,7 @@
         "x-token-allowed": false
       },
       "put": {
-        "description": "**Disponible uniquement pour les sessions de connexion ; les jetons d'API ne peuvent pas accéder à ce point d'accès.**",
+        "description": "`disabledModules` 为关闭的功能模块 ID 列表，被其他模块依赖的模块不能关闭，Modifier 后重启生效；`gatewaySSO` 开启Connexion automatique avec la session fnOS，仅飞牛安装包有效。\n\n**Disponible uniquement pour les sessions de connexion ; les jetons d'API ne peuvent pas accéder à ce point d'accès.**",
         "requestBody": {
           "content": {
             "application/json": {

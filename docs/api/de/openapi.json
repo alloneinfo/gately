@@ -1941,7 +1941,7 @@
     "url": "https://gately.cn"
   },
   "info": {
-    "description": "Die Gately Verwaltungs-API dient der Stapelverwaltung per Skript und Automatisierung.\n\nAuthentifizierung: Erstellen Sie auf der Seite „API-Tokens“ der Verwaltungsoberfläche ein Token und senden Sie im Request-Header `Authorization: Bearer gtl_xxxx`.\n\nBerechtigungen: Jedes Token besitzt nur die bei der Erstellung ausgewählten Berechtigungen im Format `\u003cModul\u003e:read` oder `\u003cModul\u003e:write`, wobei Schreibrechte Leserechte einschließen. Schnittstellen für Konto, Zwei-Faktor-Authentifizierung, Token-Verwaltung sowie Backup, Wiederherstellung, Neustart und Systemeinstellungen sind nur mit einer Anmeldesitzung nutzbar.\n\nDer Anfragekörper verwendet `Content-Type: application/json`, Fehler werden einheitlich als `{\"error\": \"Beschreibung\"}` zurückgegeben.",
+    "description": "Die Gately Verwaltungs-API dient der Stapelverwaltung per Skript und Automatisierung.\n\nAuthentifizierung: Erstellen Sie auf der Seite „API-Tokens“ der Verwaltungsoberfläche ein Token und senden Sie im Request-Header `Authorization: Bearer gtl_xxxx`.\n\nBerechtigungen: Jedes Token besitzt nur die bei der Erstellung ausgewählten Berechtigungen im Format `\u003cModul\u003e:read` oder `\u003cModul\u003e:write`, wobei Schreibrechte Leserechte einschließen. Schnittstellen für Konto, Zwei-Faktor-Authentifizierung, Token-Verwaltung sowie Backup, Wiederherstellung, Neustart und Systemeinstellungen sind nur mit einer Anmeldesitzung nutzbar.\n\nDer Anfragekörper verwendet `Content-Type: application/json`, Fehler werden einheitlich als `{\"error\": \"Beschreibung\"}` zurückgegeben.\n\nUnter „Einstellungen → Module“ deaktivierte Module stellen keine API bereit: Ihre Endpunkte liefern 403 und erscheinen nicht mehr in der API-Dokumentation der laufenden Instanz.",
     "title": "Gately Verwaltungs-API",
     "version": "dev"
   },
@@ -16101,7 +16101,7 @@
     },
     "/api/system/settings": {
       "get": {
-        "description": "**Nur für Anmeldesitzungen verfügbar; API-Tokens können auf diesen Endpunkt nicht zugreifen.**",
+        "description": "Nur mit Anmeldesitzung. Das schreibgeschützte Feld `modules` listet alle Module samt Abhängigkeiten; `gatewayAvailable` gibt an, ob Gately hinter dem einheitlichen fnOS-Gateway läuft.\n\n**Nur für Anmeldesitzungen verfügbar; API-Tokens können auf diesen Endpunkt nicht zugreifen.**",
         "responses": {
           "200": {
             "description": "Erfolgreich"
@@ -16145,7 +16145,7 @@
         "x-token-allowed": false
       },
       "put": {
-        "description": "**Nur für Anmeldesitzungen verfügbar; API-Tokens können auf diesen Endpunkt nicht zugreifen.**",
+        "description": "`disabledModules` 为关闭的功能模块 ID 列表，被其他模块依赖的模块不能关闭，后重启生效；`gatewaySSO` 开启Automatische Anmeldung mit der fnOS-Sitzung，仅飞牛安装包有效。\n\n**Nur für Anmeldesitzungen verfügbar; API-Tokens können auf diesen Endpunkt nicht zugreifen.** ändern",
         "requestBody": {
           "content": {
             "application/json": {

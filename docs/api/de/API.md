@@ -8,6 +8,8 @@ Berechtigungen: Jedes Token besitzt nur die bei der Erstellung ausgewählten Ber
 
 Der Anfragekörper verwendet `Content-Type: application/json`, Fehler werden einheitlich als `{"error": "Beschreibung"}` zurückgegeben.
 
+Unter „Einstellungen → Module“ deaktivierte Module stellen keine API bereit: Ihre Endpunkte liefern 403 und erscheinen nicht mehr in der API-Dokumentation der laufenden Instanz.
+
 Website: https://gately.cn
 
 Die maschinenlesbare Beschreibung befindet sich im selben Verzeichnis in `openapi.json` (OpenAPI 3.0).

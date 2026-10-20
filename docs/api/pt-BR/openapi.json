@@ -1941,7 +1941,7 @@
     "url": "https://gately.cn"
   },
   "info": {
-    "description": "A API de administração do Gately serve para gerenciamento em lote por scripts e automação.\n\nAutenticação: crie um token na página \"Tokens de API\" da administração e envie no cabeçalho da requisição `Authorization: Bearer gtl_xxxx`.\n\nPermissões: cada token possui apenas as permissões marcadas na criação, no formato `\u003cmódulo\u003e:read` ou `\u003cmódulo\u003e:write`; a permissão de escrita inclui a de leitura. As interfaces de conta, verificação em duas etapas, gerenciamento de tokens, backup, restauração, reinício e configurações do sistema só podem ser usadas com sessão de login.\n\nO corpo da requisição usa `Content-Type: application/json`; os erros são sempre retornados como `{\"error\": \"descrição\"}`.",
+    "description": "A API de administração do Gately serve para gerenciamento em lote por scripts e automação.\n\nAutenticação: crie um token na página \"Tokens de API\" da administração e envie no cabeçalho da requisição `Authorization: Bearer gtl_xxxx`.\n\nPermissões: cada token possui apenas as permissões marcadas na criação, no formato `\u003cmódulo\u003e:read` ou `\u003cmódulo\u003e:write`; a permissão de escrita inclui a de leitura. As interfaces de conta, verificação em duas etapas, gerenciamento de tokens, backup, restauração, reinício e configurações do sistema só podem ser usadas com sessão de login.\n\nO corpo da requisição usa `Content-Type: application/json`; os erros são sempre retornados como `{\"error\": \"descrição\"}`.\n\nMódulos desativados em \"Configurações → Módulos\" não oferecem API: seus endpoints retornam 403 e deixam de aparecer na documentação da API da instância em execução.",
     "title": "API de administração do Gately",
     "version": "dev"
   },
@@ -16101,7 +16101,7 @@
     },
     "/api/system/settings": {
       "get": {
-        "description": "**Disponível apenas para sessões de login; tokens de API não podem acessar este endpoint.**",
+        "description": "Somente sessão de login. O campo somente leitura `modules` lista todos os módulos e suas dependências; `gatewayAvailable` indica se o Gately está rodando atrás do gateway unificado do fnOS.\n\n**Disponível apenas para sessões de login; tokens de API não podem acessar este endpoint.**",
         "responses": {
           "200": {
             "description": "Sucesso"
@@ -16145,7 +16145,7 @@
         "x-token-allowed": false
       },
       "put": {
-        "description": "**Disponível apenas para sessões de login; tokens de API não podem acessar este endpoint.**",
+        "description": "`disabledModules` 为关闭的功能模块 ID 列表，被其他模块依赖的模块不能关闭，Modificar 后重启生效；`gatewaySSO` 开启Login automático com a sessão do fnOS，仅飞牛安装包有效。\n\n**Disponível apenas para sessões de login; tokens de API não podem acessar este endpoint.**",
         "requestBody": {
           "content": {
             "application/json": {

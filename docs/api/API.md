@@ -8,6 +8,8 @@ Gately 管理 API 用于脚本与自动化批量管理。
 
 请求体使用 `Content-Type: application/json`，错误统一返回 `{"error": "说明"}`。
 
+在「设置 → 功能模块」中关闭的模块不提供接口，请求其接口返回 403，运行中实例的接口文档也不再列出这些接口。
+
 官网：https://gately.cn
 
 机器可读的描述见同目录的 `openapi.json`（OpenAPI 3.0）。

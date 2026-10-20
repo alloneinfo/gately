@@ -8,6 +8,8 @@ Permissions : chaque jeton ne possède que les permissions cochées à sa créat
 
 Le corps de la requête utilise `Content-Type: application/json` ; les erreurs sont renvoyées au format `{"error": "description"}`.
 
+Les modules désactivés dans « Paramètres → Modules » n’exposent aucune API : leurs points de terminaison renvoient 403 et n’apparaissent plus dans la documentation de l’API de l’instance en cours d’exécution.
+
 Site officiel : https://gately.cn
 
 Une description lisible par machine se trouve dans `openapi.json` (OpenAPI 3.0) du même répertoire.

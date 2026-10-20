@@ -11,7 +11,8 @@ type epDoc struct {
 const apiIntro = "Gately 管理 API 用于脚本与自动化批量管理。\n\n" +
 	"认证：在管理后台的“API 令牌”页创建令牌，请求头携带 `Authorization: Bearer gtl_xxxx`。\n\n" +
 	"权限：每个令牌只拥有创建时勾选的权限，格式为 `<模块>:read` 或 `<模块>:write`，写权限包含读权限。账号、两步验证、令牌管理以及备份、恢复、重启、系统设置接口只能使用登录会话。\n\n" +
-	"请求体使用 `Content-Type: application/json`，错误统一返回 `{\"error\": \"说明\"}`。"
+	"请求体使用 `Content-Type: application/json`，错误统一返回 `{\"error\": \"说明\"}`。\n\n" +
+	"在「设置 → 功能模块」中关闭的模块不提供接口，请求其接口返回 403，运行中实例的接口文档也不再列出这些接口。"
 
 // crudNouns 把“模块/集合路径”映射到中文名称，用于生成通用增删改查接口的摘要。
 var crudNouns = map[string]string{
@@ -181,8 +182,8 @@ var apiCatalog = map[string]epDoc{
 	"GET /api/session":                                   {Summary: "查看当前认证身份"},
 	"GET /api/status":                                    {Summary: "查看系统与各模块状态", Desc: "包含主机资源、版本与模块摘要。"},
 	"GET /api/logs":                                      {Summary: "查看系统日志", Desc: "支持 `since` 参数增量拉取。"},
-	"GET /api/system/settings":                           {Summary: "读取全局设置"},
-	"PUT /api/system/settings":                           {Summary: "保存全局设置", Body: true},
+	"GET /api/system/settings":                           {Summary: "读取全局设置", Desc: "仅登录会话可用。只读字段 `modules` 列出全部功能模块及依赖关系，`gatewayAvailable` 表示以飞牛统一网关方式运行。"},
+	"PUT /api/system/settings":                           {Summary: "保存全局设置", Desc: "`disabledModules` 为关闭的功能模块 ID 列表，被其他模块依赖的模块不能关闭，修改后重启生效；`gatewaySSO` 开启飞牛登录态自动登录，仅飞牛安装包有效。", Body: true},
 	"GET /api/system/info":                               {Summary: "查看系统信息"},
 	"GET /api/system/update":                             {Summary: "检查新版本"},
 	"GET /api/audit":                                     {Summary: "查询操作审计日志", Desc: "仅登录会话可用。支持 `category`（login/change/access）、`module`、`actor`、`q`、`limit`、`offset` 参数，按时间倒序返回。"},

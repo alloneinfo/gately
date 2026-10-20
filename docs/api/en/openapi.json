@@ -1941,7 +1941,7 @@
     "url": "https://gately.cn"
   },
   "info": {
-    "description": "The Gately Admin API supports scripting and bulk automation.\n\nAuthentication: create a token on the \"API Tokens\" page of the admin console and send the header `Authorization: Bearer gtl_xxxx`.\n\nPermissions: each token has only the permissions selected at creation, in the form `\u003cmodule\u003e:read` or `\u003cmodule\u003e:write`; write permission includes read. Account, two-factor authentication and token management endpoints, as well as backup, restore, restart and system settings endpoints, can be used by login sessions only.\n\nSend the request body with `Content-Type: application/json`; errors are returned uniformly as `{\"error\": \"message\"}`.",
+    "description": "The Gately Admin API supports scripting and bulk automation.\n\nAuthentication: create a token on the \"API Tokens\" page of the admin console and send the header `Authorization: Bearer gtl_xxxx`.\n\nPermissions: each token has only the permissions selected at creation, in the form `\u003cmodule\u003e:read` or `\u003cmodule\u003e:write`; write permission includes read. Account, two-factor authentication and token management endpoints, as well as backup, restore, restart and system settings endpoints, can be used by login sessions only.\n\nSend the request body with `Content-Type: application/json`; errors are returned uniformly as `{\"error\": \"message\"}`.\n\nModules turned off under \"Settings → Modules\" serve no API: their endpoints return 403 and no longer appear in the API docs of the running instance.",
     "title": "Gately Admin API",
     "version": "dev"
   },
@@ -16101,7 +16101,7 @@
     },
     "/api/system/settings": {
       "get": {
-        "description": "**Available only to login sessions; API tokens cannot access this endpoint.**",
+        "description": "Session login only. The read-only field `modules` lists every feature module and its dependencies; `gatewayAvailable` tells whether Gately runs behind the fnOS unified gateway.\n\n**Available only to login sessions; API tokens cannot access this endpoint.**",
         "responses": {
           "200": {
             "description": "Success"
@@ -16145,7 +16145,7 @@
         "x-token-allowed": false
       },
       "put": {
-        "description": "**Available only to login sessions; API tokens cannot access this endpoint.**",
+        "description": "`disabledModules` 为关闭的功能模块 ID 列表，被其他模块依赖的模块不能关闭，Update 后重启生效；`gatewaySSO` 开启Automatic sign-in with fnOS session，仅飞牛安装包有效。\n\n**Available only to login sessions; API tokens cannot access this endpoint.**",
         "requestBody": {
           "content": {
             "application/json": {

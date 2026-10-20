@@ -8,6 +8,8 @@ Gately 管理 API 用於指令碼與自動化批次管理。
 
 請求本文使用 `Content-Type: application/json`，錯誤統一回傳 `{"error": "說明"}`。
 
+在「設定 → 功能模組」中關閉的模組不提供介面，請求其介面回傳 403，執行中執行個體的介面文件也不再列出這些介面。
+
 官網：https://gately.cn
 
 機器可讀的描述見同目錄的 `openapi.json`（OpenAPI 3.0）。
