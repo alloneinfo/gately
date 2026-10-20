@@ -144,6 +144,21 @@ func (m *Module) stopLocked(key string) {
 }
 
 func (m *Module) restartLocked(key string) {
+	// 只改了站点、监听端口设置不变时热替换站点表，不断开已有连接
+	if r, ok := m.runners[key]; ok && m.cfg.Settings.Enable {
+		for _, l := range m.cfg.Listeners {
+			if l.Key == key && l.Enable && sameSocket(r.cfg, l) {
+				if err := r.reload(l, m.waf); err != nil {
+					// 新配置无法编译时保留旧站点继续服务
+					m.errors[key] = err.Error()
+					r.log.Errorf("更新站点失败，继续使用原配置: %v", err)
+				} else {
+					delete(m.errors, key)
+				}
+				return
+			}
+		}
+	}
 	m.stopLocked(key)
 	if !m.cfg.Settings.Enable {
 		return
@@ -173,7 +188,8 @@ func (m *Module) viewLocked(l *Listener) any {
 	v := ListenerView{Listener: *l, Error: m.errors[l.Key], Stats: map[string]map[string]int64{}}
 	if r, ok := m.runners[l.Key]; ok {
 		v.Running = true
-		for _, s := range r.sites {
+		t := r.current()
+		for _, s := range t.sites {
 			v.Stats[s.site.Key] = s.stats.snapshot()
 			if st := s.upstreamStatus(); st != nil {
 				if v.Upstreams == nil {
@@ -182,8 +198,8 @@ func (m *Module) viewLocked(l *Listener) any {
 				v.Upstreams[s.site.Key] = st
 			}
 		}
-		if r.deflt != nil {
-			v.Stats["default"] = r.deflt.stats.snapshot()
+		if t.deflt != nil {
+			v.Stats["default"] = t.deflt.stats.snapshot()
 		}
 	}
 	return v

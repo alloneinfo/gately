@@ -56,13 +56,16 @@ func TestMatchAndRoute(t *testing.T) {
 	mk := func(key string, domains ...string) *siteHandler {
 		return &siteHandler{site: Site{Key: key, Domains: domains}}
 	}
-	l := &listenerRunner{sites: []*siteHandler{mk("all", "*"), mk("wild", "*.a.com"), mk("deep", "*.x.a.com"), mk("exact", "www.a.com")}, deflt: mk("def")}
+	l := &listenerRunner{}
+	tbl := &siteTable{sites: []*siteHandler{mk("all", "*"), mk("wild", "*.a.com"), mk("deep", "*.x.a.com"), mk("exact", "www.a.com")}, deflt: mk("def"), exact: map[string]*siteHandler{}}
+	tbl.exact["www.a.com"] = tbl.sites[3]
+	l.table.Store(tbl)
 	for host, want := range map[string]string{"www.a.com:443": "exact", "y.x.a.com": "deep", "b.a.com": "wild", "other.org": "all"} {
 		if got := l.route(host).site.Key; got != want {
 			t.Errorf("route(%q)=%s want %s", host, got, want)
 		}
 	}
-	l.sites = l.sites[1:]
+	tbl.sites = tbl.sites[1:]
 	if l.route("other.org").site.Key != "def" {
 		t.Error("无匹配时应使用默认站点")
 	}

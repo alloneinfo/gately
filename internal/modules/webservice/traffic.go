@@ -103,6 +103,20 @@ func compileRewrites(rs []Rewrite) ([]compiledRewrite, error) {
 	return out, nil
 }
 
+// redirectBeforeAuth 找到第一条匹配的重写规则，是跳转时直接写出跳转并返回 true；
+// 是路径重写时不处理，留给认证之后的 applyRewrite，保持“命中第一条即停止”的顺序语义。
+func (h *siteHandler) redirectBeforeAuth(w http.ResponseWriter, r *http.Request) bool {
+	for _, rw := range h.rewrites {
+		if rw.re.MatchString(r.URL.Path) {
+			if rw.redirect {
+				return h.applyRewrite(w, r)
+			}
+			return false
+		}
+	}
+	return false
+}
+
 // applyRewrite 按顺序匹配重写规则。命中重定向时直接写出响应并返回 true；
 // 命中重写时就地修改请求路径。
 func (h *siteHandler) applyRewrite(w http.ResponseWriter, r *http.Request) bool {
@@ -112,6 +126,8 @@ func (h *siteHandler) applyRewrite(w http.ResponseWriter, r *http.Request) bool 
 		}
 		out := rw.re.ReplaceAllString(r.URL.Path, rw.to)
 		if rw.redirect {
+			// 跳转目标中的 {host} 替换为访客请求的域名，便于多个域名共用一条规则跳到各自的 HTTPS
+			out = strings.ReplaceAll(out, hostPlaceholder, hostOnly(r.Host))
 			if !strings.Contains(out, "?") && r.URL.RawQuery != "" {
 				out += "?" + r.URL.RawQuery
 			}
@@ -226,15 +242,27 @@ func (c *compressWriter) Write(p []byte) (int, error) {
 		return c.ResponseWriter.Write(p)
 	}
 	if c.w == nil {
+		// 压缩器的内部缓冲较大（brotli 约数百 KB），从池中复用，避免每个响应重新分配
 		if c.enc == "br" {
-			c.w = brotli.NewWriterLevel(c.ResponseWriter, 4)
+			bw := brotliPool.Get().(*brotli.Writer)
+			bw.Reset(c.ResponseWriter)
+			c.w = bw
 		} else {
-			gz, _ := gzip.NewWriterLevel(c.ResponseWriter, gzip.DefaultCompression)
+			gz := gzipPool.Get().(*gzip.Writer)
+			gz.Reset(c.ResponseWriter)
 			c.w = gz
 		}
 	}
 	return c.w.Write(p)
 }
+
+var (
+	brotliPool = sync.Pool{New: func() any { return brotli.NewWriterLevel(nil, 4) }}
+	gzipPool   = sync.Pool{New: func() any {
+		gz, _ := gzip.NewWriterLevel(nil, gzip.DefaultCompression)
+		return gz
+	}}
+)
 
 func (c *compressWriter) Flush() {
 	if f, ok := c.w.(interface{ Flush() error }); ok {
@@ -250,9 +278,18 @@ func (c *compressWriter) Hijack() (net.Conn, *bufio.ReadWriter, error) {
 func (c *compressWriter) Unwrap() http.ResponseWriter { return c.ResponseWriter }
 
 func (c *compressWriter) finish() {
-	if c.w != nil {
-		_ = c.w.Close()
+	if c.w == nil {
+		return
 	}
+	_ = c.w.Close()
+	// Close 之后放回池中，下次使用前会 Reset 到新的输出
+	switch w := c.w.(type) {
+	case *brotli.Writer:
+		brotliPool.Put(w)
+	case *gzip.Writer:
+		gzipPool.Put(w)
+	}
+	c.w = nil
 }
 
 // compressHandler 对可压缩的响应启用 br / gzip。WebSocket 升级请求直接放行。

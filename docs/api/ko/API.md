@@ -1031,6 +1031,14 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `maxMb` | integer |
 | `ttl` | integer |
 
+### webservice.ForwardAuth
+
+| 필드 | 타입 |
+| --- | --- |
+| `copyHeaders` | Array of string |
+| `loginUrl` | string |
+| `url` | string |
+
 ### webservice.HealthCheck
 
 | 필드 | 타입 |
@@ -1060,6 +1068,14 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `remark` | string |
 | `sites` | Array of `webservice.Site` |
 | `tls` | boolean |
+
+### webservice.Location
+
+| 필드 | 타입 |
+| --- | --- |
+| `prefix` | string |
+| `requestHeaders` | Array of string |
+| `targets` | Array of string |
 
 ### webservice.PathRule
 
@@ -1117,6 +1133,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `authOptional` | boolean |
 | `basicAuth` | boolean |
 | `cache` | `webservice.CacheConfig` |
+| `cleanUrls` | boolean |
 | `compress` | boolean |
 | `contentType` | string |
 | `cors` | boolean |
@@ -1125,6 +1142,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `disableKeepAlives` | boolean |
 | `domains` | Array of string |
 | `enable` | boolean |
+| `forwardAuth` | `webservice.ForwardAuth` |
 | `forwardedHeaders` | boolean |
 | `health` | `webservice.HealthCheck` |
 | `insecureSkipVerify` | boolean |
@@ -1134,7 +1152,9 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `key` | string |
 | `lbPolicy` | string |
 | `listDir` | boolean |
+| `locations` | Array of `webservice.Location` |
 | `name` | string |
+| `notFoundPage` | string |
 | `oauthUsers` | Array of string |
 | `rateLimit` | `webservice.RateLimit` |
 | `redirectCode` | integer |
@@ -1151,6 +1171,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `targets` | Array of string |
 | `text` | string |
 | `type` | string |
+| `upstreamSniFromHost` | boolean |
 | `useTargetHost` | boolean |
 | `users` | Array of string |
 | `waf` | string |

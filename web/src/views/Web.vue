@@ -56,6 +56,8 @@
                 <StatusBadge v-if="!row.site.enable" type="off" :text="t('web.statusOff')" />
                 <el-tag v-if="row.site.webAuth" size="small" type="warning">{{ t('web.webAuthTag') }}</el-tag>
                 <el-tag v-else-if="row.site.basicAuth" size="small" type="warning">{{ t('web.basicAuthTag') }}</el-tag>
+                <el-tag v-else-if="row.site.forwardAuth?.url" size="small" type="warning">{{ t('web.forwardAuthTag') }}</el-tag>
+                <el-tag v-if="row.site.locations?.length" size="small" type="info">{{ t('web.locationsTag', { count: row.site.locations.length }) }}</el-tag>
                 <el-tag v-if="row.site.ipMode" size="small" type="info">{{ row.site.ipMode === 'whitelist' ? t('web.whitelist') : t('web.blacklist') }}</el-tag>
                 <el-tag v-if="row.site.sendProxyProtocol" size="small" type="info">PROXY v2</el-tag>
                 <el-tag v-if="downCount(l, row) > 0" size="small" type="danger">{{ t('web.upstreamsDown', { count: downCount(l, row) }) }}</el-tag>
@@ -170,10 +172,39 @@
                 <el-checkbox v-model="site.disableKeepAlives">{{ t('web.optNoKeepAlive') }}</el-checkbox>
                 <el-checkbox v-model="site.forwardedHeaders">{{ t('web.optForwarded') }}</el-checkbox>
                 <el-checkbox v-model="site.sendProxyProtocol">{{ t('web.optSendProxy') }}</el-checkbox>
+                <el-checkbox v-model="site.upstreamSniFromHost">{{ t('web.optSniFromHost') }}</el-checkbox>
+                <div class="form-help">{{ t('web.optSniFromHostHelp') }}</div>
+              </el-form-item>
+              <el-form-item :label="t('web.locations')">
+                <div class="locations">
+                  <div v-for="(loc, i) in site.locations" :key="i" class="location-row">
+                    <el-input v-model="loc.prefix" class="mono location-prefix" placeholder="/api/" />
+                    <el-input
+                      :model-value="(loc.targets ?? []).join(', ')"
+                      class="mono location-targets"
+                      :placeholder="t('web.locationTargetsPlaceholder')"
+                      @update:model-value="(v: string) => (loc.targets = splitCsv(v))"
+                    />
+                    <el-input
+                      :model-value="(loc.requestHeaders ?? []).join('\n')"
+                      type="textarea"
+                      :autosize="{ minRows: 1, maxRows: 4 }"
+                      class="mono location-headers"
+                      :placeholder="t('web.locationHeadersPlaceholder')"
+                      @update:model-value="(v: string) => (loc.requestHeaders = lines(v))"
+                    />
+                    <el-button text type="danger" :icon="Trash2" @click="site.locations.splice(i, 1)" />
+                  </div>
+                  <el-button size="small" :icon="Plus" @click="site.locations.push({ prefix: '', targets: [], requestHeaders: [] })">{{ t('web.addLocation') }}</el-button>
+                  <div class="form-help">{{ t('web.locationsHelp') }}</div>
+                </div>
               </el-form-item>
             </template>
             <template v-if="site.type === 'redirect'">
-              <el-form-item :label="t('web.redirectTo')" required><el-input v-model="site.redirectTo" placeholder="https://example.com" /></el-form-item>
+              <el-form-item :label="t('web.redirectTo')" required>
+                <el-input v-model="site.redirectTo" placeholder="https://example.com" />
+                <div class="form-help">{{ t('web.redirectHostHelp') }}</div>
+              </el-form-item>
               <el-form-item :label="t('web.statusCode')">
                 <el-select v-model="site.redirectCode" class="w-120">
                   <el-option v-for="c in [301, 302, 307, 308]" :key="c" :label="c" :value="c" />
@@ -184,6 +215,11 @@
             <template v-if="site.type === 'static'">
               <el-form-item :label="t('web.root')" required><el-input v-model="site.root" placeholder="/data/www" /></el-form-item>
               <el-form-item :label="t('web.listDir')"><el-switch v-model="site.listDir" /></el-form-item>
+              <el-form-item :label="t('web.cleanUrls')">
+                <el-switch v-model="site.cleanUrls" />
+                <div class="form-help">{{ t('web.cleanUrlsHelp') }}</div>
+              </el-form-item>
+              <el-form-item :label="t('web.notFoundPage')"><el-input v-model="site.notFoundPage" class="w-260" placeholder="404.html" /></el-form-item>
             </template>
             <template v-if="site.type === 'text'">
               <el-form-item :label="t('web.statusCode')"><el-input-number v-model="site.statusCode" :min="100" :max="599" /></el-form-item>
@@ -195,9 +231,23 @@
           </el-tab-pane>
           <el-tab-pane :label="t('web.tabSecurity')" name="security">
             <el-form-item :label="t('web.auth')">
-              <el-checkbox v-model="site.webAuth">{{ t('web.webAuth') }}</el-checkbox>
-              <el-checkbox v-model="site.basicAuth">{{ t('web.basicAuth') }}</el-checkbox>
+              <el-checkbox v-model="site.webAuth" :disabled="forwardAuthOn">{{ t('web.webAuth') }}</el-checkbox>
+              <el-checkbox v-model="site.basicAuth" :disabled="forwardAuthOn">{{ t('web.basicAuth') }}</el-checkbox>
+              <el-checkbox v-model="forwardAuthOn" :disabled="site.webAuth || site.basicAuth">{{ t('web.forwardAuth') }}</el-checkbox>
             </el-form-item>
+            <template v-if="forwardAuthOn">
+              <el-form-item :label="t('web.forwardAuthUrl')" required>
+                <el-input v-model="site.forwardAuth.url" class="mono" placeholder="http://127.0.0.1:9091/api/authz/auth-request" />
+                <div class="form-help">{{ t('web.forwardAuthUrlHelp') }}</div>
+              </el-form-item>
+              <el-form-item :label="t('web.forwardAuthLogin')">
+                <el-input v-model="site.forwardAuth.loginUrl" class="mono" placeholder="https://auth.example.com/?rd={url}&rm={method}" />
+                <div class="form-help">{{ t('web.forwardAuthLoginHelp') }}</div>
+              </el-form-item>
+              <el-form-item :label="t('web.forwardAuthHeaders')">
+                <el-input v-model="fwdHeadersText" class="mono" placeholder="Remote-User, Remote-Groups, Remote-Email, Remote-Name" />
+              </el-form-item>
+            </template>
             <el-form-item v-if="site.webAuth || site.basicAuth" :label="t('web.users')">
               <el-input v-model="usersText" type="textarea" :rows="3" class="mono" :placeholder="t('web.usersPlaceholder')" />
             </el-form-item>
@@ -298,11 +348,16 @@ interface Site {
   disableKeepAlives: boolean
   sendProxyProtocol: boolean
   forwardedHeaders: boolean
+  // 连接 HTTPS 后端时使用访客域名作为 SNI（后端按 SNI 分流时需要）
+  upstreamSniFromHost: boolean
+  locations: Location[]
   redirectTo: string
   redirectCode: number
   keepPath: boolean
   root: string
   listDir: boolean
+  cleanUrls: boolean
+  notFoundPage: string
   text: string
   contentType: string
   statusCode: number
@@ -319,6 +374,7 @@ interface Site {
   waf: string
   remark: string
   authOptional: boolean
+  forwardAuth: { url: string; loginUrl: string; copyHeaders: string[] | null }
   countryMode: string
   countries: string[] | null
   rules: PathRule[]
@@ -329,6 +385,13 @@ interface Site {
   rateLimit: { enable: boolean; rate: number; burst: number; maxConns: number }
   cache: { enable: boolean; ttl: number; maxMb: number }
   rewrites: Rewrite[]
+}
+
+// Location 把某个路径前缀分到另一组后端
+interface Location {
+  prefix: string
+  targets: string[] | null
+  requestHeaders: string[] | null
 }
 
 interface Listener {
@@ -400,6 +463,17 @@ const oauthUsersText = bind(() => site.value.oauthUsers, (v) => (site.value.oaut
 const ipText = bind(() => site.value.ipList, (v) => (site.value.ipList = v))
 const reqHeadersText = bind(() => site.value.requestHeaders, (v) => (site.value.requestHeaders = v))
 const respHeadersText = bind(() => site.value.responseHeaders, (v) => (site.value.responseHeaders = v))
+const fwdHeadersText = computed({
+  get: () => (site.value.forwardAuth?.copyHeaders ?? []).join(', '),
+  set: (v: string) => (site.value.forwardAuth.copyHeaders = splitCsv(v)),
+})
+// 转发认证以地址非空表示启用，勾选框单独记录，取消勾选时保存为空地址
+const forwardAuthOn = ref(false)
+const splitCsv = (v: string) =>
+  v
+    .split(/[\s,，]+/)
+    .map((x) => x.trim())
+    .filter(Boolean)
 const trustedText = bind(() => settings.value?.trustedProxies, (v) => settings.value && (settings.value.trustedProxies = v))
 
 function emptySite(): Site {
@@ -414,11 +488,15 @@ function emptySite(): Site {
     disableKeepAlives: false,
     sendProxyProtocol: false,
     forwardedHeaders: true,
+    upstreamSniFromHost: false,
+    locations: [],
     redirectTo: '',
     redirectCode: 302,
     keepPath: true,
     root: '',
     listDir: false,
+    cleanUrls: false,
+    notFoundPage: '',
     text: '',
     contentType: '',
     statusCode: 200,
@@ -435,6 +513,7 @@ function emptySite(): Site {
     waf: '',
     remark: '',
     authOptional: false,
+    forwardAuth: { url: '', loginUrl: '', copyHeaders: [] },
     countryMode: '',
     countries: [],
     rules: [],
@@ -599,6 +678,9 @@ function openSite(l: ListenerView, row?: SiteRow) {
   draft.shareLinks = draft.shareLinks ?? []
   draft.countries = draft.countries ?? []
   draft.rewrites = draft.rewrites ?? []
+  draft.locations = draft.locations ?? []
+  draft.forwardAuth = Object.assign({ url: '', loginUrl: '', copyHeaders: [] }, draft.forwardAuth)
+  forwardAuthOn.value = !!draft.forwardAuth.url
   // 旧配置没有这些对象，补全默认值后可直接编辑
   const defaults = emptySite()
   draft.health = { ...defaults.health, ...(draft.health ?? {}) }
@@ -612,6 +694,9 @@ function openSite(l: ListenerView, row?: SiteRow) {
 async function saveSite() {
   if (!siteOwner) {
     return
+  }
+  if (!forwardAuthOn.value) {
+    site.value.forwardAuth = { url: '', loginUrl: '', copyHeaders: [] }
   }
   const l = plain(siteOwner)
   l.sites = l.sites ?? []
@@ -722,6 +807,26 @@ onBeforeUnmount(() => window.clearInterval(timer))
 <style scoped>
 .listener-hint {
   margin-bottom: 16px;
+}
+.locations {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+.location-row {
+  display: flex;
+  gap: 6px;
+  align-items: flex-start;
+}
+.location-prefix {
+  width: 120px;
+  flex: none;
+}
+.location-targets,
+.location-headers {
+  flex: 1;
+  min-width: 0;
 }
 .sites {
   border: 1px solid var(--g-border);

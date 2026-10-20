@@ -1031,6 +1031,14 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | `maxMb` | integer |
 | `ttl` | integer |
 
+### webservice.ForwardAuth
+
+| Feld | Typ |
+| --- | --- |
+| `copyHeaders` | Array von string |
+| `loginUrl` | string |
+| `url` | string |
+
 ### webservice.HealthCheck
 
 | Feld | Typ |
@@ -1060,6 +1068,14 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | `remark` | string |
 | `sites` | Array von `webservice.Site` |
 | `tls` | boolean |
+
+### webservice.Location
+
+| Feld | Typ |
+| --- | --- |
+| `prefix` | string |
+| `requestHeaders` | Array von string |
+| `targets` | Array von string |
 
 ### webservice.PathRule
 
@@ -1117,6 +1133,7 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | `authOptional` | boolean |
 | `basicAuth` | boolean |
 | `cache` | `webservice.CacheConfig` |
+| `cleanUrls` | boolean |
 | `compress` | boolean |
 | `contentType` | string |
 | `cors` | boolean |
@@ -1125,6 +1142,7 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | `disableKeepAlives` | boolean |
 | `domains` | Array von string |
 | `enable` | boolean |
+| `forwardAuth` | `webservice.ForwardAuth` |
 | `forwardedHeaders` | boolean |
 | `health` | `webservice.HealthCheck` |
 | `insecureSkipVerify` | boolean |
@@ -1134,7 +1152,9 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | `key` | string |
 | `lbPolicy` | string |
 | `listDir` | boolean |
+| `locations` | Array von `webservice.Location` |
 | `name` | string |
+| `notFoundPage` | string |
 | `oauthUsers` | Array von string |
 | `rateLimit` | `webservice.RateLimit` |
 | `redirectCode` | integer |
@@ -1151,6 +1171,7 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | `targets` | Array von string |
 | `text` | string |
 | `type` | string |
+| `upstreamSniFromHost` | boolean |
 | `useTargetHost` | boolean |
 | `users` | Array von string |
 | `waf` | string |

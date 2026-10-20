@@ -54,7 +54,7 @@ type CacheConfig struct {
 type Rewrite struct {
 	// Pattern 为匹配请求路径的正则表达式
 	Pattern string `json:"pattern"`
-	// To 为替换结果，可使用 $1 引用分组；Redirect 时为跳转目标
+	// To 为替换结果，可使用 $1 引用分组；Redirect 时为跳转目标，可用 {host} 代表访客请求的域名
 	To       string `json:"to"`
 	Redirect bool   `json:"redirect"`
 	// Code 为重定向状态码，默认 302

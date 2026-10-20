@@ -1031,6 +1031,14 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `maxMb` | integer |
 | `ttl` | integer |
 
+### webservice.ForwardAuth
+
+| 欄位 | 類型 |
+| --- | --- |
+| `copyHeaders` | 陣列 of string |
+| `loginUrl` | string |
+| `url` | string |
+
 ### webservice.HealthCheck
 
 | 欄位 | 類型 |
@@ -1060,6 +1068,14 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `remark` | string |
 | `sites` | 陣列 of `webservice.Site` |
 | `tls` | boolean |
+
+### webservice.Location
+
+| 欄位 | 類型 |
+| --- | --- |
+| `prefix` | string |
+| `requestHeaders` | 陣列 of string |
+| `targets` | 陣列 of string |
 
 ### webservice.PathRule
 
@@ -1117,6 +1133,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `authOptional` | boolean |
 | `basicAuth` | boolean |
 | `cache` | `webservice.CacheConfig` |
+| `cleanUrls` | boolean |
 | `compress` | boolean |
 | `contentType` | string |
 | `cors` | boolean |
@@ -1125,6 +1142,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `disableKeepAlives` | boolean |
 | `domains` | 陣列 of string |
 | `enable` | boolean |
+| `forwardAuth` | `webservice.ForwardAuth` |
 | `forwardedHeaders` | boolean |
 | `health` | `webservice.HealthCheck` |
 | `insecureSkipVerify` | boolean |
@@ -1134,7 +1152,9 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `key` | string |
 | `lbPolicy` | string |
 | `listDir` | boolean |
+| `locations` | 陣列 of `webservice.Location` |
 | `name` | string |
+| `notFoundPage` | string |
 | `oauthUsers` | 陣列 of string |
 | `rateLimit` | `webservice.RateLimit` |
 | `redirectCode` | integer |
@@ -1151,6 +1171,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `targets` | 陣列 of string |
 | `text` | string |
 | `type` | string |
+| `upstreamSniFromHost` | boolean |
 | `useTargetHost` | boolean |
 | `users` | 陣列 of string |
 | `waf` | string |

@@ -20,6 +20,9 @@ const (
 	TypeText     = "text"
 )
 
+// hostPlaceholder 在重定向地址中代表访客请求的域名。
+const hostPlaceholder = "{host}"
+
 // 访问控制模式
 const (
 	IPModeOff       = ""
@@ -44,10 +47,15 @@ type Site struct {
 	DisableKeepAlives bool `json:"disableKeepAlives"`
 	// SendProxyProtocol 向后端发送 PROXY v2 头传递真实客户端 IP（需要后端支持）
 	SendProxyProtocol bool `json:"sendProxyProtocol"`
-	// ForwardedHeaders 添加 X-Forwarded-For/Proto/Host
+	// ForwardedHeaders 添加 X-Forwarded-For/Proto/Host/Port 与 X-Real-IP
 	ForwardedHeaders bool `json:"forwardedHeaders"`
+	// UpstreamSNIFromHost 为 true 时连接 HTTPS 后端使用访客请求的域名作为 SNI 并按它校验证书
+	// （相当于 nginx 的 proxy_ssl_server_name on + proxy_ssl_name $host），后端按 SNI 分流时（如 frp 的 vhost_https）需要开启
+	UpstreamSNIFromHost bool `json:"upstreamSniFromHost"`
+	// Locations 为按路径前缀分到不同后端的规则，最长前缀优先，未命中时使用站点后端
+	Locations []Location `json:"locations"`
 
-	// 重定向：RedirectTo 为目标地址前缀，KeepPath 时附加原路径与查询串
+	// 重定向：RedirectTo 为目标地址前缀，可用 {host} 代表访客请求的域名；KeepPath 时附加原路径与查询串
 	RedirectTo   string `json:"redirectTo"`
 	RedirectCode int    `json:"redirectCode"`
 	KeepPath     bool   `json:"keepPath"`
@@ -55,6 +63,10 @@ type Site struct {
 	// 静态文件
 	Root    string `json:"root"`
 	ListDir bool   `json:"listDir"`
+	// CleanURLs 时找不到文件会再尝试 路径.html 与 路径/index.html
+	CleanURLs bool `json:"cleanUrls"`
+	// NotFoundPage 为文件不存在时返回的页面，相对 Root 的路径，例如 404.html
+	NotFoundPage string `json:"notFoundPage"`
 
 	// 固定文本
 	Text        string `json:"text"`
@@ -75,6 +87,8 @@ type Site struct {
 	CountryMode string `json:"countryMode"`
 	// Countries 为两位 ISO 国家代码，如 CN、US
 	Countries []string `json:"countries"`
+	// ForwardAuth 把认证交给外部服务（如 Authelia），与基本认证、网页认证不能同时使用
+	ForwardAuth ForwardAuth `json:"forwardAuth"`
 	// AuthOptional 为 true 时，认证只作用于路径规则中标记为"必须认证"的路径，其余路径公开
 	AuthOptional bool `json:"authOptional"`
 	// Rules 为按路径前缀覆盖认证与 IP 访问控制的规则
@@ -262,7 +276,8 @@ func (s *Site) validate(isDefault bool) error {
 			}
 		}
 	case TypeRedirect:
-		u, err := url.Parse(strings.TrimSpace(s.RedirectTo))
+		s.RedirectTo = strings.TrimSpace(s.RedirectTo)
+		u, err := url.Parse(strings.ReplaceAll(s.RedirectTo, hostPlaceholder, "example.com"))
 		if err != nil || u.Scheme == "" || u.Host == "" {
 			return errors.New("重定向地址需为完整 URL")
 		}
@@ -276,6 +291,10 @@ func (s *Site) validate(isDefault bool) error {
 	case TypeStatic:
 		if !filepath.IsAbs(s.Root) {
 			return errors.New("静态文件目录需为绝对路径")
+		}
+		s.NotFoundPage = strings.TrimSpace(s.NotFoundPage)
+		if strings.Contains(s.NotFoundPage, "..") {
+			return errors.New("404 页面需为站点目录内的相对路径")
 		}
 	case TypeText:
 		if s.StatusCode == 0 {
@@ -299,6 +318,15 @@ func (s *Site) validate(isDefault bool) error {
 		return errors.New("启用网页认证时至少添加一个用户或第三方登录身份")
 	}
 	if err := thirdauth.ValidateEntries(s.OAuthUsers); err != nil {
+		return err
+	}
+	if err := s.ForwardAuth.validate(); err != nil {
+		return err
+	}
+	if s.ForwardAuth.URL != "" && (s.BasicAuth || s.WebAuth) {
+		return errors.New("转发认证不能与基本认证、网页认证同时启用")
+	}
+	if err := s.validateLocations(); err != nil {
 		return err
 	}
 	for _, u := range s.Users {

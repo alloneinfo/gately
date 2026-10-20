@@ -404,7 +404,7 @@ func TestStatsAndMetrics(t *testing.T) {
 		get(t, http.DefaultClient, addr, "m.test", "/", nil)
 	}
 	get(t, http.DefaultClient, addr, "unknown.test", "/", nil)
-	h := r.sites[0]
+	h := r.current().sites[0]
 	v := h.metrics.view(5, time.Now())
 	var total int64
 	for _, p := range v.Series {

@@ -9,6 +9,8 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
+	"sync/atomic"
 	"time"
 
 	proxyproto "github.com/pires/go-proxyproto"
@@ -38,19 +40,53 @@ type listenerRunner struct {
 	// altSvc 为通告 HTTP/3 的响应头值，未开启时为空
 	altSvc string
 	// cancel 结束所有请求上下文，用于关闭已升级（WebSocket）的连接
-	cancel  context.CancelFunc
-	sites   []*siteHandler
-	deflt   *siteHandler
+	cancel context.CancelFunc
+	// baseCtx 为全部请求与站点后台任务的父上下文，监听停止时取消
+	baseCtx context.Context
+	// table 为当前生效的站点表。修改站点时整体替换，监听端口与已建立的连接不受影响
+	table   atomic.Pointer[siteTable]
 	startAt time.Time
 	err     string
+}
+
+// siteTable 是一个监听器在某一时刻的全部站点。
+type siteTable struct {
+	sites []*siteHandler
+	deflt *siteHandler
+	// exact 为精确域名到站点的索引，站点很多时避免逐个比较
+	exact map[string]*siteHandler
+	// cancel 停止这一批站点的后台任务（健康检查）
+	cancel context.CancelFunc
+}
+
+// current 返回当前生效的站点表，监听器尚未构建时返回空表。
+func (l *listenerRunner) current() *siteTable {
+	if t := l.table.Load(); t != nil {
+		return t
+	}
+	return &siteTable{}
+}
+
+// all 返回全部站点（含默认站点）。
+func (t *siteTable) all() []*siteHandler {
+	out := append([]*siteHandler{}, t.sites...)
+	if t.deflt != nil {
+		out = append(out, t.deflt)
+	}
+	return out
 }
 
 // route 按 Host 选择站点：精确匹配优先，其次最长通配，最后 *。
 func (l *listenerRunner) route(host string) *siteHandler {
 	host = hostOnly(host)
+	t := l.current()
+	// 精确匹配的优先级最高，命中索引即可直接返回
+	if s, ok := t.exact[host]; ok {
+		return s
+	}
 	var best *siteHandler
 	bestScore, bestLen := 0, 0
-	for _, s := range l.sites {
+	for _, s := range t.sites {
 		for _, d := range s.site.Domains {
 			score := matchDomain(d, host)
 			if score == 0 {
@@ -64,7 +100,7 @@ func (l *listenerRunner) route(host string) *siteHandler {
 	if best != nil {
 		return best
 	}
-	return l.deflt
+	return t.deflt
 }
 
 func (l *listenerRunner) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -94,27 +130,100 @@ func (l *listenerRunner) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func newListenerRunner(cfg Listener, log *logbuf.Logger, auth *authenticator, waf WAFProvider) (*listenerRunner, error) {
 	l := &listenerRunner{cfg: cfg, log: log, auth: auth}
-	for _, s := range cfg.Sites {
-		if !s.Enable {
-			continue
+	t, err := buildSiteTable(cfg, log, auth, waf, nil)
+	if err != nil {
+		return nil, err
+	}
+	l.table.Store(t)
+	return l, nil
+}
+
+// buildSiteTable 编译监听器的全部站点。prev 为正在运行的旧站点表，同 key 的站点沿用其统计数据，可为 nil。
+func buildSiteTable(cfg Listener, log *logbuf.Logger, auth *authenticator, waf WAFProvider, prev *siteTable) (*siteTable, error) {
+	old := map[string]*siteHandler{}
+	if prev != nil {
+		for _, h := range prev.all() {
+			old[h.site.Key] = h
 		}
+	}
+	t := &siteTable{exact: map[string]*siteHandler{}}
+	build := func(s Site) (*siteHandler, error) {
 		s.scope = cfg.Key + "/" + s.Key
 		h, err := newSiteHandler(s, log, auth, waf)
 		if err != nil {
 			return nil, err
 		}
-		l.sites = append(l.sites, h)
+		if o := old[s.Key]; o != nil {
+			h.inherit(o)
+		}
+		return h, nil
 	}
-	if cfg.Default.Enable {
-		d := cfg.Default
-		d.scope = cfg.Key + "/" + d.Key
-		h, err := newSiteHandler(d, log, auth, waf)
+	for _, s := range cfg.Sites {
+		if !s.Enable {
+			continue
+		}
+		h, err := build(s)
 		if err != nil {
 			return nil, err
 		}
-		l.deflt = h
+		t.sites = append(t.sites, h)
+		for _, d := range h.site.Domains {
+			// 同一域名出现在多个站点时以先出现的为准，与逐个比较时的结果一致
+			if !strings.Contains(d, "*") {
+				if _, dup := t.exact[d]; !dup {
+					t.exact[d] = h
+				}
+			}
+		}
 	}
-	return l, nil
+	if cfg.Default.Enable {
+		h, err := build(cfg.Default)
+		if err != nil {
+			return nil, err
+		}
+		t.deflt = h
+	}
+	return t, nil
+}
+
+// startTable 启动站点表的后台任务。
+func startTable(t *siteTable, parent context.Context) {
+	ctx, cancel := context.WithCancel(parent)
+	t.cancel = cancel
+	for _, s := range t.all() {
+		s.startBackground(ctx)
+	}
+}
+
+// retire 停止旧站点表的后台任务，并关闭其空闲的后端连接；正在进行的请求不受影响。
+func (t *siteTable) retire() {
+	if t.cancel != nil {
+		t.cancel()
+	}
+	for _, s := range t.all() {
+		s.closeIdle()
+	}
+}
+
+// sameSocket 判断两份监听配置的端口相关设置是否相同，相同时修改站点无需重启监听。
+func sameSocket(a, b Listener) bool {
+	return a.Network == b.Network && a.ListenIP == b.ListenIP && a.Port == b.Port && a.TLS == b.TLS &&
+		a.MinTLS == b.MinTLS && a.HTTP3 == b.HTTP3 && a.AcceptProxyProtocol == b.AcceptProxyProtocol
+}
+
+// reload 在不关闭监听的情况下替换站点表：新请求立即使用新配置，已建立的连接（含 WebSocket）保持不断。
+func (l *listenerRunner) reload(cfg Listener, waf WAFProvider) error {
+	prev := l.current()
+	t, err := buildSiteTable(cfg, l.log, l.auth, waf, prev)
+	if err != nil {
+		return err
+	}
+	startTable(t, l.baseCtx)
+	l.cfg = cfg
+	l.table.Store(t)
+	prev.retire()
+	l.log.Infof("站点配置已更新（%d 个站点），监听未中断", len(t.sites))
+	return nil
 }
 
 // start 开始监听。trusted 为可信的 PROXY 协议来源。
@@ -139,11 +248,18 @@ func (l *listenerRunner) start(certs CertSource, trusted []string) error {
 	}
 	baseCtx, cancel := context.WithCancel(context.Background())
 	l.cancel = cancel
+	l.baseCtx = baseCtx
 	l.srv = &http.Server{
 		Handler:           l,
 		BaseContext:       func(net.Listener) context.Context { return baseCtx },
 		ReadHeaderTimeout: 30 * time.Second,
 		IdleTimeout:       120 * time.Second,
+		// 默认的 HTTP/2 接收窗口为 1 MB，高延迟线路上会限制单连接的上传速度，这里放大到与 nginx 默认缓冲相当的水平。
+		// 窗口只是上限，只有后端读得比客户端发得慢时才会真正占用内存
+		HTTP2: &http.HTTP2Config{
+			MaxReceiveBufferPerConnection: 8 << 20,
+			MaxReceiveBufferPerStream:     4 << 20,
+		},
 		// net/http 内部错误（TLS 握手失败、缺少证书等）写入本监听器的运行日志
 		ErrorLog: l.log.ServerErrorLog(),
 	}
@@ -166,12 +282,7 @@ func (l *listenerRunner) start(certs CertSource, trusted []string) error {
 		}
 	}
 	l.startAt = time.Now()
-	for _, s := range l.sites {
-		s.startBackground(baseCtx)
-	}
-	if l.deflt != nil {
-		l.deflt.startBackground(baseCtx)
-	}
+	startTable(l.current(), baseCtx)
 	go func() {
 		if err := l.srv.Serve(ln); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			l.log.Errorf("监听 %s 退出: %v", addr, err)
@@ -181,7 +292,7 @@ func (l *listenerRunner) start(certs CertSource, trusted []string) error {
 	if l.cfg.TLS {
 		scheme = "https"
 	}
-	l.log.Infof("%s 监听 %s（%d 个站点）", scheme, addr, len(l.sites))
+	l.log.Infof("%s 监听 %s（%d 个站点）", scheme, addr, len(l.current().sites))
 	return nil
 }
 
@@ -221,4 +332,5 @@ func (l *listenerRunner) stop() {
 	}
 	// Shutdown 不管理已劫持的连接；取消请求上下文后反向代理会关闭升级后的连接
 	l.cancel()
+	l.current().retire()
 }

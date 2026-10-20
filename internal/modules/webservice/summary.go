@@ -12,8 +12,9 @@ func (m *Module) Summary() []module.SummaryItem {
 	defer m.mu.Unlock()
 	sites, requests := 0, int64(0)
 	for _, r := range m.runners {
-		sites += len(r.sites)
-		for _, s := range r.sites {
+		t := r.current()
+		sites += len(t.sites)
+		for _, s := range t.sites {
 			requests += s.stats.Requests.Load()
 		}
 	}

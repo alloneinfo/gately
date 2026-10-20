@@ -1031,6 +1031,14 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | `maxMb` | integer |
 | `ttl` | integer |
 
+### webservice.ForwardAuth
+
+| Campo | Tipo |
+| --- | --- |
+| `copyHeaders` | Array de string |
+| `loginUrl` | string |
+| `url` | string |
+
 ### webservice.HealthCheck
 
 | Campo | Tipo |
@@ -1060,6 +1068,14 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | `remark` | string |
 | `sites` | Array de `webservice.Site` |
 | `tls` | boolean |
+
+### webservice.Location
+
+| Campo | Tipo |
+| --- | --- |
+| `prefix` | string |
+| `requestHeaders` | Array de string |
+| `targets` | Array de string |
 
 ### webservice.PathRule
 
@@ -1117,6 +1133,7 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | `authOptional` | boolean |
 | `basicAuth` | boolean |
 | `cache` | `webservice.CacheConfig` |
+| `cleanUrls` | boolean |
 | `compress` | boolean |
 | `contentType` | string |
 | `cors` | boolean |
@@ -1125,6 +1142,7 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | `disableKeepAlives` | boolean |
 | `domains` | Array de string |
 | `enable` | boolean |
+| `forwardAuth` | `webservice.ForwardAuth` |
 | `forwardedHeaders` | boolean |
 | `health` | `webservice.HealthCheck` |
 | `insecureSkipVerify` | boolean |
@@ -1134,7 +1152,9 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | `key` | string |
 | `lbPolicy` | string |
 | `listDir` | boolean |
+| `locations` | Array de `webservice.Location` |
 | `name` | string |
+| `notFoundPage` | string |
 | `oauthUsers` | Array de string |
 | `rateLimit` | `webservice.RateLimit` |
 | `redirectCode` | integer |
@@ -1151,6 +1171,7 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | `targets` | Array de string |
 | `text` | string |
 | `type` | string |
+| `upstreamSniFromHost` | boolean |
 | `useTargetHost` | boolean |
 | `users` | Array de string |
 | `waf` | string |

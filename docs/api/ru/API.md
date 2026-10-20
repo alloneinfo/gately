@@ -1031,6 +1031,14 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `maxMb` | integer |
 | `ttl` | integer |
 
+### webservice.ForwardAuth
+
+| Поле | Тип |
+| --- | --- |
+| `copyHeaders` | Массив из string |
+| `loginUrl` | string |
+| `url` | string |
+
 ### webservice.HealthCheck
 
 | Поле | Тип |
@@ -1060,6 +1068,14 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `remark` | string |
 | `sites` | Массив из `webservice.Site` |
 | `tls` | boolean |
+
+### webservice.Location
+
+| Поле | Тип |
+| --- | --- |
+| `prefix` | string |
+| `requestHeaders` | Массив из string |
+| `targets` | Массив из string |
 
 ### webservice.PathRule
 
@@ -1117,6 +1133,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `authOptional` | boolean |
 | `basicAuth` | boolean |
 | `cache` | `webservice.CacheConfig` |
+| `cleanUrls` | boolean |
 | `compress` | boolean |
 | `contentType` | string |
 | `cors` | boolean |
@@ -1125,6 +1142,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `disableKeepAlives` | boolean |
 | `domains` | Массив из string |
 | `enable` | boolean |
+| `forwardAuth` | `webservice.ForwardAuth` |
 | `forwardedHeaders` | boolean |
 | `health` | `webservice.HealthCheck` |
 | `insecureSkipVerify` | boolean |
@@ -1134,7 +1152,9 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `key` | string |
 | `lbPolicy` | string |
 | `listDir` | boolean |
+| `locations` | Массив из `webservice.Location` |
 | `name` | string |
+| `notFoundPage` | string |
 | `oauthUsers` | Массив из string |
 | `rateLimit` | `webservice.RateLimit` |
 | `redirectCode` | integer |
@@ -1151,6 +1171,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `targets` | Массив из string |
 | `text` | string |
 | `type` | string |
+| `upstreamSniFromHost` | boolean |
 | `useTargetHost` | boolean |
 | `users` | Массив из string |
 | `waf` | string |

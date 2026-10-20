@@ -147,12 +147,13 @@ func (s *Site) validateAccess() error {
 			return fmt.Errorf("路径规则 %s: %w", r.Prefix, err)
 		}
 	}
-	if s.AuthOptional && !s.BasicAuth && !s.WebAuth {
-		return errors.New("仅对指定路径认证需要先启用基本认证或网页认证")
+	hasAuth := s.BasicAuth || s.WebAuth || strings.TrimSpace(s.ForwardAuth.URL) != ""
+	if s.AuthOptional && !hasAuth {
+		return errors.New("仅对指定路径认证需要先启用基本认证、网页认证或转发认证")
 	}
 
-	if len(s.ShareLinks) > 0 && !s.BasicAuth && !s.WebAuth {
-		return errors.New("分享链接用于绕过认证，请先启用基本认证或网页认证")
+	if len(s.ShareLinks) > 0 && !hasAuth {
+		return errors.New("分享链接用于绕过认证，请先启用基本认证、网页认证或转发认证")
 	}
 	keys, tokens := map[string]bool{}, map[string]bool{}
 	for i := range s.ShareLinks {
@@ -218,7 +219,7 @@ func (h *siteHandler) matchRule(reqPath string) *compiledRule {
 
 // needAuth 判断该请求是否需要认证。
 func (h *siteHandler) needAuth(rule *compiledRule) bool {
-	if !h.site.BasicAuth && !h.site.WebAuth {
+	if !h.site.BasicAuth && !h.site.WebAuth && h.fwd == nil {
 		return false
 	}
 	if rule != nil {

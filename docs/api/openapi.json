@@ -1209,6 +1209,23 @@
         },
         "type": "object"
       },
+      "webservice.ForwardAuth": {
+        "properties": {
+          "copyHeaders": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "loginUrl": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "webservice.HealthCheck": {
         "properties": {
           "enable": {
@@ -1278,6 +1295,26 @@
           },
           "tls": {
             "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "webservice.Location": {
+        "properties": {
+          "prefix": {
+            "type": "string"
+          },
+          "requestHeaders": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "targets": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
           }
         },
         "type": "object"
@@ -1394,6 +1431,9 @@
           "cache": {
             "$ref": "#/components/schemas/webservice.CacheConfig"
           },
+          "cleanUrls": {
+            "type": "boolean"
+          },
           "compress": {
             "type": "boolean"
           },
@@ -1423,6 +1463,9 @@
           },
           "enable": {
             "type": "boolean"
+          },
+          "forwardAuth": {
+            "$ref": "#/components/schemas/webservice.ForwardAuth"
           },
           "forwardedHeaders": {
             "type": "boolean"
@@ -1454,7 +1497,16 @@
           "listDir": {
             "type": "boolean"
           },
+          "locations": {
+            "items": {
+              "$ref": "#/components/schemas/webservice.Location"
+            },
+            "type": "array"
+          },
           "name": {
+            "type": "string"
+          },
+          "notFoundPage": {
             "type": "string"
           },
           "oauthUsers": {
@@ -1525,6 +1577,9 @@
           },
           "type": {
             "type": "string"
+          },
+          "upstreamSniFromHost": {
+            "type": "boolean"
           },
           "useTargetHost": {
             "type": "boolean"

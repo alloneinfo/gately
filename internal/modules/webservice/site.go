@@ -10,6 +10,7 @@ import (
 	"net/netip"
 	"net/url"
 	"strings"
+	"sync"
 	"sync/atomic"
 	"time"
 
@@ -43,10 +44,16 @@ type siteHandler struct {
 	// pipeline 为 WAF（可选）→ 跨域 → 认证 → 站点处理器
 	pipeline http.Handler
 	pool     *pool
-	limiter  *limiter
-	cache    *respCache
-	rewrites []compiledRewrite
-	metrics  *siteMetrics
+	// locations 为按路径前缀分流的子后端（最长前缀在前）
+	locations []*locationHandler
+	// fwd 为外部转发认证，未启用时为 nil
+	fwd *forwardAuther
+	// idleClosers 关闭各反向代理的空闲后端连接，站点被替换时调用
+	idleClosers []func()
+	limiter     *limiter
+	cache       *respCache
+	rewrites    []compiledRewrite
+	metrics     *siteMetrics
 	// rules 为预编译的路径规则（最长前缀在前），countries 为国家过滤集合
 	rules     []compiledRule
 	countries map[string]bool
@@ -79,42 +86,41 @@ func newSiteHandler(s Site, log *logbuf.Logger, auth *authenticator, waf WAFProv
 	for _, c := range s.Countries {
 		h.countries[strings.ToUpper(c)] = true
 	}
+	if s.ForwardAuth.URL != "" {
+		h.fwd = newForwardAuther(s.ForwardAuth)
+	}
 	switch s.Type {
 	case TypeProxy:
 		if h.pool, err = newPool(s, log); err != nil {
 			return nil, err
 		}
-		h.handler = h.newProxy()
+		h.handler = h.newProxy(s, h.pool)
+		if len(s.Locations) > 0 {
+			if err := h.buildLocations(); err != nil {
+				return nil, err
+			}
+			h.handler = h.dispatchLocations(h.handler)
+		}
 		if s.Cache.Enable {
 			h.cache = newRespCache(s.Cache)
 			h.handler = h.cache.wrap(h.handler)
 		}
 	case TypeRedirect:
 		h.handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			to := strings.TrimRight(s.RedirectTo, "/")
+			// {host} 替换为访客请求的域名（不含端口），用于把 HTTP 统一跳到同域名的 HTTPS
+			base := strings.ReplaceAll(s.RedirectTo, hostPlaceholder, hostOnly(r.Host))
+			to := base
 			if s.KeepPath {
-				to += r.URL.RequestURI()
-			} else {
-				to = s.RedirectTo
+				to = strings.TrimRight(base, "/") + r.URL.RequestURI()
 			}
+			applyHeaders(w.Header(), s.ResponseHeaders)
 			http.Redirect(w, r, to, s.RedirectCode)
 		})
 	case TypeStatic:
-		fs := http.FileServer(http.Dir(s.Root))
-		h.handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			// 关闭目录列表时，目录请求只允许存在 index.html
-			if !s.ListDir && strings.HasSuffix(r.URL.Path, "/") {
-				f, err := http.Dir(s.Root).Open(r.URL.Path + "index.html")
-				if err != nil {
-					http.NotFound(w, r)
-					return
-				}
-				f.Close()
-			}
-			fs.ServeHTTP(w, r)
-		})
+		h.handler = h.newStatic(s)
 	case TypeText:
 		h.handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			applyHeaders(w.Header(), s.ResponseHeaders)
 			w.Header().Set("Content-Type", s.ContentType)
 			w.WriteHeader(s.StatusCode)
 			_, _ = w.Write([]byte(s.Text))
@@ -146,22 +152,74 @@ func (h *siteHandler) startBackground(ctx context.Context) {
 	if h.pool != nil {
 		h.pool.startChecks(ctx)
 	}
+	for _, l := range h.locations {
+		if l.pool != nil {
+			l.pool.startChecks(ctx)
+		}
+	}
 }
 
-func (h *siteHandler) newProxy() http.Handler {
-	s := h.site
+// closeIdle 关闭站点各反向代理的空闲后端连接。
+func (h *siteHandler) closeIdle() {
+	for _, f := range h.idleClosers {
+		f()
+	}
+}
+
+// inherit 在热更新站点时沿用旧处理器的统计数据，避免修改配置后计数与分钟曲线清零。
+func (h *siteHandler) inherit(old *siteHandler) {
+	h.stats = old.stats
+	h.metrics = old.metrics
+}
+
+// proxyBufferPool 复用反向代理的拷贝缓冲区，避免每个请求分配 32 KB 带来的 GC 压力。
+type proxyBufferPool struct{ p sync.Pool }
+
+func (b *proxyBufferPool) Get() []byte {
+	if v, ok := b.p.Get().(*[]byte); ok {
+		return *v
+	}
+	return make([]byte, 32*1024)
+}
+
+func (b *proxyBufferPool) Put(buf []byte) {
+	if cap(buf) < 32*1024 {
+		return
+	}
+	buf = buf[:32*1024]
+	b.p.Put(&buf)
+}
+
+var sharedBufferPool = &proxyBufferPool{}
+
+// sharedSessionCache 缓存到 HTTPS 后端的 TLS 会话，新连接可以复用会话，省去完整握手。
+var sharedSessionCache = tls.NewLRUClientSessionCache(512)
+
+// newTransport 为一个后端创建连接池。每个后端独立一个 Transport：
+// 开启“使用访问域名作为 SNI”时请求 URL 的主机名会换成访问域名，独立的连接池保证连接不会被串用到别的后端。
+func newTransport(s Site, up *upstream) *http.Transport {
 	dialer := &net.Dialer{Timeout: 10 * time.Second, KeepAlive: 30 * time.Second}
-	tr := &http.Transport{
-		Proxy:                 nil,
-		TLSClientConfig:       &tls.Config{InsecureSkipVerify: s.InsecureSkipVerify},
-		ForceAttemptHTTP2:     !s.SendProxyProtocol,
-		MaxIdleConnsPerHost:   32,
+	// 实际拨号地址始终是后端配置的地址，与请求 URL 中的主机名无关
+	target := up.url.Host
+	if up.url.Port() == "" {
+		port := "80"
+		if up.url.Scheme == "https" {
+			port = "443"
+		}
+		target = net.JoinHostPort(up.url.Hostname(), port)
+	}
+	return &http.Transport{
+		Proxy:             nil,
+		TLSClientConfig:   &tls.Config{InsecureSkipVerify: s.InsecureSkipVerify, ClientSessionCache: sharedSessionCache},
+		ForceAttemptHTTP2: !s.SendProxyProtocol,
+		// 本机后端的并发可能很高，空闲连接上限放宽到与 nginx keepalive 常用值相当，减少突发时的重复建连
+		MaxIdleConnsPerHost:   256,
 		IdleConnTimeout:       90 * time.Second,
 		ResponseHeaderTimeout: 0,
 		// 发送 PROXY 头时每个连接只对应一个客户端，必须禁用连接复用
 		DisableKeepAlives: s.DisableKeepAlives || s.SendProxyProtocol,
-		DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
-			c, err := dialer.DialContext(ctx, network, addr)
+		DialContext: func(ctx context.Context, network, _ string) (net.Conn, error) {
+			c, err := dialer.DialContext(ctx, network, target)
 			if err != nil || !s.SendProxyProtocol {
 				return c, err
 			}
@@ -177,8 +235,27 @@ func (h *siteHandler) newProxy() http.Handler {
 			return c, nil
 		},
 	}
+}
+
+// upstreamRoundTripper 按请求选中的后端使用对应的连接池。
+type upstreamRoundTripper map[*upstream]*http.Transport
+
+func (rt upstreamRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
+	up, _ := req.Context().Value(ctxKeyUpstream{}).(*upstream)
+	return rt[up].RoundTrip(req)
+}
+
+// newProxy 创建反向代理处理器，s 为生效的站点配置（分路径规则会传入合并后的配置），p 为其后端集合。
+func (h *siteHandler) newProxy(s Site, p *pool) http.Handler {
+	rt := upstreamRoundTripper{}
+	for _, up := range p.ups {
+		tr := newTransport(s, up)
+		rt[up] = tr
+		h.idleClosers = append(h.idleClosers, tr.CloseIdleConnections)
+	}
 	rp := &httputil.ReverseProxy{
-		Transport: tr,
+		Transport:  rt,
+		BufferPool: sharedBufferPool,
 		Rewrite: func(pr *httputil.ProxyRequest) {
 			up, _ := pr.In.Context().Value(ctxKeyUpstream{}).(*upstream)
 			pr.SetURL(up.url)
@@ -186,11 +263,24 @@ func (h *siteHandler) newProxy() http.Handler {
 				// SetURL 会改写 Host，这里恢复客户端请求的 Host
 				pr.Out.Host = pr.In.Host
 			}
+			if s.UpstreamSNIFromHost && up.url.Scheme == "https" {
+				// 把 URL 主机名换成访问域名，TLS 握手的 SNI 与证书校验都使用它；拨号地址仍是后端地址（见 newTransport）
+				if host := hostOnly(pr.In.Host); host != "" && net.ParseIP(host) == nil {
+					port := up.url.Port()
+					if port == "" {
+						port = "443"
+					}
+					pr.Out.URL.Host = net.JoinHostPort(host, port)
+				}
+			}
 			// 客户端自带的 X-Real-IP 不可信，只在开启转发头时由 Gately 写入
 			pr.Out.Header.Del("X-Real-Ip")
 			if s.ForwardedHeaders {
 				pr.SetXForwarded()
 				pr.Out.Header.Set("X-Real-Ip", clientAddr(pr.In).Addr().String())
+				if port := localPort(pr.In); port != "" {
+					pr.Out.Header.Set("X-Forwarded-Port", port)
+				}
 			}
 			// 站点会话 Cookie 只用于 Gately 自身认证，不转发给后端
 			stripCookie(pr.Out, cookieName(s), oauthNonceCookie)
@@ -199,7 +289,7 @@ func (h *siteHandler) newProxy() http.Handler {
 		ModifyResponse: func(resp *http.Response) error {
 			applyHeaders(resp.Header, s.ResponseHeaders)
 			if up, _ := resp.Request.Context().Value(ctxKeyUpstream{}).(*upstream); up != nil {
-				h.pool.ok(up)
+				p.ok(up)
 			}
 			return nil
 		},
@@ -207,7 +297,7 @@ func (h *siteHandler) newProxy() http.Handler {
 			h.stats.Errors.Add(1)
 			// 客户端中途断开不是后端的错
 			if up, _ := r.Context().Value(ctxKeyUpstream{}).(*upstream); up != nil && r.Context().Err() == nil {
-				h.pool.fail(up, err)
+				p.fail(up, err)
 			}
 			h.log.Warnf("%s %s%s 后端错误: %v", r.Method, r.Host, r.URL.Path, err)
 			writeErrorPage(w, r, http.StatusBadGateway, "无法连接到后端服务", "站点的后端服务没有响应，可能未启动或网络不可达。请稍后重试。")
@@ -217,13 +307,23 @@ func (h *siteHandler) newProxy() http.Handler {
 	}
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		client := clientAddr(r)
-		up := h.pool.pick(client.Addr())
+		up := p.pick(client.Addr())
 		up.conns.Add(1)
 		defer up.conns.Add(-1)
 		ctx := context.WithValue(r.Context(), ctxKeyClientAddr{}, client)
 		ctx = context.WithValue(ctx, ctxKeyUpstream{}, up)
 		rp.ServeHTTP(w, r.WithContext(ctx))
 	})
+}
+
+// localPort 返回请求到达的本地端口。经 PROXY 协议转入时为原始目的端口。
+func localPort(r *http.Request) string {
+	if a, ok := r.Context().Value(http.LocalAddrContextKey).(net.Addr); ok {
+		if _, port, err := net.SplitHostPort(a.String()); err == nil {
+			return port
+		}
+	}
+	return ""
 }
 
 // stripCookie 从请求中删除指定名称的 Cookie。
@@ -384,13 +484,27 @@ func (h *siteHandler) serveInner(rec http.ResponseWriter, r *http.Request) {
 		h.auth.check(rec, r, h.site)
 		return
 	}
+	if h.fwd != nil {
+		// 无论该路径是否需要认证，都不允许访客自带身份头
+		h.fwd.stripIdentity(r)
+	}
+	// 跳转类重写不返回任何内容，先于认证执行，与 nginx 中 location = / { return 302 ...; } 不经认证的行为一致
+	if len(h.rewrites) > 0 && h.redirectBeforeAuth(rec, r) {
+		return
+	}
 	if h.needAuth(h.matchRule(r.URL.Path)) {
 		handled, allowed := h.tryShare(rec, r)
 		if handled {
 			return
 		}
-		if !allowed && !h.auth.check(rec, r, h.site) {
-			return
+		if !allowed {
+			if h.fwd != nil {
+				if !h.fwd.check(rec, r, h) {
+					return
+				}
+			} else if !h.auth.check(rec, r, h.site) {
+				return
+			}
 		}
 	}
 	if len(h.rewrites) > 0 && h.applyRewrite(rec, r) {

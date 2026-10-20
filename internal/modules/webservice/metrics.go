@@ -162,10 +162,11 @@ func (m *Module) findSiteLocked(listener, site string) *siteHandler {
 	if !ok {
 		return nil
 	}
+	t := r.current()
 	if site == "default" {
-		return r.deflt
+		return t.deflt
 	}
-	for _, s := range r.sites {
+	for _, s := range t.sites {
 		if s.site.Key == site {
 			return s
 		}
@@ -197,11 +198,7 @@ func (m *Module) Metrics() []module.Sample {
 	var rows []row
 	m.mu.Lock()
 	for lk, run := range m.runners {
-		all := append([]*siteHandler{}, run.sites...)
-		if run.deflt != nil {
-			all = append(all, run.deflt)
-		}
-		for _, s := range all {
+		for _, s := range run.current().all() {
 			rows = append(rows, row{map[string]string{"listener": run.cfg.Name + "#" + lk, "site": siteLabel(s.site)}, s})
 		}
 	}

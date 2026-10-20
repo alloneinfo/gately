@@ -1031,6 +1031,14 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | `maxMb` | integer |
 | `ttl` | integer |
 
+### webservice.ForwardAuth
+
+| Campo | Tipo |
+| --- | --- |
+| `copyHeaders` | Lista de string |
+| `loginUrl` | string |
+| `url` | string |
+
 ### webservice.HealthCheck
 
 | Campo | Tipo |
@@ -1060,6 +1068,14 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | `remark` | string |
 | `sites` | Lista de `webservice.Site` |
 | `tls` | boolean |
+
+### webservice.Location
+
+| Campo | Tipo |
+| --- | --- |
+| `prefix` | string |
+| `requestHeaders` | Lista de string |
+| `targets` | Lista de string |
 
 ### webservice.PathRule
 
@@ -1117,6 +1133,7 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | `authOptional` | boolean |
 | `basicAuth` | boolean |
 | `cache` | `webservice.CacheConfig` |
+| `cleanUrls` | boolean |
 | `compress` | boolean |
 | `contentType` | string |
 | `cors` | boolean |
@@ -1125,6 +1142,7 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | `disableKeepAlives` | boolean |
 | `domains` | Lista de string |
 | `enable` | boolean |
+| `forwardAuth` | `webservice.ForwardAuth` |
 | `forwardedHeaders` | boolean |
 | `health` | `webservice.HealthCheck` |
 | `insecureSkipVerify` | boolean |
@@ -1134,7 +1152,9 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | `key` | string |
 | `lbPolicy` | string |
 | `listDir` | boolean |
+| `locations` | Lista de `webservice.Location` |
 | `name` | string |
+| `notFoundPage` | string |
 | `oauthUsers` | Lista de string |
 | `rateLimit` | `webservice.RateLimit` |
 | `redirectCode` | integer |
@@ -1151,6 +1171,7 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | `targets` | Lista de string |
 | `text` | string |
 | `type` | string |
+| `upstreamSniFromHost` | boolean |
 | `useTargetHost` | boolean |
 | `users` | Lista de string |
 | `waf` | string |

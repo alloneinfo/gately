@@ -1031,6 +1031,14 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | `maxMb` | integer |
 | `ttl` | integer |
 
+### webservice.ForwardAuth
+
+| Champ | Type |
+| --- | --- |
+| `copyHeaders` | Tableau de string |
+| `loginUrl` | string |
+| `url` | string |
+
 ### webservice.HealthCheck
 
 | Champ | Type |
@@ -1060,6 +1068,14 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | `remark` | string |
 | `sites` | Tableau de `webservice.Site` |
 | `tls` | boolean |
+
+### webservice.Location
+
+| Champ | Type |
+| --- | --- |
+| `prefix` | string |
+| `requestHeaders` | Tableau de string |
+| `targets` | Tableau de string |
 
 ### webservice.PathRule
 
@@ -1117,6 +1133,7 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | `authOptional` | boolean |
 | `basicAuth` | boolean |
 | `cache` | `webservice.CacheConfig` |
+| `cleanUrls` | boolean |
 | `compress` | boolean |
 | `contentType` | string |
 | `cors` | boolean |
@@ -1125,6 +1142,7 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | `disableKeepAlives` | boolean |
 | `domains` | Tableau de string |
 | `enable` | boolean |
+| `forwardAuth` | `webservice.ForwardAuth` |
 | `forwardedHeaders` | boolean |
 | `health` | `webservice.HealthCheck` |
 | `insecureSkipVerify` | boolean |
@@ -1134,7 +1152,9 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | `key` | string |
 | `lbPolicy` | string |
 | `listDir` | boolean |
+| `locations` | Tableau de `webservice.Location` |
 | `name` | string |
+| `notFoundPage` | string |
 | `oauthUsers` | Tableau de string |
 | `rateLimit` | `webservice.RateLimit` |
 | `redirectCode` | integer |
@@ -1151,6 +1171,7 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | `targets` | Tableau de string |
 | `text` | string |
 | `type` | string |
+| `upstreamSniFromHost` | boolean |
 | `useTargetHost` | boolean |
 | `users` | Tableau de string |
 | `waf` | string |
