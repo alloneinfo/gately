@@ -78,8 +78,8 @@
   "home": {
     "pill": "オープンソース · 監査可能 · 単一バイナリ",
     "announce": {
-      "text": "v0.5.2 リリース：SNI 振り分け、nginx の代替、TOTP ログイン →",
-      "link": "/en/news/v0.5.2"
+      "text": "v0.5.3 リリース：fnOS ネイティブアプリ、統合ゲートウェイ、fnOS ログイン状態でログイン →",
+      "link": "/en/news/v0.5.3"
     },
     "titleLine1": "中身が見える",
     "titleLine2": "ネットワークゲートウェイツールキット",

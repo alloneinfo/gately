@@ -78,8 +78,8 @@
   "home": {
     "pill": "Open source · Auditable · Binaire unique",
     "announce": {
-      "text": "v0.5.2 est disponible : routage SNI, remplaçant de nginx, connexion TOTP →",
-      "link": "/en/news/v0.5.2"
+      "text": "v0.5.3 est disponible : application native fnOS, passerelle unifiée, connexion via fnOS →",
+      "link": "/en/news/v0.5.3"
     },
     "titleLine1": "Une boîte à outils de passerelle réseau",
     "titleLine2": "où tout est visible",

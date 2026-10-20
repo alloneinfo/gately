@@ -78,8 +78,8 @@
   "home": {
     "pill": "오픈소스 · 감사 가능 · 단일 파일",
     "announce": {
-      "text": "v0.5.2 출시: SNI 라우팅, nginx 대체, TOTP 로그인 →",
-      "link": "/en/news/v0.5.2"
+      "text": "v0.5.3 출시: fnOS 네이티브 앱, 통합 게이트웨이, fnOS 로그인 상태로 로그인 →",
+      "link": "/en/news/v0.5.3"
     },
     "titleLine1": "속까지 들여다볼 수 있는",
     "titleLine2": "네트워크 게이트웨이 도구 모음",

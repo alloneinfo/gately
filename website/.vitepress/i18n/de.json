@@ -78,8 +78,8 @@
   "home": {
     "pill": "Open Source · Prüfbar · Einzelne Binärdatei",
     "announce": {
-      "text": "v0.5.2 ist da: SNI-Routing, nginx-Ersatz, Anmeldung mit TOTP →",
-      "link": "/en/news/v0.5.2"
+      "text": "v0.5.3 ist da: native fnOS-App, einheitliches Gateway, Anmeldung mit fnOS →",
+      "link": "/en/news/v0.5.3"
     },
     "titleLine1": "Ein Toolkit für Netzwerk-Gateways,",
     "titleLine2": "das Sie durchschauen können",

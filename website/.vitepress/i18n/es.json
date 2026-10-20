@@ -78,8 +78,8 @@
   "home": {
     "pill": "Código abierto · Auditable · Binario único",
     "announce": {
-      "text": "Ya está v0.5.2: enrutamiento SNI, sustituto de nginx, acceso con TOTP →",
-      "link": "/en/news/v0.5.2"
+      "text": "Ya está v0.5.3: app nativa para fnOS, pasarela unificada e inicio de sesión con fnOS →",
+      "link": "/en/news/v0.5.3"
     },
     "titleLine1": "Una pasarela de red",
     "titleLine2": "que puedes ver por dentro",
