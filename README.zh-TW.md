@@ -10,6 +10,14 @@
 
 ![Docker](docs/images/docker.webp)
 
+![連接埠轉發的 SNI 分流：多個服務共用 443 連接埠](docs/images/portforward-sni.webp)
+
+![設定歷史：差異比對與一鍵回滾](docs/images/config-history.webp)
+
+![操作稽核](docs/images/audit-log.webp)
+
+![內建 API 文件](docs/images/api-docs.webp)
+
 ## 為什麼做 Gately
 
 Gately 完全開源，使用者和社群可以直接檢視原始碼與設定。對於運行在網路邊界、掌握 DNS 金鑰與憑證私鑰的軟體，開源讓使用者能夠看見它在做什麼。Gately 的承諾：
@@ -25,12 +33,12 @@ Gately 完全開源，使用者和社群可以直接檢視原始碼與設定。�
 | --- | --- |
 | 動態網域 | Alibaba Cloud、Cloudflare、Tencent Cloud、DNSPod、Huawei Cloud、GoDaddy、Porkbun、dynv6、DuckDNS、Amazon Route 53、OVHcloud、Gandi、NS1、Bunny DNS、Namecheap、DynDNS2（No-IP、Dynu 等）、自訂回呼；以 URL／網路卡／指令取得 IP；IPv4/IPv6；Webhook |
 | STUN 穿透 | TCP/UDP、保活、UPnP/NAT-PMP、內建轉發、位址變更時觸發 Webhook 與腳本 |
-| 連接埠轉發 | TCP/UDP、IPv4/IPv6、連接埠範圍、多目標故障轉移、連線數限制、流量統計、PROXY 協定（v1/v2） |
+| 連接埠轉發 | TCP/UDP、IPv4/IPv6、連接埠範圍、多目標故障轉移、連線數限制、流量統計、PROXY 協定（v1/v2）；SNI 分流，讓多個服務共用 443 等同一個連接埠（依網域 TLS 透傳、預設目標、每條路由可單獨設定 PROXY 協定） |
 | SSL 憑證 | ACME 自動簽發與續期，支援 DNS-01（萬用字元）與 HTTP-01（無需 DNS 服務商）、EAB、上傳、讀取檔案、對應到目錄並執行腳本 |
 | Tailscale | 託管 tailscaled（使用者空間網路，容器友善）或接入系統既有的常駐程式；驗證金鑰／登入連結、Headscale、子網路由、出口節點、節點清單與 SOCKS5 代理、固定連接埠、tailscaled 額外參數與環境變數 |
 | frp | frpc 用戶端（tcp/udp/http/https/stcp/xtcp 代理，新增刪除即時生效）與 frps 伺服器端（連接埠白名單、子網域、主控台），可一鍵匯入舊版 ini／新版 toml 設定 |
 | Cloudflare 通道 | cloudflared 權杖通道與 trycloudflare 臨時通道，多通道、自動重啟、公開位址顯示 |
-| Web 服務 | 依網域反向代理／重新導向／靜態檔案／固定文字；HTTPS 與 HTTP/3（QUIC）；WebSocket；PROXY 協定收發；基本驗證、網頁驗證、GitHub/Google/QQ/OIDC 登入；IP 黑白名單、路徑規則、臨時分享連結、驗證失敗自動封鎖、GeoIP 國家過濾；後端權重／備援／負載平衡策略、主動與被動健康檢查、壓縮、限流、回應快取、路徑改寫；分鐘級存取統計與 Prometheus 指標 |
+| Web 服務 | 依網域反向代理／重新導向／靜態檔案／固定文字；HTTPS 與 HTTP/3（QUIC）；WebSocket；PROXY 協定收發；基本驗證、網頁驗證、GitHub/Google/QQ/OIDC 登入、支援 TOTP 二次驗證並可跨子網域單一登入的共用使用者、轉發認證到 Authelia 等外部服務；IP 黑白名單、路徑規則、臨時分享連結、驗證失敗自動封鎖、GeoIP 國家過濾；依路徑分流後端、HTTPS 後端依造訪網域傳送 SNI、後端權重／備援／負載平衡策略、主動與被動健康檢查、壓縮、限流、回應快取、路徑改寫；靜態站台支援無副檔名網址與自訂 404 頁面；修改站台不會中斷既有連線；分鐘級存取統計與 Prometheus 指標 |
 | WAF 防火牆 | Coraza + OWASP CRS v4，可依檔案啟用規則、自訂 SecLang、攔截／僅偵測 |
 | Docker 管理 | 容器建立與編輯、日誌與終端機、Compose、映像檔更新檢查與一鍵升級（失敗自動還原）、網路與磁碟區 |
 | Web 終端機 | SSH（主機金鑰首次信任）、Telnet、本機 Shell（預設關閉）；代理、持久工作階段、SFTP 檔案管理、2FA 與協定確認、快捷指令、分割畫面 |
@@ -47,6 +55,28 @@ Gately 完全開源，使用者和社群可以直接檢視原始碼與設定。�
 | 稽核與歷史 | 操作稽核日誌：登入、設定變更、存取敏感內容（不記錄請求內容與任何金鑰）；每次覆寫設定檔前保留舊版本，可比對差異並一鍵回滾；宣告式設定目錄（`-apply`），便於 GitOps |
 | 監控與自檢 | 全域 Prometheus 指標 `/api/metrics`（憑證、DDNS、STUN、連接埠轉發、Web 服務），附 Grafana 儀表板；一鍵網路自檢（公網 IP、電信商 NAT（CGNAT）、系統時間、80/443 連接埠、DDNS 解析、憑證到期） |
 | 遷移 | 匯入 Lucky 的 `.lkcf` 或整站設定 zip：連接埠轉發、DDNS、STUN、憑證、反向代理、WAF、網路喚醒、Web 終端機、WebDAV、基礎設定 |
+
+## 效能
+
+連接埠轉發的 SNI 分流加上 Web 服務，可以取代常見的 haproxy（依 SNI 做 TCP 分流）+ nginx（TLS 與反向代理）組合。下表在同一台機器上，依一台真實伺服器的設定比較兩者：90 個網域依 SNI 分流，兩層之間使用 PROXY 協定 v2，ECDSA P-256 憑證，TLS 1.3。
+
+| 情境 | haproxy + nginx | Gately |
+| --- | --- | --- |
+| HTTPS 反向代理，長連線，1 KB 回應，64 並行連線 | 14,767 req/s（p99 35.9 ms） | **26,434 req/s**（p99 5.7 ms） |
+| 同上，HTTP/2 | 未測試（nginx 設定使用 HTTP/1.1） | 27,795 req/s |
+| 每個請求建立新的 TLS 連線，32 並行連線 | 2,557 req/s | **3,448 req/s** |
+| 1 MB 回應，16 並行連線 | 1,053 MB/s | **1,585 MB/s** |
+| SNI 透傳 TLS 資料流，4 條連線 | 2,927 MB/s | **4,962 MB/s** |
+| SNI 透傳，每秒新建連線數，64 並行連線 | 6,334 /s | 6,266 /s（持平） |
+| 負載下的記憶體 | haproxy ≈ 21 MB + nginx ≈ 21 MB | ≈ 110 MB（包含所有模組的單一程序） |
+
+測試方法：
+
+- 機器：Intel Core i5-13500T。為貼近小型雲端伺服器，每套方案限制在 2 個 CPU 核心（haproxy 與 nginx 在 Docker 中使用 `--cpuset-cpus`，Gately 用 `taskset` 綁定核心），後端與壓測程式執行在其他核心。
+- haproxy 使用 `mode tcp`、`req_ssl_sni` 規則與 `send-proxy-v2`。nginx 使用 `worker_processes 2` 與正式站台的代理設定，其中 `Connection: upgrade` 會讓每個請求建立一條新的後端連線；啟用 upstream keep-alive 的 nginx 在小型回應上會縮小差距。
+- Gately 的路徑是 SNI 規則、PROXY v2、再到 Web 服務監聽，層數與 haproxy → nginx 相同。
+- 每個情境執行 10 秒，重複測試的情境差異在 3% 以內。在真實的 2 vCPU 雲端主機上，靜態站台為 5.5k req/s 對 3.4k req/s；用戶端使用 X25519 時，新建 TLS 連線持平（雙方都約每秒 480–550 條），使用 Go 用戶端與新版瀏覽器預設提供的後量子混合金鑰交換時，Gately 在該次測試中完成的握手少約 13%。
+- 結果受硬體、設定與流量影響，僅用於確認 Gately 跟得上 haproxy 與 nginx，請用自己的實際負載實測。
 
 ## 快速開始
 
@@ -135,7 +165,11 @@ make lint     # gofmt、go vet、前端型別檢查
 
 ## 交流群
 
-歡迎加入 Telegram 群交流使用問題、回饋建議：[t.me/gately_chat](https://t.me/gately_chat)。Bug 請提交到 [GitHub Issues](https://github.com/wangwanjie/gately/issues)。
+歡迎加入 Telegram 群交流使用問題、回饋建議：[t.me/gately_chat](https://t.me/gately_chat)，也可以用手機掃描 QR Code 加入：
+
+<a href="https://t.me/gately_chat"><img src="docs/images/telegram-qr.svg" alt="掃描加入 Gately Telegram 群組" width="160"></a>
+
+Bug 請提交到 [GitHub Issues](https://github.com/wangwanjie/gately/issues)。
 
 ## Star 趨勢
 

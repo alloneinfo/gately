@@ -10,6 +10,14 @@ Boîte à outils de passerelle réseau open source et auditable, pour les résea
 
 ![Docker](docs/images/docker.webp)
 
+![Redirection de ports avec routage SNI : un seul port 443 partagé par plusieurs services](docs/images/portforward-sni.webp)
+
+![Historique de configuration avec diff et restauration en un clic](docs/images/config-history.webp)
+
+![Journal d'audit](docs/images/audit-log.webp)
+
+![Documentation d'API intégrée](docs/images/api-docs.webp)
+
 ## Pourquoi Gately
 
 Gately est entièrement open source afin que les utilisateurs et la communauté puissent examiner directement le code source et la configuration. Pour un logiciel qui s'exécute à la frontière du réseau et manipule des clés DNS et des clés privées de certificats, l'open source permet de voir ce qu'il fait. Les engagements de Gately :
@@ -25,12 +33,12 @@ Gately est entièrement open source afin que les utilisateurs et la communauté 
 | --- | --- |
 | DNS dynamique | Alibaba Cloud, Cloudflare, Tencent Cloud, DNSPod, Huawei Cloud, GoDaddy, Porkbun, dynv6, DuckDNS, Amazon Route 53, OVHcloud, Gandi, NS1, Bunny DNS, Namecheap, DynDNS2 (No-IP, Dynu, …), rappel personnalisé ; récupération de l'IP par URL/interface réseau/commande ; IPv4/IPv6 ; Webhook |
 | Traversée STUN | TCP/UDP, keep-alive, UPnP/NAT-PMP, redirection intégrée, déclenchement de Webhook et de scripts lors d'un changement d'adresse |
-| Redirection de ports | TCP/UDP, IPv4/IPv6, plages de ports, basculement multi-cibles, limite de connexions, statistiques de trafic, protocole PROXY v1/v2 |
+| Redirection de ports | TCP/UDP, IPv4/IPv6, plages de ports, basculement multi-cibles, limite de connexions, statistiques de trafic, protocole PROXY v1/v2 ; routage SNI pour que plusieurs services partagent un même port comme le 443 (passage TLS direct selon le domaine, cible par défaut, protocole PROXY par route) |
 | Certificats SSL | Émission et renouvellement automatiques ACME via DNS-01 (wildcard) ou HTTP-01 (sans fournisseur DNS), EAB, téléversement, lecture depuis un fichier, copie vers un répertoire avec exécution de scripts |
 | Tailscale | Gère tailscaled (réseau en espace utilisateur, adapté aux conteneurs) ou se connecte à un démon système existant ; clé d'authentification/lien de connexion, Headscale, routes de sous-réseau, nœud de sortie, liste des nœuds et proxy SOCKS5, port fixe, arguments supplémentaires et variables d'environnement de tailscaled |
 | frp | Client frpc (proxys tcp/udp/http/https/stcp/xtcp, ajout et suppression pris en compte immédiatement) et serveur frps (liste blanche de ports, sous-domaines, tableau de bord) ; import en un clic des configurations ini anciennes et toml récentes |
 | Tunnel Cloudflare | Tunnel à jeton cloudflared et tunnel temporaire trycloudflare, plusieurs tunnels, redémarrage automatique, affichage de l'adresse publique |
-| Service web | Reverse proxy/redirection/fichiers statiques/texte fixe par domaine ; HTTPS et HTTP/3 (QUIC) ; WebSocket ; envoi et réception du protocole PROXY ; authentification de base, authentification web, connexion GitHub/Google/QQ/OIDC ; listes blanche et noire d'IP, règles par chemin, liens de partage temporaires, bannissement automatique après échecs d'authentification, filtrage par pays GeoIP ; poids des backends/secours/politiques d'équilibrage de charge, contrôles de santé actifs et passifs, compression, limitation de débit, cache des réponses, réécriture de chemins ; statistiques d'accès à la minute et métriques Prometheus |
+| Service web | Reverse proxy/redirection/fichiers statiques/texte fixe par domaine ; HTTPS et HTTP/3 (QUIC) ; WebSocket ; envoi et réception du protocole PROXY ; authentification de base, authentification web, connexion GitHub/Google/QQ/OIDC, utilisateurs partagés avec vérification en deux étapes TOTP et authentification unique entre sous-domaines, authentification déléguée à un service externe comme Authelia ; listes blanche et noire d'IP, règles par chemin, liens de partage temporaires, bannissement automatique après échecs d'authentification, filtrage par pays GeoIP ; backends par chemin, backends HTTPS recevant le domaine visité comme SNI, poids des backends/secours/politiques d'équilibrage de charge, contrôles de santé actifs et passifs, compression, limitation de débit, cache des réponses, réécriture de chemins ; sites statiques avec URL sans extension et page 404 personnalisée ; les modifications de site s'appliquent sans couper les connexions ouvertes ; statistiques d'accès à la minute et métriques Prometheus |
 | Pare-feu WAF | Coraza + OWASP CRS v4, activation des règles par fichier, SecLang personnalisé, blocage/détection seule |
 | Gestion Docker | Création et édition de conteneurs, journaux et terminal, Compose, vérification des mises à jour d'images et mise à niveau en un clic (retour arrière automatique en cas d'échec), réseaux et volumes |
 | Terminal web | SSH (confiance dans la clé d'hôte à la première connexion), Telnet, shell local (désactivé par défaut) ; proxy, sessions persistantes, gestion de fichiers SFTP, 2FA et confirmation du protocole, commandes rapides, écran partagé |
@@ -47,6 +55,28 @@ Gately est entièrement open source afin que les utilisateurs et la communauté 
 | Audit et historique | Journal d'audit des connexions, des modifications de configuration et des accès aux contenus sensibles (n'enregistre jamais les corps de requête ni les secrets) ; chaque fichier de configuration écrasé conserve ses versions précédentes, avec diff et restauration en un clic ; répertoire de configuration déclarative (`-apply`) pour le GitOps |
 | Supervision et autodiagnostic | Point de terminaison Prometheus global `/api/metrics` (certificats, DDNS, STUN, redirection de ports, services web) avec un tableau de bord Grafana prêt à l'emploi ; autodiagnostic réseau en un clic (IP publique, CGNAT, horloge, ports 80/443, résolution DDNS, expiration des certificats) |
 | Migration | Import du `.lkcf` de Lucky ou du zip de configuration complète : redirection de ports, DDNS, STUN, certificats, reverse proxy, WAF, Wake-on-LAN, terminal web, WebDAV, paramètres de base |
+
+## Performances
+
+La redirection de ports avec routage SNI, associée au service web, peut remplacer le duo courant haproxy (routage TCP par SNI) + nginx (TLS et reverse proxy). Les chiffres ci-dessous comparent les deux sur la même machine avec la configuration d'un vrai serveur : 90 domaines routés par SNI, protocole PROXY v2 entre les deux sauts et un certificat ECDSA P-256 avec TLS 1.3.
+
+| Scénario | haproxy + nginx | Gately |
+| --- | --- | --- |
+| Reverse proxy HTTPS, keep-alive, réponses de 1 Ko, 64 connexions | 14 767 req/s (p99 35,9 ms) | **26 434 req/s** (p99 5,7 ms) |
+| Idem en HTTP/2 | non testé (la configuration nginx utilisait HTTP/1.1) | 27 795 req/s |
+| Une nouvelle connexion TLS pour chaque requête, 32 à la fois | 2 557 req/s | **3 448 req/s** |
+| Réponses de 1 Mo, 16 connexions | 1 053 Mo/s | **1 585 Mo/s** |
+| Passage SNI direct d'un flux TLS, 4 connexions | 2 927 Mo/s | **4 962 Mo/s** |
+| Passage SNI direct, nouvelles connexions par seconde, 64 à la fois | 6 334 /s | 6 266 /s (à égalité) |
+| Mémoire sous charge | haproxy ≈ 21 Mo + nginx ≈ 21 Mo | ≈ 110 Mo (un seul processus avec tous les modules) |
+
+Méthode de mesure :
+
+- Hôte : Intel Core i5-13500T. Chaque pile était limitée à 2 cœurs de processeur (haproxy et nginx dans Docker avec `--cpuset-cpus`, Gately épinglé avec `taskset`) pour imiter un petit serveur cloud. Les backends et le générateur de charge tournaient sur d'autres cœurs.
+- haproxy utilisait `mode tcp` avec des règles `req_ssl_sni` et `send-proxy-v2`. nginx utilisait `worker_processes 2` et les paramètres de proxy du site de production, qui envoient `Connection: upgrade` et ouvrent donc une nouvelle connexion backend par requête ; un nginx optimisé avec keep-alive vers l'amont réduirait l'écart sur les petites réponses.
+- Le chemin de Gately était la règle SNI, PROXY v2, puis un écouteur du service web, soit le même nombre de sauts que haproxy → nginx.
+- Chaque cas a duré 10 secondes, et les cas répétés concordaient à 3 % près. Sur un vrai hôte cloud à 2 vCPU, le site statique a servi 5,5k req/s contre 3,4k req/s. Les nouvelles connexions TLS étaient à égalité (environ 480–550 par seconde pour les deux) quand le client utilisait X25519 ; avec l'échange de clés hybride post-quantique que proposent les clients Go et les navigateurs récents, Gately a terminé environ 13 % de poignées de main en moins lors de cette mesure.
+- Les résultats dépendent du matériel, de la configuration et du trafic. Voyez-y un contrôle de cohérence montrant que Gately tient la comparaison avec haproxy et nginx, et mesurez avec votre propre charge.
 
 ## Démarrage rapide
 
@@ -135,7 +165,11 @@ Le code source du site web ([gately.cn](https://gately.cn)) se trouve dans `webs
 
 ## Communauté
 
-Questions, retours et astuces d’utilisation sont les bienvenus dans le groupe Telegram : [t.me/gately_chat](https://t.me/gately_chat). Les bugs se signalent dans [GitHub Issues](https://github.com/wangwanjie/gately/issues).
+Questions, retours et astuces d’utilisation sont les bienvenus dans le groupe Telegram : [t.me/gately_chat](https://t.me/gately_chat), ou scannez le QR code avec votre téléphone :
+
+<a href="https://t.me/gately_chat"><img src="docs/images/telegram-qr.svg" alt="Scannez pour rejoindre le groupe Telegram de Gately" width="160"></a>
+
+Les bugs se signalent dans [GitHub Issues](https://github.com/wangwanjie/gately/issues).
 
 ## Historique des étoiles
 

@@ -10,6 +10,14 @@
 
 ![Docker](docs/images/docker.webp)
 
+![SNI 라우팅을 적용한 포트 포워딩: 여러 서비스가 443 포트를 함께 사용](docs/images/portforward-sni.webp)
+
+![설정 기록: 차이 비교와 원클릭 롤백](docs/images/config-history.webp)
+
+![감사 로그](docs/images/audit-log.webp)
+
+![내장 API 문서](docs/images/api-docs.webp)
+
 ## Gately를 만든 이유
 
 Gately는 완전한 오픈소스로, 사용자와 커뮤니티가 소스 코드와 설정을 직접 검토할 수 있습니다. 네트워크 경계에서 동작하며 DNS 키와 인증서 개인 키를 다루는 소프트웨어라면, 오픈소스를 통해 사용자가 그 동작을 직접 확인할 수 있어야 합니다. Gately의 약속은 다음과 같습니다.
@@ -25,12 +33,12 @@ Gately는 완전한 오픈소스로, 사용자와 커뮤니티가 소스 코드�
 | --- | --- |
 | 동적 도메인 | Alibaba Cloud, Cloudflare, Tencent Cloud, DNSPod, Huawei Cloud, GoDaddy, Porkbun, dynv6, DuckDNS, Amazon Route 53, OVHcloud, Gandi, NS1, Bunny DNS, Namecheap, DynDNS2(No-IP, Dynu 등), 사용자 지정 콜백. URL/네트워크 카드/명령으로 IP 조회. IPv4/IPv6. Webhook |
 | STUN 터널링 | TCP/UDP, keep-alive, UPnP/NAT-PMP, 내장 포워딩, 주소 변경 시 Webhook 및 스크립트 실행 |
-| 포트 포워딩 | TCP/UDP, IPv4/IPv6, 포트 범위, 다중 대상 장애 조치, 연결 수 제한, 트래픽 통계, PROXY 프로토콜(v1/v2) |
+| 포트 포워딩 | TCP/UDP, IPv4/IPv6, 포트 범위, 다중 대상 장애 조치, 연결 수 제한, 트래픽 통계, PROXY 프로토콜(v1/v2). SNI 라우팅으로 여러 서비스가 443 같은 포트 하나를 함께 사용(도메인별 TLS 패스스루, 기본 대상, 라우트별 PROXY 프로토콜 설정) |
 | SSL 인증서 | DNS-01(와일드카드) 또는 HTTP-01(DNS 제공업체 불필요) 방식의 ACME 자동 발급 및 갱신, EAB, 업로드, 파일 읽기, 디렉터리 매핑 및 스크립트 실행 |
 | Tailscale | tailscaled 관리(유저스페이스 네트워킹, 컨테이너 친화적) 또는 시스템에 이미 있는 데몬에 연결. 인증 키/로그인 링크, Headscale, 서브넷 라우트, 출구 노드, 노드 목록과 SOCKS5 프록시, 고정 포트, tailscaled 추가 인수 및 환경 변수 |
 | frp | frpc 클라이언트(tcp/udp/http/https/stcp/xtcp 프록시, 추가·삭제 즉시 적용)와 frps 서버(포트 허용 목록, 서브도메인, 대시보드). 기존 ini / 신규 toml 설정을 한 번에 가져올 수 있음 |
 | Cloudflare 터널 | cloudflared 토큰 터널과 trycloudflare 임시 터널, 다중 터널, 자동 재시작, 공개 주소 표시 |
-| 웹 서비스 | 도메인별 리버스 프록시/리디렉션/정적 파일/고정 텍스트. HTTPS 및 HTTP/3(QUIC). WebSocket. PROXY 프로토콜 송수신. 기본 인증, 웹 인증, GitHub/Google/QQ/OIDC 로그인. IP 허용/차단 목록, 경로 규칙, 임시 공유 링크, 인증 실패 시 자동 차단, GeoIP 국가 필터링. 백엔드 가중치/백업/로드 밸런싱 정책, 능동·수동 헬스 체크, 압축, 속도 제한, 응답 캐시, 경로 재작성. 분 단위 접속 통계와 Prometheus 메트릭 |
+| 웹 서비스 | 도메인별 리버스 프록시/리디렉션/정적 파일/고정 텍스트. HTTPS 및 HTTP/3(QUIC). WebSocket. PROXY 프로토콜 송수신. 기본 인증, 웹 인증, GitHub/Google/QQ/OIDC 로그인, TOTP 2단계 인증과 하위 도메인 간 통합 로그인(SSO)을 지원하는 공유 사용자, Authelia 같은 외부 서비스로의 포워드 인증. IP 허용/차단 목록, 경로 규칙, 임시 공유 링크, 인증 실패 시 자동 차단, GeoIP 국가 필터링. 경로별 백엔드, 방문한 도메인을 SNI로 보내는 HTTPS 백엔드, 백엔드 가중치/백업/로드 밸런싱 정책, 능동·수동 헬스 체크, 압축, 속도 제한, 응답 캐시, 경로 재작성. 확장자 없는 URL과 사용자 지정 404 페이지를 지원하는 정적 사이트. 사이트를 수정해도 기존 연결이 끊기지 않음. 분 단위 접속 통계와 Prometheus 메트릭 |
 | WAF 방화벽 | Coraza + OWASP CRS v4, 파일 단위 규칙 활성화, 사용자 지정 SecLang, 차단/탐지 전용 |
 | Docker 관리 | 컨테이너 생성 및 편집, 로그와 터미널, Compose, 이미지 업데이트 확인 및 원클릭 업그레이드(실패 시 자동 롤백), 네트워크와 볼륨 |
 | 웹 터미널 | SSH(호스트 키 최초 신뢰), Telnet, 로컬 셸(기본 비활성). 프록시, 지속 세션, SFTP 파일 관리, 2FA 및 프로토콜 확인, 빠른 명령, 화면 분할 |
@@ -47,6 +55,28 @@ Gately는 완전한 오픈소스로, 사용자와 커뮤니티가 소스 코드�
 | 감사 및 이력 | 로그인, 설정 변경, 민감한 콘텐츠 접근을 기록하는 감사 로그(요청 본문과 비밀 값은 기록하지 않음). 덮어쓴 설정 파일마다 이전 버전을 보관하며 차이 비교와 원클릭 롤백 지원. GitOps용 선언적 설정 디렉터리(`-apply`) |
 | 모니터링 및 자가 점검 | 전역 Prometheus 엔드포인트 `/api/metrics`(인증서, DDNS, STUN, 포트 포워딩, 웹 서비스)와 바로 쓸 수 있는 Grafana 대시보드. 원클릭 네트워크 자가 점검(공인 IP, CGNAT, 시스템 시간, 80/443 포트, DDNS 해석, 인증서 만료) |
 | 마이그레이션 | Lucky의 `.lkcf` 또는 전체 사이트 설정 zip 가져오기: 포트 포워딩, DDNS, STUN, 인증서, 리버스 프록시, WAF, Wake-on-LAN, 웹 터미널, WebDAV, 기본 설정 |
+
+## 성능
+
+포트 포워딩의 SNI 라우팅과 웹 서비스를 함께 쓰면 흔히 쓰는 haproxy(SNI 기반 TCP 라우팅) + nginx(TLS와 리버스 프록시) 조합을 대체할 수 있습니다. 아래 표는 실제 서버의 설정에 맞춰 같은 머신에서 둘을 비교한 결과입니다. 도메인 90개를 SNI로 라우팅하고, 두 홉 사이에는 PROXY 프로토콜 v2를 사용했으며, 인증서는 ECDSA P-256, TLS는 1.3입니다.
+
+| 시나리오 | haproxy + nginx | Gately |
+| --- | --- | --- |
+| HTTPS 리버스 프록시, Keep-Alive, 1 KB 응답, 동시 연결 64개 | 14,767 req/s (p99 35.9 ms) | **26,434 req/s** (p99 5.7 ms) |
+| 같은 조건에서 HTTP/2 | 테스트하지 않음 (nginx 설정이 HTTP/1.1) | 27,795 req/s |
+| 요청마다 새 TLS 연결, 동시 32개 | 2,557 req/s | **3,448 req/s** |
+| 1 MB 응답, 동시 연결 16개 | 1,053 MB/s | **1,585 MB/s** |
+| TLS 스트림 SNI 패스스루, 연결 4개 | 2,927 MB/s | **4,962 MB/s** |
+| SNI 패스스루, 초당 신규 연결 수, 동시 64개 | 6,334 /s | 6,266 /s (비슷함) |
+| 부하 시 메모리 | haproxy ≈ 21 MB + nginx ≈ 21 MB | ≈ 110 MB (모든 모듈을 포함한 단일 프로세스) |
+
+측정 방법:
+
+- 호스트: Intel Core i5-13500T. 소형 클라우드 서버에 맞추기 위해 각 구성을 CPU 코어 2개로 제한했습니다(haproxy와 nginx는 Docker의 `--cpuset-cpus`, Gately는 `taskset`으로 고정). 백엔드와 부하 생성기는 다른 코어에서 실행했습니다.
+- haproxy는 `mode tcp`, `req_ssl_sni` 규칙, `send-proxy-v2`를 사용했습니다. nginx는 `worker_processes 2`와 운영 사이트의 프록시 설정을 사용했으며, 이 설정은 `Connection: upgrade`를 보내므로 요청마다 백엔드 연결을 새로 엽니다. 업스트림 keep-alive를 켠 튜닝된 nginx라면 작은 응답에서의 차이가 줄어듭니다.
+- Gately의 경로는 SNI 규칙, PROXY v2, 웹 서비스 리스너 순으로, haproxy → nginx와 홉 수가 같습니다.
+- 각 케이스는 10초간 실행했고, 반복한 케이스의 결과는 3% 이내로 일치했습니다. 실제 2 vCPU 클라우드 호스트에서 정적 사이트는 5.5k req/s 대 3.4k req/s였습니다. 클라이언트가 X25519를 사용하면 새 TLS 연결은 비슷했고(양쪽 모두 초당 약 480~550개), Go 클라이언트와 최신 브라우저가 제공하는 포스트 양자 하이브리드 키 교환을 사용하면 이번 측정에서 Gately가 완료한 핸드셰이크가 약 13% 적었습니다.
+- 결과는 하드웨어, 설정, 트래픽에 따라 달라집니다. Gately가 haproxy와 nginx를 따라가는지 확인하는 참고 자료로 보고, 실제 워크로드로 직접 측정하세요.
 
 ## 빠른 시작
 
@@ -135,7 +165,11 @@ make lint     # gofmt, go vet, 프런트엔드 타입 검사
 
 ## 커뮤니티
 
-사용 문의와 의견은 Telegram 그룹에서 나눠 주세요: [t.me/gately_chat](https://t.me/gately_chat). 버그는 [GitHub Issues](https://github.com/wangwanjie/gately/issues)에 등록해 주세요.
+사용 문의와 의견은 Telegram 그룹에서 나눠 주세요: [t.me/gately_chat](https://t.me/gately_chat). 휴대폰으로 QR 코드를 스캔해 참여할 수도 있습니다.
+
+<a href="https://t.me/gately_chat"><img src="docs/images/telegram-qr.svg" alt="QR 코드를 스캔해 Gately Telegram 그룹에 참여" width="160"></a>
+
+버그는 [GitHub Issues](https://github.com/wangwanjie/gately/issues)에 등록해 주세요.
 
 ## Star 추이
 

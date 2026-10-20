@@ -10,6 +10,14 @@
 
 ![Docker](docs/images/docker.webp)
 
+![SNI 振り分けによるポート転送：複数のサービスで 443 番ポートを共用](docs/images/portforward-sni.webp)
+
+![設定履歴：差分表示とワンクリックロールバック](docs/images/config-history.webp)
+
+![監査ログ](docs/images/audit-log.webp)
+
+![組み込みの API ドキュメント](docs/images/api-docs.webp)
+
 ## なぜ Gately なのか
 
 Gately は完全なオープンソースで、ユーザーとコミュニティがソースコードと設定を直接確認できます。ネットワークの境界で動作し、DNS の鍵や証明書の秘密鍵を扱うソフトウェアだからこそ、オープンソースであることで何をしているかを自分の目で確かめられます。Gately の約束:
@@ -25,12 +33,12 @@ Gately は完全なオープンソースで、ユーザーとコミュニティ�
 | --- | --- |
 | ダイナミック DNS | Alibaba Cloud、Cloudflare、Tencent Cloud、DNSPod、Huawei Cloud、GoDaddy、Porkbun、dynv6、DuckDNS、Amazon Route 53、OVHcloud、Gandi、NS1、Bunny DNS、Namecheap、DynDNS2（No-IP、Dynu など）、カスタムコールバック。URL／ネットワークインターフェース／コマンドによる IP 取得、IPv4/IPv6、Webhook |
 | STUN 穿孔 | TCP/UDP、キープアライブ、UPnP/NAT-PMP、内蔵フォワーディング、アドレス変更時の Webhook・スクリプト実行 |
-| ポート転送 | TCP/UDP、IPv4/IPv6、ポート範囲、複数ターゲットのフェイルオーバー、接続数制限、トラフィック統計、PROXY プロトコル（v1/v2） |
+| ポート転送 | TCP/UDP、IPv4/IPv6、ポート範囲、複数ターゲットのフェイルオーバー、接続数制限、トラフィック統計、PROXY プロトコル（v1/v2）、SNI 振り分けで 443 などの 1 つのポートを複数のサービスで共用（ドメインごとの TLS パススルー、デフォルトターゲット、ルートごとの PROXY プロトコル設定） |
 | SSL 証明書 | ACME による自動発行・更新（DNS-01 はワイルドカード対応、HTTP-01 は DNS プロバイダー不要）、EAB、アップロード、ファイル読み込み、ディレクトリへのマッピングとスクリプト実行 |
 | Tailscale | tailscaled の管理（ユーザー空間ネットワーク、コンテナ対応）またはシステム既存のデーモンへの接続。認証キー／ログインリンク、Headscale、サブネットルート、出口ノード、ノード一覧と SOCKS5 プロキシ、固定ポート、tailscaled の追加引数と環境変数 |
 | frp | frpc クライアント（tcp/udp/http/https/stcp/xtcp プロキシ、追加・削除は即時反映）と frps サーバー（ポート許可リスト、サブドメイン、ダッシュボード）。旧形式の ini／新形式の toml 設定をワンクリックでインポート |
 | Cloudflare トンネル | cloudflared のトークントンネルと trycloudflare の一時トンネル、複数トンネル、自動再起動、パブリックアドレス表示 |
-| Web サービス | ドメインごとのリバースプロキシ／リダイレクト／静的ファイル／固定テキスト、HTTPS と HTTP/3（QUIC）、WebSocket、PROXY プロトコルの送受信、Basic 認証、Web 認証、GitHub/Google/QQ/OIDC ログイン、IP 許可・拒否リスト、パスルール、一時共有リンク、認証失敗時の自動ブロック、GeoIP による国別フィルタ、バックエンドの重み／スタンバイ／負荷分散ポリシー、アクティブ／パッシブヘルスチェック、圧縮、レート制限、レスポンスキャッシュ、パス書き換え、1 分単位のアクセス統計と Prometheus メトリクス |
+| Web サービス | ドメインごとのリバースプロキシ／リダイレクト／静的ファイル／固定テキスト、HTTPS と HTTP/3（QUIC）、WebSocket、PROXY プロトコルの送受信、Basic 認証、Web 認証、GitHub/Google/QQ/OIDC ログイン、TOTP による 2 段階認証とサブドメイン間のシングルサインオンに対応した共有ユーザー、Authelia などの外部サービスへのフォワード認証、IP 許可・拒否リスト、パスルール、一時共有リンク、認証失敗時の自動ブロック、GeoIP による国別フィルタ、パスごとのバックエンド、アクセスされたドメインを SNI として送る HTTPS バックエンド、バックエンドの重み／スタンバイ／負荷分散ポリシー、アクティブ／パッシブヘルスチェック、圧縮、レート制限、レスポンスキャッシュ、パス書き換え、拡張子なし URL とカスタム 404 ページに対応した静的サイト、サイトの変更時に既存の接続を切断しない、1 分単位のアクセス統計と Prometheus メトリクス |
 | WAF ファイアウォール | Coraza + OWASP CRS v4、ファイル単位のルール有効化、カスタム SecLang、ブロック／検知のみ |
 | Docker 管理 | コンテナの作成と編集、ログとターミナル、Compose、イメージ更新チェックとワンクリックアップグレード（失敗時は自動ロールバック）、ネットワークとボリューム |
 | Web ターミナル | SSH（ホストキーは初回接続時に信頼）、Telnet、ローカルシェル（既定は無効）。プロキシ、永続セッション、SFTP ファイル管理、2FA とプロトコル確認、クイックコマンド、画面分割 |
@@ -47,6 +55,28 @@ Gately は完全なオープンソースで、ユーザーとコミュニティ�
 | 監査と履歴 | ログイン、設定変更、機密情報へのアクセスを記録する監査ログ（リクエスト本文やシークレットは一切記録しません）。上書きされた設定ファイルは以前のバージョンを保持し、差分表示とワンクリックでのロールバックが可能。GitOps 向けの宣言的設定ディレクトリ（`-apply`） |
 | 監視とセルフチェック | グローバルな Prometheus エンドポイント `/api/metrics`（証明書、DDNS、STUN、ポート転送、Web サービス）とすぐに使える Grafana ダッシュボード。ワンクリックのネットワークセルフチェック（グローバル IP、CGNAT、時刻、80/443 ポート、DDNS の名前解決、証明書の期限） |
 | 移行 | Lucky の `.lkcf` またはサイト全体の設定 zip をインポート: ポート転送、DDNS、STUN、証明書、リバースプロキシ、WAF、Wake-on-LAN、Web ターミナル、WebDAV、基本設定 |
+
+## パフォーマンス
+
+ポート転送の SNI 振り分けと Web サービスを組み合わせると、よくある haproxy（SNI による TCP 振り分け）+ nginx（TLS とリバースプロキシ）の構成を置き換えられます。下の表は、実際のサーバーに近い設定で、同じマシン上の両者を比較したものです。90 個のドメインを SNI で振り分け、2 つのホップ間は PROXY プロトコル v2、証明書は ECDSA P-256、TLS 1.3 を使用しています。
+
+| シナリオ | haproxy + nginx | Gately |
+| --- | --- | --- |
+| HTTPS リバースプロキシ、Keep-Alive、1 KB のレスポンス、64 接続 | 14,767 req/s（p99 35.9 ms） | **26,434 req/s**（p99 5.7 ms） |
+| 同条件で HTTP/2 | 未テスト（使用した nginx の設定は HTTP/1.1） | 27,795 req/s |
+| リクエストごとに新しい TLS 接続、32 並列 | 2,557 req/s | **3,448 req/s** |
+| 1 MB のレスポンス、16 接続 | 1,053 MB/s | **1,585 MB/s** |
+| TLS ストリームの SNI パススルー、4 接続 | 2,927 MB/s | **4,962 MB/s** |
+| SNI パススルー、1 秒あたりの新規接続数、64 並列 | 6,334 /s | 6,266 /s（ほぼ同等） |
+| 負荷時のメモリ | haproxy ≈ 21 MB + nginx ≈ 21 MB | ≈ 110 MB（全モジュールを含む単一プロセス） |
+
+測定方法：
+
+- ホスト：Intel Core i5-13500T。小規模なクラウドサーバーに合わせて、各構成を CPU 2 コアに制限しました（haproxy と nginx は Docker の `--cpuset-cpus`、Gately は `taskset` で固定）。バックエンドと負荷生成ツールは別のコアで動かしました。
+- haproxy は `mode tcp`、`req_ssl_sni` ルール、`send-proxy-v2` を使用しました。nginx は `worker_processes 2` と本番サイトのプロキシ設定を使用しており、この設定では `Connection: upgrade` を送るため、リクエストごとにバックエンドへの新しい接続が作られます。アップストリームの Keep-Alive を有効にしてチューニングした nginx であれば、小さなレスポンスでの差は縮まります。
+- Gately の経路は、SNI ルール、PROXY v2、Web サービスのリスナーの順で、haproxy → nginx と同じホップ数です。
+- 各ケースは 10 秒間実行し、繰り返したケースの結果は 3% 以内で一致しました。実際の 2 vCPU のクラウドホストでは、静的サイトは 5.5k req/s 対 3.4k req/s でした。クライアントが X25519 を使うと、新規 TLS 接続は同等（どちらも毎秒約 480〜550）でした。Go のクライアントや最近のブラウザが提供するポスト量子ハイブリッド鍵交換を使うと、この測定では Gately のハンドシェイク完了数は約 13% 少なくなりました。
+- 結果はハードウェア、設定、トラフィックによって変わります。Gately が haproxy と nginx に引けを取らないことの目安として捉え、実際のワークロードで測定してください。
 
 ## クイックスタート
 
@@ -135,7 +165,11 @@ make lint     # gofmt、go vet、フロントエンドの型チェック
 
 ## コミュニティ
 
-使い方の質問やフィードバックは Telegram グループへどうぞ：[t.me/gately_chat](https://t.me/gately_chat)。不具合は [GitHub Issues](https://github.com/wangwanjie/gately/issues) に報告してください。
+使い方の質問やフィードバックは Telegram グループへどうぞ：[t.me/gately_chat](https://t.me/gately_chat)。スマートフォンで QR コードを読み取って参加することもできます。
+
+<a href="https://t.me/gately_chat"><img src="docs/images/telegram-qr.svg" alt="QR コードを読み取って Gately の Telegram グループに参加" width="160"></a>
+
+不具合は [GitHub Issues](https://github.com/wangwanjie/gately/issues) に報告してください。
 
 ## Star 履歴
 

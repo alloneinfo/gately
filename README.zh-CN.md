@@ -10,6 +10,14 @@
 
 ![Docker](docs/images/docker.webp)
 
+![端口转发的 SNI 分流：多个服务共用 443 端口](docs/images/portforward-sni.webp)
+
+![配置历史：差异对比与一键回滚](docs/images/config-history.webp)
+
+![操作审计](docs/images/audit-log.webp)
+
+![内置 API 文档](docs/images/api-docs.webp)
+
 ## 为什么做 Gately
 
 Gately 完全开源，用户和社区可以直接审阅源码与配置。对于运行在网络边界、手握 DNS 密钥和证书私钥的软件，开源让用户能够看到它在做什么。Gately 的承诺：
@@ -25,12 +33,12 @@ Gately 完全开源，用户和社区可以直接审阅源码与配置。对于�
 | --- | --- |
 | 动态域名 | 阿里云、Cloudflare、腾讯云、DNSPod、华为云、GoDaddy、Porkbun、dynv6、DuckDNS、Amazon Route 53、OVHcloud、Gandi、NS1、Bunny DNS、Namecheap、DynDNS2（No-IP、Dynu 等）、自定义回调；URL/网卡/命令取 IP；IPv4/IPv6；Webhook |
 | STUN 穿透 | TCP/UDP、保活、UPnP/NAT-PMP、内置转发、地址变化时触发 Webhook 与脚本 |
-| 端口转发 | TCP/UDP、IPv4/IPv6、端口段、多目标故障转移、连接数限制、流量统计、PROXY 协议（v1/v2） |
+| 端口转发 | TCP/UDP、IPv4/IPv6、端口段、多目标故障转移、连接数限制、流量统计、PROXY 协议（v1/v2）；SNI 分流，让多个服务共用 443 等同一个端口（按域名 TLS 透传、默认目标、每条路由单独设置 PROXY 协议） |
 | SSL 证书 | ACME 自动签发与续期，支持 DNS-01（通配符）与 HTTP-01（无需 DNS 服务商）、EAB、上传、读取文件、映射到目录并执行脚本 |
 | Tailscale | 托管 tailscaled（用户态网络，容器友好）或接入系统已有守护进程；认证密钥/登录链接、Headscale、子网路由、出口节点、节点列表与 SOCKS5 代理、固定端口、tailscaled 额外参数与环境变量 |
 | frp | frpc 客户端（tcp/udp/http/https/stcp/xtcp 代理，增删即生效）与 frps 服务端（端口白名单、子域名、控制台），可一键导入旧版 ini / 新版 toml 配置 |
 | Cloudflare 隧道 | cloudflared 令牌隧道与 trycloudflare 临时隧道，多隧道、自动重启、公网地址展示 |
-| Web 服务 | 按域名反向代理/重定向/静态文件/固定文本；HTTPS 与 HTTP/3（QUIC）；WebSocket；PROXY 协议收发；基本认证、网页认证、GitHub/Google/QQ/OIDC 登录；IP 黑白名单、路径规则、临时分享链接、认证失败自动封禁、GeoIP 国家过滤；后端权重/备用/负载均衡策略、主动与被动健康检查、压缩、限流、响应缓存、路径重写；分钟级访问统计与 Prometheus 指标 |
+| Web 服务 | 按域名反向代理/重定向/静态文件/固定文本；HTTPS 与 HTTP/3（QUIC）；WebSocket；PROXY 协议收发；基本认证、网页认证、GitHub/Google/QQ/OIDC 登录、带 TOTP 二次验证并可跨子域名单点登录的共享用户、转发认证到 Authelia 等外部服务；IP 黑白名单、路径规则、临时分享链接、认证失败自动封禁、GeoIP 国家过滤；按路径分流后端、HTTPS 后端按访问域名发送 SNI、后端权重/备用/负载均衡策略、主动与被动健康检查、压缩、限流、响应缓存、路径重写；静态站点支持无扩展名地址与自定义 404 页；修改站点不会断开已有连接；分钟级访问统计与 Prometheus 指标 |
 | WAF 防火墙 | Coraza + OWASP CRS v4，可按文件启用规则、自定义 SecLang、拦截/仅检测 |
 | Docker 管理 | 容器创建与编辑、日志与终端、Compose、镜像更新检查与一键升级（失败自动回滚）、网络与卷 |
 | Web 终端 | SSH（主机密钥首次信任）、Telnet、本机 Shell（默认关闭）；代理、持久会话、SFTP 文件管理、2FA 与协议确认、快捷命令、分屏 |
@@ -47,6 +55,28 @@ Gately 完全开源，用户和社区可以直接审阅源码与配置。对于�
 | 审计与历史 | 操作审计日志：登录、配置变更、访问敏感内容（不记录请求体与任何密钥）；每次覆盖配置文件前保留旧版本，可对比差异并一键回滚；声明式配置目录（`-apply`），便于 GitOps |
 | 监控与自检 | 全局 Prometheus 指标 `/api/metrics`（证书、DDNS、STUN、端口转发、Web 服务），附 Grafana 面板；一键网络自检（公网 IP、运营商 NAT、系统时间、80/443 端口、DDNS 解析、证书到期） |
 | 迁移 | 导入 Lucky 的 `.lkcf` 或整站配置 zip：端口转发、DDNS、STUN、证书、反向代理、WAF、网络唤醒、Web 终端、WebDAV、基础设置 |
+
+## 性能
+
+端口转发的 SNI 分流加 Web 服务，可以替代常见的 haproxy（按 SNI 做 TCP 分流）+ nginx（TLS 与反向代理）组合。下表在同一台机器上、按一台真实服务器的配置对比两者：90 个域名按 SNI 分流，两跳之间使用 PROXY 协议 v2，ECDSA P-256 证书，TLS 1.3。
+
+| 场景 | haproxy + nginx | Gately |
+| --- | --- | --- |
+| HTTPS 反向代理，长连接，1 KB 响应，64 并发 | 14,767 req/s（p99 35.9 ms） | **26,434 req/s**（p99 5.7 ms） |
+| 同上，HTTP/2 | 未测试（nginx 配置使用 HTTP/1.1） | 27,795 req/s |
+| 每个请求新建 TLS 连接，32 并发 | 2,557 req/s | **3,448 req/s** |
+| 1 MB 响应，16 并发 | 1,053 MB/s | **1,585 MB/s** |
+| SNI 透传 TLS 数据流，4 连接 | 2,927 MB/s | **4,962 MB/s** |
+| SNI 透传，每秒新建连接数，64 并发 | 6,334 /s | 6,266 /s（持平） |
+| 负载下的内存 | haproxy ≈ 21 MB + nginx ≈ 21 MB | ≈ 110 MB（包含全部模块的单个进程） |
+
+测试方法：
+
+- 机器：Intel Core i5-13500T。为贴近小型云服务器，每套方案限制在 2 个 CPU 核心（haproxy 与 nginx 在 Docker 中用 `--cpuset-cpus`，Gately 用 `taskset` 绑核），后端与压测程序运行在其他核心。
+- haproxy 使用 `mode tcp`、`req_ssl_sni` 规则与 `send-proxy-v2`。nginx 使用 `worker_processes 2` 与生产站点的代理设置，其中 `Connection: upgrade` 会让每个请求新建一条后端连接；开启上游 keep-alive 的 nginx 在小响应上会缩小差距。
+- Gately 的路径是 SNI 规则、PROXY v2、再到 Web 服务监听，跳数与 haproxy → nginx 相同。
+- 每个场景运行 10 秒，重复测试的场景差异在 3% 以内。在真实的 2 vCPU 云主机上，静态站点为 5.5k req/s 对 3.4k req/s；客户端使用 X25519 时新建 TLS 连接持平（双方都约每秒 480–550 个），使用 Go 客户端与新版浏览器默认提供的后量子混合密钥交换时，Gately 在该次测试中完成的握手少约 13%。
+- 结果受硬件、配置与流量影响，仅用于确认 Gately 能跟上 haproxy 与 nginx，请用自己的业务负载实测。
 
 ## 快速开始
 
@@ -135,7 +165,11 @@ make lint     # gofmt、go vet、前端类型检查
 
 ## 交流群
 
-欢迎加入 Telegram 群交流使用问题、反馈建议：[t.me/gately_chat](https://t.me/gately_chat)。Bug 请提交到 [GitHub Issues](https://github.com/wangwanjie/gately/issues)，并附上[诊断包](docs/DIAGNOSTICS.md)（设置 → 诊断）；诊断包在本机生成，不含密码、令牌、域名和真实 IP。
+欢迎加入 Telegram 群交流使用问题、反馈建议：[t.me/gately_chat](https://t.me/gately_chat)，也可以用手机扫描二维码加入：
+
+<a href="https://t.me/gately_chat"><img src="docs/images/telegram-qr.svg" alt="扫码加入 Gately Telegram 群" width="160"></a>
+
+Bug 请提交到 [GitHub Issues](https://github.com/wangwanjie/gately/issues)，并附上[诊断包](docs/DIAGNOSTICS.md)（设置 → 诊断）；诊断包在本机生成，不含密码、令牌、域名和真实 IP。
 
 ## Star 趋势
 
