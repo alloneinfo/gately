@@ -10,13 +10,15 @@ A configuração tem três camadas:
 2. Site: um site dentro de um listener, correspondido por domínio. Os domínios podem ser um domínio exato, `*.example.com` (corresponde a subdomínios em qualquer profundidade) ou `*` (corresponde a tudo). A prioridade de correspondência é: domínio exato, curinga e depois `*`.
 3. Site padrão: usado quando nenhum site corresponde. Quando não está ativado, um 404 é retornado.
 
+Ao salvar uma alteração em um site ou no site padrão, a lista de sites é trocada em tempo real: o listener continua em execução, as conexões abertas (inclusive WebSocket) permanecem ativas e cada site mantém suas estatísticas. Se a nova configuração for inválida, os sites anteriores continuam atendendo. Alterar as configurações do próprio listener (rede, endereço, porta, HTTPS, TLS mínimo, HTTP/3, protocolo PROXY) reinicia esse listener.
+
 ## Tipos de site
 
 | Tipo | Descrição |
 | --- | --- |
 | Proxy reverso | Encaminha para um ou mais backends. Os endereços dos backends usam o formato `http(s)://host:port`, e o WebSocket é compatível |
-| Redirecionamento | Redireciona para uma URL completa com código de status 301 / 302 / 307 / 308 (padrão 302), opcionalmente mantendo o caminho e a query string originais |
-| Arquivos estáticos | O diretório deve ser um caminho absoluto. Com a "Listagem de diretório" desativada, uma requisição a um diretório só retorna resposta se existir um `index.html` |
+| Redirecionamento | Redireciona para uma URL completa com código de status 301 / 302 / 307 / 308 (padrão 302), opcionalmente mantendo o caminho e a query string originais. A URL pode conter `{host}`, que é substituído pelo domínio que o visitante usou: `https://{host}` com "Manter caminho e query" envia todas as requisições HTTP para HTTPS no mesmo domínio |
+| Arquivos estáticos | O diretório deve ser um caminho absoluto. Com a "Listagem de diretório" desativada, uma requisição a um diretório só retorna resposta se existir um `index.html`. "URLs sem extensão" tenta `caminho.html` e `caminho/index.html` quando o arquivo não existe (para VitePress e geradores parecidos, como o `try_files $uri $uri.html $uri/index.html` do nginx). "Página 404" é um caminho dentro do diretório, como `404.html`, retornado com status 404 |
 | Texto fixo | Conteúdo personalizado, `Content-Type` (padrão `text/plain; charset=utf-8`) e código de status (100-599, padrão 200) |
 
 Outras opções dos sites de proxy reverso:
@@ -24,7 +26,8 @@ Outras opções dos sites de proxy reverso:
 - Usar o Host do backend: o cabeçalho Host é alterado para o endereço do backend; quando desativado, o Host da requisição do cliente é mantido;
 - Ignorar a validação do certificado do backend, desativar o Keep-Alive;
 - Enviar o protocolo PROXY ao backend (cabeçalho v2, repassa o IP real do cliente, exige suporte do backend);
-- Adicionar `X-Forwarded-For` / `X-Forwarded-Proto` / `X-Forwarded-Host`.
+- Adicionar `X-Forwarded-For` / `X-Forwarded-Proto` / `X-Forwarded-Host` / `X-Forwarded-Port` e `X-Real-IP`;
+- Usar o domínio acessado como SNI (somente backends HTTPS): o handshake leva o domínio que o visitante usou e o certificado é validado com ele, como o `proxy_ssl_server_name on; proxy_ssl_name $host` do nginx. Ative quando o backend roteia por SNI, por exemplo o `vhost_https` do frp. Cada backend tem seu próprio pool de conexões, então as conexões nunca são reutilizadas entre domínios.
 
 Sites de qualquer tipo podem definir um log de acesso, cross-origin (CORS), cabeçalhos personalizados de requisição e resposta (um `Key: Value` por linha; um Value vazio remove aquele cabeçalho) e podem referenciar uma instância do [Firewall WAF](/pt-BR/docs/modules/waf) (se a instância não existir ou estiver desativada, as requisições passam direto).
 
@@ -51,6 +54,41 @@ https://auth.example.com/__gately_auth/oauth/callback
 ```
 
 O login de terceiros da própria interface de administração é configurado separadamente em "Configurações → Conta e segurança".
+
+### Autenticação delegada (Authelia e similares)
+
+Entregue a autenticação a um serviço externo, como o `auth_request` do nginx ou o `forwardAuth` do Traefik. Marque "Autenticação delegada" na página "Segurança". Ela não pode ser combinada com a autenticação básica ou web no mesmo site.
+
+| Campo | Descrição |
+| --- | --- |
+| `url` | O endpoint de verificação, como o do Authelia, `http://127.0.0.1:9091/api/authz/auth-request` |
+| `loginUrl` | Para onde enviar os visitantes quando o endpoint responde 401, como `https://auth.example.com/?rd={url}&rm={method}`. `{url}` é o endereço original (codificado como URL) e `{method}` o método da requisição. Quando vazio, a resposta do endpoint é retornada como está |
+| `copyHeaders` | Cabeçalhos de identidade copiados da resposta do endpoint para a requisição ao backend; o padrão é `Remote-User`, `Remote-Groups`, `Remote-Email` e `Remote-Name` |
+
+Como funciona:
+
+- Toda requisição vai primeiro para `url` como um GET sem corpo, com os cabeçalhos do visitante (cookies, `Authorization` etc.) mais `X-Original-Method`, `X-Original-URL`, `X-Forwarded-Method`, `X-Forwarded-Proto`, `X-Forwarded-Host`, `X-Forwarded-Uri`, `X-Forwarded-For` e `X-Real-Ip`. O tempo limite é de 10 segundos;
+- Uma resposta 2xx libera a requisição, com os cabeçalhos de identidade adicionados; um 401 redireciona para `loginUrl` (status 302); outras respostas, como 403 ou um redirecionamento, são retornadas ao visitante; um serviço inacessível resulta em 502;
+- Os cabeçalhos de identidade enviados pelos visitantes são sempre removidos, para que não possam ser forjados;
+- Funciona com as regras por caminho e o "Escopo da autenticação", de modo que apenas alguns caminhos (por exemplo `/admin`) exijam login, e com os links de compartilhamento temporários.
+
+### Usuários compartilhados: TOTP e login único
+
+Defina as contas uma só vez e use-as em vários sites, com verificação em dois fatores TOTP opcional. Cobre o que muita gente usa o Authelia para fazer.
+
+Em "Configurações globais → Usuários compartilhados":
+
+- Adicione usuários com um nome de usuário e uma senha. As senhas são armazenadas como hashes bcrypt e nunca são retornadas pela API. Para adicionar o TOTP, clique em "Ativar TOTP", escaneie o QR code com um app autenticador (Google Authenticator, 1Password etc.) e salve. Gerar a chave novamente invalida a anterior;
+- Domínio de SSO, como `example.com`: depois de entrar em qualquer site desse domínio ou de seus subdomínios, os outros sites ali não pedem novo login. Usa um cookie de domínio pai (`gately_sso`, válido por 7 dias) que nunca é repassado aos backends. Deixe vazio para entrar em cada site separadamente.
+
+Em um site, marque "Usar usuários compartilhados" junto à autenticação web ou básica. Os usuários próprios do site continuam funcionando também.
+
+Comportamento:
+
+- A página de login mostra um campo de código de verificação quando algum usuário compartilhado tem TOTP. Cada código vale uma única vez;
+- Alterar a senha ou a chave TOTP de um usuário encerra as sessões desse usuário;
+- A autenticação básica aceita apenas usuários compartilhados sem TOTP, porque o prompt de senha do navegador não tem onde digitar um código;
+- As tentativas malsucedidas contam para o mesmo limite de tentativas e banimento automático dos demais logins.
 
 ## Controle de acesso
 
@@ -109,6 +147,20 @@ O "Filtro de países" de um site tem três modos: desativado, permitir apenas e 
 - Quando nenhum banco de dados está carregado, a filtragem não tem efeito (todos os visitantes passam) e a interface mostra um aviso;
 - Endereços de redes privadas são sempre permitidos;
 - No modo "Negar", endereços cujo país não é encontrado no banco de dados são permitidos.
+
+## Backends por caminho
+
+Para um site de proxy reverso, envie as requisições sob um prefixo de caminho para outros backends, como o `location /api/ { proxy_pass ...; }` do nginx. Adicione-os em "Backends por caminho", na página "Básico" do editor do site.
+
+| Campo | Descrição |
+| --- | --- |
+| `prefix` | Um prefixo de caminho como `/api/`. A correspondência respeita os limites de segmento de caminho: `/api` e `/api/` correspondem ambos a `/api` e `/api/x`, mas não a `/apix` |
+| `targets` | Os backends deste caminho, escritos como os backends do site. Quando vazio, os backends do site são usados e apenas os cabeçalhos abaixo são adicionados |
+| `requestHeaders` | Cabeçalhos de requisição adicionados para este caminho, um `Key: Value` por linha. São aplicados depois dos cabeçalhos do site, e um cabeçalho com o mesmo nome substitui o do site |
+
+- O prefixo mais longo vence e o caminho é repassado sem alteração (o prefixo não é removido);
+- As demais configurações do site, como a opção de Host, as verificações de certificado, os cabeçalhos encaminhados, o protocolo PROXY, a política de balanceamento de carga e as verificações de integridade, valem para todos os backends por caminho;
+- Compressão, limitação de taxa, cache e reescritas valem para o site inteiro.
 
 ## Melhorias do proxy reverso
 
@@ -202,7 +254,7 @@ As regras são correspondidas em ordem, e a correspondência para na primeira oc
 | `redirect` | Desativado para reescrita interna (o caminho reescrito é enviado ao backend, e o destino deve começar com `/`); ativado para redirecionamento |
 | `code` | Código de status do redirecionamento 301 / 302 / 307 / 308, padrão 302 |
 
-Os redirecionamentos mantêm os parâmetros de query originais.
+Os redirecionamentos mantêm os parâmetros de query originais. O destino de um redirecionamento pode conter `{host}`, o domínio que o visitante usou. As regras de redirecionamento rodam antes da autenticação, como o `location = / { return 302 ...; }` do nginx, de modo que um caminho como `/` pode encaminhar os visitantes sem pedir que façam login.
 
 ## Estatísticas de acesso e monitoramento
 
@@ -215,7 +267,7 @@ Para um listener em execução, clique em "Estatísticas" na linha de um site pa
 - Top 10 de IPs de origem e top 10 de países (as estatísticas de países exigem um banco de dados GeoIP importado);
 - Sites de proxy reverso mostram o estado de saúde, o peso, a marca de backup e o número atual de conexões de cada backend.
 
-As estatísticas ficam em memória e voltam a contar do zero depois de uma reinicialização ou de uma modificação do listener. Os rankings acompanham no máximo 5000 origens distintas.
+As estatísticas ficam em memória e voltam a contar do zero depois de uma reinicialização ou de uma alteração nas configurações do próprio listener. Editar um site mantém os contadores dele. Os rankings acompanham no máximo 5000 origens distintas.
 
 ### Métricas Prometheus
 
@@ -237,6 +289,23 @@ curl -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/webservice/m
 | `gately_upstream_up` | gauge | Se um backend está saudável: 1 saudável, 0 indisponível (com a label `upstream`) |
 
 Todas as métricas têm as labels `listener` (nome do listener#chave do listener) e `site` (nome do site, ou o primeiro domínio quando não há nome).
+
+## Substituindo haproxy e nginx
+
+O redirecionamento de portas e os Serviços Web juntos podem substituir a dupla haproxy + nginx. Uma organização comum é uma regra de [roteamento SNI](/pt-BR/docs/modules/portforward) na porta 443 que envia a VPN e outros serviços TLS diretamente para seus backends e todo o resto para um listener de Serviços Web que aceita o protocolo PROXY, mais um listener de Serviços Web na porta 80 com um site de redirecionamento (`https://{host}`).
+
+Conversão das configurações do nginx:
+
+| nginx | Gately |
+| --- | --- |
+| `server` com `server_name` | um site com esses domínios |
+| `location` com um `proxy_pass` diferente | backends por caminho |
+| `auth_request` (Authelia) | autenticação delegada, ou usuários compartilhados com TOTP |
+| `proxy_ssl_name $host` | usar o domínio acessado como SNI |
+| `return 301 https://$host$request_uri` | um site de redirecionamento com `https://{host}` e "Manter caminho e query" |
+| `return 302 /admin` em `location = /` | uma reescrita com "Redirecionamento" ativado e padrão `^/$` |
+| `try_files $uri $uri.html $uri/index.html` e `error_page 404` | arquivos estáticos com URLs sem extensão e página 404 |
+| `add_header` | cabeçalhos de resposta |
 
 ## Dica de implantação
 

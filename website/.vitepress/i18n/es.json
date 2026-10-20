@@ -78,8 +78,8 @@
   "home": {
     "pill": "Código abierto · Auditable · Binario único",
     "announce": {
-      "text": "Ya está v0.5.0: auditoría, passkeys, HTTP/3 y más →",
-      "link": "/en/news/v0.5.0"
+      "text": "Ya está v0.5.2: enrutamiento SNI, sustituto de nginx, acceso con TOTP →",
+      "link": "/en/news/v0.5.2"
     },
     "titleLine1": "Una pasarela de red",
     "titleLine2": "que puedes ver por dentro",
@@ -150,7 +150,7 @@
       },
       {
         "title": "Reenvío de puertos",
-        "text": "TCP / UDP, IPv4 / IPv6, rangos de puertos, conmutación por error entre varios destinos, límites de conexiones y estadísticas de tráfico; puede enviar el protocolo PROXY al siguiente salto para conservar la dirección real del cliente."
+        "text": "TCP / UDP, IPv4 / IPv6, rangos de puertos, conmutación por error entre varios destinos, límites de conexiones y estadísticas de tráfico; puede enviar el protocolo PROXY al siguiente salto para conservar la dirección real del cliente; el enrutamiento SNI permite que varios servicios compartan el puerto 443."
       },
       {
         "title": "Certificados SSL",
@@ -158,7 +158,7 @@
       },
       {
         "title": "Servicios web",
-        "text": "Proxy inverso, redirecciones y archivos estáticos por dominio; HTTPS, HTTP/3, WebSocket y protocolo PROXY; políticas con varios backends ponderados, comprobaciones de estado, compresión, límite de peticiones y caché de respuestas."
+        "text": "Proxy inverso, redirecciones y archivos estáticos por dominio; HTTPS, HTTP/3, WebSocket y protocolo PROXY; políticas con varios backends ponderados, comprobaciones de estado, compresión, límite de peticiones y caché de respuestas; puede sustituir a nginx: backends por ruta, autenticación delegada y usuarios compartidos con TOTP e inicio de sesión único."
       },
       {
         "title": "Cortafuegos WAF",
@@ -264,7 +264,8 @@
     "moreFaq": "Más preguntas →",
     "finalTitle": "Recupera el control del borde de tu red",
     "finalDesc": "Abierto, transparente y en un solo archivo. Despliega Gately hoy mismo.",
-    "starOnGithub": "Dar una estrella en GitHub"
+    "starOnGithub": "Dar una estrella en GitHub",
+    "telegramScan": "Escanea con el móvil para unirte al grupo de Telegram"
   },
   "download": {
     "other": "Otros",

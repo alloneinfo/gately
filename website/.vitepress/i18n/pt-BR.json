@@ -78,8 +78,8 @@
   "home": {
     "pill": "Código aberto · Auditável · Binário único",
     "announce": {
-      "text": "Saiu a v0.5.0: auditoria, passkeys, HTTP/3 e mais →",
-      "link": "/en/news/v0.5.0"
+      "text": "Saiu a v0.5.2: roteamento SNI, substituto do nginx, login com TOTP →",
+      "link": "/en/news/v0.5.2"
     },
     "titleLine1": "Um kit de gateway de rede",
     "titleLine2": "que você enxerga por dentro",
@@ -150,7 +150,7 @@
       },
       {
         "title": "Redirecionamento de portas",
-        "text": "TCP / UDP, IPv4 / IPv6, intervalos de portas, failover entre vários destinos, limite de conexões e estatísticas de tráfego; pode enviar o protocolo PROXY ao destino para preservar o endereço real do cliente."
+        "text": "TCP / UDP, IPv4 / IPv6, intervalos de portas, failover entre vários destinos, limite de conexões e estatísticas de tráfego; pode enviar o protocolo PROXY ao destino para preservar o endereço real do cliente; o roteamento SNI permite que vários serviços compartilhem a porta 443."
       },
       {
         "title": "Certificados SSL",
@@ -158,7 +158,7 @@
       },
       {
         "title": "Serviços Web",
-        "text": "Proxy reverso por domínio, redirecionamentos e arquivos estáticos; HTTPS, HTTP/3, WebSocket e protocolo PROXY; políticas com vários backends e pesos, health checks, compressão, limitação de taxa e cache de respostas."
+        "text": "Proxy reverso por domínio, redirecionamentos e arquivos estáticos; HTTPS, HTTP/3, WebSocket e protocolo PROXY; políticas com vários backends e pesos, health checks, compressão, limitação de taxa e cache de respostas; pode substituir o nginx: backends por caminho, autenticação delegada e usuários compartilhados com TOTP e login único."
       },
       {
         "title": "Firewall WAF",
@@ -264,7 +264,8 @@
     "moreFaq": "Mais perguntas →",
     "finalTitle": "Retome o controle da borda da sua rede",
     "finalDesc": "Aberto, transparente, em um único arquivo. Implante o Gately hoje mesmo.",
-    "starOnGithub": "Dar uma estrela no GitHub"
+    "starOnGithub": "Dar uma estrela no GitHub",
+    "telegramScan": "Escaneie com o celular para entrar no grupo do Telegram"
   },
   "download": {
     "other": "Outros",

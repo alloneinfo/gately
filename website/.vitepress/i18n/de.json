@@ -78,8 +78,8 @@
   "home": {
     "pill": "Open Source · Prüfbar · Einzelne Binärdatei",
     "announce": {
-      "text": "v0.5.0 ist da: Audit-Protokoll, Passkeys, HTTP/3 und mehr →",
-      "link": "/en/news/v0.5.0"
+      "text": "v0.5.2 ist da: SNI-Routing, nginx-Ersatz, Anmeldung mit TOTP →",
+      "link": "/en/news/v0.5.2"
     },
     "titleLine1": "Ein Toolkit für Netzwerk-Gateways,",
     "titleLine2": "das Sie durchschauen können",
@@ -150,7 +150,7 @@
       },
       {
         "title": "Portweiterleitung",
-        "text": "TCP / UDP, IPv4 / IPv6, Portbereiche, Failover über mehrere Ziele, Verbindungslimits und Traffic-Statistiken; optional PROXY-Protokoll an nachgelagerte Dienste, um die echte Client-Adresse zu erhalten."
+        "text": "TCP / UDP, IPv4 / IPv6, Portbereiche, Failover über mehrere Ziele, Verbindungslimits und Traffic-Statistiken; optional PROXY-Protokoll an nachgelagerte Dienste, um die echte Client-Adresse zu erhalten; SNI-Routing lässt mehrere Dienste einen Port wie 443 teilen."
       },
       {
         "title": "SSL-Zertifikate",
@@ -158,7 +158,7 @@
       },
       {
         "title": "Web-Dienste",
-        "text": "Reverse Proxy pro Domain, Weiterleitungen und statische Dateien; HTTPS, HTTP/3, WebSocket und PROXY-Protokoll; gewichtete Multi-Backend-Strategien, Health-Checks, Kompression, Ratenbegrenzung und Antwort-Caching."
+        "text": "Reverse Proxy pro Domain, Weiterleitungen und statische Dateien; HTTPS, HTTP/3, WebSocket und PROXY-Protokoll; gewichtete Multi-Backend-Strategien, Health-Checks, Kompression, Ratenbegrenzung und Antwort-Caching; ersetzt nginx: Backends pro Pfad, Forward-Auth sowie gemeinsame Benutzer mit TOTP und Single Sign-on."
       },
       {
         "title": "WAF-Firewall",
@@ -264,7 +264,8 @@
     "moreFaq": "Weitere Fragen →",
     "finalTitle": "Holen Sie sich die Kontrolle über Ihren Netzwerkrand zurück",
     "finalDesc": "Offen, transparent, eine einzige Datei. Setzen Sie noch heute Gately ein.",
-    "starOnGithub": "Auf GitHub mit Stern markieren"
+    "starOnGithub": "Auf GitHub mit Stern markieren",
+    "telegramScan": "Mit dem Handy scannen und der Telegram-Gruppe beitreten"
   },
   "download": {
     "other": "Sonstige",

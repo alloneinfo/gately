@@ -10,13 +10,15 @@
 2. 站台：監聽下依網域比對的一個站台。網域支援精確網域、`*.example.com`（比對任意層級子網域）與 `*`（比對全部）；比對優先順序為精確網域、萬用字元、`*`。
 3. 預設站台：沒有站台符合時使用，未啟用時回傳 404。
 
+修改站台或預設站台並儲存時，站台清單會原地替換：監聽保持執行，已建立的連線（含 WebSocket）不會中斷，各站台的統計資料也會保留。新設定無效時繼續使用原來的站台。修改監聽自身的設定（網路、位址、連接埠、HTTPS、最低 TLS、HTTP/3、PROXY 協定）會重新啟動該監聽。
+
 ## 站台類型
 
 | 類型 | 說明 |
 | --- | --- |
 | 反向代理 | 轉發到一個或多個後端，後端位址格式為 `http(s)://主機:連接埠`，支援 WebSocket |
-| 重新導向 | 跳轉到完整 URL，狀態碼 301 / 302 / 307 / 308（預設 302），可選保留原路徑與查詢字串 |
-| 靜態檔案 | 目錄需為絕對路徑；關閉「目錄列表」時，目錄請求只在存在 `index.html` 時回傳 |
+| 重新導向 | 跳轉到完整 URL，狀態碼 301 / 302 / 307 / 308（預設 302），可選保留原路徑與查詢字串。URL 中可以寫 `{host}`，會替換為訪客使用的網域：`https://{host}` 加上「保留路徑」，就能把所有 HTTP 請求跳轉到同一網域的 HTTPS |
+| 靜態檔案 | 目錄需為絕對路徑；關閉「目錄列表」時，目錄請求只在存在 `index.html` 時回傳。「無副檔名網址」在檔案不存在時再嘗試 `路徑.html` 與 `路徑/index.html`（適用於 VitePress 等產生器，相當於 nginx 的 `try_files $uri $uri.html $uri/index.html`）；「404 頁面」填寫目錄內的路徑，如 `404.html`，以 404 狀態回傳 |
 | 固定文字 | 自訂內容、`Content-Type`（預設 `text/plain; charset=utf-8`）與狀態碼（100-599，預設 200） |
 
 反向代理站台的其他選項：
@@ -24,7 +26,8 @@
 - 使用後端 Host：Host 標頭改為後端位址，關閉時保留用戶端請求的 Host；
 - 略過後端憑證驗證、關閉 Keep-Alive；
 - 向後端送出 PROXY 協定（v2 標頭，傳遞真實用戶端 IP，需要後端支援）；
-- 加入 `X-Forwarded-For` / `X-Forwarded-Proto` / `X-Forwarded-Host`。
+- 加入 `X-Forwarded-For` / `X-Forwarded-Proto` / `X-Forwarded-Host` / `X-Forwarded-Port` 與 `X-Real-IP`；
+- 使用造訪網域作為 SNI（僅 HTTPS 後端）：握手時傳送訪客使用的網域，並依它驗證憑證，相當於 nginx 的 `proxy_ssl_server_name on; proxy_ssl_name $host`。後端依 SNI 分流時（例如 frp 的 `vhost_https`）需要開啟。每個後端使用獨立的連線池，不同網域的連線不會互相重用。
 
 所有類型的站台都可設定存取日誌、跨來源（CORS）、自訂請求標頭與回應標頭（每行 `Key: Value`，Value 留空表示刪除該標頭），並可引用一個 [WAF 防火牆](/zh-TW/docs/modules/waf) 實例（實例不存在或停用時放行）。
 
@@ -51,6 +54,41 @@ https://auth.example.com/__gately_auth/oauth/callback
 ```
 
 管理後台自身的第三方登入在「設定 → 帳號與安全」中單獨設定。
+
+### 轉發認證（Authelia 等）
+
+把認證交給外部服務，相當於 nginx 的 `auth_request` 或 Traefik 的 `forwardAuth`。在「安全」頁勾選「轉發認證」；同一站台不能同時啟用基本驗證或網頁驗證。
+
+| 欄位 | 說明 |
+| --- | --- |
+| `url` | 驗證介面，例如 Authelia 的 `http://127.0.0.1:9091/api/authz/auth-request` |
+| `loginUrl` | 介面回傳 401 時把訪客跳轉到的位址，例如 `https://auth.example.com/?rd={url}&rm={method}`；`{url}` 為原始位址（已編碼），`{method}` 為請求方法。留空時原樣回傳介面的回應 |
+| `copyHeaders` | 驗證通過後從介面回應複製到後端請求的身分標頭，預設 `Remote-User`、`Remote-Groups`、`Remote-Email`、`Remote-Name` |
+
+運作方式：
+
+- 每個請求先以不帶請求本文的 GET 送到 `url`，帶上訪客的請求標頭（Cookie、`Authorization` 等），以及 `X-Original-Method`、`X-Original-URL`、`X-Forwarded-Method`、`X-Forwarded-Proto`、`X-Forwarded-Host`、`X-Forwarded-Uri`、`X-Forwarded-For` 與 `X-Real-Ip`，逾時 10 秒；
+- 回傳 2xx 即放行，並帶上身分標頭；回傳 401 時跳轉到 `loginUrl`（狀態碼 302）；其他結果（如 403 或跳轉）原樣回傳給訪客；介面無法連線時回傳 502；
+- 訪客自帶的身分標頭一律刪除，無法偽造；
+- 可與路徑規則和「驗證範圍」搭配，只讓部分路徑（如 `/admin`）需要登入，也可與臨時分享連結搭配。
+
+### 共用使用者：TOTP 與單一登入
+
+帳號只需定義一次，就能用於多個站台，並可選擇啟用 TOTP 二次驗證，涵蓋了很多人使用 Authelia 的主要目的。
+
+在「全域設定 → 共用使用者」中：
+
+- 新增使用者名稱與密碼；密碼以 bcrypt 雜湊儲存，API 不會回傳。要啟用 TOTP，點「啟用 TOTP」，用驗證器 App（Google Authenticator、1Password 等）掃描 QR Code 並儲存；重新產生會使舊金鑰失效；
+- 單一登入網域，例如 `example.com`：在該網域或其子網域下的任一站台登入後，其他站台無需再登入。它使用父網域 Cookie（`gately_sso`，有效期 7 天），不會轉發給後端。留空則每個站台單獨登入。
+
+在站台的「安全」頁，於網頁驗證或基本驗證旁勾選「使用共用使用者」；站台自有的使用者仍然可用。
+
+行為說明：
+
+- 只要有共用使用者啟用了 TOTP，登入頁就會顯示驗證碼輸入框，每個驗證碼只能使用一次；
+- 修改使用者的密碼或 TOTP 金鑰後，該使用者既有的工作階段立即失效；
+- 基本驗證只接受未啟用 TOTP 的共用使用者，因為瀏覽器的密碼彈出視窗沒有地方輸入驗證碼；
+- 失敗次數與其他登入共用同一套限流與自動封鎖。
 
 ## 存取控制
 
@@ -109,6 +147,20 @@ https://auth.example.com/__gately_auth/oauth/callback
 - 資料庫未載入時過濾不生效（放行所有訪客），介面會提示；
 - 內網位址一律放行；
 - 「拒絕」模式下，庫中查不到國家的位址放行。
+
+## 依路徑分流後端
+
+為反向代理站台把某個路徑前綴下的請求送到其他後端，相當於 nginx 的 `location /api/ { proxy_pass ...; }`。在站台編輯視窗「基本」頁的「分路徑後端」中新增。
+
+| 欄位 | 說明 |
+| --- | --- |
+| `prefix` | 路徑前綴，如 `/api/`。依路徑段邊界比對：`/api` 與 `/api/` 都符合 `/api` 和 `/api/x`，不符合 `/apix` |
+| `targets` | 該路徑的後端，寫法與站台後端相同；留空時使用站台後端，只追加下面的請求標頭 |
+| `requestHeaders` | 該路徑追加的請求標頭，每行 `Key: Value`；在站台請求標頭之後套用，同名時以路徑的為準 |
+
+- 最長前綴優先，路徑原樣轉發（不會去掉前綴）；
+- 站台的其他設定，如 Host 選項、憑證驗證、轉發標頭、PROXY 協定、負載平衡策略與健康檢查，對每個路徑後端同樣生效；
+- 壓縮、限流、快取與改寫作用於整個站台。
 
 ## 反向代理進階
 
@@ -202,7 +254,7 @@ http://10.0.0.3:8080 backup
 | `redirect` | 關閉為內部改寫（改寫後的路徑送往後端，目標需以 `/` 開頭）；開啟為重新導向 |
 | `code` | 重新導向狀態碼 301 / 302 / 307 / 308，預設 302 |
 
-重新導向會保留原查詢參數。
+重新導向會保留原查詢參數。重新導向目標中可以寫 `{host}`，表示訪客使用的網域。重新導向規則先於驗證執行，相當於 nginx 的 `location = / { return 302 ...; }`，所以 `/` 這類路徑可以直接把訪客送走，不要求先登入。
 
 ## 存取統計與監控
 
@@ -215,7 +267,7 @@ http://10.0.0.3:8080 backup
 - 來源 IP Top 10 與國家 Top 10（國家統計需要已匯入 GeoIP 資料庫）；
 - 反向代理站台顯示每個後端的健康狀態、權重、是否備用與目前連線數。
 
-統計保存在記憶體中，重新啟動或修改該監聽後重新計數。排行榜最多統計 5000 個不同來源。
+統計保存在記憶體中，重新啟動或修改該監聽自身的設定後重新計數；修改站台會保留其計數。排行榜最多統計 5000 個不同來源。
 
 ### Prometheus 指標
 
@@ -237,6 +289,23 @@ curl -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/webservice/m
 | `gately_upstream_up` | gauge | 後端是否健康，1 健康、0 無法使用（附標籤 `upstream`） |
 
 所有指標帶有標籤 `listener`（監聽名稱#監聽 key）與 `site`（站台名稱，未命名時取第一個網域）。
+
+## 取代 haproxy 與 nginx
+
+連接埠轉發加上 Web 服務可以取代 haproxy + nginx 的組合。常見配置是：在 443 上放一條 [SNI 分流](/zh-TW/docs/modules/portforward) 規則，把 VPN 等 TLS 服務直接送到各自的後端，其餘網域送到一個接收 PROXY 協定的 Web 服務監聽；再在 80 連接埠放一個 Web 服務監聽，用重新導向站台（`https://{host}`）跳轉到 HTTPS。
+
+nginx 設定的對應關係：
+
+| nginx | Gately |
+| --- | --- |
+| 帶 `server_name` 的 `server` | 使用這些網域的站台 |
+| `proxy_pass` 不同的 `location` | 分路徑後端 |
+| `auth_request`（Authelia） | 轉發認證，或帶 TOTP 的共用使用者 |
+| `proxy_ssl_name $host` | 使用造訪網域作為 SNI |
+| `return 301 https://$host$request_uri` | 重新導向站台，`https://{host}` 並勾選「保留路徑」 |
+| `location = /` 裡的 `return 302 /admin` | 改寫規則，開啟「重新導向」，pattern 為 `^/$` |
+| `try_files $uri $uri.html $uri/index.html` 與 `error_page 404` | 靜態檔案的無副檔名網址與 404 頁面 |
+| `add_header` | 回應標頭 |
 
 ## 部署提示
 

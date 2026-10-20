@@ -10,13 +10,15 @@ La configuración tiene tres niveles:
 2. Sitio: un sitio dentro de un listener, que se selecciona por dominio. Los dominios pueden ser un dominio exacto, `*.example.com` (coincide con subdominios de cualquier profundidad) o `*` (coincide con todo). La prioridad de coincidencia es dominio exacto, comodín y después `*`.
 3. Sitio por defecto: se usa cuando ningún sitio coincide. Si no está activado, se devuelve un 404.
 
+Al guardar un cambio en un sitio o en el sitio por defecto, la lista de sitios se sustituye en caliente: el listener sigue funcionando, las conexiones abiertas (incluido WebSocket) se mantienen y cada sitio conserva sus estadísticas. Si la nueva configuración no es válida, los sitios anteriores siguen sirviendo. Cambiar los ajustes propios del listener (red, dirección, puerto, HTTPS, TLS mínimo, HTTP/3, protocolo PROXY) reinicia ese listener.
+
 ## Tipos de sitio
 
 | Tipo | Descripción |
 | --- | --- |
 | Proxy inverso | Reenvía a uno o varios backends. Las direcciones de backend tienen la forma `http(s)://host:port` y se admite WebSocket |
-| Redirección | Redirige a una URL completa con código de estado 301 / 302 / 307 / 308 (por defecto 302), conservando opcionalmente la ruta y la cadena de consulta originales |
-| Archivos estáticos | El directorio debe ser una ruta absoluta. Con «Listado de directorios» desactivado, una petición a un directorio solo devuelve respuesta si existe `index.html` |
+| Redirección | Redirige a una URL completa con código de estado 301 / 302 / 307 / 308 (por defecto 302), conservando opcionalmente la ruta y la cadena de consulta originales. La URL puede contener `{host}`, que se sustituye por el dominio que usó el visitante: `https://{host}` con «Conservar ruta y consulta» envía todas las peticiones HTTP a HTTPS en el mismo dominio |
+| Archivos estáticos | El directorio debe ser una ruta absoluta. Con «Listado de directorios» desactivado, una petición a un directorio solo devuelve respuesta si existe `index.html`. «URL sin extensión» prueba `ruta.html` y `ruta/index.html` cuando falta un archivo (para VitePress y generadores similares, como `try_files $uri $uri.html $uri/index.html` de nginx). «Página 404» es una ruta dentro del directorio, como `404.html`, que se devuelve con estado 404 |
 | Texto fijo | Contenido personalizado, `Content-Type` (por defecto `text/plain; charset=utf-8`) y código de estado (100-599, por defecto 200) |
 
 Otras opciones de los sitios de proxy inverso:
@@ -24,7 +26,8 @@ Otras opciones de los sitios de proxy inverso:
 - Usar el Host del backend: la cabecera Host se cambia a la dirección del backend; si está desactivado, se conserva el Host de la petición del cliente;
 - Omitir la verificación del certificado del backend, desactivar Keep-Alive;
 - Enviar el protocolo PROXY al backend (cabecera v2, transmite la IP real del cliente, requiere compatibilidad del backend);
-- Añadir `X-Forwarded-For` / `X-Forwarded-Proto` / `X-Forwarded-Host`.
+- Añadir `X-Forwarded-For` / `X-Forwarded-Proto` / `X-Forwarded-Host` / `X-Forwarded-Port` y `X-Real-IP`;
+- Usar el dominio visitado como SNI (solo backends HTTPS): el handshake lleva el dominio que usó el visitante y el certificado se verifica con él, como `proxy_ssl_server_name on; proxy_ssl_name $host` de nginx. Actívalo cuando el backend enrute por SNI, por ejemplo `vhost_https` de frp. Cada backend tiene su propio pool de conexiones, así que las conexiones nunca se reutilizan entre dominios.
 
 Los sitios de cualquier tipo pueden definir un registro de acceso, orígenes cruzados (CORS), cabeceras de petición y respuesta personalizadas (un `Clave: Valor` por línea; un Valor vacío elimina esa cabecera) y pueden hacer referencia a una instancia de [Cortafuegos WAF](/es/docs/modules/waf) (si la instancia no existe o está desactivada, las peticiones pasan sin filtrar).
 
@@ -51,6 +54,41 @@ https://auth.example.com/__gately_auth/oauth/callback
 ```
 
 El inicio de sesión de terceros de la propia interfaz de administración se configura por separado en «Ajustes → Cuenta y seguridad».
+
+### Autenticación delegada (Authelia y similares)
+
+Delega la autenticación en un servicio externo, como `auth_request` de nginx o `forwardAuth` de Traefik. Marca «Autenticación delegada» en la página «Seguridad». No se puede combinar con la autenticación básica o web en el mismo sitio.
+
+| Campo | Descripción |
+| --- | --- |
+| `url` | El endpoint de comprobación, como el de Authelia, `http://127.0.0.1:9091/api/authz/auth-request` |
+| `loginUrl` | Adónde enviar a los visitantes cuando el endpoint responde 401, como `https://auth.example.com/?rd={url}&rm={method}`. `{url}` es la dirección original (codificada como URL) y `{method}` el método de la petición. Si está vacío, se devuelve tal cual la respuesta del endpoint |
+| `copyHeaders` | Cabeceras de identidad que se copian de la respuesta del endpoint a la petición al backend; por defecto son `Remote-User`, `Remote-Groups`, `Remote-Email` y `Remote-Name` |
+
+Cómo funciona:
+
+- Cada petición va primero a `url` como un GET sin cuerpo, con las cabeceras del visitante (cookies, `Authorization`, etc.) más `X-Original-Method`, `X-Original-URL`, `X-Forwarded-Method`, `X-Forwarded-Proto`, `X-Forwarded-Host`, `X-Forwarded-Uri`, `X-Forwarded-For` y `X-Real-Ip`. El tiempo de espera es de 10 segundos;
+- Una respuesta 2xx deja pasar la petición, con las cabeceras de identidad añadidas; un 401 redirige a `loginUrl` (estado 302); otras respuestas, como 403 o una redirección, se devuelven al visitante; un servicio inalcanzable produce 502;
+- Las cabeceras de identidad enviadas por los visitantes se eliminan siempre, por lo que no se pueden falsificar;
+- Funciona con las reglas por ruta y el «Ámbito de autenticación», de modo que solo algunas rutas (por ejemplo `/admin`) requieran inicio de sesión, y con los enlaces temporales para compartir.
+
+### Usuarios compartidos: TOTP e inicio de sesión único
+
+Define las cuentas una sola vez y úsalas en varios sitios, con verificación en dos pasos TOTP opcional. Cubre lo que muchas personas buscan al ejecutar Authelia.
+
+En «Ajustes globales → Usuarios compartidos»:
+
+- Añade usuarios con un nombre de usuario y una contraseña. Las contraseñas se guardan como hashes bcrypt y la API nunca las devuelve. Para añadir TOTP, pulsa «Activar TOTP», escanea el código QR con una app de autenticación (Google Authenticator, 1Password, etc.) y guarda. Regenerar la clave invalida la anterior;
+- Dominio de SSO, como `example.com`: tras iniciar sesión en cualquier sitio de ese dominio o de sus subdominios, los demás sitios no piden volver a iniciar sesión. Usa una cookie de dominio padre (`gately_sso`, válida durante 7 días) que nunca se reenvía a los backends. Déjalo vacío para iniciar sesión en cada sitio por separado.
+
+En un sitio, marca «Usar usuarios compartidos» junto a la autenticación web o básica. Los usuarios propios del sitio siguen funcionando también.
+
+Comportamiento:
+
+- La página de inicio de sesión muestra un campo de código de verificación cuando algún usuario compartido tiene TOTP. Cada código sirve una sola vez;
+- Cambiar la contraseña o la clave TOTP de un usuario cierra las sesiones de ese usuario;
+- La autenticación básica solo acepta usuarios compartidos sin TOTP, porque el aviso de contraseña del navegador no tiene dónde introducir un código;
+- Los intentos fallidos cuentan para el mismo límite de intentos y bloqueo automático que los demás inicios de sesión.
 
 ## Control de acceso
 
@@ -109,6 +147,20 @@ El «Filtro de países» de un sitio tiene tres modos: desactivado, permitir sol
 - Si no hay ninguna base de datos cargada, el filtrado no tiene efecto (todos los visitantes pasan) y la interfaz muestra un aviso;
 - Las direcciones de redes privadas siempre se permiten;
 - En el modo «Denegar», se permiten las direcciones cuyo país no se encuentra en la base de datos.
+
+## Backends por ruta
+
+Para un sitio de proxy inverso, envía las peticiones bajo un prefijo de ruta a otros backends, como `location /api/ { proxy_pass ...; }` de nginx. Añádelos en «Backends por ruta», en la página «Básico» del editor del sitio.
+
+| Campo | Descripción |
+| --- | --- |
+| `prefix` | Un prefijo de ruta como `/api/`. La coincidencia respeta los límites de segmento de ruta: `/api` y `/api/` coinciden ambos con `/api` y `/api/x`, pero no con `/apix` |
+| `targets` | Los backends de esta ruta, escritos como los backends del sitio. Si está vacío, se usan los del sitio y solo se añaden las cabeceras siguientes |
+| `requestHeaders` | Cabeceras de petición añadidas para esta ruta, una `Clave: Valor` por línea. Se aplican después de las del sitio, y una cabecera con el mismo nombre sustituye a la del sitio |
+
+- Gana el prefijo más largo y la ruta se reenvía sin cambios (el prefijo no se elimina);
+- Los demás ajustes del sitio, como la opción de Host, las comprobaciones de certificado, las cabeceras reenviadas, el protocolo PROXY, la política de balanceo de carga y las comprobaciones de estado, se aplican a todos los backends por ruta;
+- La compresión, el límite de peticiones, la caché y las reescrituras se aplican a todo el sitio.
 
 ## Mejoras del proxy inverso
 
@@ -202,7 +254,7 @@ Las reglas se evalúan en orden y la evaluación se detiene en la primera coinci
 | `redirect` | Desactivado para una reescritura interna (la ruta reescrita se envía al backend y el destino debe empezar por `/`); activado para una redirección |
 | `code` | Código de estado de la redirección 301 / 302 / 307 / 308, por defecto 302 |
 
-Las redirecciones conservan los parámetros de consulta originales.
+Las redirecciones conservan los parámetros de consulta originales. El destino de una redirección puede contener `{host}`, el dominio que usó el visitante. Las reglas de redirección se ejecutan antes de la autenticación, como `location = / { return 302 ...; }` de nginx, de modo que una ruta como `/` puede enviar a los visitantes a otro sitio sin pedirles que inicien sesión.
 
 ## Estadísticas de acceso y monitorización
 
@@ -215,7 +267,7 @@ En un listener en ejecución, pulsa «Estadísticas» en la fila de un sitio par
 - Las 10 IP de origen y los 10 países principales (las estadísticas por país requieren una base de datos GeoIP importada);
 - Los sitios de proxy inverso muestran el estado de salud, el peso, la marca de reserva y el número actual de conexiones de cada backend.
 
-Las estadísticas se guardan en memoria y vuelven a empezar a contarse tras un reinicio o tras modificar el listener. Las clasificaciones siguen como máximo 5000 orígenes distintos.
+Las estadísticas se guardan en memoria y vuelven a empezar a contarse tras un reinicio o tras cambiar los ajustes propios del listener. Editar un sitio conserva sus contadores. Las clasificaciones siguen como máximo 5000 orígenes distintos.
 
 ### Métricas de Prometheus
 
@@ -237,6 +289,23 @@ curl -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/webservice/m
 | `gately_upstream_up` | gauge | Si un backend está saludable: 1 saludable, 0 no disponible (con la etiqueta `upstream`) |
 
 Todas las métricas llevan las etiquetas `listener` (nombre del listener#clave del listener) y `site` (nombre del sitio o, si no tiene, el primer dominio).
+
+## Sustituir haproxy y nginx
+
+El reenvío de puertos y los servicios web juntos pueden sustituir la pareja haproxy + nginx. Una disposición habitual es una regla de [enrutamiento SNI](/es/docs/modules/portforward) en el puerto 443 que envía la VPN y otros servicios TLS directamente a sus backends y todo lo demás a un listener de servicios web que acepta el protocolo PROXY, más un listener de servicios web en el puerto 80 con un sitio de redirección (`https://{host}`).
+
+Conversión de ajustes de nginx:
+
+| nginx | Gately |
+| --- | --- |
+| `server` con `server_name` | un sitio con esos dominios |
+| `location` con otro `proxy_pass` | backends por ruta |
+| `auth_request` (Authelia) | autenticación delegada, o usuarios compartidos con TOTP |
+| `proxy_ssl_name $host` | usar el dominio visitado como SNI |
+| `return 301 https://$host$request_uri` | un sitio de redirección con `https://{host}` y «Conservar ruta y consulta» |
+| `return 302 /admin` en `location = /` | una reescritura con «Redirección» activada y patrón `^/$` |
+| `try_files $uri $uri.html $uri/index.html` y `error_page 404` | archivos estáticos con URL sin extensión y página 404 |
+| `add_header` | cabeceras de respuesta |
 
 ## Consejo de despliegue
 

@@ -19,3 +19,32 @@
 .vp-doc td a {
   white-space: nowrap;
 }
+
+/* 页脚 Telegram 链接：鼠标悬停时弹出二维码，方便用手机扫码加群 */
+.tg-foot {
+  position: relative;
+  display: inline-block;
+}
+
+.tg-pop {
+  display: none;
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding-bottom: 8px;
+  z-index: 20;
+}
+
+.tg-pop img {
+  display: block;
+  background: #fff;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+}
+
+.tg-foot:hover .tg-pop,
+.tg-foot:focus-within .tg-pop {
+  display: block;
+}

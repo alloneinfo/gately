@@ -10,13 +10,15 @@ The configuration has three layers:
 2. Site: a site under a listener, matched by domain. Domains can be an exact domain, `*.example.com` (matches subdomains at any depth) or `*` (matches everything). Matching priority is exact domain, wildcard, then `*`.
 3. Default site: used when no site matches. When it is not enabled, a 404 is returned.
 
+Saving a change to a site or to the default site swaps the site list in place: the listener keeps running, open connections (WebSocket included) stay up, and each site keeps its statistics. If the new configuration is invalid, the previous sites keep serving. Changing the listener's own settings (network, address, port, HTTPS, minimum TLS, HTTP/3, PROXY protocol) restarts that listener.
+
 ## Site types
 
 | Type | Description |
 | --- | --- |
 | Reverse proxy | Forwards to one or more backends. Backend addresses use the form `http(s)://host:port`, and WebSocket is supported |
-| Redirect | Redirects to a full URL with status code 301 / 302 / 307 / 308 (default 302), optionally keeping the original path and query string |
-| Static files | The directory must be an absolute path. With "Directory listing" off, a directory request returns a response only when `index.html` exists |
+| Redirect | Redirects to a full URL with status code 301 / 302 / 307 / 308 (default 302), optionally keeping the original path and query string. The URL may contain `{host}`, which is replaced by the domain the visitor used: `https://{host}` with "Keep path" sends every HTTP request to HTTPS on the same domain |
+| Static files | The directory must be an absolute path. With "Directory listing" off, a directory request returns a response only when `index.html` exists. "Clean URLs" tries `path.html` and `path/index.html` when a file is missing (for VitePress and similar generators, like nginx `try_files $uri $uri.html $uri/index.html`). "404 page" is a path inside the directory, such as `404.html`, returned with status 404 |
 | Fixed text | Custom content, `Content-Type` (default `text/plain; charset=utf-8`) and status code (100-599, default 200) |
 
 Other options for reverse proxy sites:
@@ -24,7 +26,8 @@ Other options for reverse proxy sites:
 - Use backend Host: the Host header is changed to the backend address; when off, the Host from the client request is kept;
 - Skip backend certificate verification, disable Keep-Alive;
 - Send the PROXY protocol to the backend (v2 header, passes the real client IP, requires backend support);
-- Add `X-Forwarded-For` / `X-Forwarded-Proto` / `X-Forwarded-Host`.
+- Add `X-Forwarded-For` / `X-Forwarded-Proto` / `X-Forwarded-Host` / `X-Forwarded-Port` and `X-Real-IP`;
+- Use the visited domain as SNI (HTTPS backends only): the handshake carries the domain the visitor used and the certificate is checked against it, like nginx `proxy_ssl_server_name on; proxy_ssl_name $host`. Turn it on when the backend routes by SNI, for example frp's `vhost_https`. Every backend has its own connection pool, so connections are never reused across domains.
 
 Sites of every type can set an access log, cross-origin (CORS), custom request and response headers (one `Key: Value` per line; an empty Value removes that header), and can reference a [WAF Firewall](/en/docs/modules/waf) instance (if the instance does not exist or is disabled, requests pass through).
 
@@ -51,6 +54,41 @@ https://auth.example.com/__gately_auth/oauth/callback
 ```
 
 Third-party login for the management UI itself is configured separately under "Settings → Account & Security".
+
+### Forward auth (Authelia and similar)
+
+Hand authentication to an external service, like nginx `auth_request` or Traefik `forwardAuth`. Tick "Forward auth" on the "Security" page. It cannot be combined with Basic or web authentication on the same site.
+
+| Field | Description |
+| --- | --- |
+| `url` | The check endpoint, such as Authelia's `http://127.0.0.1:9091/api/authz/auth-request` |
+| `loginUrl` | Where to send visitors when the endpoint answers 401, such as `https://auth.example.com/?rd={url}&rm={method}`. `{url}` is the original address (URL-encoded) and `{method}` the request method. When empty, the endpoint's response is returned as it is |
+| `copyHeaders` | Identity headers copied from the endpoint's reply to the backend request; the default is `Remote-User`, `Remote-Groups`, `Remote-Email` and `Remote-Name` |
+
+How it works:
+
+- Every request first goes to `url` as a GET without a body, carrying the visitor's headers (cookies, `Authorization` and so on) plus `X-Original-Method`, `X-Original-URL`, `X-Forwarded-Method`, `X-Forwarded-Proto`, `X-Forwarded-Host`, `X-Forwarded-Uri`, `X-Forwarded-For` and `X-Real-Ip`. The timeout is 10 seconds;
+- A 2xx answer lets the request through, with the identity headers added; a 401 redirects to `loginUrl` (status 302); other answers such as 403 or a redirect are returned to the visitor; an unreachable service gives 502;
+- Identity headers sent by visitors are always removed, so they cannot be forged;
+- It works with path rules and "Authentication scope", so only some paths (for example `/admin`) need a login, and with temporary share links.
+
+### Shared users: TOTP and single sign-on
+
+Define accounts once and use them on several sites, with optional TOTP two-step verification. It covers what many people run Authelia for.
+
+In "Global settings → Shared users":
+
+- Add users with a username and a password. Passwords are stored as bcrypt hashes and never returned by the API. To add TOTP, click "Enable TOTP", scan the QR code with an authenticator app (Google Authenticator, 1Password and so on) and save. Regenerating the key invalidates the old one;
+- SSO domain, such as `example.com`: after signing in on any site under that domain or its subdomains, the other sites there need no further sign-in. It uses a parent-domain cookie (`gately_sso`, valid for 7 days) that is never forwarded to backends. Leave it empty to sign in on each site separately.
+
+On a site, tick "Use shared users" next to web or Basic authentication. The site's own users keep working as well.
+
+Behavior:
+
+- The login page shows a verification code field when any shared user has TOTP. Each code works once;
+- Changing a user's password or TOTP key ends that user's sessions;
+- Basic authentication accepts only shared users without TOTP, because a browser password prompt has nowhere to enter a code;
+- Failed attempts count towards the same rate limit and automatic ban as other sign-ins.
 
 ## Access control
 
@@ -109,6 +147,20 @@ A site's "Country filter" has three modes: off, allow only, and deny. Enter two-
 - When no database is loaded, filtering has no effect (all visitors pass) and the UI shows a notice;
 - Private network addresses are always allowed;
 - In "Deny" mode, addresses whose country cannot be found in the database are allowed.
+
+## Path backends
+
+For a reverse proxy site, send requests under a path prefix to other backends, like nginx `location /api/ { proxy_pass ...; }`. Add them under "Path backends" on the "Basic" page of the site editor.
+
+| Field | Description |
+| --- | --- |
+| `prefix` | A path prefix such as `/api/`. Matching follows path segment boundaries: `/api` and `/api/` both match `/api` and `/api/x`, but not `/apix` |
+| `targets` | The backends for this path, written like the site's backends. When empty, the site's backends are used and only the headers below are added |
+| `requestHeaders` | Request headers added for this path, one `Key: Value` per line. They are applied after the site's headers, and a header with the same name overrides the site's |
+
+- The longest prefix wins, and the path is forwarded unchanged (the prefix is not stripped);
+- Other settings of the site, such as the Host option, certificate checks, forwarded headers, the PROXY protocol, the load-balancing policy and health checks, apply to every path backend;
+- Compression, rate limiting, caching and rewrites apply to the whole site.
 
 ## Reverse proxy enhancements
 
@@ -202,7 +254,7 @@ Rules are matched in order, and matching stops at the first hit.
 | `redirect` | Off for an internal rewrite (the rewritten path is sent to the backend, and the target must start with `/`); on for a redirect |
 | `code` | Redirect status code 301 / 302 / 307 / 308, default 302 |
 
-Redirects keep the original query parameters.
+Redirects keep the original query parameters. A redirect target may contain `{host}`, the domain the visitor used. Redirect rules run before authentication, like nginx `location = / { return 302 ...; }`, so a path such as `/` can send visitors on without asking them to sign in.
 
 ## Access statistics and monitoring
 
@@ -215,7 +267,7 @@ For a running listener, click "Stats" on a site row to open the statistics windo
 - Top 10 source IPs and top 10 countries (country statistics need an imported GeoIP database);
 - Reverse proxy sites show the health status, weight, backup flag and current connection count of each backend.
 
-Statistics are kept in memory and start counting again after a restart or after the listener is modified. The rankings track at most 5000 distinct sources.
+Statistics are kept in memory and start counting again after a restart or after the listener's own settings change. Editing a site keeps its counters. The rankings track at most 5000 distinct sources.
 
 ### Prometheus metrics
 
@@ -237,6 +289,23 @@ curl -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/webservice/m
 | `gately_upstream_up` | gauge | Whether a backend is healthy: 1 healthy, 0 unavailable (with label `upstream`) |
 
 All metrics carry the labels `listener` (listener name#listener key) and `site` (site name, or the first domain when unnamed).
+
+## Replacing haproxy and nginx
+
+Port forwarding and Web Services together can replace an haproxy + nginx pair. A common layout is one [SNI routing](/en/docs/modules/portforward) rule on port 443 that sends VPN and other TLS services straight to their backends and everything else to a Web Services listener that accepts the PROXY protocol, plus a Web Services listener on port 80 with a redirect site (`https://{host}`).
+
+Converting nginx settings:
+
+| nginx | Gately |
+| --- | --- |
+| `server` with `server_name` | a site with those domains |
+| `location` with a different `proxy_pass` | path backends |
+| `auth_request` (Authelia) | forward auth, or shared users with TOTP |
+| `proxy_ssl_name $host` | use the visited domain as SNI |
+| `return 301 https://$host$request_uri` | a redirect site with `https://{host}` and "Keep path" |
+| `return 302 /admin` on `location = /` | a rewrite with "Redirect" on, pattern `^/$` |
+| `try_files $uri $uri.html $uri/index.html` and `error_page 404` | static files with clean URLs and a 404 page |
+| `add_header` | response headers |
 
 ## Deployment tip
 

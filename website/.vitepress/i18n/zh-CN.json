@@ -78,8 +78,8 @@
   "home": {
     "pill": "开源 · 可审计 · 单文件部署",
     "announce": {
-      "text": "v0.5.0 发布：操作审计、Passkey、HTTP/3 等 →",
-      "link": "/news/v0.5.0"
+      "text": "v0.5.2 发布：SNI 分流、替代 nginx、TOTP 登录 →",
+      "link": "/news/v0.5.2"
     },
     "titleLine1": "看得见的",
     "titleLine2": "网络网关工具集",
@@ -150,7 +150,7 @@
       },
       {
         "title": "端口转发",
-        "text": "TCP / UDP、IPv4 / IPv6、端口段、多目标故障转移、连接数限制与流量统计；可向下游发送 PROXY 协议，保留真实客户端地址。"
+        "text": "TCP / UDP、IPv4 / IPv6、端口段、多目标故障转移、连接数限制与流量统计；可向下游发送 PROXY 协议，保留真实客户端地址；SNI 分流让多个服务共用 443 端口。"
       },
       {
         "title": "SSL 证书",
@@ -158,7 +158,7 @@
       },
       {
         "title": "Web 服务",
-        "text": "按域名反向代理、重定向、静态文件；HTTPS、HTTP/3、WebSocket、PROXY 协议；多后端权重与策略、健康检查、压缩、限流与响应缓存。"
+        "text": "按域名反向代理、重定向、静态文件；HTTPS、HTTP/3、WebSocket、PROXY 协议；多后端权重与策略、健康检查、压缩、限流与响应缓存；可替代 nginx：分路径后端、转发认证、带 TOTP 与单点登录的共享用户。"
       },
       {
         "title": "WAF 防火墙",
@@ -264,7 +264,8 @@
     "moreFaq": "更多问题 →",
     "finalTitle": "把网络边界的控制权拿回来",
     "finalDesc": "开源、透明、单文件。现在就部署一个 Gately。",
-    "starOnGithub": "在 GitHub 点亮 Star"
+    "starOnGithub": "在 GitHub 点亮 Star",
+    "telegramScan": "手机扫码加入 Telegram 群"
   },
   "download": {
     "other": "其他",

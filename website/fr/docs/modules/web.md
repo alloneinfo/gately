@@ -10,13 +10,15 @@ La configuration comporte trois niveaux :
 2. Site : un site rattaché à un écouteur, sélectionné par domaine. Un domaine peut être un domaine exact, `*.example.com` (correspond aux sous-domaines à n'importe quelle profondeur) ou `*` (correspond à tout). Priorité de correspondance : domaine exact, puis joker, puis `*`.
 3. Site par défaut : utilisé lorsqu'aucun site ne correspond. S'il n'est pas activé, une erreur 404 est renvoyée.
 
+Enregistrer une modification d'un site ou du site par défaut remplace la liste des sites sur place : l'écouteur continue de tourner, les connexions ouvertes (WebSocket compris) restent actives et chaque site conserve ses statistiques. Si la nouvelle configuration est invalide, les sites précédents continuent de servir. Modifier les paramètres de l'écouteur lui-même (réseau, adresse, port, HTTPS, TLS minimal, HTTP/3, protocole PROXY) redémarre cet écouteur.
+
 ## Types de sites
 
 | Type | Description |
 | --- | --- |
 | Proxy inverse | Transmet à un ou plusieurs backends. Les adresses de backend ont la forme `http(s)://host:port`, et WebSocket est pris en charge |
-| Redirection | Redirige vers une URL complète avec le code de statut 301 / 302 / 307 / 308 (302 par défaut), en conservant éventuellement le chemin et la chaîne de requête d'origine |
-| Fichiers statiques | Le répertoire doit être un chemin absolu. Avec « Liste du répertoire » désactivée, une requête sur un répertoire n'obtient de réponse que si `index.html` existe |
+| Redirection | Redirige vers une URL complète avec le code de statut 301 / 302 / 307 / 308 (302 par défaut), en conservant éventuellement le chemin et la chaîne de requête d'origine. L'URL peut contenir `{host}`, remplacé par le domaine utilisé par le visiteur : `https://{host}` avec « Conserver le chemin et la requête » envoie chaque requête HTTP vers HTTPS sur le même domaine |
+| Fichiers statiques | Le répertoire doit être un chemin absolu. Avec « Liste du répertoire » désactivée, une requête sur un répertoire n'obtient de réponse que si `index.html` existe. « URL sans extension » essaie `path.html` et `path/index.html` lorsqu'un fichier est introuvable (pour VitePress et les générateurs similaires, comme `try_files $uri $uri.html $uri/index.html` de nginx). « Page 404 » est un chemin à l'intérieur du répertoire, comme `404.html`, renvoyé avec le statut 404 |
 | Texte fixe | Contenu personnalisé, `Content-Type` (`text/plain; charset=utf-8` par défaut) et code de statut (100-599, 200 par défaut) |
 
 Autres options des sites en proxy inverse :
@@ -24,7 +26,8 @@ Autres options des sites en proxy inverse :
 - Utiliser l'hôte du backend : l'en-tête Host est remplacé par l'adresse du backend ; lorsque l'option est désactivée, le Host de la requête du client est conservé ;
 - Ignorer la vérification du certificat du backend, désactiver Keep-Alive ;
 - Envoyer le protocole PROXY au backend (en-tête v2, transmet l'IP réelle du client, nécessite la prise en charge côté backend) ;
-- Ajouter `X-Forwarded-For` / `X-Forwarded-Proto` / `X-Forwarded-Host`.
+- Ajouter `X-Forwarded-For` / `X-Forwarded-Proto` / `X-Forwarded-Host` / `X-Forwarded-Port` et `X-Real-IP` ;
+- Utiliser le domaine visité comme SNI (backends HTTPS uniquement) : la poignée de main TLS porte le domaine utilisé par le visiteur et le certificat est vérifié par rapport à lui, comme avec `proxy_ssl_server_name on; proxy_ssl_name $host` de nginx. Activez-la lorsque le backend route selon le SNI, par exemple le `vhost_https` de frp. Chaque backend a son propre pool de connexions, les connexions ne sont donc jamais réutilisées d'un domaine à l'autre.
 
 Les sites de tous types peuvent définir un journal d'accès, le cross-origin (CORS), des en-têtes de requête et de réponse personnalisés (un `Key: Value` par ligne ; une Value vide supprime cet en-tête), et peuvent référencer une instance de [Pare-feu WAF](/fr/docs/modules/waf) (si l'instance n'existe pas ou est désactivée, les requêtes passent sans filtrage).
 
@@ -51,6 +54,41 @@ https://auth.example.com/__gately_auth/oauth/callback
 ```
 
 La connexion tierce pour l'interface d'administration elle-même se configure séparément dans « Paramètres → Compte et sécurité ».
+
+### Authentification déléguée (Authelia et similaires)
+
+Confiez l'authentification à un service externe, comme `auth_request` de nginx ou `forwardAuth` de Traefik. Cochez « Authentification déléguée » dans la page « Sécurité ». Elle ne peut pas être combinée avec l'authentification Basic ou web sur le même site.
+
+| Champ | Description |
+| --- | --- |
+| `url` | Le point de vérification, comme `http://127.0.0.1:9091/api/authz/auth-request` pour Authelia |
+| `loginUrl` | Où envoyer les visiteurs lorsque le point répond 401, comme `https://auth.example.com/?rd={url}&rm={method}`. `{url}` est l'adresse d'origine (encodée en URL) et `{method}` la méthode de la requête. Lorsqu'il est vide, la réponse du point est renvoyée telle quelle |
+| `copyHeaders` | En-têtes d'identité copiés de la réponse du point vers la requête envoyée au backend ; par défaut `Remote-User`, `Remote-Groups`, `Remote-Email` et `Remote-Name` |
+
+Fonctionnement :
+
+- Chaque requête est d'abord envoyée à `url` en GET sans corps, avec les en-têtes du visiteur (cookies, `Authorization`, etc.) plus `X-Original-Method`, `X-Original-URL`, `X-Forwarded-Method`, `X-Forwarded-Proto`, `X-Forwarded-Host`, `X-Forwarded-Uri`, `X-Forwarded-For` et `X-Real-Ip`. Le délai d'attente est de 10 secondes ;
+- Une réponse 2xx laisse passer la requête, avec les en-têtes d'identité ajoutés ; un 401 redirige vers `loginUrl` (statut 302) ; les autres réponses, comme 403 ou une redirection, sont renvoyées au visiteur ; un service injoignable donne 502 ;
+- Les en-têtes d'identité envoyés par les visiteurs sont toujours supprimés, ils ne peuvent donc pas être falsifiés ;
+- Elle fonctionne avec les règles de chemin et le « Périmètre d'authentification », de sorte que seuls certains chemins (par exemple `/admin`) exigent une connexion, ainsi qu'avec les liens de partage temporaires.
+
+### Utilisateurs partagés : TOTP et authentification unique
+
+Définissez les comptes une seule fois et utilisez-les sur plusieurs sites, avec une vérification en deux étapes TOTP facultative. Cela couvre ce pour quoi beaucoup de gens font tourner Authelia.
+
+Dans « Paramètres globaux → Utilisateurs partagés » :
+
+- Ajoutez des utilisateurs avec un nom d'utilisateur et un mot de passe. Les mots de passe sont stockés sous forme de hash bcrypt et ne sont jamais renvoyés par l'API. Pour ajouter le TOTP, cliquez sur « Activer le TOTP », scannez le QR code avec une application d'authentification (Google Authenticator, 1Password, etc.) puis enregistrez. Régénérer la clé invalide l'ancienne ;
+- Domaine SSO, comme `example.com` : après connexion sur n'importe quel site de ce domaine ou de ses sous-domaines, les autres sites n'exigent plus de connexion. Il repose sur un cookie de domaine parent (`gately_sso`, valable 7 jours) qui n'est jamais transmis aux backends. Laissez vide pour vous connecter séparément sur chaque site.
+
+Sur un site, cochez « Utiliser les utilisateurs partagés » à côté de l'authentification web ou Basic. Les utilisateurs propres au site continuent de fonctionner.
+
+Comportement :
+
+- La page de connexion affiche un champ de code de vérification dès qu'un utilisateur partagé a le TOTP. Chaque code ne sert qu'une fois ;
+- Changer le mot de passe ou la clé TOTP d'un utilisateur met fin à ses sessions ;
+- L'authentification Basic n'accepte que les utilisateurs partagés sans TOTP, car l'invite de mot de passe du navigateur ne permet pas de saisir un code ;
+- Les échecs comptent dans la même limitation de débit et le même bannissement automatique que les autres connexions.
 
 ## Contrôle d'accès
 
@@ -109,6 +147,20 @@ Le « Filtre de pays » d'un site propose trois modes : désactivé, autoriser u
 - Lorsqu'aucune base n'est chargée, le filtrage n'a aucun effet (tous les visiteurs passent) et l'interface affiche un avertissement ;
 - Les adresses de réseaux privés sont toujours autorisées ;
 - En mode « Refuser », les adresses dont le pays est introuvable dans la base sont autorisées.
+
+## Backends par chemin
+
+Pour un site en proxy inverse, envoyez les requêtes sous un préfixe de chemin vers d'autres backends, comme `location /api/ { proxy_pass ...; }` de nginx. Ajoutez-les sous « Backends par chemin » dans la page « Général » de l'éditeur de site.
+
+| Champ | Description |
+| --- | --- |
+| `prefix` | Un préfixe de chemin comme `/api/`. La correspondance respecte les frontières de segments de chemin : `/api` et `/api/` correspondent tous deux à `/api` et `/api/x`, mais pas à `/apix` |
+| `targets` | Les backends de ce chemin, écrits comme les backends du site. Lorsque le champ est vide, les backends du site sont utilisés et seuls les en-têtes ci-dessous sont ajoutés |
+| `requestHeaders` | En-têtes de requête ajoutés pour ce chemin, un `Key: Value` par ligne. Ils sont appliqués après ceux du site, et un en-tête du même nom remplace celui du site |
+
+- Le préfixe le plus long l'emporte, et le chemin est transmis tel quel (le préfixe n'est pas retiré) ;
+- Les autres réglages du site, comme l'option Host, la vérification du certificat, les en-têtes transmis, le protocole PROXY, la politique de répartition de charge et les vérifications d'état, s'appliquent à chaque backend par chemin ;
+- La compression, la limitation de débit, le cache et les réécritures s'appliquent à l'ensemble du site.
 
 ## Améliorations du proxy inverse
 
@@ -202,7 +254,7 @@ Les règles sont évaluées dans l'ordre, et l'évaluation s'arrête à la premi
 | `redirect` | Désactivé pour une réécriture interne (le chemin réécrit est envoyé au backend, et la cible doit commencer par `/`) ; activé pour une redirection |
 | `code` | Code de statut de redirection 301 / 302 / 307 / 308, 302 par défaut |
 
-Les redirections conservent les paramètres de requête d'origine.
+Les redirections conservent les paramètres de requête d'origine. La cible d'une redirection peut contenir `{host}`, le domaine utilisé par le visiteur. Les règles de redirection s'exécutent avant l'authentification, comme `location = / { return 302 ...; }` de nginx, de sorte qu'un chemin tel que `/` peut renvoyer les visiteurs ailleurs sans leur demander de se connecter.
 
 ## Statistiques d'accès et supervision
 
@@ -215,7 +267,7 @@ Pour un écouteur en cours d'exécution, cliquez sur « Statistiques » sur la l
 - Top 10 des IP sources et top 10 des pays (les statistiques par pays nécessitent une base GeoIP importée) ;
 - Les sites en proxy inverse affichent l'état de santé, le poids, l'indicateur de secours et le nombre de connexions actuelles de chaque backend.
 
-Les statistiques sont conservées en mémoire et repartent de zéro après un redémarrage ou après la modification de l'écouteur. Les classements suivent au plus 5000 sources distinctes.
+Les statistiques sont conservées en mémoire et repartent de zéro après un redémarrage ou après la modification des paramètres de l'écouteur lui-même. Modifier un site conserve ses compteurs. Les classements suivent au plus 5000 sources distinctes.
 
 ### Métriques Prometheus
 
@@ -237,6 +289,23 @@ curl -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/webservice/m
 | `gately_upstream_up` | gauge | Indique si un backend est sain : 1 sain, 0 indisponible (avec l'étiquette `upstream`) |
 
 Toutes les métriques portent les étiquettes `listener` (nom de l'écouteur#clé de l'écouteur) et `site` (nom du site, ou premier domaine s'il n'a pas de nom).
+
+## Remplacer haproxy et nginx
+
+La redirection de ports et les Services Web réunis peuvent remplacer un duo haproxy + nginx. Une organisation courante : une règle de [routage SNI](/fr/docs/modules/portforward) sur le port 443 qui envoie le VPN et les autres services TLS directement vers leurs backends et tout le reste vers un écouteur de Services Web acceptant le protocole PROXY, plus un écouteur de Services Web sur le port 80 avec un site de redirection (`https://{host}`).
+
+Conversion des réglages nginx :
+
+| nginx | Gately |
+| --- | --- |
+| `server` avec `server_name` | un site avec ces domaines |
+| `location` avec un `proxy_pass` différent | backends par chemin |
+| `auth_request` (Authelia) | authentification déléguée, ou utilisateurs partagés avec TOTP |
+| `proxy_ssl_name $host` | utiliser le domaine visité comme SNI |
+| `return 301 https://$host$request_uri` | un site de redirection avec `https://{host}` et « Conserver le chemin et la requête » |
+| `return 302 /admin` dans `location = /` | une réécriture avec « Redirection » activée, motif `^/$` |
+| `try_files $uri $uri.html $uri/index.html` et `error_page 404` | fichiers statiques avec « URL sans extension » et « Page 404 » |
+| `add_header` | en-têtes de réponse |
 
 ## Conseil de déploiement
 

@@ -78,8 +78,8 @@
   "home": {
     "pill": "Open source · Auditable · Single binary",
     "announce": {
-      "text": "v0.5.0 is out: audit log, Passkey, HTTP/3 and more →",
-      "link": "/en/news/v0.5.0"
+      "text": "v0.5.2 is out: SNI routing, an nginx replacement, TOTP sign-in →",
+      "link": "/en/news/v0.5.2"
     },
     "titleLine1": "A network gateway toolkit",
     "titleLine2": "you can see through",
@@ -150,7 +150,7 @@
       },
       {
         "title": "Port Forwarding",
-        "text": "TCP / UDP, IPv4 / IPv6, port ranges, multi-target failover, connection limits and traffic statistics; can send the PROXY protocol downstream to preserve the real client address."
+        "text": "TCP / UDP, IPv4 / IPv6, port ranges, multi-target failover, connection limits and traffic statistics; can send the PROXY protocol downstream to preserve the real client address; SNI routing lets several services share port 443."
       },
       {
         "title": "SSL Certificates",
@@ -158,7 +158,7 @@
       },
       {
         "title": "Web Services",
-        "text": "Per-domain reverse proxy, redirects and static files; HTTPS, HTTP/3, WebSocket and PROXY protocol; weighted multi-backend policies, health checks, compression, rate limiting and response caching."
+        "text": "Per-domain reverse proxy, redirects and static files; HTTPS, HTTP/3, WebSocket and PROXY protocol; weighted multi-backend policies, health checks, compression, rate limiting and response caching; can stand in for nginx: path backends, forward auth, and shared users with TOTP and single sign-on."
       },
       {
         "title": "WAF Firewall",
@@ -264,7 +264,8 @@
     "moreFaq": "More questions →",
     "finalTitle": "Take back control of your network edge",
     "finalDesc": "Open, transparent, single-file. Deploy Gately today.",
-    "starOnGithub": "Star on GitHub"
+    "starOnGithub": "Star on GitHub",
+    "telegramScan": "Scan with your phone to join the Telegram group"
   },
   "download": {
     "other": "Other",

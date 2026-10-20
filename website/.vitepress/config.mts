@@ -64,7 +64,7 @@ function buildThemeConfig(loc: SiteLocale, pack: any): DefaultTheme.Config & Rec
     langMenuLabel: ui.langMenuLabel,
     footer: {
       message: ui.footerMessage,
-      copyright: `© 2026 Gately Contributors · <a href="${REPO}" target="_blank" rel="noreferrer">GitHub</a> · <a href="${TELEGRAM}" target="_blank" rel="noreferrer">Telegram</a>`
+      copyright: `© 2026 Gately Contributors · <a href="${REPO}" target="_blank" rel="noreferrer">GitHub</a> · <span class="tg-foot"><a href="${TELEGRAM}" target="_blank" rel="noreferrer">Telegram</a><span class="tg-pop"><img src="/telegram-qr.svg" alt="Telegram QR" width="140" height="140" loading="lazy"></span></span>`
     },
     // 首页与下载页组件使用的文案
     aiNotice: ui.aiNotice,

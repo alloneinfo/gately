@@ -183,6 +183,11 @@ const openFaq = ref(0)
           <a class="btn primary lg" :href="link('/docs/guide/quick-start')">{{ h.ctaStart }}</a>
           <a class="btn lg" href="https://github.com/wangwanjie/gately" target="_blank" rel="noreferrer">{{ h.starOnGithub }}</a>
         </div>
+        <!-- Telegram 群二维码：手机扫码即可加入 -->
+        <a class="tg" href="https://t.me/gately_chat" target="_blank" rel="noreferrer">
+          <img class="tg-qr" :src="withBase('/telegram-qr.svg')" :alt="h.telegramScan" width="128" height="128" loading="lazy" />
+          <span>{{ h.telegramScan }}</span>
+        </a>
       </div>
     </section>
   </div>
@@ -276,6 +281,9 @@ h1 { font-size: 54px; line-height: 1.15; font-weight: 800; letter-spacing: -0.02
   radial-gradient(70% 120% at 50% 0%, var(--vp-c-brand-soft), transparent 70%), var(--vp-c-bg-soft); margin-bottom: 48px; }
 .final h2 { margin: 0; font-size: 30px; font-weight: 800; border: 0; padding: 0; }
 .final p { margin: 12px 0 0; color: var(--vp-c-text-2); }
+.tg { display: inline-flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 32px; color: var(--vp-c-text-2); font-size: 14px; text-decoration: none; }
+.tg:hover { color: var(--vp-c-brand-1); }
+.tg-qr { display: block; border-radius: 12px; border: 1px solid var(--vp-c-divider); background: #fff; }
 
 @media (max-width: 960px) {
   .hero-grid { grid-template-columns: 1fr; }

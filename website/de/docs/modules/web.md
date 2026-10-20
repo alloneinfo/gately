@@ -10,13 +10,15 @@ Die Konfiguration hat drei Ebenen:
 2. Site: eine Site unter einem Listener, die über die Domain zugeordnet wird. Domains können eine exakte Domain, `*.example.com` (trifft Subdomains beliebiger Tiefe) oder `*` (trifft alles) sein. Die Zuordnungspriorität lautet: exakte Domain, Wildcard, dann `*`.
 3. Standard-Site: wird verwendet, wenn keine Site passt. Ist sie nicht aktiviert, wird 404 zurückgegeben.
 
+Wird eine Site oder die Standard-Site gespeichert, wird die Site-Liste an Ort und Stelle ausgetauscht: Der Listener läuft weiter, offene Verbindungen (auch WebSocket) bleiben bestehen, und jede Site behält ihre Statistik. Ist die neue Konfiguration ungültig, bedienen weiterhin die bisherigen Sites. Eine Änderung der Einstellungen des Listeners selbst (Netzwerk, Adresse, Port, HTTPS, minimale TLS-Version, HTTP/3, PROXY-Protokoll) startet diesen Listener neu.
+
 ## Site-Typen
 
 | Typ | Beschreibung |
 | --- | --- |
 | Reverse Proxy | Leitet an ein oder mehrere Backends weiter. Backend-Adressen haben die Form `http(s)://host:port`, WebSocket wird unterstützt |
-| Weiterleitung | Leitet mit Statuscode 301 / 302 / 307 / 308 (Standard 302) auf eine vollständige URL um, wahlweise unter Beibehaltung von ursprünglichem Pfad und Query-String |
-| Statische Dateien | Das Verzeichnis muss ein absoluter Pfad sein. Ist „Verzeichnisauflistung“ aus, liefert eine Verzeichnisanfrage nur dann eine Antwort, wenn `index.html` existiert |
+| Weiterleitung | Leitet mit Statuscode 301 / 302 / 307 / 308 (Standard 302) auf eine vollständige URL um, wahlweise unter Beibehaltung von ursprünglichem Pfad und Query-String. Die URL darf `{host}` enthalten, das durch die vom Besucher verwendete Domain ersetzt wird: `https://{host}` mit „Pfad und Query beibehalten“ leitet jede HTTP-Anfrage auf HTTPS derselben Domain um |
+| Statische Dateien | Das Verzeichnis muss ein absoluter Pfad sein. Ist „Verzeichnisauflistung“ aus, liefert eine Verzeichnisanfrage nur dann eine Antwort, wenn `index.html` existiert. „URLs ohne Endung“ probiert `path.html` und `path/index.html`, wenn eine Datei fehlt (für VitePress und ähnliche Generatoren, wie nginx `try_files $uri $uri.html $uri/index.html`). „404-Seite“ ist ein Pfad innerhalb des Verzeichnisses, etwa `404.html`, der mit Status 404 ausgeliefert wird |
 | Fester Text | Eigener Inhalt, `Content-Type` (Standard `text/plain; charset=utf-8`) und Statuscode (100-599, Standard 200) |
 
 Weitere Optionen für Reverse-Proxy-Sites:
@@ -24,7 +26,8 @@ Weitere Optionen für Reverse-Proxy-Sites:
 - Backend-Host verwenden: Der Host-Header wird auf die Backend-Adresse geändert; ist die Option aus, bleibt der Host der Client-Anfrage erhalten;
 - Prüfung des Backend-Zertifikats überspringen, Keep-Alive deaktivieren;
 - PROXY-Protokoll an das Backend senden (v2-Header, reicht die echte Client-IP durch, setzt Unterstützung durch das Backend voraus);
-- `X-Forwarded-For` / `X-Forwarded-Proto` / `X-Forwarded-Host` hinzufügen.
+- `X-Forwarded-For` / `X-Forwarded-Proto` / `X-Forwarded-Host` / `X-Forwarded-Port` und `X-Real-IP` hinzufügen;
+- Aufgerufene Domain als SNI verwenden (nur HTTPS-Backends): Der Handshake trägt die vom Besucher verwendete Domain, und das Zertifikat wird dagegen geprüft, wie bei nginx `proxy_ssl_server_name on; proxy_ssl_name $host`. Aktivieren Sie die Option, wenn das Backend nach SNI routet, zum Beispiel bei `vhost_https` von frp. Jedes Backend hat seinen eigenen Verbindungspool, daher werden Verbindungen nie domainübergreifend wiederverwendet.
 
 Sites jedes Typs können ein Zugriffslog, Cross-Origin (CORS) sowie eigene Request- und Response-Header festlegen (je Zeile ein `Key: Value`; ein leerer Value entfernt den Header) und auf eine Instanz der [WAF-Firewall](/de/docs/modules/waf) verweisen (existiert die Instanz nicht oder ist sie deaktiviert, werden Anfragen durchgelassen).
 
@@ -51,6 +54,41 @@ https://auth.example.com/__gately_auth/oauth/callback
 ```
 
 Die Anmeldung über Drittanbieter für die Verwaltungsoberfläche selbst wird separat unter „Einstellungen → Konto & Sicherheit“ konfiguriert.
+
+### Forward-Auth (Authelia und Ähnliches)
+
+Übergeben Sie die Authentifizierung an einen externen Dienst, wie nginx `auth_request` oder Traefik `forwardAuth`. Aktivieren Sie „Forward-Auth“ auf der Seite „Sicherheit“. Die Option lässt sich auf derselben Site nicht mit Basic- oder Web-Authentifizierung kombinieren.
+
+| Feld | Beschreibung |
+| --- | --- |
+| `url` | Der Prüf-Endpunkt, etwa `http://127.0.0.1:9091/api/authz/auth-request` von Authelia |
+| `loginUrl` | Wohin Besucher geschickt werden, wenn der Endpunkt mit 401 antwortet, etwa `https://auth.example.com/?rd={url}&rm={method}`. `{url}` ist die ursprüngliche Adresse (URL-kodiert) und `{method}` die Anfragemethode. Ist das Feld leer, wird die Antwort des Endpunkts unverändert zurückgegeben |
+| `copyHeaders` | Identitäts-Header, die aus der Antwort des Endpunkts in die Backend-Anfrage kopiert werden; Standard sind `Remote-User`, `Remote-Groups`, `Remote-Email` und `Remote-Name` |
+
+So funktioniert es:
+
+- Jede Anfrage geht zuerst als GET ohne Body an `url`, mit den Headern des Besuchers (Cookies, `Authorization` usw.) plus `X-Original-Method`, `X-Original-URL`, `X-Forwarded-Method`, `X-Forwarded-Proto`, `X-Forwarded-Host`, `X-Forwarded-Uri`, `X-Forwarded-For` und `X-Real-Ip`. Das Timeout beträgt 10 Sekunden;
+- Eine 2xx-Antwort lässt die Anfrage mit den hinzugefügten Identitäts-Headern durch; ein 401 leitet auf `loginUrl` um (Status 302); andere Antworten wie 403 oder eine Weiterleitung gehen an den Besucher zurück; ein nicht erreichbarer Dienst ergibt 502;
+- Von Besuchern gesendete Identitäts-Header werden immer entfernt, sie lassen sich also nicht fälschen;
+- Es funktioniert mit Pfadregeln und dem „Authentifizierungsbereich“, sodass nur manche Pfade (zum Beispiel `/admin`) eine Anmeldung brauchen, sowie mit temporären Freigabelinks.
+
+### Gemeinsame Benutzer: TOTP und Single Sign-on
+
+Legen Sie Konten einmal an und nutzen Sie sie auf mehreren Sites, optional mit TOTP-Zwei-Faktor-Prüfung. Das deckt ab, wofür viele Authelia betreiben.
+
+Unter „Globale Einstellungen → Gemeinsame Benutzer“:
+
+- Fügen Sie Benutzer mit Benutzername und Passwort hinzu. Passwörter werden als bcrypt-Hashes gespeichert und nie von der API zurückgegeben. Für TOTP klicken Sie auf „TOTP aktivieren“, scannen den QR-Code mit einer Authenticator-App (Google Authenticator, 1Password usw.) und speichern. Ein neu erzeugter Schlüssel macht den alten ungültig;
+- SSO-Domain, etwa `example.com`: Nach der Anmeldung auf einer beliebigen Site unter dieser Domain oder ihren Subdomains brauchen die anderen Sites dort keine weitere Anmeldung. Dafür dient ein Cookie auf der übergeordneten Domain (`gately_sso`, 7 Tage gültig), das nie an Backends weitergereicht wird. Leer lassen, um sich auf jeder Site einzeln anzumelden.
+
+Aktivieren Sie bei einer Site neben der Web- oder Basic-Authentifizierung „Gemeinsame Benutzer verwenden“. Die eigenen Benutzer der Site funktionieren weiterhin.
+
+Verhalten:
+
+- Die Anmeldeseite zeigt ein Feld für den Prüfcode, sobald ein gemeinsamer Benutzer TOTP hat. Jeder Code gilt nur einmal;
+- Ändert sich Passwort oder TOTP-Schlüssel eines Benutzers, werden dessen Sitzungen beendet;
+- Die Basic-Authentifizierung akzeptiert nur gemeinsame Benutzer ohne TOTP, weil eine Passwortabfrage des Browsers keine Möglichkeit bietet, einen Code einzugeben;
+- Fehlgeschlagene Versuche zählen für dieselbe Ratenbegrenzung und automatische Sperre wie andere Anmeldungen.
 
 ## Zugriffskontrolle
 
@@ -109,6 +147,20 @@ Der „Länderfilter“ einer Site hat drei Modi: aus, nur erlauben und verweige
 - Ist keine Datenbank geladen, hat die Filterung keine Wirkung (alle Besucher passieren) und die Oberfläche zeigt einen Hinweis;
 - Adressen privater Netze sind immer erlaubt;
 - Im Modus „Verweigern“ werden Adressen erlaubt, deren Land sich in der Datenbank nicht finden lässt.
+
+## Backends pro Pfad
+
+Leiten Sie bei einer Reverse-Proxy-Site Anfragen unter einem Pfadpräfix an andere Backends weiter, wie nginx `location /api/ { proxy_pass ...; }`. Fügen Sie sie unter „Backends pro Pfad“ auf der Seite „Allgemein“ des Site-Editors hinzu.
+
+| Feld | Beschreibung |
+| --- | --- |
+| `prefix` | Ein Pfadpräfix wie `/api/`. Die Zuordnung folgt den Grenzen von Pfadsegmenten: `/api` und `/api/` treffen beide `/api` und `/api/x`, aber nicht `/apix` |
+| `targets` | Die Backends für diesen Pfad, in derselben Schreibweise wie die Backends der Site. Ist das Feld leer, werden die Backends der Site verwendet und nur die folgenden Header hinzugefügt |
+| `requestHeaders` | Für diesen Pfad hinzugefügte Request-Header, je Zeile ein `Key: Value`. Sie werden nach den Headern der Site angewendet, und ein Header mit gleichem Namen überschreibt den der Site |
+
+- Das längste Präfix gewinnt, und der Pfad wird unverändert weitergeleitet (das Präfix wird nicht entfernt);
+- Die übrigen Einstellungen der Site, etwa die Host-Option, Zertifikatsprüfung, Forwarded-Header, das PROXY-Protokoll, die Lastverteilungsstrategie und Health-Checks, gelten für jedes Pfad-Backend;
+- Kompression, Ratenbegrenzung, Cache und Umschreibungen gelten für die ganze Site.
 
 ## Erweiterungen für den Reverse Proxy
 
@@ -202,7 +254,7 @@ Regeln werden der Reihe nach abgeglichen, und beim ersten Treffer endet der Abgl
 | `redirect` | Aus für ein internes Umschreiben (der umgeschriebene Pfad wird an das Backend gesendet, und das Ziel muss mit `/` beginnen); an für eine Weiterleitung |
 | `code` | Statuscode der Weiterleitung 301 / 302 / 307 / 308, Standard 302 |
 
-Weiterleitungen behalten die ursprünglichen Query-Parameter bei.
+Weiterleitungen behalten die ursprünglichen Query-Parameter bei. Ein Weiterleitungsziel darf `{host}` enthalten, die vom Besucher verwendete Domain. Weiterleitungsregeln laufen vor der Authentifizierung, wie nginx `location = / { return 302 ...; }`, sodass ein Pfad wie `/` Besucher weiterschicken kann, ohne dass sie sich anmelden müssen.
 
 ## Zugriffsstatistik und Monitoring
 
@@ -215,7 +267,7 @@ Klicken Sie bei einem laufenden Listener in der Site-Zeile auf „Statistik“, 
 - Die Top 10 der Quell-IPs und die Top 10 der Länder (für die Länderstatistik ist eine importierte GeoIP-Datenbank nötig);
 - Reverse-Proxy-Sites zeigen Health-Status, Gewichtung, Backup-Kennzeichen und aktuelle Verbindungsanzahl jedes Backends.
 
-Die Statistiken liegen im Arbeitsspeicher und beginnen nach einem Neustart oder nach einer Änderung des Listeners von vorn. Die Ranglisten verfolgen höchstens 5000 verschiedene Quellen.
+Die Statistiken liegen im Arbeitsspeicher und beginnen nach einem Neustart oder nach einer Änderung der eigenen Einstellungen des Listeners von vorn. Das Bearbeiten einer Site behält ihre Zähler. Die Ranglisten verfolgen höchstens 5000 verschiedene Quellen.
 
 ### Prometheus-Metriken
 
@@ -237,6 +289,23 @@ curl -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/webservice/m
 | `gately_upstream_up` | gauge | Ob ein Backend gesund ist: 1 gesund, 0 nicht verfügbar (mit Label `upstream`) |
 
 Alle Metriken tragen die Labels `listener` (Listener-Name#Listener-Schlüssel) und `site` (Site-Name oder, falls unbenannt, die erste Domain).
+
+## haproxy und nginx ersetzen
+
+Portweiterleitung und Web-Dienste zusammen können ein Paar aus haproxy und nginx ersetzen. Ein gängiges Layout: eine Regel mit [SNI-Routing](/de/docs/modules/portforward) auf Port 443, die VPN und andere TLS-Dienste direkt an ihre Backends und alles andere an einen Listener der Web-Dienste schickt, der das PROXY-Protokoll akzeptiert; dazu ein Listener der Web-Dienste auf Port 80 mit einer Weiterleitungs-Site (`https://{host}`).
+
+nginx-Einstellungen umsetzen:
+
+| nginx | Gately |
+| --- | --- |
+| `server` mit `server_name` | eine Site mit diesen Domains |
+| `location` mit abweichendem `proxy_pass` | Backends pro Pfad |
+| `auth_request` (Authelia) | Forward-Auth oder gemeinsame Benutzer mit TOTP |
+| `proxy_ssl_name $host` | aufgerufene Domain als SNI verwenden |
+| `return 301 https://$host$request_uri` | eine Weiterleitungs-Site mit `https://{host}` und „Pfad und Query beibehalten“ |
+| `return 302 /admin` in `location = /` | ein Umschreiben mit aktivierter „Weiterleitung“, Muster `^/$` |
+| `try_files $uri $uri.html $uri/index.html` und `error_page 404` | statische Dateien mit „URLs ohne Endung“ und „404-Seite“ |
+| `add_header` | Antwort-Header |
 
 ## Hinweis zur Bereitstellung
 
