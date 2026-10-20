@@ -12,6 +12,7 @@
     "account": "Konto & Sicherheit",
     "access": "Zugriffskontrolle",
     "runtime": "Netzwerk & Laufzeit",
+    "modules": "Module",
     "backup": "Sicherung & Migration",
     "diagnostics": "Diagnose"
   },
@@ -156,6 +157,14 @@
     "confirm": "Konsole sowie alle Weiterleitungs- und Proxy-Dienste werden während eines Neustarts kurz unterbrochen (meist einige Sekunden). Gately neu starten?",
     "confirmButton": "Neustarten",
     "progress": "Gately wird neu gestartet…"
+  },
+  "modules": {
+    "title": "Module",
+    "desc": "Aktiviere nur die Module, die du brauchst. Ein deaktiviertes Modul startet keine Dienste, stellt keine Verwaltungs-API bereit und wird in der Oberfläche ausgeblendet; seine Konfiguration bleibt erhalten und ist nach dem erneuten Aktivieren wieder da. Module, von denen andere abhängen, können nicht deaktiviert werden.",
+    "requiredBy": "Wird von {names} benötigt; kann nicht deaktiviert werden",
+    "adminHttps": "HTTPS der Verwaltungsoberfläche",
+    "separator": ", ",
+    "backupDesc": "Sichert die gesamte Konfiguration nach Zeitplan auf lokale Datenträger oder Speicher"
   },
   "save": {
     "saved": "Gespeichert und angewendet",

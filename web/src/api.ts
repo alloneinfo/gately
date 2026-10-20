@@ -47,6 +47,8 @@ export const api = {
 export interface ModuleInfo {
   id: string
   title: string
+  // 模块是否开启；关闭的模块没有摘要
+  enabled: boolean
   summary?: { label: string; value: string; level?: string }[]
 }
 
@@ -171,8 +173,20 @@ export interface SystemSettings {
   gcPercent: number
   maxProcs: number
   thirdLogin: ThirdLogin
+  // 关闭的功能模块 ID，修改后重启生效
+  disabledModules: string[] | null
+  // 全部功能模块及其依赖关系，只读
+  modules?: ModuleOption[]
   sessionHours: number
   restartRequired: boolean
+}
+
+// ModuleOption 是设置页“功能模块”中的一项。
+export interface ModuleOption {
+  id: string
+  title: string
+  // 该模块依赖的模块 ID
+  requires?: string[]
 }
 
 // SystemInfo 对应 GET /api/system/info。

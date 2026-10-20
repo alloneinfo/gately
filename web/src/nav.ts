@@ -1,5 +1,5 @@
 // 侧边栏导航与模块元信息：Layout 与总览页共用，保证图标与名称一致。
-import type { Component } from 'vue'
+import { computed, ref, type Component } from 'vue'
 import { t } from './i18n'
 import {
   Activity,
@@ -109,6 +109,24 @@ export const navGroups: NavGroup[] = [
 ]
 
 export const navItems: NavItem[] = navGroups.flatMap((g) => g.items)
+
+// 本次启动中已关闭的功能模块 ID（来自 /api/session，重启后才会变化），对应的导航与页面全部隐藏
+export const disabledModules = ref<string[]>([])
+
+// moduleEnabled 判断模块是否开启；不属于任何模块的页面视为开启。
+export function moduleEnabled(id?: string): boolean {
+  return !id || !disabledModules.value.includes(id)
+}
+
+// visibleNavGroups 为去掉已关闭模块后的导航分组，空分组一并隐藏。
+export const visibleNavGroups = computed(() =>
+  navGroups.map((g) => ({ ...g, items: g.items.filter((i) => moduleEnabled(i.moduleId)) })).filter((g) => g.items.length > 0),
+)
+
+// pathEnabled 判断路由所属模块是否开启。
+export function pathEnabled(path: string): boolean {
+  return moduleEnabled(navByPath(path)?.moduleId)
+}
 
 // navByModule 按模块 ID 查找导航项。
 export function navByModule(id: string): NavItem | undefined {

@@ -75,8 +75,8 @@ func (a *App) buildDiagnostics(includeLogs bool, now time.Time) (*diag.Bundle, e
 
 	mods := make([]map[string]any, 0, len(a.modules))
 	for _, e := range a.modules {
-		item := map[string]any{"id": e.mod.ID(), "title": e.mod.Title()}
-		if sm, ok := e.mod.(module.Summarizer); ok {
+		item := map[string]any{"id": e.mod.ID(), "title": e.mod.Title(), "enabled": e.enabled}
+		if sm, ok := e.mod.(module.Summarizer); ok && e.enabled {
 			var rows []map[string]string
 			for _, s := range sm.Summary() {
 				rows = append(rows, map[string]string{"label": red.Text(s.Label), "value": red.Text(s.Value), "level": s.Level})

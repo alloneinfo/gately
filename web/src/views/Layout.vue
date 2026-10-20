@@ -67,7 +67,7 @@ import SideNav from '../components/SideNav.vue'
 import AppLogo from '../components/AppLogo.vue'
 import ThemePicker from '../components/ThemePicker.vue'
 import LocaleSwitcher from '../components/LocaleSwitcher.vue'
-import { groupByPath } from '../nav'
+import { disabledModules, groupByPath, pathEnabled } from '../nav'
 import { useIsMobile } from '../composables/useIsMobile'
 
 const route = useRoute()
@@ -115,9 +115,14 @@ async function onCommand(cmd: string) {
 }
 
 onMounted(async () => {
-  const s = await api.get<{ username: string; role?: string }>('/api/session')
+  const s = await api.get<{ username: string; role?: string; disabledModules?: string[] }>('/api/session')
   username.value = s.username
   role.value = s.role ?? 'admin'
+  disabledModules.value = s.disabledModules ?? []
+  // 直接通过链接打开了已关闭模块的页面时，加载模块状态后再跳回总览
+  if (!pathEnabled(route.path)) {
+    router.replace('/overview')
+  }
 })
 </script>
 

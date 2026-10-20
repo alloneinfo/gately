@@ -12,6 +12,7 @@
     "account": "帳號與安全",
     "access": "存取控制",
     "runtime": "網路與執行",
+    "modules": "功能模組",
     "backup": "備份與遷移",
     "diagnostics": "診斷"
   },
@@ -156,6 +157,14 @@
     "confirm": "重新啟動期間，管理介面與所有轉發、代理服務會短暫中斷（通常數秒）。確定重新啟動 Gately？",
     "confirmButton": "重新啟動",
     "progress": "正在重新啟動 Gately…"
+  },
+  "modules": {
+    "title": "功能模組",
+    "desc": "依需求開啟功能模組。關閉的模組不啟動服務、不提供管理介面，並從介面中隱藏，既有設定會保留，重新開啟後恢復。被其他模組依賴的模組不能關閉。",
+    "requiredBy": "被 {names} 依賴，不能關閉",
+    "adminHttps": "管理介面 HTTPS",
+    "separator": "、",
+    "backupDesc": "依排程自動備份全部設定到本機或儲存空間"
   },
   "save": {
     "saved": "已儲存並生效",

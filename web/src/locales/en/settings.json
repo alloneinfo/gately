@@ -12,6 +12,7 @@
     "account": "Account & Security",
     "access": "Access Control",
     "runtime": "Network & Runtime",
+    "modules": "Modules",
     "backup": "Backup & Migration",
     "diagnostics": "Diagnostics"
   },
@@ -156,6 +157,14 @@
     "confirm": "The console and all forwarding and proxy services are briefly interrupted during a restart (usually a few seconds). Restart Gately?",
     "confirmButton": "Restart",
     "progress": "Restarting Gately…"
+  },
+  "modules": {
+    "title": "Modules",
+    "desc": "Turn on only the modules you need. A disabled module starts no services, serves no admin API and is hidden from the UI; its configuration is kept and comes back when you turn it on again. Modules that others depend on cannot be disabled.",
+    "requiredBy": "Required by {names}; cannot be disabled",
+    "adminHttps": "Admin UI HTTPS",
+    "separator": ", ",
+    "backupDesc": "Back up all configuration to local disk or storage on a schedule"
   },
   "save": {
     "saved": "Saved and applied",

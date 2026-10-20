@@ -73,6 +73,7 @@ func main() {
 		Web:       web.FS(),
 		Certs:     certs,
 		Modules:   mods,
+		Requires:  registry.Requires(),
 		ApplyDir:  *applyDir,
 		// 自动化部署时用环境变量指定初始密码，避免从日志中读取随机密码
 		InitialPassword: os.Getenv("GATELY_INITIAL_PASSWORD"),

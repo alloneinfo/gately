@@ -9,7 +9,7 @@
       </div>
     </div>
     <div class="groups">
-      <div v-for="g in navGroups" :key="g.titleKey" class="group">
+      <div v-for="g in visibleNavGroups" :key="g.titleKey" class="group">
         <div v-if="g.titleKey && !collapsed" class="group-title">{{ t(g.titleKey) }}</div>
         <div v-else-if="g.titleKey" class="group-sep" />
         <el-tooltip v-for="it in g.items" :key="it.path" :content="t(it.titleKey)" placement="right" :disabled="!collapsed" :show-after="200">
@@ -27,7 +27,7 @@
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import AppLogo from './AppLogo.vue'
-import { navGroups } from '../nav'
+import { visibleNavGroups } from '../nav'
 
 defineProps<{ collapsed?: boolean }>()
 defineEmits<{ navigate: [] }>()

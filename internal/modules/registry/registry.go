@@ -53,3 +53,14 @@ func New() (mods []module.Module, certs *ssl.Module) {
 	}
 	return mods, certs
 }
+
+// Requires 返回模块间的依赖关系：键为模块 ID，值为它依赖的模块 ID。
+// 与 New 中的装配关系一一对应；依赖方开启期间，被依赖的模块不能关闭。
+func Requires() map[string][]string {
+	return map[string][]string{
+		webservice.ID: {ssl.ID, waf.ID},
+		webdav.ID:     {ssl.ID},
+		ftp.ID:        {ssl.ID},
+		backupmod.ID:  {storage.ID},
+	}
+}

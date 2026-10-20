@@ -70,15 +70,16 @@ func (a *App) runSelfCheck(ctx context.Context) []module.CheckResult {
 	add(portCheck(80), portCheck(443))
 
 	// 各模块的专项检查
+	// 已关闭的模块不参与检查
 	for _, e := range a.modules {
-		if sc, ok := e.mod.(module.SelfChecker); ok {
+		if sc, ok := e.mod.(module.SelfChecker); ok && e.enabled {
 			add(sc.SelfCheck(ctx, env)...)
 		}
 	}
 	// 其余模块：把摘要里的警告与错误提示出来
 	for _, e := range a.modules {
 		sm, ok := e.mod.(module.Summarizer)
-		if !ok {
+		if !ok || !e.enabled {
 			continue
 		}
 		for _, it := range sm.Summary() {

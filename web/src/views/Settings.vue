@@ -315,6 +315,33 @@
         <SaveBar :dirty="dirty" :saving="saving" @save="saveSettings" @reset="resetSettings" />
       </el-tab-pane>
 
+      <!-- ============ 功能模块 ============ -->
+      <el-tab-pane name="modules">
+        <template #label><span class="tab-label"><Blocks :size="15" />{{ t('settings.tabs.modules') }}</span></template>
+        <div v-if="form" class="g-card">
+          <div class="g-card-head">
+            <div class="g-card-title"><Blocks :size="16" />{{ t('settings.modules.title') }}</div>
+          </div>
+          <div class="g-card-body">
+            <div class="form-help modules-desc"><el-tag size="small" type="warning">{{ t('settings.listen.needRestart') }}</el-tag> {{ t('settings.modules.desc') }}</div>
+            <div v-for="g in moduleGroups" :key="g.titleKey" class="module-group">
+              <div class="module-group-title">{{ t(g.titleKey) }}</div>
+              <div class="module-list">
+                <div v-for="m in g.items" :key="m.id" class="module-row" :class="{ off: !m.on }">
+                  <component :is="m.icon" :size="18" class="module-icon" />
+                  <div class="module-text">
+                    <div class="module-name">{{ m.title }}</div>
+                    <div class="module-desc">{{ m.lockedBy ? t('settings.modules.requiredBy', { names: m.lockedBy }) : m.desc }}</div>
+                  </div>
+                  <el-switch :model-value="m.on" :disabled="!!m.lockedBy" :aria-label="m.title" @update:model-value="(v: string | number | boolean) => toggleModule(m.id, !!v)" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <SaveBar :dirty="dirty" :saving="saving" @save="saveSettings" @reset="resetSettings" />
+      </el-tab-pane>
+
       <!-- ============ 备份与迁移 ============ -->
       <el-tab-pane name="backup">
         <template #label><span class="tab-label"><ArchiveRestore :size="15" />{{ t('settings.tabs.backup') }}</span></template>
@@ -411,7 +438,8 @@
           </div>
         </div>
 
-        <BackupSchedule />
+        <!-- 配置备份模块关闭时隐藏定时备份 -->
+        <BackupSchedule v-if="moduleEnabled('backup')" />
       </el-tab-pane>
 
       <!-- ============ 诊断 ============ -->
@@ -439,6 +467,7 @@ import {
   LoaderCircle,
   ShieldOff,
   ArchiveRestore,
+  Blocks,
   CircleCheck,
   Code2,
   Copy,
@@ -475,12 +504,13 @@ import SaveBar from '../components/SaveBar.vue'
 import RestartOverlay from '../components/RestartOverlay.vue'
 import { useFormLayout } from '../composables/useIsMobile'
 import { locales } from '../i18n/locales'
+import { moduleEnabled, navByModule, navGroups } from '../nav'
 
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const { labelPosition } = useFormLayout()
-const tabs = ['account', 'access', 'runtime', 'backup', 'diagnostics']
+const tabs = ['account', 'access', 'runtime', 'modules', 'backup', 'diagnostics']
 const tab = ref(typeof route.query.tab === 'string' && tabs.includes(route.query.tab) ? route.query.tab : 'account')
 const overlay = ref<InstanceType<typeof RestartOverlay>>()
 
@@ -501,7 +531,14 @@ const saving = ref(false)
 const dirty = computed(() => !!form.value && JSON.stringify(normalized(form.value)) !== savedJSON.value)
 
 function normalized(s: SystemSettings) {
-  return { ...s, dnsServers: s.dnsServers ?? [], trustedProxies: s.trustedProxies ?? [], thirdLogin: normalizedLogin(s.thirdLogin), restartRequired: false }
+  return {
+    ...s,
+    dnsServers: s.dnsServers ?? [],
+    trustedProxies: s.trustedProxies ?? [],
+    thirdLogin: normalizedLogin(s.thirdLogin),
+    disabledModules: [...(s.disabledModules ?? [])].sort(),
+    restartRequired: false,
+  }
 }
 
 // 后端的空列表会序列化为 null，统一成数组便于编辑与比较
@@ -579,7 +616,7 @@ const entryPath = computed(() => {
 })
 
 function applySettings(s: SystemSettings) {
-  form.value = { ...s, dnsServers: s.dnsServers ?? [], thirdLogin: normalizedLogin(s.thirdLogin) }
+  form.value = { ...s, dnsServers: s.dnsServers ?? [], disabledModules: s.disabledModules ?? [], thirdLogin: normalizedLogin(s.thirdLogin) }
   savedJSON.value = JSON.stringify(normalized(form.value))
 }
 
@@ -659,6 +696,89 @@ const timeZones = computed(() => [
   { value: 'Australia/Sydney', label: t('settings.network.zones.sydney') },
   { value: 'UTC', label: t('settings.network.zones.utc') },
 ])
+
+// ---------- 功能模块 ----------
+// 模块显示名：有导航项的用导航名称（与侧边栏一致），其余用后端名称
+function moduleLabel(id: string): string {
+  const nav = navByModule(id)
+  return nav ? t(nav.titleKey) : (form.value?.modules?.find((m) => m.id === id)?.title ?? id)
+}
+
+// lockedBy 返回仍依赖该模块的开启模块（含管理界面 HTTPS），非空时不能关闭
+function lockedBy(id: string): string {
+  const f = form.value
+  if (!f) {
+    return ''
+  }
+  const off = f.disabledModules ?? []
+  const names = (f.modules ?? []).filter((m) => !off.includes(m.id) && (m.requires ?? []).includes(id)).map((m) => moduleLabel(m.id))
+  if (id === 'ssl' && f.httpsListen) {
+    names.push(t('settings.modules.adminHttps'))
+  }
+  return names.join(t('settings.modules.separator'))
+}
+
+// 没有导航项的模块的说明文案
+const extraDesc: Record<string, string> = { backup: 'settings.modules.backupDesc' }
+
+// 按侧边栏分组排列；没有导航项的模块（如配置备份）归入系统分组
+const moduleGroups = computed(() => {
+  const all = form.value?.modules ?? []
+  const off = form.value?.disabledModules ?? []
+  const item = (id: string) => {
+    const nav = navByModule(id)
+    return {
+      id,
+      title: moduleLabel(id),
+      icon: nav?.icon ?? ArchiveRestore,
+      desc: nav?.descKey ? t(nav.descKey) : extraDesc[id] ? t(extraDesc[id]) : '',
+      on: !off.includes(id),
+      lockedBy: off.includes(id) ? '' : lockedBy(id),
+    }
+  }
+  const placed = new Set<string>()
+  const groups = navGroups
+    .map((g) => {
+      const items = g.items.filter((i) => i.moduleId && all.some((m) => m.id === i.moduleId)).map((i) => item(i.moduleId as string))
+      items.forEach((i) => placed.add(i.id))
+      return { titleKey: g.titleKey, items }
+    })
+    .filter((g) => g.items.length > 0)
+  const rest = all.filter((m) => !placed.has(m.id)).map((m) => item(m.id))
+  const system = groups.find((g) => g.titleKey === 'nav.groups.system')
+  if (system) {
+    system.items.push(...rest)
+  } else if (rest.length) {
+    groups.push({ titleKey: 'nav.groups.system', items: rest })
+  }
+  return groups
+})
+
+// toggleModule 切换模块开关；开启时连同它依赖的模块一起开启
+function toggleModule(id: string, on: boolean) {
+  const f = form.value
+  if (!f) {
+    return
+  }
+  const off = new Set(f.disabledModules ?? [])
+  if (on) {
+    // 依赖可能是多级的，逐层开启；seen 防止重复访问
+    const seen = new Set<string>()
+    const stack = [id]
+    while (stack.length) {
+      const cur = stack.pop() as string
+      if (seen.has(cur)) {
+        continue
+      }
+      seen.add(cur)
+      off.delete(cur)
+      stack.push(...(f.modules?.find((m) => m.id === cur)?.requires ?? []))
+    }
+  } else {
+    off.add(id)
+  }
+  f.disabledModules = [...off].sort()
+}
 
 // ---------- 账号 ----------
 const account = reactive({ oldPassword: '', username: '', newPassword: '', confirm: '' })
@@ -1211,6 +1331,49 @@ div.warns {
 }
 .file-btn input {
   display: none;
+}
+.modules-desc {
+  margin: 0 0 6px;
+}
+.module-group-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--el-text-color-secondary);
+  padding: 14px 0 8px;
+}
+.module-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 10px;
+}
+.module-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border: 1px solid var(--g-border);
+  border-radius: 8px;
+}
+.module-row.off .module-icon,
+.module-row.off .module-name {
+  color: var(--el-text-color-placeholder);
+}
+.module-icon {
+  flex-shrink: 0;
+  color: var(--el-color-primary);
+}
+.module-text {
+  flex: 1;
+  min-width: 0;
+}
+.module-name {
+  font-size: 14px;
+  font-weight: 500;
+}
+.module-desc {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--el-text-color-secondary);
 }
 .restart-row {
   display: flex;

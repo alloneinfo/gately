@@ -12,6 +12,7 @@
     "account": "Compte et sécurité",
     "access": "Contrôle d'accès",
     "runtime": "Réseau et exécution",
+    "modules": "Modules",
     "backup": "Sauvegarde et migration",
     "diagnostics": "Diagnostic"
   },
@@ -156,6 +157,14 @@
     "confirm": "La console et tous les services de redirection et de proxy sont brièvement interrompus pendant un redémarrage (généralement quelques secondes). Redémarrer Gately ?",
     "confirmButton": "Redémarrer",
     "progress": "Redémarrage de Gately…"
+  },
+  "modules": {
+    "title": "Modules",
+    "desc": "Activez uniquement les modules dont vous avez besoin. Un module désactivé ne démarre aucun service, n'expose aucune API d'administration et disparaît de l'interface ; sa configuration est conservée et revient lorsque vous le réactivez. Les modules dont d'autres dépendent ne peuvent pas être désactivés.",
+    "requiredBy": "Requis par {names} ; ne peut pas être désactivé",
+    "adminHttps": "HTTPS de l'interface d'administration",
+    "separator": ", ",
+    "backupDesc": "Sauvegarde planifiée de toute la configuration sur le disque local ou un stockage"
   },
   "save": {
     "saved": "Enregistré et appliqué",

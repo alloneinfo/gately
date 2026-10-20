@@ -34,6 +34,7 @@ import { useI18n } from 'vue-i18n'
 import { Bell, DatabaseBackup, Fingerprint, KeyRound, Rocket, Stethoscope } from 'lucide-vue-next'
 import { api } from '../api'
 import SelfCheck from './SelfCheck.vue'
+import { moduleEnabled } from '../nav'
 
 const { t } = useI18n()
 const router = useRouter()
@@ -46,13 +47,14 @@ function go(path: string, query?: Record<string, string>) {
   router.push({ path, query })
 }
 
+// 通知中心关闭时不再引导配置通知
 const steps = computed(() => [
   { key: 'password', icon: KeyRound, title: t('onboarding.password.title'), desc: t('onboarding.password.desc'), run: () => go('/settings', { tab: 'account' }) },
   { key: 'security', icon: Fingerprint, title: t('onboarding.security.title'), desc: t('onboarding.security.desc'), run: () => go('/settings', { tab: 'account' }) },
   { key: 'check', icon: Stethoscope, title: t('onboarding.check.title'), desc: t('onboarding.check.desc'), run: () => selfCheck.value?.open() },
   { key: 'import', icon: DatabaseBackup, title: t('onboarding.import.title'), desc: t('onboarding.import.desc'), run: () => go('/settings', { tab: 'backup' }) },
-  { key: 'notify', icon: Bell, title: t('onboarding.notify.title'), desc: t('onboarding.notify.desc'), run: () => go('/notify') },
-])
+  { key: 'notify', icon: Bell, title: t('onboarding.notify.title'), desc: t('onboarding.notify.desc'), run: () => go('/notify'), module: 'notify' },
+].filter((s) => moduleEnabled(s.module)))
 
 async function done() {
   visible.value = false

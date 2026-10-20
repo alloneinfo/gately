@@ -1,6 +1,7 @@
 import { watch } from 'vue'
 import { createRouter, createWebHashHistory } from 'vue-router'
 import { i18n, t } from './i18n'
+import { pathEnabled } from './nav'
 
 const router = createRouter({
   // 使用 hash 路由，避免反向代理子路径部署时刷新 404
@@ -49,6 +50,13 @@ function updateTitle() {
   const key = router.currentRoute.value.meta.titleKey as string | undefined
   document.title = key ? `${t(key)} - Gately` : 'Gately'
 }
+
+// 已关闭模块的页面不可访问，直接回到总览（首次进入时模块状态尚未加载，由 Layout 加载后再检查一次）
+router.beforeEach((to) => {
+  if (!pathEnabled(to.path)) {
+    return '/overview'
+  }
+})
 
 router.afterEach(() => {
   updateTitle()

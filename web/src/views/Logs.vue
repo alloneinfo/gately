@@ -21,7 +21,7 @@ import { useI18n } from 'vue-i18n'
 import { ScrollText } from 'lucide-vue-next'
 import PageHeader from '../components/PageHeader.vue'
 import LogViewer from '../components/LogViewer.vue'
-import { navItems } from '../nav'
+import { moduleEnabled, navItems } from '../nav'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -32,7 +32,7 @@ const router = useRouter()
 function navTitle(i: { titleKey: string }): string {
   return t(i.titleKey)
 }
-const sources = computed(() => [{ label: t('logs.system'), value: 'system' }, ...navItems.filter((i) => i.moduleId).map((i) => ({ label: navTitle(i), value: i.moduleId as string }))])
+const sources = computed(() => [{ label: t('logs.system'), value: 'system' }, ...navItems.filter((i) => i.moduleId && moduleEnabled(i.moduleId)).map((i) => ({ label: navTitle(i), value: i.moduleId as string }))])
 const initial = String(route.query.source ?? 'system')
 const source = ref(sources.value.some((s) => s.value === initial) ? initial : 'system')
 const url = computed(() => (source.value === 'system' ? '/api/logs' : `/api/${source.value}/logs`))

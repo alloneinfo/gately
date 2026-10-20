@@ -12,6 +12,7 @@
     "account": "Conta e segurança",
     "access": "Controle de acesso",
     "runtime": "Rede e execução",
+    "modules": "Módulos",
     "backup": "Backup e migração",
     "diagnostics": "Diagnóstico"
   },
@@ -156,6 +157,14 @@
     "confirm": "O console e todos os serviços de encaminhamento e proxy são interrompidos brevemente durante o reinício (geralmente alguns segundos). Reiniciar o Gately?",
     "confirmButton": "Reiniciar",
     "progress": "Reiniciando o Gately…"
+  },
+  "modules": {
+    "title": "Módulos",
+    "desc": "Ative apenas os módulos de que precisa. Um módulo desativado não inicia serviços, não oferece API de administração e fica oculto na interface; a configuração é mantida e volta quando você o ativar novamente. Módulos dos quais outros dependem não podem ser desativados.",
+    "requiredBy": "Necessário para {names}; não pode ser desativado",
+    "adminHttps": "HTTPS da interface de administração",
+    "separator": ", ",
+    "backupDesc": "Backup agendado de toda a configuração em disco local ou armazenamento"
   },
   "save": {
     "saved": "Salvo e aplicado",

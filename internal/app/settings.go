@@ -11,6 +11,7 @@ import (
 	"net/netip"
 	"runtime"
 	"runtime/debug"
+	"slices"
 	"strings"
 	"time"
 
@@ -61,6 +62,9 @@ type Settings struct {
 	MaxProcs  int `json:"maxProcs"`
 	// ThirdLogin 为管理界面的第三方登录（GitHub / Google / QQ / OIDC）
 	ThirdLogin thirdauth.LoginConfig `json:"thirdLogin"`
+	// DisabledModules 为关闭的功能模块 ID：只加载配置，不启动服务、不提供管理接口，界面中隐藏；修改后重启生效。
+	// 采用关闭列表，升级后新增的模块默认开启
+	DisabledModules []string `json:"disabledModules"`
 }
 
 // 默认值
@@ -97,6 +101,15 @@ func (s *Settings) normalize() {
 	s.DNSServers = dns
 	s.ThirdLogin.Normalize()
 	s.Language = i18n.Normalize(s.Language)
+	// 去空、去重并排序，便于比较是否变化
+	var off []string
+	for _, id := range s.DisabledModules {
+		if id = strings.TrimSpace(id); id != "" && !slices.Contains(off, id) {
+			off = append(off, id)
+		}
+	}
+	slices.Sort(off)
+	s.DisabledModules = off
 }
 
 // Validate 校验设置。
@@ -152,7 +165,7 @@ func (s *Settings) Validate() error {
 
 // restartFields 返回需要重启才能生效的字段是否变化。
 func restartRequired(old, cur Settings) bool {
-	return old.Listen != cur.Listen || old.HTTPSListen != cur.HTTPSListen
+	return old.Listen != cur.Listen || old.HTTPSListen != cur.HTTPSListen || !slices.Equal(old.DisabledModules, cur.DisabledModules)
 }
 
 // applyRuntime 应用无需重启即可生效的设置。
@@ -200,13 +213,15 @@ type settingsView struct {
 	RestartRequired bool `json:"restartRequired"`
 	// GatewayAvailable 表示以统一网关方式运行（飞牛 fpk 包），界面据此显示飞牛登录态自动登录开关；只读
 	GatewayAvailable bool `json:"gatewayAvailable"`
+	// Modules 为全部功能模块及其依赖关系，设置页据此渲染开关；只读
+	Modules []moduleOption `json:"modules"`
 }
 
 func (a *App) viewSettings() settingsView {
 	s := a.settingsSnapshot()
 	s.LegacyAPIToken = ""
 	s.ThirdLogin = s.ThirdLogin.Masked()
-	return settingsView{Settings: s, SessionHours: a.auth.TokenTTLHours(), RestartRequired: a.restartPending.Load(), GatewayAvailable: a.opts.GatewaySocket != ""}
+	return settingsView{Settings: s, SessionHours: a.auth.TokenTTLHours(), RestartRequired: a.restartPending.Load(), GatewayAvailable: a.opts.GatewaySocket != "", Modules: a.moduleOptions()}
 }
 
 func (a *App) handleGetSettings(w http.ResponseWriter, r *http.Request) {
@@ -221,6 +236,10 @@ func (a *App) handlePutSettings(w http.ResponseWriter, r *http.Request) {
 	}
 	next := req.Settings
 	if err := next.Validate(); err != nil {
+		httpx.Error(w, http.StatusBadRequest, "%v", err)
+		return
+	}
+	if err := a.validateDisabledModules(next); err != nil {
 		httpx.Error(w, http.StatusBadRequest, "%v", err)
 		return
 	}

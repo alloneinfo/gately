@@ -22,7 +22,7 @@ func (a *App) handleMetrics(w http.ResponseWriter, r *http.Request) {
 		{Name: "gately_memory_alloc_bytes", Help: "Bytes of allocated heap objects", Type: module.MetricGauge, Value: float64(mem.Alloc)},
 	}
 	for _, e := range a.modules {
-		if mm, ok := e.mod.(module.Metricer); ok {
+		if mm, ok := e.mod.(module.Metricer); ok && e.enabled {
 			samples = append(samples, mm.Metrics()...)
 		}
 	}

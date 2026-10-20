@@ -294,7 +294,8 @@ const services = computed(() => {
   for (const m of status.value?.modules ?? []) {
     const nav = navByModule(m.id)
     const items = (m.summary ?? []).filter((it) => it.label !== 'IPv4' && it.label !== 'IPv6')
-    if (!nav || !items.length) {
+    // 已关闭的模块不展示
+    if (!nav || !m.enabled || !items.length) {
       continue
     }
     let level = 'ok'

@@ -51,8 +51,10 @@ type Options struct {
 	Listen string
 	// Web 是嵌入的前端文件系统，可为 nil
 	Web fs.FS
-	// Modules 是要启用的功能模块
+	// Modules 是全部功能模块；其中被设置关闭的模块只加载配置，不启动服务，也不提供管理接口
 	Modules []module.Module
+	// Requires 为模块间的依赖关系（模块 ID → 它依赖的模块 ID），依赖方开启时被依赖的模块不能关闭；可为 nil
+	Requires map[string][]string
 	// Certs 为管理界面 HTTPS 提供证书，可为 nil
 	Certs CertProvider
 	// ApplyDir 非空时，每次启动把该目录下的 <名称>.json 覆盖到配置目录（声明式配置，适合 GitOps、Docker 与 Kubernetes）
@@ -68,6 +70,8 @@ type Options struct {
 type moduleEntry struct {
 	mod  module.Module
 	logs *logbuf.Buffer
+	// enabled 为本次启动时模块是否开启，进程运行期间不变；修改开关需重启生效
+	enabled bool
 }
 
 // App 是一个运行中的 Gately 实例。
@@ -176,6 +180,7 @@ func New(opts Options) (*App, error) {
 		}
 		a.modules = append(a.modules, entry)
 	}
+	a.resolveEnabledModules()
 	if err := a.initTokens(); err != nil {
 		return nil, err
 	}
@@ -234,6 +239,12 @@ func (a *App) Handler() http.Handler {
 	rec.add("POST /api/system/onboarding/dismiss", a.handleOnboardingDismiss, "")
 	for _, e := range a.modules {
 		prefix := "/api/" + e.mod.ID()
+		if !e.enabled {
+			// 已关闭的模块不注册任何接口，整个前缀统一返回"已关闭"；
+			// 该模式不带请求方法，不会登记到路由表，接口文档中也就不再出现这些接口
+			rec.add(prefix+"/", a.moduleDisabledHandler(e.mod), e.mod.ID())
+			continue
+		}
 		rec.add("GET "+prefix+"/logs", a.logsHandler(e.logs), e.mod.ID())
 		rec.add("DELETE "+prefix+"/logs", func(w http.ResponseWriter, r *http.Request) {
 			e.logs.Clear()
@@ -260,11 +271,19 @@ func (a *App) Run(parent context.Context) error {
 	// 模块使用独立的可取消上下文：重启时先取消，确保后台协程退出后 Stop 不会一直等待
 	ctx, cancelModules := context.WithCancel(parent)
 	defer cancelModules()
+	var disabled []string
 	for _, e := range a.modules {
+		if !e.enabled {
+			disabled = append(disabled, e.mod.Title())
+			continue
+		}
 		if err := e.mod.Start(ctx); err != nil {
 			// 单个模块失败不影响其他模块，错误写入日志供界面查看
 			e.logs.Add(logbuf.LevelError, "", "模块启动失败: "+err.Error())
 		}
+	}
+	if len(disabled) > 0 {
+		a.sysLogs.Add(logbuf.LevelInfo, "", "以下功能模块已关闭，未启动："+strings.Join(disabled, "、"))
 	}
 	s := a.settingsSnapshot()
 	handler := a.Handler()
@@ -345,6 +364,10 @@ func (a *App) Run(parent context.Context) error {
 func (a *App) stopModules() {
 	// 逆序停止，和启动顺序对称
 	for i := len(a.modules) - 1; i >= 0; i-- {
+		// 未启动的模块无需停止
+		if !a.modules[i].enabled {
+			continue
+		}
 		if err := a.modules[i].mod.Stop(); err != nil {
 			a.logger.Printf("停止模块 %s 失败: %v", a.modules[i].mod.ID(), err)
 		}
@@ -412,20 +435,23 @@ func (a *App) handleSession(w http.ResponseWriter, r *http.Request) {
 	if role == "" {
 		role = auth.RoleAdmin
 	}
-	httpx.OK(w, map[string]string{"username": auth.UserFromContext(r.Context()), "role": role})
+	// disabledModules 为已关闭的功能模块，前端据此隐藏导航与页面
+	httpx.OK(w, map[string]any{"username": auth.UserFromContext(r.Context()), "role": role, "disabledModules": a.disabledModuleIDs()})
 }
 
 type moduleInfo struct {
-	ID      string               `json:"id"`
-	Title   string               `json:"title"`
+	ID    string `json:"id"`
+	Title string `json:"title"`
+	// Enabled 为模块是否开启；关闭的模块不提供摘要
+	Enabled bool                 `json:"enabled"`
 	Summary []module.SummaryItem `json:"summary,omitempty"`
 }
 
 func (a *App) handleStatus(w http.ResponseWriter, r *http.Request) {
 	mods := make([]moduleInfo, 0, len(a.modules))
 	for _, e := range a.modules {
-		info := moduleInfo{ID: e.mod.ID(), Title: e.mod.Title()}
-		if sm, ok := e.mod.(module.Summarizer); ok {
+		info := moduleInfo{ID: e.mod.ID(), Title: e.mod.Title(), Enabled: e.enabled}
+		if sm, ok := e.mod.(module.Summarizer); ok && e.enabled {
 			info.Summary = sm.Summary()
 		}
 		mods = append(mods, info)
@@ -625,6 +651,13 @@ func (a *App) handleLuckyImport(w http.ResponseWriter, r *http.Request) {
 			for _, e := range a.modules {
 				imp, ok := e.mod.(luckyimport.Importer)
 				if !ok {
+					continue
+				}
+				if !e.enabled {
+					// 导入会直接作用到运行中的规则，已关闭的模块只预览，告知用户开启后再导入
+					if rep := a.skipDisabledImport(e.mod, imp, doc, opts); rep != nil {
+						res.Reports = append(res.Reports, rep)
+					}
 					continue
 				}
 				rep, ierr := imp.ImportLucky(doc, opts)
