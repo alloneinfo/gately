@@ -1563,6 +1563,9 @@
             },
             "type": "array"
           },
+          "sharedUsers": {
+            "type": "boolean"
+          },
           "statusCode": {
             "type": "integer"
           },
@@ -1681,6 +1684,25 @@
       },
       "webservice.geoipDownload": {
         "properties": {
+          "url": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "webservice.totpRequest": {
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "webservice.totpResponse": {
+        "properties": {
+          "secret": {
+            "type": "string"
+          },
           "url": {
             "type": "string"
           }
@@ -18871,6 +18893,73 @@
           "Service Web"
         ],
         "x-required-scope": "webservice:read",
+        "x-token-allowed": true
+      }
+    },
+    "/api/webservice/totp-secret": {
+      "post": {
+        "description": "Permission requise : `webservice:write`.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/webservice.totpRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/webservice.totpResponse"
+                }
+              }
+            },
+            "description": "Succès"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Paramètres de requête incorrects"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Jeton invalide, expiré ou non connecté"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Il manque au jeton la permission requise"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Générer une nouvelle clé TOTP pour un utilisateur partagé (non enregistrée ; effective après enregistrement)",
+        "tags": [
+          "Service Web"
+        ],
+        "x-required-scope": "webservice:write",
         "x-token-allowed": true
       }
     },

@@ -32,6 +32,12 @@ func NewTOTPSecret() string {
 	return b32.EncodeToString(b)
 }
 
+// ValidTOTPSecret 判断密钥是否为可解码的 Base32，且长度足够（至少 80 位）。
+func ValidTOTPSecret(secret string) bool {
+	key, err := b32.DecodeString(strings.ToUpper(strings.ReplaceAll(secret, " ", "")))
+	return err == nil && len(key) >= 10
+}
+
 // totpCode 计算指定时间步的验证码。
 func totpCode(secret string, step int64) (string, error) {
 	key, err := b32.DecodeString(strings.ToUpper(strings.ReplaceAll(secret, " ", "")))

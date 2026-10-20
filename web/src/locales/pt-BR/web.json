@@ -119,5 +119,13 @@
   "forwardAuthLogin": "Redirecionamento de login",
   "forwardAuthLoginHelp": "Para onde enviar o visitante quando o endpoint retorna 401. {'{url}'} é a URL original e {'{method}'} o método. Vazio repassa a resposta do endpoint",
   "forwardAuthHeaders": "Cabeçalhos de identidade",
-  "locationsTag": "{count} regras de caminho"
+  "locationsTag": "{count} regras de caminho",
+  "sharedUsersDivider": "Usuários compartilhados (TOTP / login único)",
+  "sharedUsers": "Usuários compartilhados",
+  "sharedUsersHelp": "Contas de login compartilhadas entre vários sites, cada uma com TOTP opcional. Um site as usa ao marcar “Usar usuários compartilhados” na autenticação web; substitui autenticação externa como o Authelia",
+  "ssoDomain": "Domínio de SSO",
+  "ssoDomainHelp": "ex.: example.com: após entrar em qualquer site deste domínio ou subdomínios, os outros não pedem login de novo. Vazio para login por site",
+  "sharedUsersSite": "Usuários compartilhados",
+  "sharedUsersSiteLabel": "Usar usuários compartilhados (TOTP e login único)",
+  "sharedUsersSiteHelp": "Gerencie-os nas configurações globais do serviço web; funcionam junto com os usuários próprios do site"
 }

@@ -14,6 +14,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/wangwanjie/gately/internal/auth"
 	"github.com/wangwanjie/gately/internal/config"
 	"github.com/wangwanjie/gately/internal/crud"
 	"github.com/wangwanjie/gately/internal/geoip"
@@ -69,6 +70,7 @@ func (m *Module) Init(env module.Env) error {
 	m.auth = newAuthenticator(m.cfg.Settings.AuthSecret)
 	m.auth.setBanSeconds(m.cfg.Settings.AutoBanSeconds)
 	m.applyOAuthLocked()
+	m.auth.shared.set(m.cfg.Settings.AuthUsers, m.cfg.Settings.SSODomain)
 	// 已导入过 GeoIP 数据库时随模块加载，失败只记录日志
 	if _, err := os.Stat(m.geoipPath()); err == nil {
 		if err := geoip.Default.Load(m.geoipPath()); err != nil {
@@ -228,8 +230,11 @@ func (m *Module) Routes(r module.Router) {
 		for i := range s.OAuthProviders {
 			s.OAuthProviders[i].ClientSecret = crud.Mask(s.OAuthProviders[i].ClientSecret)
 		}
+		s.AuthUsers = maskAuthUsers(s.AuthUsers)
 		httpx.OK(w, s)
 	})
+	r.HandleFunc("POST /totp-secret", m.handleNewTOTP)
+	module.DocOf(r, "POST /totp-secret", module.Doc{Summary: "为共享用户生成新的 TOTP 密钥（不保存，保存设置后生效）", Req: &totpRequest{}, Resp: &totpResponse{}})
 	r.HandleFunc("PUT /settings", m.handlePutSettings)
 	r.HandleFunc("GET /stats", m.handleStats)
 	r.HandleFunc("GET /metrics", m.handleMetrics)
@@ -293,6 +298,16 @@ func (m *Module) handlePutSettings(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	s.TrustedProxies = cleanList(s.TrustedProxies)
+	users, err := normalizeAuthUsers(s.AuthUsers, old.AuthUsers)
+	if err != nil {
+		httpx.Error(w, http.StatusBadRequest, "%v", err)
+		return
+	}
+	s.AuthUsers = users
+	if s.SSODomain, err = validateSSODomain(s.SSODomain); err != nil {
+		httpx.Error(w, http.StatusBadRequest, "%v", err)
+		return
+	}
 	if s.AutoBanSeconds < 0 || time.Duration(s.AutoBanSeconds)*time.Second > maxBanDuration {
 		httpx.Error(w, http.StatusBadRequest, "自动封禁时长需在 0 到 30 天之间")
 		return
@@ -305,6 +320,7 @@ func (m *Module) handlePutSettings(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	m.applyOAuthLocked()
+	m.auth.shared.set(s.AuthUsers, s.SSODomain)
 	for key := range m.runners {
 		m.stopLocked(key)
 	}
@@ -319,5 +335,28 @@ func (m *Module) handlePutSettings(w http.ResponseWriter, r *http.Request) {
 	for i := range s.OAuthProviders {
 		s.OAuthProviders[i].ClientSecret = crud.Mask(s.OAuthProviders[i].ClientSecret)
 	}
+	s.AuthUsers = maskAuthUsers(s.AuthUsers)
 	httpx.OK(w, s)
+}
+
+type totpRequest struct {
+	// Name 为共享用户名，用于验证器 App 中显示的账户名
+	Name string `json:"name"`
+}
+
+type totpResponse struct {
+	Secret string `json:"secret"`
+	// URL 为 otpauth 地址，前端据此生成二维码
+	URL string `json:"url"`
+}
+
+// handleNewTOTP 生成新的 TOTP 密钥。密钥随设置一起保存，未保存前不生效。
+func (m *Module) handleNewTOTP(w http.ResponseWriter, r *http.Request) {
+	var req totpRequest
+	if err := httpx.ReadJSON(r, &req); err != nil {
+		httpx.Error(w, http.StatusBadRequest, "%v", err)
+		return
+	}
+	secret := auth.NewTOTPSecret()
+	httpx.OK(w, totpResponse{Secret: secret, URL: auth.TOTPURL(secret, strings.TrimSpace(req.Name))})
 }

@@ -248,6 +248,10 @@
                 <el-input v-model="fwdHeadersText" class="mono" placeholder="Remote-User, Remote-Groups, Remote-Email, Remote-Name" />
               </el-form-item>
             </template>
+            <el-form-item v-if="site.webAuth || site.basicAuth" :label="t('web.sharedUsersSite')">
+              <el-checkbox v-model="site.sharedUsers">{{ t('web.sharedUsersSiteLabel') }}</el-checkbox>
+              <div class="form-help">{{ t('web.sharedUsersSiteHelp') }}</div>
+            </el-form-item>
             <el-form-item v-if="site.webAuth || site.basicAuth" :label="t('web.users')">
               <el-input v-model="usersText" type="textarea" :rows="3" class="mono" :placeholder="t('web.usersPlaceholder')" />
             </el-form-item>
@@ -305,6 +309,15 @@
           <div class="form-help">{{ t('web.callbackHelp', { url: (settings?.oauthCallbackBase || 'https://...').replace(/\/$/, '') + '/__gately_auth/oauth/callback' }) }}</div>
         </el-form-item>
         <OAuthProviders v-if="settings" v-model="settings.oauthProviders" />
+        <el-divider content-position="left">{{ t('web.sharedUsersDivider') }}</el-divider>
+        <el-form-item :label="t('web.sharedUsers')">
+          <SharedUsers v-if="settings" v-model="settings.authUsers" />
+          <div class="form-help">{{ t('web.sharedUsersHelp') }}</div>
+        </el-form-item>
+        <el-form-item :label="t('web.ssoDomain')">
+          <el-input v-if="settings" v-model="settings.ssoDomain" class="w-260" placeholder="example.com" />
+          <div class="form-help">{{ t('web.ssoDomainHelp') }}</div>
+        </el-form-item>
         <AccessSettings v-if="settings" v-model:auto-ban-seconds="settings.autoBanSeconds" />
       </el-form>
       <template #footer>
@@ -328,6 +341,8 @@ import EntityCard from '../components/EntityCard.vue'
 import { useCompactView } from '../composables/useCompactView'
 import { useCollapsed } from '../composables/useCollapsed'
 import OAuthProviders from '../components/OAuthProviders.vue'
+import SharedUsers from '../components/SharedUsers.vue'
+import { type AuthUser, fromAPI, toAPI } from '../sharedUsers'
 import AccessSettings from '../components/AccessSettings.vue'
 import SiteTraffic, { type Rewrite } from '../components/SiteTraffic.vue'
 import SiteStats from '../components/SiteStats.vue'
@@ -363,6 +378,8 @@ interface Site {
   statusCode: number
   basicAuth: boolean
   webAuth: boolean
+  // 同时接受全局设置中的共享用户（支持 TOTP 与单点登录）
+  sharedUsers: boolean
   users: string[] | null
   oauthUsers: string[] | null
   ipMode: string
@@ -450,7 +467,16 @@ const { isMobile, labelPosition } = useFormLayout()
 const moduleEnabled = ref<boolean>()
 const moduleOff = computed(() => moduleEnabled.value === false)
 const enabling = ref(false)
-const settings = ref<{ enable: boolean; trustedProxies: string[] | null; oauthCallbackBase: string; oauthProviders: OAuthProvider[]; autoBanSeconds: number }>()
+interface WebSettings {
+  enable: boolean
+  trustedProxies: string[] | null
+  oauthCallbackBase: string
+  oauthProviders: OAuthProvider[]
+  autoBanSeconds: number
+  authUsers: AuthUser[]
+  ssoDomain: string
+}
+const settings = ref<WebSettings>()
 let timer: number | undefined
 
 const lines = (v: string) => v.split('\n').map((s) => s.trim()).filter(Boolean)
@@ -502,6 +528,7 @@ function emptySite(): Site {
     statusCode: 200,
     basicAuth: false,
     webAuth: false,
+    sharedUsers: false,
     users: [],
     oauthUsers: [],
     ipMode: '',
@@ -759,9 +786,9 @@ async function resetDefaultSite(lv: ListenerView) {
 }
 
 async function fetchSettings() {
-  const s = await api.get<{ enable: boolean; trustedProxies: string[] | null; oauthCallbackBase: string; oauthProviders: OAuthProvider[] | null; autoBanSeconds: number }>('/api/webservice/settings')
+  const s = await api.get<Omit<WebSettings, 'oauthProviders' | 'authUsers'> & { oauthProviders: OAuthProvider[] | null; authUsers: AuthUser[] | null }>('/api/webservice/settings')
   moduleEnabled.value = s.enable
-  return { ...s, oauthProviders: s.oauthProviders ?? [] }
+  return { ...s, oauthProviders: s.oauthProviders ?? [], authUsers: fromAPI(s.authUsers), ssoDomain: s.ssoDomain ?? '' }
 }
 
 async function openSettings() {
@@ -774,7 +801,7 @@ async function enableModule() {
   enabling.value = true
   try {
     const s = await fetchSettings()
-    await api.put('/api/webservice/settings', { ...s, enable: true })
+    await api.put('/api/webservice/settings', { ...s, enable: true, authUsers: toAPI(s.authUsers) })
     ElMessage.success(t('web.moduleEnabled'))
     await Promise.all([fetchSettings(), load()])
   } catch (e) {
@@ -786,7 +813,7 @@ async function enableModule() {
 
 async function saveSettings() {
   try {
-    await api.put('/api/webservice/settings', settings.value)
+    await api.put('/api/webservice/settings', { ...settings.value, authUsers: toAPI(settings.value?.authUsers ?? []) })
     settingsVisible.value = false
     ElMessage.success(t('common.saved'))
     await Promise.all([fetchSettings(), load()])

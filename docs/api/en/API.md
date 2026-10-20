@@ -199,6 +199,7 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | PUT | `/api/webservice/listeners/{key}/enable` | `webservice:write` | Enable or disable Web service listening |
 | PUT | `/api/webservice/listeners-order` | `webservice:write` | Reorder Web service listening |
 | GET | `/api/webservice/settings` | `webservice:read` | Read Web service global settings |
+| POST | `/api/webservice/totp-secret` | `webservice:write` | Generate a new TOTP key for a shared user (not saved; takes effect after saving settings) |
 | PUT | `/api/webservice/settings` | `webservice:write` | Save Web service global settings |
 | GET | `/api/webservice/stats` | `webservice:read` | Per-minute site statistics (?listener=&site=&minutes=) |
 | GET | `/api/webservice/metrics` | `webservice:read` | Metrics in Prometheus text format |
@@ -1167,6 +1168,7 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | `rules` | Array of `webservice.PathRule` |
 | `sendProxyProtocol` | boolean |
 | `shareLinks` | Array of `webservice.ShareLink` |
+| `sharedUsers` | boolean |
 | `statusCode` | integer |
 | `targets` | Array of string |
 | `text` | string |
@@ -1216,6 +1218,19 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 
 | Field | Type |
 | --- | --- |
+| `url` | string |
+
+### webservice.totpRequest
+
+| Field | Type |
+| --- | --- |
+| `name` | string |
+
+### webservice.totpResponse
+
+| Field | Type |
+| --- | --- |
+| `secret` | string |
 | `url` | string |
 
 ### webterminal.Connection

@@ -199,6 +199,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | PUT | `/api/webservice/listeners/{key}/enable` | `webservice:write` | Web サービスのリッスン の有効/無効を切り替え |
 | PUT | `/api/webservice/listeners-order` | `webservice:write` | Web サービスのリッスン の並び順を変更 |
 | GET | `/api/webservice/settings` | `webservice:read` | Web サービスのグローバル設定を読み取り |
+| POST | `/api/webservice/totp-secret` | `webservice:write` | 共有ユーザーの新しい TOTP 鍵を生成（保存はせず、設定保存後に有効） |
 | PUT | `/api/webservice/settings` | `webservice:write` | Web サービスのグローバル設定を保存 |
 | GET | `/api/webservice/stats` | `webservice:read` | サイトの分単位統計（?listener=&site=&minutes=） |
 | GET | `/api/webservice/metrics` | `webservice:read` | Prometheus テキスト形式のメトリクス |
@@ -1167,6 +1168,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `rules` | 配列 of `webservice.PathRule` |
 | `sendProxyProtocol` | boolean |
 | `shareLinks` | 配列 of `webservice.ShareLink` |
+| `sharedUsers` | boolean |
 | `statusCode` | integer |
 | `targets` | 配列 of string |
 | `text` | string |
@@ -1216,6 +1218,19 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 
 | フィールド | 型 |
 | --- | --- |
+| `url` | string |
+
+### webservice.totpRequest
+
+| フィールド | 型 |
+| --- | --- |
+| `name` | string |
+
+### webservice.totpResponse
+
+| フィールド | 型 |
+| --- | --- |
+| `secret` | string |
 | `url` | string |
 
 ### webterminal.Connection

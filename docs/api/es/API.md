@@ -199,6 +199,7 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | PUT | `/api/webservice/listeners/{key}/enable` | `webservice:write` | Activar o desactivar Escucha del servicio web |
 | PUT | `/api/webservice/listeners-order` | `webservice:write` | Reordenar Escucha del servicio web |
 | GET | `/api/webservice/settings` | `webservice:read` | Leer los ajustes globales del servicio web |
+| POST | `/api/webservice/totp-secret` | `webservice:write` | Generar una nueva clave TOTP para un usuario compartido (no se guarda; se aplica al guardar la configuración) |
 | PUT | `/api/webservice/settings` | `webservice:write` | Guardar los ajustes globales del servicio web |
 | GET | `/api/webservice/stats` | `webservice:read` | Estadísticas por minuto del sitio (?listener=&site=&minutes=) |
 | GET | `/api/webservice/metrics` | `webservice:read` | Métricas en formato de texto de Prometheus |
@@ -1167,6 +1168,7 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | `rules` | Lista de `webservice.PathRule` |
 | `sendProxyProtocol` | boolean |
 | `shareLinks` | Lista de `webservice.ShareLink` |
+| `sharedUsers` | boolean |
 | `statusCode` | integer |
 | `targets` | Lista de string |
 | `text` | string |
@@ -1216,6 +1218,19 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 
 | Campo | Tipo |
 | --- | --- |
+| `url` | string |
+
+### webservice.totpRequest
+
+| Campo | Tipo |
+| --- | --- |
+| `name` | string |
+
+### webservice.totpResponse
+
+| Campo | Tipo |
+| --- | --- |
+| `secret` | string |
 | `url` | string |
 
 ### webterminal.Connection

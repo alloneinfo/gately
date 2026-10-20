@@ -199,6 +199,7 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | PUT | `/api/webservice/listeners/{key}/enable` | `webservice:write` | Web-Dienst lauscht aktivieren oder deaktivieren |
 | PUT | `/api/webservice/listeners-order` | `webservice:write` | Web-Dienst lauscht neu anordnen |
 | GET | `/api/webservice/settings` | `webservice:read` | Globale Web-Dienst-Einstellungen lesen |
+| POST | `/api/webservice/totp-secret` | `webservice:write` | Neuen TOTP-Schlüssel für einen gemeinsamen Benutzer erzeugen (nicht gespeichert; wirksam nach dem Speichern) |
 | PUT | `/api/webservice/settings` | `webservice:write` | Globale Web-Dienst-Einstellungen speichern |
 | GET | `/api/webservice/stats` | `webservice:read` | Minutenstatistik einer Site (?listener=&site=&minutes=) |
 | GET | `/api/webservice/metrics` | `webservice:read` | Metriken im Prometheus-Textformat |
@@ -1167,6 +1168,7 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | `rules` | Array von `webservice.PathRule` |
 | `sendProxyProtocol` | boolean |
 | `shareLinks` | Array von `webservice.ShareLink` |
+| `sharedUsers` | boolean |
 | `statusCode` | integer |
 | `targets` | Array von string |
 | `text` | string |
@@ -1216,6 +1218,19 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 
 | Feld | Typ |
 | --- | --- |
+| `url` | string |
+
+### webservice.totpRequest
+
+| Feld | Typ |
+| --- | --- |
+| `name` | string |
+
+### webservice.totpResponse
+
+| Feld | Typ |
+| --- | --- |
+| `secret` | string |
 | `url` | string |
 
 ### webterminal.Connection

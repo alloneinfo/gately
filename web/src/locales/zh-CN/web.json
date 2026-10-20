@@ -119,5 +119,13 @@
   "forwardAuthLogin": "登录跳转",
   "forwardAuthLoginHelp": "认证接口返回 401 时跳转到该地址，{'{url}'} 为访客原始地址，{'{method}'} 为请求方法；留空时把认证接口的响应原样返回",
   "forwardAuthHeaders": "传递身份头",
-  "locationsTag": "{count} 条分路径"
+  "locationsTag": "{count} 条分路径",
+  "sharedUsersDivider": "共享认证用户（TOTP / 单点登录）",
+  "sharedUsers": "共享用户",
+  "sharedUsersHelp": "可在多个站点共用的登录账号，可为每个用户启用 TOTP 二次验证；站点在“网页认证”中勾选“使用共享用户”后生效，可替代 Authelia 等外部认证",
+  "ssoDomain": "单点登录域",
+  "ssoDomainHelp": "例如 example.com：共享用户在该域及其子域名的任一站点登录后，其他站点无需再登录；留空则每个站点单独登录",
+  "sharedUsersSite": "共享用户",
+  "sharedUsersSiteLabel": "使用共享用户（支持 TOTP 与单点登录）",
+  "sharedUsersSiteHelp": "在 Web 服务全局设置中管理共享用户；与下方站点自有用户可同时使用"
 }

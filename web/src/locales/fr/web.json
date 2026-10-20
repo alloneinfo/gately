@@ -119,5 +119,13 @@
   "forwardAuthLogin": "Redirection de connexion",
   "forwardAuthLoginHelp": "Où envoyer le visiteur quand le point renvoie 401. {'{url}'} est l'URL d'origine et {'{method}'} la méthode. Vide pour renvoyer la réponse du point telle quelle",
   "forwardAuthHeaders": "En-têtes d'identité",
-  "locationsTag": "{count} règles de chemin"
+  "locationsTag": "{count} règles de chemin",
+  "sharedUsersDivider": "Utilisateurs partagés (TOTP / authentification unique)",
+  "sharedUsers": "Utilisateurs partagés",
+  "sharedUsersHelp": "Comptes de connexion partagés entre plusieurs sites, avec TOTP optionnel par utilisateur. Un site les utilise une fois « Utiliser les utilisateurs partagés » coché dans l'authentification web ; remplace une authentification externe comme Authelia",
+  "ssoDomain": "Domaine SSO",
+  "ssoDomainHelp": "ex. example.com : après connexion sur un site de ce domaine ou de ses sous-domaines, les autres sites ne redemandent pas de connexion. Vide pour une connexion par site",
+  "sharedUsersSite": "Utilisateurs partagés",
+  "sharedUsersSiteLabel": "Utiliser les utilisateurs partagés (TOTP et authentification unique)",
+  "sharedUsersSiteHelp": "Gérez-les dans les paramètres globaux du service web ; ils s'ajoutent aux utilisateurs propres au site"
 }

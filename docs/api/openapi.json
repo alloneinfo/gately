@@ -1563,6 +1563,9 @@
             },
             "type": "array"
           },
+          "sharedUsers": {
+            "type": "boolean"
+          },
           "statusCode": {
             "type": "integer"
           },
@@ -1681,6 +1684,25 @@
       },
       "webservice.geoipDownload": {
         "properties": {
+          "url": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "webservice.totpRequest": {
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "webservice.totpResponse": {
+        "properties": {
+          "secret": {
+            "type": "string"
+          },
           "url": {
             "type": "string"
           }
@@ -18871,6 +18893,73 @@
           "Web 服务"
         ],
         "x-required-scope": "webservice:read",
+        "x-token-allowed": true
+      }
+    },
+    "/api/webservice/totp-secret": {
+      "post": {
+        "description": "所需权限：`webservice:write`。",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/webservice.totpRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/webservice.totpResponse"
+                }
+              }
+            },
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "请求参数错误"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌无效、已过期或未登录"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌缺少所需权限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "为共享用户生成新的 TOTP 密钥（不保存，保存设置后生效）",
+        "tags": [
+          "Web 服务"
+        ],
+        "x-required-scope": "webservice:write",
         "x-token-allowed": true
       }
     },

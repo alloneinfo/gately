@@ -199,6 +199,7 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | PUT | `/api/webservice/listeners/{key}/enable` | `webservice:write` | Activer ou désactiver Écoute du service Web |
 | PUT | `/api/webservice/listeners-order` | `webservice:write` | Réordonner Écoute du service Web |
 | GET | `/api/webservice/settings` | `webservice:read` | Lire les paramètres globaux du service Web |
+| POST | `/api/webservice/totp-secret` | `webservice:write` | Générer une nouvelle clé TOTP pour un utilisateur partagé (non enregistrée ; effective après enregistrement) |
 | PUT | `/api/webservice/settings` | `webservice:write` | Enregistrer les paramètres globaux du service Web |
 | GET | `/api/webservice/stats` | `webservice:read` | Statistiques par minute du site (?listener=&site=&minutes=) |
 | GET | `/api/webservice/metrics` | `webservice:read` | Métriques au format texte Prometheus |
@@ -1167,6 +1168,7 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | `rules` | Tableau de `webservice.PathRule` |
 | `sendProxyProtocol` | boolean |
 | `shareLinks` | Tableau de `webservice.ShareLink` |
+| `sharedUsers` | boolean |
 | `statusCode` | integer |
 | `targets` | Tableau de string |
 | `text` | string |
@@ -1216,6 +1218,19 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 
 | Champ | Type |
 | --- | --- |
+| `url` | string |
+
+### webservice.totpRequest
+
+| Champ | Type |
+| --- | --- |
+| `name` | string |
+
+### webservice.totpResponse
+
+| Champ | Type |
+| --- | --- |
+| `secret` | string |
 | `url` | string |
 
 ### webterminal.Connection

@@ -119,5 +119,13 @@
   "forwardAuthLogin": "登入跳轉",
   "forwardAuthLoginHelp": "認證介面回傳 401 時跳轉到該位址，{'{url}'} 為訪客原始位址，{'{method}'} 為請求方法；留空時把認證介面的回應原樣傳回",
   "forwardAuthHeaders": "傳遞身分標頭",
-  "locationsTag": "{count} 條分路徑"
+  "locationsTag": "{count} 條分路徑",
+  "sharedUsersDivider": "共用認證使用者（TOTP / 單一登入）",
+  "sharedUsers": "共用使用者",
+  "sharedUsersHelp": "可在多個站點共用的登入帳號，可為每個使用者啟用 TOTP 二次驗證；站點在「網頁認證」中勾選「使用共用使用者」後生效，可取代 Authelia 等外部認證",
+  "ssoDomain": "單一登入網域",
+  "ssoDomainHelp": "例如 example.com：共用使用者在該網域及其子網域的任一站點登入後，其他站點無需再登入；留空則每個站點單獨登入",
+  "sharedUsersSite": "共用使用者",
+  "sharedUsersSiteLabel": "使用共用使用者（支援 TOTP 與單一登入）",
+  "sharedUsersSiteHelp": "在 Web 服務全域設定中管理共用使用者；可與下方站點自有使用者同時使用"
 }

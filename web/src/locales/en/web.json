@@ -119,5 +119,13 @@
   "forwardAuthLogin": "Login redirect",
   "forwardAuthLoginHelp": "Where to send visitors when the endpoint returns 401. {'{url}'} is the original URL and {'{method}'} the request method. Leave empty to pass the endpoint's response through",
   "forwardAuthHeaders": "Identity headers",
-  "locationsTag": "{count} path rules"
+  "locationsTag": "{count} path rules",
+  "sharedUsersDivider": "Shared users (TOTP / single sign-on)",
+  "sharedUsers": "Shared users",
+  "sharedUsersHelp": "Login accounts shared by several sites, each with optional TOTP two-step verification. A site uses them once “Use shared users” is ticked under web auth; can replace external auth such as Authelia",
+  "ssoDomain": "SSO domain",
+  "ssoDomainHelp": "e.g. example.com: after a shared user signs in on any site under this domain or its subdomains, the other sites need no further sign-in. Leave empty to sign in per site",
+  "sharedUsersSite": "Shared users",
+  "sharedUsersSiteLabel": "Use shared users (TOTP and single sign-on)",
+  "sharedUsersSiteHelp": "Manage shared users in the Web service global settings; works alongside the site's own users below"
 }

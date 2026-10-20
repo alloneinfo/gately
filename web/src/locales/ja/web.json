@@ -119,5 +119,13 @@
   "forwardAuthLogin": "ログインへのリダイレクト",
   "forwardAuthLoginHelp": "エンドポイントが 401 を返したときのリダイレクト先です。{'{url}'} は元の URL、{'{method}'} はリクエストメソッドです。空ならエンドポイントの応答をそのまま返します",
   "forwardAuthHeaders": "渡す ID ヘッダー",
-  "locationsTag": "パス別 {count} 件"
+  "locationsTag": "パス別 {count} 件",
+  "sharedUsersDivider": "共有ユーザー（TOTP / シングルサインオン）",
+  "sharedUsers": "共有ユーザー",
+  "sharedUsersHelp": "複数サイトで共用するログインアカウントで、ユーザーごとに TOTP の 2 段階認証を有効にできます。サイトの Web 認証で「共有ユーザーを使う」をオンにすると有効になり、Authelia などの外部認証の代わりになります",
+  "ssoDomain": "SSO ドメイン",
+  "ssoDomainHelp": "例：example.com。共有ユーザーがこのドメインとサブドメインのいずれかのサイトでログインすると、他のサイトでは再ログイン不要です。空ならサイトごとにログイン",
+  "sharedUsersSite": "共有ユーザー",
+  "sharedUsersSiteLabel": "共有ユーザーを使う（TOTP とシングルサインオン）",
+  "sharedUsersSiteHelp": "共有ユーザーは Web サービスの全体設定で管理します。下のサイト独自ユーザーと併用できます"
 }

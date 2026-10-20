@@ -199,6 +199,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | PUT | `/api/webservice/listeners/{key}/enable` | `webservice:write` | Включить или отключить: Прослушивание веб-службы |
 | PUT | `/api/webservice/listeners-order` | `webservice:write` | Изменить порядок: Прослушивание веб-службы |
 | GET | `/api/webservice/settings` | `webservice:read` | Чтение глобальных настроек веб-службы |
+| POST | `/api/webservice/totp-secret` | `webservice:write` | Создать новый ключ TOTP для общего пользователя (не сохраняется; действует после сохранения настроек) |
 | PUT | `/api/webservice/settings` | `webservice:write` | Сохранить глобальные настройки веб-службы |
 | GET | `/api/webservice/stats` | `webservice:read` | Поминутная статистика сайта (?listener=&site=&minutes=) |
 | GET | `/api/webservice/metrics` | `webservice:read` | Метрики в текстовом формате Prometheus |
@@ -1167,6 +1168,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `rules` | Массив из `webservice.PathRule` |
 | `sendProxyProtocol` | boolean |
 | `shareLinks` | Массив из `webservice.ShareLink` |
+| `sharedUsers` | boolean |
 | `statusCode` | integer |
 | `targets` | Массив из string |
 | `text` | string |
@@ -1216,6 +1218,19 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 
 | Поле | Тип |
 | --- | --- |
+| `url` | string |
+
+### webservice.totpRequest
+
+| Поле | Тип |
+| --- | --- |
+| `name` | string |
+
+### webservice.totpResponse
+
+| Поле | Тип |
+| --- | --- |
+| `secret` | string |
 | `url` | string |
 
 ### webterminal.Connection

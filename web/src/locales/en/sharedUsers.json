@@ -1,0 +1,14 @@
+{
+  "namePlaceholder": "Username",
+  "passwordPlaceholder": "Password",
+  "passwordKeep": "Set; leave blank to keep",
+  "totpOn": "TOTP on",
+  "totpOff": "TOTP off",
+  "totpEnable": "Enable TOTP",
+  "totpReset": "Regenerate",
+  "totpDisable": "Disable TOTP",
+  "add": "Add shared user",
+  "nameFirst": "Enter a username first",
+  "qrTitle": "TOTP for {name}",
+  "qrHelp": "Scan with an authenticator app (Google Authenticator, 1Password, etc.) or enter the key manually. Takes effect after you save the settings; regenerating invalidates the old key"
+}

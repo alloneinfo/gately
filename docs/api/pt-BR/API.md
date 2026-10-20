@@ -199,6 +199,7 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | PUT | `/api/webservice/listeners/{key}/enable` | `webservice:write` | Ativar ou desativar Escuta do serviço web |
 | PUT | `/api/webservice/listeners-order` | `webservice:write` | Reordenar Escuta do serviço web |
 | GET | `/api/webservice/settings` | `webservice:read` | Ler configurações globais do serviço web |
+| POST | `/api/webservice/totp-secret` | `webservice:write` | Gerar nova chave TOTP para um usuário compartilhado (não salva; vale após salvar as configurações) |
 | PUT | `/api/webservice/settings` | `webservice:write` | Salvar configurações globais do serviço web |
 | GET | `/api/webservice/stats` | `webservice:read` | Estatísticas por minuto do site (?listener=&site=&minutes=) |
 | GET | `/api/webservice/metrics` | `webservice:read` | Métricas em formato de texto do Prometheus |
@@ -1167,6 +1168,7 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | `rules` | Array de `webservice.PathRule` |
 | `sendProxyProtocol` | boolean |
 | `shareLinks` | Array de `webservice.ShareLink` |
+| `sharedUsers` | boolean |
 | `statusCode` | integer |
 | `targets` | Array de string |
 | `text` | string |
@@ -1216,6 +1218,19 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 
 | Campo | Tipo |
 | --- | --- |
+| `url` | string |
+
+### webservice.totpRequest
+
+| Campo | Tipo |
+| --- | --- |
+| `name` | string |
+
+### webservice.totpResponse
+
+| Campo | Tipo |
+| --- | --- |
+| `secret` | string |
 | `url` | string |
 
 ### webterminal.Connection

@@ -1,0 +1,14 @@
+{
+  "namePlaceholder": "使用者名稱",
+  "passwordPlaceholder": "密碼",
+  "passwordKeep": "已設定，留空不修改",
+  "totpOn": "已啟用 TOTP",
+  "totpOff": "未啟用 TOTP",
+  "totpEnable": "啟用 TOTP",
+  "totpReset": "重新產生",
+  "totpDisable": "關閉 TOTP",
+  "add": "新增共用使用者",
+  "nameFirst": "請先填寫使用者名稱",
+  "qrTitle": "{name} 的 TOTP",
+  "qrHelp": "用驗證器 App（Google Authenticator、1Password 等）掃碼或手動輸入金鑰，儲存設定後生效；重新產生會使舊金鑰失效"
+}

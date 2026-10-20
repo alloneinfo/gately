@@ -119,5 +119,13 @@
   "forwardAuthLogin": "로그인 리디렉션",
   "forwardAuthLoginHelp": "엔드포인트가 401을 반환할 때 보낼 주소입니다. {'{url}'}은 원래 주소, {'{method}'}는 요청 메서드입니다. 비우면 엔드포인트 응답을 그대로 반환합니다",
   "forwardAuthHeaders": "신원 헤더 전달",
-  "locationsTag": "경로 규칙 {count}개"
+  "locationsTag": "경로 규칙 {count}개",
+  "sharedUsersDivider": "공유 사용자 (TOTP / 통합 로그인)",
+  "sharedUsers": "공유 사용자",
+  "sharedUsersHelp": "여러 사이트에서 함께 쓰는 로그인 계정이며 사용자별로 TOTP 2단계 인증을 켤 수 있습니다. 사이트의 웹 인증에서 \"공유 사용자 사용\"을 체크하면 적용되며 Authelia 같은 외부 인증을 대신할 수 있습니다",
+  "ssoDomain": "통합 로그인 도메인",
+  "ssoDomainHelp": "예: example.com. 공유 사용자가 이 도메인과 하위 도메인의 사이트 중 하나에 로그인하면 다른 사이트는 다시 로그인할 필요가 없습니다. 비우면 사이트마다 로그인",
+  "sharedUsersSite": "공유 사용자",
+  "sharedUsersSiteLabel": "공유 사용자 사용 (TOTP 및 통합 로그인)",
+  "sharedUsersSiteHelp": "공유 사용자는 웹 서비스 전역 설정에서 관리하며 아래 사이트 자체 사용자와 함께 쓸 수 있습니다"
 }

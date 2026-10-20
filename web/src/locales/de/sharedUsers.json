@@ -1,0 +1,14 @@
+{
+  "namePlaceholder": "Benutzername",
+  "passwordPlaceholder": "Passwort",
+  "passwordKeep": "Gesetzt; leer lassen zum Beibehalten",
+  "totpOn": "TOTP aktiv",
+  "totpOff": "TOTP aus",
+  "totpEnable": "TOTP aktivieren",
+  "totpReset": "Neu erzeugen",
+  "totpDisable": "TOTP deaktivieren",
+  "add": "Gemeinsamen Benutzer hinzufügen",
+  "nameFirst": "Zuerst den Benutzernamen eingeben",
+  "qrTitle": "TOTP für {name}",
+  "qrHelp": "Mit einer Authenticator-App (Google Authenticator, 1Password usw.) scannen oder den Schlüssel eingeben. Wirksam nach dem Speichern; neu erzeugen macht den alten Schlüssel ungültig"
+}

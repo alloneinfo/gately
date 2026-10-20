@@ -1563,6 +1563,9 @@
             },
             "type": "array"
           },
+          "sharedUsers": {
+            "type": "boolean"
+          },
           "statusCode": {
             "type": "integer"
           },
@@ -1681,6 +1684,25 @@
       },
       "webservice.geoipDownload": {
         "properties": {
+          "url": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "webservice.totpRequest": {
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "webservice.totpResponse": {
+        "properties": {
+          "secret": {
+            "type": "string"
+          },
           "url": {
             "type": "string"
           }
@@ -18871,6 +18893,73 @@
           "Web 서비스"
         ],
         "x-required-scope": "webservice:read",
+        "x-token-allowed": true
+      }
+    },
+    "/api/webservice/totp-secret": {
+      "post": {
+        "description": "필요한 권한: `webservice:write`.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/webservice.totpRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/webservice.totpResponse"
+                }
+              }
+            },
+            "description": "성공"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "요청 매개변수 오류"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰이 유효하지 않거나 만료되었거나 로그인하지 않음"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰에 필요한 권한이 없음"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "공유 사용자의 새 TOTP 키 생성(저장하지 않음, 설정 저장 후 적용)",
+        "tags": [
+          "Web 서비스"
+        ],
+        "x-required-scope": "webservice:write",
         "x-token-allowed": true
       }
     },

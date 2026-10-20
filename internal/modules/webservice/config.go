@@ -77,6 +77,8 @@ type Site struct {
 	BasicAuth bool     `json:"basicAuth"`
 	WebAuth   bool     `json:"webAuth"`
 	Users     []string `json:"users"`
+	// SharedUsers 为 true 时网页认证与基本认证也接受全局设置中的共享用户（支持 TOTP 与跨站单点登录）
+	SharedUsers bool `json:"sharedUsers"`
 	// OAuthUsers 为允许通过第三方登录访问的身份，格式 提供方key:标识（用户名、邮箱、稳定 ID 均可，行尾可用 " #" 加备注），提供方key:* 表示该提供方任意用户
 	OAuthUsers []string `json:"oauthUsers"`
 
@@ -152,6 +154,10 @@ type Settings struct {
 	OAuthCallbackBase string `json:"oauthCallbackBase"`
 	// AutoBanSeconds 为认证连续失败后自动封禁来源 IP 的秒数，0 表示不自动封禁
 	AutoBanSeconds int `json:"autoBanSeconds"`
+	// AuthUsers 为可在多个站点共用的认证用户，站点开启“使用共享用户”后生效
+	AuthUsers []AuthUser `json:"authUsers"`
+	// SSODomain 为共享用户登录态的 Cookie 域（如 example.com），设置后该域及其子域名下的站点登录一次即可通用
+	SSODomain string `json:"ssoDomain"`
 }
 
 type fileConfig struct {
@@ -311,10 +317,10 @@ func (s *Site) validate(isDefault bool) error {
 	}
 	s.Users = cleanList(s.Users)
 	s.OAuthUsers = cleanList(s.OAuthUsers)
-	if s.BasicAuth && len(s.Users) == 0 {
+	if s.BasicAuth && len(s.Users) == 0 && !s.SharedUsers {
 		return errors.New("启用基本认证时至少添加一个用户")
 	}
-	if s.WebAuth && len(s.Users) == 0 && len(s.OAuthUsers) == 0 {
+	if s.WebAuth && len(s.Users) == 0 && len(s.OAuthUsers) == 0 && !s.SharedUsers {
 		return errors.New("启用网页认证时至少添加一个用户或第三方登录身份")
 	}
 	if err := thirdauth.ValidateEntries(s.OAuthUsers); err != nil {

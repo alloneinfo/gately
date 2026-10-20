@@ -199,6 +199,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | PUT | `/api/webservice/listeners/{key}/enable` | `webservice:write` | Web 서비스 수신 대기 사용 설정/해제 |
 | PUT | `/api/webservice/listeners-order` | `webservice:write` | Web 서비스 수신 대기 순서 변경 |
 | GET | `/api/webservice/settings` | `webservice:read` | Web 서비스 전역 설정 읽기 |
+| POST | `/api/webservice/totp-secret` | `webservice:write` | 공유 사용자의 새 TOTP 키 생성(저장하지 않음, 설정 저장 후 적용) |
 | PUT | `/api/webservice/settings` | `webservice:write` | Web 서비스 전역 설정 저장 |
 | GET | `/api/webservice/stats` | `webservice:read` | 사이트 분 단위 통계 (?listener=&site=&minutes=) |
 | GET | `/api/webservice/metrics` | `webservice:read` | Prometheus 텍스트 형식 지표 |
@@ -1167,6 +1168,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `rules` | Array of `webservice.PathRule` |
 | `sendProxyProtocol` | boolean |
 | `shareLinks` | Array of `webservice.ShareLink` |
+| `sharedUsers` | boolean |
 | `statusCode` | integer |
 | `targets` | Array of string |
 | `text` | string |
@@ -1216,6 +1218,19 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 
 | 필드 | 타입 |
 | --- | --- |
+| `url` | string |
+
+### webservice.totpRequest
+
+| 필드 | 타입 |
+| --- | --- |
+| `name` | string |
+
+### webservice.totpResponse
+
+| 필드 | 타입 |
+| --- | --- |
+| `secret` | string |
 | `url` | string |
 
 ### webterminal.Connection

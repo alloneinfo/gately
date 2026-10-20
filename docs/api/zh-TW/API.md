@@ -199,6 +199,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | PUT | `/api/webservice/listeners/{key}/enable` | `webservice:write` | 啟用或停用Web 服務監聽 |
 | PUT | `/api/webservice/listeners-order` | `webservice:write` | 調整Web 服務監聽排序 |
 | GET | `/api/webservice/settings` | `webservice:read` | 讀取 Web 服務全域設定 |
+| POST | `/api/webservice/totp-secret` | `webservice:write` | 為共用使用者產生新的 TOTP 金鑰（不儲存，儲存設定後生效） |
 | PUT | `/api/webservice/settings` | `webservice:write` | 儲存 Web 服務全域設定 |
 | GET | `/api/webservice/stats` | `webservice:read` | 站點分鐘級統計（?listener=&site=&minutes=） |
 | GET | `/api/webservice/metrics` | `webservice:read` | Prometheus 文字格式指標 |
@@ -1167,6 +1168,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `rules` | 陣列 of `webservice.PathRule` |
 | `sendProxyProtocol` | boolean |
 | `shareLinks` | 陣列 of `webservice.ShareLink` |
+| `sharedUsers` | boolean |
 | `statusCode` | integer |
 | `targets` | 陣列 of string |
 | `text` | string |
@@ -1216,6 +1218,19 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 
 | 欄位 | 類型 |
 | --- | --- |
+| `url` | string |
+
+### webservice.totpRequest
+
+| 欄位 | 類型 |
+| --- | --- |
+| `name` | string |
+
+### webservice.totpResponse
+
+| 欄位 | 類型 |
+| --- | --- |
+| `secret` | string |
 | `url` | string |
 
 ### webterminal.Connection

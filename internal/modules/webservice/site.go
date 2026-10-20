@@ -283,7 +283,7 @@ func (h *siteHandler) newProxy(s Site, p *pool) http.Handler {
 				}
 			}
 			// 站点会话 Cookie 只用于 Gately 自身认证，不转发给后端
-			stripCookie(pr.Out, cookieName(s), oauthNonceCookie)
+			stripCookie(pr.Out, cookieName(s), oauthNonceCookie, ssoCookie)
 			applyHeaders(pr.Out.Header, s.RequestHeaders)
 		},
 		ModifyResponse: func(resp *http.Response) error {

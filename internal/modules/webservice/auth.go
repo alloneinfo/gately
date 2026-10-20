@@ -42,6 +42,9 @@ type authenticator struct {
 	bans      map[string]banEntry
 	autoBan   time.Duration
 	shareUses map[string]int
+
+	// shared 为共享认证用户与单点登录域，设置变更时整体替换
+	shared sharedStore
 }
 
 func (a *authenticator) setOAuth(env oauthEnv) {
@@ -180,6 +183,8 @@ type siteSession struct {
 	Cred string `json:"c,omitempty"`
 	// Aliases 为第三方登录身份的其他标识，校验允许列表时与 User 一起匹配
 	Aliases []string `json:"a,omitempty"`
+	// Shared 表示共享认证用户的会话（Cred 为共享用户凭据指纹，Scope 为 sso 时跨站有效）
+	Shared bool `json:"sh,omitempty"`
 }
 
 // credVersion 返回用户当前凭据的指纹（HMAC，Cookie 中不暴露密码哈希）。
@@ -213,6 +218,9 @@ func (a *authenticator) validCookie(r *http.Request, s Site) bool {
 	var sess siteSession
 	if err := a.verifyBlob("session", c.Value, &sess); err != nil {
 		return false
+	}
+	if sess.Shared {
+		return s.SharedUsers && a.validShared(r, s, &sess)
 	}
 	if sess.Host != hostOnly(r.Host) || sess.Scope != s.scope {
 		return false
@@ -251,7 +259,7 @@ func (a *authenticator) check(w http.ResponseWriter, r *http.Request, s Site) bo
 			a.handleLogin(w, r, s, ip)
 			return false
 		}
-		if a.validCookie(r, s) {
+		if a.validCookie(r, s) || (s.SharedUsers && a.validSSOCookie(r, s)) {
 			return true
 		}
 		if isBrowser(r) {
@@ -261,7 +269,7 @@ func (a *authenticator) check(w http.ResponseWriter, r *http.Request, s Site) bo
 		}
 	}
 	// 基本认证（网页认证对非浏览器的回退）；只配置了第三方身份时非浏览器无法登录
-	if len(s.Users) == 0 {
+	if len(s.Users) == 0 && !s.SharedUsers {
 		http.Error(w, "401 Unauthorized", http.StatusUnauthorized)
 		return false
 	}
@@ -272,6 +280,12 @@ func (a *authenticator) check(w http.ResponseWriter, r *http.Request, s Site) bo
 			return false
 		}
 		valid := verifyUser(s.Users, name, pass)
+		if !valid && s.SharedUsers {
+			// 基本认证无法输入动态验证码，启用了 TOTP 的共享用户只能通过网页登录
+			if u, ok := a.shared.get().checkPassword(name, pass); ok && u.TOTPSecret == "" {
+				valid = true
+			}
+		}
 		a.release(key, valid)
 		if valid {
 			return true
@@ -300,6 +314,7 @@ button{width:100%;padding:10px;border:0;border-radius:6px;background:#0e7c66;col
 {{if .HasPassword}}
 <input name="username" placeholder="用户名" autocomplete="username" required autofocus>
 <input name="password" type="password" placeholder="密码" autocomplete="current-password" required>
+{{if .HasTOTP}}<input name="code" placeholder="动态验证码（未启用可留空）" inputmode="numeric" autocomplete="one-time-code" maxlength="6">{{end}}
 <input type="hidden" name="next" value="{{.Next}}">
 <button type="submit">登录</button>
 {{end}}
@@ -346,10 +361,15 @@ func (a *authenticator) handleLogin(w http.ResponseWriter, r *http.Request, s Si
 	host := hostOnly(r.Host)
 	data := map[string]any{
 		"Host": host, "Action": authPath + "/login", "Next": safeNext(r.URL.Query().Get("next")),
-		"HasPassword": len(s.Users) > 0, "Providers": a.siteProviders(s), "StartURL": oauthStart,
+		"HasPassword": len(s.Users) > 0 || s.SharedUsers, "Providers": a.siteProviders(s), "StartURL": oauthStart,
+		"HasTOTP": s.SharedUsers && a.shared.get().hasTOTP(),
 	}
 	if r.URL.Path == authPath+"/logout" {
 		http.SetCookie(w, &http.Cookie{Name: cookieName(s), Value: "", Path: "/", MaxAge: -1})
+		if domain := a.shared.get().ssoFor(host); domain != "" && s.SharedUsers {
+			// 单点登录的会话写在父域，退出时一并清除
+			http.SetCookie(w, &http.Cookie{Name: ssoCookie, Value: "", Path: "/", Domain: domain, MaxAge: -1})
+		}
 		http.Redirect(w, r, authPath+"/login", http.StatusFound)
 		return
 	}
@@ -362,14 +382,29 @@ func (a *authenticator) handleLogin(w http.ResponseWriter, r *http.Request, s Si
 			data["Error"] = "失败次数过多，请稍后再试"
 		} else {
 			user := r.PostForm.Get("username")
-			valid := len(s.Users) > 0 && verifyUser(s.Users, user, r.PostForm.Get("password"))
+			pass := r.PostForm.Get("password")
+			valid := len(s.Users) > 0 && verifyUser(s.Users, user, pass)
+			msg := "用户名或密码错误"
+			var shared AuthUser
+			if !valid && s.SharedUsers {
+				var errMsg string
+				shared, errMsg = a.loginShared(user, pass, r.PostForm.Get("code"))
+				valid = errMsg == ""
+				if !valid {
+					msg = errMsg
+				}
+			}
 			a.release(key, valid)
 			if valid {
-				a.issueSession(w, r, s, user)
+				if shared.Name != "" {
+					a.issueSharedSession(w, r, s, shared)
+				} else {
+					a.issueSession(w, r, s, user)
+				}
 				http.Redirect(w, r, next, http.StatusFound)
 				return
 			}
-			data["Error"] = "用户名或密码错误"
+			data["Error"] = msg
 		}
 	}
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")

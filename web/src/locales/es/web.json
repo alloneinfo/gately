@@ -119,5 +119,13 @@
   "forwardAuthLogin": "Redirección de inicio de sesión",
   "forwardAuthLoginHelp": "Adónde enviar al visitante cuando el endpoint devuelve 401. {'{url}'} es la URL original y {'{method}'} el método. Vacío para devolver la respuesta del endpoint tal cual",
   "forwardAuthHeaders": "Cabeceras de identidad",
-  "locationsTag": "{count} reglas de ruta"
+  "locationsTag": "{count} reglas de ruta",
+  "sharedUsersDivider": "Usuarios compartidos (TOTP / inicio de sesión único)",
+  "sharedUsers": "Usuarios compartidos",
+  "sharedUsersHelp": "Cuentas de acceso compartidas por varios sitios, cada una con verificación TOTP opcional. Un sitio las usa al marcar «Usar usuarios compartidos» en la autenticación web; sustituye a autenticaciones externas como Authelia",
+  "ssoDomain": "Dominio de SSO",
+  "ssoDomainHelp": "p. ej. example.com: tras iniciar sesión en cualquier sitio de este dominio o sus subdominios, los demás no lo piden de nuevo. Vacío para iniciar sesión por sitio",
+  "sharedUsersSite": "Usuarios compartidos",
+  "sharedUsersSiteLabel": "Usar usuarios compartidos (TOTP e inicio de sesión único)",
+  "sharedUsersSiteHelp": "Los usuarios compartidos se gestionan en la configuración global del servicio web; funcionan junto a los usuarios propios del sitio"
 }

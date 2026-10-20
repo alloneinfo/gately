@@ -119,5 +119,13 @@
   "forwardAuthLogin": "Login-Weiterleitung",
   "forwardAuthLoginHelp": "Ziel, wenn der Endpunkt 401 liefert. {'{url}'} ist die ursprüngliche URL, {'{method}'} die Methode. Leer lassen, um die Antwort des Endpunkts durchzureichen",
   "forwardAuthHeaders": "Identitäts-Header",
-  "locationsTag": "{count} Pfadregeln"
+  "locationsTag": "{count} Pfadregeln",
+  "sharedUsersDivider": "Gemeinsame Benutzer (TOTP / Single Sign-on)",
+  "sharedUsers": "Gemeinsame Benutzer",
+  "sharedUsersHelp": "Anmeldekonten für mehrere Sites, je Benutzer optional mit TOTP. Eine Site nutzt sie, wenn unter Web-Auth „Gemeinsame Benutzer verwenden“ aktiviert ist; ersetzt externe Authentifizierung wie Authelia",
+  "ssoDomain": "SSO-Domain",
+  "ssoDomainHelp": "z. B. example.com: Nach der Anmeldung auf einer Site dieser Domain oder ihrer Subdomains ist auf den anderen keine erneute Anmeldung nötig. Leer = Anmeldung pro Site",
+  "sharedUsersSite": "Gemeinsame Benutzer",
+  "sharedUsersSiteLabel": "Gemeinsame Benutzer verwenden (TOTP und Single Sign-on)",
+  "sharedUsersSiteHelp": "Verwaltung in den globalen Einstellungen des Webdienstes; zusätzlich zu den eigenen Benutzern der Site"
 }

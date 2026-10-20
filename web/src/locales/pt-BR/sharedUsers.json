@@ -1,0 +1,14 @@
+{
+  "namePlaceholder": "Usuário",
+  "passwordPlaceholder": "Senha",
+  "passwordKeep": "Definida; deixe vazio para manter",
+  "totpOn": "TOTP ativo",
+  "totpOff": "TOTP inativo",
+  "totpEnable": "Ativar TOTP",
+  "totpReset": "Gerar novamente",
+  "totpDisable": "Desativar TOTP",
+  "add": "Adicionar usuário compartilhado",
+  "nameFirst": "Informe o usuário primeiro",
+  "qrTitle": "TOTP de {name}",
+  "qrHelp": "Escaneie com um app autenticador (Google Authenticator, 1Password etc.) ou digite a chave. Vale após salvar as configurações; gerar novamente invalida a chave antiga"
+}
