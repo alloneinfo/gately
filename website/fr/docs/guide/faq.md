@@ -12,6 +12,10 @@ Il est affiché dans le journal au premier démarrage, une seule fois. Pour un d
 
 Arrêtez Gately, supprimez `account.json` du dossier de configuration, puis redémarrez-le. Le programme recrée le compte `admin` et affiche un nouveau mot de passe initial dans le journal. Après la connexion, vérifiez les paramètres de sécurité comme l'authentification à deux facteurs.
 
+## fnOS est-il pris en charge ?
+
+Oui. Chaque version fournit des paquets fnOS hors ligne (`.fpk`) à installer manuellement depuis le Centre d'applications. Gately s'intègre à la passerelle unifiée fnOS : il s'ouvre depuis l'icône du bureau et fonctionne aussi via votre domaine fnOS distant. Activez « Connexion via fnOS » dans « Paramètres → Contrôle d'accès » et les administrateurs fnOS déjà connectés entrent directement, sans mot de passe ni code à deux facteurs. Consultez [Application native fnOS](/fr/docs/guide/install#fnos).
+
 ## Pourquoi recommander `--network host` ?
 
 La redirection de ports, STUN et les services Web écoutent directement sur les ports de l'hôte. Avec le réseau bridge, il faut publier soi-même chaque port utilisé.

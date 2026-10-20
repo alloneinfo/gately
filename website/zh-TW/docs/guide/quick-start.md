@@ -14,6 +14,10 @@ docker logs gately 2>&1 | grep -i "initial password"
 
 不需要 Docker 管理功能時，可以移除 `docker.sock` 掛載。連接埠轉發、STUN、Web 服務需要監聽主機的連接埠，建議使用 `--network host`。
 
+::: tip 飛牛 fnOS 使用者
+可以直接安裝原生應用：經飛牛統一閘道從桌面圖示開啟，並支援飛牛管理員登入狀態直接登入，見 [飛牛 fnOS 原生應用](/zh-TW/docs/guide/install#fnos)。
+:::
+
 ## 2. 登入
 
 瀏覽器開啟 `http://<裝置IP>:16680`，使用者名稱 `admin`，密碼為日誌中輸出的初始密碼（僅在首次啟動時列印一次）。

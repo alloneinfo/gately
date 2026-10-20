@@ -12,6 +12,10 @@ Se imprime en el registro en el primer arranque, una sola vez. En despliegues co
 
 Detén Gately, elimina `account.json` del directorio de configuración y vuelve a iniciarlo. El programa recrea la cuenta `admin` e imprime una nueva contraseña inicial en el registro. Tras iniciar sesión, revisa los ajustes de seguridad, como la autenticación de dos factores.
 
+## ¿Es compatible con fnOS?
+
+Sí. Cada versión incluye paquetes sin conexión para fnOS (`.fpk`) que se instalan manualmente desde el Centro de aplicaciones. Gately se integra en la pasarela unificada de fnOS, de modo que se abre desde el icono del escritorio y también funciona a través de tu dominio remoto de fnOS. Activa «Iniciar sesión con fnOS» en «Ajustes → Control de acceso» y los administradores de fnOS con la sesión iniciada entran directamente, sin contraseña ni código de verificación en dos pasos. Consulta [Aplicación nativa para fnOS](/es/docs/guide/install#fnos).
+
 ## ¿Por qué se recomienda `--network host`?
 
 El reenvío de puertos, STUN y los servicios web escuchan directamente en puertos del host. Con una red bridge tienes que publicar tú mismo cada puerto en uso.

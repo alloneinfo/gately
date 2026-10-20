@@ -24,6 +24,8 @@ Gately runs on the network edge and handles DNS provider keys, certificate priva
 - Login rate limiting;
 - Local reverse proxies: when the admin UI sits behind nginx, haproxy or Gately Web Services on the same host, `X-Real-IP` / `X-Forwarded-For` are trusted only when sent from addresses of this host. LAN-only access, login rate limiting and the audit log use them to get the real source. You can turn this off or add extra trusted proxies under "Settings → Access Control";
 - Secure entrance path, LAN-only access and admin UI HTTPS;
+- fnOS unified gateway: when the fnOS package is accessed through the fnOS unified gateway, fnOS controls access and only fnOS administrators can open it. "Sign in with fnOS" is off by default; once enabled, fnOS administrators who are signed in enter as the Gately administrator (skipping two-step verification), while regular fnOS users still sign in. See [fnOS native app](/en/docs/guide/install#fnos);
+- Module switches: modules turned off under "Settings → Modules" start no services and serve no admin API, which shrinks the attack surface;
 - Multi-token API: each token has read/write access only to the modules selected at creation, can have an expiry time, and records the source IP of its most recent use. Account, two-factor authentication, token management, and the backup, restore, restart and system settings endpoints accept login sessions only. See [API Tokens & OpenAPI](/en/docs/reference/api);
 - Site access control: automatic bans on authentication failures, GeoIP country filtering and path rules. See [Web Services](/en/docs/modules/web);
 - Configuration backups support encryption (scrypt + AES-GCM). See [Configuration Backup](/en/docs/modules/backup).

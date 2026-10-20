@@ -12,6 +12,10 @@ Es wird beim ersten Start einmalig ins Log geschrieben. Führen Sie bei Docker-B
 
 Beenden Sie Gately, löschen Sie `account.json` im Konfigurationsverzeichnis und starten Sie es erneut. Das Programm legt das Konto `admin` neu an und schreibt ein neues Initialpasswort ins Log. Prüfen Sie nach der Anmeldung die Sicherheitseinstellungen, etwa die Zwei-Faktor-Authentifizierung.
 
+## Unterstützt Gately fnOS?
+
+Ja. Jedes Release enthält Offline-Pakete für fnOS (`.fpk`), die Sie manuell über das App Center installieren. Gately ist in das einheitliche fnOS-Gateway eingebunden, öffnet sich über das Desktop-Symbol und funktioniert auch über Ihre Remote-Domain von fnOS. Aktivieren Sie „Mit fnOS anmelden“ unter „Einstellungen → Zugriffskontrolle“, dann gelangen bei fnOS angemeldete Administratoren direkt hinein, ohne Passwort und Bestätigungscode. Siehe [Native fnOS-App](/de/docs/guide/install#fnos).
+
 ## Warum wird `--network host` empfohlen?
 
 Portweiterleitung, STUN und Web-Dienste lauschen direkt auf Ports des Hosts. Beim Bridge-Netzwerk müssen Sie jeden verwendeten Port selbst veröffentlichen.

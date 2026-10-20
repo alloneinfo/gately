@@ -14,6 +14,10 @@ docker logs gately 2>&1 | grep -i "initial password"
 
 Si no necesitas la gestión de Docker, quita el montaje de `docker.sock`. El reenvío de puertos, STUN y los servicios web escuchan en puertos del host, por lo que se recomienda `--network host`.
 
+::: tip Usuarios de fnOS
+Te recomendamos instalar la aplicación nativa: se abre desde el icono del escritorio a través de la pasarela unificada de fnOS y puede iniciar la sesión de los administradores de fnOS con su sesión de fnOS. Consulta [Aplicación nativa para fnOS](/es/docs/guide/install#fnos).
+:::
+
 ## 2. Iniciar sesión
 
 Abre `http://<ip-del-dispositivo>:16680` en un navegador. El usuario es `admin` y la contraseña es la contraseña inicial que aparece en los registros (se muestra una sola vez, en el primer arranque).

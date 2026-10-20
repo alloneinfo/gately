@@ -14,6 +14,10 @@ docker logs gately 2>&1 | grep -i "initial password"
 
 If you do not need Docker management, drop the `docker.sock` mount. Port forwarding, STUN and web services listen on host ports, so `--network host` is recommended.
 
+::: tip fnOS users
+Install the native app instead: it opens from the desktop icon through the fnOS unified gateway and can sign fnOS administrators in with their fnOS session. See [fnOS native app](/en/docs/guide/install#fnos).
+:::
+
 ## 2. Sign in
 
 Open `http://<device-ip>:16680` in a browser. The username is `admin` and the password is the initial password printed in the logs (shown only once, on first start).

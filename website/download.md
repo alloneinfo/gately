@@ -1,6 +1,6 @@
 ---
 title: 下载
-description: 下载 Gately 最新版本的二进制，或使用 Docker 镜像部署。
+description: 下载 Gately 最新版本的二进制与飞牛 fnOS 安装包，或使用 Docker 镜像部署。
 ---
 
 # 下载 Gately
@@ -24,6 +24,15 @@ docker pull ghcr.io/wangwanjie/gately:latest
 ::: tip 下载较慢？
 GitHub 在部分网络环境下访问较慢，NAS 与软路由用户可以先通过代理拉取，或使用 Docker 镜像。
 :::
+
+## 飞牛 fnOS 原生应用 {#fnos}
+
+飞牛 fnOS 用户可以直接安装原生应用：在上方列表的 fnOS 分组中下载 `.fpk`（Intel / AMD 选 `x86`，ARM 设备选 `arm`），然后在飞牛「应用中心 → 手动安装」中选择该文件。
+
+- 支持飞牛统一网关：点击桌面图标即可打开，远程访问飞牛的域名同样可用，无需额外开放端口；
+- 支持飞牛管理员登录态直接登录：开启后已登录飞牛的管理员无需再输入 Gately 密码与两步验证码。
+
+详见 [安装部署 · 飞牛 fnOS 原生应用](/docs/guide/install#fnos)。
 
 ## 从源码构建
 

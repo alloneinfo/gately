@@ -2,6 +2,8 @@
 
 Cada capacidad de Gately es un módulo independiente. Cada uno se puede activar, desactivar y configurar por separado, y guarda su configuración en un archivo JSON de texto plano.
 
+Puedes desactivar un módulo completo en «Ajustes → Módulos». Un módulo desactivado sigue cargando su configuración, pero no inicia servicios, no ofrece API de administración (sus endpoints devuelven 403) y se oculta de la interfaz; su configuración se conserva y vuelve a aplicarse cuando lo reactivas. Los módulos de los que dependen otros no se pueden desactivar, y los cambios se aplican tras un reinicio.
+
 | Módulo | Capacidades | Documentación |
 | --- | --- | --- |
 | DNS dinámico | 11 proveedores DNS, IP obtenida por URL / interfaz de red / comando, IPv4 / IPv6, webhook | [Ver](/es/docs/modules/ddns) |

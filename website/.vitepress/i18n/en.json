@@ -2,7 +2,7 @@
   "label": "English",
   "lang": "en",
   "description": "An open-source, auditable network gateway toolkit: DDNS, STUN NAT traversal, port forwarding, reverse proxy, certificates, WAF, Tailscale and frp in a single binary.",
-  "keywords": "Gately,DDNS,STUN,NAT traversal,port forwarding,reverse proxy,ACME,WAF,Tailscale,frp,NAS,homelab,self-hosted",
+  "keywords": "Gately,DDNS,STUN,NAT traversal,port forwarding,reverse proxy,ACME,WAF,Tailscale,frp,NAS,homelab,self-hosted,fnOS",
   "ogTitle": "Gately - Open-source, auditable network gateway toolkit",
   "nav": {
     "home": "Home",
@@ -214,6 +214,26 @@
       }
     ],
     "moreModules": "See all modules →",
+    "fnos": {
+      "tag": "Native fnOS app",
+      "title": "Install on fnOS, open from the desktop",
+      "desc": "Gately ships offline packages for fnOS (x86 / ARM) that you install manually from the App Center. It plugs into the fnOS unified gateway, shares the entry point you already use for fnOS, and can reuse the fnOS administrator's session.",
+      "cta": "fnOS install guide",
+      "points": [
+        {
+          "title": "Works with the fnOS unified gateway",
+          "text": "Click the icon on the fnOS desktop and the admin UI opens under /app/gately/. Both the LAN address and your remote fnOS domain work, with no extra port to open or forward, and fnOS handles access control."
+        },
+        {
+          "title": "Sign in with your fnOS admin session",
+          "text": "Turn on Sign in with fnOS and administrators already signed in to fnOS go straight into Gately, without a password or two-step code. Regular fnOS users still sign in. Off by default."
+        },
+        {
+          "title": "Every feature, running natively",
+          "text": "Runs as root, so it can listen on 80/443, manage Docker and open the Web terminal. Config is kept on uninstall, and upgrading is installing the newer .fpk."
+        }
+      ]
+    },
     "promisesTitle": "Software on your network edge should be easy to see through",
     "promisesDesc": "It holds your DNS keys and certificate private keys, so every behavior should be open to inspection.",
     "promises": [
@@ -239,6 +259,8 @@
     "installTabBinary": "Binary",
     "installDocker": "docker run -d --name gately --network host \\\n  -v ./gately-data:/etc/gately \\\n  -v /var/run/docker.sock:/var/run/docker.sock \\\n  ghcr.io/wangwanjie/gately:latest\ndocker logs gately 2>&1 | grep -i \"initial password\"",
     "installBinary": "# Download the archive for your platform from Releases and extract it\n./gately -c /etc/gately\n\n# The admin UI listens on :16680 by default\n# Username admin; the initial password is printed in the startup log",
+    "installTabFnos": "fnOS",
+    "installFnos": "# 1. Download gately_<version>_fnos_x86.fpk from Releases (_arm.fpk for ARM devices)\n# 2. In fnOS, open App Center → Manual install, pick the file and finish the wizard\n# 3. Click the Gately icon on the fnOS desktop to open it through the unified gateway\n\n# Initial password (written to the log on first start)\ngrep -i \"initial password\" /var/apps/gately/var/gately.log",
     "copy": "Copy",
     "copied": "Copied",
     "fullInstall": "Full installation guide →",
@@ -254,7 +276,11 @@
       },
       {
         "q": "Which devices can it run on?",
-        "a": "Home NAS, soft routers, cloud hosts and servers of all kinds. Binaries are provided for Linux (amd64 / arm64 / arm / mips / mipsle / riscv64), macOS, Windows and FreeBSD, plus Docker images for amd64 / arm64 / arm/v7."
+        "a": "Home NAS, soft routers, cloud hosts and servers of all kinds. Binaries are provided for Linux (amd64 / arm64 / arm / mips / mipsle / riscv64), macOS, Windows and FreeBSD, plus Docker images for amd64 / arm64 / arm/v7 and a native app package for fnOS."
+      },
+      {
+        "q": "Does it support fnOS?",
+        "a": "Yes. Every release ships offline fnOS packages (.fpk) that you install manually from the App Center. Gately plugs into the fnOS unified gateway, so it opens from the desktop icon and also works over your remote fnOS domain. Turn on Sign in with fnOS under Settings → Access control and fnOS administrators who are signed in go straight in, without a password or two-step code."
       },
       {
         "q": "Why is host networking recommended for port forwarding and STUN?",

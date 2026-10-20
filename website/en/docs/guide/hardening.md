@@ -15,6 +15,8 @@ The admin UI controls DNS, certificates and ports. Work through the following ch
 - [ ] Configure push notifications in the [Notification Center](/en/docs/modules/notify) with the "Security & sign-ins", "Configuration changes" and "Critical failures" templates
 - [ ] When the admin UI is exposed through a reverse proxy on the same host, confirm that the [audit log](/en/docs/guide/audit) records the real source; for port forwarding entry points, enable the [PROXY protocol](/en/docs/modules/portforward#proxy-protocol)
 - [ ] After downloading a new version, check its signature as described in [Verifying Releases](/en/docs/guide/verify)
+- [ ] Turn off modules you do not use under "Settings → Modules" to reduce listening services and callable endpoints
+- [ ] On fnOS, turn on "Sign in with fnOS" only if you trust every fnOS administrator account; once it is on, a compromised fnOS administrator account is a compromised Gately administrator account
 
 ## Public-facing services
 

@@ -1,6 +1,6 @@
 ---
 title: "Download"
-description: "Laden Sie die neuesten Gately-Binärdateien herunter oder setzen Sie das Docker-Image ein."
+description: "Laden Sie die neuesten Gately-Binärdateien und fnOS-Pakete herunter oder setzen Sie das Docker-Image ein."
 ---
 
 # Gately herunterladen
@@ -24,6 +24,15 @@ Laden Sie das Archiv für Ihre Plattform herunter, entpacken Sie es und starten 
 ::: tip Downloads langsam?
 GitHub ist in manchen Netzwerken langsam. Nutzer von NAS und Soft-Routern können zuerst über einen Proxy laden oder stattdessen das Docker-Image verwenden.
 :::
+
+## Native fnOS-App {#fnos}
+
+fnOS-Nutzer können direkt die native App installieren: Laden Sie die `.fpk` aus der fnOS-Gruppe in der Liste oben herunter (`x86` für Intel / AMD, `arm` für ARM-Geräte) und wählen Sie sie in fnOS unter „App Center → Manuelle Installation“ aus.
+
+- Funktioniert mit dem einheitlichen fnOS-Gateway: Start über das Desktop-Symbol, auch über Ihre Remote-Domain von fnOS, ohne zusätzlich freigegebenen Port;
+- Meldet fnOS-Administratoren mit ihrer fnOS-Sitzung an: Nach dem Aktivieren überspringen bei fnOS angemeldete Administratoren das Gately-Passwort und den Bestätigungscode.
+
+Siehe [Installation · Native fnOS-App](/de/docs/guide/install#fnos).
 
 ## Aus dem Quellcode bauen
 

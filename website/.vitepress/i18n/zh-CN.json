@@ -2,7 +2,7 @@
   "label": "简体中文",
   "lang": "zh-CN",
   "description": "开源、可审计的网络网关工具集：DDNS、STUN 穿透、端口转发、反向代理、证书、WAF、Tailscale、frp 集成在一个单文件中。",
-  "keywords": "Gately,DDNS,STUN,内网穿透,端口转发,反向代理,ACME,WAF,Tailscale,frp,NAS",
+  "keywords": "Gately,DDNS,STUN,内网穿透,端口转发,反向代理,ACME,WAF,Tailscale,frp,NAS,飞牛,fnOS",
   "ogTitle": "Gately - 开源可审计的网络网关工具集",
   "nav": {
     "home": "首页",
@@ -214,6 +214,26 @@
       }
     ],
     "moreModules": "查看全部模块 →",
+    "fnos": {
+      "tag": "飞牛 fnOS 原生应用",
+      "title": "装进飞牛，点开就用",
+      "desc": "Gately 提供飞牛 fnOS 离线安装包（x86 / ARM），在应用中心手动安装即可。它接入飞牛统一网关，与飞牛共用同一个访问入口，并能沿用飞牛管理员的登录状态。",
+      "cta": "飞牛安装说明",
+      "points": [
+        {
+          "title": "支持飞牛统一网关",
+          "text": "点击飞牛桌面图标，管理界面在 /app/gately/ 下打开。局域网地址与远程访问飞牛的域名都能直接使用，无需额外开放或映射端口，访问控制由飞牛负责。"
+        },
+        {
+          "title": "飞牛管理员登录态直接登录",
+          "text": "开启「飞牛登录态自动登录」后，已登录飞牛的管理员直接进入 Gately，无需再输入密码与两步验证码；普通飞牛用户仍需登录。默认关闭。"
+        },
+        {
+          "title": "完整能力，原生运行",
+          "text": "以 root 运行，可监听 80/443、管理 Docker、使用 Web 终端；配置卸载时默认保留，升级时安装新版 .fpk 即可。"
+        }
+      ]
+    },
     "promisesTitle": "运行在网络边界的软件，应该让你看得清楚",
     "promisesDesc": "它手握 DNS 密钥与证书私钥，所以每一个行为都应当可以被检查。",
     "promises": [
@@ -239,6 +259,8 @@
     "installTabBinary": "二进制",
     "installDocker": "docker run -d --name gately --network host \\\n  -v ./gately-data:/etc/gately \\\n  -v /var/run/docker.sock:/var/run/docker.sock \\\n  ghcr.io/wangwanjie/gately:latest\ndocker logs gately 2>&1 | grep -i \"initial password\"",
     "installBinary": "# 从 Releases 下载对应平台的压缩包并解压\n./gately -c /etc/gately\n\n# 管理界面默认监听 :16680\n# 用户名 admin，初始密码输出在启动日志中",
+    "installTabFnos": "飞牛 fnOS",
+    "installFnos": "# 1. 从 Releases 下载 gately_<版本>_fnos_x86.fpk（ARM 设备选 _arm.fpk）\n# 2. 飞牛「应用中心 → 手动安装」，选择文件并完成向导\n# 3. 点击飞牛桌面上的 Gately 图标，经统一网关打开管理界面\n\n# 初始密码（首次启动时写入日志）\ngrep -i \"initial password\" /var/apps/gately/var/gately.log",
     "copy": "复制",
     "copied": "已复制",
     "fullInstall": "完整安装文档 →",
@@ -254,7 +276,11 @@
       },
       {
         "q": "适合在哪些设备上运行？",
-        "a": "家庭 NAS、软路由、云主机与各类服务器均可，提供 Linux（amd64 / arm64 / arm / mips / mipsle / riscv64）、macOS、Windows、FreeBSD 二进制，以及 amd64 / arm64 / arm/v7 的 Docker 镜像。"
+        "a": "家庭 NAS、软路由、云主机与各类服务器均可，提供 Linux（amd64 / arm64 / arm / mips / mipsle / riscv64）、macOS、Windows、FreeBSD 二进制，amd64 / arm64 / arm/v7 的 Docker 镜像，以及飞牛 fnOS 原生应用安装包。"
+      },
+      {
+        "q": "支持飞牛 fnOS 吗？",
+        "a": "支持。每个版本附带飞牛离线安装包（.fpk），在应用中心手动安装。它接入飞牛统一网关，点击桌面图标即可打开，远程访问飞牛的域名同样可用；在「设置 → 访问控制」开启「飞牛登录态自动登录」后，已登录的飞牛管理员可直接进入，无需再输入密码与两步验证码。"
       },
       {
         "q": "端口转发、STUN 为什么推荐 host 网络？",

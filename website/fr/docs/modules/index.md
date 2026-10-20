@@ -2,6 +2,8 @@
 
 Chaque fonction de Gately est un module indépendant. Chacun peut être activé, désactivé et configuré séparément, et enregistre sa configuration dans un simple fichier JSON en texte brut.
 
+Vous pouvez désactiver un module entier dans « Paramètres → Modules ». Un module désactivé charge toujours sa configuration, mais ne démarre aucun service, n'expose aucune API d'administration (ses points d'accès renvoient 403) et est masqué dans l'interface ; sa configuration est conservée et revient dès que vous le réactivez. Les modules dont d'autres dépendent ne peuvent pas être désactivés, et les changements prennent effet après un redémarrage.
+
 | Module | Fonctions | Documentation |
 | --- | --- | --- |
 | DNS dynamique | 11 fournisseurs DNS, IP via URL / interface réseau / commande, IPv4 / IPv6, Webhook | [Consulter](/fr/docs/modules/ddns) |

@@ -2,6 +2,8 @@
 
 Every Gately capability is an independent module. Each can be enabled, disabled and configured on its own, and each saves its configuration as a plain-text JSON file.
 
+You can turn off a whole module under "Settings → Modules". A disabled module still loads its configuration but starts no services, serves no admin API (its endpoints return 403) and is hidden from the UI; its configuration is kept and comes back when you turn it on again. Modules that others depend on cannot be turned off, and changes take effect after a restart.
+
 | Module | Capabilities | Docs |
 | --- | --- | --- |
 | Dynamic DNS | 11 DNS providers, IP from URL / network interface / command, IPv4 / IPv6, Webhook | [View](/en/docs/modules/ddns) |

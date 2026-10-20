@@ -5,7 +5,7 @@ import AiNotice from './AiNotice.vue'
 import {
   Globe, RadioTower, ArrowLeftRight, ShieldCheck, Waypoints, ShieldAlert, Network, Boxes,
   Terminal, HardDrive, Clock, KeyRound, Copy, Check, Github, Lock, Eye, FileJson, Package,
-  Bell, DatabaseBackup, Activity, Bot, UserCheck, ChartLine
+  Bell, DatabaseBackup, Activity, Bot, UserCheck, ChartLine, AppWindow, LogIn, Server
 } from 'lucide-vue-next'
 
 // 所有文案来自当前语言包（.vitepress/i18n/<语言>.json 的 home 节点），图标按顺序与条目一一对应
@@ -19,9 +19,12 @@ const featureIcons = [
   HardDrive, Clock, ShieldCheck, UserCheck, ChartLine, Bell, DatabaseBackup, Activity, Bot
 ]
 const promiseIcons = [Eye, FileJson, Lock, Package]
+// 飞牛专区的三个要点：统一网关、登录态直接登录、root 运行
+const fnosIcons = [AppWindow, LogIn, Server]
 
 const features = computed(() => h.value.features.map((f: any, i: number) => ({ ...f, icon: featureIcons[i] })))
 const promises = computed(() => h.value.promises.map((f: any, i: number) => ({ ...f, icon: promiseIcons[i] })))
+const fnosPoints = computed(() => h.value.fnos.points.map((f: any, i: number) => ({ ...f, icon: fnosIcons[i] })))
 
 const COMPOSE = `services:
   gately:
@@ -38,7 +41,8 @@ const COMPOSE = `services:
 const installTabs = computed(() => [
   { key: 'docker', label: 'Docker', code: h.value.installDocker },
   { key: 'compose', label: 'Compose', code: COMPOSE },
-  { key: 'binary', label: h.value.installTabBinary, code: h.value.installBinary }
+  { key: 'binary', label: h.value.installTabBinary, code: h.value.installBinary },
+  { key: 'fnos', label: h.value.installTabFnos, code: h.value.installFnos }
 ])
 const activeTab = ref('docker')
 const copied = ref(false)
@@ -122,6 +126,30 @@ const openFaq = ref(0)
         </article>
       </div>
       <p class="more"><a :href="link('/docs/modules/')">{{ h.moreModules }}</a></p>
+    </section>
+
+    <!-- 飞牛 fnOS 原生应用：突出统一网关与登录态直接登录 -->
+    <section class="wrap block">
+      <div class="fnos">
+        <div class="fnos-text">
+          <span class="tag">{{ h.fnos.tag }}</span>
+          <h2>{{ h.fnos.title }}</h2>
+          <p>{{ h.fnos.desc }}</p>
+          <div class="cta">
+            <a class="btn primary" :href="link('/docs/guide/install#fnos')">{{ h.fnos.cta }}</a>
+            <a class="btn" :href="link('/download#fnos')">{{ h.ctaDownload }}</a>
+          </div>
+        </div>
+        <div class="fnos-points">
+          <article v-for="p in fnosPoints" :key="p.title" class="card">
+            <div class="ico"><component :is="p.icon" :size="20" /></div>
+            <div>
+              <h3>{{ p.title }}</h3>
+              <p>{{ p.text }}</p>
+            </div>
+          </article>
+        </div>
+      </div>
     </section>
 
     <!-- Promises -->
@@ -259,6 +287,16 @@ h1 { font-size: 54px; line-height: 1.15; font-weight: 800; letter-spacing: -0.02
 .card h3 { margin: 14px 0 8px; font-size: 17px; font-weight: 700; }
 .card p { margin: 0; font-size: 14px; line-height: 1.7; color: var(--vp-c-text-2); }
 
+/* fnOS */
+.fnos { display: grid; grid-template-columns: 1fr 1.15fr; gap: 40px; align-items: center; padding: 40px; border-radius: 20px; border: 1px solid var(--vp-c-divider); background:
+  radial-gradient(60% 90% at 0% 0%, var(--vp-c-brand-soft), transparent 70%), var(--vp-c-bg-soft); }
+.fnos .tag { display: inline-block; padding: 4px 12px; border-radius: 999px; font-size: 13px; font-weight: 600; color: var(--vp-c-brand-1); background: var(--vp-c-brand-soft); }
+.fnos h2 { margin: 16px 0 12px; font-size: 30px; font-weight: 700; letter-spacing: -0.01em; border: 0; padding: 0; }
+.fnos-text p { margin: 0; color: var(--vp-c-text-2); line-height: 1.8; }
+.fnos-points { display: grid; gap: 14px; }
+.fnos-points .card { display: grid; grid-template-columns: 38px 1fr; gap: 16px; padding: 18px 20px; }
+.fnos-points .card h3 { margin: 0 0 6px; }
+
 /* terminal */
 .term { max-width: 820px; margin: 0 auto; border-radius: 14px; overflow: hidden; background: #0f1b1a; border: 1px solid #1d3532; box-shadow: 0 18px 40px -22px rgba(0, 0, 0, .6); }
 .tabs { display: flex; gap: 2px; padding: 8px 8px 0; background: #14211f; }
@@ -291,9 +329,11 @@ h1 { font-size: 54px; line-height: 1.15; font-weight: 800; letter-spacing: -0.02
   h1 { font-size: 40px; }
   .feat { grid-template-columns: repeat(2, 1fr); }
   .prom, .stats { grid-template-columns: repeat(2, 1fr); }
+  .fnos { grid-template-columns: 1fr; padding: 28px; }
 }
 @media (max-width: 600px) {
   .feat, .prom, .stats { grid-template-columns: 1fr; }
-  .head h2, .final h2 { font-size: 24px; }
+  .head h2, .final h2, .fnos h2 { font-size: 24px; }
+  .fnos { padding: 22px; }
 }
 </style>

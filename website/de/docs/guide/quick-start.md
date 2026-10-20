@@ -14,6 +14,10 @@ docker logs gately 2>&1 | grep -i "initial password"
 
 Wenn Sie die Docker-Verwaltung nicht brauchen, lassen Sie die Einbindung von `docker.sock` weg. Portweiterleitung, STUN und Web-Dienste lauschen auf Ports des Hosts, daher empfehlen wir `--network host`.
 
+::: tip fnOS-Nutzer
+Installieren Sie stattdessen die native App: Sie öffnet sich über das Desktop-Symbol durch das einheitliche fnOS-Gateway und kann fnOS-Administratoren mit ihrer fnOS-Sitzung anmelden. Siehe [Native fnOS-App](/de/docs/guide/install#fnos).
+:::
+
 ## 2. Anmelden
 
 Öffnen Sie `http://<geräte-ip>:16680` im Browser. Der Benutzername lautet `admin`, das Passwort ist das im Log ausgegebene Initialpasswort (es erscheint nur einmal, beim ersten Start).

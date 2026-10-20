@@ -2,7 +2,7 @@
   "label": "Español",
   "lang": "es",
   "description": "Conjunto de herramientas de pasarela de red de código abierto y auditable: DDNS, traversal NAT con STUN, reenvío de puertos, proxy inverso, certificados, WAF, Tailscale y frp en un único binario.",
-  "keywords": "Gately,DDNS,DNS dinámico,STUN,traversal NAT,reenvío de puertos,proxy inverso,ACME,WAF,Tailscale,frp,NAS,homelab,autoalojado",
+  "keywords": "Gately,DDNS,DNS dinámico,STUN,traversal NAT,reenvío de puertos,proxy inverso,ACME,WAF,Tailscale,frp,NAS,homelab,autoalojado,fnOS",
   "ogTitle": "Gately - Herramientas de pasarela de red de código abierto y auditables",
   "nav": {
     "home": "Inicio",
@@ -214,6 +214,26 @@
       }
     ],
     "moreModules": "Ver todos los módulos →",
+    "fnos": {
+      "tag": "Aplicación nativa para fnOS",
+      "title": "Instálalo en fnOS y ábrelo desde el escritorio",
+      "desc": "Gately ofrece paquetes sin conexión para fnOS (x86 / ARM) que se instalan manualmente desde el Centro de aplicaciones. Se integra en la pasarela unificada de fnOS, comparte el punto de entrada que ya usas para fnOS y puede reutilizar la sesión del administrador de fnOS.",
+      "cta": "Guía de instalación en fnOS",
+      "points": [
+        {
+          "title": "Funciona con la pasarela unificada de fnOS",
+          "text": "Haz clic en el icono del escritorio de fnOS y la interfaz de administración se abre en /app/gately/. Funcionan tanto la dirección de la red local como tu dominio remoto de fnOS, sin abrir ni redirigir puertos adicionales, y fnOS se encarga del control de acceso."
+        },
+        {
+          "title": "Inicia sesión con tu sesión de administrador de fnOS",
+          "text": "Activa Iniciar sesión con fnOS y los administradores que ya tengan la sesión iniciada en fnOS entran directamente en Gately, sin contraseña ni código de verificación en dos pasos. Los usuarios normales de fnOS siguen iniciando sesión. Desactivado por defecto."
+        },
+        {
+          "title": "Todas las funciones, de forma nativa",
+          "text": "Se ejecuta como root, así que puede escuchar en 80/443, gestionar Docker y abrir el terminal web. La configuración se conserva al desinstalar, y para actualizar basta con instalar el .fpk más reciente."
+        }
+      ]
+    },
     "promisesTitle": "El software en el borde de tu red debe poder verse por dentro",
     "promisesDesc": "Guarda tus claves DNS y las claves privadas de tus certificados, así que cada comportamiento debe poder inspeccionarse.",
     "promises": [
@@ -239,6 +259,8 @@
     "installTabBinary": "Binario",
     "installDocker": "docker run -d --name gately --network host \\\n  -v ./gately-data:/etc/gately \\\n  -v /var/run/docker.sock:/var/run/docker.sock \\\n  ghcr.io/wangwanjie/gately:latest\ndocker logs gately 2>&1 | grep -i \"initial password\"",
     "installBinary": "# Descarga desde Releases el archivo para tu plataforma y descomprímelo\n./gately -c /etc/gately\n\n# La interfaz de administración escucha por defecto en :16680\n# Usuario admin; la contraseña inicial se imprime en el registro de arranque",
+    "installTabFnos": "fnOS",
+    "installFnos": "# 1. Descarga desde Releases gately_<version>_fnos_x86.fpk (_arm.fpk para dispositivos ARM)\n# 2. En fnOS, abre Centro de aplicaciones → Instalación manual, elige el archivo y completa el asistente\n# 3. Haz clic en el icono de Gately del escritorio de fnOS para abrirlo a través de la pasarela unificada\n\n# Contraseña inicial (se escribe en el registro en el primer arranque)\ngrep -i \"initial password\" /var/apps/gately/var/gately.log",
     "copy": "Copiar",
     "copied": "Copiado",
     "fullInstall": "Guía de instalación completa →",
@@ -254,7 +276,11 @@
       },
       {
         "q": "¿En qué dispositivos funciona?",
-        "a": "En NAS domésticos, routers software, servidores en la nube y servidores de todo tipo. Hay binarios para Linux (amd64 / arm64 / arm / mips / mipsle / riscv64), macOS, Windows y FreeBSD, además de imágenes Docker para amd64 / arm64 / arm/v7."
+        "a": "En NAS domésticos, routers software, servidores en la nube y servidores de todo tipo. Hay binarios para Linux (amd64 / arm64 / arm / mips / mipsle / riscv64), macOS, Windows y FreeBSD, además de imágenes Docker para amd64 / arm64 / arm/v7 y un paquete de aplicación nativa para fnOS."
+      },
+      {
+        "q": "¿Es compatible con fnOS?",
+        "a": "Sí. Cada versión incluye paquetes sin conexión para fnOS (.fpk) que se instalan manualmente desde el Centro de aplicaciones. Gately se integra en la pasarela unificada de fnOS, de modo que se abre desde el icono del escritorio y también funciona a través de tu dominio remoto de fnOS. Activa Iniciar sesión con fnOS en Ajustes → Control de acceso y los administradores de fnOS con la sesión iniciada entran directamente, sin contraseña ni código de verificación en dos pasos."
       },
       {
         "q": "¿Por qué se recomienda la red del host para el reenvío de puertos y STUN?",

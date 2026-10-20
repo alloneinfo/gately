@@ -25,16 +25,19 @@ const failed = ref(false)
 // 把文件名里的系统/架构识别成可读标签，便于用户挑选
 function describe(name: string, other: string): { os: string; arch: string } {
   const n = name.toLowerCase()
-  const os = n.includes('darwin') || n.includes('macos')
-    ? 'macOS'
-    : n.includes('windows')
-      ? 'Windows'
-      : n.includes('freebsd')
-        ? 'FreeBSD'
-        : n.includes('linux')
-          ? 'Linux'
-          : other
-  const arch = ['amd64', 'x86_64', 'arm64', 'aarch64', 'armv7', 'armv6', 'arm', 'mipsle', 'mips64le', 'mips', 'riscv64', '386']
+  // 飞牛 fnOS 原生应用安装包（.fpk）单独成组
+  const os = n.includes('fnos') || n.endsWith('.fpk')
+    ? 'fnOS'
+    : n.includes('darwin') || n.includes('macos')
+      ? 'macOS'
+      : n.includes('windows')
+        ? 'Windows'
+        : n.includes('freebsd')
+          ? 'FreeBSD'
+          : n.includes('linux')
+            ? 'Linux'
+            : other
+  const arch = ['amd64', 'x86_64', 'x86', 'arm64', 'aarch64', 'armv7', 'armv6', 'arm', 'mipsle', 'mips64le', 'mips', 'riscv64', '386']
     .find((a) => n.includes(a)) ?? ''
   return { os, arch }
 }

@@ -12,6 +12,10 @@ It is printed to the log on first start, only once. For Docker deployments, run 
 
 Stop Gately, delete `account.json` from the config directory, and start it again. The program recreates the `admin` account and prints a new initial password to the log. After signing in, review security settings such as two-factor authentication.
 
+## Does it support fnOS?
+
+Yes. Every release ships offline fnOS packages (`.fpk`) that you install manually from the App Center. Gately plugs into the fnOS unified gateway, so it opens from the desktop icon and also works over your remote fnOS domain. Turn on "Sign in with fnOS" under "Settings → Access control" and fnOS administrators who are signed in go straight in, without a password or two-step code. See [fnOS native app](/en/docs/guide/install#fnos).
+
 ## Why is `--network host` recommended?
 
 Port forwarding, STUN and web services listen directly on host ports. With bridge networking you have to publish every port in use yourself.

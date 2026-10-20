@@ -62,6 +62,37 @@ cp gately.init /etc/init.d/gately && chmod +x /etc/init.d/gately
 /etc/init.d/gately enable && /etc/init.d/gately start
 ```
 
+## fnOS native app {#fnos}
+
+Every release ships offline packages for fnOS: `gately_<version>_fnos_x86.fpk` (Intel / AMD) and `gately_<version>_fnos_arm.fpk` (ARM). They are not listed in the official App Center, so install them manually:
+
+1. Get the `.fpk` for your device's architecture from the [download page](/en/download#fnos);
+2. In fnOS, open "App Center → Manual install" (the button at the bottom-left), pick the file and finish the wizard;
+3. Click the Gately icon on the fnOS desktop to open the admin UI.
+
+### Works with the fnOS unified gateway
+
+The desktop icon opens the admin UI through the fnOS unified gateway at `/app/gately/` on the address you use for fnOS, sharing the same entry point. Both the LAN address and your remote fnOS domain work, with no need to open or forward port 16680.
+
+Access through the gateway is controlled by fnOS, and only fnOS administrators can open it. The secure entrance path and "LAN-only access" apply only to direct access on port 16680. On the LAN, `http://<NAS address>:16680` still works.
+
+### Sign in with your fnOS administrator session
+
+Turn on "Sign in with fnOS" under "Settings → Access control" and administrators who are signed in to fnOS enter Gately straight from the desktop icon, without a password or two-step code:
+
+- Only fnOS administrators are signed in, as the Gately administrator; regular fnOS users still enter a username and password;
+- It applies only to access through the unified gateway; direct access on port 16680 still requires a normal sign-in;
+- After you sign out, Gately does not sign you back in silently; the login page shows a "Sign in as fnOS user &lt;name&gt;" button instead;
+- The setting is off by default and only shown in the fnOS package.
+
+### Notes
+
+- The app runs as `root`, so it can listen on 80/443, manage Docker through `docker.sock` and open a real Web terminal. Install it only on a NAS you control.
+- On the first start the initial `admin` password is written to `/var/apps/gately/var/gately.log`: `grep -i "initial password" /var/apps/gately/var/gately.log`.
+- Config lives in the app's `var` directory and is kept on uninstall unless you choose "delete all" in the uninstall wizard.
+- The package also adds a `/usr/local/bin/gately` command for `gately ctl` and `gately mcp`.
+- Port 16680 is shared with the Docker image. Stop the `gately` container before starting the native app.
+
 ## Initial sign-in
 
 The admin UI listens on port `16680` by default. The username is `admin`, and the initial password is written to the log on first start. For automated deployments, set the initial password with the `GATELY_INITIAL_PASSWORD` environment variable; no random password is generated in that case.
@@ -73,6 +104,7 @@ The first sign-in shows an onboarding guide that walks you through changing the 
 Gately has no built-in online self-update; upgrades are handled by your deployment method:
 
 - Docker: `docker pull` the new image and recreate the container (keep the config directory mounted);
-- Binary: replace the executable and restart the service.
+- Binary: replace the executable and restart the service;
+- fnOS: manually install the newer `.fpk` from the App Center; your config is kept.
 
 Before upgrading, export a configuration backup or keep the config directory in git. Downloaded archives and images can be checked against their signatures as described in [Verifying Releases](/en/docs/guide/verify).

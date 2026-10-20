@@ -4,6 +4,8 @@
 
 An open-source, auditable network gateway toolkit for home networks, NAS boxes, cloud hosts, and servers of all kinds. DDNS, STUN traversal, port forwarding, reverse proxy, certificates, WAF, and more ship in a single ~32 MB file, and existing Lucky configurations can be imported.
 
+> **fnOS users:** Gately ships as a native fnOS app. It plugs into the **fnOS unified gateway**, so it opens from the fnOS desktop icon and works over the same address you use for fnOS, including your remote domain, with no extra port to open. Once enabled, **fnOS administrators can sign in directly with their fnOS session**, without a Gately password or two-step code. See [fnOS native app](#fnos-native-app).
+
 ![Gately overview](docs/images/overview.webp)
 
 ![Dynamic DNS](docs/images/ddns.webp)
@@ -51,7 +53,8 @@ Gately is fully open source, so users and the community can read the source and 
 | FTP | Multiple users, per-user directories, read-only mode, FTPS and passive port ranges |
 | Storage management | Local directories and remote WebDAV mounts, online file manager |
 | Scheduled tasks | Cron expressions, commands or HTTP requests, run history |
-| Security and settings | Passkey (WebAuthn) sign-in, two-factor authentication (TOTP), read-only accounts, login rate limiting, secure entry path, LAN-only access, HTTPS for the admin UI, multiple API tokens (per-module read/write grants), custom DNS (DoH supported), time zone, config backup and restore, real client address from trusted local reverse proxies |
+| Security and settings | Passkey (WebAuthn) sign-in, two-factor authentication (TOTP), read-only accounts, login rate limiting, secure entry path, LAN-only access, HTTPS for the admin UI, multiple API tokens (per-module read/write grants), custom DNS (DoH supported), time zone, config backup and restore, real client address from trusted local reverse proxies, turn feature modules on or off (disabled modules start no services and serve no API) |
+| fnOS native app | Offline `.fpk` packages (x86 / ARM); integrated with the fnOS unified gateway, opens from the fnOS desktop icon and works over your remote fnOS domain; fnOS administrators can sign in with their fnOS session (off by default); runs as root to listen on 80/443 and manage Docker |
 | Audit and history | Audit log of sign-ins, configuration changes and access to sensitive content (never records request bodies or secrets); every overwritten config file keeps its previous versions with diff and one-click rollback; declarative config directory (`-apply`) for GitOps |
 | Monitoring and self-check | Global Prometheus endpoint `/api/metrics` (certificates, DDNS, STUN, port forwarding, web services) with a ready-made Grafana dashboard; one-click network self-check (public IP, CGNAT, clock, ports 80/443, DDNS resolution, certificate expiry) |
 | Migration | Import a Lucky `.lkcf` file or a full-site config zip: port forwarding, DDNS, STUN, certificates, reverse proxy, WAF, Wake-on-LAN, web terminal, WebDAV, basic settings |
@@ -112,10 +115,10 @@ Service templates: [systemd](deploy/systemd/gately.service) and [OpenWrt procd](
 
 Each Release ships offline `.fpk` packages for fnOS: `gately_<version>_fnos_x86.fpk` (Intel/AMD) and `gately_<version>_fnos_arm.fpk` (ARM). They are not in the official App Center, so install them manually: open **App Center → Manual install** (the button at the bottom-left), pick the file, and finish the wizard.
 
+- **Works with the fnOS unified gateway**: click the Gately icon on the fnOS desktop and the admin UI opens through the fnOS unified gateway under `/app/gately/`, sharing the entry point you already use for fnOS. Both the LAN address and your remote fnOS domain work, with no need to open or forward port 16680. Access through the gateway is controlled by fnOS (only fnOS administrators can open it), so the safe entry and LAN-only settings apply only to direct access on port 16680.
+- **Signs fnOS administrators in with their fnOS session**: turn on **Settings → Access control → Sign in with fnOS** and fnOS administrators who are signed in to fnOS enter Gately from the desktop icon without a password or two-step code; regular fnOS users still sign in. After you sign out, the login page offers a "Sign in as fnOS user &lt;name&gt;" button instead of signing you back in silently. The setting is off by default and only shown in the fnOS package.
+- On the LAN the admin UI is also at `http://<NAS address>:16680`. On the first start the initial `admin` password is written to `/var/apps/gately/var/gately.log` (`grep -i "initial password"`).
 - The app runs as `root`, so it can listen on 80/443, manage Docker through `docker.sock`, and open a real Web terminal. Install it only on a NAS you control.
-- Click the Gately icon on the fnOS desktop to open the admin UI through the fnOS gateway (`/app/gately/` on whatever address you use for fnOS, including a remote domain); on the LAN it is also at `http://<NAS address>:16680`. On the first start the initial `admin` password is written to `/var/apps/gately/var/gately.log` (`grep -i "initial password"`).
-- Access through the desktop icon is controlled by fnOS (only fnOS administrators can open it), so the safe entry and LAN-only settings apply only to direct access on port 16680.
-- Turn on **Settings → Access control → Sign in with fnOS** to let signed-in fnOS administrators open Gately from the desktop icon without a password or two-step code; regular fnOS users still sign in. It is off by default and only shown in the fnOS package.
 - Config lives in the app's `var` directory and is kept on uninstall unless you choose "delete all" in the uninstall wizard. Upgrading is another manual install of the newer `.fpk`.
 - The package also adds a `gately` command (`/usr/local/bin/gately`) for `gately ctl` and `gately mcp`.
 - Port 16680 is shared with the Docker image. Stop the `gately` container before starting the native app.

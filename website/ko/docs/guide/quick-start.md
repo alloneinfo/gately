@@ -14,6 +14,10 @@ docker logs gately 2>&1 | grep -i "initial password"
 
 Docker 관리 기능이 필요 없다면 `docker.sock` 마운트를 생략해도 됩니다. 포트 포워딩, STUN, 웹 서비스는 호스트 포트를 직접 수신해야 하므로 `--network host`를 권장합니다.
 
+::: tip fnOS 사용자
+네이티브 앱을 설치하세요. fnOS 통합 게이트웨이를 통해 바탕 화면 아이콘으로 열 수 있고, fnOS 관리자는 fnOS 로그인 상태로 바로 로그인할 수 있습니다. 자세한 내용은 [fnOS 네이티브 앱](/ko/docs/guide/install#fnos)을 참고하세요.
+:::
+
 ## 2. 로그인
 
 브라우저에서 `http://<장치 IP>:16680`을 엽니다. 사용자 이름은 `admin`이고 비밀번호는 로그에 출력된 초기 비밀번호입니다(최초 실행 시 한 번만 출력됩니다).

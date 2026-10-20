@@ -2,6 +2,8 @@
 
 Cada recurso do Gately é um módulo independente. Todos podem ser ativados, desativados e configurados individualmente, e cada um salva a sua configuração em um arquivo JSON em texto simples.
 
+Você pode desativar um módulo inteiro em "Configurações → Módulos". Um módulo desativado continua carregando a sua configuração, mas não inicia serviços, não oferece a API de administração (os endpoints dele retornam 403) e fica oculto na interface; a configuração é mantida e volta a valer quando você o ativa de novo. Módulos dos quais outros dependem não podem ser desativados, e as alterações passam a valer depois de reiniciar.
+
 | Módulo | Recursos | Documentação |
 | --- | --- | --- |
 | DNS dinâmico | 11 provedores de DNS, IP obtido por URL / interface de rede / comando, IPv4 / IPv6, Webhook | [Ver](/pt-BR/docs/modules/ddns) |

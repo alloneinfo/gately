@@ -15,6 +15,8 @@ A interface de administração controla DNS, certificados e portas. Percorra a l
 - [ ] Configure notificações na [Central de notificações](/pt-BR/docs/modules/notify) com os modelos "Segurança e logins", "Alterações de configuração" e "Falhas críticas"
 - [ ] Se a interface de administração for exposta por um proxy reverso neste mesmo host, confirme que o [log de auditoria](/pt-BR/docs/guide/audit) registra a origem real; nas entradas de redirecionamento de portas, ative o [protocolo PROXY](/pt-BR/docs/modules/portforward#protocolo-proxy)
 - [ ] Depois de baixar uma nova versão, confira as assinaturas conforme [Verificar versões](/en/docs/guide/verify)
+- [ ] Desative em "Configurações → Módulos" os módulos que você não usa, para reduzir os serviços em escuta e os endpoints disponíveis
+- [ ] No fnOS, ative "Entrar com o fnOS" somente se você confia em todas as contas de administrador do fnOS; com a opção ativada, uma conta de administrador do fnOS comprometida equivale a uma conta de administrador do Gately comprometida
 
 ## Serviços expostos à internet
 

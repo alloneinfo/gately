@@ -1,6 +1,6 @@
 ---
 title: "Download"
-description: "Download the latest Gately binaries or deploy with the Docker image."
+description: "Download the latest Gately binaries and fnOS packages, or deploy with the Docker image."
 ---
 
 # Download Gately
@@ -24,6 +24,15 @@ Download the archive for your platform, extract it and run `./gately -c /etc/gat
 ::: tip Slow downloads?
 GitHub can be slow on some networks. NAS and soft-router users can pull through a proxy first, or use the Docker image instead.
 :::
+
+## fnOS native app {#fnos}
+
+fnOS users can install the native app directly: download the `.fpk` from the fnOS group in the list above (`x86` for Intel / AMD, `arm` for ARM devices), then pick it under "App Center → Manual install" in fnOS.
+
+- Works with the fnOS unified gateway: open it from the desktop icon, also over your remote fnOS domain, with no extra port to open;
+- Signs fnOS administrators in with their fnOS session: once enabled, administrators already signed in to fnOS skip the Gately password and two-step code.
+
+See [Installation · fnOS native app](/en/docs/guide/install#fnos).
 
 ## Build from source
 

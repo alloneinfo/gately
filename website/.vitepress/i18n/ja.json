@@ -2,7 +2,7 @@
   "label": "日本語",
   "lang": "ja",
   "description": "オープンソースで監査可能なネットワークゲートウェイツールキット。DDNS、STUN 穿孔、ポート転送、リバースプロキシ、証明書、WAF、Tailscale、frp を単一バイナリに統合した。",
-  "keywords": "Gately,DDNS,ダイナミック DNS,STUN,NAT 越え,ポート転送,リバースプロキシ,ACME,WAF,Tailscale,frp,NAS,自宅サーバー",
+  "keywords": "Gately,DDNS,ダイナミック DNS,STUN,NAT 越え,ポート転送,リバースプロキシ,ACME,WAF,Tailscale,frp,NAS,自宅サーバー,fnOS",
   "ogTitle": "Gately - オープンソースで監査可能なネットワークゲートウェイツールキット",
   "nav": {
     "home": "ホーム",
@@ -214,6 +214,26 @@
       }
     ],
     "moreModules": "すべてのモジュールを見る →",
+    "fnos": {
+      "tag": "fnOS ネイティブアプリ",
+      "title": "fnOS にインストールして、デスクトップから開く",
+      "desc": "Gately は fnOS 向けのオフラインパッケージ（x86 / ARM）を提供しており、アプリセンターから手動でインストールできます。fnOS 統一ゲートウェイに統合され、fnOS と同じアクセス入口を共用し、fnOS 管理者のログイン状態をそのまま利用できます。",
+      "cta": "fnOS インストールガイド",
+      "points": [
+        {
+          "title": "fnOS 統一ゲートウェイに対応",
+          "text": "fnOS デスクトップのアイコンをクリックすると、管理画面が /app/gately/ 配下に開きます。LAN のアドレスでも fnOS のリモートドメインでもそのまま使え、ポートを追加で開放・転送する必要はありません。アクセス制御は fnOS が担います。"
+        },
+        {
+          "title": "fnOS 管理者のログイン状態でログイン",
+          "text": "「fnOS のログイン状態で自動ログイン」を有効にすると、fnOS にログイン済みの管理者はパスワードや 2 段階認証コードなしで Gately に入れます。一般の fnOS ユーザーは引き続きログインが必要です。既定は無効です。"
+        },
+        {
+          "title": "全機能をネイティブで実行",
+          "text": "root で動作するため、80/443 の待ち受け、Docker の管理、Web ターミナルが利用できます。アンインストール時も設定は保持され、アップグレードは新しい .fpk をインストールするだけです。"
+        }
+      ]
+    },
     "promisesTitle": "ネットワーク境界で動くソフトウェアは、中身が見えるべきです",
     "promisesDesc": "DNS の API キーや証明書の秘密鍵を預かるからこそ、すべての動作を検証できる必要があります。",
     "promises": [
@@ -239,6 +259,8 @@
     "installTabBinary": "バイナリ",
     "installDocker": "docker run -d --name gately --network host \\\n  -v ./gately-data:/etc/gately \\\n  -v /var/run/docker.sock:/var/run/docker.sock \\\n  ghcr.io/wangwanjie/gately:latest\ndocker logs gately 2>&1 | grep -i \"initial password\"",
     "installBinary": "# Releases から使用するプラットフォーム向けのアーカイブをダウンロードして展開\n./gately -c /etc/gately\n\n# 管理画面はデフォルトで :16680 で待ち受け\n# ユーザー名は admin、初期パスワードは起動ログに出力されます",
+    "installTabFnos": "fnOS",
+    "installFnos": "# 1. Releases から gately_<version>_fnos_x86.fpk をダウンロード（ARM デバイスは _arm.fpk）\n# 2. fnOS でアプリセンター → 手動インストールを開き、ファイルを選んでウィザードを完了\n# 3. fnOS デスクトップの Gately アイコンをクリックすると、統一ゲートウェイ経由で開きます\n\n# 初期パスワード（初回起動時にログへ出力）\ngrep -i \"initial password\" /var/apps/gately/var/gately.log",
     "copy": "コピー",
     "copied": "コピーしました",
     "fullInstall": "インストールガイド全文 →",
@@ -254,7 +276,11 @@
       },
       {
         "q": "どんなデバイスで動かせますか？",
-        "a": "自宅の NAS、ソフトルーター、クラウドホスト、各種サーバーで動作します。Linux（amd64 / arm64 / arm / mips / mipsle / riscv64）、macOS、Windows、FreeBSD のバイナリと、amd64 / arm64 / arm/v7 の Docker イメージを提供しています。"
+        "a": "自宅の NAS、ソフトルーター、クラウドホスト、各種サーバーで動作します。Linux（amd64 / arm64 / arm / mips / mipsle / riscv64）、macOS、Windows、FreeBSD のバイナリと、amd64 / arm64 / arm/v7 の Docker イメージ、さらに fnOS 向けのネイティブアプリパッケージを提供しています。"
+      },
+      {
+        "q": "fnOS に対応していますか？",
+        "a": "対応しています。各リリースに fnOS 向けのオフラインパッケージ（.fpk）が含まれており、アプリセンターから手動でインストールできます。Gately は fnOS 統一ゲートウェイに統合されるため、デスクトップのアイコンから開け、fnOS のリモートドメインでも利用できます。「設定 → アクセス制御」で「fnOS のログイン状態で自動ログイン」を有効にすると、fnOS にログイン済みの管理者はパスワードや 2 段階認証コードなしでそのまま入れます。"
       },
       {
         "q": "ポート転送と STUN で host ネットワークを推奨するのはなぜですか？",

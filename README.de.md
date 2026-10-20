@@ -4,6 +4,8 @@
 
 Ein quelloffenes, prüfbares Toolkit für Netzwerk-Gateways – für Heimnetz, NAS, Cloud-Hosts und beliebige Server. DDNS, STUN-Traversal, Portweiterleitung, Reverse-Proxy, Zertifikate, WAF und weitere gängige Funktionen sind in einer einzigen Datei von etwa 32 MB vereint; bestehende Lucky-Konfigurationen lassen sich importieren.
 
+> **fnOS-Nutzer:** Gately gibt es als native fnOS-App. Sie ist in das **einheitliche fnOS-Gateway** eingebunden, öffnet sich über das Symbol auf dem fnOS-Desktop und funktioniert unter derselben Adresse, die Sie für fnOS verwenden, auch über Ihre Remote-Domain – ohne zusätzlich freigegebenen Port. Nach dem Aktivieren können sich **fnOS-Administratoren direkt mit ihrer fnOS-Sitzung anmelden**, ohne Gately-Passwort und ohne Bestätigungscode. Siehe [Native fnOS-App](#native-fnos-app).
+
 ![Gately-Übersicht](docs/images/overview.webp)
 
 ![Dynamisches DNS](docs/images/ddns.webp)
@@ -51,7 +53,8 @@ Gately ist vollständig quelloffen, sodass Nutzer und Community Quellcode und Ko
 | FTP | Mehrere Benutzer, eigene Verzeichnisse, schreibgeschützt, mit FTPS und passivem Portbereich |
 | Speicherverwaltung | Lokale Verzeichnisse und entfernte WebDAV-Mounts, Dateiverwaltung online |
 | Geplante Aufgaben | cron-Ausdrücke, Befehle oder HTTP-Anfragen, Ausführungsprotokoll |
-| Sicherheit und Einstellungen | Anmeldung per Passkey (WebAuthn), Zwei-Faktor-Authentifizierung (TOTP), schreibgeschützte Konten, Ratenbegrenzung bei fehlgeschlagenen Anmeldungen, Sicherheitseinstieg, Zugriff nur aus dem internen Netz, HTTPS für die Verwaltungsoberfläche, mehrere API-Tokens (Lese-/Schreibrechte je Modul), benutzerdefiniertes DNS (mit DoH-Unterstützung), Zeitzone, Konfigurationsbackup und -wiederherstellung, echte Client-Adresse von vertrauenswürdigen lokalen Reverse-Proxys |
+| Sicherheit und Einstellungen | Anmeldung per Passkey (WebAuthn), Zwei-Faktor-Authentifizierung (TOTP), schreibgeschützte Konten, Ratenbegrenzung bei fehlgeschlagenen Anmeldungen, Sicherheitseinstieg, Zugriff nur aus dem internen Netz, HTTPS für die Verwaltungsoberfläche, mehrere API-Tokens (Lese-/Schreibrechte je Modul), benutzerdefiniertes DNS (mit DoH-Unterstützung), Zeitzone, Konfigurationsbackup und -wiederherstellung, echte Client-Adresse von vertrauenswürdigen lokalen Reverse-Proxys, Funktionsmodule ein- und ausschalten (deaktivierte Module starten keine Dienste und stellen keine API bereit) |
+| Native fnOS-App | Offline-`.fpk`-Pakete (x86 / ARM); in das einheitliche fnOS-Gateway eingebunden, Start über das Symbol auf dem fnOS-Desktop, auch über Ihre Remote-Domain von fnOS erreichbar; fnOS-Administratoren können sich mit ihrer fnOS-Sitzung anmelden (standardmäßig aus); läuft als root, um auf 80/443 zu lauschen und Docker zu verwalten |
 | Audit und Verlauf | Audit-Log für Anmeldungen, Konfigurationsänderungen und Zugriffe auf sensible Inhalte (Request-Bodys und Geheimnisse werden nie protokolliert); jede überschriebene Konfigurationsdatei behält ihre früheren Versionen mit Diff und Rollback per Klick; deklaratives Konfigurationsverzeichnis (`-apply`) für GitOps |
 | Monitoring und Selbsttest | Globaler Prometheus-Endpunkt `/api/metrics` (Zertifikate, DDNS, STUN, Portweiterleitung, Web-Dienste) mit fertigem Grafana-Dashboard; Netzwerk-Selbsttest per Klick (öffentliche IP, CGNAT, Uhrzeit, Ports 80/443, DDNS-Auflösung, Zertifikatsablauf) |
 | Migration | Import von Lucky-`.lkcf`-Dateien oder Konfigurations-ZIPs der gesamten Instanz: Portweiterleitung, DDNS, STUN, Zertifikate, Reverse-Proxy, WAF, Wake-on-LAN, Web-Terminal, WebDAV, Grundeinstellungen |
@@ -107,6 +110,19 @@ Laden Sie von [Releases](https://github.com/wangwanjie/gately/releases) das Arch
 Parameter: `-c` Konfigurationsverzeichnis (alternativ die Umgebungsvariable `GATELY_CONFIG_DIR`), `-listen` überschreibt die Listen-Adresse der Verwaltungsoberfläche, `-apply` wendet bei jedem Start die `<name>.json`-Dateien eines Verzeichnisses auf das Konfigurationsverzeichnis an (`GATELY_APPLY_DIR`, praktisch für GitOps und Kubernetes; Konto- und Token-Dateien können nicht überschrieben werden), `-version` gibt die Version aus. Für unbeaufsichtigte Installationen legen Sie mit `GATELY_INITIAL_PASSWORD` das initiale Admin-Passwort fest, statt ein zufälliges Passwort aus dem Log zu lesen.
 
 Dienstvorlagen: [systemd](deploy/systemd/gately.service) und [OpenWrt procd](deploy/openwrt/gately.init). Wie Sie heruntergeladene Archive und Images prüfen (cosign-Signaturen, Build-Provenienz, SBOM), beschreibt [Release-Artefakte verifizieren](docs/en/VERIFY.md).
+
+### Native fnOS-App
+
+Jedes Release enthält Offline-`.fpk`-Pakete für fnOS: `gately_<version>_fnos_x86.fpk` (Intel/AMD) und `gately_<version>_fnos_arm.fpk` (ARM). Sie stehen nicht im offiziellen App Center und werden daher manuell installiert: Öffnen Sie **App Center → Manuelle Installation** (Schaltfläche unten links), wählen Sie die Datei aus und schließen Sie den Assistenten ab.
+
+- **Funktioniert mit dem einheitlichen fnOS-Gateway**: Ein Klick auf das Gately-Symbol auf dem fnOS-Desktop öffnet die Verwaltungsoberfläche über das einheitliche fnOS-Gateway unter `/app/gately/` – über denselben Zugang, den Sie bereits für fnOS nutzen. Sowohl die LAN-Adresse als auch Ihre Remote-Domain von fnOS funktionieren, ohne Port 16680 freizugeben oder weiterzuleiten. Den Zugriff über das Gateway kontrolliert fnOS (nur fnOS-Administratoren können es öffnen); „Sicherer Einstieg“ und „Nur LAN-Zugriff“ gelten deshalb nur für den direkten Zugriff auf Port 16680.
+- **Meldet fnOS-Administratoren mit ihrer fnOS-Sitzung an**: Aktivieren Sie **Einstellungen → Zugriffskontrolle → Mit fnOS anmelden**, dann gelangen bei fnOS angemeldete Administratoren über das Desktop-Symbol ohne Passwort und Bestätigungscode in Gately; normale fnOS-Benutzer melden sich weiterhin an. Nach dem Abmelden zeigt die Anmeldeseite eine Schaltfläche „Als fnOS-Benutzer &lt;Name&gt; anmelden“, statt Sie stillschweigend wieder anzumelden. Die Einstellung ist standardmäßig aus und wird nur im fnOS-Paket angezeigt.
+- Im LAN ist die Verwaltungsoberfläche außerdem unter `http://<NAS-Adresse>:16680` erreichbar. Beim ersten Start wird das initiale `admin`-Passwort in `/var/apps/gately/var/gately.log` geschrieben (`grep -i "initial password"`).
+- Die App läuft als `root`, damit sie auf 80/443 lauschen, Docker über `docker.sock` verwalten und ein echtes Web-Terminal öffnen kann. Installieren Sie sie nur auf einem NAS, das Sie selbst kontrollieren.
+- Die Konfiguration liegt im `var`-Verzeichnis der App und bleibt bei der Deinstallation erhalten, sofern Sie im Deinstallationsassistenten nicht „Alles löschen“ wählen. Ein Upgrade ist eine erneute manuelle Installation der neueren `.fpk`.
+- Das Paket installiert außerdem einen Befehl `gately` (`/usr/local/bin/gately`) für `gately ctl` und `gately mcp`.
+- Port 16680 wird mit dem Docker-Image geteilt. Stoppen Sie den `gately`-Container, bevor Sie die native App starten.
+- Prüfen Sie den Download wie in [Release-Artefakte verifizieren](docs/en/VERIFY.md) beschrieben; `.fpk`-Dateien sind in `checksums.txt` aufgeführt.
 
 ### Monitoring
 
