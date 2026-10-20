@@ -108,6 +108,17 @@ Flags: `-c` sets the config directory (the `GATELY_CONFIG_DIR` environment varia
 
 Service templates: [systemd](deploy/systemd/gately.service) and [OpenWrt procd](deploy/openwrt/gately.init). To verify downloaded archives and images (cosign signatures, build provenance, SBOM), see [Verifying release artifacts](docs/en/VERIFY.md).
 
+### fnOS native app
+
+Each Release ships offline `.fpk` packages for fnOS: `gately_<version>_fnos_x86.fpk` (Intel/AMD) and `gately_<version>_fnos_arm.fpk` (ARM). They are not in the official App Center, so install them manually: open **App Center → Manual install** (the button at the bottom-left), pick the file, and finish the wizard.
+
+- The app runs as `root`, so it can listen on 80/443, manage Docker through `docker.sock`, and open a real Web terminal. Install it only on a NAS you control.
+- Click the Gately icon on the fnOS desktop to open the admin UI through the fnOS gateway (`/app/gately/` on whatever address you use for fnOS, including a remote domain); on the LAN it is also at `http://<NAS address>:16680`. On the first start the initial `admin` password is written to `/var/apps/gately/var/gately.log` (`grep -i "initial password"`).
+- Config lives in the app's `var` directory and is kept on uninstall unless you choose "delete all" in the uninstall wizard. Upgrading is another manual install of the newer `.fpk`.
+- The package also adds a `gately` command (`/usr/local/bin/gately`) for `gately ctl` and `gately mcp`.
+- Port 16680 is shared with the Docker image. Stop the `gately` container before starting the native app.
+- Verify the download as described in [Verifying release artifacts](docs/en/VERIFY.md); `.fpk` files are listed in `checksums.txt`.
+
 ### Monitoring
 
 Create an API token with only the `metrics:read` permission and point Prometheus at `/api/metrics`. Metrics, alert examples and the Grafana dashboard are described in [Monitoring](docs/en/MONITORING.md).

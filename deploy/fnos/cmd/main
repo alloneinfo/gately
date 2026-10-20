@@ -1,0 +1,120 @@
+#!/bin/bash
+# Gately 的 fnOS 启停脚本。应用以 root 身份运行（见 config/privilege），可监听 80/443、访问 docker.sock 与本机 Shell。
+# 配置、日志与 pid 均放在 TRIM_PKGVAR（卸载时默认保留）。
+
+BIN="${TRIM_APPDEST}/gately"
+CONF_DIR="${TRIM_PKGVAR}/config"
+LOG_FILE="${TRIM_PKGVAR}/gately.log"
+PID_FILE="${TRIM_PKGVAR}/gately.pid"
+# 统一网关：桌面图标经 NAS 自身的域名与端口访问 /app/gately/，由 fnOS 转发到应用目录下的 Socket（见 app/ui/config）
+GATEWAY_SOCKET="${TRIM_APPDEST}/gately.sock"
+GATEWAY_PREFIX="/app/gately"
+# 命令行入口的稳定路径，不随存储空间变化
+LINK_PATH="/usr/local/bin/gately"
+LINK_TARGET="/var/apps/gately/target/gately"
+
+log_msg() {
+    echo "$(date '+%Y-%m-%d %H:%M:%S') [fnos] $1" >> "${LOG_FILE}"
+}
+
+# 读取 pid 文件，进程存在且确实是 gately 时返回 0
+is_running() {
+    local pid
+    if [ ! -r "${PID_FILE}" ]; then
+        return 1
+    fi
+    pid=$(head -n 1 "${PID_FILE}" | tr -d '[:space:]')
+    if [ -z "${pid}" ] || ! kill -0 "${pid}" 2>/dev/null; then
+        rm -f "${PID_FILE}"
+        return 1
+    fi
+    # 防止 pid 被系统复用给其他进程
+    if ! tr '\0' ' ' < "/proc/${pid}/cmdline" 2>/dev/null | grep -q "gately"; then
+        rm -f "${PID_FILE}"
+        return 1
+    fi
+    return 0
+}
+
+start_process() {
+    if is_running; then
+        return 0
+    fi
+    if [ ! -x "${BIN}" ]; then
+        echo "找不到可执行文件 ${BIN}" > "${TRIM_TEMP_LOGFILE}"
+        return 1
+    fi
+    mkdir -p "${CONF_DIR}"
+    chmod 700 "${CONF_DIR}"
+
+    # 日志超过 10 MB 时轮转一次，只保留一份旧日志
+    if [ -f "${LOG_FILE}" ] && [ "$(wc -c < "${LOG_FILE}")" -gt 10485760 ]; then
+        mv -f "${LOG_FILE}" "${LOG_FILE}.1"
+    fi
+
+    # 提供命令行入口：gately ctl / gately mcp
+    if [ ! -e "${LINK_PATH}" ] || [ -L "${LINK_PATH}" ]; then
+        ln -sfn "${LINK_TARGET}" "${LINK_PATH}" 2>/dev/null
+    fi
+
+    # 反向代理会占用大量连接，提高文件描述符上限
+    ulimit -n 1048576 2>/dev/null || ulimit -n 65535 2>/dev/null
+
+    log_msg "启动 Gately，配置目录 ${CONF_DIR}"
+    GATELY_CONFIG_DIR="${CONF_DIR}" setsid nohup "${BIN}" -c "${CONF_DIR}" \
+        -gateway-socket "${GATEWAY_SOCKET}" -gateway-prefix "${GATEWAY_PREFIX}" >> "${LOG_FILE}" 2>&1 < /dev/null &
+    printf "%s" "$!" > "${PID_FILE}"
+
+    # 等待片刻确认进程没有立刻退出（端口被占用、配置损坏等）
+    sleep 2
+    if ! is_running; then
+        echo "Gately 启动后立即退出，请查看日志 ${LOG_FILE}" > "${TRIM_TEMP_LOGFILE}"
+        return 1
+    fi
+    return 0
+}
+
+stop_process() {
+    local pid count
+    if ! is_running; then
+        rm -f "${PID_FILE}"
+        return 0
+    fi
+    pid=$(head -n 1 "${PID_FILE}" | tr -d '[:space:]')
+    log_msg "停止 Gately，pid=${pid}"
+    kill -TERM "${pid}" 2>/dev/null
+    # 优雅退出最多等待 15 秒，之后强制结束
+    count=0
+    while kill -0 "${pid}" 2>/dev/null && [ "${count}" -lt 15 ]; do
+        sleep 1
+        count=$((count + 1))
+    done
+    if kill -0 "${pid}" 2>/dev/null; then
+        log_msg "优雅退出超时，强制结束"
+        kill -KILL "${pid}" 2>/dev/null
+        sleep 1
+    fi
+    rm -f "${PID_FILE}"
+    return 0
+}
+
+case $1 in
+start)
+    start_process
+    exit $?
+    ;;
+stop)
+    stop_process
+    exit $?
+    ;;
+status)
+    # 运行中返回 0，未运行返回 3
+    if is_running; then
+        exit 0
+    fi
+    exit 3
+    ;;
+*)
+    exit 1
+    ;;
+esac

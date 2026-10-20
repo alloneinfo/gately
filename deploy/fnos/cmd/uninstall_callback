@@ -1,0 +1,13 @@
+#!/bin/bash
+# 卸载完成后调用。命令行入口总是移除；配置与数据仅在用户于卸载向导中选择“全部删除”时清理。
+
+if [ -L /usr/local/bin/gately ]; then
+    rm -f /usr/local/bin/gately
+fi
+
+if [ "${wizard_delete_data}" = "true" ] && [ -n "${TRIM_PKGVAR}" ] && [ "${TRIM_PKGVAR}" != "/" ]; then
+    rm -rf "${TRIM_PKGVAR}/config"
+    rm -f "${TRIM_PKGVAR}/gately.log" "${TRIM_PKGVAR}/gately.log.1" "${TRIM_PKGVAR}/gately.pid"
+fi
+
+exit 0

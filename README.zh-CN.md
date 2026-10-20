@@ -108,6 +108,17 @@ docker logs gately 2>&1 | grep -i "initial password"
 
 服务模板：[systemd](deploy/systemd/gately.service)、[OpenWrt procd](deploy/openwrt/gately.init)。校验下载的压缩包与镜像（cosign 签名、构建来源证明、SBOM）见[校验发布产物](docs/VERIFY.md)。
 
+### 飞牛原生应用
+
+每个 Release 附带飞牛 fnOS 的离线安装包 `gately_<版本>_fnos_x86.fpk`（Intel/AMD）与 `gately_<版本>_fnos_arm.fpk`（ARM）。它们没有上架官方应用中心，需要手动安装：打开 **应用中心 → 手动安装**（左下角按钮），选择文件并完成向导。
+
+- 应用以 `root` 身份运行，因此可以监听 80/443、通过 `docker.sock` 管理 Docker、使用真实的 Web 终端。请只安装在自己掌控的 NAS 上。
+- 点击飞牛桌面上的 Gately 图标，会经飞牛统一网关打开管理界面（访问飞牛所用的地址加 `/app/gately/`，远程域名同样可用）；局域网内也可直接访问 `http://<NAS 地址>:16680`。首次启动时 `admin` 的初始密码写在 `/var/apps/gately/var/gately.log`（`grep -i "initial password"`）。
+- 配置保存在应用的 `var` 目录，卸载时默认保留；在卸载向导里选择“全部删除”才会清除。升级时手动安装新版 `.fpk` 即可。
+- 安装包同时提供命令行入口 `gately`（`/usr/local/bin/gately`），可使用 `gately ctl` 与 `gately mcp`。
+- 16680 端口与 Docker 镜像相同，启动原生应用前请先停止 `gately` 容器。
+- 下载后可按[校验发布产物](docs/VERIFY.md)校验，`.fpk` 的 SHA-256 同样列在 `checksums.txt`。
+
 ### 监控
 
 创建一个只有 `metrics:read` 权限的 API 令牌，让 Prometheus 抓取 `/api/metrics`。指标列表、告警示例与 Grafana 面板见[监控指标](docs/MONITORING.md)。

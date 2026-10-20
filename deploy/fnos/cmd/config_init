@@ -1,0 +1,4 @@
+#!/bin/bash
+
+# Gately 无需额外的安装期处理
+exit 0

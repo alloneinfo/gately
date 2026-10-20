@@ -1,0 +1,17 @@
+[
+    {
+        "stepTitle": "卸载 Gately",
+        "items": [
+            {
+                "type": "radio",
+                "field": "wizard_delete_data",
+                "label": "配置与数据",
+                "initValue": "false",
+                "options": [
+                    { "label": "保留（重新安装后可继续使用）", "value": "false" },
+                    { "label": "全部删除（包含站点、证书、账号等配置）", "value": "true" }
+                ]
+            }
+        ]
+    }
+]

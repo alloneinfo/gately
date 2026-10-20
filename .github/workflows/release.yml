@@ -39,9 +39,23 @@ jobs:
             out=gately_${GITHUB_REF_NAME}_${os}_${arch}
             ext=""; [ "$os" = windows ] && ext=".exe"
             GOOS=$os GOARCH=$arch CGO_ENABLED=0 go build -trimpath -ldflags "$LDFLAGS" -o dist/gately$ext ./cmd/gately
+            # 飞牛 fpk 需要裸二进制，先留一份
+            if [ "$os" = linux ] && { [ "$arch" = amd64 ] || [ "$arch" = arm64 ]; }; then
+              mkdir -p "$RUNNER_TEMP/fpk-bin/$arch" && cp dist/gately "$RUNNER_TEMP/fpk-bin/$arch/gately"
+            fi
             (cd dist && tar czf $out.tar.gz gately$ext LICENSE README.md && rm gately$ext)
           done
-          (cd dist && rm LICENSE README.md && sha256sum *.tar.gz > checksums.txt)
+          rm dist/LICENSE dist/README.md
+      - name: 打包飞牛 fnOS 离线安装包（.fpk）
+        run: |
+          # 固定版本并校验哈希，避免下载被替换
+          curl -fsSL -o fnpack https://static2.fnnas.com/fnpack/fnpack-1.2.3-linux-amd64
+          echo "54b97fa7b70968c4d05c79840f5daeff508957d0bb2062fdb0376d00d9615c93  fnpack" | sha256sum -c -
+          sudo install -m 0755 fnpack /usr/local/bin/fnpack
+          deploy/fnos/build.sh "$GITHUB_REF_NAME" x86 "$RUNNER_TEMP/fpk-bin/amd64/gately" dist
+          deploy/fnos/build.sh "$GITHUB_REF_NAME" arm "$RUNNER_TEMP/fpk-bin/arm64/gately" dist
+      - name: 生成校验和
+        run: cd dist && sha256sum *.tar.gz *.fpk > checksums.txt
       - name: 生成 SBOM
         uses: anchore/sbom-action@v0
         with:
@@ -58,7 +72,9 @@ jobs:
       - name: 生成构建来源证明
         uses: actions/attest-build-provenance@v2
         with:
-          subject-path: dist/*.tar.gz
+          subject-path: |
+            dist/*.tar.gz
+            dist/*.fpk
       - uses: softprops/action-gh-release@v2
         with:
           files: dist/*
