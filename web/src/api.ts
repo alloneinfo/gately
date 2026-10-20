@@ -155,6 +155,10 @@ export interface SystemSettings {
   forceHTTPS: boolean
   safePath: string
   lanOnly: boolean
+  // 经飞牛统一网关访问时，飞牛管理员自动登录
+  gatewaySSO: boolean
+  // 以统一网关方式运行（飞牛 fpk 包）时为 true，只读
+  gatewayAvailable?: boolean
   // 为 true 时不信任本机反向代理传来的客户端地址
   disableProxyHeaders: boolean
   trustedProxies: string[] | null

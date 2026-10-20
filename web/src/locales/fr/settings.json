@@ -95,6 +95,8 @@
     "entryName": "entree",
     "lanOnly": "Accès réseau local uniquement",
     "lanOnlyHelp": "Autorise uniquement les adresses du réseau local (y compris les adresses Tailscale 100.64.0.0/10) à accéder à la console",
+    "gatewaySSO": "Connexion via fnOS",
+    "gatewaySSOHelp": "Lorsque Gately est ouvert depuis l'icône du bureau fnOS, un administrateur fnOS connecté est connecté à Gately en tant qu'administrateur, sans mot de passe ni code à deux étapes. Les utilisateurs fnOS ordinaires doivent toujours se connecter.",
     "trustProxy": "Faire confiance aux proxys locaux",
     "trustProxyHelp": "Si l’interface d’administration se trouve derrière nginx, haproxy ou le service Web Gately sur cet hôte, l’adresse réelle du client est lue dans les en-têtes X-Real-IP / X-Forwarded-For qu’ils ajoutent. Sert à l’accès réservé au LAN, à la limitation des connexions et au journal d’audit. Seuls les en-têtes provenant des adresses de cet hôte sont pris en compte.",
     "trustedProxies": "Proxys de confiance supplémentaires",

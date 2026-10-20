@@ -10,6 +10,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 	"testing/fstest"
@@ -291,5 +292,114 @@ func TestGatewayWebSocket(t *testing.T) {
 	}
 	if _, msg, err := ws.Read(ctx); err != nil || string(msg) != "echo:hi" {
 		t.Fatalf("WebSocket 回显异常: %q %v", msg, err)
+	}
+}
+
+// fnosRequest 模拟 fnOS 网关在校验登录态后转发的请求，附带 X-Trim-* 用户信息。
+func fnosRequest(t *testing.T, c *http.Client, method, url string, admin bool) *http.Response {
+	t.Helper()
+	req, _ := http.NewRequest(method, url, nil)
+	req.Host = "nas.example.com"
+	req.Header.Set("X-Real-IP", "192.168.1.5")
+	req.Header.Set("X-Forwarded-Proto", "https")
+	req.Header.Set("X-Trim-Username", "alice")
+	req.Header.Set("X-Trim-Userid", "1000")
+	req.Header.Set("X-Trim-Isadmin", strconv.FormatBool(admin))
+	if method == "POST" {
+		req.Header.Set("Origin", "https://nas.example.com:4433")
+	}
+	resp, err := c.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { resp.Body.Close() })
+	return resp
+}
+
+func TestGatewayAutoLogin(t *testing.T) {
+	a, direct, gw := newGatewayApp(t)
+	newClient := func() *http.Client {
+		jar, _ := cookiejar.New(nil)
+		return &http.Client{Jar: jar, CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}
+	}
+
+	// 默认关闭：飞牛管理员打开首页也不会自动登录
+	c := newClient()
+	if resp := fnosRequest(t, c, "GET", gw.URL+"/app/gately/", true); resp.Header.Get("Set-Cookie") != "" {
+		t.Fatal("未开启时不应自动登录")
+	}
+	if resp := fnosRequest(t, c, "POST", gw.URL+"/app/gately/api/login/fnos", true); resp.StatusCode != http.StatusForbidden {
+		t.Fatalf("未开启时飞牛登录接口应返回 403，实际 %d", resp.StatusCode)
+	}
+
+	a.settingsMu.Lock()
+	a.settings.GatewaySSO = true
+	a.settingsMu.Unlock()
+
+	// 普通飞牛用户不会自动登录，登录页也不显示飞牛登录
+	if resp := fnosRequest(t, c, "GET", gw.URL+"/app/gately/", false); resp.Header.Get("Set-Cookie") != "" {
+		t.Fatal("普通飞牛用户不应自动登录")
+	}
+	resp := fnosRequest(t, c, "GET", gw.URL+"/app/gately/api/login/providers", false)
+	if body, _ := io.ReadAll(resp.Body); strings.Contains(string(body), "fnosUser") {
+		t.Fatalf("普通飞牛用户不应看到飞牛登录: %s", body)
+	}
+
+	// 飞牛管理员打开首页即登录，Cookie 限定在前缀路径下且仅经 HTTPS 发送
+	resp = fnosRequest(t, c, "GET", gw.URL+"/app/gately/", true)
+	sc := resp.Header.Get("Set-Cookie")
+	if !strings.Contains(sc, "gately_token=") || !strings.Contains(sc, "Path=/app/gately") || !strings.Contains(sc, "Secure") {
+		t.Fatalf("飞牛管理员应自动登录: %q", sc)
+	}
+	// 测试服务是 HTTP，带 Secure 的 Cookie 不会被 cookiejar 回传，这里手动带上
+	token := strings.TrimPrefix(strings.Split(sc, ";")[0], "gately_token=")
+	req, _ := http.NewRequest("GET", gw.URL+"/app/gately/api/session", nil)
+	req.AddCookie(&http.Cookie{Name: "gately_token", Value: token})
+	if resp, err := http.DefaultClient.Do(req); err != nil || resp.StatusCode != 200 {
+		t.Fatalf("自动登录后的会话应可用: %v", err)
+	} else {
+		resp.Body.Close()
+	}
+	// 已有有效会话时不重复签发
+	req, _ = http.NewRequest("GET", gw.URL+"/app/gately/", nil)
+	req.Header.Set("X-Trim-Username", "alice")
+	req.Header.Set("X-Trim-Isadmin", "true")
+	req.AddCookie(&http.Cookie{Name: "gately_token", Value: token})
+	if resp, err := http.DefaultClient.Do(req); err != nil || resp.Header.Get("Set-Cookie") != "" {
+		t.Fatalf("已有会话时不应重复签发: %v", err)
+	} else {
+		resp.Body.Close()
+	}
+
+	// 退出登录后，登录页显示飞牛登录，点击即可登录
+	resp = fnosRequest(t, newClient(), "GET", gw.URL+"/app/gately/api/login/providers", true)
+	if body, _ := io.ReadAll(resp.Body); !strings.Contains(string(body), `"fnosUser":"alice"`) {
+		t.Fatalf("登录页应提供飞牛登录: %s", body)
+	}
+	if resp = fnosRequest(t, newClient(), "POST", gw.URL+"/app/gately/api/login/fnos", true); resp.StatusCode != 200 || !strings.Contains(resp.Header.Get("Set-Cookie"), "gately_token=") {
+		t.Fatalf("飞牛登录接口应签发会话，实际 %d", resp.StatusCode)
+	}
+
+	// 直接访问 TCP 监听时伪造的 X-Trim-* 请求头无效
+	dc := newClient()
+	if resp = fnosRequest(t, dc, "GET", direct.URL+"/", true); resp.Header.Get("Set-Cookie") != "" {
+		t.Fatal("直接访问时不应信任 X-Trim-* 请求头")
+	}
+	if resp = fnosRequest(t, dc, "POST", direct.URL+"/api/login/fnos", true); resp.StatusCode == 200 {
+		t.Fatal("直接访问时飞牛登录接口不应可用")
+	}
+
+	// 开启仅内网访问时，外网地址不会自动登录
+	a.settingsMu.Lock()
+	a.settings.LANOnly = true
+	a.settingsMu.Unlock()
+	req, _ = http.NewRequest("GET", gw.URL+"/app/gately/", nil)
+	req.Header.Set("X-Real-IP", "203.0.113.9")
+	req.Header.Set("X-Trim-Username", "alice")
+	req.Header.Set("X-Trim-Isadmin", "true")
+	if resp, err := http.DefaultClient.Do(req); err != nil || resp.Header.Get("Set-Cookie") != "" {
+		t.Fatalf("外网地址不应自动登录: %v", err)
+	} else {
+		resp.Body.Close()
 	}
 }

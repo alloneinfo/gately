@@ -95,6 +95,8 @@
     "entryName": "진입 경로",
     "lanOnly": "내부망 접근만 허용",
     "lanOnlyHelp": "내부망 주소(Tailscale 등 100.64.0.0/10 주소 포함)에서만 관리 화면에 접속할 수 있습니다",
+    "gatewaySSO": "fnOS 로그인 상태로 자동 로그인",
+    "gatewaySSOHelp": "fnOS 데스크톱 아이콘으로 Gately를 열 때 로그인한 fnOS 관리자는 비밀번호와 2단계 인증 코드 없이 Gately 관리자로 로그인됩니다. 일반 fnOS 사용자는 계속 로그인해야 합니다.",
     "trustProxy": "로컬 프록시 신뢰",
     "trustProxyHelp": "관리 화면이 이 호스트의 nginx, haproxy 또는 Gately 웹 서비스 뒤에 있을 때, 이들이 설정한 X-Real-IP / X-Forwarded-For에서 실제 클라이언트 주소를 가져와 내부망 전용 접근, 로그인 제한, 감사 로그에 사용합니다. 이 호스트 주소에서 온 헤더만 신뢰합니다.",
     "trustedProxies": "추가 신뢰 프록시",

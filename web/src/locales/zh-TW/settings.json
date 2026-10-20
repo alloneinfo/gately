@@ -95,6 +95,8 @@
     "entryName": "入口",
     "lanOnly": "僅允許內網存取",
     "lanOnlyHelp": "只允許內網位址（含 Tailscale 等 100.64.0.0/10 位址）存取管理介面",
+    "gatewaySSO": "飛牛登入狀態自動登入",
+    "gatewaySSOHelp": "點擊飛牛桌面圖示開啟 Gately 時，已登入的飛牛管理員自動以 Gately 管理員身分登入，無需再輸入密碼與兩步驟驗證碼；一般飛牛使用者仍需登入。",
     "trustProxy": "信任本機代理",
     "trustProxyHelp": "管理介面放在本機的 nginx、haproxy 或 Gately Web 服務之後時，從代理寫入的 X-Real-IP / X-Forwarded-For 取得真實用戶端位址，用於僅限內網存取、登入限流與稽核日誌。只信任本機位址送來的標頭。",
     "trustedProxies": "額外可信代理",

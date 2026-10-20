@@ -195,6 +195,7 @@ func (a *App) Handler() http.Handler {
 	mux.HandleFunc("POST /api/login/passkey/begin", a.handlePasskeyLoginBegin)
 	mux.HandleFunc("POST /api/login/passkey/finish", a.handlePasskeyLoginFinish)
 	mux.HandleFunc("GET /api/login/providers", a.handleThirdProviders)
+	mux.HandleFunc("POST /api/login/fnos", a.handleGatewayLogin)
 	mux.HandleFunc("GET "+thirdauth.StartPath, a.handleThirdStart)
 	mux.HandleFunc("GET "+thirdauth.CallbackPath, a.handleThirdCallback)
 

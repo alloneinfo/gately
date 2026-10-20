@@ -24,5 +24,6 @@
   "verifying": "Verificando…",
   "totpAuto": "El código se verifica automáticamente al completarlo",
   "or": "o",
-  "passkey": "Iniciar sesión con passkey"
+  "passkey": "Iniciar sesión con passkey",
+  "fnos": "Iniciar sesión como usuario de fnOS {user}"
 }

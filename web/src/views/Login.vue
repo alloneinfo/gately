@@ -76,13 +76,21 @@
           </el-button>
         </el-form>
 
-        <div v-if="canPasskey" class="third">
+        <div v-if="canPasskey || fnosUser" class="third">
           <div class="third-title"><span>{{ t('login.or') }}</span></div>
-          <button type="button" class="third-btn passkey-btn" :disabled="loading" @click="loginWithPasskey">
-            <LoaderCircle v-if="passkeyBusy" :size="16" class="spin" />
-            <Fingerprint v-else :size="16" />
-            <span class="third-name">{{ t('login.passkey') }}</span>
-          </button>
+          <div class="third-stack">
+            <!-- 经飞牛统一网关访问且已开启飞牛登录态自动登录时显示 -->
+            <button v-if="fnosUser" type="button" class="third-btn passkey-btn" :disabled="loading || fnosBusy" @click="loginWithFnos">
+              <LoaderCircle v-if="fnosBusy" :size="16" class="spin" />
+              <Server v-else :size="16" />
+              <span class="third-name">{{ t('login.fnos', { user: fnosUser }) }}</span>
+            </button>
+            <button v-if="canPasskey" type="button" class="third-btn passkey-btn" :disabled="loading" @click="loginWithPasskey">
+              <LoaderCircle v-if="passkeyBusy" :size="16" class="spin" />
+              <Fingerprint v-else :size="16" />
+              <span class="third-name">{{ t('login.passkey') }}</span>
+            </button>
+          </div>
         </div>
 
         <div v-if="providers.length" class="third">
@@ -173,6 +181,9 @@ const codeInput = ref<InstanceType<typeof OtpInput>>()
 const canPasskey = passkeySupported()
 const passkeyBusy = ref(false)
 const providers = ref<{ key: string; name: string; type: string; url: string }[]>([])
+// 可凭飞牛登录态登录的飞牛用户名（仅经飞牛统一网关访问且已开启时由后端返回）
+const fnosUser = ref('')
+const fnosBusy = ref(false)
 
 // 正在跳转的第三方登录方式；非空时按钮显示进度并禁止重复点击
 const redirecting = ref('')
@@ -200,8 +211,9 @@ if (typeof route.query.oauthError === 'string') {
 
 onMounted(async () => {
   try {
-    const r = await api.get<{ providers: typeof providers.value }>('/api/login/providers')
+    const r = await api.get<{ providers: typeof providers.value; fnosUser?: string }>('/api/login/providers')
     providers.value = r.providers ?? []
+    fnosUser.value = r.fnosUser ?? ''
   } catch {
     // 登录方式获取失败不影响密码登录
   }
@@ -256,6 +268,23 @@ async function loginWithPasskey() {
     }
   } finally {
     passkeyBusy.value = false
+  }
+}
+
+// 使用飞牛登录态登录：飞牛网关已校验登录，后端直接签发管理员会话
+async function loginWithFnos() {
+  if (loading.value || fnosBusy.value) {
+    return
+  }
+  fnosBusy.value = true
+  try {
+    await api.post('/api/login/fnos', {})
+    const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : '/overview'
+    router.replace(redirect)
+  } catch (e) {
+    ElMessage.error((e as Error).message)
+  } finally {
+    fnosBusy.value = false
   }
 }
 
@@ -593,6 +622,10 @@ h2 {
   width: 17px;
   height: 17px;
   flex-shrink: 0;
+}
+.third-stack {
+  display: grid;
+  gap: 10px;
 }
 .passkey-btn {
   width: 100%;

@@ -84,7 +84,12 @@ func (a *App) handleThirdProviders(w http.ResponseWriter, r *http.Request) {
 			out = append(out, item{Key: p.Key, Name: p.DisplayName(), Type: p.Type, URL: cfg.CallbackBase + thirdauth.StartPath + "?p=" + url.QueryEscape(p.Key)})
 		}
 	}
-	httpx.OK(w, map[string]any{"providers": out})
+	resp := map[string]any{"providers": out}
+	// 经统一网关访问且可用飞牛登录态登录时，登录页显示“使用飞牛账号登录”
+	if user, ok := a.gatewaySSOUser(r); ok {
+		resp["fnosUser"] = user
+	}
+	httpx.OK(w, resp)
 }
 
 // loginFailure 把失败原因带回登录页展示。

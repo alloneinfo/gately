@@ -95,6 +95,8 @@
     "entryName": "エントリー",
     "lanOnly": "LAN 内からのみ許可",
     "lanOnlyHelp": "管理画面へのアクセスを LAN 内のアドレス（Tailscale などの 100.64.0.0/10 を含む）のみに制限します",
+    "gatewaySSO": "fnOS のログイン状態で自動ログイン",
+    "gatewaySSOHelp": "fnOS デスクトップのアイコンから Gately を開いたとき、ログイン済みの fnOS 管理者はパスワードや 2 段階認証コードなしで Gately 管理者としてログインします。一般の fnOS ユーザーは通常どおりログインが必要です。",
     "trustProxy": "ローカルプロキシを信頼",
     "trustProxyHelp": "管理画面がこのホスト上の nginx・haproxy・Gately Web サービスの背後にある場合、それらが付ける X-Real-IP / X-Forwarded-For から実際のクライアントアドレスを取得し、内部ネットワーク限定アクセス・ログイン制限・監査ログに使います。ヘッダーはこのホストのアドレスから来たものだけを信頼します。",
     "trustedProxies": "追加の信頼済みプロキシ",

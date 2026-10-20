@@ -18,7 +18,12 @@ import (
 	"os"
 	"strings"
 	"sync/atomic"
+	"time"
 
+	"github.com/wangwanjie/gately/internal/audit"
+	"github.com/wangwanjie/gately/internal/auth"
+	"github.com/wangwanjie/gately/internal/events"
+	"github.com/wangwanjie/gately/internal/httpx"
 	"github.com/wangwanjie/gately/internal/logbuf"
 )
 
@@ -114,11 +119,15 @@ func (a *App) gatewayHandler(prefix string, next http.Handler) http.Handler {
 			}
 		}
 		r2 = r2.WithContext(context.WithValue(r.Context(), gatewayKey{}, prefix))
-		if prefix == "" {
-			next.ServeHTTP(w, r2)
-			return
+		out := w
+		if prefix != "" {
+			out = &gatewayWriter{ResponseWriter: w, prefix: prefix}
 		}
-		next.ServeHTTP(&gatewayWriter{ResponseWriter: w, prefix: prefix}, r2)
+		// 打开管理界面首页（点击飞牛桌面图标）时，按飞牛登录态自动登录
+		if r2.Method == http.MethodGet && r2.URL.Path == "/" {
+			a.gatewayAutoLogin(out, r2)
+		}
+		next.ServeHTTP(out, r2)
 	})
 }
 
@@ -227,4 +236,63 @@ func absolutizeAssets(index []byte, prefix string) []byte {
 func injectBase(index []byte, prefix string) []byte {
 	meta := `<head>` + "\n    " + `<meta name="gately-base" content="` + html.EscapeString(prefix) + `" />`
 	return []byte(strings.Replace(string(index), "<head>", meta, 1))
+}
+
+// ---- 飞牛登录态自动登录 ----
+
+// gatewaySSOUser 返回可凭飞牛登录态登录的飞牛用户名：请求须经统一网关、已开启该功能，且网关标明是飞牛管理员。
+// X-Trim-* 请求头由 fnOS 网关在校验登录态后写入，只信任经网关 Socket 进入的请求，TCP 监听上的同名请求头一律忽略。
+func (a *App) gatewaySSOUser(r *http.Request) (string, bool) {
+	s := a.settingsSnapshot()
+	if _, viaGateway := gatewayPrefix(r); !viaGateway || !s.GatewaySSO {
+		return "", false
+	}
+	// 自动登录发生在访问控制之前，这里同样遵守“仅内网访问”
+	if s.LANOnly && !isPrivate(httpx.ClientIP(r)) {
+		return "", false
+	}
+	if !strings.EqualFold(strings.TrimSpace(r.Header.Get("X-Trim-Isadmin")), "true") {
+		return "", false
+	}
+	user := strings.TrimSpace(r.Header.Get("X-Trim-Username"))
+	return user, user != ""
+}
+
+// gatewayAutoLogin 在没有有效会话时，为飞牛管理员签发 Gately 管理员会话。已有会话（含以只读账号登录）时保持不变。
+func (a *App) gatewayAutoLogin(w http.ResponseWriter, r *http.Request) {
+	user, ok := a.gatewaySSOUser(r)
+	if !ok {
+		return
+	}
+	if _, valid := a.auth.Identify(auth.TokenFromRequest(r)); valid {
+		return
+	}
+	a.issueGatewaySession(w, r, user)
+}
+
+// handleGatewayLogin 供登录页“使用飞牛账号登录”按钮调用（退出登录或会话过期后）。
+func (a *App) handleGatewayLogin(w http.ResponseWriter, r *http.Request) {
+	user, ok := a.gatewaySSOUser(r)
+	if !ok {
+		httpx.Error(w, http.StatusForbidden, "未开启飞牛登录态自动登录，或当前飞牛账号不是管理员")
+		return
+	}
+	exp := a.issueGatewaySession(w, r, user)
+	httpx.OK(w, map[string]any{"username": a.auth.Username(), "expires": exp})
+}
+
+// issueGatewaySession 签发管理员会话 Cookie，并记录日志、审计与登录通知。
+func (a *App) issueGatewaySession(w http.ResponseWriter, r *http.Request, user string) time.Time {
+	token, exp := a.auth.Issue()
+	http.SetCookie(w, &http.Cookie{
+		Name: auth.CookieName, Value: token, Path: "/", Expires: exp, HttpOnly: true, SameSite: http.SameSiteStrictMode,
+		// 网关以 HTTPS 对外提供时，Cookie 只经 HTTPS 发送
+		Secure: r.TLS != nil || strings.EqualFold(r.Header.Get("X-Forwarded-Proto"), "https"),
+	})
+	ip := httpx.ClientIP(r)
+	a.sysLogs.Add(logbuf.LevelInfo, "auth", fmt.Sprintf("飞牛用户 %s 从 %s 经统一网关自动登录", user, ip))
+	a.audit.Record(audit.Entry{Actor: "fnOS:" + user, IP: ip, Via: audit.Via(r), Category: audit.CategoryLogin, Method: r.Method, Path: r.URL.Path, Status: http.StatusOK, Detail: "飞牛登录态自动登录"})
+	events.Publish(events.Event{Type: events.LoginSuccessful, Source: "管理后台", Level: events.LevelInfo,
+		Title: "管理后台登录成功", Message: fmt.Sprintf("飞牛用户 %s 从 %s 经统一网关自动登录", user, ip), Fields: map[string]string{"ip": ip, "user": "fnOS:" + user}})
+	return exp
 }

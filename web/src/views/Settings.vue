@@ -223,6 +223,11 @@
                 <el-switch v-model="form.lanOnly" />
                 <span class="help">{{ t('settings.restrict.lanOnlyHelp') }}</span>
               </el-form-item>
+              <!-- 仅飞牛 fpk 包（统一网关方式运行）显示 -->
+              <el-form-item v-if="form.gatewayAvailable" :label="t('settings.restrict.gatewaySSO')">
+                <el-switch v-model="form.gatewaySSO" />
+                <span class="help">{{ t('settings.restrict.gatewaySSOHelp') }}</span>
+              </el-form-item>
               <el-form-item :label="t('settings.restrict.trustProxy')">
                 <el-switch v-model="trustProxy" />
                 <span class="help">{{ t('settings.restrict.trustProxyHelp') }}</span>

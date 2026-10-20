@@ -95,6 +95,8 @@
     "entryName": "入口",
     "lanOnly": "仅允许内网访问",
     "lanOnlyHelp": "只允许内网地址（含 Tailscale 等 100.64.0.0/10 地址）访问管理界面",
+    "gatewaySSO": "飞牛登录态自动登录",
+    "gatewaySSOHelp": "点击飞牛桌面图标打开 Gately 时，已登录的飞牛管理员自动以 Gately 管理员身份登录，不再输入密码与两步验证码；普通飞牛用户仍需登录。",
     "trustProxy": "信任本机代理",
     "trustProxyHelp": "管理界面放在本机的 nginx、haproxy 或 Gately Web 服务之后时，从代理写入的 X-Real-IP / X-Forwarded-For 取真实客户端地址，用于仅内网访问、登录限流与审计日志。只信任本机地址发来的请求头。",
     "trustedProxies": "额外可信代理",

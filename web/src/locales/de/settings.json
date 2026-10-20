@@ -95,6 +95,8 @@
     "entryName": "einstieg",
     "lanOnly": "Nur LAN-Zugriff",
     "lanOnlyHelp": "Nur LAN-Adressen (einschließlich Tailscale-Adressen aus 100.64.0.0/10) dürfen auf die Konsole zugreifen",
+    "gatewaySSO": "Mit fnOS anmelden",
+    "gatewaySSOHelp": "Wird Gately über das Symbol auf dem fnOS-Desktop geöffnet, wird ein angemeldeter fnOS-Administrator ohne Passwort und Zwei-Faktor-Code als Gately-Administrator angemeldet. Normale fnOS-Benutzer müssen sich weiterhin anmelden.",
     "trustProxy": "Lokalen Proxys vertrauen",
     "trustProxyHelp": "Liegt die Verwaltungsoberfläche hinter nginx, haproxy oder dem Gately-Webdienst auf diesem Host, wird die echte Client-Adresse aus deren X-Real-IP- / X-Forwarded-For-Headern übernommen – für den Nur-LAN-Zugriff, die Anmeldebegrenzung und das Audit-Protokoll. Header werden nur von Adressen dieses Hosts akzeptiert.",
     "trustedProxies": "Weitere vertrauenswürdige Proxys",

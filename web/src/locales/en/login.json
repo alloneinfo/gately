@@ -24,5 +24,6 @@
   "verifying": "Verifying…",
   "totpAuto": "The code is verified automatically once complete",
   "or": "or",
-  "passkey": "Sign in with a Passkey"
+  "passkey": "Sign in with a Passkey",
+  "fnos": "Sign in as fnOS user {user}"
 }

@@ -24,5 +24,6 @@
   "verifying": "Verificando…",
   "totpAuto": "O código é verificado automaticamente ao ser concluído",
   "or": "ou",
-  "passkey": "Entrar com passkey"
+  "passkey": "Entrar com passkey",
+  "fnos": "Entrar como usuário do fnOS {user}"
 }

@@ -24,5 +24,6 @@
   "verifying": "확인 중…",
   "totpAuto": "입력이 완료되면 자동으로 확인됩니다",
   "or": "또는",
-  "passkey": "패스키로 로그인"
+  "passkey": "패스키로 로그인",
+  "fnos": "fnOS 계정 {user}(으)로 로그인"
 }

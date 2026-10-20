@@ -34,6 +34,8 @@ type Settings struct {
 	SafePath string `json:"safePath"`
 	// LANOnly 只允许内网地址（含 Tailscale 等 CGNAT 地址）访问管理界面
 	LANOnly bool `json:"lanOnly"`
+	// GatewaySSO 为 true 时，经飞牛 fnOS 统一网关访问的飞牛管理员自动以 Gately 管理员身份登录（跳过两步验证）
+	GatewaySSO bool `json:"gatewaySSO"`
 	// DisableProxyHeaders 为 true 时不再信任本机反向代理传来的 X-Real-IP / X-Forwarded-For，一律以 TCP 对端为客户端地址。
 	// 默认信任：管理界面放在 nginx、haproxy 或 Gately Web 服务之后时，仅内网访问、登录限流与审计日志才能看到真实来源。
 	DisableProxyHeaders bool `json:"disableProxyHeaders"`
@@ -196,13 +198,15 @@ type settingsView struct {
 	SessionHours int `json:"sessionHours"`
 	// RestartRequired 表示有修改需要重启后生效
 	RestartRequired bool `json:"restartRequired"`
+	// GatewayAvailable 表示以统一网关方式运行（飞牛 fpk 包），界面据此显示飞牛登录态自动登录开关；只读
+	GatewayAvailable bool `json:"gatewayAvailable"`
 }
 
 func (a *App) viewSettings() settingsView {
 	s := a.settingsSnapshot()
 	s.LegacyAPIToken = ""
 	s.ThirdLogin = s.ThirdLogin.Masked()
-	return settingsView{Settings: s, SessionHours: a.auth.TokenTTLHours(), RestartRequired: a.restartPending.Load()}
+	return settingsView{Settings: s, SessionHours: a.auth.TokenTTLHours(), RestartRequired: a.restartPending.Load(), GatewayAvailable: a.opts.GatewaySocket != ""}
 }
 
 func (a *App) handleGetSettings(w http.ResponseWriter, r *http.Request) {

@@ -24,5 +24,6 @@
   "verifying": "Wird überprüft…",
   "totpAuto": "Der Code wird nach vollständiger Eingabe automatisch überprüft",
   "or": "oder",
-  "passkey": "Mit Passkey anmelden"
+  "passkey": "Mit Passkey anmelden",
+  "fnos": "Als fnOS-Benutzer {user} anmelden"
 }

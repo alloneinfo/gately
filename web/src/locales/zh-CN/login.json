@@ -24,5 +24,6 @@
   "verifying": "正在验证…",
   "totpAuto": "输入完成后将自动验证",
   "or": "或",
-  "passkey": "使用 Passkey 登录"
+  "passkey": "使用 Passkey 登录",
+  "fnos": "使用飞牛账号 {user} 登录"
 }
