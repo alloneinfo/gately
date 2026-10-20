@@ -313,8 +313,12 @@ func (l *Log) Middleware(next http.Handler) http.Handler {
 	})
 }
 
-// Via 返回转发该请求的代理地址：客户端地址取自代理请求头时为 TCP 对端，直连时为空。
+// Via 返回转发该请求的代理地址：客户端地址取自代理请求头时为 TCP 对端，直连时为空；
+// 经由已标记的代理（如飞牛统一网关）时为代理名称。
 func Via(r *http.Request) string {
+	if v := httpx.ViaOf(r); v != "" {
+		return v
+	}
 	if peer := httpx.PeerIP(r); peer != httpx.ClientIP(r) {
 		return peer
 	}

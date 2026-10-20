@@ -114,6 +114,7 @@ Each Release ships offline `.fpk` packages for fnOS: `gately_<version>_fnos_x86.
 
 - The app runs as `root`, so it can listen on 80/443, manage Docker through `docker.sock`, and open a real Web terminal. Install it only on a NAS you control.
 - Click the Gately icon on the fnOS desktop to open the admin UI through the fnOS gateway (`/app/gately/` on whatever address you use for fnOS, including a remote domain); on the LAN it is also at `http://<NAS address>:16680`. On the first start the initial `admin` password is written to `/var/apps/gately/var/gately.log` (`grep -i "initial password"`).
+- Access through the desktop icon is controlled by fnOS (only fnOS administrators can open it), so the safe entry and LAN-only settings apply only to direct access on port 16680.
 - Turn on **Settings → Access control → Sign in with fnOS** to let signed-in fnOS administrators open Gately from the desktop icon without a password or two-step code; regular fnOS users still sign in. It is off by default and only shown in the fnOS package.
 - Config lives in the app's `var` directory and is kept on uninstall unless you choose "delete all" in the uninstall wizard. Upgrading is another manual install of the newer `.fpk`.
 - The package also adds a `gately` command (`/usr/local/bin/gately`) for `gately ctl` and `gately mcp`.

@@ -119,6 +119,8 @@ func (a *App) gatewayHandler(prefix string, next http.Handler) http.Handler {
 			}
 		}
 		r2 = r2.WithContext(context.WithValue(r.Context(), gatewayKey{}, prefix))
+		// 审计日志标注经由飞牛网关，提示客户端地址未经核实
+		r2 = httpx.WithVia(r2, "fnOS")
 		out := w
 		if prefix != "" {
 			out = &gatewayWriter{ResponseWriter: w, prefix: prefix}
@@ -132,8 +134,9 @@ func (a *App) gatewayHandler(prefix string, next http.Handler) http.Handler {
 }
 
 // gatewayClientAddr 依次从 X-Real-IP、X-Forwarded-For 最右侧取得客户端地址，返回 host:port 形式；取不到时为空。
-// fnOS 网关在 X-Real-IP 中给出真实客户端地址，X-Forwarded-For 固定为 127.0.0.1（网关自身），
-// 因此回环与未指定地址一律忽略，避免被当作内网地址绕过“仅内网访问”。
+// 实测 fnOS 网关不会改写 X-Real-IP：前面有反向代理时是代理写入的真实地址，浏览器直连时为空，也可能被客户端伪造；
+// X-Forwarded-For 固定为 127.0.0.1（网关自身）。这里的地址只用于日志、审计与登录限流（审计中标注“经代理 fnOS”），
+// 不用于访问控制；回环与未指定地址一律忽略。
 func gatewayClientAddr(r *http.Request) string {
 	candidates := []string{strings.TrimSpace(r.Header.Get("X-Real-IP"))}
 	if xff := r.Header.Values("X-Forwarded-For"); len(xff) > 0 {
@@ -243,12 +246,7 @@ func injectBase(index []byte, prefix string) []byte {
 // gatewaySSOUser 返回可凭飞牛登录态登录的飞牛用户名：请求须经统一网关、已开启该功能，且网关标明是飞牛管理员。
 // X-Trim-* 请求头由 fnOS 网关在校验登录态后写入，只信任经网关 Socket 进入的请求，TCP 监听上的同名请求头一律忽略。
 func (a *App) gatewaySSOUser(r *http.Request) (string, bool) {
-	s := a.settingsSnapshot()
-	if _, viaGateway := gatewayPrefix(r); !viaGateway || !s.GatewaySSO {
-		return "", false
-	}
-	// 自动登录发生在访问控制之前，这里同样遵守“仅内网访问”
-	if s.LANOnly && !isPrivate(httpx.ClientIP(r)) {
+	if _, viaGateway := gatewayPrefix(r); !viaGateway || !a.settingsSnapshot().GatewaySSO {
 		return "", false
 	}
 	if !strings.EqualFold(strings.TrimSpace(r.Header.Get("X-Trim-Isadmin")), "true") {

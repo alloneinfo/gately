@@ -114,6 +114,7 @@ docker logs gately 2>&1 | grep -i "initial password"
 
 - 应用以 `root` 身份运行，因此可以监听 80/443、通过 `docker.sock` 管理 Docker、使用真实的 Web 终端。请只安装在自己掌控的 NAS 上。
 - 点击飞牛桌面上的 Gately 图标，会经飞牛统一网关打开管理界面（访问飞牛所用的地址加 `/app/gately/`，远程域名同样可用）；局域网内也可直接访问 `http://<NAS 地址>:16680`。首次启动时 `admin` 的初始密码写在 `/var/apps/gately/var/gately.log`（`grep -i "initial password"`）。
+- 经桌面图标访问时由飞牛负责访问控制（只有飞牛管理员能打开），安全入口与“仅允许内网访问”只约束直接访问 16680 端口。
 - 在 **设置 → 访问控制 → 飞牛登录态自动登录** 开启后，已登录的飞牛管理员点击桌面图标即可进入 Gately，无需密码与两步验证码；普通飞牛用户仍需登录。默认关闭，只在飞牛安装包中显示。
 - 配置保存在应用的 `var` 目录，卸载时默认保留；在卸载向导里选择“全部删除”才会清除。升级时手动安装新版 `.fpk` 即可。
 - 安装包同时提供命令行入口 `gately`（`/usr/local/bin/gately`），可使用 `gately ctl` 与 `gately mcp`。

@@ -1,6 +1,7 @@
 package httpx
 
 import (
+	"context"
 	"net"
 	"net/http"
 	"net/netip"
@@ -153,4 +154,19 @@ func localAddrs() *addrSet {
 	}
 	localCache = set
 	return set
+}
+
+// viaKey 是请求上下文中“经由的代理名称”的键。
+type viaKey struct{}
+
+// WithVia 标记请求经由指定的代理转发（例如飞牛统一网关）。这类代理给出的客户端地址无法核实，
+// 审计日志据此显示来源，避免把转发来的地址当作已验证的地址。
+func WithVia(r *http.Request, via string) *http.Request {
+	return r.WithContext(context.WithValue(r.Context(), viaKey{}, via))
+}
+
+// ViaOf 返回 WithVia 标记的代理名称，未标记时为空。
+func ViaOf(r *http.Request) string {
+	v, _ := r.Context().Value(viaKey{}).(string)
+	return v
 }

@@ -210,27 +210,43 @@ func TestGatewayServesPrefixedUI(t *testing.T) {
 }
 
 func TestGatewayClientIPAndLANOnly(t *testing.T) {
-	a, _, gw := newGatewayApp(t)
+	a, direct, gw := newGatewayApp(t)
 	a.settingsMu.Lock()
 	a.settings.LANOnly = true
 	a.settingsMu.Unlock()
 	c := &http.Client{}
-	if resp := gatewayRequest(t, c, "GET", gw.URL+"/app/gately/", "", "203.0.113.9"); resp.StatusCode != http.StatusForbidden {
-		t.Fatalf("仅内网访问时外网地址应被拒绝，实际 %d", resp.StatusCode)
+	// 经飞牛网关的请求由飞牛负责访问控制，不受“仅内网访问”约束：网关给出的地址可伪造，直连时还为空
+	for _, ip := range []string{"203.0.113.9", "192.168.1.5", ""} {
+		if resp := gatewayRequest(t, c, "GET", gw.URL+"/app/gately/", "", ip); resp.StatusCode != 200 {
+			t.Fatalf("经网关访问不应受仅内网访问限制（X-Real-IP=%q），实际 %d", ip, resp.StatusCode)
+		}
 	}
-	if resp := gatewayRequest(t, c, "GET", gw.URL+"/app/gately/", "", "192.168.1.5"); resp.StatusCode != 200 {
-		t.Fatalf("仅内网访问时内网地址应放行，实际 %d", resp.StatusCode)
-	}
-	// fnOS 网关的 X-Forwarded-For 固定为 127.0.0.1：缺少 X-Real-IP 时不能因此被当作内网放行
-	req, _ := http.NewRequest("GET", gw.URL+"/app/gately/", nil)
-	req.Header.Set("X-Forwarded-For", "127.0.0.1")
+	// 直接访问 TCP 端口仍然遵守“仅内网访问”（本机代理转发的外网地址被拒绝）
+	req, _ := http.NewRequest("GET", direct.URL+"/", nil)
+	req.Header.Set("X-Real-IP", "203.0.113.9")
 	resp, err := c.Do(req)
 	if err != nil {
 		t.Fatal(err)
 	}
 	resp.Body.Close()
 	if resp.StatusCode != http.StatusForbidden {
-		t.Fatalf("只有回环转发地址时应视为未知地址并拒绝，实际 %d", resp.StatusCode)
+		t.Fatalf("直接访问时外网地址应被拒绝，实际 %d", resp.StatusCode)
+	}
+
+	// 客户端地址只用于展示：取 X-Real-IP，忽略网关自身的回环地址
+	for _, tc := range []struct{ realIP, xff, want string }{
+		{"203.0.113.9", "127.0.0.1", "203.0.113.9:0"},
+		{"", "127.0.0.1", ""},
+		{"", "198.51.100.7", "198.51.100.7:0"},
+	} {
+		r := httptest.NewRequest("GET", "/", nil)
+		if tc.realIP != "" {
+			r.Header.Set("X-Real-IP", tc.realIP)
+		}
+		r.Header.Set("X-Forwarded-For", tc.xff)
+		if got := gatewayClientAddr(r); got != tc.want {
+			t.Errorf("gatewayClientAddr(X-Real-IP=%q, XFF=%q) = %q，期望 %q", tc.realIP, tc.xff, got, tc.want)
+		}
 	}
 }
 
@@ -389,17 +405,11 @@ func TestGatewayAutoLogin(t *testing.T) {
 		t.Fatal("直接访问时飞牛登录接口不应可用")
 	}
 
-	// 开启仅内网访问时，外网地址不会自动登录
+	// 开启仅内网访问不影响经网关的自动登录（访问控制由飞牛负责）
 	a.settingsMu.Lock()
 	a.settings.LANOnly = true
 	a.settingsMu.Unlock()
-	req, _ = http.NewRequest("GET", gw.URL+"/app/gately/", nil)
-	req.Header.Set("X-Real-IP", "203.0.113.9")
-	req.Header.Set("X-Trim-Username", "alice")
-	req.Header.Set("X-Trim-Isadmin", "true")
-	if resp, err := http.DefaultClient.Do(req); err != nil || resp.Header.Get("Set-Cookie") != "" {
-		t.Fatalf("外网地址不应自动登录: %v", err)
-	} else {
-		resp.Body.Close()
+	if resp = fnosRequest(t, newClient(), "GET", gw.URL+"/app/gately/", true); !strings.Contains(resp.Header.Get("Set-Cookie"), "gately_token=") {
+		t.Fatal("开启仅内网访问时经网关仍应自动登录")
 	}
 }
