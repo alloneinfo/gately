@@ -1,6 +1,6 @@
 [
     {
-        "stepTitle": "卸载 Gately",
+        "stepTitle": "处理配置与数据",
         "items": [
             {
                 "type": "radio",
