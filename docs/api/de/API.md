@@ -840,13 +840,25 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | `listenAddress` | string |
 | `listenPorts` | string |
 | `maxConnections` | integer |
+| `mode` | string |
 | `name` | string |
 | `protocols` | Array von string |
 | `proxyProtocol` | string |
 | `remark` | string |
+| `sniRoutes` | Array von `portforward.SNIRoute` |
 | `targetAddresses` | Array von string |
 | `targetPorts` | string |
 | `udpSessionTimeout` | integer |
+
+### portforward.SNIRoute
+
+| Feld | Typ |
+| --- | --- |
+| `domains` | Array von string |
+| `name` | string |
+| `proxyProtocol` | string |
+| `targetAddresses` | Array von string |
+| `targetPort` | integer |
 
 ### ssl.ACMEConfig
 

@@ -725,6 +725,9 @@
           "maxConnections": {
             "type": "integer"
           },
+          "mode": {
+            "type": "string"
+          },
           "name": {
             "type": "string"
           },
@@ -740,6 +743,12 @@
           "remark": {
             "type": "string"
           },
+          "sniRoutes": {
+            "items": {
+              "$ref": "#/components/schemas/portforward.SNIRoute"
+            },
+            "type": "array"
+          },
           "targetAddresses": {
             "items": {
               "type": "string"
@@ -750,6 +759,32 @@
             "type": "string"
           },
           "udpSessionTimeout": {
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "portforward.SNIRoute": {
+        "properties": {
+          "domains": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "name": {
+            "type": "string"
+          },
+          "proxyProtocol": {
+            "type": "string"
+          },
+          "targetAddresses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "targetPort": {
             "type": "integer"
           }
         },

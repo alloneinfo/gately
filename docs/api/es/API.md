@@ -840,13 +840,25 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | `listenAddress` | string |
 | `listenPorts` | string |
 | `maxConnections` | integer |
+| `mode` | string |
 | `name` | string |
 | `protocols` | Lista de string |
 | `proxyProtocol` | string |
 | `remark` | string |
+| `sniRoutes` | Lista de `portforward.SNIRoute` |
 | `targetAddresses` | Lista de string |
 | `targetPorts` | string |
 | `udpSessionTimeout` | integer |
+
+### portforward.SNIRoute
+
+| Campo | Tipo |
+| --- | --- |
+| `domains` | Lista de string |
+| `name` | string |
+| `proxyProtocol` | string |
+| `targetAddresses` | Lista de string |
+| `targetPort` | integer |
 
 ### ssl.ACMEConfig
 

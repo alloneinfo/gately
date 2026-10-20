@@ -24,6 +24,8 @@ type Stats struct {
 	TotalConns  atomic.Int64
 	BytesIn     atomic.Int64 // 客户端 -> 目标
 	BytesOut    atomic.Int64 // 目标 -> 客户端
+	// SNIRejected 是 SNI 未命中且没有默认目标而被断开的连接数
+	SNIRejected atomic.Int64
 }
 
 // StatsSnapshot 是统计的快照，用于 API 输出。
@@ -32,6 +34,10 @@ type StatsSnapshot struct {
 	TotalConns  int64 `json:"totalConns"`
 	BytesIn     int64 `json:"bytesIn"`
 	BytesOut    int64 `json:"bytesOut"`
+	// 以下仅 SNI 分流规则输出：RouteConns 与规则的 sniRoutes 一一对应，为各路由累计连接数
+	RouteConns   []int64 `json:"routeConns,omitempty"`
+	DefaultConns int64   `json:"defaultConns,omitempty"`
+	SNIRejected  int64   `json:"sniRejected,omitempty"`
 }
 
 func (s *Stats) snapshot() StatsSnapshot {
@@ -40,7 +46,23 @@ func (s *Stats) snapshot() StatsSnapshot {
 		TotalConns:  s.TotalConns.Load(),
 		BytesIn:     s.BytesIn.Load(),
 		BytesOut:    s.BytesOut.Load(),
+		SNIRejected: s.SNIRejected.Load(),
 	}
+}
+
+// snapshot 输出规则统计，SNI 规则附带各路由的命中数。
+func (r *runner) snapshot() StatsSnapshot {
+	snap := r.stats.snapshot()
+	if r.sni != nil {
+		snap.RouteConns = make([]int64, len(r.sni.targets))
+		for i, t := range r.sni.targets {
+			snap.RouteConns[i] = t.conns.Load()
+		}
+		if r.sni.fallback != nil {
+			snap.DefaultConns = r.sni.fallback.conns.Load()
+		}
+	}
+	return snap
 }
 
 // targetPicker 在多个目标地址间轮询，连接失败时依次尝试下一个。
@@ -67,6 +89,8 @@ type runner struct {
 	log      *logbuf.Logger
 	stats    *Stats
 	picker   *targetPicker
+	// sni 为 SNI 分流路由表，仅 SNI 模式的规则存在
+	sni *sniRouter
 
 	cancel  context.CancelFunc
 	wg      sync.WaitGroup
@@ -77,13 +101,17 @@ type runner struct {
 }
 
 func newRunner(rule Rule, settings Settings, log *logbuf.Logger) *runner {
-	return &runner{
+	r := &runner{
 		rule:     rule,
 		settings: settings,
 		log:      log,
 		stats:    &Stats{},
 		picker:   &targetPicker{hosts: rule.TargetAddresses},
 	}
+	if rule.Mode == ModeSNI {
+		r.sni = newSNIRouter(rule)
+	}
+	return r
 }
 
 // start 为每个 协议×端口 建立监听。部分端口失败时其余端口照常工作。
@@ -110,7 +138,7 @@ func (r *runner) start(parent context.Context) error {
 			addr := net.JoinHostPort(r.rule.ListenAddress, strconv.Itoa(pair.Listen))
 			var startErr error
 			if strings.HasPrefix(proto, "tcp") {
-				startErr = r.startTCP(ctx, proto, addr, pair.Target, maxConns)
+				startErr = r.startTCP(ctx, proto, addr, pair, maxConns)
 			} else {
 				startErr = r.startUDP(ctx, proto, addr, pair.Target, udpTimeout)
 			}
@@ -121,7 +149,11 @@ func (r *runner) start(parent context.Context) error {
 				continue
 			}
 			okCount++
-			r.log.Infof("%s %s -> %s:%d 已启动", proto, addr, strings.Join(r.rule.TargetAddresses, "|"), pair.Target)
+			if r.sni != nil {
+				r.log.Infof("%s %s 已启动（SNI 分流，%d 条路由）", proto, addr, len(r.rule.SNIRoutes))
+			} else {
+				r.log.Infof("%s %s -> %s:%d 已启动", proto, addr, strings.Join(r.rule.TargetAddresses, "|"), pair.Target)
+			}
 		}
 	}
 	if okCount == 0 {
@@ -164,7 +196,7 @@ func (r *runner) dialTarget(network string, port int) (net.Conn, error) {
 	return nil, lastErr
 }
 
-func (r *runner) startTCP(ctx context.Context, network, addr string, targetPort, maxConns int) error {
+func (r *runner) startTCP(ctx context.Context, network, addr string, pair PortPair, maxConns int) error {
 	var lc net.ListenConfig
 	ln, err := lc.Listen(ctx, network, addr)
 	if err != nil {
@@ -197,7 +229,11 @@ func (r *runner) startTCP(ctx context.Context, network, addr string, targetPort,
 			go func() {
 				defer r.wg.Done()
 				defer func() { <-sem }()
-				r.handleTCP(ctx, conn, targetPort)
+				if r.sni != nil {
+					r.handleSNI(ctx, conn, pair)
+				} else {
+					r.handleTCP(ctx, conn, pair.Target)
+				}
 			}()
 		}
 	}()
@@ -216,21 +252,91 @@ func (r *runner) handleTCP(ctx context.Context, client net.Conn, targetPort int)
 		return
 	}
 	defer target.Close()
-	if v := r.rule.ProxyProtocol; v != "" {
-		// 源地址为真实客户端，目的地址为本规则的监听地址
-		version := byte(2)
-		if v == "v1" {
-			version = 1
-		}
-		if _, err := proxyproto.HeaderProxyFromAddrs(version, client.RemoteAddr(), client.LocalAddr()).WriteTo(target); err != nil {
-			r.log.Warnf("%s 发送 PROXY 协议头失败: %v", client.RemoteAddr(), err)
-			return
-		}
+	if err := writePrefix(target, client, r.rule.ProxyProtocol, nil); err != nil {
+		r.log.Warnf("%s 发送 PROXY 协议头失败: %v", client.RemoteAddr(), err)
+		return
 	}
 	r.log.Debugf("%s -> %s 已连接", client.RemoteAddr(), target.RemoteAddr())
 
 	in, out := netpipe.Join(ctx, client, target)
 	r.stats.BytesIn.Add(in)
+	r.stats.BytesOut.Add(out)
+}
+
+// writePrefix 在双向转发开始前写入 PROXY 协议头（version 非空时）与已预读的客户端数据，合并为一次写入以减少小包。
+func writePrefix(target, client net.Conn, version string, peeked []byte) error {
+	var buf []byte
+	if version != "" {
+		// 源地址为真实客户端，目的地址为本规则的监听地址
+		v := byte(2)
+		if version == "v1" {
+			v = 1
+		}
+		header, err := proxyproto.HeaderProxyFromAddrs(v, client.RemoteAddr(), client.LocalAddr()).Format()
+		if err != nil {
+			return err
+		}
+		buf = header
+	}
+	buf = append(buf, peeked...)
+	if len(buf) == 0 {
+		return nil
+	}
+	_, err := target.Write(buf)
+	return err
+}
+
+// handleSNI 预读 ClientHello，按 SNI 选择目标后透传整个连接（TLS 不终止）。
+// 与 haproxy 的 inspect-delay + req_ssl_sni 行为一致：非 TLS、无 SNI、解析失败或超时未收到 ClientHello 时交给默认目标。
+func (r *runner) handleSNI(ctx context.Context, client net.Conn, pair PortPair) {
+	defer client.Close()
+	r.stats.ActiveConns.Add(1)
+	r.stats.TotalConns.Add(1)
+	defer r.stats.ActiveConns.Add(-1)
+
+	_ = client.SetReadDeadline(time.Now().Add(sniPeekTimeout))
+	peeked, hello, err := peekClientHello(client)
+	_ = client.SetReadDeadline(time.Time{})
+	var ne net.Error
+	switch {
+	case err == nil:
+	case errors.As(err, &ne) && ne.Timeout():
+		// 客户端迟迟未发送 ClientHello（例如服务端先发言的协议），交给默认目标
+	case errors.As(err, &ne), errors.Is(err, io.EOF), errors.Is(err, io.ErrUnexpectedEOF):
+		// 客户端在发完 ClientHello 前断开
+		return
+	default:
+		r.log.Debugf("%s 未解析到 SNI: %v", client.RemoteAddr(), err)
+	}
+
+	target := r.sni.match(hello.ServerName)
+	if target == nil {
+		r.stats.SNIRejected.Add(1)
+		r.log.Debugf("%s SNI %q 未命中路由且未设置默认目标，已断开", client.RemoteAddr(), hello.ServerName)
+		return
+	}
+	target.conns.Add(1)
+	port := target.port
+	if target == r.sni.fallback {
+		port = pair.Target
+	} else if port == 0 {
+		port = pair.Listen
+	}
+	conn, err := dialSNITarget(target, port, time.Duration(r.settings.DialTimeout)*time.Second)
+	if err != nil {
+		r.log.Warnf("%s SNI %q 连接目标失败: %v", client.RemoteAddr(), hello.ServerName, err)
+		return
+	}
+	defer conn.Close()
+	if err := writePrefix(conn, client, target.proxyProtocol, peeked); err != nil {
+		r.log.Warnf("%s 写入目标失败: %v", client.RemoteAddr(), err)
+		return
+	}
+	r.log.Debugf("%s SNI %q ALPN %v -> %s", client.RemoteAddr(), hello.ServerName, hello.ALPN, conn.RemoteAddr())
+
+	// 预读的数据已直接写给目标，这里传入原始连接，Linux 上 io.Copy 可走 splice 零拷贝
+	in, out := netpipe.Join(ctx, client, conn)
+	r.stats.BytesIn.Add(in + int64(len(peeked)))
 	r.stats.BytesOut.Add(out)
 }
 

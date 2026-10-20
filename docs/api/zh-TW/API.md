@@ -840,13 +840,25 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `listenAddress` | string |
 | `listenPorts` | string |
 | `maxConnections` | integer |
+| `mode` | string |
 | `name` | string |
 | `protocols` | 陣列 of string |
 | `proxyProtocol` | string |
 | `remark` | string |
+| `sniRoutes` | 陣列 of `portforward.SNIRoute` |
 | `targetAddresses` | 陣列 of string |
 | `targetPorts` | string |
 | `udpSessionTimeout` | integer |
+
+### portforward.SNIRoute
+
+| 欄位 | 類型 |
+| --- | --- |
+| `domains` | 陣列 of string |
+| `name` | string |
+| `proxyProtocol` | string |
+| `targetAddresses` | 陣列 of string |
+| `targetPort` | integer |
 
 ### ssl.ACMEConfig
 

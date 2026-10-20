@@ -840,13 +840,25 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | `listenAddress` | string |
 | `listenPorts` | string |
 | `maxConnections` | integer |
+| `mode` | string |
 | `name` | string |
 | `protocols` | Tableau de string |
 | `proxyProtocol` | string |
 | `remark` | string |
+| `sniRoutes` | Tableau de `portforward.SNIRoute` |
 | `targetAddresses` | Tableau de string |
 | `targetPorts` | string |
 | `udpSessionTimeout` | integer |
+
+### portforward.SNIRoute
+
+| Champ | Type |
+| --- | --- |
+| `domains` | Tableau de string |
+| `name` | string |
+| `proxyProtocol` | string |
+| `targetAddresses` | Tableau de string |
+| `targetPort` | integer |
 
 ### ssl.ACMEConfig
 

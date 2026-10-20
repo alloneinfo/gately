@@ -141,7 +141,7 @@ func (m *Module) viewLocked(rule Rule) RuleView {
 	v := RuleView{Rule: rule, Error: m.errors[rule.Key]}
 	if r, ok := m.runners[rule.Key]; ok {
 		v.Running = true
-		v.Stats = r.stats.snapshot()
+		v.Stats = r.snapshot()
 		v.Details = r.listenErrors
 	}
 	return v

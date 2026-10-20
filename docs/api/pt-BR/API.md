@@ -840,13 +840,25 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | `listenAddress` | string |
 | `listenPorts` | string |
 | `maxConnections` | integer |
+| `mode` | string |
 | `name` | string |
 | `protocols` | Array de string |
 | `proxyProtocol` | string |
 | `remark` | string |
+| `sniRoutes` | Array de `portforward.SNIRoute` |
 | `targetAddresses` | Array de string |
 | `targetPorts` | string |
 | `udpSessionTimeout` | integer |
+
+### portforward.SNIRoute
+
+| Campo | Tipo |
+| --- | --- |
+| `domains` | Array de string |
+| `name` | string |
+| `proxyProtocol` | string |
+| `targetAddresses` | Array de string |
+| `targetPort` | integer |
 
 ### ssl.ACMEConfig
 
