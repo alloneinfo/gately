@@ -2,6 +2,7 @@
   "title": "Web 服务",
   "desc": "按域名把请求反向代理、重定向或提供静态文件，可叠加认证与 WAF",
   "globalSettings": "全局设置",
+  "importNginx": "导入 nginx",
   "addListener": "添加监听",
   "editListener": "编辑监听",
   "moduleOffTitle": "Web 服务模块已停用",

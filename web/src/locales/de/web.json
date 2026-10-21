@@ -2,6 +2,7 @@
   "title": "Web-Dienst",
   "desc": "Reverse-Proxy, Weiterleitung oder statische Dateien je Domain bereitstellen, optional mit Authentifizierung und WAF",
   "globalSettings": "Globale Einstellungen",
+  "importNginx": "nginx importieren",
   "addListener": "Listener hinzufügen",
   "editListener": "Listener bearbeiten",
   "moduleOffTitle": "Das Modul Web-Dienst ist deaktiviert",

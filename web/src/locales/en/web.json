@@ -2,6 +2,7 @@
   "title": "Web Service",
   "desc": "Reverse proxy, redirect or serve static files by domain, optionally with authentication and WAF",
   "globalSettings": "Global settings",
+  "importNginx": "Import nginx",
   "addListener": "Add listener",
   "editListener": "Edit listener",
   "moduleOffTitle": "The Web service module is disabled",

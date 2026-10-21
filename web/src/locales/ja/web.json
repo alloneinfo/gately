@@ -2,6 +2,7 @@
   "title": "Web サービス",
   "desc": "ドメインごとにリクエストをリバースプロキシ、リダイレクト、または静的ファイルとして配信します。認証や WAF も組み合わせられます",
   "globalSettings": "全体設定",
+  "importNginx": "nginx をインポート",
   "addListener": "リスナーを追加",
   "editListener": "リスナーを編集",
   "moduleOffTitle": "Web サービスモジュールは無効です",

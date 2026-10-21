@@ -5,6 +5,7 @@
         {{ allListenersCollapsed ? t('common.expandAll') : t('common.collapseAll') }}
       </el-button>
       <CompactToggle v-model="compact" />
+      <el-button :icon="FileInput" @click="nginxImport?.open()">{{ t('web.importNginx') }}</el-button>
       <el-button :icon="SlidersHorizontal" @click="openSettings">{{ t('web.globalSettings') }}</el-button>
       <el-button type="primary" :icon="Plus" @click="openListener()">{{ t('web.addListener') }}</el-button>
     </PageHeader>
@@ -335,6 +336,7 @@
         <el-button type="primary" @click="saveSettings">{{ t('common.save') }}</el-button>
       </template>
     </el-dialog>
+    <NginxImport ref="nginxImport" @imported="load" />
   </div>
 </template>
 
@@ -342,7 +344,7 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
-import { BarChart3, ChevronsDownUp, ChevronsUpDown, Pencil, Plus, Server, SlidersHorizontal, Trash2 } from 'lucide-vue-next'
+import { BarChart3, ChevronsDownUp, ChevronsUpDown, FileInput, Pencil, Plus, Server, SlidersHorizontal, Trash2 } from 'lucide-vue-next'
 import { api, type OAuthProvider } from '../api'
 import PageHeader from '../components/PageHeader.vue'
 import ModuleBanner from '../components/ModuleBanner.vue'
@@ -355,6 +357,7 @@ import SharedUsers from '../components/SharedUsers.vue'
 import { type AuthUser, fromAPI, toAPI } from '../sharedUsers'
 import AccessSettings from '../components/AccessSettings.vue'
 import IPListsManager from '../components/IPListsManager.vue'
+import NginxImport from '../components/NginxImport.vue'
 import SiteTraffic, { type Rewrite } from '../components/SiteTraffic.vue'
 import SiteStats from '../components/SiteStats.vue'
 import SiteAccess, { type PathRule, type ShareLink } from '../components/SiteAccess.vue'
@@ -463,6 +466,7 @@ const listeners = ref<ListenerView[]>([])
 const { isCollapsed, setCollapsed, setAll, allCollapsed } = useCollapsed('web')
 const allListenersCollapsed = allCollapsed(() => listeners.value.map((l) => l.key))
 const wafInstances = ref<{ key: string; name: string }[]>([])
+const nginxImport = ref<InstanceType<typeof NginxImport>>()
 // ipLists 为订阅的 IP 列表，供站点与路径规则的访问控制引用
 const ipLists = ref<{ key: string; name: string; loaded: boolean }[]>([])
 const loading = ref(true)

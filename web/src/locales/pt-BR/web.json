@@ -2,6 +2,7 @@
   "title": "Serviço Web",
   "desc": "Proxy reverso, redirecionamento ou arquivos estáticos por domínio, com autenticação e WAF opcionais",
   "globalSettings": "Configurações globais",
+  "importNginx": "Importar nginx",
   "addListener": "Adicionar listener",
   "editListener": "Editar listener",
   "moduleOffTitle": "O módulo de serviço Web está desativado",

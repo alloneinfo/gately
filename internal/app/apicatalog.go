@@ -66,6 +66,7 @@ var apiCatalog = map[string]epDoc{
 	"POST /api/ssl/certs/{key}/renew":                    {Summary: "立即签发或续期证书"},
 	"GET /api/ssl/certs/{key}/download":                  {Summary: "下载证书与私钥", Desc: "返回包含私钥的文件，因此需要写权限。"},
 	"POST /api/ssl/certs/{key}/deploy":                   {Summary: "立即部署证书", Desc: "把证书部署到全部启用的目标（经 SSH 上传并执行命令，或重启 Docker 容器），忽略是否已部署与失败退避，同步返回每个目标的结果。"},
+	"POST /api/webservice/import/nginx":                  {Summary: "导入 nginx 配置", Desc: "请求体 `{config, apply, enable}`。`config` 为 nginx 配置文本，推荐 `nginx -T` 的完整输出；`apply` 为 false 时只返回转换预览。站点按监听端口合并到已有监听或新建监听，已存在的域名会跳过；`enable` 为 false 时导入为停用状态。", Body: true},
 	"POST /api/webservice/iplists/{key}/refresh":         {Summary: "立即刷新订阅 IP 列表", Desc: "忽略刷新间隔与失败退避，同步下载并返回列表状态；内容无法识别时保留原列表。"},
 	"GET /api/ssl/deploy-targets":                        {Summary: "列出可选的部署目标", Desc: "返回 Web 终端中的 SSH 连接（`trusted` 表示已记录主机密钥）与本机 Docker 容器名称。"},
 	"GET /api/ssl/providers":                             {Summary: "列出支持的 DNS 验证服务商"},

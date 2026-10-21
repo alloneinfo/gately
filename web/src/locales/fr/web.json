@@ -2,6 +2,7 @@
   "title": "Service Web",
   "desc": "Proxy inverse, redirection ou fichiers statiques par domaine, avec authentification et WAF en option",
   "globalSettings": "Paramètres globaux",
+  "importNginx": "Importer nginx",
   "addListener": "Ajouter un écouteur",
   "editListener": "Modifier l'écouteur",
   "moduleOffTitle": "Le module de service Web est désactivé",
