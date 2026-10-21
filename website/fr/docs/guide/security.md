@@ -32,7 +32,7 @@ Gately fonctionne à la frontière du réseau et manipule des clés de fournisse
 
 ## Audit et traçabilité
 
-Le journal d'audit enregistre les connexions, les modifications de configuration et les accès sensibles. L'historique de configuration conserve la version de chaque fichier de configuration avant écrasement et permet de la restaurer en un clic. Consultez [Audit et historique de configuration](/fr/docs/guide/audit). Les artefacts publiés sont accompagnés d'une signature cosign, d'une attestation de provenance de build et d'un SBOM ; la méthode de vérification est décrite dans [Vérifier les versions](/en/docs/guide/verify).
+Le journal d'audit enregistre les connexions, les modifications de configuration et les accès sensibles. L'historique de configuration conserve la version de chaque fichier de configuration avant écrasement et permet de la restaurer en un clic. Consultez [Audit et historique de configuration](/fr/docs/guide/audit). Les artefacts publiés sont accompagnés d'une signature cosign, d'une attestation de provenance de build et d'un SBOM ; la méthode de vérification est décrite dans [Vérifier les versions](/fr/docs/guide/verify).
 
 ## Valeurs par défaut des fonctions à risque
 

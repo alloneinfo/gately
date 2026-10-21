@@ -271,7 +271,7 @@ Die Statistiken liegen im Arbeitsspeicher und beginnen nach einem Neustart oder 
 
 ### Prometheus-Metriken
 
-Der globale Metriken-Endpunkt `GET /api/metrics` fasst die Metriken aller Module zusammen, siehe [Monitoring](/en/docs/reference/monitoring). Der folgende Modul-Endpunkt enthält nur die Metriken der Web-Dienste.
+Der globale Metriken-Endpunkt `GET /api/metrics` fasst die Metriken aller Module zusammen, siehe [Monitoring](/de/docs/reference/monitoring). Der folgende Modul-Endpunkt enthält nur die Metriken der Web-Dienste.
 
 Der Metriken-Endpunkt ist `GET /api/webservice/metrics` im Prometheus-Textformat und erfordert Anmeldedaten oder ein [API-Token](/en/docs/reference/api-reference).
 

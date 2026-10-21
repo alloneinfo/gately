@@ -25,9 +25,6 @@ export const siteLocales: SiteLocale[] = [
   { code: 'pt-BR', dir: 'pt-BR', match: ['pt'] }
 ]
 
-// 仅提供英文（及简体中文）的参考类页面：其余语言的侧边栏直接链到英文版
-export const englishOnlySlugs = ['reference/docker-api', 'reference/webterminal-api', 'reference/diagnostics', 'reference/monitoring', 'guide/verify']
-
 export interface SidebarGroup {
   id: string
   slugs: string[]

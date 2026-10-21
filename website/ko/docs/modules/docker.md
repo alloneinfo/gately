@@ -78,4 +78,4 @@ Gately는 Docker 이벤트 스트림을 구독하며, 컨테이너가 비정상 
 
 ## API
 
-전체 API 설명은 [Docker API](/en/docs/reference/docker-api)를 참고하세요.
+전체 API 설명은 [Docker API](/ko/docs/reference/docker-api)를 참고하세요.

@@ -34,3 +34,11 @@ make lint     # gofmt, go vet, 프런트엔드 타입 검사
 ## 라이선스
 
 [Apache License 2.0](https://github.com/wangwanjie/gately/blob/main/LICENSE)
+
+## 번역
+
+- 관리 UI 문자열은 `web/src/locales/<language>/<namespace>.json`에 있습니다. 원본 언어는 중국어 간체이며, 문자열을 추가하거나 바꿀 때는 최소한 `zh-CN`과 `en`을 함께 갱신하고 제출 전에 `cd web && node scripts/check-i18n.mjs`를 실행하세요. 규칙은 `web/src/locales/README.md`를 참고하세요.
+- 웹사이트 언어 팩은 `website/.vitepress/i18n/<language>.json`에 있고, 언어별 페이지는 `website/<language dir>/`에 있습니다.
+- 백엔드 런타임 텍스트(오류 메시지, 로그, 알림, API 문서)는 소스 코드의 중국어 문자열 리터럴을 키로 사용하며, 번역은 `internal/i18n/locales/<language>.json`에 있습니다. 중국어 텍스트를 추가하거나 바꾼 뒤에는 `go run ./internal/i18n/cmd/i18nsync -root .`를 실행해 새 키를 모든 언어 파일에 동기화하고 번역을 채우세요. `go test ./internal/i18n`은 모든 언어가 빠짐없이 번역되었는지, 포맷 동사가 원문과 일치하는지 검사합니다. 값을 채워 넣어야 하는 문장은 중국어 조각 여러 개를 이어 붙이지 말고 문장 전체를 담은 `fmt.Sprintf` 포맷 문자열을 사용하세요. 그래야 언어마다 자기 어순을 따를 수 있습니다.
+- API 문서는 프로그램이 언어별로 생성합니다. `make api-docs`가 `docs/api/<language>/`에 출력하므로 직접 동기화할 필요가 없습니다.
+- 지원 언어: 简体中文, English, 繁體中文, 日本語, 한국어, Español, Français, Deutsch, Русский, Português (Brasil).

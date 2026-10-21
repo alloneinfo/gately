@@ -166,4 +166,4 @@ Si concediste al binario permiso para puertos bajos con `setcap`, vuelve a ejecu
 - Paquetes de OpenWrt: descarga el `.ipk` / `.apk` más reciente y ejecuta `opkg install` / `apk add --allow-untrusted`; tu configuración se conserva (consulta [OpenWrt](#openwrt));
 - Windows, macOS, FreeBSD: sustituye el ejecutable y reinicia el servicio.
 
-Antes de actualizar, exporta una copia de seguridad de la configuración o guarda el directorio de configuración en git. Puedes comprobar la firma de los archivos e imágenes descargados según [Verificar versiones](/en/docs/guide/verify).
+Antes de actualizar, exporta una copia de seguridad de la configuración o guarda el directorio de configuración en git. Puedes comprobar la firma de los archivos e imágenes descargados según [Verificar versiones](/es/docs/guide/verify).

@@ -109,7 +109,7 @@ docker logs gately 2>&1 | grep -i "initial password"
 
 인수: `-c` 설정 디렉터리(환경 변수 `GATELY_CONFIG_DIR`로도 지정 가능), `-listen` 관리 UI 수신 주소 덮어쓰기, `-apply` 시작할 때마다 디렉터리의 `<name>.json` 파일을 설정 디렉터리에 적용(`GATELY_APPLY_DIR`, GitOps와 Kubernetes에 유용. 계정 및 토큰 파일은 덮어쓸 수 없음), `-version` 버전 출력. 무인 설치 시 `GATELY_INITIAL_PASSWORD`를 설정하면 로그에서 무작위 비밀번호를 읽는 대신 관리자 초기 비밀번호를 지정할 수 있습니다.
 
-서비스 템플릿: [systemd](deploy/systemd/gately.service), [OpenWrt procd](deploy/openwrt/gately.init). 다운로드한 압축 파일과 이미지 검증(cosign 서명, 빌드 출처 증명, SBOM)은 [릴리스 산출물 검증](docs/en/VERIFY.md)을 참고하세요.
+서비스 템플릿: [systemd](deploy/systemd/gately.service), [OpenWrt procd](deploy/openwrt/gately.init). 다운로드한 압축 파일과 이미지 검증(cosign 서명, 빌드 출처 증명, SBOM)은 [릴리스 산출물 검증](docs/ko/VERIFY.md)을 참고하세요.
 
 ### fnOS 네이티브 앱
 
@@ -122,7 +122,7 @@ docker logs gately 2>&1 | grep -i "initial password"
 - 설정은 앱의 `var` 디렉터리에 저장되며, 제거 마법사에서 "모두 삭제"를 선택하지 않는 한 제거해도 유지됩니다. 업그레이드는 새 버전의 `.fpk`를 다시 수동 설치하면 됩니다.
 - 패키지는 `gately ctl`과 `gately mcp`용 `gately` 명령(`/usr/local/bin/gately`)도 추가합니다.
 - 16680 포트는 Docker 이미지와 같습니다. 네이티브 앱을 시작하기 전에 `gately` 컨테이너를 중지하세요.
-- 내려받은 파일은 [릴리스 산출물 검증](docs/en/VERIFY.md)에 따라 검증하세요. `.fpk` 파일도 `checksums.txt`에 포함되어 있습니다.
+- 내려받은 파일은 [릴리스 산출물 검증](docs/ko/VERIFY.md)에 따라 검증하세요. `.fpk` 파일도 `checksums.txt`에 포함되어 있습니다.
 
 ### OpenWrt
 
@@ -134,7 +134,7 @@ docker logs gately 2>&1 | grep -i "initial password"
 
 ### 모니터링
 
-`metrics:read` 권한만 있는 API 토큰을 만들고 Prometheus가 `/api/metrics`를 수집하도록 설정하세요. 메트릭, 알림 예시, Grafana 대시보드는 [모니터링](docs/en/MONITORING.md)에서 설명합니다.
+`metrics:read` 권한만 있는 API 토큰을 만들고 Prometheus가 `/api/metrics`를 수집하도록 설정하세요. 메트릭, 알림 예시, Grafana 대시보드는 [모니터링](docs/ko/MONITORING.md)에서 설명합니다.
 
 ### API 호출
 
@@ -177,7 +177,7 @@ make lint     # gofmt, go vet, 프런트엔드 타입 검사
 | 실제 공용 STUN 서버 | `GATELY_NET_TEST=1` |
 | 실제 Lucky 설정으로 가져오기 검증 | `GATELY_LUCKY_SAMPLE` 등, 각 모듈의 `TestImportRealSample` 참고 |
 
-디렉터리 구조와 기술 선정은 [docs/ROADMAP.md](docs/ROADMAP.md)를 참고하세요.
+디렉터리 구조와 기술 선정은 [docs/ko/ROADMAP.md](docs/ko/ROADMAP.md)를 참고하세요.
 
 공식 사이트([gately.cn](https://gately.cn))의 소스는 `website/`에 있으며 VitePress 기반입니다. `cd website && pnpm install && pnpm dev`; `pnpm deploy:site`는 빌드 후 서버에 동기화합니다.
 
@@ -193,7 +193,7 @@ make lint     # gofmt, go vet, 프런트엔드 타입 검사
 
 <a href="https://t.me/gately_chat"><img src="docs/images/telegram-qr.svg" alt="QR 코드를 스캔해 Gately Telegram 그룹에 참여" width="160"></a>
 
-버그는 [GitHub Issues](https://github.com/wangwanjie/gately/issues)에 등록해 주세요.
+버그는 [GitHub Issues](https://github.com/wangwanjie/gately/issues)에 등록하고 [진단 패키지](docs/ko/DIAGNOSTICS.md)(설정 → 진단)를 첨부해 주세요. 진단 패키지는 로컬에서 생성되며 비밀번호, 토큰, 도메인, 실제 IP를 포함하지 않습니다.
 
 ## Star 추이
 

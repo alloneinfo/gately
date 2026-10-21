@@ -78,4 +78,4 @@ Gately は Docker のイベントストリームを購読しており、コン�
 
 ## API
 
-API の詳細は [Docker API](/en/docs/reference/docker-api) を参照してください。
+API の詳細は [Docker API](/ja/docs/reference/docker-api) を参照してください。

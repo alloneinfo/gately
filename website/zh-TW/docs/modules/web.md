@@ -271,7 +271,7 @@ http://10.0.0.3:8080 backup
 
 ### Prometheus 指標
 
-全域指標端點 `GET /api/metrics` 彙總了全部模組的指標，見 [監控指標](/en/docs/reference/monitoring)。下面的模組端點只包含 Web 服務的指標。
+全域指標端點 `GET /api/metrics` 彙總了全部模組的指標，見 [監控指標](/zh-TW/docs/reference/monitoring)。下面的模組端點只包含 Web 服務的指標。
 
 指標端點為 `GET /api/webservice/metrics`，Prometheus 文字格式，需攜帶登入憑據或 [API 權杖](/en/docs/reference/api-reference)。
 

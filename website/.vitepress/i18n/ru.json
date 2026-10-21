@@ -51,8 +51,7 @@
       "reference/diagnostics": "Диагностический пакет",
       "reference/monitoring": "Мониторинг",
       "guide/contributing": "Участие в разработке"
-    },
-    "englishOnly": " (English)"
+    }
   },
   "ui": {
     "searchButton": "Поиск по документации",
@@ -79,7 +78,7 @@
     "pill": "Открытый код · Проверяемость · Один бинарный файл",
     "announce": {
       "text": "Вышла v0.5.4: онлайн-обновление, без пересоздания LXC-контейнеров PVE, пакеты для OpenWrt →",
-      "link": "/en/news/v0.5.4"
+      "link": "/ru/news/v0.5.4"
     },
     "titleLine1": "Набор инструментов сетевого шлюза,",
     "titleLine2": "в котором всё прозрачно",

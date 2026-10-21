@@ -34,3 +34,11 @@ Certains tests sont ignorés par défaut et demandent une préparation suppléme
 ## Licence
 
 [Apache License 2.0](https://github.com/wangwanjie/gately/blob/main/LICENSE)
+
+## Traductions
+
+- Les textes de l'interface d'administration se trouvent dans `web/src/locales/<language>/<namespace>.json`. La langue source est le chinois simplifié ; quand vous ajoutez ou modifiez des textes, mettez à jour au moins `zh-CN` et `en`, et lancez `cd web && node scripts/check-i18n.mjs` avant de soumettre. Voir `web/src/locales/README.md` pour les conventions.
+- Les packs de langue du site se trouvent dans `website/.vitepress/i18n/<language>.json`, et les pages de chaque langue dans `website/<language dir>/`.
+- Les textes d'exécution du backend (messages d'erreur, journaux, notifications, documentation de l'API) ont pour clés les chaînes littérales chinoises du code source, avec les traductions dans `internal/i18n/locales/<language>.json`. Après avoir ajouté ou modifié du texte chinois, lancez `go run ./internal/i18n/cmd/i18nsync -root .` pour synchroniser les nouvelles clés dans chaque fichier de langue et compléter les traductions ; `go test ./internal/i18n` vérifie que chaque langue est complète et que les verbes de format correspondent à la source. Pour les phrases qui doivent intégrer des valeurs, utilisez une chaîne de format `fmt.Sprintf` couvrant la phrase entière plutôt que d'assembler plusieurs fragments chinois, afin que chaque langue puisse suivre son propre ordre des mots.
+- La documentation de l'API est générée par langue par le programme : `make api-docs` l'écrit dans `docs/api/<language>/` ; il n'y a donc rien à synchroniser à la main.
+- Langues prises en charge : 简体中文, English, 繁體中文, 日本語, 한국어, Español, Français, Deutsch, Русский, Português (Brasil).

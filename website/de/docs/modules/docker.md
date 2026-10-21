@@ -78,4 +78,4 @@ Gately abonniert den Docker-Ereignisstrom und veröffentlicht ein Ereignis `dock
 
 ## API
 
-Die vollständige API-Referenz finden Sie in der [Docker-API](/en/docs/reference/docker-api).
+Die vollständige API-Referenz finden Sie in der [Docker-API](/de/docs/reference/docker-api).

@@ -55,4 +55,4 @@ make build    # genera bin/gately
 
 Cada versión incluye un archivo de sumas de verificación. Comprueba el SHA-256 tras la descarga y antes de ejecutar.
 
-Desde v0.5.0, el archivo de sumas y las imágenes Docker llevan firmas sin clave de cosign, los archivos incluyen atestación de procedencia y se publica un SBOM. Consulta [Verificar versiones](/en/docs/guide/verify) (en inglés).
+Desde v0.5.0, el archivo de sumas y las imágenes Docker llevan firmas sin clave de cosign, los archivos incluyen atestación de procedencia y se publica un SBOM. Consulta [Verificar versiones](/es/docs/guide/verify) (en inglés).

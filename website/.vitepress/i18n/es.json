@@ -51,8 +51,7 @@
       "reference/diagnostics": "Paquete de diagnóstico",
       "reference/monitoring": "Monitorización",
       "guide/contributing": "Cómo contribuir"
-    },
-    "englishOnly": " (en inglés)"
+    }
   },
   "ui": {
     "searchButton": "Buscar en la documentación",
@@ -79,7 +78,7 @@
     "pill": "Código abierto · Auditable · Binario único",
     "announce": {
       "text": "Ya está aquí v0.5.4: actualización en línea, sin recrear contenedores LXC de PVE y paquetes para OpenWrt →",
-      "link": "/en/news/v0.5.4"
+      "link": "/es/news/v0.5.4"
     },
     "titleLine1": "Una pasarela de red",
     "titleLine2": "que puedes ver por dentro",

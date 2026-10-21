@@ -166,4 +166,4 @@ Se você concedeu ao binário acesso a portas baixas com `setcap`, execute `setc
 - Pacotes para OpenWrt: baixe o `.ipk` / `.apk` mais novo e execute `opkg install` / `apk add --allow-untrusted`; a sua configuração é mantida (veja [OpenWrt](#openwrt));
 - Windows, macOS, FreeBSD: substitua o executável e reinicie o serviço.
 
-Antes de atualizar, exporte um backup da configuração ou mantenha o diretório de configuração no git. As assinaturas dos arquivos e imagens baixados podem ser conferidas conforme [Verificar versões](/en/docs/guide/verify).
+Antes de atualizar, exporte um backup da configuração ou mantenha o diretório de configuração no git. As assinaturas dos arquivos e imagens baixados podem ser conferidas conforme [Verificar versões](/pt-BR/docs/guide/verify).

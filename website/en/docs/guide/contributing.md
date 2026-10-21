@@ -27,6 +27,7 @@ For frontend development, run `cd web && pnpm dev`; `/api` is proxied to local `
 - Website language packs live in `website/.vitepress/i18n/<lang>.json`; pages live in `website/<lang-dir>/`.
 - Backend runtime text (error messages, logs, notifications, API docs) uses the Chinese string literals in the source as keys; translations live in `internal/i18n/locales/<lang>.json`. After adding or changing Chinese text, run `go run ./internal/i18n/cmd/i18nsync -root .` to sync new keys into every language file and fill in the translations. `go test ./internal/i18n` checks that every language is complete and that format verbs match the original. For sentences with dynamic parts, use a single `fmt.Sprintf` format string instead of concatenating several Chinese fragments, so each language can reorder the words.
 - API docs are generated per language by the program: `make api-docs` writes them to `docs/api/<lang>/`, so nothing needs to be synced by hand.
+- Supported languages: 简体中文, English, 繁體中文, 日本語, 한국어, Español, Français, Deutsch, Русский, Português (Brasil).
 
 ## Extra tests
 

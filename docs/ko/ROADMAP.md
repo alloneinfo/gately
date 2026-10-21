@@ -1,0 +1,64 @@
+# Gately 기술 설계와 로드맵
+
+## 목표
+
+오픈소스이며 감사 가능하고 커뮤니티가 주도하는 네트워크 게이트웨이 도구를 만듭니다. 가정 네트워크, NAS, 서버 사용자가 가장 많이 쓰는 DDNS, STUN 터널링, 포트 포워딩, 리버스 프록시, 인증서 관리를 다루고, 기존 Lucky 설정 가져오기를 지원합니다.
+
+설계 원칙:
+
+1. **투명성**: 기본적으로 프로젝트 측 서버에 연결하지 않습니다. 모든 외부 주소를 확인하고 변경하고 끌 수 있습니다.
+2. **마이그레이션 가능**: Lucky `.lkcf` 설정 가져오기를 제공합니다.
+3. **감사 가능한 설정**: 설정은 평문 JSON(파일 권한 0600)이며, git에 그대로 넣어 diff와 롤백에 활용할 수 있습니다.
+4. **단일 파일 배포**: 프런트엔드를 내장한 정적 바이너리 하나로 Docker, systemd, OpenWrt를 지원합니다.
+
+## 기술 스택
+
+| 계층 | 선택 | 이유 |
+| --- | --- | --- |
+| 백엔드 | Go 1.26+ | lego, pion/stun, frp, cloudflared, coraza, rclone 등 검증된 라이브러리를 그대로 재사용할 수 있음. 정적 컴파일, arm/arm64/mips/riscv 라우터와 NAS용 크로스 컴파일 |
+| HTTP | 표준 라이브러리 `net/http`(Go 1.22 라우팅 문법) | 의존성이 가장 적어 감사하기 쉬움 |
+| 저장소 | 모듈마다 평문 JSON 파일 하나, 원자적 쓰기 | 가져오기, 백업, git diff가 쉬움 |
+| 인증 | bcrypt 비밀번호 + HMAC 서명 세션 토큰, 로그인 실패 속도 제한, 이후 TOTP 지원 | 외부 의존성 없음 |
+| 로그 | 모듈별 메모리 링 버퍼 + 증분 조회 API | 로그 폴링 API가 단순하고 프런트엔드가 증분으로 갱신 |
+| 프런트엔드 | Vue 3 + TypeScript + Vite + Element Plus, `go:embed`로 패키징 | 컴포넌트가 풍부하고 개발 효율이 높음 |
+| 릴리스 | GoReleaser 다중 아키텍처 바이너리 + 다중 아키텍처 Docker 이미지 | — |
+
+## 디렉터리 구조
+
+```
+cmd/gately/            프로그램 진입점
+internal/app/          조립: 설정 로드, 모듈 시작, HTTP 서비스
+internal/config/       모듈화된 JSON 설정 저장소
+internal/auth/         관리자 인증과 세션
+internal/logbuf/       모듈 로그 링 버퍼
+internal/httpx/        HTTP 유틸리티와 미들웨어
+internal/module/       모듈 인터페이스와 레지스트리
+internal/modules/*/    각 기능 모듈
+internal/luckyimport/  Lucky .lkcf 복호화와 필드 매핑
+web/                   프런트엔드 프로젝트, 빌드 결과물은 web/embed.go로 내장
+```
+
+## 마일스톤
+
+사용자의 실제 사용 규모 순으로 정렬했습니다(STUN 18, 포트 포워딩 25, 리버스 프록시 27, 인증서 5, DDNS 75개 레코드).
+
+| 단계 | 내용 | 검수 |
+| --- | --- | --- |
+| ✅ **M0 골격** | 설정 저장소, 관리자 로그인, 모듈 프레임워크, 로그 버퍼, 관리 UI 셸, Dockerfile | 로그인 후 개요와 모듈 메뉴가 보임 |
+| ✅ **M1 포트 포워딩** | TCP/UDP, v4/v6, 다중 포트와 포트 범위, 다중 대상, 연결 수 제한, 시작/중지와 로그. Lucky 포트 포워딩 규칙 가져오기 | 단위 테스트로 TCP/UDP 포워딩 검증. 실제 샘플 25/25개 가져오기 통과 |
+| ✅ **M2 DDNS** | IP 조회(URL/네트워크 카드/명령), IPv4/IPv6, Alibaba Cloud/Cloudflare/DNSPod(Tencent Cloud)/Huawei Cloud/사용자 지정 콜백, Webhook. 가져오기 | 11개 제공업체(Alibaba Cloud 서명은 공식 예제로 검증). 실제 샘플 작업 2/2개, 레코드 75개 가져오기 통과 |
+| ✅ **M3 STUN 터널링** | STUN으로 공인 매핑 조회, TCP keep-alive, UPnP/NAT-PMP, 내장 포워딩, Webhook과 스크립트 변수. 가져오기 | 로컬 종단 간 테스트 + 가정 네트워크 실제 터널링. 실제 샘플 18/18개 가져오기 통과 |
+| ✅ **M4 인증서** | ACME(lego, DNS-01은 M2 Provider 재사용), 자동 갱신, 경로로 내보내기, 변경 시 스크립트 | Pebble 종단 간 테스트(와일드카드 + 갱신). 실제 샘플 5/5개를 재발급 없이 가져오기 |
+| ✅ **M5 웹 서비스** | 리버스 프록시, 리디렉션, 정적 파일, 도메인별 라우팅, 자동 TLS, BasicAuth, IP 필터링. 가져오기 | 라우팅, 4가지 사이트 유형, 인증, WebSocket, HTTPS, PROXY 프로토콜 송수신 검증. 실제 샘플 사이트 27개 가져오기 통과 |
+| ✅ M6 운영 | Wake-on-LAN, 웹 터미널(SSH/로컬 셸), 예약 작업, 관리자 2단계 인증 | WOL 3/3, 터미널 연결 14/14 가져오기. TOTP는 RFC 6238 테스트 벡터 통과 |
+| ✅ M7 생태계(일부) | Coraza WAF, GitHub/Google/QQ/OIDC 서드파티 로그인(사이트 인증과 관리 화면 로그인, Lucky 신원 테이블 마이그레이션 가능), Docker 관리, WebDAV, FTP 서비스, 스토리지 관리(로컬/원격 WebDAV 마운트와 온라인 파일 관리) | WAF는 실제 공격 페이로드로 테스트. Docker는 실제 환경에서 읽기 전용으로 검증 |
+| ✅ M7.5 네트워크 터널링 | Tailscale, frp(frpc + frps), cloudflared를 공식 바이너리의 프로세스 관리 방식으로 통합 | 설정 생성, 프로세스 감시, 로그 수집에 단위 테스트가 있음. 업스트림 프로그램은 내장하지 않음 |
+| ✅ M8 신뢰성과 운영 | 작업 감사 로그, 설정 기록과 롤백, 선언적 설정 디렉터리. 패스키 로그인과 읽기 전용 계정. ACME HTTP-01. HTTP/3. 전역 Prometheus 메트릭과 Grafana 대시보드. 네트워크 자가 점검과 최초 실행 안내. DDNS에 Route 53, OVH, Gandi, NS1, Bunny, Namecheap, DynDNS2 추가. 알림에 ntfy, Gotify, Pushover, Discord, Slack, ServerChan, PushPlus와 규칙 템플릿 추가. 릴리스 결과물의 cosign 서명, 빌드 출처 증명, SBOM. systemd와 OpenWrt 서비스 템플릿 | WebAuthn은 소프트웨어 인증기로 종단 간 테스트. Route 53 서명은 AWS 공식 SigV4 테스트 벡터로 검증. HTTP/3는 quic-go 클라이언트로 실측 |
+| ✅ M8.5 설치와 업그레이드 | fnOS 네이티브 앱(.fpk, 통합 게이트웨이와 fnOS 로그인 상태 연동). Linux 바이너리 온라인 업그레이드. OpenWrt 설치 패키지(24.10 이하용 .ipk, 25.12 이상용 .apk) | fpk는 fnOS 가상 머신에서 실측. OpenWrt 설치 패키지는 24.10 / 25.12 공식 rootfs 컨테이너와 iStoreOS에서 실측, CI 스모크 테스트가 설치와 제거를 검증 |
+| M9 미정 | 전역 IP 필터링, 다중 관리자와 세분화된 역할 | 커뮤니티 요구에 따라 일정 결정 |
+
+## 설계상 선택
+
+- 온라인 업그레이드는 Linux 바이너리 배포에서만 제공하며 관리자가 직접 실행할 때만 동작합니다. 내려받은 뒤 checksums.txt의 SHA-256을 대조하고 새 프로그램을 시험 실행하며, 교체할 때 이전 버전을 보관합니다. Docker, fnOS, OpenWrt 설치 패키지는 계속 이미지, 앱 센터, 패키지 관리자로 업그레이드합니다.
+- 원격 설정을 내려보내지 않고 기기 정보를 전송하지 않습니다.
+- 설정은 평문으로 저장하며, 민감한 필드는 API 출력에서 마스킹합니다.

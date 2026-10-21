@@ -34,3 +34,11 @@ make lint     # gofmt、go vet、フロントエンドの型チェック
 ## ライセンス
 
 [Apache License 2.0](https://github.com/wangwanjie/gately/blob/main/LICENSE)
+
+## 翻訳
+
+- 管理画面の文言は `web/src/locales/<language>/<namespace>.json` にあります。原文の言語は簡体字中国語です。文言を追加・変更するときは少なくとも `zh-CN` と `en` を更新し、提出前に `cd web && node scripts/check-i18n.mjs` を実行してください。規約は `web/src/locales/README.md` を参照してください。
+- Web サイトの言語パックは `website/.vitepress/i18n/<language>.json` に、各言語のページは `website/<language dir>/` にあります。
+- バックエンドの実行時の文言（エラーメッセージ、ログ、通知、API ドキュメント）は、ソースコード内の中国語の文字列リテラルをキーとし、翻訳は `internal/i18n/locales/<language>.json` にあります。中国語の文言を追加・変更したら `go run ./internal/i18n/cmd/i18nsync -root .` を実行して新しいキーを各言語のファイルに同期し、翻訳を埋めてください。`go test ./internal/i18n` は、すべての言語がそろっているか、書式指定子が原文と一致しているかを検査します。値を埋め込む文は、中国語の断片をいくつもつなぎ合わせず、文全体を 1 つの `fmt.Sprintf` 書式文字列にしてください。そうすれば各言語が独自の語順に従えます。
+- API ドキュメントはプログラムが言語ごとに生成します。`make api-docs` が `docs/api/<language>/` に出力するため、手作業での同期は不要です。
+- 対応言語：简体中文、English、繁體中文、日本語、한국어、Español、Français、Deutsch、Русский、Português (Brasil)。

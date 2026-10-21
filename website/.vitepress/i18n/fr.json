@@ -51,8 +51,7 @@
       "reference/diagnostics": "Paquet de diagnostic",
       "reference/monitoring": "Supervision",
       "guide/contributing": "Contribuer"
-    },
-    "englishOnly": "(English)"
+    }
   },
   "ui": {
     "searchButton": "Rechercher dans la documentation",
@@ -79,7 +78,7 @@
     "pill": "Open source · Auditable · Binaire unique",
     "announce": {
       "text": "v0.5.4 est disponible : mise à niveau en ligne, plus besoin de recréer les conteneurs LXC PVE, paquets OpenWrt →",
-      "link": "/en/news/v0.5.4"
+      "link": "/fr/news/v0.5.4"
     },
     "titleLine1": "Une boîte à outils de passerelle réseau",
     "titleLine2": "où tout est visible",

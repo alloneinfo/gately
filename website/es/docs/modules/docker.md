@@ -78,4 +78,4 @@ Gately se suscribe al flujo de eventos de Docker y publica un evento `docker.exi
 
 ## API
 
-Consulta la [API de Docker](/en/docs/reference/docker-api) para ver la referencia completa de la API.
+Consulta la [API de Docker](/es/docs/reference/docker-api) para ver la referencia completa de la API.

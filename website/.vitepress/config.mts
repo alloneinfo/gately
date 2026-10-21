@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { defineConfig, type DefaultTheme, type HeadConfig } from 'vitepress'
-import { FALLBACK_CODE, SOURCE_CODE, englishOnlySlugs, sidebarGroups, siteLocales, type SiteLocale } from './i18n/structure'
+import { FALLBACK_CODE, sidebarGroups, siteLocales, type SiteLocale } from './i18n/structure'
 
 const SITE = 'https://gately.cn'
 const REPO = 'https://github.com/wangwanjie/gately'
@@ -23,19 +23,13 @@ function prefixOf(loc: SiteLocale) {
   return loc.dir ? `/${loc.dir}` : ''
 }
 
-// 侧边栏：参考类大文档只有英文版，其余语言链接到英文页面并在标题后注明
+// 侧边栏：各语言共用同一骨架，标题取自语言包
 function buildSidebar(loc: SiteLocale, pack: any): DefaultTheme.SidebarItem[] {
-  const hasEnglish = packs.some((p) => p.loc.code === FALLBACK_CODE)
   return sidebarGroups.map((g) => ({
     text: pack.sidebar.groups[g.id],
     items: g.slugs.map((slug) => {
-      const title = pack.sidebar.items[slug]
       const link = slug === 'modules/index' ? '/docs/modules/' : `/docs/${slug}`
-      const onlyEnglish = englishOnlySlugs.includes(slug) && loc.code !== SOURCE_CODE && loc.code !== FALLBACK_CODE
-      if (onlyEnglish && hasEnglish) {
-        return { text: `${title}${pack.sidebar.englishOnly ?? ''}`, link: `/en${link}` }
-      }
-      return { text: title, link: `${prefixOf(loc)}${link}` }
+      return { text: pack.sidebar.items[slug], link: `${prefixOf(loc)}${link}` }
     })
   }))
 }
@@ -49,7 +43,7 @@ function buildThemeConfig(loc: SiteLocale, pack: any): DefaultTheme.Config & Rec
       { text: pack.nav.docs, link: `${p}/docs/guide/introduction`, activeMatch: `${p}/docs/` },
       { text: pack.nav.modules, link: `${p}/docs/modules/`, activeMatch: `${p}/docs/modules/` },
       { text: pack.nav.download, link: `${p}/download` },
-      { text: pack.nav.changelog, link: `${REPO}/releases` }
+      { text: pack.nav.changelog, link: `${p}/news/`, activeMatch: `${p}/news/` }
     ],
     sidebar: { [`${p}/docs/`]: buildSidebar(loc, pack) },
     editLink: { pattern: `${REPO}/edit/main/website/:path`, text: ui.editLink },
@@ -125,9 +119,7 @@ for(var a=0;a<langs.length&&!hit;a++){var s=String(langs[a]).toLowerCase();
  for(var b=0;b<L.length&&!hit;b++){ var m=L[b].match; for(var c=0;c<m.length;c++){ if(s===m[c]||s.indexOf(m[c]+'-')===0){hit=L[b];break} } } }
 if(!hit){ hit=L.filter(function(l){return l.code===F})[0]||L[0] }
 if(cur!==hit.dir && cur===''){
-  var target=(hit.dir?'/'+hit.dir:'')+p;
-  if(hit.dir && /^\\/docs\\/reference\\/(docker-api|webterminal-api|diagnostics)/.test(p) && hit.code!=='en'){ target='/en'+p }
-  location.replace(target+location.search+location.hash);
+  location.replace((hit.dir?'/'+hit.dir:'')+p+location.search+location.hash);
 }
 }catch(e){}})();`
 

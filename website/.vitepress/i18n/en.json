@@ -51,8 +51,7 @@
       "reference/diagnostics": "Diagnostics Bundle",
       "reference/monitoring": "Monitoring",
       "guide/contributing": "Contributing"
-    },
-    "englishOnly": ""
+    }
   },
   "ui": {
     "searchButton": "Search docs",

@@ -95,7 +95,7 @@ SSH 連線首次建立時記錄伺服器主機指紋並信任，之後每次連�
 
 ## 介面
 
-完整介面說明請見 [Web 終端機 API](/en/docs/reference/webterminal-api)。
+完整介面說明請見 [Web 終端機 API](/zh-TW/docs/reference/webterminal-api)。
 
 ## 從 Lucky 遷移
 

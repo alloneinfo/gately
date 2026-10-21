@@ -177,7 +177,7 @@ Some tests are skipped by default and need extra setup:
 | Real public STUN servers | `GATELY_NET_TEST=1` |
 | Import validation with a real Lucky config | `GATELY_LUCKY_SAMPLE` and others, see `TestImportRealSample` in each module |
 
-For the directory layout and technology choices, see [docs/ROADMAP.md](docs/ROADMAP.md).
+For the directory layout and technology choices, see [docs/en/ROADMAP.md](docs/en/ROADMAP.md).
 
 The website ([gately.cn](https://gately.cn)) source lives in `website/` and is built with VitePress: `cd website && pnpm install && pnpm dev`; `pnpm deploy:site` builds and syncs it to the server.
 

@@ -51,8 +51,7 @@
       "reference/diagnostics": "診断パッケージ",
       "reference/monitoring": "監視メトリクス",
       "guide/contributing": "コントリビュート"
-    },
-    "englishOnly": "（English）"
+    }
   },
   "ui": {
     "searchButton": "ドキュメントを検索",
@@ -79,7 +78,7 @@
     "pill": "オープンソース · 監査可能 · 単一バイナリ",
     "announce": {
       "text": "v0.5.4 リリース：オンラインアップグレード、PVE LXC の再作成不要、OpenWrt パッケージ →",
-      "link": "/en/news/v0.5.4"
+      "link": "/ja/news/v0.5.4"
     },
     "titleLine1": "中身が見える",
     "titleLine2": "ネットワークゲートウェイツールキット",

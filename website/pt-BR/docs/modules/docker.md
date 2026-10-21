@@ -78,4 +78,4 @@ O Gately assina o fluxo de eventos do Docker e publica um evento `docker.exited`
 
 ## API
 
-Veja a referência completa da API na [API do Docker](/en/docs/reference/docker-api).
+Veja a referência completa da API na [API do Docker](/pt-BR/docs/reference/docker-api).

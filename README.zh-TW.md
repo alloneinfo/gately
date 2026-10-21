@@ -109,7 +109,7 @@ docker logs gately 2>&1 | grep -i "initial password"
 
 參數：`-c` 設定目錄（也可用環境變數 `GATELY_CONFIG_DIR`），`-listen` 覆寫管理介面監聽位址，`-apply` 每次啟動時將目錄中的 `<名稱>.json` 覆寫到設定目錄（環境變數 `GATELY_APPLY_DIR`，適合 GitOps 與 Kubernetes；帳號與權杖檔案不允許覆寫），`-version` 輸出版本。無人值守安裝時可設定環境變數 `GATELY_INITIAL_PASSWORD` 指定管理員初始密碼，免從日誌讀取隨機密碼。
 
-服務範本：[systemd](deploy/systemd/gately.service)、[OpenWrt procd](deploy/openwrt/gately.init)。驗證下載的壓縮檔與映像檔（cosign 簽章、建置來源證明、SBOM）請見[驗證發布產物](docs/en/VERIFY.md)。
+服務範本：[systemd](deploy/systemd/gately.service)、[OpenWrt procd](deploy/openwrt/gately.init)。驗證下載的壓縮檔與映像檔（cosign 簽章、建置來源證明、SBOM）請見[驗證發布產物](docs/zh-TW/VERIFY.md)。
 
 ### 飛牛原生應用
 
@@ -122,7 +122,7 @@ docker logs gately 2>&1 | grep -i "initial password"
 - 設定儲存在應用的 `var` 目錄，解除安裝時預設保留；在解除安裝精靈中選擇「全部刪除」才會清除。升級時手動安裝新版 `.fpk` 即可。
 - 安裝包同時提供命令列入口 `gately`（`/usr/local/bin/gately`），可使用 `gately ctl` 與 `gately mcp`。
 - 16680 連接埠與 Docker 映像檔相同，啟動原生應用前請先停止 `gately` 容器。
-- 下載後可依[驗證發布產物](docs/en/VERIFY.md)驗證，`.fpk` 的 SHA-256 同樣列在 `checksums.txt`。
+- 下載後可依[驗證發布產物](docs/zh-TW/VERIFY.md)驗證，`.fpk` 的 SHA-256 同樣列在 `checksums.txt`。
 
 ### OpenWrt
 
@@ -134,7 +134,7 @@ docker logs gately 2>&1 | grep -i "initial password"
 
 ### 監控
 
-建立一組僅具 `metrics:read` 權限的 API 權杖，讓 Prometheus 抓取 `/api/metrics`。指標清單、告警範例與 Grafana 儀表板請見[監控指標](docs/en/MONITORING.md)。
+建立一組僅具 `metrics:read` 權限的 API 權杖，讓 Prometheus 抓取 `/api/metrics`。指標清單、告警範例與 Grafana 儀表板請見[監控指標](docs/zh-TW/MONITORING.md)。
 
 ### API 呼叫
 
@@ -177,7 +177,7 @@ make lint     # gofmt、go vet、前端型別檢查
 | 真實公共 STUN 伺服器 | `GATELY_NET_TEST=1` |
 | 以真實 Lucky 設定驗證匯入 | `GATELY_LUCKY_SAMPLE` 等，見各模組 `TestImportRealSample` |
 
-目錄結構與技術選型見 [docs/ROADMAP.md](docs/ROADMAP.md)。
+目錄結構與技術選型見 [docs/zh-TW/ROADMAP.md](docs/zh-TW/ROADMAP.md)。
 
 官網（[gately.cn](https://gately.cn)）原始碼在 `website/`，基於 VitePress：`cd website && pnpm install && pnpm dev`；`pnpm deploy:site` 建置並同步到伺服器。
 
@@ -193,7 +193,7 @@ make lint     # gofmt、go vet、前端型別檢查
 
 <a href="https://t.me/gately_chat"><img src="docs/images/telegram-qr.svg" alt="掃描加入 Gately Telegram 群組" width="160"></a>
 
-Bug 請提交到 [GitHub Issues](https://github.com/wangwanjie/gately/issues)。
+Bug 請提交到 [GitHub Issues](https://github.com/wangwanjie/gately/issues)，並附上[診斷包](docs/zh-TW/DIAGNOSTICS.md)（設定 → 診斷）；診斷包在本機產生，不含密碼、權杖、網域名稱和真實 IP。
 
 ## Star 趨勢
 

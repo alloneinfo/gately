@@ -14,7 +14,7 @@ Die Verwaltungsoberfläche steuert DNS, Zertifikate und Ports. Arbeiten Sie die 
 - [ ] Eine Verschlüsselungs-Passphrase für [Konfigurationssicherungen](/de/docs/modules/backup) setzen und geplante Sicherungen aktivieren
 - [ ] In der [Benachrichtigungszentrale](/de/docs/modules/notify) Push-Benachrichtigungen mit den Vorlagen „Sicherheit & Anmeldungen“, „Konfigurationsänderungen“ und „Kritische Ausfälle“ einrichten
 - [ ] Wenn die Verwaltungsoberfläche über einen Reverse Proxy auf diesem Host erreichbar ist, prüfen, ob das [Audit-Protokoll](/de/docs/guide/audit) die echte Quelle erfasst; für Einstiegspunkte über die Portweiterleitung das [PROXY-Protokoll](/de/docs/modules/portforward#proxy-protokoll) aktivieren
-- [ ] Nach dem Download einer neuen Version die Signaturen gemäß [Releases verifizieren](/en/docs/guide/verify) prüfen
+- [ ] Nach dem Download einer neuen Version die Signaturen gemäß [Releases verifizieren](/de/docs/guide/verify) prüfen
 - [ ] Nicht genutzte Module unter „Einstellungen → Module“ ausschalten, um lauschende Dienste und aufrufbare Endpunkte zu reduzieren
 - [ ] Auf fnOS „Mit fnOS anmelden“ nur aktivieren, wenn Sie jedem fnOS-Administratorkonto vertrauen; sobald die Einstellung aktiv ist, bedeutet ein kompromittiertes fnOS-Administratorkonto ein kompromittiertes Gately-Administratorkonto
 

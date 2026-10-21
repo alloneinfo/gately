@@ -95,7 +95,7 @@
 
 ## API
 
-Полное описание интерфейса — в [API веб-терминала](/en/docs/reference/webterminal-api).
+Полное описание интерфейса — в [API веб-терминала](/ru/docs/reference/webterminal-api).
 
 ## Миграция из Lucky
 

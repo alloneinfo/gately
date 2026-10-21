@@ -78,4 +78,4 @@ Gately подписывается на поток событий Docker и пу�
 
 ## API
 
-Полное описание интерфейса — в [Docker API](/en/docs/reference/docker-api).
+Полное описание интерфейса — в [Docker API](/ru/docs/reference/docker-api).

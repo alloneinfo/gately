@@ -271,7 +271,7 @@ As estatísticas ficam em memória e voltam a contar do zero depois de uma reini
 
 ### Métricas Prometheus
 
-O endpoint global de métricas `GET /api/metrics` reúne as métricas de todos os módulos; veja [Monitoramento](/en/docs/reference/monitoring). O endpoint do módulo abaixo contém apenas as métricas dos Serviços Web.
+O endpoint global de métricas `GET /api/metrics` reúne as métricas de todos os módulos; veja [Monitoramento](/pt-BR/docs/reference/monitoring). O endpoint do módulo abaixo contém apenas as métricas dos Serviços Web.
 
 O endpoint de métricas é `GET /api/webservice/metrics`, em formato de texto Prometheus, e exige credenciais de login ou um [token de API](/en/docs/reference/api-reference).
 

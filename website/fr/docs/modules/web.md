@@ -271,7 +271,7 @@ Les statistiques sont conservées en mémoire et repartent de zéro après un re
 
 ### Métriques Prometheus
 
-Le point de terminaison global `GET /api/metrics` regroupe les métriques de tous les modules ; voir [Métriques de supervision](/en/docs/reference/monitoring). Le point de terminaison du module décrit ci-dessous ne contient que les métriques des services Web.
+Le point de terminaison global `GET /api/metrics` regroupe les métriques de tous les modules ; voir [Métriques de supervision](/fr/docs/reference/monitoring). Le point de terminaison du module décrit ci-dessous ne contient que les métriques des services Web.
 
 Le point de terminaison des métriques est `GET /api/webservice/metrics`, au format texte Prometheus, et il exige des identifiants de connexion ou un [jeton d'API](/en/docs/reference/api-reference).
 

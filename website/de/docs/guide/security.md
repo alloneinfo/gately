@@ -32,7 +32,7 @@ Gately läuft am Netzwerkrand und verwaltet DNS-Anbieter-Schlüssel, private Zer
 
 ## Audit und Nachvollziehbarkeit
 
-Das Audit-Protokoll erfasst Anmeldungen, Konfigurationsänderungen und sensible Zugriffe. Der Konfigurationsverlauf bewahrt jede Konfigurationsdatei in der Version vor dem Überschreiben auf und erlaubt das Zurücksetzen mit einem Klick. Siehe [Audit und Konfigurationsverlauf](/de/docs/guide/audit). Release-Artefakte werden mit cosign-Signaturen, Build-Provenienz-Nachweisen und SBOM ausgeliefert; wie Sie sie prüfen, steht unter [Releases verifizieren](/en/docs/guide/verify).
+Das Audit-Protokoll erfasst Anmeldungen, Konfigurationsänderungen und sensible Zugriffe. Der Konfigurationsverlauf bewahrt jede Konfigurationsdatei in der Version vor dem Überschreiben auf und erlaubt das Zurücksetzen mit einem Klick. Siehe [Audit und Konfigurationsverlauf](/de/docs/guide/audit). Release-Artefakte werden mit cosign-Signaturen, Build-Provenienz-Nachweisen und SBOM ausgeliefert; wie Sie sie prüfen, steht unter [Releases verifizieren](/de/docs/guide/verify).
 
 ## Standardwerte für Funktionen mit hohem Risiko
 

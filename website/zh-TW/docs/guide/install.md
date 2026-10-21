@@ -166,4 +166,4 @@ systemctl restart gately
 - OpenWrt 安裝包：下載新版 `.ipk` / `.apk` 後執行 `opkg install` / `apk add --allow-untrusted`，設定自動保留（見 [OpenWrt](#openwrt)）；
 - Windows、macOS、FreeBSD：替換可執行檔並重新啟動服務。
 
-升級前建議匯出一份設定備份，或直接把設定目錄納入 git。下載的壓縮檔與映像檔可依 [驗證發佈檔案](/en/docs/guide/verify) 核對簽章。
+升級前建議匯出一份設定備份，或直接把設定目錄納入 git。下載的壓縮檔與映像檔可依 [驗證發佈檔案](/zh-TW/docs/guide/verify) 核對簽章。

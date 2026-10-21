@@ -109,7 +109,7 @@ Descarga el paquete de tu plataforma desde [Releases](https://github.com/wangwan
 
 Parámetros: `-c` directorio de configuración (también se puede usar la variable de entorno `GATELY_CONFIG_DIR`), `-listen` sobrescribe la dirección de escucha de la interfaz de administración, `-apply` aplica en cada arranque los archivos `<nombre>.json` de un directorio al directorio de configuración (`GATELY_APPLY_DIR`, útil para GitOps y Kubernetes; los archivos de cuentas y tokens no se pueden sobrescribir), `-version` muestra la versión. En instalaciones desatendidas, define `GATELY_INITIAL_PASSWORD` para elegir la contraseña inicial del administrador en lugar de leer una aleatoria del registro.
 
-Plantillas de servicio: [systemd](deploy/systemd/gately.service) y [OpenWrt procd](deploy/openwrt/gately.init). Para verificar los archivos e imágenes descargados (firmas cosign, procedencia de compilación, SBOM), consulta [Verificar los artefactos publicados](docs/en/VERIFY.md).
+Plantillas de servicio: [systemd](deploy/systemd/gately.service) y [OpenWrt procd](deploy/openwrt/gately.init). Para verificar los archivos e imágenes descargados (firmas cosign, procedencia de compilación, SBOM), consulta [Verificar los artefactos publicados](docs/es/VERIFY.md).
 
 ### Aplicación nativa para fnOS
 
@@ -122,7 +122,7 @@ Cada versión (Release) incluye paquetes `.fpk` sin conexión para fnOS: `gately
 - La configuración se guarda en el directorio `var` de la aplicación y se conserva al desinstalar, salvo que elijas «Eliminar todo» en el asistente de desinstalación. Para actualizar, instala manualmente el `.fpk` más reciente.
 - El paquete también añade el comando `gately` (`/usr/local/bin/gately`) para `gately ctl` y `gately mcp`.
 - El puerto 16680 se comparte con la imagen de Docker. Detén el contenedor `gately` antes de iniciar la aplicación nativa.
-- Verifica la descarga como se describe en [Verificar los artefactos publicados](docs/en/VERIFY.md); los archivos `.fpk` figuran en `checksums.txt`.
+- Verifica la descarga como se describe en [Verificar los artefactos publicados](docs/es/VERIFY.md); los archivos `.fpk` figuran en `checksums.txt`.
 
 ### OpenWrt
 
@@ -134,7 +134,7 @@ Cada versión (Release) incluye paquetes para OpenWrt: `gately_<version>_openwrt
 
 ### Monitorización
 
-Crea un token de API con solo el permiso `metrics:read` y apunta Prometheus a `/api/metrics`. Las métricas, los ejemplos de alertas y el panel de Grafana se describen en [Monitorización](docs/en/MONITORING.md).
+Crea un token de API con solo el permiso `metrics:read` y apunta Prometheus a `/api/metrics`. Las métricas, los ejemplos de alertas y el panel de Grafana se describen en [Monitorización](docs/es/MONITORING.md).
 
 ### Uso de la API
 
@@ -177,7 +177,7 @@ Algunas pruebas se omiten por defecto y requieren condiciones adicionales:
 | Servidores STUN públicos reales | `GATELY_NET_TEST=1` |
 | Verificar la importación con una configuración real de Lucky | `GATELY_LUCKY_SAMPLE`, etc.; consulta `TestImportRealSample` en cada módulo |
 
-La estructura de directorios y la selección tecnológica están en [docs/ROADMAP.md](docs/ROADMAP.md).
+La estructura de directorios y la selección tecnológica están en [docs/es/ROADMAP.md](docs/es/ROADMAP.md).
 
 El código del sitio web ([gately.cn](https://gately.cn)) está en `website/` y se basa en VitePress: `cd website && pnpm install && pnpm dev`; `pnpm deploy:site` compila y sincroniza con el servidor.
 
@@ -193,7 +193,7 @@ Las preguntas, comentarios y consejos de uso son bienvenidos en el grupo de Tele
 
 <a href="https://t.me/gately_chat"><img src="docs/images/telegram-qr.svg" alt="Escanea para unirte al grupo de Telegram de Gately" width="160"></a>
 
-Los errores se reportan en [GitHub Issues](https://github.com/wangwanjie/gately/issues).
+Los errores se reportan en [GitHub Issues](https://github.com/wangwanjie/gately/issues); adjunta un [paquete de diagnóstico](docs/es/DIAGNOSTICS.md) (Ajustes → Diagnóstico). Se genera localmente y no contiene contraseñas, tokens, dominios ni IP reales.
 
 ## Evolución de estrellas
 

@@ -166,4 +166,4 @@ Si vous avez accordé au binaire l'accès aux ports bas avec `setcap`, relancez 
 - Paquets OpenWrt : téléchargez le `.ipk` / `.apk` plus récent et exécutez `opkg install` / `apk add --allow-untrusted` ; votre configuration est conservée (voir [OpenWrt](#openwrt)) ;
 - Windows, macOS, FreeBSD : remplacez l'exécutable et redémarrez le service.
 
-Avant de mettre à niveau, exportez une sauvegarde de la configuration ou conservez le dossier de configuration dans git. Les archives et images téléchargées peuvent être vérifiées selon [Vérifier les versions](/en/docs/guide/verify).
+Avant de mettre à niveau, exportez une sauvegarde de la configuration ou conservez le dossier de configuration dans git. Les archives et images téléchargées peuvent être vérifiées selon [Vérifier les versions](/fr/docs/guide/verify).

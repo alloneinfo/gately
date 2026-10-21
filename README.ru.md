@@ -109,7 +109,7 @@ docker logs gately 2>&1 | grep -i "initial password"
 
 Параметры: `-c` — каталог конфигурации (можно также задать переменной окружения `GATELY_CONFIG_DIR`), `-listen` переопределяет адрес, на котором слушает интерфейс управления, `-apply` при каждом запуске применяет файлы `<имя>.json` из каталога к каталогу конфигурации (`GATELY_APPLY_DIR`, удобно для GitOps и Kubernetes; файлы учётных записей и токенов перезаписать нельзя), `-version` выводит версию. Для автоматической установки задайте `GATELY_INITIAL_PASSWORD`, чтобы указать начальный пароль администратора вместо чтения случайного пароля из журнала.
 
-Шаблоны служб: [systemd](deploy/systemd/gately.service) и [OpenWrt procd](deploy/openwrt/gately.init). Проверка загруженных архивов и образов (подписи cosign, происхождение сборки, SBOM) описана в разделе [Проверка артефактов релиза](docs/en/VERIFY.md).
+Шаблоны служб: [systemd](deploy/systemd/gately.service) и [OpenWrt procd](deploy/openwrt/gately.init). Проверка загруженных архивов и образов (подписи cosign, происхождение сборки, SBOM) описана в разделе [Проверка артефактов релиза](docs/ru/VERIFY.md).
 
 ### Нативное приложение для fnOS
 
@@ -122,7 +122,7 @@ docker logs gately 2>&1 | grep -i "initial password"
 - Конфигурация хранится в каталоге `var` приложения и сохраняется при удалении, если в мастере удаления не выбрать «удалить всё». Обновление — это повторная ручная установка более нового `.fpk`.
 - Пакет также добавляет команду `gately` (`/usr/local/bin/gately`) для `gately ctl` и `gately mcp`.
 - Порт 16680 общий с образом Docker. Перед запуском нативного приложения остановите контейнер `gately`.
-- Проверьте загруженный файл по инструкции [Проверка артефактов релиза](docs/en/VERIFY.md); файлы `.fpk` перечислены в `checksums.txt`.
+- Проверьте загруженный файл по инструкции [Проверка артефактов релиза](docs/ru/VERIFY.md); файлы `.fpk` перечислены в `checksums.txt`.
 
 ### OpenWrt
 
@@ -134,7 +134,7 @@ docker logs gately 2>&1 | grep -i "initial password"
 
 ### Мониторинг
 
-Создайте API-токен только с правом `metrics:read` и настройте Prometheus на сбор `/api/metrics`. Метрики, примеры оповещений и панель Grafana описаны в разделе [Мониторинг](docs/en/MONITORING.md).
+Создайте API-токен только с правом `metrics:read` и настройте Prometheus на сбор `/api/metrics`. Метрики, примеры оповещений и панель Grafana описаны в разделе [Мониторинг](docs/ru/MONITORING.md).
 
 ### Вызовы API
 
@@ -177,7 +177,7 @@ make lint     # gofmt, go vet, проверка типов фронтенда
 | Реальные публичные STUN-серверы | `GATELY_NET_TEST=1` |
 | Проверка импорта на реальной конфигурации Lucky | `GATELY_LUCKY_SAMPLE` и др., см. `TestImportRealSample` в соответствующих модулях |
 
-Структура каталогов и выбор технологий описаны в [docs/ROADMAP.md](docs/ROADMAP.md).
+Структура каталогов и выбор технологий описаны в [docs/ru/ROADMAP.md](docs/ru/ROADMAP.md).
 
 Исходный код сайта ([gately.cn](https://gately.cn)) находится в `website/` и основан на VitePress: `cd website && pnpm install && pnpm dev`; `pnpm deploy:site` собирает сайт и синхронизирует его с сервером.
 
@@ -193,7 +193,7 @@ make lint     # gofmt, go vet, проверка типов фронтенда
 
 <a href="https://t.me/gately_chat"><img src="docs/images/telegram-qr.svg" alt="Отсканируйте, чтобы вступить в группу Gately в Telegram" width="160"></a>
 
-Об ошибках сообщайте в [GitHub Issues](https://github.com/wangwanjie/gately/issues).
+Об ошибках сообщайте в [GitHub Issues](https://github.com/wangwanjie/gately/issues) и прикладывайте [диагностический пакет](docs/ru/DIAGNOSTICS.md) (Настройки → Диагностика). Он создаётся локально и не содержит паролей, токенов, доменов и реальных IP-адресов.
 
 ## История звёзд
 

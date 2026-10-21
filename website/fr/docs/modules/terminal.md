@@ -95,7 +95,7 @@ Avant d'activer le shell local, activez l'authentification à deux facteurs pour
 
 ## API
 
-Consultez l'[API du Terminal Web](/en/docs/reference/webterminal-api) pour la référence complète de l'API.
+Consultez l'[API du Terminal Web](/fr/docs/reference/webterminal-api) pour la référence complète de l'API.
 
 ## Migration depuis Lucky
 

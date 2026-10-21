@@ -109,7 +109,7 @@ Téléchargez l'archive correspondant à votre plateforme depuis [Releases](http
 
 Paramètres : `-c` répertoire de configuration (la variable d'environnement `GATELY_CONFIG_DIR` fonctionne aussi), `-listen` remplace l'adresse d'écoute de l'interface d'administration, `-apply` applique à chaque démarrage les fichiers `<nom>.json` d'un répertoire au répertoire de configuration (`GATELY_APPLY_DIR`, pratique pour le GitOps et Kubernetes ; les fichiers de comptes et de jetons ne peuvent pas être écrasés), `-version` affiche la version. Pour une installation sans intervention, définissez `GATELY_INITIAL_PASSWORD` afin de choisir le mot de passe administrateur initial au lieu de lire un mot de passe aléatoire dans le journal.
 
-Modèles de service : [systemd](deploy/systemd/gately.service) et [OpenWrt procd](deploy/openwrt/gately.init). Pour vérifier les archives et images téléchargées (signatures cosign, provenance de build, SBOM), consultez [Vérifier les artefacts publiés](docs/en/VERIFY.md).
+Modèles de service : [systemd](deploy/systemd/gately.service) et [OpenWrt procd](deploy/openwrt/gately.init). Pour vérifier les archives et images téléchargées (signatures cosign, provenance de build, SBOM), consultez [Vérifier les artefacts publiés](docs/fr/VERIFY.md).
 
 ### Application native fnOS
 
@@ -122,7 +122,7 @@ Chaque Release fournit des paquets `.fpk` hors ligne pour fnOS : `gately_<versio
 - La configuration se trouve dans le répertoire `var` de l'application et est conservée lors de la désinstallation, sauf si vous choisissez « tout supprimer » dans l'assistant de désinstallation. Pour mettre à niveau, installez manuellement le `.fpk` plus récent.
 - Le paquet ajoute aussi une commande `gately` (`/usr/local/bin/gately`) pour `gately ctl` et `gately mcp`.
 - Le port 16680 est partagé avec l'image Docker. Arrêtez le conteneur `gately` avant de démarrer l'application native.
-- Vérifiez le téléchargement selon [Vérifier les artefacts publiés](docs/en/VERIFY.md) ; les fichiers `.fpk` figurent dans `checksums.txt`.
+- Vérifiez le téléchargement selon [Vérifier les artefacts publiés](docs/fr/VERIFY.md) ; les fichiers `.fpk` figurent dans `checksums.txt`.
 
 ### OpenWrt
 
@@ -134,7 +134,7 @@ Chaque Release fournit des paquets OpenWrt : `gately_<version>_openwrt_<architec
 
 ### Supervision
 
-Créez un jeton d'API disposant uniquement de l'autorisation `metrics:read` et pointez Prometheus vers `/api/metrics`. Les métriques, les exemples d'alertes et le tableau de bord Grafana sont décrits dans [Supervision](docs/en/MONITORING.md).
+Créez un jeton d'API disposant uniquement de l'autorisation `metrics:read` et pointez Prometheus vers `/api/metrics`. Les métriques, les exemples d'alertes et le tableau de bord Grafana sont décrits dans [Supervision](docs/fr/MONITORING.md).
 
 ### Appels d'API
 
@@ -177,7 +177,7 @@ Certains tests sont ignorés par défaut et nécessitent des conditions supplém
 | Serveurs STUN publics réels | `GATELY_NET_TEST=1` |
 | Vérification de l'import avec une vraie configuration Lucky | `GATELY_LUCKY_SAMPLE`, etc. ; voir `TestImportRealSample` dans chaque module |
 
-La structure des répertoires et les choix techniques sont décrits dans [docs/ROADMAP.md](docs/ROADMAP.md).
+La structure des répertoires et les choix techniques sont décrits dans [docs/fr/ROADMAP.md](docs/fr/ROADMAP.md).
 
 Le code source du site web ([gately.cn](https://gately.cn)) se trouve dans `website/` et repose sur VitePress : `cd website && pnpm install && pnpm dev` ; `pnpm deploy:site` compile et synchronise vers le serveur.
 
@@ -193,7 +193,7 @@ Questions, retours et astuces d’utilisation sont les bienvenus dans le groupe 
 
 <a href="https://t.me/gately_chat"><img src="docs/images/telegram-qr.svg" alt="Scannez pour rejoindre le groupe Telegram de Gately" width="160"></a>
 
-Les bugs se signalent dans [GitHub Issues](https://github.com/wangwanjie/gately/issues).
+Les bugs se signalent dans [GitHub Issues](https://github.com/wangwanjie/gately/issues), avec un [paquet de diagnostic](docs/fr/DIAGNOSTICS.md) en pièce jointe (Paramètres → Diagnostic). Il est généré localement et ne contient ni mots de passe, ni jetons, ni domaines, ni IP réelles.
 
 ## Historique des étoiles
 

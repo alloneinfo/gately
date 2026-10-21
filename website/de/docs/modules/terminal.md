@@ -95,7 +95,7 @@ Aktivieren Sie vor dem Einschalten der lokalen Shell die Zwei-Faktor-Authentifiz
 
 ## API
 
-Die vollständige API-Referenz finden Sie in der [Web-Terminal-API](/en/docs/reference/webterminal-api).
+Die vollständige API-Referenz finden Sie in der [Web-Terminal-API](/de/docs/reference/webterminal-api).
 
 ## Migration von Lucky
 

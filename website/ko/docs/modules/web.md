@@ -271,7 +271,7 @@ http://10.0.0.3:8080 backup
 
 ### Prometheus 메트릭
 
-전역 메트릭 엔드포인트 `GET /api/metrics`는 모든 모듈의 메트릭을 모아 제공합니다. [모니터링 메트릭](/en/docs/reference/monitoring)을 참고하세요. 아래 모듈 엔드포인트에는 웹 서비스 메트릭만 포함됩니다.
+전역 메트릭 엔드포인트 `GET /api/metrics`는 모든 모듈의 메트릭을 모아 제공합니다. [모니터링 메트릭](/ko/docs/reference/monitoring)을 참고하세요. 아래 모듈 엔드포인트에는 웹 서비스 메트릭만 포함됩니다.
 
 메트릭 엔드포인트는 `GET /api/webservice/metrics`이며 Prometheus 텍스트 형식입니다. 로그인 자격 증명이나 [API 토큰](/en/docs/reference/api-reference)이 필요합니다.
 

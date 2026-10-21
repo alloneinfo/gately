@@ -32,7 +32,7 @@ Gately funciona en el borde de la red y maneja claves de proveedores DNS, claves
 
 ## Auditoría y trazabilidad
 
-El registro de auditoría guarda los inicios de sesión, los cambios de configuración y los accesos sensibles. El historial de configuración conserva la versión de cada archivo de configuración antes de sobrescribirlo y permite revertirla con un clic. Consulta [Auditoría e historial de configuración](/es/docs/guide/audit). Los artefactos publicados incluyen firma de cosign, atestación de procedencia de la compilación y SBOM; consulta cómo comprobarlos en [Verificar versiones](/en/docs/guide/verify).
+El registro de auditoría guarda los inicios de sesión, los cambios de configuración y los accesos sensibles. El historial de configuración conserva la versión de cada archivo de configuración antes de sobrescribirlo y permite revertirla con un clic. Consulta [Auditoría e historial de configuración](/es/docs/guide/audit). Los artefactos publicados incluyen firma de cosign, atestación de procedencia de la compilación y SBOM; consulta cómo comprobarlos en [Verificar versiones](/es/docs/guide/verify).
 
 ## Valores por defecto de las funciones de alto riesgo
 

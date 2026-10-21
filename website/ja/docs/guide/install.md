@@ -166,4 +166,4 @@ systemctl restart gately
 - OpenWrt パッケージ：新しい `.ipk` / `.apk` をダウンロードして `opkg install` / `apk add --allow-untrusted` を実行します。設定は保持されます（[OpenWrt](#openwrt) を参照）。
 - Windows、macOS、FreeBSD：実行ファイルを置き換えて、サービスを再起動します。
 
-アップグレード前に設定のバックアップをエクスポートするか、設定ディレクトリごと git に入れておくことをおすすめします。ダウンロードしたアーカイブやイメージは、[リリースの検証](/en/docs/guide/verify) に従って署名を確認できます。
+アップグレード前に設定のバックアップをエクスポートするか、設定ディレクトリごと git に入れておくことをおすすめします。ダウンロードしたアーカイブやイメージは、[リリースの検証](/ja/docs/guide/verify) に従って署名を確認できます。

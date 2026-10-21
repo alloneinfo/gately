@@ -95,7 +95,7 @@ SSH 연결을 처음 맺을 때 서버의 호스트 지문을 기록하고 신�
 
 ## API
 
-전체 API 설명은 [웹 터미널 API](/en/docs/reference/webterminal-api)를 참고하세요.
+전체 API 설명은 [웹 터미널 API](/ko/docs/reference/webterminal-api)를 참고하세요.
 
 ## Lucky에서 마이그레이션
 

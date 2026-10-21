@@ -34,3 +34,11 @@ make lint     # gofmt、go vet、前端型別檢查
 ## 授權條款
 
 [Apache License 2.0](https://github.com/wangwanjie/gately/blob/main/LICENSE)
+
+## 多語言
+
+- 管理介面文案位於 `web/src/locales/<語言>/<命名空間>.json`，來源語言為簡體中文，新增或修改文案時至少同步更新 `zh-CN` 與 `en`，提交前執行 `cd web && node scripts/check-i18n.mjs`。約定詳見 `web/src/locales/README.md`。
+- 官網語言包位於 `website/.vitepress/i18n/<語言>.json`，各語言頁面位於 `website/<語言目錄>/`。
+- 後端執行期文案（錯誤說明、日誌、通知、介面文件）以原始碼裡的中文字面值為鍵，譯文在 `internal/i18n/locales/<語言>.json`。新增或修改中文文案後執行 `go run ./internal/i18n/cmd/i18nsync -root .`，把新鍵同步到各語言檔案並補齊譯文；`go test ./internal/i18n` 會檢查所有語言是否完整、格式動詞是否與原文一致。需要填入數值的句子請使用 `fmt.Sprintf` 的整句格式字串，讓各語言能依自己的語序翻譯；拼接多段中文會導致無法翻譯。
+- 介面文件由程式依各語言產生：`make api-docs` 輸出到 `docs/api/<語言>/`，無需手動同步。
+- 目前支援：简体中文、English、繁體中文、日本語、한국어、Español、Français、Deutsch、Русский、Português (Brasil)。

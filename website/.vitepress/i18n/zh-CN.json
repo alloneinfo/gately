@@ -51,8 +51,7 @@
       "reference/diagnostics": "诊断包",
       "reference/monitoring": "监控指标",
       "guide/contributing": "参与贡献"
-    },
-    "englishOnly": "（英文）"
+    }
   },
   "ui": {
     "searchButton": "搜索文档",

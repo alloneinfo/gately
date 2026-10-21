@@ -271,7 +271,7 @@ http://10.0.0.3:8080 backup
 
 ### Prometheus メトリクス
 
-グローバルなメトリクスのエンドポイント `GET /api/metrics` はすべてのモジュールのメトリクスを集約しています。[監視メトリクス](/en/docs/reference/monitoring) を参照してください。以下のモジュール用エンドポイントには Web サービスのメトリクスのみが含まれます。
+グローバルなメトリクスのエンドポイント `GET /api/metrics` はすべてのモジュールのメトリクスを集約しています。[監視メトリクス](/ja/docs/reference/monitoring) を参照してください。以下のモジュール用エンドポイントには Web サービスのメトリクスのみが含まれます。
 
 メトリクスのエンドポイントは `GET /api/webservice/metrics` で、Prometheus のテキスト形式です。ログイン認証情報または [API トークン](/en/docs/reference/api-reference) が必要です。
 

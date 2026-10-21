@@ -166,4 +166,4 @@ Haben Sie der Binärdatei mit `setcap` Zugriff auf niedrige Ports gegeben, führ
 - OpenWrt-Pakete: die neuere `.ipk` / `.apk` herunterladen und `opkg install` / `apk add --allow-untrusted` ausführen; Ihre Konfiguration bleibt erhalten (siehe [OpenWrt](#openwrt));
 - Windows, macOS, FreeBSD: die ausführbare Datei ersetzen und den Dienst neu starten.
 
-Exportieren Sie vor dem Upgrade eine Konfigurationssicherung oder legen Sie das Konfigurationsverzeichnis in Git ab. Die Signaturen heruntergeladener Archive und Images können Sie gemäß [Releases verifizieren](/en/docs/guide/verify) prüfen.
+Exportieren Sie vor dem Upgrade eine Konfigurationssicherung oder legen Sie das Konfigurationsverzeichnis in Git ab. Die Signaturen heruntergeladener Archive und Images können Sie gemäß [Releases verifizieren](/de/docs/guide/verify) prüfen.

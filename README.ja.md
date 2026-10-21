@@ -109,7 +109,7 @@ docker logs gately 2>&1 | grep -i "initial password"
 
 オプション: `-c` は設定ディレクトリ（環境変数 `GATELY_CONFIG_DIR` でも指定可能）、`-listen` は管理画面の待ち受けアドレスの上書き、`-apply` は起動のたびにディレクトリ内の `<name>.json` を設定ディレクトリに適用（`GATELY_APPLY_DIR`、GitOps や Kubernetes に便利。アカウントとトークンのファイルは上書き不可）、`-version` はバージョン表示です。無人インストールでは `GATELY_INITIAL_PASSWORD` を設定すると、ログからランダムなパスワードを読む代わりに管理者の初期パスワードを指定できます。
 
-サービステンプレート: [systemd](deploy/systemd/gately.service)、[OpenWrt procd](deploy/openwrt/gately.init)。ダウンロードしたアーカイブやイメージの検証（cosign 署名、ビルド来歴、SBOM）は[リリース成果物の検証](docs/en/VERIFY.md)を参照してください。
+サービステンプレート: [systemd](deploy/systemd/gately.service)、[OpenWrt procd](deploy/openwrt/gately.init)。ダウンロードしたアーカイブやイメージの検証（cosign 署名、ビルド来歴、SBOM）は[リリース成果物の検証](docs/ja/VERIFY.md)を参照してください。
 
 ### fnOS ネイティブアプリ
 
@@ -122,7 +122,7 @@ docker logs gately 2>&1 | grep -i "initial password"
 - 設定はアプリの `var` ディレクトリに保存され、アンインストール時も保持されます。アンインストールウィザードで「すべて削除」を選んだ場合のみ消去されます。アップグレードは新しい `.fpk` を再度手動インストールするだけです。
 - パッケージには `gately` コマンド（`/usr/local/bin/gately`）も含まれ、`gately ctl` と `gately mcp` を使えます。
 - 16680 ポートは Docker イメージと共通です。ネイティブアプリを起動する前に `gately` コンテナを停止してください。
-- ダウンロードしたファイルは [リリース成果物の検証](docs/en/VERIFY.md) の手順で検証できます。`.fpk` ファイルも `checksums.txt` に記載されています。
+- ダウンロードしたファイルは [リリース成果物の検証](docs/ja/VERIFY.md) の手順で検証できます。`.fpk` ファイルも `checksums.txt` に記載されています。
 
 ### OpenWrt
 
@@ -134,7 +134,7 @@ docker logs gately 2>&1 | grep -i "initial password"
 
 ### 監視
 
-`metrics:read` 権限だけを持つ API トークンを作成し、Prometheus から `/api/metrics` をスクレイプします。メトリクス、アラート例、Grafana ダッシュボードは[監視](docs/en/MONITORING.md)で説明しています。
+`metrics:read` 権限だけを持つ API トークンを作成し、Prometheus から `/api/metrics` をスクレイプします。メトリクス、アラート例、Grafana ダッシュボードは[監視](docs/ja/MONITORING.md)で説明しています。
 
 ### API の利用
 
@@ -177,7 +177,7 @@ make lint     # gofmt、go vet、フロントエンドの型チェック
 | 実際のパブリック STUN サーバー | `GATELY_NET_TEST=1` |
 | 実際の Lucky 設定によるインポート検証 | `GATELY_LUCKY_SAMPLE` など。各モジュールの `TestImportRealSample` を参照 |
 
-ディレクトリ構成と技術選定は [docs/ROADMAP.md](docs/ROADMAP.md) を参照してください。
+ディレクトリ構成と技術選定は [docs/ja/ROADMAP.md](docs/ja/ROADMAP.md) を参照してください。
 
 公式サイト（[gately.cn](https://gately.cn)）のソースは `website/` にあり、VitePress で構築されています: `cd website && pnpm install && pnpm dev`。`pnpm deploy:site` でビルドしてサーバーに同期します。
 
@@ -193,7 +193,7 @@ make lint     # gofmt、go vet、フロントエンドの型チェック
 
 <a href="https://t.me/gately_chat"><img src="docs/images/telegram-qr.svg" alt="QR コードを読み取って Gately の Telegram グループに参加" width="160"></a>
 
-不具合は [GitHub Issues](https://github.com/wangwanjie/gately/issues) に報告してください。
+不具合は [GitHub Issues](https://github.com/wangwanjie/gately/issues) に報告し、[診断パッケージ](docs/ja/DIAGNOSTICS.md)（設定 → 診断）を添付してください。診断パッケージはローカルで生成され、パスワード、トークン、ドメイン、実際の IP は含まれません。
 
 ## Star 履歴
 

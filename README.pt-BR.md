@@ -109,7 +109,7 @@ Baixe o pacote da sua plataforma em [Releases](https://github.com/wangwanjie/gat
 
 Parâmetros: `-c` diretório de configuração (também pode ser definido pela variável de ambiente `GATELY_CONFIG_DIR`), `-listen` substitui o endereço de escuta da interface de administração, `-apply` aplica a cada inicialização os arquivos `<nome>.json` de um diretório ao diretório de configuração (`GATELY_APPLY_DIR`, útil para GitOps e Kubernetes; os arquivos de contas e tokens não podem ser sobrescritos), `-version` exibe a versão. Em instalações automatizadas, defina `GATELY_INITIAL_PASSWORD` para escolher a senha inicial do administrador em vez de ler uma senha aleatória no log.
 
-Modelos de serviço: [systemd](deploy/systemd/gately.service) e [OpenWrt procd](deploy/openwrt/gately.init). Para verificar os pacotes e imagens baixados (assinaturas cosign, proveniência do build, SBOM), consulte [Verificação dos artefatos de release](docs/en/VERIFY.md).
+Modelos de serviço: [systemd](deploy/systemd/gately.service) e [OpenWrt procd](deploy/openwrt/gately.init). Para verificar os pacotes e imagens baixados (assinaturas cosign, proveniência do build, SBOM), consulte [Verificação dos artefatos de release](docs/pt-BR/VERIFY.md).
 
 ### Aplicativo nativo para fnOS
 
@@ -122,7 +122,7 @@ Cada Release inclui pacotes `.fpk` offline para o fnOS: `gately_<versão>_fnos_x
 - A configuração fica no diretório `var` do aplicativo e é mantida na desinstalação, a menos que você escolha "excluir tudo" no assistente de desinstalação. Para atualizar, instale manualmente o `.fpk` mais novo.
 - O pacote também adiciona o comando `gately` (`/usr/local/bin/gately`) para usar `gately ctl` e `gately mcp`.
 - A porta 16680 é a mesma da imagem Docker. Pare o contêiner `gately` antes de iniciar o aplicativo nativo.
-- Verifique o download conforme [Verificação dos artefatos de release](docs/en/VERIFY.md); os arquivos `.fpk` constam em `checksums.txt`.
+- Verifique o download conforme [Verificação dos artefatos de release](docs/pt-BR/VERIFY.md); os arquivos `.fpk` constam em `checksums.txt`.
 
 ### OpenWrt
 
@@ -134,7 +134,7 @@ Cada Release inclui pacotes para OpenWrt: `gately_<versão>_openwrt_<arquitetura
 
 ### Monitoramento
 
-Crie um token de API apenas com a permissão `metrics:read` e aponte o Prometheus para `/api/metrics`. As métricas, os exemplos de alertas e o painel do Grafana estão descritos em [Monitoramento](docs/en/MONITORING.md).
+Crie um token de API apenas com a permissão `metrics:read` e aponte o Prometheus para `/api/metrics`. As métricas, os exemplos de alertas e o painel do Grafana estão descritos em [Monitoramento](docs/pt-BR/MONITORING.md).
 
 ### Chamadas de API
 
@@ -177,7 +177,7 @@ Alguns testes são ignorados por padrão e exigem condições adicionais:
 | Servidores STUN públicos reais | `GATELY_NET_TEST=1` |
 | Validação da importação com configuração real do Lucky | `GATELY_LUCKY_SAMPLE` etc., veja `TestImportRealSample` em cada módulo |
 
-A estrutura de diretórios e as escolhas tecnológicas estão em [docs/ROADMAP.md](docs/ROADMAP.md).
+A estrutura de diretórios e as escolhas tecnológicas estão em [docs/pt-BR/ROADMAP.md](docs/pt-BR/ROADMAP.md).
 
 O código do site ([gately.cn](https://gately.cn)) fica em `website/` e usa VitePress: `cd website && pnpm install && pnpm dev`; `pnpm deploy:site` compila e sincroniza com o servidor.
 
@@ -193,7 +193,7 @@ Dúvidas, feedback e dicas de uso são bem-vindos no grupo do Telegram: [t.me/ga
 
 <a href="https://t.me/gately_chat"><img src="docs/images/telegram-qr.svg" alt="Escaneie para entrar no grupo do Gately no Telegram" width="160"></a>
 
-Relate bugs no [GitHub Issues](https://github.com/wangwanjie/gately/issues).
+Relate bugs no [GitHub Issues](https://github.com/wangwanjie/gately/issues) e anexe um [pacote de diagnóstico](docs/pt-BR/DIAGNOSTICS.md) (Configurações → Diagnóstico). Ele é gerado localmente e não contém senhas, tokens, domínios nem IPs reais.
 
 ## Histórico de estrelas
 

@@ -51,8 +51,7 @@
       "reference/diagnostics": "Pacote de diagnóstico",
       "reference/monitoring": "Monitoramento",
       "guide/contributing": "Como contribuir"
-    },
-    "englishOnly": " (em inglês)"
+    }
   },
   "ui": {
     "searchButton": "Pesquisar na documentação",
@@ -79,7 +78,7 @@
     "pill": "Código aberto · Auditável · Binário único",
     "announce": {
       "text": "Saiu a v0.5.4: atualização online, sem recriar contêineres LXC do PVE e pacotes para OpenWrt →",
-      "link": "/en/news/v0.5.4"
+      "link": "/pt-BR/news/v0.5.4"
     },
     "titleLine1": "Um kit de gateway de rede",
     "titleLine2": "que você enxerga por dentro",

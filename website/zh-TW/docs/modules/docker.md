@@ -78,4 +78,4 @@ Gately 訂閱 Docker 事件串流，容器異常結束（結束碼非 0）或觸
 
 ## 介面
 
-完整介面說明請見 [Docker API](/en/docs/reference/docker-api)。
+完整介面說明請見 [Docker API](/zh-TW/docs/reference/docker-api)。

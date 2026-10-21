@@ -55,4 +55,4 @@ make build    # produit bin/gately
 
 Chaque version est accompagnée d'un fichier de sommes de contrôle. Vérifiez le SHA-256 après le téléchargement et avant l'exécution.
 
-Depuis la v0.5.0, le fichier de sommes et les images Docker portent une signature cosign sans clé, les archives sont accompagnées d’une attestation de provenance et un SBOM est publié. Voir [Vérifier les versions](/en/docs/guide/verify) (en anglais).
+Depuis la v0.5.0, le fichier de sommes et les images Docker portent une signature cosign sans clé, les archives sont accompagnées d’une attestation de provenance et un SBOM est publié. Voir [Vérifier les versions](/fr/docs/guide/verify) (en anglais).

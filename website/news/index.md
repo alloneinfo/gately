@@ -1,0 +1,24 @@
+---
+title: 更新日志
+description: Gately 各版本的发布公告与更新说明。
+---
+
+# 更新日志
+
+重要版本的发布公告如下，每个版本的完整变更与下载文件见 [GitHub Releases](https://github.com/wangwanjie/gately/releases)。
+
+## [v0.5.4](/news/v0.5.4)
+
+2026 年 10 月 21 日 · Linux 二进制部署支持在线升级，PVE LXC 容器不用再删除重建；新增 OpenWrt 安装包（.ipk / .apk）。
+
+## [v0.5.3](/news/v0.5.3)
+
+2026 年 10 月 21 日 · 飞牛 fnOS 原生应用：接入飞牛统一网关，支持飞牛管理员登录态直接登录；功能模块可按需开关。
+
+## [v0.5.2](/news/v0.5.2)
+
+2026 年 10 月 20 日 · SNI 分流让多个服务共用 443 端口，Web 服务可以替代 nginx，共享用户支持 TOTP 与单点登录；并附上与 haproxy + nginx 的性能对比。
+
+## [v0.5.0](/news/v0.5.0)
+
+2026 年 10 月 19 日 · 操作审计、配置历史与回滚、Passkey、只读账号、ACME HTTP-01、HTTP/3、PROXY 协议、全局 Prometheus 指标、网络自检，以及签名发布。

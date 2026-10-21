@@ -51,8 +51,7 @@
       "reference/diagnostics": "진단 패키지",
       "reference/monitoring": "모니터링 지표",
       "guide/contributing": "기여 가이드"
-    },
-    "englishOnly": " (English)"
+    }
   },
   "ui": {
     "searchButton": "문서 검색",
@@ -79,7 +78,7 @@
     "pill": "오픈소스 · 감사 가능 · 단일 파일",
     "announce": {
       "text": "v0.5.4 출시: 온라인 업그레이드, PVE LXC 재생성 불필요, OpenWrt 패키지 →",
-      "link": "/en/news/v0.5.4"
+      "link": "/ko/news/v0.5.4"
     },
     "titleLine1": "속까지 들여다볼 수 있는",
     "titleLine2": "네트워크 게이트웨이 도구 모음",

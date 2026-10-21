@@ -32,7 +32,7 @@ O Gately roda na borda da rede e lida com chaves de provedores de DNS, chaves pr
 
 ## Auditoria e rastreabilidade
 
-O log de auditoria registra logins, alterações de configuração e acessos sensíveis, e o histórico de configuração guarda a versão anterior de cada arquivo de configuração antes de ser sobrescrito, com reversão em um clique. Veja [Auditoria e histórico de configuração](/pt-BR/docs/guide/audit). Os artefatos de cada versão vêm com assinaturas cosign, atestados de proveniência de build e SBOM; para conferi-los, veja [Verificar versões](/en/docs/guide/verify).
+O log de auditoria registra logins, alterações de configuração e acessos sensíveis, e o histórico de configuração guarda a versão anterior de cada arquivo de configuração antes de ser sobrescrito, com reversão em um clique. Veja [Auditoria e histórico de configuração](/pt-BR/docs/guide/audit). Os artefatos de cada versão vêm com assinaturas cosign, atestados de proveniência de build e SBOM; para conferi-los, veja [Verificar versões](/pt-BR/docs/guide/verify).
 
 ## Padrões dos recursos de alto risco
 

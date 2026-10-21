@@ -78,4 +78,4 @@ Gately s'abonne au flux d'événements Docker et publie un événement `docker.e
 
 ## API
 
-Consultez l'[API Docker](/en/docs/reference/docker-api) pour la référence complète de l'API.
+Consultez l'[API Docker](/fr/docs/reference/docker-api) pour la référence complète de l'API.

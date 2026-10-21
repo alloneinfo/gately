@@ -95,7 +95,7 @@ SSH 接続を初めて確立するときにサーバーのホストフィンガ�
 
 ## API
 
-API の詳細は [Web ターミナル API](/en/docs/reference/webterminal-api) を参照してください。
+API の詳細は [Web ターミナル API](/ja/docs/reference/webterminal-api) を参照してください。
 
 ## Lucky からの移行
 
