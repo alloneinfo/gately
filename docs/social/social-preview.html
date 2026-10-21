@@ -1,0 +1,94 @@
+<!doctype html>
+<!-- GitHub 社交预览图源文件：1280×640，用 Chrome 无头模式截图生成 docs/images/social-preview.png（命令见 docs/social/README.md） -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1280px; height: 640px; overflow: hidden; }
+  body {
+    font-family: -apple-system, "SF Pro Display", "PingFang SC", "Helvetica Neue", sans-serif;
+    color: #fff;
+    background:
+      radial-gradient(900px 520px at 85% 110%, rgba(62, 209, 174, 0.35), transparent 60%),
+      radial-gradient(700px 420px at -5% -10%, rgba(24, 168, 136, 0.45), transparent 60%),
+      linear-gradient(135deg, #0a3d33 0%, #0b5f4f 55%, #0e7c66 100%);
+    position: relative;
+  }
+  /* 背景网格，增加质感 */
+  .grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+    background-size: 40px 40px;
+    mask-image: linear-gradient(90deg, rgba(0,0,0,0.9), rgba(0,0,0,0.2));
+  }
+  .left { position: absolute; left: 72px; top: 76px; width: 560px; }
+  .brand { display: flex; align-items: center; gap: 22px; }
+  .brand svg { width: 92px; height: 92px; filter: drop-shadow(0 10px 24px rgba(0,0,0,0.3)); }
+  .brand h1 { font-size: 84px; font-weight: 800; letter-spacing: -2px; line-height: 1; }
+  .tagline { margin-top: 30px; font-size: 34px; font-weight: 700; line-height: 1.25; letter-spacing: -0.3px; }
+  .tagline span { color: #9ff3dc; }
+  .sub { margin-top: 14px; font-size: 21px; color: rgba(255,255,255,0.78); line-height: 1.5; }
+  .chips { margin-top: 28px; display: flex; flex-wrap: wrap; gap: 10px; }
+  .chip {
+    font-size: 17px; font-weight: 600; padding: 7px 14px; border-radius: 999px;
+    background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.22);
+  }
+  .foot { position: absolute; left: 72px; bottom: 56px; display: flex; gap: 26px; font-size: 19px; color: rgba(255,255,255,0.85); font-weight: 600; }
+  .foot b { color: #9ff3dc; }
+  /* 右侧界面截图：裁出左上角，带浏览器窗口外框 */
+  .shot {
+    position: absolute; left: 676px; top: 92px; width: 700px; height: 600px;
+    border-radius: 16px; overflow: hidden; background: #fff;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.25);
+    transform: perspective(1600px) rotateY(-8deg) rotateX(3deg);
+    transform-origin: left center;
+  }
+  .bar { height: 36px; background: #eef2f1; display: flex; align-items: center; gap: 8px; padding-left: 16px; border-bottom: 1px solid #dde3e1; }
+  .bar i { width: 12px; height: 12px; border-radius: 50%; display: block; }
+  .shot img { display: block; width: 1100px; margin-left: 0; }
+</style>
+</head>
+<body>
+  <div class="grid"></div>
+  <div class="left">
+    <div class="brand">
+      <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="g" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="#18a888" />
+            <stop offset="1" stop-color="#0b5f4f" />
+          </linearGradient>
+        </defs>
+        <rect width="32" height="32" rx="9" fill="url(#g)" stroke="rgba(255,255,255,0.35)" stroke-width="0.6" />
+        <path d="M21.7 10.3A8 8 0 1 0 24 16h-7" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+        <circle cx="23.6" cy="8.6" r="2.2" fill="#9ff3dc" />
+      </svg>
+      <h1>Gately</h1>
+    </div>
+    <div class="tagline">Open-source, auditable<br><span>network gateway</span> in one binary</div>
+    <div class="sub">For homelabs, NAS boxes and servers<br>开源 · 可审计 · 单文件的网络网关工具集</div>
+    <div class="chips">
+      <div class="chip">DDNS</div>
+      <div class="chip">STUN</div>
+      <div class="chip">Port Forwarding · SNI</div>
+      <div class="chip">Reverse Proxy</div>
+      <div class="chip">ACME</div>
+      <div class="chip">WAF</div>
+      <div class="chip">Tailscale</div>
+      <div class="chip">frp</div>
+      <div class="chip">Cloudflare Tunnel</div>
+    </div>
+  </div>
+  <div class="foot">
+    <div>Docker · fnOS · OpenWrt · Linux · macOS · Windows</div>
+    <div><b>gately.cn</b></div>
+  </div>
+  <div class="shot">
+    <div class="bar"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i></div>
+    <img src="../images/overview.webp" alt="">
+  </div>
+</body>
+</html>
