@@ -4,7 +4,7 @@ Toute la configuration de Gately est stockée dans des fichiers `*.json` du rép
 
 ## Contenu de la sauvegarde
 
-Une sauvegarde est un fichier zip contenant tous les `*.json` situés à la racine du répertoire de configuration (compte, règles des modules, certificats, hachages de jetons, etc.). Elle inclut les hachages de mots de passe, les secrets, les hachages des jetons d'API et les clés privées des certificats ; conservez-la donc avec soin.
+Une sauvegarde est un fichier zip contenant tous les `*.json` situés à la racine du répertoire de configuration (compte, règles des modules, certificats, hachages de jetons, etc.). Elle inclut les hachages de mots de passe, les secrets, les hachages des jetons d'API et les clés privées des certificats ; conservez-la donc avec soin. Les journaux d'exécution (`logs/`) et le journal d'audit (`audit.log`) ne sont pas inclus.
 
 Le format du nom de fichier est `gately-backup-YYYYMMDD-HHMMSS.zip`, et les sauvegardes chiffrées utilisent `gately-backup-YYYYMMDD-HHMMSS.zip.enc`.
 

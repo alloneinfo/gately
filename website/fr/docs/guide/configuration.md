@@ -43,6 +43,16 @@ Les modules Tailscale, frp et cloudflared supervisent les programmes externes of
 
 Pour un déploiement Docker, placez les binaires dans le dossier de configuration monté, par exemple `./gately-data/bin/frpc`. Tailscale nécessite à la fois `tailscale` et `tailscaled`. Consultez [Tailscale / frp / cloudflared](/fr/docs/modules/tunnels) pour les détails.
 
+## Journaux d'exécution
+
+Les journaux d'exécution du système et de chaque module sont écrits par défaut dans `logs/` du répertoire de configuration ; ils restent donc consultables dans la page des journaux système et dans chaque module après un redémarrage ou une mise à jour :
+
+- Un fichier JSON Lines par source : `logs/<ID du module>.log`, et `logs/gately.log` pour le système. Au démarrage, les entrées les plus récentes, dans la limite de « Lignes de journal conservées », sont restaurées depuis le fichier ;
+- Les nouvelles entrées sont écrites par lots, au plus 1 seconde plus tard. Un fichier qui dépasse la limite (2 Mo par défaut) est renouvelé en `.1` et seul ce fichier précédent est conservé : chaque source occupe au plus le double de la limite ;
+- Dans Paramètres → Réseau et exécution → Paramètres d'exécution, vous pouvez désactiver « Conserver les journaux sur disque » ou modifier « Limite du fichier journal », avec effet immédiat. Désactivés, les journaux restent uniquement en mémoire et sont effacés au redémarrage ;
+- Effacer les journaux d'un module dans l'interface supprime aussi ses fichiers ;
+- Les sauvegardes de configuration n'incluent ni `logs/` ni le journal d'audit `audit.log`.
+
 ## Sauvegarde et restauration
 
 « Paramètres » propose la sauvegarde et la restauration de la configuration, et sert aussi de point d'entrée pour importer des configurations Lucky.

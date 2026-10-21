@@ -4,7 +4,7 @@ Toda la configuración de Gately se guarda en archivos `*.json` del directorio d
 
 ## Contenido de la copia
 
-Una copia es un archivo zip que contiene todos los `*.json` de la raíz del directorio de configuración (cuenta, reglas de los módulos, certificados, hashes de tokens, etc.). Incluye hashes de contraseñas, secretos, hashes de tokens de API y claves privadas de certificados, así que guárdala con cuidado.
+Una copia es un archivo zip que contiene todos los `*.json` de la raíz del directorio de configuración (cuenta, reglas de los módulos, certificados, hashes de tokens, etc.). Incluye hashes de contraseñas, secretos, hashes de tokens de API y claves privadas de certificados, así que guárdala con cuidado. Los registros de ejecución (`logs/`) y el registro de auditoría (`audit.log`) no se incluyen.
 
 El formato del nombre de archivo es `gately-backup-YYYYMMDD-HHMMSS.zip`, y las copias cifradas usan `gately-backup-YYYYMMDD-HHMMSS.zip.enc`.
 

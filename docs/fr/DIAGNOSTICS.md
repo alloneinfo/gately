@@ -12,7 +12,7 @@ Le paquet est généré sur votre propre machine et n'est jamais envoyé nulle p
 | `summary.json` | Version et informations de build de Gately, système d'exploitation et architecture, modèle de CPU et nombre de cœurs, totaux de mémoire / disque, durée de fonctionnement, statistiques du runtime Go, numéros de port de l'interface d'administration, **noms** des interfaces réseau avec les **catégories** d'adresses (par exemple `private: 1, public: 2`) |
 | `modules.json` | Liste des modules et résumé d'état affiché dans la page de vue d'ensemble |
 | `config/*.json` | **Structure** de la configuration : noms de champs, nombres, interrupteurs et valeurs énumérées comme le protocole et le mode |
-| `logs/*.log` | Journaux récents en mémoire du système et de chaque module (désactivable) |
+| `logs/*.log` | Journaux d'exécution récents du système et de chaque module, y compris ceux enregistrés sur disque avant un redémarrage (désactivable) |
 
 ## Ce qui n'est jamais exporté
 

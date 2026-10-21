@@ -4,7 +4,7 @@ Die gesamte Konfiguration von Gately liegt in `*.json`-Dateien im Konfigurations
 
 ## Inhalt der Sicherung
 
-Eine Sicherung ist eine Zip-Datei mit allen `*.json` im Stammverzeichnis des Konfigurationsverzeichnisses (Konto, Modulregeln, Zertifikate, Token-Hashes und so weiter). Sie enthält Passwort-Hashes, Secrets, API-Token-Hashes und private Zertifikatsschlüssel, bewahren Sie sie daher sorgfältig auf.
+Eine Sicherung ist eine Zip-Datei mit allen `*.json` im Stammverzeichnis des Konfigurationsverzeichnisses (Konto, Modulregeln, Zertifikate, Token-Hashes und so weiter). Sie enthält Passwort-Hashes, Secrets, API-Token-Hashes und private Zertifikatsschlüssel, bewahren Sie sie daher sorgfältig auf. Laufzeitprotokolle (`logs/`) und das Audit-Protokoll (`audit.log`) sind nicht enthalten.
 
 Das Dateinamensformat lautet `gately-backup-YYYYMMDD-HHMMSS.zip`, verschlüsselte Sicherungen heißen `gately-backup-YYYYMMDD-HHMMSS.zip.enc`.
 

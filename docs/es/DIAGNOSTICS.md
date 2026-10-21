@@ -12,7 +12,7 @@ El paquete se genera en tu propia máquina y nunca se sube a ningún sitio. Puls
 | `summary.json` | Versión e información de compilación de Gately, sistema operativo y arquitectura, modelo y número de núcleos de la CPU, totales de memoria / disco, tiempo en funcionamiento, estadísticas del runtime de Go, números de puerto de la interfaz de administración, **nombres** de las interfaces de red con las **categorías** de sus direcciones (por ejemplo `private: 1, public: 2`) |
 | `modules.json` | Lista de módulos y el resumen de estado que se muestra en la página de resumen |
 | `config/*.json` | **Estructura** de la configuración: nombres de campos, números, interruptores y valores enumerados como el protocolo y el modo |
-| `logs/*.log` | Registros recientes en memoria del sistema y de cada módulo (se puede desactivar) |
+| `logs/*.log` | Registros de ejecución recientes del sistema y de cada módulo, incluidos los guardados en disco antes de un reinicio (se puede desactivar) |
 
 ## Qué no se exporta nunca
 

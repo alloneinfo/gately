@@ -12,7 +12,7 @@ The bundle is generated on your own machine and is never uploaded anywhere. Clic
 | `summary.json` | Gately version and build info, OS and architecture, CPU model and core count, memory / disk totals, uptime, Go runtime stats, admin UI port numbers, network interface **names** with address **categories** (for example `private: 1, public: 2`) |
 | `modules.json` | Module list and the status summary shown on the overview page |
 | `config/*.json` | Configuration **structure**: field names, numbers, switches, and enum values such as protocol and mode |
-| `logs/*.log` | Recent in-memory logs of the system and every module (can be turned off) |
+| `logs/*.log` | Recent runtime logs of the system and every module, including those persisted before a restart (can be turned off) |
 
 ## What is never exported
 

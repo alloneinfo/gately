@@ -43,6 +43,16 @@ Os módulos Tailscale, frp e cloudflared gerenciam os programas externos oficiai
 
 Em implantações com Docker, coloque os binários no diretório de configuração montado, por exemplo `./gately-data/bin/frpc`. O Tailscale precisa de `tailscale` e `tailscaled`. Veja os detalhes em [Tailscale / frp / cloudflared](/pt-BR/docs/modules/tunnels).
 
+## Logs de execução
+
+Os logs de execução do sistema e de cada módulo são gravados por padrão em `logs/` no diretório de configuração, então continuam disponíveis na página de logs do sistema e na de cada módulo depois de reiniciar ou atualizar:
+
+- Um arquivo JSON Lines por origem: `logs/<ID do módulo>.log`, e os do sistema em `logs/gately.log`. Na inicialização, as entradas mais recentes, até "Linhas de log retidas", são restauradas do arquivo;
+- Novas entradas são gravadas em lote com no máximo 1 segundo de atraso. Quando um arquivo passa do limite (2 MB por padrão), ele é rotacionado para `.1` e só esse arquivo anterior é mantido, então cada origem ocupa no máximo o dobro do limite;
+- Em Configurações → Rede e execução → Parâmetros de execução você pode desativar "Salvar logs em disco" ou alterar "Limite do arquivo de log", com efeito imediato. Desativado, os logs ficam apenas na memória e são apagados ao reiniciar;
+- Limpar os logs de um módulo na interface também apaga os arquivos dele;
+- Os backups de configuração não incluem `logs/` nem o log de auditoria `audit.log`.
+
 ## Backup e restauração
 
 Em "Configurações" você encontra o backup e a restauração da configuração, que também é o ponto de entrada para importar configurações do Lucky.

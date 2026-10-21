@@ -12,7 +12,7 @@ Das Paket wird auf Ihrem eigenen Rechner erzeugt und nirgendwohin hochgeladen. K
 | `summary.json` | Gately-Version und Build-Informationen, Betriebssystem und Architektur, CPU-Modell und Kernzahl, Gesamtgröße von Arbeitsspeicher / Festplatte, Laufzeit, Statistiken der Go-Laufzeit, Portnummern der Verwaltungsoberfläche, **Namen** der Netzwerkschnittstellen mit **Kategorien** ihrer Adressen (zum Beispiel `private: 1, public: 2`) |
 | `modules.json` | Modulliste und die Statuszusammenfassung der Übersichtsseite |
 | `config/*.json` | **Struktur** der Konfiguration: Feldnamen, Zahlen, Schalter und Enum-Werte wie Protokoll und Modus |
-| `logs/*.log` | Aktuelle In-Memory-Logs des Systems und aller Module (abschaltbar) |
+| `logs/*.log` | Aktuelle Laufzeitprotokolle des Systems und aller Module, einschließlich der vor einem Neustart gespeicherten (abschaltbar) |
 
 ## Was nie exportiert wird
 

@@ -43,6 +43,16 @@ The Tailscale, frp and cloudflared modules supervise the official external progr
 
 For Docker deployments, put the binaries in the mounted config directory, for example `./gately-data/bin/frpc`. Tailscale needs both `tailscale` and `tailscaled`. See [Tailscale / frp / cloudflared](/en/docs/modules/tunnels) for details.
 
+## Runtime logs
+
+System and module runtime logs are written to `logs/` in the configuration directory by default, so they are still available on the System logs page and each module page after a restart or upgrade:
+
+- One JSON Lines file per source: `logs/<module ID>.log`, with system logs in `logs/gately.log`. On startup the most recent entries, up to "Log retention lines", are restored from the file;
+- New entries are written in batches at most 1 second later. A file is rotated to `.1` once it exceeds the limit (2 MB by default) and only that one previous file is kept, so each source uses at most twice the limit;
+- Under Settings → Network & Runtime → Runtime parameters you can turn off "Persist logs" or change "Log file limit", effective immediately. When off, logs are kept in memory only and cleared on restart;
+- Clearing a module's logs in the UI also deletes its files;
+- Configuration backups do not include `logs/` or the audit log `audit.log`.
+
 ## Backup and restore
 
 "Settings" provides configuration backup and restore, and is also the entry point for importing Lucky configurations.

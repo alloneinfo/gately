@@ -4,7 +4,7 @@ All of Gately's configuration is stored in `*.json` files in the configuration d
 
 ## Backup contents
 
-A backup is a zip file containing every `*.json` at the root of the configuration directory (account, module rules, certificates, token hashes and so on). It includes password hashes, secrets, API token hashes and certificate private keys, so store it carefully.
+A backup is a zip file containing every `*.json` at the root of the configuration directory (account, module rules, certificates, token hashes and so on). It includes password hashes, secrets, API token hashes and certificate private keys, so store it carefully. Runtime logs (`logs/`) and the audit log (`audit.log`) are not included.
 
 The file name format is `gately-backup-YYYYMMDD-HHMMSS.zip`, and encrypted backups use `gately-backup-YYYYMMDD-HHMMSS.zip.enc`.
 
