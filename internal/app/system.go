@@ -17,6 +17,7 @@ import (
 	"time"
 
 	"github.com/wangwanjie/gately/internal/backup"
+	"github.com/wangwanjie/gately/internal/fsperm"
 	"github.com/wangwanjie/gately/internal/httpx"
 	"github.com/wangwanjie/gately/internal/logbuf"
 	"github.com/wangwanjie/gately/internal/luckyimport"
@@ -87,14 +88,14 @@ func (a *App) handleRestore(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	dir := filepath.Join(a.opts.ConfigDir, "backup-"+time.Now().Format("20060102-150405"))
-	if err := os.MkdirAll(dir, 0o700); err != nil {
+	if err := fsperm.MkdirAll(dir, 0o700); err != nil {
 		httpx.Error(w, http.StatusInternalServerError, "%v", err)
 		return
 	}
 	old, _ := filepath.Glob(filepath.Join(a.opts.ConfigDir, "*.json"))
 	for _, f := range old {
 		if b, err := os.ReadFile(f); err == nil {
-			_ = os.WriteFile(filepath.Join(dir, filepath.Base(f)), b, 0o600)
+			_ = fsperm.WriteFile(filepath.Join(dir, filepath.Base(f)), b, 0o600)
 		}
 	}
 	for name, b := range restored {

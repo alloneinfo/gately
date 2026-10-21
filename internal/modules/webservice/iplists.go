@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/wangwanjie/gately/internal/crud"
+	"github.com/wangwanjie/gately/internal/fsperm"
 	"github.com/wangwanjie/gately/internal/httpx"
 	"github.com/wangwanjie/gately/internal/i18n"
 	"github.com/wangwanjie/gately/internal/iplist"
@@ -230,11 +231,11 @@ func (m *Module) downloadIPList(ctx context.Context, l IPList) (*iplist.Set, int
 		return nil, 0, err
 	}
 	p := m.ipListPath(l.Key)
-	if err := os.MkdirAll(filepath.Dir(p), 0o700); err != nil {
+	if err := fsperm.MkdirAll(filepath.Dir(p), 0o700); err != nil {
 		return nil, 0, err
 	}
 	tmp := p + ".tmp"
-	if err := os.WriteFile(tmp, data, 0o600); err != nil {
+	if err := fsperm.WriteFile(tmp, data, 0o600); err != nil {
 		return nil, 0, err
 	}
 	if err := os.Rename(tmp, p); err != nil {

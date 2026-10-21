@@ -152,6 +152,9 @@ func New(opts Options) (*App, error) {
 	// 先按设置开启日志落盘并恢复上次的日志，后续初始化过程中的日志也能写入文件
 	a.sysLogs.Resize(a.settings.LogLines)
 	a.persistLogs(a.sysLogs, settingsName, a.settings)
+	if n := tightenConfigDir(opts.ConfigDir); n > 0 {
+		a.sysLogs.Add(logbuf.LevelInfo, "", fmt.Sprintf("已收紧配置目录中 %d 个文件或目录的权限", n))
+	}
 	a.fileListen = a.settings.Listen
 	if opts.Listen != "" {
 		a.settings.Listen = opts.Listen

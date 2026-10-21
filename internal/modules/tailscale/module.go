@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
-	"os"
 	"sort"
 	"strconv"
 	"strings"
@@ -16,6 +15,7 @@ import (
 
 	"github.com/wangwanjie/gately/internal/config"
 	"github.com/wangwanjie/gately/internal/crud"
+	"github.com/wangwanjie/gately/internal/fsperm"
 	"github.com/wangwanjie/gately/internal/httpx"
 	"github.com/wangwanjie/gately/internal/logbuf"
 	"github.com/wangwanjie/gately/internal/module"
@@ -120,7 +120,7 @@ func (m *Module) applyLocked() {
 			m.fail(err.Error())
 			return
 		}
-		if err := os.MkdirAll(s.stateDir(dir), 0o700); err != nil {
+		if err := fsperm.MkdirAll(s.stateDir(dir), 0o700); err != nil {
 			m.fail("创建状态目录失败: " + err.Error())
 			return
 		}

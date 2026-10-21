@@ -20,6 +20,7 @@ import (
 	"github.com/wangwanjie/gately/internal/config"
 	"github.com/wangwanjie/gately/internal/crud"
 	"github.com/wangwanjie/gately/internal/events"
+	"github.com/wangwanjie/gately/internal/fsperm"
 	"github.com/wangwanjie/gately/internal/httpx"
 	"github.com/wangwanjie/gately/internal/logbuf"
 	"github.com/wangwanjie/gately/internal/module"
@@ -299,11 +300,11 @@ func (m *Module) report(results []Result, failed int, name string) {
 func (m *Module) writeLocal(name string, data []byte, keep int) Result {
 	res := Result{Target: "本地目录 (" + localDirName + ")", File: name}
 	dir := m.localDir()
-	if err := os.MkdirAll(dir, 0o700); err != nil {
+	if err := fsperm.MkdirAll(dir, 0o700); err != nil {
 		res.Error = err.Error()
 		return res
 	}
-	if err := os.WriteFile(filepath.Join(dir, name), data, 0o600); err != nil {
+	if err := fsperm.WriteFile(filepath.Join(dir, name), data, 0o600); err != nil {
 		res.Error = err.Error()
 		return res
 	}

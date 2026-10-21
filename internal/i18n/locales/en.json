@@ -909,6 +909,7 @@
   "已拦截": "Blocked",
   "已接受 Web 终端用户协议": "Web terminal user agreement accepted",
   "已提交，运行中的 Gately 暂未处理（可能未在运行），将在下次启动时生效。": "Submitted. The running Gately has not picked it up yet (it may not be running); it will take effect on the next start.",
+  "已收紧配置目录中 %d 个文件或目录的权限": "Tightened permissions of %d files or directories in the config directory",
   "已映射到 ": "Mapped to ",
   "已更新": "Updated",
   "已有同名 Compose 项目 %s": "A Compose project named %s already exists",

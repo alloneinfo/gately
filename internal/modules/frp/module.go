@@ -12,6 +12,7 @@ import (
 
 	"github.com/wangwanjie/gately/internal/config"
 	"github.com/wangwanjie/gately/internal/crud"
+	"github.com/wangwanjie/gately/internal/fsperm"
 	"github.com/wangwanjie/gately/internal/httpx"
 	"github.com/wangwanjie/gately/internal/logbuf"
 	"github.com/wangwanjie/gately/internal/module"
@@ -96,12 +97,12 @@ func (m *Module) saveLocked() error { return m.store.Save(ID, m.cfg) }
 // writeConfig 把配置写入 <配置目录>/frp/<file>，文件含令牌，权限 0600。
 func (m *Module) writeConfig(file, content string) (string, error) {
 	dir := filepath.Join(m.store.Dir(), "frp")
-	if err := os.MkdirAll(dir, 0o700); err != nil {
+	if err := fsperm.MkdirAll(dir, 0o700); err != nil {
 		return "", err
 	}
 	path := filepath.Join(dir, file)
 	tmp := path + ".tmp"
-	if err := os.WriteFile(tmp, []byte(content), 0o600); err != nil {
+	if err := fsperm.WriteFile(tmp, []byte(content), 0o600); err != nil {
 		return "", err
 	}
 	return path, os.Rename(tmp, path)

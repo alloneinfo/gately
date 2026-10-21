@@ -9,6 +9,8 @@ import (
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
+
+	"github.com/wangwanjie/gately/internal/fsperm"
 )
 
 // ResetFile 是命令行重置请求在配置目录中的文件名。
@@ -59,7 +61,7 @@ func WriteResetRequest(dir string, req ResetRequest) error {
 	}
 	// 与配置文件一样先写临时文件再 rename，服务端不会读到写了一半的请求
 	tmp := p + ".tmp"
-	if err := os.WriteFile(tmp, data, 0o600); err != nil {
+	if err := fsperm.WriteFile(tmp, data, 0o600); err != nil {
 		return err
 	}
 	if err := os.Rename(tmp, p); err != nil {

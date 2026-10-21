@@ -909,6 +909,7 @@
   "已拦截": "Bloqué",
   "已接受 Web 终端用户协议": "Contrat d'utilisation du terminal Web accepté",
   "已提交，运行中的 Gately 暂未处理（可能未在运行），将在下次启动时生效。": "Demande enregistrée. Le Gately en cours d'exécution ne l'a pas encore traitée (il n'est peut-être pas lancé) ; elle prendra effet au prochain démarrage.",
+  "已收紧配置目录中 %d 个文件或目录的权限": "Permissions de %d fichiers ou dossiers du répertoire de configuration restreintes",
   "已映射到 ": "Mappé vers ",
   "已更新": "Mis à jour",
   "已有同名 Compose 项目 %s": "Un projet Compose %s du même nom existe déjà",

@@ -10,6 +10,8 @@ import (
 	"path/filepath"
 	"sync"
 	"time"
+
+	"github.com/wangwanjie/gately/internal/fsperm"
 )
 
 // 落盘参数
@@ -58,7 +60,7 @@ func (b *Buffer) Persist(path string, maxBytes int64) error {
 		b.sink.close()
 		b.sink = nil
 	}
-	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
+	if err := fsperm.MkdirAll(filepath.Dir(path), 0o700); err != nil {
 		return err
 	}
 	var size int64
@@ -141,6 +143,10 @@ func (s *fileSink) flush() {
 	if err != nil {
 		log.Printf("写入日志文件 %s 失败: %v", s.path, err)
 		return
+	}
+	if s.size == 0 {
+		// 新建（或轮转、清空后重建）的文件显式设置权限，部分文件系统会忽略创建权限，见 fsperm
+		_ = f.Chmod(0o600)
 	}
 	n, err := f.Write(data)
 	s.size += int64(n)

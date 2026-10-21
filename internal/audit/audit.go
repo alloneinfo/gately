@@ -93,6 +93,8 @@ func (l *Log) Record(e Entry) {
 	l.mu.Lock()
 	l.rotateLocked()
 	if f, err := os.OpenFile(l.path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o600); err == nil {
+		// 部分文件系统会忽略创建权限（见 fsperm）；审计记录写入不频繁，每次都显式设置
+		_ = f.Chmod(0o600)
 		_, _ = f.Write(line)
 		_ = f.Close()
 	}

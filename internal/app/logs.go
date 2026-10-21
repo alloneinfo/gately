@@ -3,6 +3,8 @@ package app
 import (
 	"path/filepath"
 
+	"github.com/wangwanjie/gately/internal/auth"
+	"github.com/wangwanjie/gately/internal/fsperm"
 	"github.com/wangwanjie/gately/internal/logbuf"
 )
 
@@ -37,4 +39,22 @@ func (a *App) closeLogs() {
 	for _, e := range a.modules {
 		e.logs.ClosePersist()
 	}
+}
+
+// privatePaths 是配置目录下保存敏感内容的文件与子目录（支持通配符）：配置、令牌、配置历史、
+// frp 生成的配置、审计与运行日志、IP 列表缓存、本地备份、恢复前的备份与 Tailscale 状态。
+// bin/ 等存放用户程序的目录不在其中。
+var privatePaths = []string{"*.json", "audit.log*", auth.ResetFile, logsDir, "history", "frp", "iplists", "backups", "backup-*", "tailscale"}
+
+// tightenConfigDir 收紧配置目录下敏感文件的权限，修复旧版本在会忽略创建权限的文件系统
+// （如飞牛 fnOS 的 trimacl 卷）上创建的 0755 文件，返回改动的数量。
+func tightenConfigDir(dir string) int {
+	n := 0
+	for _, pattern := range privatePaths {
+		matches, _ := filepath.Glob(filepath.Join(dir, pattern))
+		for _, p := range matches {
+			n += fsperm.Tighten(p)
+		}
+	}
+	return n
 }

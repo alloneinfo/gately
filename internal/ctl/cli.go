@@ -10,6 +10,8 @@ import (
 	"os"
 	"strings"
 	"text/tabwriter"
+
+	"github.com/wangwanjie/gately/internal/fsperm"
 )
 
 const ctlUsage = `用法：
@@ -172,12 +174,12 @@ func runLogin(args []string, insecure bool, stdout, stderr io.Writer) int {
 		fmt.Fprintln(stderr, "无法确定配置目录")
 		return 1
 	}
-	if err := os.MkdirAll(dirOf(p), 0o700); err != nil {
+	if err := fsperm.MkdirAll(dirOf(p), 0o700); err != nil {
 		fmt.Fprintln(stderr, err)
 		return 1
 	}
 	b, _ := json.MarshalIndent(cfg, "", "  ")
-	if err := os.WriteFile(p, append(b, '\n'), 0o600); err != nil {
+	if err := fsperm.WriteFile(p, append(b, '\n'), 0o600); err != nil {
 		fmt.Fprintln(stderr, err)
 		return 1
 	}

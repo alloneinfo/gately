@@ -9,6 +9,8 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/wangwanjie/gately/internal/fsperm"
 )
 
 // historyDir 是配置目录下保存历史版本的子目录：history/<配置名>/<版本ID>.json。
@@ -65,11 +67,11 @@ func (s *Store) snapshotLocked(name, p string, next []byte) {
 		return
 	}
 	dir := s.versionDir(name)
-	if err := os.MkdirAll(dir, 0o700); err != nil {
+	if err := fsperm.MkdirAll(dir, 0o700); err != nil {
 		return
 	}
 	id := time.Now().UTC().Format(versionLayout)
-	if err := os.WriteFile(filepath.Join(dir, id+".json"), old, 0o600); err != nil {
+	if err := fsperm.WriteFile(filepath.Join(dir, id+".json"), old, 0o600); err != nil {
 		return
 	}
 	// 超出保留数量时删除最旧的版本
