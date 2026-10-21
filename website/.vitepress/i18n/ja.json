@@ -77,8 +77,8 @@
   "home": {
     "pill": "オープンソース · 監査可能 · 単一バイナリ",
     "announce": {
-      "text": "v0.5.4 リリース：オンラインアップグレード、PVE LXC の再作成不要、OpenWrt パッケージ →",
-      "link": "/ja/news/v0.5.4"
+      "text": "v0.5.5 リリース：nginx インポート、証明書の自動デプロイ、WAF の WebDAV 対応 →",
+      "link": "/ja/news/v0.5.5"
     },
     "titleLine1": "中身が見える",
     "titleLine2": "ネットワークゲートウェイツールキット",

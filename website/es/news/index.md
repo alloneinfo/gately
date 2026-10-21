@@ -7,6 +7,10 @@ description: Anuncios y notas de cada versión de Gately.
 
 A continuación se listan los anuncios de las versiones principales. Consulta [GitHub Releases](https://github.com/wangwanjie/gately/releases) para ver todos los cambios y las descargas de cada versión.
 
+## [v0.5.5](/es/news/v0.5.5)
+
+21 de octubre de 2026 · Importación de configuraciones de nginx, despliegue automático de certificados en otros hosts y contenedores, subidas grandes y WebDAV en el WAF, listas de IP suscritas, y el autodiagnóstico comprueba ahora la cobertura de certificados y los conflictos de frp.
+
 ## [v0.5.4](/es/news/v0.5.4)
 
 21 de octubre de 2026 · Actualización en línea para las instalaciones binarias en Linux, de modo que ya no hay que recrear los contenedores LXC de PVE; nuevos paquetes para OpenWrt (.ipk / .apk).

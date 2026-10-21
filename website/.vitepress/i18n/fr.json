@@ -77,8 +77,8 @@
   "home": {
     "pill": "Open source · Auditable · Binaire unique",
     "announce": {
-      "text": "v0.5.4 est disponible : mise à niveau en ligne, plus besoin de recréer les conteneurs LXC PVE, paquets OpenWrt →",
-      "link": "/fr/news/v0.5.4"
+      "text": "v0.5.5 est disponible : import nginx, déploiement automatique des certificats, WebDAV derrière le WAF →",
+      "link": "/fr/news/v0.5.5"
     },
     "titleLine1": "Une boîte à outils de passerelle réseau",
     "titleLine2": "où tout est visible",

@@ -7,6 +7,10 @@ description: Gately 각 버전의 릴리스 공지와 변경 사항입니다.
 
 주요 버전의 릴리스 공지는 아래와 같습니다. 모든 버전의 전체 변경 사항과 다운로드 파일은 [GitHub Releases](https://github.com/wangwanjie/gately/releases)에서 확인하세요.
 
+## [v0.5.5](/ko/news/v0.5.5)
+
+2026년 10월 21일 · nginx 설정 가져오기, 다른 호스트와 컨테이너로 인증서 자동 배포, WAF의 대용량 업로드와 WebDAV 지원, 구독 IP 목록이 추가되었고, 자가 점검에 인증서 적용 여부와 frp 충돌 검사가 추가되었습니다.
+
 ## [v0.5.4](/ko/news/v0.5.4)
 
 2026년 10월 21일 · Linux 바이너리 설치의 온라인 업그레이드로 PVE LXC 컨테이너를 다시 만들 필요가 없어졌습니다. OpenWrt 패키지(.ipk / .apk)가 추가되었습니다.

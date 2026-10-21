@@ -7,6 +7,10 @@ description: Gately 各版本的發布公告與更新說明。
 
 重要版本的發布公告如下，每個版本的完整變更與下載檔案見 [GitHub Releases](https://github.com/wangwanjie/gately/releases)。
 
+## [v0.5.5](/zh-TW/news/v0.5.5)
+
+2026 年 10 月 21 日 · 匯入 nginx 設定、憑證自動部署到其他主機與容器、WAF 支援大型檔案上傳與 WebDAV、訂閱 IP 清單，自檢新增憑證涵蓋與 frp 衝突檢查。
+
 ## [v0.5.4](/zh-TW/news/v0.5.4)
 
 2026 年 10 月 21 日 · Linux 執行檔部署支援線上升級，PVE LXC 容器不用再刪除重建；新增 OpenWrt 安裝包（.ipk / .apk）。

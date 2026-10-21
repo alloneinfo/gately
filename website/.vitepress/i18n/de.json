@@ -77,8 +77,8 @@
   "home": {
     "pill": "Open Source · Prüfbar · Einzelne Binärdatei",
     "announce": {
-      "text": "v0.5.4 ist da: Online-Upgrade, PVE-LXC-Container ohne Neuanlage aktualisieren, OpenWrt-Pakete →",
-      "link": "/de/news/v0.5.4"
+      "text": "v0.5.5 ist da: nginx importieren, automatische Zertifikatsbereitstellung, WAF mit WebDAV-Unterstützung →",
+      "link": "/de/news/v0.5.5"
     },
     "titleLine1": "Ein Toolkit für Netzwerk-Gateways,",
     "titleLine2": "das Sie durchschauen können",
