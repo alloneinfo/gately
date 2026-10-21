@@ -95,6 +95,8 @@ type Cert struct {
 	IssuerPEM string `json:"issuerPem"`
 
 	Mapping Mapping `json:"mapping"`
+	// Deploys 为证书内容变化后自动执行的部署目标（SSH 主机、Docker 容器）
+	Deploys []Deploy `json:"deploys"`
 	// UpdatedAt 为证书内容最近一次变化时间
 	UpdatedAt time.Time `json:"updatedAt,omitzero"`
 }
@@ -171,6 +173,11 @@ func (c *Cert) Validate(settings Settings) error {
 	}
 	if c.Remark != "" && !reRemark.MatchString(c.Remark) {
 		return errors.New("备注只能包含字母、数字以及 . _ - * @")
+	}
+	for i := range c.Deploys {
+		if err := c.Deploys[i].validate(c.Remark); err != nil {
+			return fmt.Errorf("部署目标 %s: %w", deployIndexLabel(i), err)
+		}
 	}
 	switch c.Source {
 	case SourceACME:

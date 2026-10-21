@@ -86,6 +86,7 @@ func startSFTPServer(t *testing.T, clientPub ssh.PublicKey) string {
 // sftpEnv 描述一个测试环境：key 为连接 key，root 为可读写的临时目录。
 type sftpEnv struct {
 	t    *testing.T
+	m    *Module
 	srv  *httptest.Server
 	key  string
 	root string
@@ -99,7 +100,7 @@ func newLocalEnv(t *testing.T) *sftpEnv {
 	m.cfg.Security.AgreementAccepted = true
 	m.cfg.Settings.AllowLocalShell = true
 	m.cfg.Connections = []Connection{{Key: "l", Name: "local", Type: TypeLocal}}
-	return &sftpEnv{t: t, srv: srv, key: "l", root: t.TempDir()}
+	return &sftpEnv{t: t, m: m, srv: srv, key: "l", root: t.TempDir()}
 }
 
 func newSSHEnv(t *testing.T) *sftpEnv {
@@ -117,7 +118,7 @@ func newSSHEnv(t *testing.T) *sftpEnv {
 		t.Fatal(err)
 	}
 	m.cfg.Connections = []Connection{c}
-	return &sftpEnv{t: t, srv: srv, key: "s", root: t.TempDir()}
+	return &sftpEnv{t: t, m: m, srv: srv, key: "s", root: t.TempDir()}
 }
 
 func (e *sftpEnv) url(op string) string {

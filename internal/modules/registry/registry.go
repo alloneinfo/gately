@@ -2,6 +2,8 @@
 package registry
 
 import (
+	"context"
+
 	"github.com/wangwanjie/gately/internal/module"
 	backupmod "github.com/wangwanjie/gately/internal/modules/backup"
 	"github.com/wangwanjie/gately/internal/modules/cloudflared"
@@ -30,6 +32,27 @@ func New() (mods []module.Module, certs *ssl.Module) {
 	certs = ssl.New()
 	firewall := waf.New()
 	files := storage.New()
+	term := webterminal.New()
+	dock := docker.New()
+	// 证书部署复用 Web 终端的 SSH 连接与 Docker 模块的客户端，经适配函数注入，避免模块之间直接依赖
+	certs.SetDeployers(ssl.Deployers{
+		Push: func(ctx context.Context, conn, dir string, files []ssl.RemoteFile, command string) (string, error) {
+			pf := make([]webterminal.PushFile, 0, len(files))
+			for _, f := range files {
+				pf = append(pf, webterminal.PushFile{Name: f.Name, Data: f.Data, Mode: f.Mode})
+			}
+			return term.Push(ctx, conn, dir, pf, command)
+		},
+		Restart: dock.RestartContainers,
+		SSHTargets: func() []ssl.SSHTarget {
+			out := []ssl.SSHTarget{}
+			for _, t := range term.SSHTargets() {
+				out = append(out, ssl.SSHTarget{Key: t.Key, Name: t.Name, Host: t.Host, Trusted: t.Trusted})
+			}
+			return out
+		},
+		Containers: dock.ContainerNames,
+	})
 	mods = []module.Module{
 		portforward.New(),
 		ddns.New(),
@@ -41,9 +64,9 @@ func New() (mods []module.Module, certs *ssl.Module) {
 		firewall,
 		webservice.New(certs, firewall),
 		wol.New(),
-		webterminal.New(),
+		term,
 		cron.New(),
-		docker.New(),
+		dock,
 		webdav.New(certs),
 		ftp.New(certs),
 		files,

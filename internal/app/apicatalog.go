@@ -64,6 +64,8 @@ var apiCatalog = map[string]epDoc{
 	"PUT /api/cloudflared/settings":                      {Summary: "保存 Cloudflare 隧道设置", Body: true},
 	"POST /api/ssl/certs/{key}/renew":                    {Summary: "立即签发或续期证书"},
 	"GET /api/ssl/certs/{key}/download":                  {Summary: "下载证书与私钥", Desc: "返回包含私钥的文件，因此需要写权限。"},
+	"POST /api/ssl/certs/{key}/deploy":                   {Summary: "立即部署证书", Desc: "把证书部署到全部启用的目标（经 SSH 上传并执行命令，或重启 Docker 容器），忽略是否已部署与失败退避，同步返回每个目标的结果。"},
+	"GET /api/ssl/deploy-targets":                        {Summary: "列出可选的部署目标", Desc: "返回 Web 终端中的 SSH 连接（`trusted` 表示已记录主机密钥）与本机 Docker 容器名称。"},
 	"GET /api/ssl/providers":                             {Summary: "列出支持的 DNS 验证服务商"},
 	"GET /api/ssl/settings":                              {Summary: "读取证书全局设置"},
 	"PUT /api/ssl/settings":                              {Summary: "保存证书全局设置", Body: true},

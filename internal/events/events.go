@@ -21,6 +21,7 @@ const (
 	DDNSFailed      = "ddns.failed"
 	SSLExpiring     = "ssl.expiring"
 	SSLRenewFailed  = "ssl.renew_failed"
+	SSLDeployFailed = "ssl.deploy_failed"
 	WAFBlocked      = "waf.blocked"
 	UpstreamDown    = "upstream.down"
 	UpstreamUp      = "upstream.up"
@@ -63,6 +64,7 @@ var Catalog = []TypeInfo{
 	{STUNChanged, "STUN：穿透地址变化", LevelInfo},
 	{SSLExpiring, "证书：即将到期", LevelWarn},
 	{SSLRenewFailed, "证书：续期失败", LevelError},
+	{SSLDeployFailed, "证书：部署失败", LevelError},
 	{WAFBlocked, "WAF：拦截请求", LevelWarn},
 	{UpstreamDown, "反向代理：上游不可用", LevelError},
 	{UpstreamUp, "反向代理：上游恢复", LevelInfo},

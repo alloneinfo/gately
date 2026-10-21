@@ -46,6 +46,8 @@ type CertState struct {
 	LastAttempt time.Time `json:"lastAttempt,omitzero"`
 	NextRetry   time.Time `json:"nextRetry,omitzero"`
 	MappingNote string    `json:"mappingNote,omitempty"`
+	// Deploys 为各部署目标的运行状态，与 Cert.Deploys 按下标对应
+	Deploys []DeployState `json:"deploys,omitempty"`
 
 	// lastExpiryWarn 是上次发出到期事件的时间，用于每天最多提醒一次
 	lastExpiryWarn time.Time
@@ -67,6 +69,9 @@ type Module struct {
 	tlsMu    sync.RWMutex
 	tlsIndex map[string]*tls.Certificate
 	wildcard map[string]*tls.Certificate
+
+	// deployers 由主程序注入的部署能力（SSH 推送、重启容器）
+	deployers Deployers
 }
 
 // New 创建模块实例。
@@ -114,6 +119,8 @@ func (m *Module) Start(ctx context.Context) error {
 	for i := range m.cfg.Certs {
 		if m.cfg.Certs[i].Enable {
 			m.applyMappingLocked(&m.cfg.Certs[i], false)
+			// 启动时补做尚未成功的部署（例如上次部署失败或新增了目标）
+			m.scheduleDeploysLocked(&m.cfg.Certs[i])
 		}
 	}
 	m.mu.Unlock()
@@ -231,6 +238,8 @@ func (m *Module) checkAll(force bool) {
 		if !c.Enable {
 			continue
 		}
+		// 失败的部署在退避结束后重试
+		m.scheduleDeploysLocked(c)
 		switch c.Source {
 		case SourceFile:
 			m.reloadFileLocked(c)
@@ -358,6 +367,7 @@ func (m *Module) obtainNow(key string) {
 	}
 	m.rebuildTLSLocked()
 	m.applyMappingLocked(c, true)
+	m.scheduleDeploysLocked(c)
 }
 
 // done 返回模块退出信号；模块尚未启动时返回永不关闭的通道。
@@ -391,6 +401,7 @@ func (m *Module) reloadFileLocked(c *Cert) {
 	m.logs.Logger(label(c)).Infof("已从文件加载新证书")
 	m.rebuildTLSLocked()
 	m.applyMappingLocked(c, true)
+	m.scheduleDeploysLocked(c)
 }
 
 // mappingFiles 返回映射目录下需要写入的文件。
@@ -578,12 +589,22 @@ func (m *Module) changedLocked(key string) {
 	if !c.Enable {
 		return
 	}
+	// 部署目标可能被增删或调整顺序，运行状态按新的下标重新累计
+	if st := m.stateLocked(key); len(st.Deploys) > len(c.Deploys) {
+		st.Deploys = st.Deploys[:len(c.Deploys)]
+	}
+	for i := range c.Deploys {
+		// 用户修改配置后立即重试，不等失败退避结束
+		m.deployStateLocked(key, i).NextRetry = time.Time{}
+	}
 	switch c.Source {
 	case SourceUpload:
 		c.UpdatedAt = time.Now()
 		m.applyMappingLocked(c, true)
+		m.scheduleDeploysLocked(c)
 	case SourceFile:
 		m.reloadFileLocked(c)
+		m.scheduleDeploysLocked(c)
 	case SourceACME:
 		st := m.stateLocked(key)
 		st.NextRetry = time.Time{}
@@ -591,6 +612,7 @@ func (m *Module) changedLocked(key string) {
 			m.triggerLocked(key)
 		} else {
 			m.applyMappingLocked(c, true)
+			m.scheduleDeploysLocked(c)
 		}
 	}
 }
@@ -614,6 +636,7 @@ func (m *Module) Routes(r module.Router) {
 			if updated.Source == SourceACME && old.Source == SourceACME {
 				updated.CertPEM, updated.KeyPEM, updated.IssuerPEM, updated.UpdatedAt = old.CertPEM, old.KeyPEM, old.IssuerPEM, old.UpdatedAt
 			}
+			keepDeployRecords(old, updated)
 		},
 		View:    m.viewLocked,
 		Changed: m.changedLocked,
@@ -625,6 +648,8 @@ func (m *Module) Routes(r module.Router) {
 	certs.Register(r, "/certs")
 	r.HandleFunc("POST /certs/{key}/renew", m.handleRenew)
 	r.HandleFunc("GET /certs/{key}/download", m.handleDownload)
+	r.HandleFunc("POST /certs/{key}/deploy", m.handleDeploy)
+	r.HandleFunc("GET /deploy-targets", m.handleDeployTargets)
 	r.HandleFunc("GET /providers", func(w http.ResponseWriter, r *http.Request) {
 		var out []dnsprovider.Meta
 		for _, p := range dnsprovider.List() {

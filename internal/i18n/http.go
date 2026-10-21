@@ -176,3 +176,21 @@ func (t *transWriter) finish() {
 	t.ResponseWriter.WriteHeader(t.status)
 	_, _ = t.ResponseWriter.Write(body)
 }
+
+// Localize 把程序生成的结果（如导入预览、部署结果）转为按请求语言翻译后的 JSON 值。
+// 中间件只翻译 GET 响应与错误响应，POST 接口返回的说明文字需要用它显式翻译。
+func Localize(r *http.Request, v any) any {
+	lang := RequestLang(r)
+	if lang == SourceLang {
+		return v
+	}
+	b, err := json.Marshal(v)
+	if err != nil {
+		return v
+	}
+	var x any
+	if err := json.Unmarshal(b, &x); err != nil {
+		return v
+	}
+	return TrDeep(lang, x, 0)
+}

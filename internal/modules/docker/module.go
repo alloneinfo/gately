@@ -474,3 +474,38 @@ func normalizeRegistry(server string) string {
 	}
 	return s
 }
+
+// ContainerNames 返回全部容器的名称，供证书部署等功能选择要重启的容器。
+func (m *Module) ContainerNames(ctx context.Context) ([]string, error) {
+	c, err := m.client()
+	if err != nil {
+		return nil, err
+	}
+	list, err := c.Containers(ctx)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]string, 0, len(list))
+	for _, ct := range list {
+		out = append(out, ct.Name())
+	}
+	sort.Strings(out)
+	return out, nil
+}
+
+// RestartContainers 依次重启指定容器（名称或 ID），例如证书更新后让服务加载新证书。
+func (m *Module) RestartContainers(ctx context.Context, names []string) error {
+	c, err := m.client()
+	if err != nil {
+		return err
+	}
+	var errs []error
+	for _, name := range names {
+		if err := c.Action(ctx, name, "restart"); err != nil {
+			errs = append(errs, fmt.Errorf("重启容器 %s 失败: %w", name, err))
+			continue
+		}
+		m.logs.Add(logbuf.LevelInfo, "", fmt.Sprintf("证书已更新，重启容器 %s", name))
+	}
+	return errors.Join(errs...)
+}

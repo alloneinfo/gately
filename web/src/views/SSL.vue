@@ -32,13 +32,19 @@
         <Field :label="t('ssl.validUntil')">{{ c.info ? new Date(c.info.notAfter).toLocaleDateString() : '-' }}</Field>
         <Field :label="t('ssl.issuer')">{{ c.info?.issuer || '-' }}</Field>
         <Field :label="t('ssl.updatedAt')">{{ c.updatedAt ? new Date(c.updatedAt).toLocaleString() : '-' }}</Field>
-        <template v-if="c.enable && (c.state.lastError || c.state.mappingNote || c.state.nextRetry)" #extra>
+        <template v-if="c.enable && (c.state.lastError || c.state.mappingNote || c.state.nextRetry || enabledDeploys(c).length)" #extra>
           <div v-if="c.state.lastError" class="err-line">{{ c.state.lastError }}</div>
           <div v-if="c.state.nextRetry" class="meta">{{ t('ssl.nextRetry', { time: new Date(c.state.nextRetry).toLocaleString() }) }}</div>
           <div v-if="c.state.mappingNote" class="meta">{{ c.state.mappingNote }}</div>
+          <div v-for="d in enabledDeploys(c)" :key="d.index" class="deploy-line" :class="deployLine(c, d.index).cls">
+            <span class="dot" />
+            <span class="deploy-name">{{ deployTitle(d.deploy) }}</span>
+            <span class="meta">{{ deployLine(c, d.index).text }}</span>
+          </div>
         </template>
         <template #actions>
           <el-button v-if="c.source === 'acme'" text size="small" :icon="RotateCw" :disabled="c.state.obtaining || !c.enable" @click="renew(c)">{{ t('ssl.renew') }}</el-button>
+          <el-button v-if="c.info && enabledDeploys(c).length" text size="small" :icon="Send" :loading="deploying === c.key" :disabled="!c.enable" @click="deployNow(c)">{{ t('ssl.deployNow') }}</el-button>
           <el-dropdown v-if="c.info" trigger="click" @command="(cmd: string) => download(c, cmd)">
             <el-button text size="small" :icon="Download">{{ t('common.download') }}</el-button>
             <template #dropdown>
@@ -169,7 +175,44 @@
             <div class="form-help">{{ t('ssl.envHelp') }}</div>
           </el-form-item>
         </template>
-        <el-form-item :label="t('common.enable')"><el-switch v-model="editing.enable" /></el-form-item>
+        <el-divider content-position="left">{{ t('ssl.deploy') }}</el-divider>
+        <div class="form-help deploy-help">{{ t('ssl.deployHelp') }}</div>
+        <div v-for="(d, i) in editing.deploys" :key="i" class="deploy-box">
+          <div class="deploy-head">
+            <el-switch v-model="d.enable" size="small" />
+            <el-radio-group v-model="d.type" size="small">
+              <el-radio-button value="ssh">{{ t('ssl.deploySSH') }}</el-radio-button>
+              <el-radio-button value="docker">{{ t('ssl.deployDocker') }}</el-radio-button>
+            </el-radio-group>
+            <el-input v-model="d.remark" size="small" :placeholder="t('common.remark')" class="deploy-remark" />
+            <el-button text type="danger" size="small" :icon="Trash2" :aria-label="t('ssl.deleteDeploy')" @click="editing.deploys.splice(i, 1)" />
+          </div>
+          <template v-if="d.type === 'ssh'">
+            <el-form-item :label="t('ssl.deployConnection')">
+              <el-select v-model="d.connection" filterable :placeholder="t('ssl.deployConnectionPlaceholder')" :no-data-text="t('ssl.deployNoConnections')" class="full">
+                <el-option v-for="o in targets.ssh" :key="o.key" :label="o.name" :value="o.key">
+                  <span>{{ o.name }}</span>
+                  <span class="opt-meta mono">{{ o.host }}</span>
+                  <span v-if="!o.trusted" class="opt-warn">{{ t('ssl.deployUntrusted') }}</span>
+                </el-option>
+              </el-select>
+              <div v-if="d.connection && targets.ssh.find((o) => o.key === d.connection && !o.trusted)" class="form-help warn">{{ t('ssl.deployUntrustedHelp') }}</div>
+            </el-form-item>
+            <el-form-item :label="t('ssl.deployDir')"><el-input v-model="d.dir" class="mono" placeholder="/etc/nginx/certs" /></el-form-item>
+            <el-form-item :label="t('ssl.deployCommand')">
+              <el-input v-model="d.command" type="textarea" :rows="2" class="mono" placeholder="systemctl reload nginx" />
+              <div class="form-help">{{ t('ssl.deployCommandHelp') }}</div>
+            </el-form-item>
+          </template>
+          <el-form-item v-else :label="t('ssl.deployContainers')">
+            <el-select v-model="d.containers" multiple filterable allow-create default-first-option :placeholder="t('ssl.deployContainersPlaceholder')" class="full">
+              <el-option v-for="n in targets.containers" :key="n" :label="n" :value="n" />
+            </el-select>
+            <div class="form-help">{{ targets.containersError ? t('ssl.deployContainersError', { error: targets.containersError }) : t('ssl.deployContainersHelp') }}</div>
+          </el-form-item>
+        </div>
+        <el-button size="small" :icon="Plus" @click="addDeploy">{{ t('ssl.addDeploy') }}</el-button>
+        <el-form-item :label="t('common.enable')" class="enable-row"><el-switch v-model="editing.enable" /></el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="editorVisible = false">{{ t('common.cancel') }}</el-button>
@@ -196,7 +239,7 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
-import { Download, Pencil, Plus, RotateCw, ShieldCheck, SlidersHorizontal, Trash2, Upload } from 'lucide-vue-next'
+import { Download, Pencil, Plus, RotateCw, Send, ShieldCheck, SlidersHorizontal, Trash2, Upload } from 'lucide-vue-next'
 import { api } from '../api'
 import PageHeader from '../components/PageHeader.vue'
 import ModuleBanner from '../components/ModuleBanner.vue'
@@ -246,13 +289,40 @@ interface Cert {
   keyPem: string
   issuerPem: string
   mapping: { enable: boolean; dir: string; script: string }
+  deploys: Deploy[]
   updatedAt?: string
+}
+
+// Deploy 是证书变化后自动执行的部署目标：经 SSH 上传到远程主机，或重启本机容器
+interface Deploy {
+  enable: boolean
+  type: 'ssh' | 'docker'
+  remark: string
+  connection: string
+  dir: string
+  command: string
+  containers: string[]
+  deployedHash?: string
+  deployedAt?: string
+}
+
+interface DeployState {
+  running: boolean
+  lastError?: string
+  nextRetry?: string
 }
 
 interface CertView extends Cert {
   key: string
   info?: { domains: string[]; issuer: string; notBefore: string; notAfter: string }
-  state: { obtaining: boolean; lastError?: string; nextRetry?: string; mappingNote?: string }
+  state: { obtaining: boolean; lastError?: string; nextRetry?: string; mappingNote?: string; deploys?: DeployState[] }
+}
+
+// DeployTargets 对应 GET /api/ssl/deploy-targets
+interface DeployTargets {
+  ssh: { key: string; name: string; host: string; trusted: boolean }[]
+  containers: string[]
+  containersError?: string
 }
 
 const certs = ref<CertView[]>([])
@@ -274,6 +344,8 @@ const settings = ref<RenewSettings>()
 // renewSettings 为当前生效的续签设置，用于显示横幅
 const renewSettings = ref<RenewSettings>()
 const enabling = ref(false)
+const targets = ref<DeployTargets>({ ssh: [], containers: [] })
+const deploying = ref('')
 const { t } = useI18n()
 const { isMobile, labelPosition } = useFormLayout()
 let timer: number | undefined
@@ -315,6 +387,72 @@ function emptyCert(): Cert {
     keyPem: '',
     issuerPem: '',
     mapping: { enable: false, dir: '', script: '' },
+    deploys: [],
+  }
+}
+
+function addDeploy() {
+  editing.value.deploys.push({ enable: true, type: 'ssh', remark: '', connection: '', dir: '', command: '', containers: [] })
+}
+
+// enabledDeploys 返回启用的部署目标及其下标（运行状态按下标对应）
+function enabledDeploys(c: CertView) {
+  return (c.deploys ?? []).map((deploy, index) => ({ deploy, index })).filter((d) => d.deploy.enable)
+}
+
+// deployTitle 返回部署目标的显示名：备注优先，否则显示主机或容器
+function deployTitle(d: Deploy) {
+  if (d.remark) {
+    return d.remark
+  }
+  if (d.type === 'docker') {
+    return t('ssl.deployDockerTitle', { names: (d.containers ?? []).join(', ') })
+  }
+  const name = targets.value.ssh.find((o) => o.key === d.connection)?.name ?? d.connection
+  return `${name}:${d.dir}`
+}
+
+// deployLine 计算部署目标的状态文字与样式
+function deployLine(c: CertView, i: number): { text: string; cls: string } {
+  const st = c.state.deploys?.[i]
+  const d = c.deploys[i]
+  if (st?.running) {
+    return { text: t('ssl.deployRunning'), cls: 'pending' }
+  }
+  if (st?.lastError) {
+    const retry = st.nextRetry ? t('ssl.deployRetryAt', { time: new Date(st.nextRetry).toLocaleString() }) : ''
+    return { text: t('ssl.deployFailed', { error: st.lastError }) + retry, cls: 'error' }
+  }
+  if (d.deployedAt) {
+    return { text: t('ssl.deployedAt', { time: new Date(d.deployedAt).toLocaleString() }), cls: 'ok' }
+  }
+  return { text: t('ssl.deployPending'), cls: 'pending' }
+}
+
+async function loadTargets() {
+  try {
+    targets.value = await api.get<DeployTargets>('/api/ssl/deploy-targets')
+  } catch {
+    targets.value = { ssh: [], containers: [] }
+  }
+}
+
+// deployNow 立即部署到全部启用的目标，逐个提示结果
+async function deployNow(c: CertView) {
+  deploying.value = c.key
+  try {
+    const res = await api.post<{ index: number; name: string; ok: boolean; error?: string }[]>(`/api/ssl/certs/${c.key}/deploy`)
+    const failed = res.filter((r) => !r.ok)
+    if (failed.length) {
+      ElMessage.error(failed.map((r) => `${r.name}: ${r.error}`).join('\n'))
+    } else {
+      ElMessage.success(t('ssl.deployDone', { count: res.length }))
+    }
+  } catch (e) {
+    ElMessage.error((e as Error).message)
+  } finally {
+    deploying.value = ''
+    await load()
   }
 }
 
@@ -364,9 +502,11 @@ function openEditor(row?: CertView) {
     editing.value = JSON.parse(JSON.stringify(cert))
     // 旧配置没有验证方式字段，视为 DNS 验证
     editing.value.acme.challenge ||= 'dns'
+    editing.value.deploys = (editing.value.deploys ?? []).map((d) => ({ ...d, containers: d.containers ?? [] }))
   } else {
     editing.value = emptyCert()
   }
+  loadTargets()
   extra.value = { ...(editing.value.acme.credentials.extra ?? {}) }
   editorVisible.value = true
 }
@@ -469,6 +609,7 @@ async function saveSettings() {
 
 onMounted(async () => {
   loadRenew()
+  loadTargets()
   providers.value = await api.get<ProviderMeta[]>('/api/ssl/providers')
   await load()
   timer = window.setInterval(load, 5000)
@@ -503,6 +644,70 @@ onBeforeUnmount(() => window.clearInterval(timer))
 .file-pick input {
   display: none;
 }
+.deploy-help {
+  margin: -6px 0 12px;
+}
+.deploy-box {
+  border: 1px solid var(--g-border);
+  border-radius: 8px;
+  padding: 10px 10px 0;
+  margin-bottom: 10px;
+}
+.deploy-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.deploy-remark {
+  width: 200px;
+}
+.full {
+  width: 100%;
+}
+.opt-meta {
+  margin-left: 8px;
+  font-size: 12px;
+  color: var(--el-text-color-secondary);
+}
+.opt-warn {
+  margin-left: 8px;
+  font-size: 12px;
+  color: var(--el-color-warning);
+}
+.form-help.warn {
+  color: var(--el-color-warning);
+}
+.enable-row {
+  margin-top: 16px;
+}
+.deploy-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  font-size: 12px;
+}
+.deploy-line .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--el-text-color-placeholder);
+}
+.deploy-line.ok .dot {
+  background: var(--el-color-success);
+}
+.deploy-line.error .dot {
+  background: var(--el-color-danger);
+}
+.deploy-line.error .meta {
+  color: var(--el-color-danger);
+  word-break: break-all;
+}
+.deploy-line.pending .dot {
+  background: var(--el-color-warning);
+}
 .el-checkbox {
   white-space: normal;
   height: auto;
@@ -512,6 +717,11 @@ onBeforeUnmount(() => window.clearInterval(timer))
   .w-260,
   .w-160 {
     width: 100%;
+  }
+  .deploy-remark {
+    width: auto;
+    flex: 1;
+    min-width: 120px;
   }
 }
 </style>
