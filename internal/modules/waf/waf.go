@@ -148,6 +148,16 @@ func splitLines(s string) []string {
 	return out
 }
 
+// lfiRulesFile 是 CRS 的本地文件包含（LFI）规则文件。
+const lfiRulesFile = "REQUEST-930-APPLICATION-ATTACK-LFI.conf"
+
+// jsonNamesLFIExclusion 让规则 930120 不再检查 JSON 请求体的字段名。
+// Coraza 把 JSON 字段名展开为 json.credentials.secret、json.default.forwardAuth 这样的形式，
+// 其中的 “.credentials”“.forward”“.history”“.profile” 等片段会命中 CRS 的敏感文件名单，
+// 导致提交普通 JSON（例如 Gately 自身的 DDNS、Web 服务配置）被判为文件访问攻击而拦截。
+// 字段值仍按原规则检查，攻击载荷通常位于值中，不受影响。
+const jsonNamesLFIExclusion = "SecRuleUpdateTargetById 930120 \"!ARGS_NAMES:/^json\\./\"\n"
+
 // directives 生成实例的 SecLang 指令。
 func (in *Instance) directives() (string, error) {
 	var b strings.Builder
@@ -176,6 +186,9 @@ func (in *Instance) directives() (string, error) {
 		if !included[f] {
 			included[f] = true
 			b.WriteString("Include @owasp_crs/" + f + "\n")
+			if f == lfiRulesFile {
+				b.WriteString(jsonNamesLFIExclusion)
+			}
 		}
 	}
 	for _, rs := range in.RuleSets {

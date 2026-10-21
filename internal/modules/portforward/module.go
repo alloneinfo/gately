@@ -99,13 +99,23 @@ func (m *Module) stopRuleLocked(key string) {
 	if r, ok := m.runners[key]; ok {
 		r.stop()
 		delete(m.runners, key)
-		r.log.Infof("已停止")
+		r.current().log.Infof("已停止")
 	}
 	delete(m.errors, key)
 }
 
 // restartLocked 按当前配置重启一条规则（规则不存在或已禁用时只停止）。
+// 监听参数不变时只热替换目标与路由表，不断开已有连接：管理界面本身可能正经由这条规则访问，
+// 重启会把正在等待响应的保存请求一起断开。
 func (m *Module) restartLocked(key string) {
+	if r, ok := m.runners[key]; ok && m.cfg.Settings.Enable {
+		for _, rule := range m.cfg.Rules {
+			if rule.Key == key && rule.Enable && r.canUpdate(rule, m.cfg.Settings) {
+				r.update(rule, m.cfg.Settings, m.logs.Logger(ruleLabel(rule)))
+				return
+			}
+		}
+	}
 	m.stopRuleLocked(key)
 	if !m.cfg.Settings.Enable {
 		return
@@ -187,16 +197,9 @@ func (m *Module) handlePutSettings(w http.ResponseWriter, r *http.Request) {
 		httpx.Error(w, http.StatusInternalServerError, "保存失败: %v", err)
 		return
 	}
-	// 全局参数影响所有规则，整体重启
-	for key := range m.runners {
-		m.stopRuleLocked(key)
-	}
-	if s.Enable {
-		for _, rule := range m.cfg.Rules {
-			if rule.Enable {
-				m.startRuleLocked(rule)
-			}
-		}
+	// 全局参数影响所有规则：逐条应用，连接上限等监听参数变化的规则才重启
+	for _, rule := range m.cfg.Rules {
+		m.restartLocked(rule.Key)
 	}
 	httpx.OK(w, s)
 }

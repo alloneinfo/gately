@@ -204,8 +204,8 @@ func TestTCPFailoverToSecondTarget(t *testing.T) {
 	}
 	r := testRunner(rule)
 	// 直接替换目标列表，让轮询从不可达地址开始
-	r.picker.hosts = []string{"192.0.2.1", "127.0.0.1"}
-	r.settings.DialTimeout = 1
+	r.current().picker.hosts = []string{"192.0.2.1", "127.0.0.1"}
+	r.current().settings.DialTimeout = 1
 	if err := r.start(context.Background()); err != nil {
 		t.Fatal(err)
 	}

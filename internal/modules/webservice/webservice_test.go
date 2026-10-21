@@ -2,6 +2,7 @@ package webservice
 
 import (
 	"bufio"
+	"context"
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
@@ -680,5 +681,51 @@ func TestHTTP3Listener(t *testing.T) {
 	resp.Body.Close()
 	if string(body) != "h3 ok" || resp.ProtoMajor != 3 {
 		t.Fatalf("HTTP/3 访问异常: proto=%d body=%q", resp.ProtoMajor, body)
+	}
+}
+
+func TestPutSettingsKeepsConnections(t *testing.T) {
+	st, _ := config.Open(t.TempDir())
+	m := New(nil, nil)
+	if err := m.Init(module.Env{Store: st, Logs: logbuf.New(50, log.New(io.Discard, "", 0))}); err != nil {
+		t.Fatal(err)
+	}
+	ln, _ := net.Listen("tcp4", "127.0.0.1:0")
+	port := ln.Addr().(*net.TCPAddr).Port
+	ln.Close()
+	l := Listener{Key: "l1", Enable: true, ListenIP: "127.0.0.1", Network: "tcp4", Port: port,
+		Sites: []Site{{Enable: true, Domains: []string{"a.test"}, Type: TypeText, Text: "ok"}}}
+	if err := l.Validate(); err != nil {
+		t.Fatal(err)
+	}
+	m.cfg.Listeners = []Listener{l}
+	if err := m.Start(t.Context()); err != nil {
+		t.Fatal(err)
+	}
+	defer m.Stop()
+
+	// 统计拨号次数：保存设置后复用原连接说明监听器与已有连接未被关闭
+	var dials atomic.Int32
+	c := &http.Client{Transport: &http.Transport{DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
+		dials.Add(1)
+		return (&net.Dialer{}).DialContext(ctx, network, addr)
+	}}}
+	addr := fmt.Sprintf("127.0.0.1:%d", port)
+	if resp, body := get(t, c, addr, "a.test", "/", nil); resp.StatusCode != 200 || body != "ok" {
+		t.Fatalf("首次请求异常: %d %q", resp.StatusCode, body)
+	}
+	raw, _ := json.Marshal(Settings{Enable: true, AutoBanSeconds: 60})
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest("PUT", "/settings", strings.NewReader(string(raw)))
+	req.Header.Set("Content-Type", "application/json")
+	m.handlePutSettings(rec, req)
+	if rec.Code != 200 {
+		t.Fatalf("保存设置失败: %d %s", rec.Code, rec.Body.String())
+	}
+	if resp, body := get(t, c, addr, "a.test", "/", nil); resp.StatusCode != 200 || body != "ok" {
+		t.Fatalf("保存设置后请求异常: %d %q", resp.StatusCode, body)
+	}
+	if n := dials.Load(); n != 1 {
+		t.Fatalf("保存设置后连接被断开，共拨号 %d 次", n)
 	}
 }

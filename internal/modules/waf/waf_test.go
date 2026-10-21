@@ -153,3 +153,42 @@ func TestImportRealSample(t *testing.T) {
 		t.Logf("%s(%s) LFI 拦截=%v", in.Name, in.Key, status(t, h, "/?f="+url.QueryEscape("../../etc/passwd")) == 403)
 	}
 }
+
+// postJSON 以 JSON 请求体提交，返回状态码。
+func postJSON(t *testing.T, h http.Handler, body string) int {
+	t.Helper()
+	req := httptest.NewRequest("PUT", "/api/x", strings.NewReader(body))
+	req.Header.Set("User-Agent", "Mozilla/5.0")
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("Content-Type", "application/json")
+	req.RemoteAddr = "203.0.113.7:4000"
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+	return rec.Code
+}
+
+func TestJSONFieldNamesNotLFI(t *testing.T) {
+	// 与 hk_main 的 waf-main 一样只启用 LFI 规则，阈值取 CRS 默认的 5：命中一条严重规则即拦截
+	m := newModule(t, Instance{Key: "lfi", Name: "lfi", Enable: true, InboundThreshold: 5, OutboundThreshold: 4,
+		RuleSets: []RuleSet{{Enable: true, Type: RuleCRS, Param: "REQUEST-901-INITIALIZATION.conf\nREQUEST-930-APPLICATION-ATTACK-LFI.conf\nREQUEST-949-BLOCKING-EVALUATION.conf"}}})
+	h := m.Middleware("lfi", ok)
+	// 字段名展开后为 json.credentials.secret、json.default.forwardAuth.url 等，曾被 930120 误判
+	benign := []string{
+		`{"name":"ddns","credentials":{"id":"LTAI","secret":"xxx"}}`,
+		`{"port":443,"default":{"forwardedHeaders":true,"forwardAuth":{"url":"http://127.0.0.1:9091","loginUrl":""}}}`,
+		`{"history":[1,2],"profile":{"secrets":"a"},"bash_alias":"x"}`,
+	}
+	for _, b := range benign {
+		if c := postJSON(t, h, b); c != 200 {
+			t.Errorf("普通 JSON 不应被拦截 %s: %d", b, c)
+		}
+	}
+	// 字段值中的攻击载荷照常拦截
+	if c := postJSON(t, h, `{"file":"../../../../etc/passwd"}`); c != 403 {
+		t.Fatalf("JSON 值中的 LFI 应被拦截: %d", c)
+	}
+	// 非 JSON 参数名不受排除影响
+	if c := status(t, h, "/?"+url.QueryEscape(".bash_history")+"=1"); c != 403 {
+		t.Fatalf("查询参数名中的敏感文件名应被拦截: %d", c)
+	}
+}

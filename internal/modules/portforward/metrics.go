@@ -21,17 +21,17 @@ func (m *Module) Metrics() []module.Sample {
 	}
 	for _, k := range keys {
 		r := m.runners[k]
-		l := map[string]string{"rule": r.rule.Name}
+		l := map[string]string{"rule": r.current().rule.Name}
 		add("gately_portforward_active_connections", "Connections currently open on the port forwarding rule", module.MetricGauge, l, r.stats.ActiveConns.Load())
 	}
 	for _, k := range keys {
 		r := m.runners[k]
-		add("gately_portforward_connections_total", "Connections accepted by the port forwarding rule", module.MetricCounter, map[string]string{"rule": r.rule.Name}, r.stats.TotalConns.Load())
+		add("gately_portforward_connections_total", "Connections accepted by the port forwarding rule", module.MetricCounter, map[string]string{"rule": r.current().rule.Name}, r.stats.TotalConns.Load())
 	}
 	for _, k := range keys {
 		r := m.runners[k]
-		add("gately_portforward_bytes_total", "Bytes relayed by the port forwarding rule", module.MetricCounter, map[string]string{"rule": r.rule.Name, "direction": "in"}, r.stats.BytesIn.Load())
-		add("gately_portforward_bytes_total", "Bytes relayed by the port forwarding rule", module.MetricCounter, map[string]string{"rule": r.rule.Name, "direction": "out"}, r.stats.BytesOut.Load())
+		add("gately_portforward_bytes_total", "Bytes relayed by the port forwarding rule", module.MetricCounter, map[string]string{"rule": r.current().rule.Name, "direction": "in"}, r.stats.BytesIn.Load())
+		add("gately_portforward_bytes_total", "Bytes relayed by the port forwarding rule", module.MetricCounter, map[string]string{"rule": r.current().rule.Name, "direction": "out"}, r.stats.BytesOut.Load())
 	}
 	return out
 }

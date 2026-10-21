@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"slices"
 	"strconv"
 	"strings"
 	"sync"
@@ -321,15 +322,14 @@ func (m *Module) handlePutSettings(w http.ResponseWriter, r *http.Request) {
 	}
 	m.applyOAuthLocked()
 	m.auth.shared.set(s.AuthUsers, s.SSODomain)
-	for key := range m.runners {
-		m.stopLocked(key)
-	}
-	if s.Enable {
-		for _, l := range m.cfg.Listeners {
-			if l.Enable {
-				m.startLocked(l)
-			}
+	// 可信代理在监听层校验 PROXY 协议来源，变化时接收 PROXY 协议的监听器需要重新监听；
+	// 其余设置只需热替换站点表，避免断开正经由这些监听器访问的管理界面（包括本次保存请求）
+	trustedChanged := !slices.Equal(old.TrustedProxies, s.TrustedProxies)
+	for _, l := range m.cfg.Listeners {
+		if trustedChanged && l.AcceptProxyProtocol {
+			m.stopLocked(l.Key)
 		}
+		m.restartLocked(l.Key)
 	}
 	s.AuthSecret = ""
 	for i := range s.OAuthProviders {
