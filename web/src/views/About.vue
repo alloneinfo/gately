@@ -222,6 +222,9 @@ async function checkUpdate() {
     update.value = u
     if (u.hasUpdate) {
       dialog.value?.showRelease(u)
+    } else if (u.comparable === false) {
+      // 版本号无法比较（如开发版），提示最新版本号由用户自行判断
+      ElMessage.warning(t('about.versionIncomparable', { current: u.current, latest: u.latest }))
     } else {
       ElMessage.success(t('about.upToDate') + (u.latest ? t('about.latestRelease', { latest: u.latest }) : ''))
     }

@@ -7,6 +7,7 @@
   "checkUpdate": "檢查更新",
   "newVersion": "發現新版本 {latest}（目前 {current}）",
   "upToDate": "目前已是最新版本",
+  "versionIncomparable": "無法比較目前版本 {current} 與最新版本 {latest}，請自行確認是否需要升級",
   "latestRelease": "（最新發佈 {latest}）",
   "publishedAt": "發佈於 {time}",
   "viewRelease": "查看發佈頁",

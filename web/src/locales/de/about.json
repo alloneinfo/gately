@@ -7,6 +7,7 @@
   "checkUpdate": "Nach Updates suchen",
   "newVersion": "Neue Version {latest} verfügbar (aktuell {current})",
   "upToDate": "Sie verwenden die neueste Version",
+  "versionIncomparable": "Die aktuelle Version {current} lässt sich nicht mit der neuesten Version {latest} vergleichen; prüfen Sie selbst, ob ein Upgrade nötig ist",
   "latestRelease": " (neuestes Release {latest})",
   "publishedAt": "Veröffentlicht {time}",
   "viewRelease": "Release-Seite ansehen",

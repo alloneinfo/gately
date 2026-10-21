@@ -7,6 +7,7 @@
   "checkUpdate": "업데이트 확인",
   "newVersion": "새 버전 {latest}을(를) 찾았습니다 (현재 {current})",
   "upToDate": "현재 최신 버전입니다",
+  "versionIncomparable": "현재 버전 {current}과(와) 최신 버전 {latest}을(를) 비교할 수 없습니다. 업그레이드가 필요한지 직접 확인하세요",
   "latestRelease": "(최신 릴리스 {latest})",
   "publishedAt": "{time}에 릴리스됨",
   "viewRelease": "릴리스 페이지 보기",

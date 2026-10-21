@@ -663,19 +663,19 @@ func (a *App) handleUpgradeUpload(w http.ResponseWriter, r *http.Request) {
 	a.finishUpgrade(w, sup.Executable, to)
 }
 
-// versionNewer 判断版本 a 是否比 b 新。版本格式为 v主.次.修订[-预发布]，无法解析（如 dev）时返回 false。
+// versionNewer 判断版本 a 是否比 b 新。版本格式为 v主.次.修订[.补丁][-预发布]，无法解析（如 dev）时返回 false。
 func versionNewer(a, b string) bool {
 	va, okA := parseVersion(a)
 	vb, okB := parseVersion(b)
 	if !okA || !okB {
 		return false
 	}
-	for i := 0; i < 3; i++ {
+	for i := range va.nums {
 		if va.nums[i] != vb.nums[i] {
 			return va.nums[i] > vb.nums[i]
 		}
 	}
-	// 主版本号相同时，正式版比预发布版新；两者都是预发布版时按字符串比较
+	// 数字部分相同时，正式版比预发布版新；两者都是预发布版时按字符串比较
 	switch {
 	case va.pre == vb.pre:
 		return false
@@ -687,8 +687,18 @@ func versionNewer(a, b string) bool {
 	return va.pre > vb.pre
 }
 
+// versionComparable 判断两个版本号能否比较新旧，用于在检查更新时提示开发版等无法比较的情况。
+func versionComparable(a, b string) bool {
+	_, okA := parseVersion(a)
+	_, okB := parseVersion(b)
+	return okA && okB
+}
+
+// maxVersionParts 是版本号数字部分的最大段数；不足的段按 0 补齐，因此 v0.5.4 与 v0.5.4.0 相同、v0.5.4.1 比 v0.5.4 新。
+const maxVersionParts = 4
+
 type parsedVersion struct {
-	nums [3]int
+	nums [maxVersionParts]int
 	pre  string
 }
 
@@ -702,7 +712,8 @@ func parseVersion(s string) (parsedVersion, bool) {
 		s, v.pre = s[:i], s[i+1:]
 	}
 	parts := strings.Split(s, ".")
-	if len(parts) != 3 {
+	// 至少要有 主.次.修订 三段，最多四段
+	if len(parts) < 3 || len(parts) > maxVersionParts {
 		return v, false
 	}
 	for i, p := range parts {

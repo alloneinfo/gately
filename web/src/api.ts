@@ -251,6 +251,8 @@ export interface UpdateInfo {
   notes: string
   publishedAt: string
   hasUpdate: boolean
+  // 当前版本与最新版本号能否比较新旧（开发版等无法比较时为 false）
+  comparable: boolean
   selfUpgrade: SelfUpgrade
 }
 

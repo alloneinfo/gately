@@ -7,6 +7,7 @@
   "checkUpdate": "アップデートを確認",
   "newVersion": "新しいバージョン {latest} があります（現在 {current}）",
   "upToDate": "最新バージョンです",
+  "versionIncomparable": "現在のバージョン {current} と最新バージョン {latest} を比較できません。アップグレードが必要かご自身で確認してください",
   "latestRelease": "（最新リリース {latest}）",
   "publishedAt": "{time} 公開",
   "viewRelease": "リリースページを開く",

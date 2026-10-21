@@ -172,6 +172,8 @@ func (a *App) handleCheckUpdate(w http.ResponseWriter, r *http.Request) {
 	httpx.OK(w, map[string]any{
 		"current": version.Version, "latest": rel.TagName, "url": rel.HTMLURL, "notes": rel.Body,
 		"publishedAt": rel.PublishedAt, "hasUpdate": versionNewer(rel.TagName, version.Version),
+		// 版本号无法比较（如开发版 dev）时前端提示用户自行确认，避免误报“已是最新”
+		"comparable": versionComparable(rel.TagName, version.Version),
 		// 能否在线升级，前端据此显示“立即升级”或对应部署方式的升级说明
 		"selfUpgrade": a.upgradeSupport(),
 	})
