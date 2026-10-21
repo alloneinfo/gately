@@ -860,6 +860,12 @@
           "certPem": {
             "type": "string"
           },
+          "deploys": {
+            "items": {
+              "$ref": "#/components/schemas/ssl.Deploy"
+            },
+            "type": "array"
+          },
           "enable": {
             "type": "boolean"
           },
@@ -886,6 +892,42 @@
           },
           "updatedAt": {
             "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ssl.Deploy": {
+        "properties": {
+          "command": {
+            "type": "string"
+          },
+          "connection": {
+            "type": "string"
+          },
+          "containers": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "deployedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "deployedHash": {
+            "type": "string"
+          },
+          "dir": {
+            "type": "string"
+          },
+          "enable": {
+            "type": "boolean"
+          },
+          "remark": {
+            "type": "string"
+          },
+          "type": {
             "type": "string"
           }
         },
@@ -1092,6 +1134,12 @@
       },
       "waf.Instance": {
         "properties": {
+          "bodyLimitAction": {
+            "type": "string"
+          },
+          "bodyLimitMB": {
+            "type": "integer"
+          },
           "enable": {
             "type": "boolean"
           },
@@ -1121,6 +1169,9 @@
               "$ref": "#/components/schemas/waf.RuleSet"
             },
             "type": "array"
+          },
+          "skipBodyPaths": {
+            "type": "string"
           }
         },
         "type": "object"
@@ -1252,6 +1303,36 @@
         },
         "type": "object"
       },
+      "webservice.IPList": {
+        "properties": {
+          "count": {
+            "type": "integer"
+          },
+          "enable": {
+            "type": "boolean"
+          },
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "refreshHours": {
+            "type": "integer"
+          },
+          "remark": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "webservice.Listener": {
         "properties": {
           "acceptProxyProtocol": {
@@ -1332,6 +1413,12 @@
           },
           "ipMode": {
             "type": "string"
+          },
+          "ipSets": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
           },
           "prefix": {
             "type": "string"
@@ -1484,6 +1571,12 @@
           },
           "ipMode": {
             "type": "string"
+          },
+          "ipSets": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
           },
           "keepPath": {
             "type": "boolean"
@@ -13604,6 +13697,67 @@
         "x-token-allowed": true
       }
     },
+    "/api/ssl/certs/{key}/deploy": {
+      "post": {
+        "description": "把憑證部署到全部啟用的目標（經 SSH 上傳並執行指令，或重新啟動 Docker 容器），忽略是否已部署與失敗退避，同步回傳每個目標的結果。\n\n所需權限：`ssl:write`。",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "請求參數錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖無效、已過期或未登入"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖缺少所需權限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "立即部署憑證",
+        "tags": [
+          "SSL 憑證"
+        ],
+        "x-required-scope": "ssl:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/ssl/certs/{key}/download": {
       "get": {
         "description": "回傳包含私鑰的檔案，因此需要寫入權限。\n\n所需權限：`ssl:write`。",
@@ -13793,6 +13947,57 @@
           "SSL 憑證"
         ],
         "x-required-scope": "ssl:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/ssl/deploy-targets": {
+      "get": {
+        "description": "回傳 Web 終端中的 SSH 連線（`trusted` 表示已記錄主機金鑰）與本機 Docker 容器名稱。\n\n所需權限：`ssl:read`。",
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "請求參數錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖無效、已過期或未登入"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖缺少所需權限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "列出可選的部署目標",
+        "tags": [
+          "SSL 憑證"
+        ],
+        "x-required-scope": "ssl:read",
         "x-token-allowed": true
       }
     },
@@ -18353,6 +18558,519 @@
           }
         ],
         "summary": "上傳 GeoIP 資料庫（multipart 欄位 file，.mmdb）",
+        "tags": [
+          "Web 服務"
+        ],
+        "x-required-scope": "webservice:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/webservice/import/nginx": {
+      "post": {
+        "description": "請求內容 `{config, apply, enable}`。`config` 為 nginx 設定文字，建議使用 `nginx -T` 的完整輸出；`apply` 為 false 時只回傳轉換預覽。站點依監聽連接埠合併到既有監聽或新增監聽，已存在的網域會略過；`enable` 為 false 時匯入為停用狀態。\n\n所需權限：`webservice:write`。",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "請求參數錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖無效、已過期或未登入"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖缺少所需權限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "匯入 nginx 設定",
+        "tags": [
+          "Web 服務"
+        ],
+        "x-required-scope": "webservice:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/webservice/iplists": {
+      "get": {
+        "description": "所需權限：`webservice:read`。",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/webservice.IPList"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "請求參數錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖無效、已過期或未登入"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖缺少所需權限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "取得订阅 IP 清單列表",
+        "tags": [
+          "Web 服務"
+        ],
+        "x-required-scope": "webservice:read",
+        "x-token-allowed": true
+      },
+      "post": {
+        "description": "所需權限：`webservice:write`。",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/webservice.IPList"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/webservice.IPList"
+                }
+              }
+            },
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "請求參數錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖無效、已過期或未登入"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖缺少所需權限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "新增訂閱 IP 清單",
+        "tags": [
+          "Web 服務"
+        ],
+        "x-required-scope": "webservice:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/webservice/iplists-order": {
+      "put": {
+        "description": "所需權限：`webservice:write`。",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/crud.orderRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "請求參數錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖無效、已過期或未登入"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖缺少所需權限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "調整訂閱 IP 清單排序",
+        "tags": [
+          "Web 服務"
+        ],
+        "x-required-scope": "webservice:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/webservice/iplists/{key}": {
+      "delete": {
+        "description": "所需權限：`webservice:write`。",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "請求參數錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖無效、已過期或未登入"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖缺少所需權限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "刪除訂閱 IP 清單",
+        "tags": [
+          "Web 服務"
+        ],
+        "x-required-scope": "webservice:write",
+        "x-token-allowed": true
+      },
+      "put": {
+        "description": "所需權限：`webservice:write`。",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/webservice.IPList"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/webservice.IPList"
+                }
+              }
+            },
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "請求參數錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖無效、已過期或未登入"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖缺少所需權限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "修改訂閱 IP 清單",
+        "tags": [
+          "Web 服務"
+        ],
+        "x-required-scope": "webservice:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/webservice/iplists/{key}/enable": {
+      "put": {
+        "description": "所需權限：`webservice:write`。",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/crud.enableRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "請求參數錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖無效、已過期或未登入"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖缺少所需權限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "啟用或停用訂閱 IP 清單",
+        "tags": [
+          "Web 服務"
+        ],
+        "x-required-scope": "webservice:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/webservice/iplists/{key}/refresh": {
+      "post": {
+        "description": "忽略重新整理間隔與失敗退避，同步下載並回傳清單狀態；內容無法辨識時保留原清單。\n\n所需權限：`webservice:write`。",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "請求參數錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖無效、已過期或未登入"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖缺少所需權限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "立即重新整理訂閱 IP 清單",
         "tags": [
           "Web 服務"
         ],

@@ -169,6 +169,8 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | PUT | `/api/ssl/certs-order` | `ssl:write` | Zertifikate neu anordnen |
 | POST | `/api/ssl/certs/{key}/renew` | `ssl:write` | Zertifikat sofort ausstellen oder erneuern |
 | GET | `/api/ssl/certs/{key}/download` | `ssl:write` | Zertifikat und privaten Schlüssel herunterladen |
+| POST | `/api/ssl/certs/{key}/deploy` | `ssl:write` | Zertifikat jetzt bereitstellen |
+| GET | `/api/ssl/deploy-targets` | `ssl:read` | Verfügbare Bereitstellungsziele auflisten |
 | GET | `/api/ssl/providers` | `ssl:read` | Unterstützte DNS-Validierungsanbieter auflisten |
 | GET | `/api/ssl/settings` | `ssl:read` | Globale Zertifikatseinstellungen lesen |
 | PUT | `/api/ssl/settings` | `ssl:write` | Globale Zertifikatseinstellungen speichern |
@@ -200,6 +202,14 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | DELETE | `/api/webservice/listeners/{key}` | `webservice:write` | Web-Dienst lauscht löschen |
 | PUT | `/api/webservice/listeners/{key}/enable` | `webservice:write` | Web-Dienst lauscht aktivieren oder deaktivieren |
 | PUT | `/api/webservice/listeners-order` | `webservice:write` | Web-Dienst lauscht neu anordnen |
+| GET | `/api/webservice/iplists` | `webservice:read` | 订阅 IP  auflisten列表 |
+| POST | `/api/webservice/iplists` | `webservice:write` | Abonnierte IP-Liste hinzufügen |
+| PUT | `/api/webservice/iplists/{key}` | `webservice:write` | Abonnierte IP-Liste ändern |
+| DELETE | `/api/webservice/iplists/{key}` | `webservice:write` | Abonnierte IP-Liste löschen |
+| PUT | `/api/webservice/iplists/{key}/enable` | `webservice:write` | Abonnierte IP-Liste aktivieren oder deaktivieren |
+| PUT | `/api/webservice/iplists-order` | `webservice:write` | Abonnierte IP-Liste neu anordnen |
+| POST | `/api/webservice/iplists/{key}/refresh` | `webservice:write` | Abonnierte IP-Liste jetzt aktualisieren |
+| POST | `/api/webservice/import/nginx` | `webservice:write` | nginx-Konfiguration importieren |
 | GET | `/api/webservice/settings` | `webservice:read` | Globale Web-Dienst-Einstellungen lesen |
 | POST | `/api/webservice/totp-secret` | `webservice:write` | Neuen TOTP-Schlüssel für einen gemeinsamen Benutzer erzeugen (nicht gespeichert; wirksam nach dem Speichern) |
 | PUT | `/api/webservice/settings` | `webservice:write` | Globale Web-Dienst-Einstellungen speichern |
@@ -895,6 +905,7 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | `acme` | `ssl.ACMEConfig` |
 | `certFile` | string |
 | `certPem` | string |
+| `deploys` | Array von `ssl.Deploy` |
 | `enable` | boolean |
 | `issuerPem` | string |
 | `key` | string |
@@ -904,6 +915,20 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | `remark` | string |
 | `source` | string |
 | `updatedAt` | Zeit (RFC 3339) |
+
+### ssl.Deploy
+
+| Feld | Typ |
+| --- | --- |
+| `command` | string |
+| `connection` | string |
+| `containers` | Array von string |
+| `deployedAt` | Zeit (RFC 3339) |
+| `deployedHash` | string |
+| `dir` | string |
+| `enable` | boolean |
+| `remark` | string |
+| `type` | string |
 
 ### ssl.Mapping
 
@@ -989,6 +1014,8 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 
 | Feld | Typ |
 | --- | --- |
+| `bodyLimitAction` | string |
+| `bodyLimitMB` | integer |
 | `enable` | boolean |
 | `inboundThreshold` | integer |
 | `key` | string |
@@ -998,6 +1025,7 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | `paranoia` | integer |
 | `remark` | string |
 | `ruleSets` | Array von `waf.RuleSet` |
+| `skipBodyPaths` | string |
 
 ### waf.RuleSet
 
@@ -1058,6 +1086,19 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | `path` | string |
 | `timeout` | integer |
 
+### webservice.IPList
+
+| Feld | Typ |
+| --- | --- |
+| `count` | integer |
+| `enable` | boolean |
+| `key` | string |
+| `name` | string |
+| `refreshHours` | integer |
+| `remark` | string |
+| `updatedAt` | Zeit (RFC 3339) |
+| `url` | string |
+
 ### webservice.Listener
 
 | Feld | Typ |
@@ -1091,6 +1132,7 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | `auth` | string |
 | `ipList` | Array von string |
 | `ipMode` | string |
+| `ipSets` | Array von string |
 | `prefix` | string |
 
 ### webservice.Point
@@ -1155,6 +1197,7 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | `insecureSkipVerify` | boolean |
 | `ipList` | Array von string |
 | `ipMode` | string |
+| `ipSets` | Array von string |
 | `keepPath` | boolean |
 | `key` | string |
 | `lbPolicy` | string |

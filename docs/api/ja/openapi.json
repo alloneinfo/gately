@@ -860,6 +860,12 @@
           "certPem": {
             "type": "string"
           },
+          "deploys": {
+            "items": {
+              "$ref": "#/components/schemas/ssl.Deploy"
+            },
+            "type": "array"
+          },
           "enable": {
             "type": "boolean"
           },
@@ -886,6 +892,42 @@
           },
           "updatedAt": {
             "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ssl.Deploy": {
+        "properties": {
+          "command": {
+            "type": "string"
+          },
+          "connection": {
+            "type": "string"
+          },
+          "containers": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "deployedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "deployedHash": {
+            "type": "string"
+          },
+          "dir": {
+            "type": "string"
+          },
+          "enable": {
+            "type": "boolean"
+          },
+          "remark": {
+            "type": "string"
+          },
+          "type": {
             "type": "string"
           }
         },
@@ -1092,6 +1134,12 @@
       },
       "waf.Instance": {
         "properties": {
+          "bodyLimitAction": {
+            "type": "string"
+          },
+          "bodyLimitMB": {
+            "type": "integer"
+          },
           "enable": {
             "type": "boolean"
           },
@@ -1121,6 +1169,9 @@
               "$ref": "#/components/schemas/waf.RuleSet"
             },
             "type": "array"
+          },
+          "skipBodyPaths": {
+            "type": "string"
           }
         },
         "type": "object"
@@ -1252,6 +1303,36 @@
         },
         "type": "object"
       },
+      "webservice.IPList": {
+        "properties": {
+          "count": {
+            "type": "integer"
+          },
+          "enable": {
+            "type": "boolean"
+          },
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "refreshHours": {
+            "type": "integer"
+          },
+          "remark": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "webservice.Listener": {
         "properties": {
           "acceptProxyProtocol": {
@@ -1332,6 +1413,12 @@
           },
           "ipMode": {
             "type": "string"
+          },
+          "ipSets": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
           },
           "prefix": {
             "type": "string"
@@ -1484,6 +1571,12 @@
           },
           "ipMode": {
             "type": "string"
+          },
+          "ipSets": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
           },
           "keepPath": {
             "type": "boolean"
@@ -13604,6 +13697,67 @@
         "x-token-allowed": true
       }
     },
+    "/api/ssl/certs/{key}/deploy": {
+      "post": {
+        "description": "証明書を有効なすべてのデプロイ先に配布し（SSH でアップロードしてコマンドを実行、または Docker コンテナを再起動）、デプロイ済みかどうかや失敗時の待機を無視して、各デプロイ先の結果を同期的に返します。\n\n必要な権限: `ssl:write`。",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "リクエストパラメーターが不正です"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンが無効、期限切れ、または未ログインです"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンに必要な権限がありません"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "証明書を今すぐデプロイ",
+        "tags": [
+          "SSL 証明書"
+        ],
+        "x-required-scope": "ssl:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/ssl/certs/{key}/download": {
       "get": {
         "description": "秘密鍵を含むファイルを返すため、書き込み権限が必要です。\n\n必要な権限: `ssl:write`。",
@@ -13793,6 +13947,57 @@
           "SSL 証明書"
         ],
         "x-required-scope": "ssl:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/ssl/deploy-targets": {
+      "get": {
+        "description": "Web ターミナルの SSH 接続（`trusted` はホスト鍵が記録済みであることを示します）とローカルの Docker コンテナ名を返します。\n\n必要な権限: `ssl:read`。",
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "リクエストパラメーターが不正です"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンが無効、期限切れ、または未ログインです"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンに必要な権限がありません"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "選択できるデプロイ先を一覧表示",
+        "tags": [
+          "SSL 証明書"
+        ],
+        "x-required-scope": "ssl:read",
         "x-token-allowed": true
       }
     },
@@ -18353,6 +18558,519 @@
           }
         ],
         "summary": "GeoIP データベースをアップロード（multipart フィールド file、.mmdb）",
+        "tags": [
+          "Web サービス"
+        ],
+        "x-required-scope": "webservice:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/webservice/import/nginx": {
+      "post": {
+        "description": "リクエストボディは `{config, apply, enable}`。`config` は nginx の設定テキストで、`nginx -T` の出力全体を推奨します。`apply` が false の場合はプレビューのみ返します。サイトは同じポートの既存リスナーまたは新しいリスナーに追加され、既存のドメインはスキップされます。`enable` が false の場合は無効の状態でインポートします。\n\n必要な権限: `webservice:write`。",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "リクエストパラメーターが不正です"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンが無効、期限切れ、または未ログインです"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンに必要な権限がありません"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "nginx 設定をインポート",
+        "tags": [
+          "Web サービス"
+        ],
+        "x-required-scope": "webservice:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/webservice/iplists": {
+      "get": {
+        "description": "必要な権限: `webservice:read`。",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/webservice.IPList"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "リクエストパラメーターが不正です"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンが無効、期限切れ、または未ログインです"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンに必要な権限がありません"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "订阅 IP  の一覧を取得列表",
+        "tags": [
+          "Web サービス"
+        ],
+        "x-required-scope": "webservice:read",
+        "x-token-allowed": true
+      },
+      "post": {
+        "description": "必要な権限: `webservice:write`。",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/webservice.IPList"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/webservice.IPList"
+                }
+              }
+            },
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "リクエストパラメーターが不正です"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンが無効、期限切れ、または未ログインです"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンに必要な権限がありません"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "購読 IP リスト を追加",
+        "tags": [
+          "Web サービス"
+        ],
+        "x-required-scope": "webservice:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/webservice/iplists-order": {
+      "put": {
+        "description": "必要な権限: `webservice:write`。",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/crud.orderRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "リクエストパラメーターが不正です"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンが無効、期限切れ、または未ログインです"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンに必要な権限がありません"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "購読 IP リスト の並び順を変更",
+        "tags": [
+          "Web サービス"
+        ],
+        "x-required-scope": "webservice:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/webservice/iplists/{key}": {
+      "delete": {
+        "description": "必要な権限: `webservice:write`。",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "リクエストパラメーターが不正です"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンが無効、期限切れ、または未ログインです"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンに必要な権限がありません"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "購読 IP リスト を削除",
+        "tags": [
+          "Web サービス"
+        ],
+        "x-required-scope": "webservice:write",
+        "x-token-allowed": true
+      },
+      "put": {
+        "description": "必要な権限: `webservice:write`。",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/webservice.IPList"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/webservice.IPList"
+                }
+              }
+            },
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "リクエストパラメーターが不正です"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンが無効、期限切れ、または未ログインです"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンに必要な権限がありません"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "購読 IP リスト を更新",
+        "tags": [
+          "Web サービス"
+        ],
+        "x-required-scope": "webservice:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/webservice/iplists/{key}/enable": {
+      "put": {
+        "description": "必要な権限: `webservice:write`。",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/crud.enableRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "リクエストパラメーターが不正です"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンが無効、期限切れ、または未ログインです"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンに必要な権限がありません"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "購読 IP リスト の有効/無効を切り替え",
+        "tags": [
+          "Web サービス"
+        ],
+        "x-required-scope": "webservice:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/webservice/iplists/{key}/refresh": {
+      "post": {
+        "description": "更新間隔と失敗時の待機を無視して同期的にダウンロードし、リストの状態を返します。内容を解析できない場合は元のリストを保持します。\n\n必要な権限: `webservice:write`。",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "リクエストパラメーターが不正です"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンが無効、期限切れ、または未ログインです"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンに必要な権限がありません"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "購読 IP リストを今すぐ更新",
         "tags": [
           "Web サービス"
         ],

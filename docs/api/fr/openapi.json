@@ -860,6 +860,12 @@
           "certPem": {
             "type": "string"
           },
+          "deploys": {
+            "items": {
+              "$ref": "#/components/schemas/ssl.Deploy"
+            },
+            "type": "array"
+          },
           "enable": {
             "type": "boolean"
           },
@@ -886,6 +892,42 @@
           },
           "updatedAt": {
             "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ssl.Deploy": {
+        "properties": {
+          "command": {
+            "type": "string"
+          },
+          "connection": {
+            "type": "string"
+          },
+          "containers": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "deployedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "deployedHash": {
+            "type": "string"
+          },
+          "dir": {
+            "type": "string"
+          },
+          "enable": {
+            "type": "boolean"
+          },
+          "remark": {
+            "type": "string"
+          },
+          "type": {
             "type": "string"
           }
         },
@@ -1092,6 +1134,12 @@
       },
       "waf.Instance": {
         "properties": {
+          "bodyLimitAction": {
+            "type": "string"
+          },
+          "bodyLimitMB": {
+            "type": "integer"
+          },
           "enable": {
             "type": "boolean"
           },
@@ -1121,6 +1169,9 @@
               "$ref": "#/components/schemas/waf.RuleSet"
             },
             "type": "array"
+          },
+          "skipBodyPaths": {
+            "type": "string"
           }
         },
         "type": "object"
@@ -1252,6 +1303,36 @@
         },
         "type": "object"
       },
+      "webservice.IPList": {
+        "properties": {
+          "count": {
+            "type": "integer"
+          },
+          "enable": {
+            "type": "boolean"
+          },
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "refreshHours": {
+            "type": "integer"
+          },
+          "remark": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "webservice.Listener": {
         "properties": {
           "acceptProxyProtocol": {
@@ -1332,6 +1413,12 @@
           },
           "ipMode": {
             "type": "string"
+          },
+          "ipSets": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
           },
           "prefix": {
             "type": "string"
@@ -1484,6 +1571,12 @@
           },
           "ipMode": {
             "type": "string"
+          },
+          "ipSets": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
           },
           "keepPath": {
             "type": "boolean"
@@ -13604,6 +13697,67 @@
         "x-token-allowed": true
       }
     },
+    "/api/ssl/certs/{key}/deploy": {
+      "post": {
+        "description": "Déploie le certificat vers toutes les cibles actives (envoi par SSH puis commande, ou redémarrage de conteneurs Docker), sans tenir compte d'un déploiement antérieur ni du délai après échec, et renvoie le résultat de chaque cible de façon synchrone.\n\nPermission requise : `ssl:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succès"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Paramètres de requête incorrects"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Jeton invalide, expiré ou non connecté"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Il manque au jeton la permission requise"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Déployer un certificat maintenant",
+        "tags": [
+          "Certificat SSL"
+        ],
+        "x-required-scope": "ssl:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/ssl/certs/{key}/download": {
       "get": {
         "description": "Renvoie un fichier contenant la clé privée, la permission d'écriture est donc requise.\n\nPermission requise : `ssl:write`.",
@@ -13793,6 +13947,57 @@
           "Certificat SSL"
         ],
         "x-required-scope": "ssl:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/ssl/deploy-targets": {
+      "get": {
+        "description": "Renvoie les connexions SSH du terminal web (`trusted` indique que la clé d'hôte est enregistrée) et les noms des conteneurs Docker locaux.\n\nPermission requise : `ssl:read`.",
+        "responses": {
+          "200": {
+            "description": "Succès"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Paramètres de requête incorrects"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Jeton invalide, expiré ou non connecté"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Il manque au jeton la permission requise"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Lister les cibles de déploiement disponibles",
+        "tags": [
+          "Certificat SSL"
+        ],
+        "x-required-scope": "ssl:read",
         "x-token-allowed": true
       }
     },
@@ -18353,6 +18558,519 @@
           }
         ],
         "summary": "Téléverser la base GeoIP (champ multipart file, .mmdb)",
+        "tags": [
+          "Service Web"
+        ],
+        "x-required-scope": "webservice:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/webservice/import/nginx": {
+      "post": {
+        "description": "Corps `{config, apply, enable}`. `config` est le texte de configuration nginx, idéalement la sortie complète de `nginx -T` ; si `apply` vaut false, seul un aperçu est renvoyé. Les sites sont ajoutés à une écoute existante sur le même port ou à une nouvelle écoute, les domaines existants sont ignorés ; si `enable` vaut false, l'import reste désactivé.\n\nPermission requise : `webservice:write`.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succès"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Paramètres de requête incorrects"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Jeton invalide, expiré ou non connecté"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Il manque au jeton la permission requise"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Importer une configuration nginx",
+        "tags": [
+          "Service Web"
+        ],
+        "x-required-scope": "webservice:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/webservice/iplists": {
+      "get": {
+        "description": "Permission requise : `webservice:read`.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/webservice.IPList"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Succès"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Paramètres de requête incorrects"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Jeton invalide, expiré ou non connecté"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Il manque au jeton la permission requise"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Lister Liste d'IP abonnée",
+        "tags": [
+          "Service Web"
+        ],
+        "x-required-scope": "webservice:read",
+        "x-token-allowed": true
+      },
+      "post": {
+        "description": "Permission requise : `webservice:write`.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/webservice.IPList"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/webservice.IPList"
+                }
+              }
+            },
+            "description": "Succès"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Paramètres de requête incorrects"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Jeton invalide, expiré ou non connecté"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Il manque au jeton la permission requise"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Ajouter Liste d'IP abonnée",
+        "tags": [
+          "Service Web"
+        ],
+        "x-required-scope": "webservice:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/webservice/iplists-order": {
+      "put": {
+        "description": "Permission requise : `webservice:write`.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/crud.orderRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succès"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Paramètres de requête incorrects"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Jeton invalide, expiré ou non connecté"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Il manque au jeton la permission requise"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Réordonner Liste d'IP abonnée",
+        "tags": [
+          "Service Web"
+        ],
+        "x-required-scope": "webservice:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/webservice/iplists/{key}": {
+      "delete": {
+        "description": "Permission requise : `webservice:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succès"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Paramètres de requête incorrects"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Jeton invalide, expiré ou non connecté"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Il manque au jeton la permission requise"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Supprimer Liste d'IP abonnée",
+        "tags": [
+          "Service Web"
+        ],
+        "x-required-scope": "webservice:write",
+        "x-token-allowed": true
+      },
+      "put": {
+        "description": "Permission requise : `webservice:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/webservice.IPList"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/webservice.IPList"
+                }
+              }
+            },
+            "description": "Succès"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Paramètres de requête incorrects"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Jeton invalide, expiré ou non connecté"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Il manque au jeton la permission requise"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Modifier Liste d'IP abonnée",
+        "tags": [
+          "Service Web"
+        ],
+        "x-required-scope": "webservice:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/webservice/iplists/{key}/enable": {
+      "put": {
+        "description": "Permission requise : `webservice:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/crud.enableRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succès"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Paramètres de requête incorrects"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Jeton invalide, expiré ou non connecté"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Il manque au jeton la permission requise"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Activer ou désactiver Liste d'IP abonnée",
+        "tags": [
+          "Service Web"
+        ],
+        "x-required-scope": "webservice:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/webservice/iplists/{key}/refresh": {
+      "post": {
+        "description": "Ignore l'intervalle d'actualisation et le délai après échec, télécharge de façon synchrone et renvoie l'état de la liste ; si le contenu est illisible, la liste précédente est conservée.\n\nPermission requise : `webservice:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succès"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Paramètres de requête incorrects"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Jeton invalide, expiré ou non connecté"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Il manque au jeton la permission requise"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Actualiser maintenant une liste d'IP abonnée",
         "tags": [
           "Service Web"
         ],

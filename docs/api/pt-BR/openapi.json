@@ -860,6 +860,12 @@
           "certPem": {
             "type": "string"
           },
+          "deploys": {
+            "items": {
+              "$ref": "#/components/schemas/ssl.Deploy"
+            },
+            "type": "array"
+          },
           "enable": {
             "type": "boolean"
           },
@@ -886,6 +892,42 @@
           },
           "updatedAt": {
             "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ssl.Deploy": {
+        "properties": {
+          "command": {
+            "type": "string"
+          },
+          "connection": {
+            "type": "string"
+          },
+          "containers": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "deployedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "deployedHash": {
+            "type": "string"
+          },
+          "dir": {
+            "type": "string"
+          },
+          "enable": {
+            "type": "boolean"
+          },
+          "remark": {
+            "type": "string"
+          },
+          "type": {
             "type": "string"
           }
         },
@@ -1092,6 +1134,12 @@
       },
       "waf.Instance": {
         "properties": {
+          "bodyLimitAction": {
+            "type": "string"
+          },
+          "bodyLimitMB": {
+            "type": "integer"
+          },
           "enable": {
             "type": "boolean"
           },
@@ -1121,6 +1169,9 @@
               "$ref": "#/components/schemas/waf.RuleSet"
             },
             "type": "array"
+          },
+          "skipBodyPaths": {
+            "type": "string"
           }
         },
         "type": "object"
@@ -1252,6 +1303,36 @@
         },
         "type": "object"
       },
+      "webservice.IPList": {
+        "properties": {
+          "count": {
+            "type": "integer"
+          },
+          "enable": {
+            "type": "boolean"
+          },
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "refreshHours": {
+            "type": "integer"
+          },
+          "remark": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "webservice.Listener": {
         "properties": {
           "acceptProxyProtocol": {
@@ -1332,6 +1413,12 @@
           },
           "ipMode": {
             "type": "string"
+          },
+          "ipSets": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
           },
           "prefix": {
             "type": "string"
@@ -1484,6 +1571,12 @@
           },
           "ipMode": {
             "type": "string"
+          },
+          "ipSets": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
           },
           "keepPath": {
             "type": "boolean"
@@ -13604,6 +13697,67 @@
         "x-token-allowed": true
       }
     },
+    "/api/ssl/certs/{key}/deploy": {
+      "post": {
+        "description": "Implanta o certificado em todos os destinos ativos (envio via SSH e execução de comando, ou reinício de contêineres Docker), ignorando se já foi implantado e a espera após falhas, e retorna o resultado de cada destino de forma síncrona.\n\nPermissão necessária: `ssl:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parâmetros da requisição inválidos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token inválido, expirado ou sem login"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "O token não tem a permissão necessária"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Implantar um certificado agora",
+        "tags": [
+          "Certificado SSL"
+        ],
+        "x-required-scope": "ssl:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/ssl/certs/{key}/download": {
       "get": {
         "description": "Retorna um arquivo que contém a chave privada, por isso requer permissão de escrita.\n\nPermissão necessária: `ssl:write`.",
@@ -13793,6 +13947,57 @@
           "Certificado SSL"
         ],
         "x-required-scope": "ssl:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/ssl/deploy-targets": {
+      "get": {
+        "description": "Retorna as conexões SSH do terminal web (`trusted` indica que a chave do host está registrada) e os nomes dos contêineres Docker locais.\n\nPermissão necessária: `ssl:read`.",
+        "responses": {
+          "200": {
+            "description": "Sucesso"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parâmetros da requisição inválidos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token inválido, expirado ou sem login"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "O token não tem a permissão necessária"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Listar destinos de implantação disponíveis",
+        "tags": [
+          "Certificado SSL"
+        ],
+        "x-required-scope": "ssl:read",
         "x-token-allowed": true
       }
     },
@@ -18353,6 +18558,519 @@
           }
         ],
         "summary": "Enviar banco de dados GeoIP (campo multipart file, .mmdb)",
+        "tags": [
+          "Serviço web"
+        ],
+        "x-required-scope": "webservice:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/webservice/import/nginx": {
+      "post": {
+        "description": "Corpo `{config, apply, enable}`. `config` é o texto de configuração do nginx, de preferência a saída completa de `nginx -T`; com `apply` false só é retornada uma prévia. Os sites são adicionados a um listener existente na mesma porta ou a um novo, e domínios existentes são ignorados; com `enable` false a importação fica desativada.\n\nPermissão necessária: `webservice:write`.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sucesso"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parâmetros da requisição inválidos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token inválido, expirado ou sem login"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "O token não tem a permissão necessária"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Importar configuração do nginx",
+        "tags": [
+          "Serviço web"
+        ],
+        "x-required-scope": "webservice:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/webservice/iplists": {
+      "get": {
+        "description": "Permissão necessária: `webservice:read`.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/webservice.IPList"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Sucesso"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parâmetros da requisição inválidos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token inválido, expirado ou sem login"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "O token não tem a permissão necessária"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Listar Lista de IP assinada",
+        "tags": [
+          "Serviço web"
+        ],
+        "x-required-scope": "webservice:read",
+        "x-token-allowed": true
+      },
+      "post": {
+        "description": "Permissão necessária: `webservice:write`.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/webservice.IPList"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/webservice.IPList"
+                }
+              }
+            },
+            "description": "Sucesso"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parâmetros da requisição inválidos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token inválido, expirado ou sem login"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "O token não tem a permissão necessária"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Adicionar Lista de IP assinada",
+        "tags": [
+          "Serviço web"
+        ],
+        "x-required-scope": "webservice:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/webservice/iplists-order": {
+      "put": {
+        "description": "Permissão necessária: `webservice:write`.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/crud.orderRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sucesso"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parâmetros da requisição inválidos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token inválido, expirado ou sem login"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "O token não tem a permissão necessária"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Reordenar Lista de IP assinada",
+        "tags": [
+          "Serviço web"
+        ],
+        "x-required-scope": "webservice:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/webservice/iplists/{key}": {
+      "delete": {
+        "description": "Permissão necessária: `webservice:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parâmetros da requisição inválidos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token inválido, expirado ou sem login"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "O token não tem a permissão necessária"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Excluir Lista de IP assinada",
+        "tags": [
+          "Serviço web"
+        ],
+        "x-required-scope": "webservice:write",
+        "x-token-allowed": true
+      },
+      "put": {
+        "description": "Permissão necessária: `webservice:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/webservice.IPList"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/webservice.IPList"
+                }
+              }
+            },
+            "description": "Sucesso"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parâmetros da requisição inválidos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token inválido, expirado ou sem login"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "O token não tem a permissão necessária"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Modificar Lista de IP assinada",
+        "tags": [
+          "Serviço web"
+        ],
+        "x-required-scope": "webservice:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/webservice/iplists/{key}/enable": {
+      "put": {
+        "description": "Permissão necessária: `webservice:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/crud.enableRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sucesso"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parâmetros da requisição inválidos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token inválido, expirado ou sem login"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "O token não tem a permissão necessária"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Ativar ou desativar Lista de IP assinada",
+        "tags": [
+          "Serviço web"
+        ],
+        "x-required-scope": "webservice:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/webservice/iplists/{key}/refresh": {
+      "post": {
+        "description": "Ignora o intervalo de atualização e a espera após falhas, baixa de forma síncrona e retorna o status da lista; se o conteúdo não puder ser lido, a lista anterior é mantida.\n\nPermissão necessária: `webservice:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parâmetros da requisição inválidos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token inválido, expirado ou sem login"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "O token não tem a permissão necessária"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Atualizar agora uma lista de IP assinada",
         "tags": [
           "Serviço web"
         ],

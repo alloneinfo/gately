@@ -169,6 +169,8 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | PUT | `/api/ssl/certs-order` | `ssl:write` | 调整证书排序 |
 | POST | `/api/ssl/certs/{key}/renew` | `ssl:write` | 立即签发或续期证书 |
 | GET | `/api/ssl/certs/{key}/download` | `ssl:write` | 下载证书与私钥 |
+| POST | `/api/ssl/certs/{key}/deploy` | `ssl:write` | 立即部署证书 |
+| GET | `/api/ssl/deploy-targets` | `ssl:read` | 列出可选的部署目标 |
 | GET | `/api/ssl/providers` | `ssl:read` | 列出支持的 DNS 验证服务商 |
 | GET | `/api/ssl/settings` | `ssl:read` | 读取证书全局设置 |
 | PUT | `/api/ssl/settings` | `ssl:write` | 保存证书全局设置 |
@@ -200,6 +202,14 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/webservice/listeners/{key}` | `webservice:write` | 删除Web 服务监听 |
 | PUT | `/api/webservice/listeners/{key}/enable` | `webservice:write` | 启用或停用Web 服务监听 |
 | PUT | `/api/webservice/listeners-order` | `webservice:write` | 调整Web 服务监听排序 |
+| GET | `/api/webservice/iplists` | `webservice:read` | 获取订阅 IP 列表列表 |
+| POST | `/api/webservice/iplists` | `webservice:write` | 新增订阅 IP 列表 |
+| PUT | `/api/webservice/iplists/{key}` | `webservice:write` | 修改订阅 IP 列表 |
+| DELETE | `/api/webservice/iplists/{key}` | `webservice:write` | 删除订阅 IP 列表 |
+| PUT | `/api/webservice/iplists/{key}/enable` | `webservice:write` | 启用或停用订阅 IP 列表 |
+| PUT | `/api/webservice/iplists-order` | `webservice:write` | 调整订阅 IP 列表排序 |
+| POST | `/api/webservice/iplists/{key}/refresh` | `webservice:write` | 立即刷新订阅 IP 列表 |
+| POST | `/api/webservice/import/nginx` | `webservice:write` | 导入 nginx 配置 |
 | GET | `/api/webservice/settings` | `webservice:read` | 读取 Web 服务全局设置 |
 | POST | `/api/webservice/totp-secret` | `webservice:write` | 为共享用户生成新的 TOTP 密钥（不保存，保存设置后生效） |
 | PUT | `/api/webservice/settings` | `webservice:write` | 保存 Web 服务全局设置 |
@@ -895,6 +905,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `acme` | `ssl.ACMEConfig` |
 | `certFile` | string |
 | `certPem` | string |
+| `deploys` | 数组 of `ssl.Deploy` |
 | `enable` | boolean |
 | `issuerPem` | string |
 | `key` | string |
@@ -904,6 +915,20 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `remark` | string |
 | `source` | string |
 | `updatedAt` | 时间 (RFC 3339) |
+
+### ssl.Deploy
+
+| 字段 | 类型 |
+| --- | --- |
+| `command` | string |
+| `connection` | string |
+| `containers` | 数组 of string |
+| `deployedAt` | 时间 (RFC 3339) |
+| `deployedHash` | string |
+| `dir` | string |
+| `enable` | boolean |
+| `remark` | string |
+| `type` | string |
 
 ### ssl.Mapping
 
@@ -989,6 +1014,8 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 
 | 字段 | 类型 |
 | --- | --- |
+| `bodyLimitAction` | string |
+| `bodyLimitMB` | integer |
 | `enable` | boolean |
 | `inboundThreshold` | integer |
 | `key` | string |
@@ -998,6 +1025,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `paranoia` | integer |
 | `remark` | string |
 | `ruleSets` | 数组 of `waf.RuleSet` |
+| `skipBodyPaths` | string |
 
 ### waf.RuleSet
 
@@ -1058,6 +1086,19 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `path` | string |
 | `timeout` | integer |
 
+### webservice.IPList
+
+| 字段 | 类型 |
+| --- | --- |
+| `count` | integer |
+| `enable` | boolean |
+| `key` | string |
+| `name` | string |
+| `refreshHours` | integer |
+| `remark` | string |
+| `updatedAt` | 时间 (RFC 3339) |
+| `url` | string |
+
 ### webservice.Listener
 
 | 字段 | 类型 |
@@ -1091,6 +1132,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `auth` | string |
 | `ipList` | 数组 of string |
 | `ipMode` | string |
+| `ipSets` | 数组 of string |
 | `prefix` | string |
 
 ### webservice.Point
@@ -1155,6 +1197,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `insecureSkipVerify` | boolean |
 | `ipList` | 数组 of string |
 | `ipMode` | string |
+| `ipSets` | 数组 of string |
 | `keepPath` | boolean |
 | `key` | string |
 | `lbPolicy` | string |

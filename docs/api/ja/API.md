@@ -169,6 +169,8 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | PUT | `/api/ssl/certs-order` | `ssl:write` | 証明書 の並び順を変更 |
 | POST | `/api/ssl/certs/{key}/renew` | `ssl:write` | 証明書を即時発行または更新 |
 | GET | `/api/ssl/certs/{key}/download` | `ssl:write` | 証明書と秘密鍵をダウンロード |
+| POST | `/api/ssl/certs/{key}/deploy` | `ssl:write` | 証明書を今すぐデプロイ |
+| GET | `/api/ssl/deploy-targets` | `ssl:read` | 選択できるデプロイ先を一覧表示 |
 | GET | `/api/ssl/providers` | `ssl:read` | 対応する DNS 検証プロバイダーを一覧表示 |
 | GET | `/api/ssl/settings` | `ssl:read` | 証明書のグローバル設定を読み取り |
 | PUT | `/api/ssl/settings` | `ssl:write` | 証明書のグローバル設定を保存 |
@@ -200,6 +202,14 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/webservice/listeners/{key}` | `webservice:write` | Web サービスのリッスン を削除 |
 | PUT | `/api/webservice/listeners/{key}/enable` | `webservice:write` | Web サービスのリッスン の有効/無効を切り替え |
 | PUT | `/api/webservice/listeners-order` | `webservice:write` | Web サービスのリッスン の並び順を変更 |
+| GET | `/api/webservice/iplists` | `webservice:read` | 订阅 IP  の一覧を取得列表 |
+| POST | `/api/webservice/iplists` | `webservice:write` | 購読 IP リスト を追加 |
+| PUT | `/api/webservice/iplists/{key}` | `webservice:write` | 購読 IP リスト を更新 |
+| DELETE | `/api/webservice/iplists/{key}` | `webservice:write` | 購読 IP リスト を削除 |
+| PUT | `/api/webservice/iplists/{key}/enable` | `webservice:write` | 購読 IP リスト の有効/無効を切り替え |
+| PUT | `/api/webservice/iplists-order` | `webservice:write` | 購読 IP リスト の並び順を変更 |
+| POST | `/api/webservice/iplists/{key}/refresh` | `webservice:write` | 購読 IP リストを今すぐ更新 |
+| POST | `/api/webservice/import/nginx` | `webservice:write` | nginx 設定をインポート |
 | GET | `/api/webservice/settings` | `webservice:read` | Web サービスのグローバル設定を読み取り |
 | POST | `/api/webservice/totp-secret` | `webservice:write` | 共有ユーザーの新しい TOTP 鍵を生成（保存はせず、設定保存後に有効） |
 | PUT | `/api/webservice/settings` | `webservice:write` | Web サービスのグローバル設定を保存 |
@@ -895,6 +905,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `acme` | `ssl.ACMEConfig` |
 | `certFile` | string |
 | `certPem` | string |
+| `deploys` | 配列 of `ssl.Deploy` |
 | `enable` | boolean |
 | `issuerPem` | string |
 | `key` | string |
@@ -904,6 +915,20 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `remark` | string |
 | `source` | string |
 | `updatedAt` | 時刻 (RFC 3339) |
+
+### ssl.Deploy
+
+| フィールド | 型 |
+| --- | --- |
+| `command` | string |
+| `connection` | string |
+| `containers` | 配列 of string |
+| `deployedAt` | 時刻 (RFC 3339) |
+| `deployedHash` | string |
+| `dir` | string |
+| `enable` | boolean |
+| `remark` | string |
+| `type` | string |
 
 ### ssl.Mapping
 
@@ -989,6 +1014,8 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 
 | フィールド | 型 |
 | --- | --- |
+| `bodyLimitAction` | string |
+| `bodyLimitMB` | integer |
 | `enable` | boolean |
 | `inboundThreshold` | integer |
 | `key` | string |
@@ -998,6 +1025,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `paranoia` | integer |
 | `remark` | string |
 | `ruleSets` | 配列 of `waf.RuleSet` |
+| `skipBodyPaths` | string |
 
 ### waf.RuleSet
 
@@ -1058,6 +1086,19 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `path` | string |
 | `timeout` | integer |
 
+### webservice.IPList
+
+| フィールド | 型 |
+| --- | --- |
+| `count` | integer |
+| `enable` | boolean |
+| `key` | string |
+| `name` | string |
+| `refreshHours` | integer |
+| `remark` | string |
+| `updatedAt` | 時刻 (RFC 3339) |
+| `url` | string |
+
 ### webservice.Listener
 
 | フィールド | 型 |
@@ -1091,6 +1132,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `auth` | string |
 | `ipList` | 配列 of string |
 | `ipMode` | string |
+| `ipSets` | 配列 of string |
 | `prefix` | string |
 
 ### webservice.Point
@@ -1155,6 +1197,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `insecureSkipVerify` | boolean |
 | `ipList` | 配列 of string |
 | `ipMode` | string |
+| `ipSets` | 配列 of string |
 | `keepPath` | boolean |
 | `key` | string |
 | `lbPolicy` | string |

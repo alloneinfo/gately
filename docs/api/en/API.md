@@ -169,6 +169,8 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | PUT | `/api/ssl/certs-order` | `ssl:write` | Reorder Certificate |
 | POST | `/api/ssl/certs/{key}/renew` | `ssl:write` | Issue or renew a certificate immediately |
 | GET | `/api/ssl/certs/{key}/download` | `ssl:write` | Download certificate and private key |
+| POST | `/api/ssl/certs/{key}/deploy` | `ssl:write` | Deploy a certificate now |
+| GET | `/api/ssl/deploy-targets` | `ssl:read` | List available deployment targets |
 | GET | `/api/ssl/providers` | `ssl:read` | List supported DNS validation providers |
 | GET | `/api/ssl/settings` | `ssl:read` | Read certificate global settings |
 | PUT | `/api/ssl/settings` | `ssl:write` | Save certificate global settings |
@@ -200,6 +202,14 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | DELETE | `/api/webservice/listeners/{key}` | `webservice:write` | Delete Web service listening |
 | PUT | `/api/webservice/listeners/{key}/enable` | `webservice:write` | Enable or disable Web service listening |
 | PUT | `/api/webservice/listeners-order` | `webservice:write` | Reorder Web service listening |
+| GET | `/api/webservice/iplists` | `webservice:read` | List Subscribed IP list |
+| POST | `/api/webservice/iplists` | `webservice:write` | Create Subscribed IP list |
+| PUT | `/api/webservice/iplists/{key}` | `webservice:write` | Update Subscribed IP list |
+| DELETE | `/api/webservice/iplists/{key}` | `webservice:write` | Delete Subscribed IP list |
+| PUT | `/api/webservice/iplists/{key}/enable` | `webservice:write` | Enable or disable Subscribed IP list |
+| PUT | `/api/webservice/iplists-order` | `webservice:write` | Reorder Subscribed IP list |
+| POST | `/api/webservice/iplists/{key}/refresh` | `webservice:write` | Refresh a subscribed IP list now |
+| POST | `/api/webservice/import/nginx` | `webservice:write` | Import nginx config |
 | GET | `/api/webservice/settings` | `webservice:read` | Read Web service global settings |
 | POST | `/api/webservice/totp-secret` | `webservice:write` | Generate a new TOTP key for a shared user (not saved; takes effect after saving settings) |
 | PUT | `/api/webservice/settings` | `webservice:write` | Save Web service global settings |
@@ -895,6 +905,7 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | `acme` | `ssl.ACMEConfig` |
 | `certFile` | string |
 | `certPem` | string |
+| `deploys` | Array of `ssl.Deploy` |
 | `enable` | boolean |
 | `issuerPem` | string |
 | `key` | string |
@@ -904,6 +915,20 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | `remark` | string |
 | `source` | string |
 | `updatedAt` | Time (RFC 3339) |
+
+### ssl.Deploy
+
+| Field | Type |
+| --- | --- |
+| `command` | string |
+| `connection` | string |
+| `containers` | Array of string |
+| `deployedAt` | Time (RFC 3339) |
+| `deployedHash` | string |
+| `dir` | string |
+| `enable` | boolean |
+| `remark` | string |
+| `type` | string |
 
 ### ssl.Mapping
 
@@ -989,6 +1014,8 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 
 | Field | Type |
 | --- | --- |
+| `bodyLimitAction` | string |
+| `bodyLimitMB` | integer |
 | `enable` | boolean |
 | `inboundThreshold` | integer |
 | `key` | string |
@@ -998,6 +1025,7 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | `paranoia` | integer |
 | `remark` | string |
 | `ruleSets` | Array of `waf.RuleSet` |
+| `skipBodyPaths` | string |
 
 ### waf.RuleSet
 
@@ -1058,6 +1086,19 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | `path` | string |
 | `timeout` | integer |
 
+### webservice.IPList
+
+| Field | Type |
+| --- | --- |
+| `count` | integer |
+| `enable` | boolean |
+| `key` | string |
+| `name` | string |
+| `refreshHours` | integer |
+| `remark` | string |
+| `updatedAt` | Time (RFC 3339) |
+| `url` | string |
+
 ### webservice.Listener
 
 | Field | Type |
@@ -1091,6 +1132,7 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | `auth` | string |
 | `ipList` | Array of string |
 | `ipMode` | string |
+| `ipSets` | Array of string |
 | `prefix` | string |
 
 ### webservice.Point
@@ -1155,6 +1197,7 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | `insecureSkipVerify` | boolean |
 | `ipList` | Array of string |
 | `ipMode` | string |
+| `ipSets` | Array of string |
 | `keepPath` | boolean |
 | `key` | string |
 | `lbPolicy` | string |

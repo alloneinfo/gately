@@ -169,6 +169,8 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | PUT | `/api/ssl/certs-order` | `ssl:write` | Изменить порядок: Сертификат |
 | POST | `/api/ssl/certs/{key}/renew` | `ssl:write` | Немедленно выпустить или продлить сертификат |
 | GET | `/api/ssl/certs/{key}/download` | `ssl:write` | Скачать сертификат и закрытый ключ |
+| POST | `/api/ssl/certs/{key}/deploy` | `ssl:write` | Развернуть сертификат сейчас |
+| GET | `/api/ssl/deploy-targets` | `ssl:read` | Список доступных целей развёртывания |
 | GET | `/api/ssl/providers` | `ssl:read` | Список поддерживаемых провайдеров DNS-проверки |
 | GET | `/api/ssl/settings` | `ssl:read` | Чтение глобальных настроек сертификатов |
 | PUT | `/api/ssl/settings` | `ssl:write` | Сохранить глобальные настройки сертификатов |
@@ -200,6 +202,14 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/webservice/listeners/{key}` | `webservice:write` | Удалить: Прослушивание веб-службы |
 | PUT | `/api/webservice/listeners/{key}/enable` | `webservice:write` | Включить или отключить: Прослушивание веб-службы |
 | PUT | `/api/webservice/listeners-order` | `webservice:write` | Изменить порядок: Прослушивание веб-службы |
+| GET | `/api/webservice/iplists` | `webservice:read` | Список: Подписной список IP |
+| POST | `/api/webservice/iplists` | `webservice:write` | Добавить: Подписной список IP |
+| PUT | `/api/webservice/iplists/{key}` | `webservice:write` | Изменить: Подписной список IP |
+| DELETE | `/api/webservice/iplists/{key}` | `webservice:write` | Удалить: Подписной список IP |
+| PUT | `/api/webservice/iplists/{key}/enable` | `webservice:write` | Включить или отключить: Подписной список IP |
+| PUT | `/api/webservice/iplists-order` | `webservice:write` | Изменить порядок: Подписной список IP |
+| POST | `/api/webservice/iplists/{key}/refresh` | `webservice:write` | Обновить подписной список IP сейчас |
+| POST | `/api/webservice/import/nginx` | `webservice:write` | Импорт конфигурации nginx |
 | GET | `/api/webservice/settings` | `webservice:read` | Чтение глобальных настроек веб-службы |
 | POST | `/api/webservice/totp-secret` | `webservice:write` | Создать новый ключ TOTP для общего пользователя (не сохраняется; действует после сохранения настроек) |
 | PUT | `/api/webservice/settings` | `webservice:write` | Сохранить глобальные настройки веб-службы |
@@ -895,6 +905,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `acme` | `ssl.ACMEConfig` |
 | `certFile` | string |
 | `certPem` | string |
+| `deploys` | Массив из `ssl.Deploy` |
 | `enable` | boolean |
 | `issuerPem` | string |
 | `key` | string |
@@ -904,6 +915,20 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `remark` | string |
 | `source` | string |
 | `updatedAt` | Время (RFC 3339) |
+
+### ssl.Deploy
+
+| Поле | Тип |
+| --- | --- |
+| `command` | string |
+| `connection` | string |
+| `containers` | Массив из string |
+| `deployedAt` | Время (RFC 3339) |
+| `deployedHash` | string |
+| `dir` | string |
+| `enable` | boolean |
+| `remark` | string |
+| `type` | string |
 
 ### ssl.Mapping
 
@@ -989,6 +1014,8 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 
 | Поле | Тип |
 | --- | --- |
+| `bodyLimitAction` | string |
+| `bodyLimitMB` | integer |
 | `enable` | boolean |
 | `inboundThreshold` | integer |
 | `key` | string |
@@ -998,6 +1025,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `paranoia` | integer |
 | `remark` | string |
 | `ruleSets` | Массив из `waf.RuleSet` |
+| `skipBodyPaths` | string |
 
 ### waf.RuleSet
 
@@ -1058,6 +1086,19 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `path` | string |
 | `timeout` | integer |
 
+### webservice.IPList
+
+| Поле | Тип |
+| --- | --- |
+| `count` | integer |
+| `enable` | boolean |
+| `key` | string |
+| `name` | string |
+| `refreshHours` | integer |
+| `remark` | string |
+| `updatedAt` | Время (RFC 3339) |
+| `url` | string |
+
 ### webservice.Listener
 
 | Поле | Тип |
@@ -1091,6 +1132,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `auth` | string |
 | `ipList` | Массив из string |
 | `ipMode` | string |
+| `ipSets` | Массив из string |
 | `prefix` | string |
 
 ### webservice.Point
@@ -1155,6 +1197,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `insecureSkipVerify` | boolean |
 | `ipList` | Массив из string |
 | `ipMode` | string |
+| `ipSets` | Массив из string |
 | `keepPath` | boolean |
 | `key` | string |
 | `lbPolicy` | string |

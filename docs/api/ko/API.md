@@ -169,6 +169,8 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | PUT | `/api/ssl/certs-order` | `ssl:write` | 인증서 순서 변경 |
 | POST | `/api/ssl/certs/{key}/renew` | `ssl:write` | 인증서 즉시 발급 또는 갱신 |
 | GET | `/api/ssl/certs/{key}/download` | `ssl:write` | 인증서와 개인 키 다운로드 |
+| POST | `/api/ssl/certs/{key}/deploy` | `ssl:write` | 인증서 지금 배포 |
+| GET | `/api/ssl/deploy-targets` | `ssl:read` | 선택 가능한 배포 대상 목록 |
 | GET | `/api/ssl/providers` | `ssl:read` | 지원되는 DNS 검증 서비스 제공자 목록 조회 |
 | GET | `/api/ssl/settings` | `ssl:read` | 인증서 전역 설정 읽기 |
 | PUT | `/api/ssl/settings` | `ssl:write` | 인증서 전역 설정 저장 |
@@ -200,6 +202,14 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/webservice/listeners/{key}` | `webservice:write` | Web 서비스 수신 대기 삭제 |
 | PUT | `/api/webservice/listeners/{key}/enable` | `webservice:write` | Web 서비스 수신 대기 사용 설정/해제 |
 | PUT | `/api/webservice/listeners-order` | `webservice:write` | Web 서비스 수신 대기 순서 변경 |
+| GET | `/api/webservice/iplists` | `webservice:read` | 订阅 IP  목록 조회列表 |
+| POST | `/api/webservice/iplists` | `webservice:write` | 구독 IP 목록 추가 |
+| PUT | `/api/webservice/iplists/{key}` | `webservice:write` | 구독 IP 목록 수정 |
+| DELETE | `/api/webservice/iplists/{key}` | `webservice:write` | 구독 IP 목록 삭제 |
+| PUT | `/api/webservice/iplists/{key}/enable` | `webservice:write` | 구독 IP 목록 사용 설정/해제 |
+| PUT | `/api/webservice/iplists-order` | `webservice:write` | 구독 IP 목록 순서 변경 |
+| POST | `/api/webservice/iplists/{key}/refresh` | `webservice:write` | 구독 IP 목록 지금 새로고침 |
+| POST | `/api/webservice/import/nginx` | `webservice:write` | nginx 설정 가져오기 |
 | GET | `/api/webservice/settings` | `webservice:read` | Web 서비스 전역 설정 읽기 |
 | POST | `/api/webservice/totp-secret` | `webservice:write` | 공유 사용자의 새 TOTP 키 생성(저장하지 않음, 설정 저장 후 적용) |
 | PUT | `/api/webservice/settings` | `webservice:write` | Web 서비스 전역 설정 저장 |
@@ -895,6 +905,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `acme` | `ssl.ACMEConfig` |
 | `certFile` | string |
 | `certPem` | string |
+| `deploys` | Array of `ssl.Deploy` |
 | `enable` | boolean |
 | `issuerPem` | string |
 | `key` | string |
@@ -904,6 +915,20 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `remark` | string |
 | `source` | string |
 | `updatedAt` | 시간 (RFC 3339) |
+
+### ssl.Deploy
+
+| 필드 | 타입 |
+| --- | --- |
+| `command` | string |
+| `connection` | string |
+| `containers` | Array of string |
+| `deployedAt` | 시간 (RFC 3339) |
+| `deployedHash` | string |
+| `dir` | string |
+| `enable` | boolean |
+| `remark` | string |
+| `type` | string |
 
 ### ssl.Mapping
 
@@ -989,6 +1014,8 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 
 | 필드 | 타입 |
 | --- | --- |
+| `bodyLimitAction` | string |
+| `bodyLimitMB` | integer |
 | `enable` | boolean |
 | `inboundThreshold` | integer |
 | `key` | string |
@@ -998,6 +1025,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `paranoia` | integer |
 | `remark` | string |
 | `ruleSets` | Array of `waf.RuleSet` |
+| `skipBodyPaths` | string |
 
 ### waf.RuleSet
 
@@ -1058,6 +1086,19 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `path` | string |
 | `timeout` | integer |
 
+### webservice.IPList
+
+| 필드 | 타입 |
+| --- | --- |
+| `count` | integer |
+| `enable` | boolean |
+| `key` | string |
+| `name` | string |
+| `refreshHours` | integer |
+| `remark` | string |
+| `updatedAt` | 시간 (RFC 3339) |
+| `url` | string |
+
 ### webservice.Listener
 
 | 필드 | 타입 |
@@ -1091,6 +1132,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `auth` | string |
 | `ipList` | Array of string |
 | `ipMode` | string |
+| `ipSets` | Array of string |
 | `prefix` | string |
 
 ### webservice.Point
@@ -1155,6 +1197,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `insecureSkipVerify` | boolean |
 | `ipList` | Array of string |
 | `ipMode` | string |
+| `ipSets` | Array of string |
 | `keepPath` | boolean |
 | `key` | string |
 | `lbPolicy` | string |

@@ -169,6 +169,8 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | PUT | `/api/ssl/certs-order` | `ssl:write` | Reordenar Certificado |
 | POST | `/api/ssl/certs/{key}/renew` | `ssl:write` | Emitir ou renovar o certificado imediatamente |
 | GET | `/api/ssl/certs/{key}/download` | `ssl:write` | Baixar certificado e chave privada |
+| POST | `/api/ssl/certs/{key}/deploy` | `ssl:write` | Implantar um certificado agora |
+| GET | `/api/ssl/deploy-targets` | `ssl:read` | Listar destinos de implantação disponíveis |
 | GET | `/api/ssl/providers` | `ssl:read` | Listar provedores de validação DNS suportados |
 | GET | `/api/ssl/settings` | `ssl:read` | Ler configurações globais de certificados |
 | PUT | `/api/ssl/settings` | `ssl:write` | Salvar configurações globais de certificados |
@@ -200,6 +202,14 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | DELETE | `/api/webservice/listeners/{key}` | `webservice:write` | Excluir Escuta do serviço web |
 | PUT | `/api/webservice/listeners/{key}/enable` | `webservice:write` | Ativar ou desativar Escuta do serviço web |
 | PUT | `/api/webservice/listeners-order` | `webservice:write` | Reordenar Escuta do serviço web |
+| GET | `/api/webservice/iplists` | `webservice:read` | Listar Lista de IP assinada |
+| POST | `/api/webservice/iplists` | `webservice:write` | Adicionar Lista de IP assinada |
+| PUT | `/api/webservice/iplists/{key}` | `webservice:write` | Modificar Lista de IP assinada |
+| DELETE | `/api/webservice/iplists/{key}` | `webservice:write` | Excluir Lista de IP assinada |
+| PUT | `/api/webservice/iplists/{key}/enable` | `webservice:write` | Ativar ou desativar Lista de IP assinada |
+| PUT | `/api/webservice/iplists-order` | `webservice:write` | Reordenar Lista de IP assinada |
+| POST | `/api/webservice/iplists/{key}/refresh` | `webservice:write` | Atualizar agora uma lista de IP assinada |
+| POST | `/api/webservice/import/nginx` | `webservice:write` | Importar configuração do nginx |
 | GET | `/api/webservice/settings` | `webservice:read` | Ler configurações globais do serviço web |
 | POST | `/api/webservice/totp-secret` | `webservice:write` | Gerar nova chave TOTP para um usuário compartilhado (não salva; vale após salvar as configurações) |
 | PUT | `/api/webservice/settings` | `webservice:write` | Salvar configurações globais do serviço web |
@@ -895,6 +905,7 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | `acme` | `ssl.ACMEConfig` |
 | `certFile` | string |
 | `certPem` | string |
+| `deploys` | Array de `ssl.Deploy` |
 | `enable` | boolean |
 | `issuerPem` | string |
 | `key` | string |
@@ -904,6 +915,20 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | `remark` | string |
 | `source` | string |
 | `updatedAt` | Hora (RFC 3339) |
+
+### ssl.Deploy
+
+| Campo | Tipo |
+| --- | --- |
+| `command` | string |
+| `connection` | string |
+| `containers` | Array de string |
+| `deployedAt` | Hora (RFC 3339) |
+| `deployedHash` | string |
+| `dir` | string |
+| `enable` | boolean |
+| `remark` | string |
+| `type` | string |
 
 ### ssl.Mapping
 
@@ -989,6 +1014,8 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 
 | Campo | Tipo |
 | --- | --- |
+| `bodyLimitAction` | string |
+| `bodyLimitMB` | integer |
 | `enable` | boolean |
 | `inboundThreshold` | integer |
 | `key` | string |
@@ -998,6 +1025,7 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | `paranoia` | integer |
 | `remark` | string |
 | `ruleSets` | Array de `waf.RuleSet` |
+| `skipBodyPaths` | string |
 
 ### waf.RuleSet
 
@@ -1058,6 +1086,19 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | `path` | string |
 | `timeout` | integer |
 
+### webservice.IPList
+
+| Campo | Tipo |
+| --- | --- |
+| `count` | integer |
+| `enable` | boolean |
+| `key` | string |
+| `name` | string |
+| `refreshHours` | integer |
+| `remark` | string |
+| `updatedAt` | Hora (RFC 3339) |
+| `url` | string |
+
 ### webservice.Listener
 
 | Campo | Tipo |
@@ -1091,6 +1132,7 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | `auth` | string |
 | `ipList` | Array de string |
 | `ipMode` | string |
+| `ipSets` | Array de string |
 | `prefix` | string |
 
 ### webservice.Point
@@ -1155,6 +1197,7 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | `insecureSkipVerify` | boolean |
 | `ipList` | Array de string |
 | `ipMode` | string |
+| `ipSets` | Array de string |
 | `keepPath` | boolean |
 | `key` | string |
 | `lbPolicy` | string |

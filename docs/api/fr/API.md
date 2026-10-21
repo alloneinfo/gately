@@ -169,6 +169,8 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | PUT | `/api/ssl/certs-order` | `ssl:write` | Réordonner Certificat |
 | POST | `/api/ssl/certs/{key}/renew` | `ssl:write` | Émettre ou renouveler un certificat immédiatement |
 | GET | `/api/ssl/certs/{key}/download` | `ssl:write` | Télécharger le certificat et la clé privée |
+| POST | `/api/ssl/certs/{key}/deploy` | `ssl:write` | Déployer un certificat maintenant |
+| GET | `/api/ssl/deploy-targets` | `ssl:read` | Lister les cibles de déploiement disponibles |
 | GET | `/api/ssl/providers` | `ssl:read` | Lister les fournisseurs de validation DNS pris en charge |
 | GET | `/api/ssl/settings` | `ssl:read` | Lire les paramètres globaux des certificats |
 | PUT | `/api/ssl/settings` | `ssl:write` | Enregistrer les paramètres globaux des certificats |
@@ -200,6 +202,14 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | DELETE | `/api/webservice/listeners/{key}` | `webservice:write` | Supprimer Écoute du service Web |
 | PUT | `/api/webservice/listeners/{key}/enable` | `webservice:write` | Activer ou désactiver Écoute du service Web |
 | PUT | `/api/webservice/listeners-order` | `webservice:write` | Réordonner Écoute du service Web |
+| GET | `/api/webservice/iplists` | `webservice:read` | Lister Liste d'IP abonnée |
+| POST | `/api/webservice/iplists` | `webservice:write` | Ajouter Liste d'IP abonnée |
+| PUT | `/api/webservice/iplists/{key}` | `webservice:write` | Modifier Liste d'IP abonnée |
+| DELETE | `/api/webservice/iplists/{key}` | `webservice:write` | Supprimer Liste d'IP abonnée |
+| PUT | `/api/webservice/iplists/{key}/enable` | `webservice:write` | Activer ou désactiver Liste d'IP abonnée |
+| PUT | `/api/webservice/iplists-order` | `webservice:write` | Réordonner Liste d'IP abonnée |
+| POST | `/api/webservice/iplists/{key}/refresh` | `webservice:write` | Actualiser maintenant une liste d'IP abonnée |
+| POST | `/api/webservice/import/nginx` | `webservice:write` | Importer une configuration nginx |
 | GET | `/api/webservice/settings` | `webservice:read` | Lire les paramètres globaux du service Web |
 | POST | `/api/webservice/totp-secret` | `webservice:write` | Générer une nouvelle clé TOTP pour un utilisateur partagé (non enregistrée ; effective après enregistrement) |
 | PUT | `/api/webservice/settings` | `webservice:write` | Enregistrer les paramètres globaux du service Web |
@@ -895,6 +905,7 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | `acme` | `ssl.ACMEConfig` |
 | `certFile` | string |
 | `certPem` | string |
+| `deploys` | Tableau de `ssl.Deploy` |
 | `enable` | boolean |
 | `issuerPem` | string |
 | `key` | string |
@@ -904,6 +915,20 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | `remark` | string |
 | `source` | string |
 | `updatedAt` | Heure (RFC 3339) |
+
+### ssl.Deploy
+
+| Champ | Type |
+| --- | --- |
+| `command` | string |
+| `connection` | string |
+| `containers` | Tableau de string |
+| `deployedAt` | Heure (RFC 3339) |
+| `deployedHash` | string |
+| `dir` | string |
+| `enable` | boolean |
+| `remark` | string |
+| `type` | string |
 
 ### ssl.Mapping
 
@@ -989,6 +1014,8 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 
 | Champ | Type |
 | --- | --- |
+| `bodyLimitAction` | string |
+| `bodyLimitMB` | integer |
 | `enable` | boolean |
 | `inboundThreshold` | integer |
 | `key` | string |
@@ -998,6 +1025,7 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | `paranoia` | integer |
 | `remark` | string |
 | `ruleSets` | Tableau de `waf.RuleSet` |
+| `skipBodyPaths` | string |
 
 ### waf.RuleSet
 
@@ -1058,6 +1086,19 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | `path` | string |
 | `timeout` | integer |
 
+### webservice.IPList
+
+| Champ | Type |
+| --- | --- |
+| `count` | integer |
+| `enable` | boolean |
+| `key` | string |
+| `name` | string |
+| `refreshHours` | integer |
+| `remark` | string |
+| `updatedAt` | Heure (RFC 3339) |
+| `url` | string |
+
 ### webservice.Listener
 
 | Champ | Type |
@@ -1091,6 +1132,7 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | `auth` | string |
 | `ipList` | Tableau de string |
 | `ipMode` | string |
+| `ipSets` | Tableau de string |
 | `prefix` | string |
 
 ### webservice.Point
@@ -1155,6 +1197,7 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | `insecureSkipVerify` | boolean |
 | `ipList` | Tableau de string |
 | `ipMode` | string |
+| `ipSets` | Tableau de string |
 | `keepPath` | boolean |
 | `key` | string |
 | `lbPolicy` | string |

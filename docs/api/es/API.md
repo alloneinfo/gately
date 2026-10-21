@@ -169,6 +169,8 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | PUT | `/api/ssl/certs-order` | `ssl:write` | Reordenar Certificado |
 | POST | `/api/ssl/certs/{key}/renew` | `ssl:write` | Emitir o renovar un certificado ahora |
 | GET | `/api/ssl/certs/{key}/download` | `ssl:write` | Descargar certificado y clave privada |
+| POST | `/api/ssl/certs/{key}/deploy` | `ssl:write` | Desplegar un certificado ahora |
+| GET | `/api/ssl/deploy-targets` | `ssl:read` | Listar destinos de despliegue disponibles |
 | GET | `/api/ssl/providers` | `ssl:read` | Listar los proveedores compatibles con validación DNS |
 | GET | `/api/ssl/settings` | `ssl:read` | Leer los ajustes globales de certificados |
 | PUT | `/api/ssl/settings` | `ssl:write` | Guardar los ajustes globales de certificados |
@@ -200,6 +202,14 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | DELETE | `/api/webservice/listeners/{key}` | `webservice:write` | Eliminar Escucha del servicio web |
 | PUT | `/api/webservice/listeners/{key}/enable` | `webservice:write` | Activar o desactivar Escucha del servicio web |
 | PUT | `/api/webservice/listeners-order` | `webservice:write` | Reordenar Escucha del servicio web |
+| GET | `/api/webservice/iplists` | `webservice:read` | Listar Lista de IP suscrita |
+| POST | `/api/webservice/iplists` | `webservice:write` | Añadir Lista de IP suscrita |
+| PUT | `/api/webservice/iplists/{key}` | `webservice:write` | Modificar Lista de IP suscrita |
+| DELETE | `/api/webservice/iplists/{key}` | `webservice:write` | Eliminar Lista de IP suscrita |
+| PUT | `/api/webservice/iplists/{key}/enable` | `webservice:write` | Activar o desactivar Lista de IP suscrita |
+| PUT | `/api/webservice/iplists-order` | `webservice:write` | Reordenar Lista de IP suscrita |
+| POST | `/api/webservice/iplists/{key}/refresh` | `webservice:write` | Actualizar ahora una lista de IP suscrita |
+| POST | `/api/webservice/import/nginx` | `webservice:write` | Importar configuración de nginx |
 | GET | `/api/webservice/settings` | `webservice:read` | Leer los ajustes globales del servicio web |
 | POST | `/api/webservice/totp-secret` | `webservice:write` | Generar una nueva clave TOTP para un usuario compartido (no se guarda; se aplica al guardar la configuración) |
 | PUT | `/api/webservice/settings` | `webservice:write` | Guardar los ajustes globales del servicio web |
@@ -895,6 +905,7 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | `acme` | `ssl.ACMEConfig` |
 | `certFile` | string |
 | `certPem` | string |
+| `deploys` | Lista de `ssl.Deploy` |
 | `enable` | boolean |
 | `issuerPem` | string |
 | `key` | string |
@@ -904,6 +915,20 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | `remark` | string |
 | `source` | string |
 | `updatedAt` | Hora (RFC 3339) |
+
+### ssl.Deploy
+
+| Campo | Tipo |
+| --- | --- |
+| `command` | string |
+| `connection` | string |
+| `containers` | Lista de string |
+| `deployedAt` | Hora (RFC 3339) |
+| `deployedHash` | string |
+| `dir` | string |
+| `enable` | boolean |
+| `remark` | string |
+| `type` | string |
 
 ### ssl.Mapping
 
@@ -989,6 +1014,8 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 
 | Campo | Tipo |
 | --- | --- |
+| `bodyLimitAction` | string |
+| `bodyLimitMB` | integer |
 | `enable` | boolean |
 | `inboundThreshold` | integer |
 | `key` | string |
@@ -998,6 +1025,7 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | `paranoia` | integer |
 | `remark` | string |
 | `ruleSets` | Lista de `waf.RuleSet` |
+| `skipBodyPaths` | string |
 
 ### waf.RuleSet
 
@@ -1058,6 +1086,19 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | `path` | string |
 | `timeout` | integer |
 
+### webservice.IPList
+
+| Campo | Tipo |
+| --- | --- |
+| `count` | integer |
+| `enable` | boolean |
+| `key` | string |
+| `name` | string |
+| `refreshHours` | integer |
+| `remark` | string |
+| `updatedAt` | Hora (RFC 3339) |
+| `url` | string |
+
 ### webservice.Listener
 
 | Campo | Tipo |
@@ -1091,6 +1132,7 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | `auth` | string |
 | `ipList` | Lista de string |
 | `ipMode` | string |
+| `ipSets` | Lista de string |
 | `prefix` | string |
 
 ### webservice.Point
@@ -1155,6 +1197,7 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | `insecureSkipVerify` | boolean |
 | `ipList` | Lista de string |
 | `ipMode` | string |
+| `ipSets` | Lista de string |
 | `keepPath` | boolean |
 | `key` | string |
 | `lbPolicy` | string |
