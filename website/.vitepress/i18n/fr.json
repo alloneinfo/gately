@@ -77,8 +77,8 @@
   "home": {
     "pill": "Open source · Auditable · Binaire unique",
     "announce": {
-      "text": "v0.5.5 est disponible : import nginx, déploiement automatique des certificats, WebDAV derrière le WAF →",
-      "link": "/fr/news/v0.5.5"
+      "text": "v0.5.5.1 est disponible : les journaux d'exécution survivent aux redémarrages →",
+      "link": "/fr/news/v0.5.5.1"
     },
     "titleLine1": "Une boîte à outils de passerelle réseau",
     "titleLine2": "où tout est visible",

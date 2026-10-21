@@ -77,8 +77,8 @@
   "home": {
     "pill": "Open source · Auditable · Single binary",
     "announce": {
-      "text": "v0.5.5 is out: nginx import, certificate auto deploy, WebDAV behind the WAF →",
-      "link": "/en/news/v0.5.5"
+      "text": "v0.5.5.1 is out: runtime logs now survive restarts →",
+      "link": "/en/news/v0.5.5.1"
     },
     "titleLine1": "A network gateway toolkit",
     "titleLine2": "you can see through",

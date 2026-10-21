@@ -77,8 +77,8 @@
   "home": {
     "pill": "오픈소스 · 감사 가능 · 단일 파일",
     "announce": {
-      "text": "v0.5.5 출시: nginx 가져오기, 인증서 자동 배포, WAF WebDAV 지원 →",
-      "link": "/ko/news/v0.5.5"
+      "text": "v0.5.5.1 출시: 실행 로그 영구 저장, 재시작해도 사라지지 않습니다 →",
+      "link": "/ko/news/v0.5.5.1"
     },
     "titleLine1": "속까지 들여다볼 수 있는",
     "titleLine2": "네트워크 게이트웨이 도구 모음",

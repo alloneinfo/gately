@@ -77,8 +77,8 @@
   "home": {
     "pill": "Código abierto · Auditable · Binario único",
     "announce": {
-      "text": "Ya está aquí v0.5.5: importar nginx, despliegue automático de certificados y WebDAV en el WAF →",
-      "link": "/es/news/v0.5.5"
+      "text": "Ya está aquí v0.5.5.1: los registros de ejecución sobreviven a los reinicios →",
+      "link": "/es/news/v0.5.5.1"
     },
     "titleLine1": "Una pasarela de red",
     "titleLine2": "que puedes ver por dentro",

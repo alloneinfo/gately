@@ -7,6 +7,10 @@ description: Release-Ankündigungen und Versionshinweise zu jeder Gately-Version
 
 Unten stehen die Ankündigungen zu wichtigen Releases. Alle Änderungen und Downloads jeder Version finden Sie unter [GitHub Releases](https://github.com/wangwanjie/gately/releases).
 
+## [v0.5.5.1](/de/news/v0.5.5.1)
+
+21. Oktober 2026 · Laufzeitprotokolle werden auf die Festplatte geschrieben und überstehen Neustarts und Upgrades.
+
 ## [v0.5.5](/de/news/v0.5.5)
 
 21. Oktober 2026 · nginx-Konfigurationen importieren, Zertifikate automatisch auf andere Hosts und Container verteilen, WAF mit Unterstützung für große Uploads und WebDAV, abonnierte IP-Listen; der Selbsttest prüft jetzt auch Zertifikatsabdeckung und frp-Konflikte.

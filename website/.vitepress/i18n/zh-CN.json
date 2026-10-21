@@ -77,8 +77,8 @@
   "home": {
     "pill": "开源 · 可审计 · 单文件部署",
     "announce": {
-      "text": "v0.5.5 发布：导入 nginx、证书自动部署、WAF 支持 WebDAV →",
-      "link": "/news/v0.5.5"
+      "text": "v0.5.5.1 发布：运行日志落盘，重启后不再丢失 →",
+      "link": "/news/v0.5.5.1"
     },
     "titleLine1": "看得见的",
     "titleLine2": "网络网关工具集",

@@ -7,6 +7,10 @@ description: Anúncios e notas de cada versão do Gately.
 
 Abaixo estão os anúncios das versões principais. Veja as [GitHub Releases](https://github.com/wangwanjie/gately/releases) para as mudanças completas e os downloads de cada versão.
 
+## [v0.5.5.1](/pt-BR/news/v0.5.5.1)
+
+21 de outubro de 2026 · Os logs de execução são gravados em disco e sobrevivem a reinícios e atualizações.
+
 ## [v0.5.5](/pt-BR/news/v0.5.5)
 
 21 de outubro de 2026 · Importação de configurações do nginx, implantação automática de certificados em outros hosts e contêineres, WAF com suporte a uploads grandes e WebDAV, listas de IP assinadas e novas verificações de cobertura de certificados e conflitos do frp no autodiagnóstico.
