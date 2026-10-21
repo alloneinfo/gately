@@ -10,7 +10,29 @@
   "latestRelease": " (dernière version : {latest})",
   "publishedAt": "Publiée le {time}",
   "viewRelease": "Voir la page de la version",
-  "updateHint": "api.github.com n'est contacté que lorsque vous cliquez sur Rechercher des mises à jour. Gately ne se connecte jamais à Internet de lui-même.",
+  "updateHint": "La recherche de mises à jour et la mise à niveau en ligne ne contactent GitHub que lorsque vous cliquez ; Gately ne se connecte jamais de lui-même.",
+  "upgrade": {
+    "now": "Mettre à niveau vers {latest}",
+    "title": "Mise à niveau en ligne",
+    "confirm": "Gately va télécharger {latest} depuis GitHub, vérifier son SHA-256, le tester, remplacer {exe} puis redémarrer. La version précédente est conservée sous {exe}.old. Exportez une sauvegarde de la configuration avant la mise à niveau.",
+    "confirmButton": "Mettre à niveau et redémarrer",
+    "restarting": "Mis à niveau vers {version}, redémarrage…",
+    "upload": "Téléverser un paquet de mise à niveau",
+    "uploadConfirm": "Gately va remplacer le binaire actuel par {name} et redémarrer. Accepte le tar.gz Linux de la page des versions ou le binaire gately extrait. Toute version convient, ce qui permet aussi de revenir en arrière.",
+    "reason": {
+      "os": "La mise à niveau en ligne ne fonctionne que sous Linux. Téléchargez la nouvelle version et remplacez le binaire manuellement.",
+      "docker": "Exécution dans un conteneur. Récupérez la nouvelle image et recréez le conteneur (gardez le répertoire de configuration monté).",
+      "fnos": "Pour le paquet fnOS, installez manuellement le nouveau .fpk dans le Centre d’applications ; la configuration est conservée.",
+      "readonly": "Le répertoire de l’exécutable n’est pas accessible en écriture : mise à niveau en ligne impossible. Remplacez le binaire manuellement."
+    }
+  },
+  "proxy": {
+    "label": "Proxy de mise à jour : ",
+    "none": "direct",
+    "title": "Proxy de mise à jour",
+    "help": "Utilisé pour joindre GitHub lors de la recherche de mises à jour et de la mise à niveau en ligne. Prend en charge http://, https:// et socks5://. Laissez vide pour une connexion directe ; la variable d’environnement HTTPS_PROXY reste prise en compte. Modifiable aussi dans Réglages → Réseau et exécution.",
+    "saved": "Proxy de mise à jour enregistré"
+  },
   "promiseTitle": "Notre engagement de transparence",
   "featuresTitle": "Fonctionnalités",
   "quickStart": "Démarrage rapide",

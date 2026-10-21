@@ -101,10 +101,32 @@ El primer inicio de sesión muestra una guía de bienvenida que te propone, paso
 
 ## Actualización
 
-Gately no tiene autoactualización en línea integrada; las actualizaciones dependen de tu método de despliegue:
+### Actualización en línea {#online-upgrade}
+
+Las instalaciones binarias en Linux (systemd, contenedores LXC de PVE, OpenWrt, etc.) pueden actualizarse en línea desde la página Acerca de del panel: pulsa «Buscar actualizaciones» y, si hay una versión nueva, «Actualizar ahora». También sirve para los contenedores LXC creados en PVE a partir de la imagen OCI, sin necesidad de borrarlos y recrearlos. Gately hará lo siguiente:
+
+1. Descargar desde GitHub el `gately_<versión>_linux_<arquitectura>.tar.gz` de esta plataforma;
+2. Verificar su SHA-256 con el `checksums.txt` de la misma versión;
+3. Probar el nuevo binario con `-version` para confirmar que se ejecuta en esta máquina;
+4. Reemplazar el ejecutable y reiniciar con los mismos argumentos, conservando la versión anterior como `gately.old` en el mismo directorio.
+
+Si cuesta acceder a GitHub, configura un **proxy de actualización** en la página Acerca de o en Ajustes → Red y ejecución. Admite `http://`, `https://` y `socks5://`, y tanto la búsqueda como la descarga pasan por él. Si está vacío, Gately conecta directamente y sigue respetando la variable de entorno `HTTPS_PROXY`.
+
+Sin acceso a internet, descarga el tar.gz desde la [página de descargas](/es/download) y pulsa «Subir paquete de actualización» en la página Acerca de. Se acepta cualquier versión, así que también sirve para volver a una anterior.
+
+La actualización en línea solo se ejecuta cuando un administrador la inicia; Gately nunca descarga ni instala versiones por su cuenta. Si la nueva versión no arranca, vuelve atrás manualmente con la copia conservada (ejemplo con systemd):
+
+```bash
+mv /usr/local/bin/gately.old /usr/local/bin/gately
+systemctl restart gately
+```
+
+Si concediste al binario permiso para puertos bajos con `setcap`, vuelve a ejecutar `setcap` tras actualizar.
+
+### Otros despliegues
 
 - Docker: ejecuta `docker pull` con la nueva imagen y recrea el contenedor (mantén montado el directorio de configuración);
-- Binario: sustituye el ejecutable y reinicia el servicio;
-- fnOS: instala manualmente el `.fpk` más reciente desde el Centro de aplicaciones; tu configuración se conserva.
+- fnOS: instala manualmente el `.fpk` más reciente desde el Centro de aplicaciones; tu configuración se conserva;
+- Windows, macOS, FreeBSD: sustituye el ejecutable y reinicia el servicio.
 
 Antes de actualizar, exporta una copia de seguridad de la configuración o guarda el directorio de configuración en git. Puedes comprobar la firma de los archivos e imágenes descargados según [Verificar versiones](/en/docs/guide/verify).

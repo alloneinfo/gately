@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -153,7 +152,7 @@ func (a *App) handleSystemInfo(w http.ResponseWriter, r *http.Request) {
 		"hostname": host, "pid": os.Getpid(), "startTime": a.startTime, "configDir": a.opts.ConfigDir,
 		"goroutines": runtime.NumGoroutine(), "memSys": ms.Sys, "memAlloc": ms.Alloc,
 		"numCPU": runtime.NumCPU(), "maxProcs": runtime.GOMAXPROCS(0), "timeZone": time.Local.String(),
-		"inDocker": fileExists("/.dockerenv"),
+		"inDocker": fileExists("/.dockerenv"), "selfUpgrade": a.upgradeSupport(),
 	})
 }
 
@@ -162,37 +161,19 @@ func fileExists(p string) bool {
 	return err == nil
 }
 
-// releaseAPI 是检查更新使用的地址，只在用户点击“检查更新”时访问。
-var releaseAPI = "https://api.github.com/repos/wangwanjie/gately/releases/latest"
-
 func (a *App) handleCheckUpdate(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), 15*time.Second)
 	defer cancel()
-	req, _ := http.NewRequestWithContext(ctx, http.MethodGet, releaseAPI, nil)
-	req.Header.Set("Accept", "application/vnd.github+json")
-	resp, err := http.DefaultClient.Do(req)
+	rel, err := fetchLatestRelease(ctx, a.updateClient())
 	if err != nil {
-		httpx.Error(w, http.StatusBadGateway, "无法访问 GitHub: %v", err)
-		return
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
-		httpx.Error(w, http.StatusBadGateway, "GitHub 返回 %s", resp.Status)
-		return
-	}
-	var rel struct {
-		TagName     string    `json:"tag_name"`
-		HTMLURL     string    `json:"html_url"`
-		Body        string    `json:"body"`
-		PublishedAt time.Time `json:"published_at"`
-	}
-	if err := json.NewDecoder(io.LimitReader(resp.Body, 1<<20)).Decode(&rel); err != nil {
-		httpx.Error(w, http.StatusBadGateway, "解析版本信息失败: %v", err)
+		httpx.Error(w, http.StatusBadGateway, "%v", err)
 		return
 	}
 	httpx.OK(w, map[string]any{
 		"current": version.Version, "latest": rel.TagName, "url": rel.HTMLURL, "notes": rel.Body,
-		"publishedAt": rel.PublishedAt, "hasUpdate": rel.TagName != "" && rel.TagName != version.Version && version.Version != "dev",
+		"publishedAt": rel.PublishedAt, "hasUpdate": versionNewer(rel.TagName, version.Version),
+		// 能否在线升级，前端据此显示“立即升级”或对应部署方式的升级说明
+		"selfUpgrade": a.upgradeSupport(),
 	})
 }
 

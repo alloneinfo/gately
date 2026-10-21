@@ -101,10 +101,32 @@ Bei der ersten Anmeldung erscheint ein Einrichtungsassistent, der nacheinander d
 
 ## Upgrade
 
-Gately hat kein eingebautes Online-Selbst-Update; Upgrades übernimmt Ihre Bereitstellungsmethode:
+### Online-Upgrade {#online-upgrade}
+
+Linux-Binärinstallationen (systemd, PVE-LXC-Container, OpenWrt usw.) lassen sich auf der Seite „Über“ der Verwaltungsoberfläche online aktualisieren: Klicken Sie auf „Nach Updates suchen“ und bei einer neuen Version auf „Jetzt aktualisieren“. Das gilt auch für LXC-Container, die in PVE aus dem OCI-Image erstellt wurden; Löschen und Neuanlegen ist nicht nötig. Gately geht so vor:
+
+1. `gately_<Version>_linux_<Architektur>.tar.gz` für diese Plattform von GitHub herunterladen;
+2. die SHA-256 mit der `checksums.txt` desselben Releases abgleichen;
+3. die neue Binärdatei mit `-version` testweise starten, um sicherzustellen, dass sie auf diesem Rechner läuft;
+4. die ausführbare Datei ersetzen und mit denselben Argumenten neu starten; die vorherige Version bleibt als `gately.old` im selben Verzeichnis.
+
+Ist GitHub schlecht erreichbar, legen Sie auf der Seite „Über“ oder unter Einstellungen → Netzwerk & Laufzeit einen **Update-Proxy** fest. Unterstützt werden `http://`, `https://` und `socks5://`; Update-Prüfung und Download laufen beide darüber. Ist das Feld leer, verbindet Gately direkt und beachtet weiterhin die Umgebungsvariable `HTTPS_PROXY`.
+
+Ohne Internetzugang laden Sie das tar.gz von der [Download-Seite](/de/download) und klicken auf der Seite „Über“ auf „Upgrade-Paket hochladen“. Jede Version wird akzeptiert, sodass Sie auch auf eine ältere zurückgehen können.
+
+Online-Upgrades laufen nur, wenn ein Administrator sie startet; Gately lädt oder installiert nie von selbst eine Version. Startet die neue Version nicht, gehen Sie mit der behaltenen Kopie manuell zurück (Beispiel mit systemd):
+
+```bash
+mv /usr/local/bin/gately.old /usr/local/bin/gately
+systemctl restart gately
+```
+
+Haben Sie der Binärdatei mit `setcap` Zugriff auf niedrige Ports gegeben, führen Sie `setcap` nach dem Upgrade erneut aus.
+
+### Andere Bereitstellungen
 
 - Docker: das neue Image mit `docker pull` laden und den Container neu erstellen (das Konfigurationsverzeichnis bleibt eingebunden);
-- Binärdatei: die ausführbare Datei ersetzen und den Dienst neu starten;
-- fnOS: die neuere `.fpk` manuell über das App Center installieren; Ihre Konfiguration bleibt erhalten.
+- fnOS: die neuere `.fpk` manuell über das App Center installieren; Ihre Konfiguration bleibt erhalten;
+- Windows, macOS, FreeBSD: die ausführbare Datei ersetzen und den Dienst neu starten.
 
 Exportieren Sie vor dem Upgrade eine Konfigurationssicherung oder legen Sie das Konfigurationsverzeichnis in Git ab. Die Signaturen heruntergeladener Archive und Images können Sie gemäß [Releases verifizieren](/en/docs/guide/verify) prüfen.

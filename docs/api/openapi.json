@@ -16101,7 +16101,7 @@
     },
     "/api/system/settings": {
       "get": {
-        "description": "仅登录会话可用。只读字段 `modules` 列出全部功能模块及依赖关系，`gatewayAvailable` 表示以飞牛统一网关方式运行。\n\n**仅登录会话可用，API 令牌无法访问此接口。**",
+        "description": "仅登录会话可用。只读字段 `modules` 列出全部功能模块及依赖关系，`gatewayAvailable` 表示以飞牛统一网关方式运行。`updateProxy` 为检查更新与在线升级访问 GitHub 时使用的代理。\n\n**仅登录会话可用，API 令牌无法访问此接口。**",
         "responses": {
           "200": {
             "description": "成功"
@@ -16200,7 +16200,7 @@
     },
     "/api/system/update": {
       "get": {
-        "description": "所需权限：`status:read`。",
+        "description": "访问 GitHub 时使用全局设置 `updateProxy` 中的代理。`selfUpgrade.supported` 表示当前部署方式能否在线升级，不能时 `reason` 为 `os`、`docker`、`fnos` 或 `readonly`。\n\n所需权限：`status:read`。",
         "responses": {
           "200": {
             "description": "成功"
@@ -16247,6 +16247,98 @@
         ],
         "x-required-scope": "status:read",
         "x-token-allowed": true
+      }
+    },
+    "/api/system/upgrade": {
+      "post": {
+        "description": "仅登录会话（管理员）可用，只支持 Linux 二进制部署。下载与本机平台对应的发布包，核对 checksums.txt 中的 SHA-256 并试运行新程序，替换可执行文件后重启；旧版本保留为同目录下的 `\u003c文件名\u003e.old`。\n\n**仅登录会话可用，API 令牌无法访问此接口。**",
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "请求参数错误"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌无效、已过期或未登录"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌缺少所需权限"
+          }
+        },
+        "summary": "在线升级到最新版本",
+        "tags": [
+          "系统"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
+      }
+    },
+    "/api/system/upgrade/upload": {
+      "post": {
+        "description": "仅登录会话（管理员）可用。表单字段 `file` 为发布页的 `gately_\u003c版本\u003e_linux_\u003c架构\u003e.tar.gz` 或解压后的 `gately` 程序，不限制版本高低，可用于离线升级或回退。\n\n**仅登录会话可用，API 令牌无法访问此接口。**",
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "请求参数错误"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌无效、已过期或未登录"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌缺少所需权限"
+          }
+        },
+        "summary": "上传升级包升级",
+        "tags": [
+          "系统"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
       }
     },
     "/api/tailscale/logout": {

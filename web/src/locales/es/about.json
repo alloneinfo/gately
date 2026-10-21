@@ -10,7 +10,29 @@
   "latestRelease": " (última versión {latest})",
   "publishedAt": "Publicada {time}",
   "viewRelease": "Ver página de la versión",
-  "updateHint": "Solo se contacta con api.github.com cuando pulsas Buscar actualizaciones. Gately nunca se conecta por su cuenta.",
+  "updateHint": "Buscar actualizaciones y actualizar en línea solo accede a GitHub cuando haces clic; Gately nunca se conecta por su cuenta.",
+  "upgrade": {
+    "now": "Actualizar ahora a {latest}",
+    "title": "Actualización en línea",
+    "confirm": "Gately descargará {latest} desde GitHub, verificará su SHA-256, lo probará, reemplazará {exe} y se reiniciará. La versión anterior se conserva como {exe}.old. Exporta una copia de seguridad de la configuración antes de actualizar.",
+    "confirmButton": "Actualizar y reiniciar",
+    "restarting": "Actualizado a {version}, reiniciando…",
+    "upload": "Subir paquete de actualización",
+    "uploadConfirm": "Gately reemplazará el binario actual por {name} y se reiniciará. Acepta el tar.gz de Linux de la página de versiones o el binario gately extraído. Sirve cualquier versión, así que también permite volver atrás.",
+    "reason": {
+      "os": "La actualización en línea solo funciona en Linux. Descarga la nueva versión y reemplaza el binario manualmente.",
+      "docker": "Se ejecuta en un contenedor. Descarga la nueva imagen y vuelve a crear el contenedor (mantén montado el directorio de configuración).",
+      "fnos": "Para el paquete de fnOS, instala manualmente el nuevo .fpk en el Centro de aplicaciones; la configuración se conserva.",
+      "readonly": "El directorio del ejecutable no tiene permiso de escritura, así que no se puede actualizar en línea. Reemplaza el binario manualmente."
+    }
+  },
+  "proxy": {
+    "label": "Proxy de actualización: ",
+    "none": "directo",
+    "title": "Proxy de actualización",
+    "help": "Se usa para acceder a GitHub al buscar actualizaciones y actualizar en línea. Admite http://, https:// y socks5://. Déjalo vacío para conectar directamente; se sigue respetando la variable de entorno HTTPS_PROXY. También puedes cambiarlo en Ajustes → Red y ejecución.",
+    "saved": "Proxy de actualización guardado"
+  },
   "promiseTitle": "Nuestra promesa de transparencia",
   "featuresTitle": "Funciones",
   "quickStart": "Inicio rápido",

@@ -10,7 +10,29 @@
   "latestRelease": " (versão mais recente {latest})",
   "publishedAt": "Publicada {time}",
   "viewRelease": "Ver página da versão",
-  "updateHint": "O api.github.com só é contatado quando você clica em Verificar atualizações. O Gately nunca se conecta à internet por conta própria.",
+  "updateHint": "Verificar atualizações e atualizar online só acessa o GitHub quando você clica; o Gately nunca se conecta por conta própria.",
+  "upgrade": {
+    "now": "Atualizar agora para {latest}",
+    "title": "Atualização online",
+    "confirm": "O Gately vai baixar {latest} do GitHub, conferir o SHA-256, executar em teste, substituir {exe} e reiniciar. A versão anterior fica guardada como {exe}.old. Exporte um backup da configuração antes de atualizar.",
+    "confirmButton": "Atualizar e reiniciar",
+    "restarting": "Atualizado para {version}, reiniciando…",
+    "upload": "Enviar pacote de atualização",
+    "uploadConfirm": "O Gately vai substituir o binário atual por {name} e reiniciar. Aceita o tar.gz Linux da página de versões ou o binário gately extraído. Qualquer versão serve, então também é possível reverter.",
+    "reason": {
+      "os": "A atualização online só funciona no Linux. Baixe a nova versão e substitua o binário manualmente.",
+      "docker": "Rodando em um contêiner. Baixe a nova imagem e recrie o contêiner (mantenha o diretório de configuração montado).",
+      "fnos": "Para o pacote do fnOS, instale manualmente o novo .fpk na Central de Aplicativos; a configuração é mantida.",
+      "readonly": "O diretório do executável não permite gravação, então a atualização online está indisponível. Substitua o binário manualmente."
+    }
+  },
+  "proxy": {
+    "label": "Proxy de atualização: ",
+    "none": "direto",
+    "title": "Proxy de atualização",
+    "help": "Usado para acessar o GitHub ao verificar atualizações e atualizar online. Suporta http://, https:// e socks5://. Deixe vazio para conexão direta; a variável de ambiente HTTPS_PROXY continua valendo. Também pode ser alterado em Configurações → Rede e execução.",
+    "saved": "Proxy de atualização salvo"
+  },
   "promiseTitle": "Nosso compromisso de transparência",
   "featuresTitle": "Recursos",
   "quickStart": "Início rápido",

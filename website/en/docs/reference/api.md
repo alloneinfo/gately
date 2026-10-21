@@ -63,7 +63,7 @@ The following endpoints accept login sessions only, and any token access returns
 
 - Account and two-factor authentication: `/api/account`
 - Token management: `/api/tokens`
-- System settings, system token, restart: `/api/system/settings`, `/api/system/token`, `/api/system/restart`
+- System settings, system token, restart, online upgrade: `/api/system/settings`, `/api/system/token`, `/api/system/restart`, `/api/system/upgrade`
 - Configuration backup download and restore: `/api/system/backup`, `/api/system/restore`
 - Local backup file download: `/api/backup/local`
 - Web Terminal security settings: `/api/webterminal/security`

@@ -16101,7 +16101,7 @@
     },
     "/api/system/settings": {
       "get": {
-        "description": "Только для сеанса входа. Поле только для чтения `modules` перечисляет все модули и их зависимости; `gatewayAvailable` показывает, работает ли Gately за единым шлюзом fnOS.\n\n**Доступно только для сессий входа; API-токены не имеют доступа к этому эндпоинту.**",
+        "description": "Только для сеанса входа. Поле только для чтения `modules` перечисляет все модули и их зависимости; `gatewayAvailable` означает работу за единым шлюзом fnOS. `updateProxy` — прокси для доступа к GitHub при проверке обновлений и онлайн-обновлении.\n\n**Доступно только для сессий входа; API-токены не имеют доступа к этому эндпоинту.**",
         "responses": {
           "200": {
             "description": "Успешно"
@@ -16200,7 +16200,7 @@
     },
     "/api/system/update": {
       "get": {
-        "description": "Требуемое разрешение: `status:read`.",
+        "description": "Для доступа к GitHub использует прокси из глобальной настройки `updateProxy`. `selfUpgrade.supported` показывает, можно ли обновить эту установку онлайн; если нет, `reason` равен `os`, `docker`, `fnos` или `readonly`.\n\nТребуемое разрешение: `status:read`.",
         "responses": {
           "200": {
             "description": "Успешно"
@@ -16247,6 +16247,98 @@
         ],
         "x-required-scope": "status:read",
         "x-token-allowed": true
+      }
+    },
+    "/api/system/upgrade": {
+      "post": {
+        "description": "Только для сеанса входа (администратор), только для бинарной установки в Linux. Скачивает пакет релиза для этой платформы, сверяет SHA-256 с checksums.txt, пробно запускает новый бинарный файл, заменяет исполняемый файл и перезапускается. Предыдущая версия сохраняется как `\u003cимя файла\u003e.old` в том же каталоге.\n\n**Доступно только для сессий входа; API-токены не имеют доступа к этому эндпоинту.**",
+        "responses": {
+          "200": {
+            "description": "Успешно"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка параметров запроса"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Токен недействителен, истёк или вход не выполнен"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "У токена нет необходимого права"
+          }
+        },
+        "summary": "Обновить онлайн до последней версии",
+        "tags": [
+          "Система"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
+      }
+    },
+    "/api/system/upgrade/upload": {
+      "post": {
+        "description": "Только для сеанса входа (администратор). Поле формы `file` — архив `gately_\u003cверсия\u003e_linux_\u003cархитектура\u003e.tar.gz` со страницы релизов или распакованный бинарный файл `gately`. Принимается любая версия, поэтому подходит для офлайн-обновления и отката.\n\n**Доступно только для сессий входа; API-токены не имеют доступа к этому эндпоинту.**",
+        "responses": {
+          "200": {
+            "description": "Успешно"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка параметров запроса"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Токен недействителен, истёк или вход не выполнен"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "У токена нет необходимого права"
+          }
+        },
+        "summary": "Обновить из загруженного пакета",
+        "tags": [
+          "Система"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
       }
     },
     "/api/tailscale/logout": {

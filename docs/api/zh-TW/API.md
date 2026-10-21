@@ -474,6 +474,8 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | PUT | `/api/system/settings` | 僅登入工作階段 | 儲存全域設定 |
 | GET | `/api/system/info` | `status:read` | 檢視系統資訊 |
 | GET | `/api/system/update` | `status:read` | 檢查新版本 |
+| POST | `/api/system/upgrade` | 僅登入工作階段 | 線上升級到最新版本 |
+| POST | `/api/system/upgrade/upload` | 僅登入工作階段 | 上傳升級包升級 |
 | GET | `/api/system/backup` | 僅登入工作階段 | 下載設定備份 |
 | GET | `/api/system/diagnostics` | 僅登入工作階段 | 匯出已去識別化的診斷包 |
 | GET | `/api/audit` | 僅登入工作階段 | 查詢操作稽核日誌 |

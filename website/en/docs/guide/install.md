@@ -101,10 +101,32 @@ The first sign-in shows an onboarding guide that walks you through changing the 
 
 ## Upgrading
 
-Gately has no built-in online self-update; upgrades are handled by your deployment method:
+### Online upgrade {#online-upgrade}
+
+Linux binary installs (systemd, PVE LXC containers, OpenWrt and so on) can upgrade online from the About page of the admin UI: click "Check for Updates", then "Upgrade now" when a new version is found. This also works for LXC containers created in PVE from the OCI image, so there is no need to delete and recreate them. Gately will:
+
+1. Download `gately_<version>_linux_<arch>.tar.gz` for this platform from GitHub;
+2. Verify its SHA-256 against the `checksums.txt` of the same release;
+3. Test-run the new binary with `-version` to make sure it runs on this machine;
+4. Replace the executable and restart with the same arguments, keeping the previous version as `gately.old` in the same directory.
+
+If GitHub is hard to reach, set an **update proxy** on the About page or under Settings → Network & Runtime. It supports `http://`, `https://` and `socks5://`, and both the update check and the download go through it. When empty, Gately connects directly and still honors the `HTTPS_PROXY` environment variable.
+
+Without internet access, get the tar.gz from the [download page](/en/download) and click "Upload upgrade package" on the About page. Uploads accept any version, so you can also roll back to an older release.
+
+Online upgrades only run when an admin starts them; Gately never downloads or installs a version on its own. If the new version fails to start, roll back manually with the kept copy (systemd example):
+
+```bash
+mv /usr/local/bin/gately.old /usr/local/bin/gately
+systemctl restart gately
+```
+
+If you granted low-port access to the binary with `setcap`, run `setcap` again after the upgrade.
+
+### Other deployments
 
 - Docker: `docker pull` the new image and recreate the container (keep the config directory mounted);
-- Binary: replace the executable and restart the service;
-- fnOS: manually install the newer `.fpk` from the App Center; your config is kept.
+- fnOS: manually install the newer `.fpk` from the App Center; your config is kept;
+- Windows, macOS, FreeBSD: replace the executable and restart the service.
 
 Before upgrading, export a configuration backup or keep the config directory in git. Downloaded archives and images can be checked against their signatures as described in [Verifying Releases](/en/docs/guide/verify).

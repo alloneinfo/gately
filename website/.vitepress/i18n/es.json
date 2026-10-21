@@ -247,7 +247,7 @@
       },
       {
         "title": "Bajo tu control",
-        "text": "El inicio de sesión de terceros usa aplicaciones OAuth que registras tú mismo, sin intermediarios. No hay autoactualización integrada; las actualizaciones llegan con Docker o tu gestor de paquetes."
+        "text": "El inicio de sesión de terceros usa aplicaciones OAuth que registras tú mismo, sin intermediarios. La actualización en línea solo se ejecuta cuando un administrador hace clic (instalaciones binarias en Linux); nada se actualiza en segundo plano."
       },
       {
         "title": "Despliegue en un solo archivo",

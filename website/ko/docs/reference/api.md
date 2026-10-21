@@ -63,7 +63,7 @@ curl -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/status
 
 - 계정과 2단계 인증: `/api/account`
 - 토큰 관리: `/api/tokens`
-- 시스템 설정, 시스템 토큰, 재시작: `/api/system/settings`, `/api/system/token`, `/api/system/restart`
+- 시스템 설정, 시스템 토큰, 재시작, 온라인 업그레이드: `/api/system/settings`, `/api/system/token`, `/api/system/restart`, `/api/system/upgrade`
 - 설정 백업 다운로드와 복원: `/api/system/backup`, `/api/system/restore`
 - 로컬 백업 파일 다운로드: `/api/backup/local`
 - 웹 터미널 보안 설정: `/api/webterminal/security`

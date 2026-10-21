@@ -63,7 +63,7 @@ curl -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/status
 
 - 帳號與兩步驟驗證：`/api/account`
 - 權杖管理：`/api/tokens`
-- 系統設定、系統權杖、重新啟動：`/api/system/settings`、`/api/system/token`、`/api/system/restart`
+- 系統設定、系統權杖、重新啟動、線上升級：`/api/system/settings`、`/api/system/token`、`/api/system/restart`、`/api/system/upgrade`
 - 設定備份下載與還原：`/api/system/backup`、`/api/system/restore`
 - 本機備份檔案下載：`/api/backup/local`
 - Web 終端機安全設定：`/api/webterminal/security`

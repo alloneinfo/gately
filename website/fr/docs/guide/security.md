@@ -7,7 +7,7 @@ Gately fonctionne à la frontière du réseau et manipule des clés de fournisse
 - **Zéro connexion sortante par défaut** : aucune connexion aux serveurs du projet, aucune remontée d'informations sur l'appareil, aucune poussée de configuration à distance.
 - **Adresses externes visibles et modifiables** : la recherche de l'IP publique, les serveurs STUN et les adresses similaires sont affichés dans l'interface et peuvent être modifiés ou désactivés.
 - **Connexion via des tiers sous votre contrôle** : les connexions GitHub, Google, QQ et OIDC utilisent des applications OAuth que vous enregistrez vous-même, sans relais intermédiaire.
-- **Mises à niveau sous votre contrôle** : le programme ne remplace jamais son propre binaire en arrière-plan ; vous décidez quand mettre à niveau.
+- **Mises à niveau sous votre contrôle** : le programme ne se télécharge ni ne se remplace jamais en arrière-plan. La mise à niveau en ligne des installations binaires Linux ne s’exécute qu’après le clic d’un administrateur, vérifie le SHA-256 et conserve la version précédente ; vous décidez quand mettre à niveau.
 
 ## Protection des données
 

@@ -46,6 +46,8 @@ func TestRequiredAndMatch(t *testing.T) {
 		{"GET", "/api/system/backup", Denied},
 		{"POST", "/api/system/restore", Denied},
 		{"POST", "/api/system/restart", Denied},
+		{"POST", "/api/system/upgrade", Denied},
+		{"POST", "/api/system/upgrade/upload", Denied},
 		{"PUT", "/api/system/settings", Denied},
 		{"POST", "/api/webterminal/security/2fa/disable", Denied},
 		{"GET", "/index.html", Denied},

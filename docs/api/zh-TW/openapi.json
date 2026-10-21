@@ -16101,7 +16101,7 @@
     },
     "/api/system/settings": {
       "get": {
-        "description": "僅限登入工作階段。唯讀欄位 `modules` 列出全部功能模組及相依關係，`gatewayAvailable` 表示以飛牛統一閘道方式執行。\n\n**僅限登入工作階段使用，API 權杖無法存取此介面。**",
+        "description": "僅登入工作階段可用。唯讀欄位 `modules` 列出全部功能模組及相依關係，`gatewayAvailable` 表示以飛牛統一閘道方式執行。`updateProxy` 為檢查更新與線上升級存取 GitHub 時使用的代理。\n\n**僅限登入工作階段使用，API 權杖無法存取此介面。**",
         "responses": {
           "200": {
             "description": "成功"
@@ -16200,7 +16200,7 @@
     },
     "/api/system/update": {
       "get": {
-        "description": "所需權限：`status:read`。",
+        "description": "存取 GitHub 時使用全域設定 `updateProxy` 中的代理。`selfUpgrade.supported` 表示目前部署方式能否線上升級，不能時 `reason` 為 `os`、`docker`、`fnos` 或 `readonly`。\n\n所需權限：`status:read`。",
         "responses": {
           "200": {
             "description": "成功"
@@ -16247,6 +16247,98 @@
         ],
         "x-required-scope": "status:read",
         "x-token-allowed": true
+      }
+    },
+    "/api/system/upgrade": {
+      "post": {
+        "description": "僅登入工作階段（管理員）可用，只支援 Linux 二進位部署。下載與本機平台對應的發佈包，核對 checksums.txt 中的 SHA-256 並試執行新程式，替換執行檔後重新啟動；舊版本保留為同目錄下的 `\u003c檔名\u003e.old`。\n\n**僅限登入工作階段使用，API 權杖無法存取此介面。**",
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "請求參數錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖無效、已過期或未登入"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖缺少所需權限"
+          }
+        },
+        "summary": "線上升級到最新版本",
+        "tags": [
+          "系統"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
+      }
+    },
+    "/api/system/upgrade/upload": {
+      "post": {
+        "description": "僅登入工作階段（管理員）可用。表單欄位 `file` 為發佈頁的 `gately_\u003c版本\u003e_linux_\u003c架構\u003e.tar.gz` 或解壓後的 `gately` 程式，不限制版本高低，可用於離線升級或回退。\n\n**僅限登入工作階段使用，API 權杖無法存取此介面。**",
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "請求參數錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖無效、已過期或未登入"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖缺少所需權限"
+          }
+        },
+        "summary": "上傳升級包升級",
+        "tags": [
+          "系統"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
       }
     },
     "/api/tailscale/logout": {

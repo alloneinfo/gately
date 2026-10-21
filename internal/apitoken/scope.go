@@ -38,6 +38,8 @@ var forbiddenPrefixes = []string{
 	"/api/system/diagnostics",
 	"/api/system/restore",
 	"/api/system/restart",
+	// 在线升级会替换可执行文件
+	"/api/system/upgrade",
 	"/api/system/selfcheck",
 	"/api/system/onboarding",
 	// Web 终端的安全设置（两步验证、协议确认）等同于账号安全，只允许会话修改

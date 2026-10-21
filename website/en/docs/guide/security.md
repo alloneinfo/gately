@@ -7,7 +7,7 @@ Gately runs on the network edge and handles DNS provider keys, certificate priva
 - **Zero outbound connections by default**: no connections to project servers, no device reporting, no remote configuration push.
 - **Visible, editable outbound addresses**: public IP lookup, STUN servers and similar addresses are shown in the UI and can be changed or turned off.
 - **Self-managed third-party sign-in**: GitHub, Google, QQ and OIDC sign-in use OAuth apps you register yourself, with no relay in between.
-- **Self-managed upgrades**: the program never replaces its own binary in the background; you decide when to upgrade.
+- **Self-managed upgrades**: the program never downloads or replaces itself in the background. Online upgrades on Linux binary installs run only after an admin clicks, verify the SHA-256 and keep the previous version; you decide when to upgrade.
 
 ## Data protection
 

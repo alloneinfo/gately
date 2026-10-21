@@ -266,6 +266,10 @@
                 </el-select>
                 <div class="form-help">{{ t('settings.network.dnsHelp') }}</div>
               </el-form-item>
+              <el-form-item :label="t('settings.network.updateProxy')">
+                <el-input v-model="form.updateProxy" clearable :placeholder="t('settings.network.updateProxyPlaceholder')" class="w-480" />
+                <div class="form-help">{{ t('settings.network.updateProxyHelp') }}</div>
+              </el-form-item>
               <el-form-item :label="t('settings.network.timeZone')">
                 <el-select v-model="form.timeZone" filterable allow-create default-first-option clearable :placeholder="t('settings.network.timeZonePlaceholder')" class="w-280">
                   <el-option v-for="z in timeZones" :key="z.value" :label="`${z.label}  ${z.value}`" :value="z.value" />

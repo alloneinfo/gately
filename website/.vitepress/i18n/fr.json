@@ -247,7 +247,7 @@
       },
       {
         "title": "Sous votre contrôle",
-        "text": "La connexion via des tiers utilise vos propres applications OAuth, sans aucun relais. Pas de mise à jour automatique intégrée : les mises à niveau passent par Docker ou votre gestionnaire de paquets."
+        "text": "La connexion via des tiers utilise vos propres applications OAuth, sans aucun relais. La mise à niveau en ligne ne s’exécute que sur clic d’un administrateur (installations binaires Linux) ; rien ne se met à jour en arrière-plan."
       },
       {
         "title": "Déploiement en un fichier",

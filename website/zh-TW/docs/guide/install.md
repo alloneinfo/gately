@@ -101,10 +101,32 @@ cp gately.init /etc/init.d/gately && chmod +x /etc/init.d/gately
 
 ## 升級
 
-Gately 不內建線上自動更新，升級由部署方式負責：
+### 線上升級 {#online-upgrade}
+
+Linux 執行檔部署（systemd、PVE LXC 容器、OpenWrt 等）可以在管理介面的「關於」頁線上升級：點擊「檢查更新」，發現新版本後點擊「立即升級」。在 PVE 中用 OCI 映像檔建立的 LXC 容器同樣適用，無需刪除重建。Gately 會依序：
+
+1. 從 GitHub 下載與本機平台對應的 `gately_<版本>_linux_<架構>.tar.gz`；
+2. 對照同一版本的 `checksums.txt` 校驗 SHA-256；
+3. 以 `-version` 試執行新程式，確認能在本機執行；
+4. 替換可執行檔並以相同參數重新啟動，舊版本保留為同目錄下的 `gately.old`。
+
+存取 GitHub 不穩定時，可以在「關於」頁或「設定 → 網路與執行」中設定**更新代理**，支援 `http://`、`https://` 與 `socks5://`，檢查更新與下載都經過該代理。留空時直連，仍會遵循 `HTTPS_PROXY` 環境變數。
+
+無法連網時，從 [下載頁](/zh-TW/download) 取得 tar.gz，在「關於」頁點擊「上傳升級包」即可升級。上傳不限制版本高低，也可以用來回退到舊版本。
+
+線上升級只由管理員手動觸發，Gately 不會自動下載或安裝任何版本。新版本啟動異常時，可以用保留的舊版本手動回退（以 systemd 部署為例）：
+
+```bash
+mv /usr/local/bin/gately.old /usr/local/bin/gately
+systemctl restart gately
+```
+
+用 `setcap` 給程式授予過低位埠權限的，替換後需要重新執行一次 `setcap`。
+
+### 其他部署方式
 
 - Docker：`docker pull` 新映像檔後重建容器（設定目錄維持掛載即可）；
-- 執行檔：替換可執行檔並重新啟動服務；
-- 飛牛 fnOS：在應用中心手動安裝新版 `.fpk`，設定自動保留。
+- 飛牛 fnOS：在應用中心手動安裝新版 `.fpk`，設定自動保留；
+- Windows、macOS、FreeBSD：替換可執行檔並重新啟動服務。
 
 升級前建議匯出一份設定備份，或直接把設定目錄納入 git。下載的壓縮檔與映像檔可依 [驗證發佈檔案](/en/docs/guide/verify) 核對簽章。

@@ -10,7 +10,29 @@
   "latestRelease": "（最新发布 {latest}）",
   "publishedAt": "发布于 {time}",
   "viewRelease": "查看发布页",
-  "updateHint": "检查更新只在点击时访问 api.github.com，平时不会主动联网。",
+  "updateHint": "检查更新与在线升级只在点击时访问 GitHub，平时不会主动联网。",
+  "upgrade": {
+    "now": "立即升级到 {latest}",
+    "title": "在线升级",
+    "confirm": "将从 GitHub 下载 {latest}，核对 SHA-256 并试运行后替换 {exe}，随后自动重启。旧版本保留为 {exe}.old，升级前建议先导出配置备份。",
+    "confirmButton": "升级并重启",
+    "restarting": "已升级到 {version}，正在重启…",
+    "upload": "上传升级包",
+    "uploadConfirm": "将用 {name} 替换当前程序并重启。支持发布页的 Linux tar.gz 或解压后的 gately 程序，版本不限高低，也可用于回退。",
+    "reason": {
+      "os": "在线升级只支持 Linux，请下载新版本后手动替换程序。",
+      "docker": "运行在容器中，请拉取新镜像后重建容器（配置目录保持挂载即可）。",
+      "fnos": "飞牛 fnOS 安装包请在应用中心手动安装新版 .fpk，配置会自动保留。",
+      "readonly": "程序所在目录不可写，无法在线升级，请手动替换程序。"
+    }
+  },
+  "proxy": {
+    "label": "更新代理：",
+    "none": "直连",
+    "title": "更新代理",
+    "help": "检查更新与在线升级访问 GitHub 时使用，支持 http://、https:// 与 socks5://。留空时直连，仍会遵循 HTTPS_PROXY 环境变量。也可在「设置 → 网络与运行」中修改。",
+    "saved": "更新代理已保存"
+  },
   "promiseTitle": "透明度承诺",
   "featuresTitle": "功能一览",
   "quickStart": "快速开始",

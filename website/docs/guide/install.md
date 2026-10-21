@@ -101,10 +101,32 @@ cp gately.init /etc/init.d/gately && chmod +x /etc/init.d/gately
 
 ## 升级
 
-Gately 不内置在线自更新，升级由部署方式负责：
+### 在线升级 {#online-upgrade}
+
+Linux 二进制部署（systemd、PVE LXC 容器、OpenWrt 等）可以在管理界面的「关于」页在线升级：点击「检查更新」，发现新版本后点击「立即升级」。在 PVE 中用 OCI 镜像创建的 LXC 容器同样适用，无需删除重建。Gately 会依次：
+
+1. 从 GitHub 下载与本机平台对应的 `gately_<版本>_linux_<架构>.tar.gz`；
+2. 对照同一版本的 `checksums.txt` 校验 SHA-256；
+3. 以 `-version` 试运行新程序，确认能在本机执行；
+4. 替换可执行文件并以相同参数重启，旧版本保留为同目录下的 `gately.old`。
+
+访问 GitHub 不稳定时，可以在「关于」页或「设置 → 网络与运行」中设置**更新代理**，支持 `http://`、`https://` 与 `socks5://`，检查更新与下载都经过该代理。留空时直连，仍会遵循 `HTTPS_PROXY` 环境变量。
+
+无法联网时，从 [下载页](/download) 获取 tar.gz，在「关于」页点击「上传升级包」即可升级。上传不限制版本高低，也可以用来回退到旧版本。
+
+在线升级只由管理员手动触发，Gately 不会自动下载或安装任何版本。新版本启动异常时，可以用保留的旧版本手动回退（以 systemd 部署为例）：
+
+```bash
+mv /usr/local/bin/gately.old /usr/local/bin/gately
+systemctl restart gately
+```
+
+用 `setcap` 给程序授予过低位端口权限的，替换后需要重新执行一次 `setcap`。
+
+### 其他部署方式
 
 - Docker：`docker pull` 新镜像后重建容器（配置目录保持挂载即可）；
-- 二进制：替换可执行文件并重启服务；
-- 飞牛 fnOS：在应用中心手动安装新版 `.fpk`，配置自动保留。
+- 飞牛 fnOS：在应用中心手动安装新版 `.fpk`，配置自动保留；
+- Windows、macOS、FreeBSD：替换可执行文件并重启服务。
 
 升级前建议导出一份配置备份，或直接把配置目录纳入 git。下载的压缩包与镜像可按 [校验发布产物](/docs/guide/verify) 核对签名。

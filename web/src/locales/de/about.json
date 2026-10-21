@@ -10,7 +10,29 @@
   "latestRelease": " (neuestes Release {latest})",
   "publishedAt": "Veröffentlicht {time}",
   "viewRelease": "Release-Seite ansehen",
-  "updateHint": "api.github.com wird nur kontaktiert, wenn Sie auf „Nach Updates suchen“ klicken. Gately geht nie von selbst online.",
+  "updateHint": "Update-Prüfung und Online-Upgrade greifen nur beim Klicken auf GitHub zu; Gately geht nie von selbst online.",
+  "upgrade": {
+    "now": "Jetzt auf {latest} aktualisieren",
+    "title": "Online-Upgrade",
+    "confirm": "Gately lädt {latest} von GitHub, prüft die SHA-256, startet die neue Version testweise, ersetzt {exe} und startet neu. Die vorherige Version bleibt als {exe}.old erhalten. Exportieren Sie vor dem Upgrade eine Konfigurationssicherung.",
+    "confirmButton": "Aktualisieren und neu starten",
+    "restarting": "Auf {version} aktualisiert, Neustart…",
+    "upload": "Upgrade-Paket hochladen",
+    "uploadConfirm": "Gately ersetzt die aktuelle Binärdatei durch {name} und startet neu. Akzeptiert das Linux-tar.gz von der Release-Seite oder die entpackte gately-Binärdatei. Jede Version ist möglich, also auch eine Rückstufung.",
+    "reason": {
+      "os": "Online-Upgrade wird nur unter Linux unterstützt. Laden Sie die neue Version herunter und ersetzen Sie die Binärdatei manuell.",
+      "docker": "Läuft in einem Container. Ziehen Sie das neue Image und erstellen Sie den Container neu (Konfigurationsverzeichnis bleibt eingehängt).",
+      "fnos": "Für das fnOS-Paket installieren Sie die neue .fpk manuell im App-Center; die Konfiguration bleibt erhalten.",
+      "readonly": "Das Verzeichnis der ausführbaren Datei ist nicht beschreibbar, daher ist kein Online-Upgrade möglich. Ersetzen Sie die Binärdatei manuell."
+    }
+  },
+  "proxy": {
+    "label": "Update-Proxy: ",
+    "none": "direkt",
+    "title": "Update-Proxy",
+    "help": "Wird für den Zugriff auf GitHub bei Update-Prüfung und Online-Upgrade verwendet. Unterstützt http://, https:// und socks5://. Leer lassen für direkte Verbindung; die Umgebungsvariable HTTPS_PROXY wird weiterhin beachtet. Auch unter Einstellungen → Netzwerk & Laufzeit änderbar.",
+    "saved": "Update-Proxy gespeichert"
+  },
   "promiseTitle": "Unser Transparenzversprechen",
   "featuresTitle": "Funktionen",
   "quickStart": "Schnellstart",

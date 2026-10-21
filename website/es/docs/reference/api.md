@@ -63,7 +63,7 @@ Los siguientes endpoints solo aceptan sesiones de inicio de sesión, y cualquier
 
 - Cuenta y autenticación de dos factores: `/api/account`
 - Gestión de tokens: `/api/tokens`
-- Ajustes del sistema, token del sistema, reinicio: `/api/system/settings`, `/api/system/token`, `/api/system/restart`
+- Ajustes del sistema, token del sistema, reinicio, actualización en línea: `/api/system/settings`, `/api/system/token`, `/api/system/restart`, `/api/system/upgrade`
 - Descarga y restauración de la copia de seguridad de la configuración: `/api/system/backup`, `/api/system/restore`
 - Descarga de archivos de copia locales: `/api/backup/local`
 - Ajustes de seguridad del terminal web: `/api/webterminal/security`

@@ -30,10 +30,39 @@
         <template #default>
           <div v-if="update.publishedAt && update.latest" class="meta">{{ t('about.publishedAt', { time: new Date(update.publishedAt).toLocaleString() }) }}</div>
           <pre v-if="update.hasUpdate && update.notes" class="notes">{{ update.notes }}</pre>
-          <a v-if="update.url" :href="update.url" target="_blank" rel="noopener">{{ t('about.viewRelease') }}</a>
+          <div class="update-actions">
+            <el-button v-if="update.hasUpdate && update.selfUpgrade?.supported && isAdmin" type="primary" size="small" :icon="Download" :loading="upgrading" @click="upgradeOnline">
+              {{ t('about.upgrade.now', { latest: update.latest }) }}
+            </el-button>
+            <a v-if="update.url" :href="update.url" target="_blank" rel="noopener">{{ t('about.viewRelease') }}</a>
+          </div>
+          <div v-if="update.hasUpdate && update.selfUpgrade && !update.selfUpgrade.supported && update.selfUpgrade.reason" class="meta">
+            {{ t(`about.upgrade.reason.${update.selfUpgrade.reason}`) }}
+          </div>
         </template>
       </el-alert>
+      <!-- 在线升级工具：更新代理与手动上传升级包，仅管理员可见 -->
+      <div v-if="isAdmin" class="upgrade-tools">
+        <span>
+          {{ t('about.proxy.label') }}<span class="mono">{{ proxy || t('about.proxy.none') }}</span>
+          <el-button link type="primary" @click="openProxy">{{ t('common.edit') }}</el-button>
+        </span>
+        <el-button v-if="info?.selfUpgrade?.supported" link type="primary" :icon="Upload" :disabled="upgrading" @click="fileInput?.click()">
+          {{ t('about.upgrade.upload') }}
+        </el-button>
+        <input ref="fileInput" type="file" accept=".gz,.tgz,application/gzip,application/octet-stream" hidden @change="upgradeUpload" />
+      </div>
       <div class="hint">{{ t('about.updateHint') }}</div>
+
+      <el-dialog v-model="proxyDialog" :title="t('about.proxy.title')" width="480px" append-to-body>
+        <el-input v-model="proxyDraft" clearable placeholder="http://127.0.0.1:7890" />
+        <div class="dialog-help">{{ t('about.proxy.help') }}</div>
+        <template #footer>
+          <el-button @click="proxyDialog = false">{{ t('common.cancel') }}</el-button>
+          <el-button type="primary" :loading="proxySaving" @click="saveProxy">{{ t('common.save') }}</el-button>
+        </template>
+      </el-dialog>
+      <RestartOverlay ref="overlay" />
     </section>
 
     <!-- ============ 透明度承诺 ============ -->
@@ -127,7 +156,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { useI18n } from 'vue-i18n'
 import {
   ArrowLeftRight,
@@ -136,6 +165,7 @@ import {
   CalendarClock,
   Container,
   Copy,
+  Download,
   Eye,
   FileBraces,
   FolderSync,
@@ -155,10 +185,12 @@ import {
   ShieldCheck,
   ShieldHalf,
   SquareTerminal,
+  Upload,
   WifiOff,
 } from 'lucide-vue-next'
-import { api, type SystemInfo, type UpdateInfo } from '../api'
+import { api, type SystemSettings, type SystemInfo, type UpdateInfo, type UpgradeResult } from '../api'
 import AppLogo from '../components/AppLogo.vue'
+import RestartOverlay from '../components/RestartOverlay.vue'
 
 const { t } = useI18n()
 
@@ -210,6 +242,104 @@ async function checkUpdate() {
   }
 }
 
+// ---- 在线升级 ----
+
+// 能读取全局设置即为管理员，可以设置更新代理与执行升级
+const isAdmin = ref(false)
+const proxy = ref('')
+const proxyDialog = ref(false)
+const proxyDraft = ref('')
+const proxySaving = ref(false)
+const upgrading = ref(false)
+const fileInput = ref<HTMLInputElement>()
+const overlay = ref<InstanceType<typeof RestartOverlay>>()
+
+async function loadProxy() {
+  try {
+    const s = await api.get<SystemSettings>('/api/system/settings')
+    proxy.value = s.updateProxy ?? ''
+    isAdmin.value = true
+  } catch {
+    // 只读账号无权读取设置，不显示升级工具
+  }
+}
+
+function openProxy() {
+  proxyDraft.value = proxy.value
+  proxyDialog.value = true
+}
+
+// saveProxy 读取最新的全局设置后只改动更新代理，避免覆盖其他页面的修改
+async function saveProxy() {
+  proxySaving.value = true
+  try {
+    const s = await api.get<SystemSettings>('/api/system/settings')
+    const saved = await api.put<SystemSettings>('/api/system/settings', { ...s, updateProxy: proxyDraft.value.trim() })
+    proxy.value = saved.updateProxy ?? ''
+    proxyDialog.value = false
+    ElMessage.success(t('about.proxy.saved'))
+  } catch (e) {
+    ElMessage.error((e as Error).message)
+  } finally {
+    proxySaving.value = false
+  }
+}
+
+async function upgradeOnline() {
+  if (!update.value) {
+    return
+  }
+  try {
+    await ElMessageBox.confirm(
+      t('about.upgrade.confirm', { latest: update.value.latest, exe: update.value.selfUpgrade?.executable ?? 'gately' }),
+      t('about.upgrade.title'),
+      { type: 'warning', confirmButtonText: t('about.upgrade.confirmButton'), cancelButtonText: t('common.cancel') },
+    )
+  } catch {
+    return
+  }
+  upgrading.value = true
+  try {
+    const r = await api.post<UpgradeResult>('/api/system/upgrade')
+    overlay.value?.start(t('about.upgrade.restarting', { version: r.to }))
+  } catch (e) {
+    ElMessage.error((e as Error).message)
+  } finally {
+    upgrading.value = false
+  }
+}
+
+// upgradeUpload 用发布页的 tar.gz 或解压后的 gately 程序升级，不限制版本高低
+async function upgradeUpload(ev: Event) {
+  const input = ev.target as HTMLInputElement
+  const file = input.files?.[0]
+  // 清空选择，便于再次选择同一文件
+  input.value = ''
+  if (!file) {
+    return
+  }
+  try {
+    await ElMessageBox.confirm(t('about.upgrade.uploadConfirm', { name: file.name }), t('about.upgrade.upload'), {
+      type: 'warning',
+      confirmButtonText: t('about.upgrade.confirmButton'),
+      cancelButtonText: t('common.cancel'),
+    })
+  } catch {
+    return
+  }
+  upgrading.value = true
+  try {
+    const fd = new FormData()
+    fd.append('file', file)
+    const r = await api.post<UpgradeResult>('/api/system/upgrade/upload', fd)
+    overlay.value?.start(t('about.upgrade.restarting', { version: r.to }))
+  } catch (e) {
+    ElMessage.error((e as Error).message)
+  } finally {
+    upgrading.value = false
+  }
+}
+
 async function copy(text: string) {
   try {
     await navigator.clipboard.writeText(text)
@@ -220,6 +350,7 @@ async function copy(text: string) {
 }
 
 onMounted(async () => {
+  loadProxy()
   try {
     info.value = await api.get<SystemInfo>('/api/system/info')
   } catch {
@@ -333,6 +464,32 @@ h1 {
   margin: 6px 0;
   max-height: 200px;
   overflow: auto;
+}
+.update-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 6px;
+}
+.upgrade-tools {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 20px;
+  margin-top: 14px;
+  font-size: 12px;
+  color: var(--el-text-color-secondary);
+}
+.upgrade-tools .mono {
+  margin: 0 4px;
+}
+.dialog-help {
+  margin-top: 8px;
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--el-text-color-secondary);
 }
 .hint {
   margin-top: 14px;

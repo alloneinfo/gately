@@ -16101,7 +16101,7 @@
     },
     "/api/system/settings": {
       "get": {
-        "description": "Session connectée uniquement. Le champ en lecture seule `modules` liste tous les modules et leurs dépendances ; `gatewayAvailable` indique si Gately fonctionne derrière la passerelle unifiée de fnOS.\n\n**Disponible uniquement pour les sessions de connexion ; les jetons d'API ne peuvent pas accéder à ce point d'accès.**",
+        "description": "Session uniquement. Le champ en lecture seule `modules` liste tous les modules et leurs dépendances ; `gatewayAvailable` indique que Gately fonctionne derrière la passerelle unifiée de fnOS. `updateProxy` est le proxy utilisé pour joindre GitHub lors de la recherche de mises à jour et de la mise à niveau en ligne.\n\n**Disponible uniquement pour les sessions de connexion ; les jetons d'API ne peuvent pas accéder à ce point d'accès.**",
         "responses": {
           "200": {
             "description": "Succès"
@@ -16200,7 +16200,7 @@
     },
     "/api/system/update": {
       "get": {
-        "description": "Permission requise : `status:read`.",
+        "description": "Utilise le proxy du réglage global `updateProxy` pour joindre GitHub. `selfUpgrade.supported` indique si cette installation peut être mise à niveau en ligne ; sinon `reason` vaut `os`, `docker`, `fnos` ou `readonly`.\n\nPermission requise : `status:read`.",
         "responses": {
           "200": {
             "description": "Succès"
@@ -16247,6 +16247,98 @@
         ],
         "x-required-scope": "status:read",
         "x-token-allowed": true
+      }
+    },
+    "/api/system/upgrade": {
+      "post": {
+        "description": "Session (administrateur) uniquement, installations binaires Linux uniquement. Télécharge le paquet de cette plateforme, vérifie son SHA-256 avec checksums.txt, teste le nouveau binaire, remplace l’exécutable puis redémarre. La version précédente est conservée sous `\u003cnom de fichier\u003e.old` dans le même répertoire.\n\n**Disponible uniquement pour les sessions de connexion ; les jetons d'API ne peuvent pas accéder à ce point d'accès.**",
+        "responses": {
+          "200": {
+            "description": "Succès"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Paramètres de requête incorrects"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Jeton invalide, expiré ou non connecté"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Il manque au jeton la permission requise"
+          }
+        },
+        "summary": "Mettre à niveau en ligne vers la dernière version",
+        "tags": [
+          "Système"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
+      }
+    },
+    "/api/system/upgrade/upload": {
+      "post": {
+        "description": "Session (administrateur) uniquement. Le champ de formulaire `file` est le `gately_\u003cversion\u003e_linux_\u003carchitecture\u003e.tar.gz` de la page des versions ou le binaire `gately` extrait. Toute version est acceptée, ce qui convient aussi aux mises à niveau hors ligne ou aux retours en arrière.\n\n**Disponible uniquement pour les sessions de connexion ; les jetons d'API ne peuvent pas accéder à ce point d'accès.**",
+        "responses": {
+          "200": {
+            "description": "Succès"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Paramètres de requête incorrects"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Jeton invalide, expiré ou non connecté"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Il manque au jeton la permission requise"
+          }
+        },
+        "summary": "Mettre à niveau avec un paquet téléversé",
+        "tags": [
+          "Système"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
       }
     },
     "/api/tailscale/logout": {

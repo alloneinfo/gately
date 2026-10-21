@@ -16101,7 +16101,7 @@
     },
     "/api/system/settings": {
       "get": {
-        "description": "ログインセッションのみ。読み取り専用フィールド `modules` はすべての機能モジュールと依存関係を示し、`gatewayAvailable` は fnOS 統合ゲートウェイ経由で動作しているかを示します。\n\n**ログインセッションでのみ利用できます。API トークンではこのエンドポイントにアクセスできません。**",
+        "description": "ログインセッションのみ利用可能。読み取り専用フィールド `modules` はすべての機能モジュールと依存関係を示し、`gatewayAvailable` は fnOS 統合ゲートウェイ経由で動作していることを示します。`updateProxy` は更新確認とオンラインアップグレードで GitHub にアクセスする際のプロキシです。\n\n**ログインセッションでのみ利用できます。API トークンではこのエンドポイントにアクセスできません。**",
         "responses": {
           "200": {
             "description": "成功"
@@ -16200,7 +16200,7 @@
     },
     "/api/system/update": {
       "get": {
-        "description": "必要な権限: `status:read`。",
+        "description": "GitHub へのアクセスにはグローバル設定 `updateProxy` のプロキシを使います。`selfUpgrade.supported` は現在の導入方法でオンラインアップグレードできるかを示し、できない場合 `reason` は `os`、`docker`、`fnos`、`readonly` のいずれかです。\n\n必要な権限: `status:read`。",
         "responses": {
           "200": {
             "description": "成功"
@@ -16247,6 +16247,98 @@
         ],
         "x-required-scope": "status:read",
         "x-token-allowed": true
+      }
+    },
+    "/api/system/upgrade": {
+      "post": {
+        "description": "ログインセッション（管理者）のみ利用可能で、Linux バイナリ導入のみ対応。このプラットフォーム用のリリースパッケージをダウンロードし、checksums.txt の SHA-256 を照合して新しいバイナリを試験実行し、実行ファイルを置き換えて再起動します。旧バージョンは同じディレクトリに `\u003cファイル名\u003e.old` として保存されます。\n\n**ログインセッションでのみ利用できます。API トークンではこのエンドポイントにアクセスできません。**",
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "リクエストパラメーターが不正です"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンが無効、期限切れ、または未ログインです"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンに必要な権限がありません"
+          }
+        },
+        "summary": "最新バージョンへオンラインアップグレード",
+        "tags": [
+          "システム"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
+      }
+    },
+    "/api/system/upgrade/upload": {
+      "post": {
+        "description": "ログインセッション（管理者）のみ利用可能。フォームフィールド `file` はリリースページの `gately_\u003cバージョン\u003e_linux_\u003cアーキテクチャ\u003e.tar.gz` または展開済みの `gately` バイナリです。バージョンの新旧は問わず、オフラインアップグレードやロールバックにも使えます。\n\n**ログインセッションでのみ利用できます。API トークンではこのエンドポイントにアクセスできません。**",
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "リクエストパラメーターが不正です"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンが無効、期限切れ、または未ログインです"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンに必要な権限がありません"
+          }
+        },
+        "summary": "アップロードしたパッケージでアップグレード",
+        "tags": [
+          "システム"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
       }
     },
     "/api/tailscale/logout": {

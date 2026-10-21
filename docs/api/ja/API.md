@@ -474,6 +474,8 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | PUT | `/api/system/settings` | ログインセッションのみ | グローバル設定を保存 |
 | GET | `/api/system/info` | `status:read` | システム情報を表示 |
 | GET | `/api/system/update` | `status:read` | 新しいバージョンを確認 |
+| POST | `/api/system/upgrade` | ログインセッションのみ | 最新バージョンへオンラインアップグレード |
+| POST | `/api/system/upgrade/upload` | ログインセッションのみ | アップロードしたパッケージでアップグレード |
 | GET | `/api/system/backup` | ログインセッションのみ | 設定バックアップをダウンロード |
 | GET | `/api/system/diagnostics` | ログインセッションのみ | マスク済み診断パッケージをエクスポート |
 | GET | `/api/audit` | ログインセッションのみ | 操作監査ログを検索 |

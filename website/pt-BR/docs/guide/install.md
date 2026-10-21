@@ -101,10 +101,32 @@ No primeiro acesso aparece um assistente de configuração inicial que sugere, e
 
 ## Atualização
 
-O Gately não tem autoatualização online embutida; as atualizações dependem do seu método de implantação:
+### Atualização online {#online-upgrade}
+
+Instalações binárias no Linux (systemd, contêineres LXC do PVE, OpenWrt etc.) podem ser atualizadas online pela página Sobre do painel: clique em "Verificar atualizações" e, havendo versão nova, em "Atualizar agora". Isso vale também para contêineres LXC criados no PVE a partir da imagem OCI, sem precisar apagá-los e recriá-los. O Gately vai:
+
+1. Baixar do GitHub o `gately_<versão>_linux_<arquitetura>.tar.gz` desta plataforma;
+2. Conferir o SHA-256 com o `checksums.txt` da mesma versão;
+3. Executar o novo binário em teste com `-version` para confirmar que roda nesta máquina;
+4. Substituir o executável e reiniciar com os mesmos argumentos, guardando a versão anterior como `gately.old` no mesmo diretório.
+
+Se o GitHub estiver difícil de acessar, defina um **proxy de atualização** na página Sobre ou em Configurações → Rede e execução. Ele suporta `http://`, `https://` e `socks5://`, e tanto a verificação quanto o download passam por ele. Vazio, o Gately conecta diretamente e continua respeitando a variável de ambiente `HTTPS_PROXY`.
+
+Sem acesso à internet, baixe o tar.gz na [página de download](/pt-BR/download) e clique em "Enviar pacote de atualização" na página Sobre. Qualquer versão é aceita, então também dá para voltar a uma anterior.
+
+A atualização online só roda quando um administrador a inicia; o Gately nunca baixa nem instala versões por conta própria. Se a nova versão não iniciar, reverta manualmente com a cópia guardada (exemplo com systemd):
+
+```bash
+mv /usr/local/bin/gately.old /usr/local/bin/gately
+systemctl restart gately
+```
+
+Se você concedeu ao binário acesso a portas baixas com `setcap`, execute `setcap` de novo após atualizar.
+
+### Outras implantações
 
 - Docker: execute `docker pull` da nova imagem e recrie o contêiner (mantenha o diretório de configuração montado);
-- Binário: substitua o executável e reinicie o serviço;
-- fnOS: instale manualmente o `.fpk` mais novo pela Central de aplicativos; a sua configuração é mantida.
+- fnOS: instale manualmente o `.fpk` mais novo pela Central de aplicativos; a sua configuração é mantida;
+- Windows, macOS, FreeBSD: substitua o executável e reinicie o serviço.
 
 Antes de atualizar, exporte um backup da configuração ou mantenha o diretório de configuração no git. As assinaturas dos arquivos e imagens baixados podem ser conferidas conforme [Verificar versões](/en/docs/guide/verify).

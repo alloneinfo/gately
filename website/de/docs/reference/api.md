@@ -63,7 +63,7 @@ Die folgenden Endpunkte akzeptieren nur Anmeldesitzungen, und jeder Zugriff mit 
 
 - Konto und Zwei-Faktor-Authentifizierung: `/api/account`
 - Token-Verwaltung: `/api/tokens`
-- Systemeinstellungen, System-Token, Neustart: `/api/system/settings`, `/api/system/token`, `/api/system/restart`
+- Systemeinstellungen, System-Token, Neustart, Online-Upgrade: `/api/system/settings`, `/api/system/token`, `/api/system/restart`, `/api/system/upgrade`
 - Download und Wiederherstellung der Konfigurationssicherung: `/api/system/backup`, `/api/system/restore`
 - Download lokaler Sicherungsdateien: `/api/backup/local`
 - Sicherheitseinstellungen des Web-Terminals: `/api/webterminal/security`

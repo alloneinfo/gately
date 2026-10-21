@@ -247,7 +247,7 @@
       },
       {
         "title": "In Ihrer Hand",
-        "text": "Die Anmeldung über Drittanbieter nutzt Ihre eigenen OAuth-Apps, ohne Relay dazwischen. Es gibt kein eingebautes Selbst-Update; Upgrades erfolgen über Docker oder Ihren Paketmanager."
+        "text": "Die Anmeldung über Drittanbieter nutzt Ihre eigenen OAuth-Apps, ohne Relay dazwischen. Online-Upgrades laufen nur, wenn ein Administrator klickt (Linux-Binärinstallationen); im Hintergrund wird nichts aktualisiert."
       },
       {
         "title": "Bereitstellung als einzelne Datei",

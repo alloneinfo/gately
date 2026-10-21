@@ -247,7 +247,7 @@
       },
       {
         "title": "Sob o seu controle",
-        "text": "O login de terceiros usa aplicativos OAuth que você mesmo registra, sem intermediários. Não há autoatualização embutida; as atualizações vêm do Docker ou do gerenciador de pacotes."
+        "text": "O login de terceiros usa aplicativos OAuth que você mesmo registra, sem intermediários. A atualização online só roda quando um administrador clica (instalações binárias no Linux); nada é atualizado em segundo plano."
       },
       {
         "title": "Implantação em um único arquivo",

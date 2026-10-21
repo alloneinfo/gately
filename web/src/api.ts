@@ -169,6 +169,8 @@ export interface SystemSettings {
   timeZone: string
   language: string
   dnsServers: string[] | null
+  // 检查更新与在线升级访问 GitHub 时使用的代理，为空直连
+  updateProxy: string
   logLines: number
   gcPercent: number
   maxProcs: number
@@ -208,6 +210,24 @@ export interface SystemInfo {
   maxProcs: number
   timeZone: string
   inDocker: boolean
+  selfUpgrade: SelfUpgrade
+}
+
+// SelfUpgrade 表示当前部署方式能否在线升级；不能时 reason 为 os / docker / fnos / readonly。
+export interface SelfUpgrade {
+  supported: boolean
+  reason?: 'os' | 'docker' | 'fnos' | 'readonly'
+  // 将被替换的可执行文件路径
+  executable?: string
+}
+
+// UpgradeResult 对应在线升级与上传升级包的返回。
+export interface UpgradeResult {
+  from: string
+  to: string
+  executable: string
+  // 旧版本保留的位置
+  previous: string
 }
 
 // UpdateInfo 对应 GET /api/system/update。
@@ -218,6 +238,7 @@ export interface UpdateInfo {
   notes: string
   publishedAt: string
   hasUpdate: boolean
+  selfUpgrade: SelfUpgrade
 }
 
 // formatBytes 把字节数格式化为可读字符串。

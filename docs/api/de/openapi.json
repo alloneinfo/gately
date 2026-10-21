@@ -16101,7 +16101,7 @@
     },
     "/api/system/settings": {
       "get": {
-        "description": "Nur mit Anmeldesitzung. Das schreibgeschützte Feld `modules` listet alle Module samt Abhängigkeiten; `gatewayAvailable` gibt an, ob Gately hinter dem einheitlichen fnOS-Gateway läuft.\n\n**Nur für Anmeldesitzungen verfügbar; API-Tokens können auf diesen Endpunkt nicht zugreifen.**",
+        "description": "Nur mit Sitzung. Das schreibgeschützte Feld `modules` listet alle Funktionsmodule und ihre Abhängigkeiten; `gatewayAvailable` bedeutet, dass Gately hinter dem einheitlichen fnOS-Gateway läuft. `updateProxy` ist der Proxy für den Zugriff auf GitHub bei Update-Prüfung und Online-Upgrade.\n\n**Nur für Anmeldesitzungen verfügbar; API-Tokens können auf diesen Endpunkt nicht zugreifen.**",
         "responses": {
           "200": {
             "description": "Erfolgreich"
@@ -16200,7 +16200,7 @@
     },
     "/api/system/update": {
       "get": {
-        "description": "Erforderliche Berechtigung: `status:read`.",
+        "description": "Verwendet für den Zugriff auf GitHub den Proxy aus der globalen Einstellung `updateProxy`. `selfUpgrade.supported` gibt an, ob diese Installation online aktualisiert werden kann; andernfalls ist `reason` `os`, `docker`, `fnos` oder `readonly`.\n\nErforderliche Berechtigung: `status:read`.",
         "responses": {
           "200": {
             "description": "Erfolgreich"
@@ -16247,6 +16247,98 @@
         ],
         "x-required-scope": "status:read",
         "x-token-allowed": true
+      }
+    },
+    "/api/system/upgrade": {
+      "post": {
+        "description": "Nur mit Sitzung (Administrator) und nur für Linux-Binärinstallationen. Lädt das Release-Paket für diese Plattform, prüft die SHA-256 gegen checksums.txt, startet die neue Binärdatei testweise, ersetzt die ausführbare Datei und startet neu. Die vorherige Version bleibt als `\u003cDateiname\u003e.old` im selben Verzeichnis erhalten.\n\n**Nur für Anmeldesitzungen verfügbar; API-Tokens können auf diesen Endpunkt nicht zugreifen.**",
+        "responses": {
+          "200": {
+            "description": "Erfolgreich"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Anfrageparameter fehlerhaft"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token ungültig, abgelaufen oder nicht angemeldet"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Dem Token fehlt die erforderliche Berechtigung"
+          }
+        },
+        "summary": "Online auf die neueste Version aktualisieren",
+        "tags": [
+          "System"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
+      }
+    },
+    "/api/system/upgrade/upload": {
+      "post": {
+        "description": "Nur mit Sitzung (Administrator). Das Formularfeld `file` ist das `gately_\u003cVersion\u003e_linux_\u003cArchitektur\u003e.tar.gz` von der Release-Seite oder die entpackte `gately`-Binärdatei. Jede Version wird akzeptiert, daher auch für Offline-Upgrades oder Rückstufungen geeignet.\n\n**Nur für Anmeldesitzungen verfügbar; API-Tokens können auf diesen Endpunkt nicht zugreifen.**",
+        "responses": {
+          "200": {
+            "description": "Erfolgreich"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Anfrageparameter fehlerhaft"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token ungültig, abgelaufen oder nicht angemeldet"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Dem Token fehlt die erforderliche Berechtigung"
+          }
+        },
+        "summary": "Mit hochgeladenem Paket aktualisieren",
+        "tags": [
+          "System"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
       }
     },
     "/api/tailscale/logout": {

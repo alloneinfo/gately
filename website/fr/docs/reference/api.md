@@ -63,7 +63,7 @@ Les API suivantes n'acceptent que les sessions de connexion ; tout accès par je
 
 - Compte et authentification à deux facteurs : `/api/account`
 - Gestion des jetons : `/api/tokens`
-- Paramètres système, jeton système, redémarrage : `/api/system/settings`, `/api/system/token`, `/api/system/restart`
+- Paramètres système, jeton système, redémarrage, mise à niveau en ligne : `/api/system/settings`, `/api/system/token`, `/api/system/restart`, `/api/system/upgrade`
 - Téléchargement et restauration de la sauvegarde de configuration : `/api/system/backup`, `/api/system/restore`
 - Téléchargement des fichiers de sauvegarde locaux : `/api/backup/local`
 - Paramètres de sécurité du terminal Web : `/api/webterminal/security`

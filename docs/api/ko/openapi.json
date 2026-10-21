@@ -16101,7 +16101,7 @@
     },
     "/api/system/settings": {
       "get": {
-        "description": "로그인 세션 전용입니다. 읽기 전용 필드 `modules`는 모든 기능 모듈과 의존 관계를 나열하고, `gatewayAvailable`은 fnOS 통합 게이트웨이 방식으로 실행 중인지를 나타냅니다.\n\n**로그인 세션에서만 사용할 수 있으며, API 토큰으로는 이 엔드포인트에 접근할 수 없습니다.**",
+        "description": "로그인 세션에서만 사용할 수 있습니다. 읽기 전용 필드 `modules`는 모든 기능 모듈과 의존 관계를 나열하며, `gatewayAvailable`은 fnOS 통합 게이트웨이 방식으로 실행 중임을 뜻합니다. `updateProxy`는 업데이트 확인과 온라인 업그레이드 시 GitHub 접속에 쓰는 프록시입니다.\n\n**로그인 세션에서만 사용할 수 있으며, API 토큰으로는 이 엔드포인트에 접근할 수 없습니다.**",
         "responses": {
           "200": {
             "description": "성공"
@@ -16200,7 +16200,7 @@
     },
     "/api/system/update": {
       "get": {
-        "description": "필요한 권한: `status:read`.",
+        "description": "GitHub 접속 시 전역 설정 `updateProxy`의 프록시를 사용합니다. `selfUpgrade.supported`는 현재 설치 방식에서 온라인 업그레이드가 가능한지 나타내며, 불가능하면 `reason`은 `os`, `docker`, `fnos`, `readonly` 중 하나입니다.\n\n필요한 권한: `status:read`.",
         "responses": {
           "200": {
             "description": "성공"
@@ -16247,6 +16247,98 @@
         ],
         "x-required-scope": "status:read",
         "x-token-allowed": true
+      }
+    },
+    "/api/system/upgrade": {
+      "post": {
+        "description": "로그인 세션(관리자)에서만 사용할 수 있으며 Linux 바이너리 설치만 지원합니다. 이 플랫폼용 릴리스 패키지를 내려받아 checksums.txt의 SHA-256을 대조하고 새 바이너리를 시험 실행한 뒤 실행 파일을 교체하고 재시작합니다. 이전 버전은 같은 디렉터리에 `\u003c파일 이름\u003e.old`로 보관됩니다.\n\n**로그인 세션에서만 사용할 수 있으며, API 토큰으로는 이 엔드포인트에 접근할 수 없습니다.**",
+        "responses": {
+          "200": {
+            "description": "성공"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "요청 매개변수 오류"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰이 유효하지 않거나 만료되었거나 로그인하지 않음"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰에 필요한 권한이 없음"
+          }
+        },
+        "summary": "최신 버전으로 온라인 업그레이드",
+        "tags": [
+          "시스템"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
+      }
+    },
+    "/api/system/upgrade/upload": {
+      "post": {
+        "description": "로그인 세션(관리자)에서만 사용할 수 있습니다. 폼 필드 `file`은 릴리스 페이지의 `gately_\u003c버전\u003e_linux_\u003c아키텍처\u003e.tar.gz` 또는 압축을 푼 `gately` 바이너리입니다. 버전 높낮이에 제한이 없어 오프라인 업그레이드나 롤백에도 쓸 수 있습니다.\n\n**로그인 세션에서만 사용할 수 있으며, API 토큰으로는 이 엔드포인트에 접근할 수 없습니다.**",
+        "responses": {
+          "200": {
+            "description": "성공"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "요청 매개변수 오류"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰이 유효하지 않거나 만료되었거나 로그인하지 않음"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰에 필요한 권한이 없음"
+          }
+        },
+        "summary": "업로드한 패키지로 업그레이드",
+        "tags": [
+          "시스템"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
       }
     },
     "/api/tailscale/logout": {

@@ -247,7 +247,7 @@
       },
       {
         "title": "In your control",
-        "text": "Third-party sign-in uses OAuth apps you register yourself, with no relay in between. There is no built-in self-update; upgrades come from Docker or your package manager."
+        "text": "Third-party sign-in uses OAuth apps you register yourself, with no relay in between. Online upgrades run only when an admin clicks (Linux binary installs); nothing updates in the background."
       },
       {
         "title": "Single-file deployment",

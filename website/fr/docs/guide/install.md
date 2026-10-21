@@ -101,10 +101,32 @@ La première connexion ouvre un guide de démarrage qui propose successivement d
 
 ## Mise à niveau
 
-Gately n'a pas de mise à jour automatique en ligne intégrée ; les mises à niveau dépendent de votre mode de déploiement :
+### Mise à niveau en ligne {#online-upgrade}
+
+Les installations binaires Linux (systemd, conteneurs LXC de PVE, OpenWrt, etc.) peuvent être mises à niveau en ligne depuis la page À propos de l'interface d'administration : cliquez sur « Rechercher des mises à jour », puis sur « Mettre à niveau » si une nouvelle version est disponible. Cela fonctionne aussi pour les conteneurs LXC créés dans PVE à partir de l'image OCI, sans les supprimer ni les recréer. Gately va :
+
+1. Télécharger depuis GitHub le `gately_<version>_linux_<architecture>.tar.gz` de cette plateforme ;
+2. Vérifier son SHA-256 avec le `checksums.txt` de la même version ;
+3. Tester le nouveau binaire avec `-version` pour s'assurer qu'il s'exécute sur cette machine ;
+4. Remplacer l'exécutable et redémarrer avec les mêmes arguments, en conservant la version précédente sous `gately.old` dans le même répertoire.
+
+Si GitHub est difficile à joindre, définissez un **proxy de mise à jour** sur la page À propos ou dans Réglages → Réseau et exécution. Il prend en charge `http://`, `https://` et `socks5://`, et la recherche comme le téléchargement passent par lui. Vide, Gately se connecte directement et tient toujours compte de la variable d'environnement `HTTPS_PROXY`.
+
+Sans accès à Internet, récupérez le tar.gz sur la [page de téléchargement](/fr/download) et cliquez sur « Téléverser un paquet de mise à niveau » dans la page À propos. Toute version est acceptée, ce qui permet aussi de revenir à une version antérieure.
+
+La mise à niveau en ligne ne s'exécute que sur action d'un administrateur ; Gately ne télécharge ni n'installe jamais de version de lui-même. Si la nouvelle version ne démarre pas, revenez en arrière manuellement avec la copie conservée (exemple avec systemd) :
+
+```bash
+mv /usr/local/bin/gately.old /usr/local/bin/gately
+systemctl restart gately
+```
+
+Si vous avez accordé au binaire l'accès aux ports bas avec `setcap`, relancez `setcap` après la mise à niveau.
+
+### Autres déploiements
 
 - Docker : `docker pull` de la nouvelle image, puis recréation du conteneur (en conservant le dossier de configuration monté) ;
-- Binaire : remplacez l'exécutable et redémarrez le service ;
-- fnOS : installez manuellement le `.fpk` plus récent depuis le Centre d'applications ; votre configuration est conservée.
+- fnOS : installez manuellement le `.fpk` plus récent depuis le Centre d'applications ; votre configuration est conservée ;
+- Windows, macOS, FreeBSD : remplacez l'exécutable et redémarrez le service.
 
 Avant de mettre à niveau, exportez une sauvegarde de la configuration ou conservez le dossier de configuration dans git. Les archives et images téléchargées peuvent être vérifiées selon [Vérifier les versions](/en/docs/guide/verify).

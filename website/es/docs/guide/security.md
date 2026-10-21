@@ -7,7 +7,7 @@ Gately funciona en el borde de la red y maneja claves de proveedores DNS, claves
 - **Cero conexiones salientes por defecto**: sin conexiones a servidores del proyecto, sin envío de datos del dispositivo y sin envío remoto de configuración.
 - **Direcciones salientes visibles y editables**: la consulta de IP pública, los servidores STUN y direcciones similares se muestran en la interfaz y se pueden cambiar o desactivar.
 - **Inicio de sesión de terceros bajo tu control**: el acceso con GitHub, Google, QQ y OIDC usa aplicaciones OAuth que registras tú mismo, sin ningún relé intermedio.
-- **Actualizaciones bajo tu control**: el programa nunca reemplaza su propio binario en segundo plano; tú decides cuándo actualizar.
+- **Actualizaciones bajo tu control**: el programa nunca se descarga ni se reemplaza a sí mismo en segundo plano. La actualización en línea de las instalaciones binarias en Linux solo se ejecuta cuando un administrador hace clic, verifica el SHA-256 y conserva la versión anterior; tú decides cuándo actualizar.
 
 ## Protección de los datos
 

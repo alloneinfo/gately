@@ -63,7 +63,7 @@ API に必要な権限は、パスとメソッドで決まります。
 
 - アカウントと 2 段階認証：`/api/account`
 - トークン管理：`/api/tokens`
-- システム設定、システムトークン、再起動：`/api/system/settings`、`/api/system/token`、`/api/system/restart`
+- システム設定、システムトークン、再起動、オンラインアップグレード：`/api/system/settings`、`/api/system/token`、`/api/system/restart`、`/api/system/upgrade`
 - 設定バックアップのダウンロードと復元：`/api/system/backup`、`/api/system/restore`
 - ローカルのバックアップファイルのダウンロード：`/api/backup/local`
 - Web ターミナルのセキュリティ設定：`/api/webterminal/security`

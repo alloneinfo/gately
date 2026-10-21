@@ -63,7 +63,7 @@ Os endpoints a seguir aceitam apenas sessões com login, e qualquer acesso com t
 
 - Conta e autenticação em dois fatores: `/api/account`
 - Gerenciamento de tokens: `/api/tokens`
-- Configurações do sistema, token do sistema, reinício: `/api/system/settings`, `/api/system/token`, `/api/system/restart`
+- Configurações do sistema, token do sistema, reinício, atualização online: `/api/system/settings`, `/api/system/token`, `/api/system/restart`, `/api/system/upgrade`
 - Download e restauração do backup da configuração: `/api/system/backup`, `/api/system/restore`
 - Download de arquivos de backup locais: `/api/backup/local`
 - Configurações de segurança do Terminal Web: `/api/webterminal/security`

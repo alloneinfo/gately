@@ -63,7 +63,7 @@ curl -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/status
 
 - Аккаунт и двухфакторная аутентификация: `/api/account`
 - Управление токенами: `/api/tokens`
-- Системные настройки, системный токен, перезапуск: `/api/system/settings`, `/api/system/token`, `/api/system/restart`
+- Системные настройки, системный токен, перезапуск, онлайн-обновление: `/api/system/settings`, `/api/system/token`, `/api/system/restart`, `/api/system/upgrade`
 - Скачивание и восстановление резервной копии конфигурации: `/api/system/backup`, `/api/system/restore`
 - Скачивание локальных файлов резервных копий: `/api/backup/local`
 - Настройки безопасности веб-терминала: `/api/webterminal/security`

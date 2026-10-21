@@ -10,7 +10,29 @@
   "latestRelease": "（最新發佈 {latest}）",
   "publishedAt": "發佈於 {time}",
   "viewRelease": "查看發佈頁",
-  "updateHint": "檢查更新只在點擊時存取 api.github.com，平時不會主動連線。",
+  "updateHint": "檢查更新與線上升級只在點擊時存取 GitHub，平時不會主動連網。",
+  "upgrade": {
+    "now": "立即升級到 {latest}",
+    "title": "線上升級",
+    "confirm": "將從 GitHub 下載 {latest}，核對 SHA-256 並試執行後替換 {exe}，隨後自動重新啟動。舊版本保留為 {exe}.old，升級前建議先匯出設定備份。",
+    "confirmButton": "升級並重新啟動",
+    "restarting": "已升級到 {version}，正在重新啟動…",
+    "upload": "上傳升級包",
+    "uploadConfirm": "將用 {name} 替換目前程式並重新啟動。支援發佈頁的 Linux tar.gz 或解壓後的 gately 程式，版本不限高低，也可用於回退。",
+    "reason": {
+      "os": "線上升級只支援 Linux，請下載新版本後手動替換程式。",
+      "docker": "執行在容器中，請拉取新映像後重建容器（設定目錄保持掛載即可）。",
+      "fnos": "飛牛 fnOS 安裝包請在應用中心手動安裝新版 .fpk，設定會自動保留。",
+      "readonly": "程式所在目錄不可寫入，無法線上升級，請手動替換程式。"
+    }
+  },
+  "proxy": {
+    "label": "更新代理：",
+    "none": "直連",
+    "title": "更新代理",
+    "help": "檢查更新與線上升級存取 GitHub 時使用，支援 http://、https:// 與 socks5://。留空時直連，仍會遵循 HTTPS_PROXY 環境變數。也可在「設定 → 網路與執行」中修改。",
+    "saved": "更新代理已儲存"
+  },
   "promiseTitle": "透明度承諾",
   "featuresTitle": "功能一覽",
   "quickStart": "快速開始",

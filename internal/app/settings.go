@@ -55,6 +55,9 @@ type Settings struct {
 	// DNSServers 为自定义 DNS 服务器，影响所有出站域名解析（DDNS、Webhook、ACME 等）；
 	// 支持 IP、IP:端口、doh@主机 与 https:// DoH 地址
 	DNSServers []string `json:"dnsServers"`
+	// UpdateProxy 为检查更新与在线升级访问 GitHub 时使用的代理，支持 http、https 与 socks5；
+	// 为空时直连（仍遵循 HTTPS_PROXY 等环境变量）
+	UpdateProxy string `json:"updateProxy"`
 	// LogLines 为每个模块保留的日志条数
 	LogLines int `json:"logLines"`
 	// GCPercent / MaxProcs 为运行时调优参数，0 表示默认
@@ -99,6 +102,7 @@ func (s *Settings) normalize() {
 		}
 	}
 	s.DNSServers = dns
+	s.UpdateProxy = strings.TrimSpace(s.UpdateProxy)
 	s.ThirdLogin.Normalize()
 	s.Language = i18n.Normalize(s.Language)
 	// 去空、去重并排序，便于比较是否变化
@@ -153,6 +157,11 @@ func (s *Settings) Validate() error {
 	}
 	if err := resolver.Validate(s.DNSServers); err != nil {
 		return err
+	}
+	if s.UpdateProxy != "" {
+		if err := validateProxyURL(s.UpdateProxy); err != nil {
+			return err
+		}
 	}
 	if s.LogLines > maxLogLines {
 		return fmt.Errorf("日志条数不能超过 %d", maxLogLines)
