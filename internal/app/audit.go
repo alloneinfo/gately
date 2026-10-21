@@ -36,9 +36,14 @@ func publishAudit(e audit.Entry) {
 	default:
 		return
 	}
+	msg := fmt.Sprintf("%s 从 %s 执行 %s %s（状态 %d）", e.Actor, e.IP, e.Method, e.Path, e.Status)
+	if e.Method == "" && e.Detail != "" {
+		// 非请求类记录（如命令行重置管理员账号）直接使用补充说明
+		msg = e.Detail
+	}
 	events.Publish(events.Event{
 		Type: typ, Source: "管理后台", Level: level, Title: title,
-		Message: fmt.Sprintf("%s 从 %s 执行 %s %s（状态 %d）", e.Actor, e.IP, e.Method, e.Path, e.Status),
+		Message: msg,
 		Fields:  map[string]string{"actor": e.Actor, "ip": e.IP, "method": e.Method, "path": e.Path},
 	})
 }

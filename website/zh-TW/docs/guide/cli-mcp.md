@@ -2,6 +2,8 @@
 
 `gately` 執行檔內建兩個子命令：`gately ctl` 在終端機中呼叫執行中實例的管理 API，`gately mcp` 把同一批介面以 MCP 工具的形式提供給 AI 用戶端。兩者都透過 HTTP 與 [API 權杖](/zh-TW/docs/reference/api) 存取實例，介面清單來自實例的 `/api/openapi.json`，權限由權杖決定。
 
+另有 `gately reset-password` 與 `gately reset-totp` 直接讀寫本機設定目錄，不經過 API，用於忘記密碼或遺失兩步驟驗證器時找回管理員帳號，見 [重設密碼與兩步驟驗證](/zh-TW/docs/guide/install#reset)。
+
 ## 連線設定
 
 連線資訊依以下順序決定，後面的會覆蓋前面的：

@@ -4,13 +4,17 @@
 
 Não. Por padrão, o Gately não se conecta a nenhum servidor do projeto e não envia informações do dispositivo. Endereços externos, como a consulta do IP público, usam serviços públicos de terceiros e podem ser alterados na tarefa correspondente.
 
-## Onde está a senha inicial?
+## Qual é a conta e a senha padrão?
 
-Ela é gravada no log na primeira inicialização e exibida uma única vez. Em implantações com Docker, execute `docker logs gately 2>&1 | grep -i "initial password"`.
+A conta padrão é `admin` e a senha padrão é `gately.cn`. Essa senha é pública: altere-a logo depois de entrar, em "Configurações → Conta e segurança"; até lá, um aviso fica fixo no topo da interface de administração. Se a variável de ambiente `GATELY_INITIAL_PASSWORD` foi definida na implantação, vale a senha dela.
 
 ## Esqueci a senha do administrador. O que fazer?
 
-Pare o Gately, apague o `account.json` do diretório de configuração e inicie de novo: o programa recria a conta `admin` e imprime uma nova senha inicial no log. Depois de entrar, revise as configurações de segurança, como a autenticação em dois fatores.
+Execute `gately reset-password` no servidor (no Docker, `docker exec -it gately gately reset-password`) e digite `yes` para confirmar: a senha volta para a senha padrão `gately.cn`, e uma instância em execução aplica isso em poucos segundos. Veja [Redefinir a senha e a autenticação em dois fatores](/pt-BR/docs/guide/install#reset).
+
+## Perdi o autenticador de dois fatores. O que fazer?
+
+Execute `gately reset-totp` no servidor (no Docker, `docker exec -it gately gately reset-totp`). Depois de confirmar, a autenticação em dois fatores é desativada; entre com a senha e ative-a de novo.
 
 ## Ele é compatível com o fnOS?
 

@@ -4,13 +4,17 @@
 
 Nein. Gately verbindet sich standardmäßig mit keinem Projektserver und übermittelt keine Geräteinformationen. Ausgehende Adressen wie die Abfrage der öffentlichen IP nutzen öffentliche Drittanbieter-Dienste und lassen sich in den jeweiligen Aufgaben ändern.
 
-## Wo finde ich das Initialpasswort?
+## Wie lauten Standardkonto und Standardpasswort?
 
-Es wird beim ersten Start einmalig ins Log geschrieben. Führen Sie bei Docker-Bereitstellungen `docker logs gately 2>&1 | grep -i "initial password"` aus.
+Das Standardkonto ist `admin`, das Standardpasswort `gately.cn`. Das Standardpasswort ist öffentlich bekannt: Ändern Sie es nach der Anmeldung sofort unter „Einstellungen → Konto & Sicherheit“; bis dahin zeigt die Verwaltungsoberfläche oben einen dauerhaften Hinweis an. Wurde bei der Bereitstellung die Umgebungsvariable `GATELY_INITIAL_PASSWORD` gesetzt, gilt dieses Passwort.
 
 ## Was tun, wenn ich das Administratorpasswort vergessen habe?
 
-Beenden Sie Gately, löschen Sie `account.json` im Konfigurationsverzeichnis und starten Sie es erneut. Das Programm legt das Konto `admin` neu an und schreibt ein neues Initialpasswort ins Log. Prüfen Sie nach der Anmeldung die Sicherheitseinstellungen, etwa die Zwei-Faktor-Authentifizierung.
+Führen Sie auf dem Server `gately reset-password` aus (bei Docker `docker exec -it gately gately reset-password`) und bestätigen Sie mit `yes`. Das Passwort wird auf das Standardpasswort `gately.cn` zurückgesetzt; eine laufende Instanz übernimmt das innerhalb weniger Sekunden. Siehe [Passwort und Zwei-Faktor-Authentifizierung zurücksetzen](/de/docs/guide/install#reset).
+
+## Was tun, wenn ich den Zwei-Faktor-Authenticator verloren habe?
+
+Führen Sie auf dem Server `gately reset-totp` aus (bei Docker `docker exec -it gately gately reset-totp`). Nach der Bestätigung ist die Zwei-Faktor-Authentifizierung abgeschaltet; melden Sie sich mit dem Passwort an und aktivieren Sie sie erneut.
 
 ## Unterstützt Gately fnOS?
 

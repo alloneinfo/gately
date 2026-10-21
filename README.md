@@ -92,10 +92,11 @@ docker run -d --name gately --network host \
   -v ./gately-data:/etc/gately \
   -v /var/run/docker.sock:/var/run/docker.sock \
   ghcr.io/wangwanjie/gately:latest
-docker logs gately 2>&1 | grep -i "initial password"
 ```
 
-Open `http://<device-ip>:16680` and sign in as `admin` with the initial password from the log. Then change the password and enable two-factor authentication under Settings. See [deploy/docker-compose.yml](deploy/docker-compose.yml) for a complete Compose example.
+Open `http://<device-ip>:16680` and sign in with the default account `admin` and the default password `gately.cn`. Then change the password and enable two-factor authentication under Settings. See [deploy/docker-compose.yml](deploy/docker-compose.yml) for a complete Compose example.
+
+If you forget the password or lose your authenticator, run `gately reset-password` or `gately reset-totp` on the server (`docker exec -it gately gately reset-password` for Docker); the change takes effect once you confirm. See [Reset password and two-factor authentication](https://gately.cn/en/docs/guide/install#reset).
 
 Port forwarding, STUN, and web services listen on host ports, so `--network host` is recommended. If you do not need Docker management, drop the `docker.sock` mount.
 
@@ -107,7 +108,7 @@ Download the archive for your platform from [Releases](https://github.com/wangwa
 ./gately -c /etc/gately
 ```
 
-Flags: `-c` sets the config directory (the `GATELY_CONFIG_DIR` environment variable also works), `-listen` overrides the admin UI listen address, `-apply` applies `<name>.json` files from a directory to the config directory on every start (`GATELY_APPLY_DIR`, handy for GitOps and Kubernetes; the account and token files cannot be overwritten), and `-version` prints the version. For unattended installs, set `GATELY_INITIAL_PASSWORD` to choose the initial admin password instead of reading a random one from the log.
+Flags: `-c` sets the config directory (the `GATELY_CONFIG_DIR` environment variable also works), `-listen` overrides the admin UI listen address, `-apply` applies `<name>.json` files from a directory to the config directory on every start (`GATELY_APPLY_DIR`, handy for GitOps and Kubernetes; the account and token files cannot be overwritten), and `-version` prints the version. For unattended installs, set `GATELY_INITIAL_PASSWORD` to choose the initial admin password instead of the default `gately.cn`.
 
 Service templates: [systemd](deploy/systemd/gately.service) and [OpenWrt procd](deploy/openwrt/gately.init). To verify downloaded archives and images (cosign signatures, build provenance, SBOM), see [Verifying release artifacts](docs/en/VERIFY.md).
 
@@ -117,7 +118,7 @@ Each Release ships offline `.fpk` packages for fnOS: `gately_<version>_fnos_x86.
 
 - **Works with the fnOS unified gateway**: click the Gately icon on the fnOS desktop and the admin UI opens through the fnOS unified gateway under `/app/gately/`, sharing the entry point you already use for fnOS. Both the LAN address and your remote fnOS domain work, with no need to open or forward port 16680. Access through the gateway is controlled by fnOS (only fnOS administrators can open it), so the safe entry and LAN-only settings apply only to direct access on port 16680.
 - **Signs fnOS administrators in with their fnOS session**: turn on **Settings → Access control → Sign in with fnOS** and fnOS administrators who are signed in to fnOS enter Gately from the desktop icon without a password or two-step code; regular fnOS users still sign in. After you sign out, the login page offers a "Sign in as fnOS user &lt;name&gt;" button instead of signing you back in silently. The setting is off by default and only shown in the fnOS package.
-- On the LAN the admin UI is also at `http://<NAS address>:16680`. On the first start the initial `admin` password is written to `/var/apps/gately/var/gately.log` (`grep -i "initial password"`).
+- On the LAN the admin UI is also at `http://<NAS address>:16680`. The default account is `admin` and the default password is `gately.cn`.
 - The app runs as `root`, so it can listen on 80/443, manage Docker through `docker.sock`, and open a real Web terminal. Install it only on a NAS you control.
 - Config lives in the app's `var` directory and is kept on uninstall unless you choose "delete all" in the uninstall wizard. Upgrading is another manual install of the newer `.fpk`.
 - The package also adds a `gately` command (`/usr/local/bin/gately`) for `gately ctl` and `gately mcp`.
@@ -128,7 +129,7 @@ Each Release ships offline `.fpk` packages for fnOS: `gately_<version>_fnos_x86.
 
 Each Release ships OpenWrt packages: `gately_<version>_openwrt_<arch>.ipk` for OpenWrt 24.10 and earlier (including iStoreOS), installed with `opkg install`, and `.apk` for OpenWrt 25.12 and later, installed with `apk add --allow-untrusted`. Packages cover amd64 / arm64 / arm / mipsle / mips / riscv64; pick one by `DISTRIB_ARCH` in `/etc/openwrt_release` (see the table in the [install guide](https://gately.cn/en/docs/guide/install#openwrt)).
 
-- The service is enabled and started on install; the admin UI is at `http://<router address>:16680`, and `logread | grep -i "initial password"` shows the initial password.
+- The service is enabled and started on install; the admin UI is at `http://<router address>:16680`, and the default account is `admin` with the password `gately.cn`.
 - Config lives in `/etc/gately` and is kept across upgrades, uninstalls and firmware upgrades (sysupgrade). To upgrade, install the newer package; the online upgrade on the About page points you to the package manager instead.
 - The binary is about 35 MB, so the packages suit x86 soft routers, ARM64 boxes and other devices with ample storage; the arm package needs ARMv7 with hardware floating point.
 

@@ -49,7 +49,6 @@ El repositorio incluye un archivo de servicio completo, [deploy/systemd/gately.s
 sudo install -m 0755 gately /usr/local/bin/gately
 sudo install -m 0644 gately.service /etc/systemd/system/gately.service
 sudo systemctl daemon-reload && sudo systemctl enable --now gately
-journalctl -u gately | grep -i "initial password"
 ```
 
 ### OpenWrt {#openwrt}
@@ -76,9 +75,6 @@ cd /tmp
 opkg install ./gately_<version>_openwrt_amd64.ipk
 # OpenWrt 25.12
 apk add --allow-untrusted ./gately_<version>_openwrt_amd64.apk
-
-# Contraseña inicial (se escribe en el registro del sistema en el primer arranque)
-logread | grep -i "initial password"
 ```
 
 - El servicio se activa en el arranque y se inicia justo después de instalar; la interfaz de administración está en `http://<dirección del router>:16680`. La configuración se guarda en `/etc/gately` y se conserva al actualizar el firmware (sysupgrade);
@@ -122,16 +118,34 @@ Activa «Iniciar sesión con fnOS» en «Ajustes → Control de acceso» y los a
 ### Notas
 
 - La aplicación se ejecuta como `root`, de modo que puede escuchar en 80/443, gestionar Docker mediante `docker.sock` y abrir un terminal web real. Instálala solo en un NAS que controles.
-- En el primer arranque, la contraseña inicial de `admin` se escribe en `/var/apps/gately/var/gately.log`: `grep -i "initial password" /var/apps/gately/var/gately.log`.
 - La configuración se guarda en el directorio `var` de la aplicación y se conserva al desinstalar, salvo que elijas «Eliminar todo» en el asistente de desinstalación.
-- El paquete también añade el comando `/usr/local/bin/gately` para `gately ctl` y `gately mcp`.
+- El paquete también añade el comando `/usr/local/bin/gately` para `gately ctl`, `gately mcp` y `gately reset-password`.
 - El puerto 16680 se comparte con la imagen de Docker. Detén el contenedor `gately` antes de iniciar la aplicación nativa.
 
 ## Primer inicio de sesión
 
-La interfaz de administración escucha por defecto en el puerto `16680`. El usuario es `admin` y la contraseña inicial se escribe en el registro en el primer arranque. En despliegues automatizados puedes fijar la contraseña inicial con la variable de entorno `GATELY_INITIAL_PASSWORD`; en ese caso no se genera ninguna contraseña aleatoria.
+La interfaz de administración escucha por defecto en el puerto `16680`. El usuario predeterminado es `admin` y la contraseña predeterminada, `gately.cn`. En despliegues automatizados puedes fijar otra contraseña inicial con la variable de entorno `GATELY_INITIAL_PASSWORD`.
 
-El primer inicio de sesión muestra una guía de bienvenida que te propone, paso a paso, cambiar la contraseña, activar la autenticación de dos factores o una passkey, ejecutar el autodiagnóstico de red, importar desde Lucky y configurar las notificaciones.
+La contraseña predeterminada es pública; mientras sigas usándola, la interfaz de administración mostrará en la parte superior un aviso para que la cambies. El primer inicio de sesión muestra una guía de bienvenida que te propone, paso a paso, cambiar la contraseña, activar la autenticación de dos factores o una passkey, ejecutar el autodiagnóstico de red, importar desde Lucky y configurar las notificaciones.
+
+## Restablecer la contraseña y la autenticación de dos factores {#reset}
+
+Si olvidas la contraseña del administrador o pierdes el autenticador (TOTP), restablécelos con un comando en el servidor donde se ejecuta Gately. El comando necesita leer y escribir el directorio de configuración, lo que equivale a tener acceso al servidor, por lo que no se puede usar a través de la red:
+
+- `gately reset-password`: restablece la contraseña del administrador a la predeterminada, `gately.cn`; con `-p <nueva contraseña>` puedes fijar directamente una nueva;
+- `gately reset-totp`: desactiva la autenticación de dos factores del administrador; puedes volver a activarla después de iniciar sesión.
+
+Antes de ejecutarse, el comando muestra el nombre del administrador y la operación que va a realizar, y pide escribir `yes` para confirmar y evitar errores; en scripts y otros entornos no interactivos, añade `-y` para omitir la confirmación. Una instancia de Gately en ejecución aplica el cambio en pocos segundos sin reiniciarse; si no está en ejecución, se aplica en el siguiente arranque. Tras el restablecimiento se invalidan todas las sesiones iniciadas y se levantan los bloqueos por intentos fallidos; el nombre de usuario, las passkeys, las cuentas de solo lectura y el resto de la configuración no cambian.
+
+| Tipo de instalación | Comando |
+| --- | --- |
+| Docker | `docker exec -it gately gately reset-password` |
+| systemd | `sudo gately reset-password` |
+| OpenWrt / iStoreOS | `gately reset-password` |
+| fnOS | `sudo gately reset-password` |
+| Otros | `./gately reset-password -c <directorio de configuración>` |
+
+Sin `-c`, el comando busca por orden en `GATELY_CONFIG_DIR`, en `data` dentro del directorio actual, en `/etc/gately` y en el directorio de configuración del paquete de fnOS, `/var/apps/gately/var/config`, y muestra el directorio que usa. Cada restablecimiento queda registrado en el registro del sistema y en el registro de auditoría.
 
 ## Actualización
 

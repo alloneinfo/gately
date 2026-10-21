@@ -38,7 +38,7 @@ func newTestServer(t *testing.T) (*httptest.Server, *http.Client) {
 		t.Fatal(err)
 	}
 	a.logger = log.New(io.Discard, "", 0)
-	// 把随机初始密码替换成已知值，便于测试登录
+	// 换成不落盘的账号，初始密码为默认密码，便于测试登录
 	a.auth = auth.NewManager(auth.Account{}, func(auth.Account) error { return nil })
 	if _, err := a.auth.EnsureInitialized(); err != nil {
 		t.Fatal(err)

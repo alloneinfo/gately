@@ -4,13 +4,17 @@
 
 연결할 필요가 없습니다. Gately는 기본적으로 어떤 프로젝트 서버에도 연결하지 않으며 기기 정보도 보고하지 않습니다. 공인 IP 조회 같은 외부 주소는 서드파티 공개 서비스를 사용하며 해당 작업에서 수정할 수 있습니다.
 
-## 초기 비밀번호는 어디에 있나요?
+## 기본 계정과 비밀번호는 무엇인가요?
 
-최초 실행 시 로그에 한 번만 출력됩니다. Docker로 배포했다면 `docker logs gately 2>&1 | grep -i "initial password"`를 실행하세요.
+기본 계정은 `admin`, 기본 비밀번호는 `gately.cn`입니다. 기본 비밀번호는 공개되어 있으므로 로그인한 뒤 바로 「설정 → 계정 및 보안」에서 변경하세요. 변경하기 전까지 관리 UI 상단에 경고가 계속 표시됩니다. 배포할 때 환경 변수 `GATELY_INITIAL_PASSWORD`를 설정했다면 그 비밀번호를 사용합니다.
 
 ## 관리자 비밀번호를 잊어버렸습니다
 
-Gately를 중지하고 설정 디렉터리의 `account.json`을 삭제한 뒤 다시 시작하세요. 프로그램이 `admin` 계정을 새로 만들고 새 초기 비밀번호를 로그에 출력합니다. 로그인한 뒤에는 2단계 인증 등 보안 설정을 확인하세요.
+서버에서 `gately reset-password`를 실행하세요(Docker는 `docker exec -it gately gately reset-password`). `yes`를 입력해 확인하면 비밀번호가 기본 비밀번호 `gately.cn`으로 재설정되며, 실행 중인 인스턴스에는 몇 초 안에 적용됩니다. 자세한 내용은 [비밀번호와 2단계 인증 재설정](/ko/docs/guide/install#reset)을 참고하세요.
+
+## 2단계 인증기를 잃어버렸습니다
+
+서버에서 `gately reset-totp`를 실행하세요(Docker는 `docker exec -it gately gately reset-totp`). 확인하면 2단계 인증이 꺼지므로 비밀번호로 로그인한 뒤 다시 켜세요.
 
 ## fnOS를 지원하나요?
 

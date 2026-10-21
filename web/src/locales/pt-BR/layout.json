@@ -8,5 +8,7 @@
   "logoutTitle": "Sair",
   "logoutConfirm": "Tem certeza de que deseja sair?",
   "logoutOk": "Sair",
-  "readonlyBadge": "Somente leitura"
+  "readonlyBadge": "Somente leitura",
+  "defaultPassword": "Você ainda está usando a senha padrão {password}. Qualquer pessoa que a conheça pode entrar na interface de administração; troque-a agora.",
+  "changeNow": "Trocar agora"
 }

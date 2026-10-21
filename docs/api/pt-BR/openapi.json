@@ -13243,7 +13243,7 @@
     },
     "/api/session": {
       "get": {
-        "description": "Qualquer token de API válido pode acessar; nenhuma permissão específica é necessária.",
+        "description": "返回 `username`、`role`（`admin` 或 `readonly`）、`disabledModules`（已关闭的功能模块 ID）与 `defaultPassword`（管理员仍在使用默认密码 `gately.cn` 时为 true，管理界面据此提醒Modificar ）。\n\nQualquer token de API válido pode acessar; nenhuma permissão específica é necessária.",
         "responses": {
           "200": {
             "description": "Sucesso"

@@ -4,13 +4,17 @@
 
 Non. Par défaut, Gately ne se connecte à aucun serveur du projet et ne remonte aucune information sur l'appareil. Les adresses externes, comme la recherche de l'IP publique, utilisent des services publics tiers et se modifient dans les tâches correspondantes.
 
-## Où trouver le mot de passe initial ?
+## Quels sont le compte et le mot de passe par défaut ?
 
-Il est affiché dans le journal au premier démarrage, une seule fois. Pour un déploiement Docker, exécutez `docker logs gately 2>&1 | grep -i "initial password"`.
+Le compte par défaut est `admin` et le mot de passe par défaut `gately.cn`. Ce mot de passe est public : changez-le dans « Paramètres → Compte et sécurité » dès la première connexion ; d'ici là, un avertissement reste affiché en haut de l'interface d'administration. Si la variable d'environnement `GATELY_INITIAL_PASSWORD` a été définie lors du déploiement, c'est ce mot de passe qui s'applique.
 
 ## Que faire si j'ai oublié le mot de passe administrateur ?
 
-Arrêtez Gately, supprimez `account.json` du dossier de configuration, puis redémarrez-le. Le programme recrée le compte `admin` et affiche un nouveau mot de passe initial dans le journal. Après la connexion, vérifiez les paramètres de sécurité comme l'authentification à deux facteurs.
+Exécutez `gately reset-password` sur le serveur (avec Docker : `docker exec -it gately gately reset-password`) et tapez `yes` pour confirmer. Le mot de passe redevient le mot de passe par défaut `gately.cn` ; une instance en cours d'exécution applique le changement en quelques secondes. Consultez [Réinitialiser le mot de passe et l'authentification à deux facteurs](/fr/docs/guide/install#reset).
+
+## Que faire si j'ai perdu mon application d'authentification ?
+
+Exécutez `gately reset-totp` sur le serveur (avec Docker : `docker exec -it gately gately reset-totp`) et confirmez. L'authentification à deux facteurs est désactivée : connectez-vous avec le mot de passe, puis réactivez-la.
 
 ## fnOS est-il pris en charge ?
 

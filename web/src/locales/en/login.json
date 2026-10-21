@@ -15,7 +15,7 @@
   "thirdParty": "Or use a third-party account",
   "loginWith": "Sign in with {name}",
   "redirecting": "Redirecting to {name}…",
-  "initialPasswordHint": "On first launch, the initial password is printed in the program log.",
+  "initialPasswordHint": "The default account is admin with password gately.cn; change it right after signing in. Forgot the password? Run gately reset-password on the server to reset it.",
   "totpTitle": "Two-factor authentication",
   "totpPrompt": "Open your authenticator app and enter the 6-digit code for {user}",
   "code": "Verification code",
@@ -25,5 +25,6 @@
   "totpAuto": "The code is verified automatically once complete",
   "or": "or",
   "passkey": "Sign in with a Passkey",
-  "fnos": "Sign in as fnOS user {user}"
+  "fnos": "Sign in as fnOS user {user}",
+  "totpLost": "Lost your authenticator? Run gately reset-totp on the server to turn off two-factor authentication."
 }

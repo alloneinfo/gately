@@ -8,5 +8,7 @@
   "logoutTitle": "Déconnexion",
   "logoutConfirm": "Voulez-vous vraiment vous déconnecter ?",
   "logoutOk": "Se déconnecter",
-  "readonlyBadge": "Lecture seule"
+  "readonlyBadge": "Lecture seule",
+  "defaultPassword": "Vous utilisez toujours le mot de passe par défaut {password}. Toute personne qui le connaît peut se connecter à l'interface d'administration : changez-le maintenant.",
+  "changeNow": "Changer maintenant"
 }

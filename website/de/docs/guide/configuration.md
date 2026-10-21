@@ -11,7 +11,7 @@
 
 | Umgebungsvariable | Beschreibung |
 | --- | --- |
-| `GATELY_INITIAL_PASSWORD` | Initialpasswort des Administrators beim ersten Start (mindestens 8 Zeichen); ohne Wirkung, wenn das Konto bereits existiert |
+| `GATELY_INITIAL_PASSWORD` | Initialpasswort des Administrators beim ersten Start (mindestens 8 Zeichen), ohne Angabe gilt das Standardpasswort `gately.cn`; ohne Wirkung, wenn das Konto bereits existiert |
 
 ## Konfigurationsverzeichnis
 

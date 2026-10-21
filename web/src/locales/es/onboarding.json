@@ -5,8 +5,8 @@
   "later": "Recordármelo luego",
   "done": "Hecho, no volver a mostrar",
   "password": {
-    "title": "Cambia la contraseña inicial",
-    "desc": "La contraseña inicial se imprimió en el registro de inicio. Sustitúyela por la tuya."
+    "title": "Cambia la contraseña predeterminada",
+    "desc": "La contraseña predeterminada gately.cn es pública; cámbiala por una propia."
   },
   "security": {
     "title": "Añade un segundo factor",

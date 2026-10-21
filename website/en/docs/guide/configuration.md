@@ -11,7 +11,7 @@
 
 | Environment variable | Description |
 | --- | --- |
-| `GATELY_INITIAL_PASSWORD` | Initial administrator password on first start (at least 8 characters); has no effect once the account exists |
+| `GATELY_INITIAL_PASSWORD` | Initial administrator password on first start (at least 8 characters); defaults to `gately.cn` when unset; has no effect once the account exists |
 
 ## Config directory
 

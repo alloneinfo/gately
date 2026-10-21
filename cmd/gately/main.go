@@ -30,6 +30,9 @@ func main() {
 			os.Exit(ctl.RunCtl(os.Args[2:], i18n.NewWriterFor(os.Stdout, i18n.FromEnv()), i18n.NewWriterFor(os.Stderr, i18n.FromEnv())))
 		case "mcp":
 			os.Exit(ctl.RunMCP(os.Args[2:], os.Stdin, os.Stdout, i18n.NewWriterFor(os.Stderr, i18n.FromEnv())))
+		case "reset-password", "reset-totp":
+			// 在服务器上重置管理员密码或关闭两步验证，提示按系统语言翻译
+			os.Exit(runReset(os.Args[1], os.Args[2:], os.Stdin, i18n.NewWriterFor(os.Stdout, i18n.FromEnv())))
 		case "version":
 			// 与 -version 等价，避免 docker exec gately gately version 误启动第二个服务实例
 			printVersion()
@@ -75,7 +78,7 @@ func main() {
 		Modules:   mods,
 		Requires:  registry.Requires(),
 		ApplyDir:  *applyDir,
-		// 自动化部署时用环境变量指定初始密码，避免从日志中读取随机密码
+		// 自动化部署时用环境变量指定初始密码，不指定时使用默认密码 gately.cn
 		InitialPassword: os.Getenv("GATELY_INITIAL_PASSWORD"),
 		GatewaySocket:   *gatewaySocket,
 		GatewayPrefix:   *gatewayPrefix,

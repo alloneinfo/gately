@@ -4,13 +4,17 @@
 
 无需连接。Gately 默认不连接任何项目方服务器，也不上报设备信息。公网 IP 查询等对外地址使用第三方公共服务，可以在对应任务中修改。
 
-## 初始密码在哪里？
+## 默认账号和密码是什么？
 
-首次启动时输出在日志中，仅打印一次。Docker 部署执行 `docker logs gately 2>&1 | grep -i "initial password"`。
+默认账号 `admin`，默认密码 `gately.cn`。默认密码是公开的，登录后请立即在「设置 → 账号与安全」修改，修改之前管理界面顶部会一直提示。部署时设置了环境变量 `GATELY_INITIAL_PASSWORD` 的，以该密码为准。
 
 ## 忘记管理员密码怎么办？
 
-停止 Gately，删除配置目录中的 `account.json`，再启动：程序会重新创建 `admin` 账号，并把新的初始密码打印到日志。登录后请检查两步验证等安全设置。
+在服务器上运行 `gately reset-password`（Docker 为 `docker exec -it gately gately reset-password`），输入 `yes` 确认后，密码重置为默认密码 `gately.cn`，运行中的实例几秒内生效。详见 [重置密码与两步验证](/docs/guide/install#reset)。
+
+## 丢失了两步验证器怎么办？
+
+在服务器上运行 `gately reset-totp`（Docker 为 `docker exec -it gately gately reset-totp`），确认后关闭两步验证，再用密码登录并重新启用。
 
 ## 支持飞牛 fnOS 吗？
 

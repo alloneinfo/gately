@@ -11,7 +11,7 @@
 
 | Variable d'environnement | Description |
 | --- | --- |
-| `GATELY_INITIAL_PASSWORD` | Mot de passe administrateur initial au premier démarrage (8 caractères minimum) ; sans effet si le compte existe déjà |
+| `GATELY_INITIAL_PASSWORD` | Mot de passe administrateur initial au premier démarrage (8 caractères minimum) ; à défaut, le mot de passe par défaut `gately.cn` est utilisé. Sans effet si le compte existe déjà |
 
 ## Dossier de configuration
 

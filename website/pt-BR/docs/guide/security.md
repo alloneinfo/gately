@@ -18,6 +18,7 @@ O Gately roda na borda da rede e lida com chaves de provedores de DNS, chaves pr
 ## Autenticação e controle de acesso
 
 - Hash de senhas com bcrypt e tokens de sessão assinados com HMAC;
+- A senha padrão `gately.cn` é pública; enquanto ela estiver em uso, um aviso fixo no topo da interface de administração lembra de alterá-la. Senha esquecida ou autenticador de dois fatores perdido só podem ser redefinidos no servidor com `gately reset-password` / `gately reset-totp` (exige leitura e gravação no diretório de configuração e confirmação digitando `yes`); depois disso, todas as sessões são invalidadas e a operação fica no log de auditoria. Veja [Redefinir a senha e a autenticação em dois fatores](/pt-BR/docs/guide/install#reset);
 - Login com passkey (WebAuthn): só a chave pública é armazenada, a verificação do usuário (digital, rosto ou PIN) é obrigatória e um contador de assinaturas impede clonagem; exige acesso por domínio com HTTPS (ou localhost);
 - Autenticação em dois fatores (TOTP, verificada com os vetores de teste da RFC 6238);
 - Contas somente leitura: podem ver o status e a configuração, mas não podem alterar nada, baixar backups, ler segredos ou abrir o terminal; ao redefinir a senha ou excluir a conta, as sessões são invalidadas na hora;

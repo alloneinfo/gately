@@ -92,10 +92,11 @@ docker run -d --name gately --network host \
   -v ./gately-data:/etc/gately \
   -v /var/run/docker.sock:/var/run/docker.sock \
   ghcr.io/wangwanjie/gately:latest
-docker logs gately 2>&1 | grep -i "initial password"
 ```
 
-`http://<デバイスのIP>:16680` を開き、`admin` とログに出力された初期パスワードでログインします。その後「設定」でパスワードを変更し、2 段階認証を有効にしてください。完全な Compose の例は [deploy/docker-compose.yml](deploy/docker-compose.yml) を参照してください。
+`http://<デバイスのIP>:16680` を開き、デフォルトのアカウント `admin` とデフォルトのパスワード `gately.cn` でログインします。その後「設定」でパスワードを変更し、2 段階認証を有効にしてください。完全な Compose の例は [deploy/docker-compose.yml](deploy/docker-compose.yml) を参照してください。
+
+パスワードを忘れたときや 2 段階認証アプリを紛失したときは、サーバー上で `gately reset-password` または `gately reset-totp` を実行します（Docker では `docker exec -it gately gately reset-password`）。確認するとすぐに反映されます。詳しくは[パスワードと 2 段階認証のリセット](https://gately.cn/ja/docs/guide/install#reset)を参照してください。
 
 ポート転送、STUN、Web サービスはホストのポートで待ち受けるため、`--network host` を推奨します。Docker 管理が不要な場合は `docker.sock` のマウントを外せます。
 
@@ -107,7 +108,7 @@ docker logs gately 2>&1 | grep -i "initial password"
 ./gately -c /etc/gately
 ```
 
-オプション: `-c` は設定ディレクトリ（環境変数 `GATELY_CONFIG_DIR` でも指定可能）、`-listen` は管理画面の待ち受けアドレスの上書き、`-apply` は起動のたびにディレクトリ内の `<name>.json` を設定ディレクトリに適用（`GATELY_APPLY_DIR`、GitOps や Kubernetes に便利。アカウントとトークンのファイルは上書き不可）、`-version` はバージョン表示です。無人インストールでは `GATELY_INITIAL_PASSWORD` を設定すると、ログからランダムなパスワードを読む代わりに管理者の初期パスワードを指定できます。
+オプション: `-c` は設定ディレクトリ（環境変数 `GATELY_CONFIG_DIR` でも指定可能）、`-listen` は管理画面の待ち受けアドレスの上書き、`-apply` は起動のたびにディレクトリ内の `<name>.json` を設定ディレクトリに適用（`GATELY_APPLY_DIR`、GitOps や Kubernetes に便利。アカウントとトークンのファイルは上書き不可）、`-version` はバージョン表示です。無人インストールでは `GATELY_INITIAL_PASSWORD` を設定すると、デフォルトのパスワード `gately.cn` の代わりに管理者の初期パスワードを指定できます。
 
 サービステンプレート: [systemd](deploy/systemd/gately.service)、[OpenWrt procd](deploy/openwrt/gately.init)。ダウンロードしたアーカイブやイメージの検証（cosign 署名、ビルド来歴、SBOM）は[リリース成果物の検証](docs/ja/VERIFY.md)を参照してください。
 
@@ -117,7 +118,7 @@ docker logs gately 2>&1 | grep -i "initial password"
 
 - **fnOS 統一ゲートウェイに対応**：fnOS デスクトップの Gately アイコンをクリックすると、管理画面が fnOS 統一ゲートウェイ経由で `/app/gately/` 配下に開き、fnOS と同じアクセス入口を共用します。LAN のアドレスでも fnOS のリモートドメインでもそのまま使え、16680 ポートを開放・転送する必要はありません。ゲートウェイ経由のアクセスは fnOS が制御する（fnOS 管理者だけが開けます）ため、セキュアエントリーと「LAN 内からのみ許可」は 16680 ポートへの直接アクセスにのみ適用されます。
 - **fnOS 管理者は fnOS のログイン状態でそのままログイン**：**設定 → アクセス制御 → fnOS のログイン状態で自動ログイン** を有効にすると、fnOS にログイン済みの管理者はデスクトップのアイコンからパスワードや 2 段階認証コードなしで Gately に入れます。一般の fnOS ユーザーは引き続きログインが必要です。ログアウトした後は、自動で再ログインせず、ログイン画面に「fnOS アカウント &lt;ユーザー名&gt; でログイン」ボタンが表示されます。この設定は既定で無効で、fnOS パッケージでのみ表示されます。
-- LAN 内では `http://<NAS のアドレス>:16680` でも管理画面にアクセスできます。初回起動時に `admin` の初期パスワードが `/var/apps/gately/var/gately.log` に書き込まれます（`grep -i "initial password"`）。
+- LAN 内では `http://<NAS のアドレス>:16680` でも管理画面にアクセスできます。デフォルトのアカウントは `admin`、パスワードは `gately.cn` です。
 - アプリは `root` で動作するため、80/443 の待ち受け、`docker.sock` を通じた Docker の管理、実際の Web ターミナルが利用できます。自分で管理している NAS にのみインストールしてください。
 - 設定はアプリの `var` ディレクトリに保存され、アンインストール時も保持されます。アンインストールウィザードで「すべて削除」を選んだ場合のみ消去されます。アップグレードは新しい `.fpk` を再度手動インストールするだけです。
 - パッケージには `gately` コマンド（`/usr/local/bin/gately`）も含まれ、`gately ctl` と `gately mcp` を使えます。
@@ -128,7 +129,7 @@ docker logs gately 2>&1 | grep -i "initial password"
 
 各 Release には OpenWrt 向けパッケージが含まれます。`gately_<version>_openwrt_<arch>.ipk` は OpenWrt 24.10 以前（iStoreOS を含む）向けで `opkg install` で、`.apk` は OpenWrt 25.12 以降向けで `apk add --allow-untrusted` でインストールします。アーキテクチャは amd64 / arm64 / arm / mipsle / mips / riscv64 で、`/etc/openwrt_release` の `DISTRIB_ARCH` に合わせて選びます（対応表は[インストールガイド](https://gately.cn/ja/docs/guide/install#openwrt)を参照）。
 
-- インストール時に自動起動が有効になり、サービスが起動します。管理画面は `http://<ルーターのアドレス>:16680` で、初期パスワードは `logread | grep -i "initial password"` で確認できます。
+- インストール時に自動起動が有効になり、サービスが起動します。管理画面は `http://<ルーターのアドレス>:16680` で、デフォルトのアカウントは `admin`、パスワードは `gately.cn` です。
 - 設定は `/etc/gately` に保存され、アップグレード、アンインストール、ファームウェアの更新（sysupgrade）でも保持されます。アップグレードは新しいパッケージをインストールするだけです。「バージョン情報」ページのオンラインアップグレードでは、パッケージマネージャーを使うよう案内されます。
 - バイナリは約 35 MB のため、x86 のソフトルーターや ARM64 ボックスなどストレージに余裕のあるデバイス向けです。arm パッケージにはハードウェア浮動小数点に対応した ARMv7 が必要です。
 

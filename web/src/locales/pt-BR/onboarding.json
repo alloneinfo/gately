@@ -5,8 +5,8 @@
   "later": "Lembrar depois",
   "done": "Concluído, não mostrar mais",
   "password": {
-    "title": "Altere a senha inicial",
-    "desc": "A senha inicial foi impressa no log de inicialização. Troque pela sua."
+    "title": "Troque a senha padrão",
+    "desc": "A senha padrão gately.cn é pública; troque-a por uma sua."
   },
   "security": {
     "title": "Adicione um segundo fator",

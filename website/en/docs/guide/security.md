@@ -18,6 +18,7 @@ Gately runs on the network edge and handles DNS provider keys, certificate priva
 ## Authentication and access control
 
 - bcrypt password hashing and HMAC-signed session tokens;
+- The default password `gately.cn` is public, and the admin UI keeps reminding you to change it while it is in use; a forgotten password or lost two-factor authenticator can only be reset on the server with `gately reset-password` / `gately reset-totp` (this needs read and write access to the config directory and typing `yes` to confirm); a reset invalidates all sessions and is recorded in the audit log. See [Reset password and two-factor authentication](/en/docs/guide/install#reset);
 - Passkey (WebAuthn) sign-in: only the public key is stored, user verification (fingerprint, face or PIN) is required, and the signature counter guards against cloned authenticators; requires access through a domain name over HTTPS (or localhost);
 - Two-factor authentication (TOTP, verified against the RFC 6238 test vectors);
 - Read-only accounts: can view status and configuration, but cannot make changes, download backups, read secrets or open terminals; sessions are invalidated immediately when the password is reset or the account is deleted;

@@ -49,7 +49,6 @@ services:
 sudo install -m 0755 gately /usr/local/bin/gately
 sudo install -m 0644 gately.service /etc/systemd/system/gately.service
 sudo systemctl daemon-reload && sudo systemctl enable --now gately
-journalctl -u gately | grep -i "initial password"
 ```
 
 ### OpenWrt {#openwrt}
@@ -76,9 +75,6 @@ cd /tmp
 opkg install ./gately_<版本>_openwrt_amd64.ipk
 # OpenWrt 25.12
 apk add --allow-untrusted ./gately_<版本>_openwrt_amd64.apk
-
-# 初始密碼（首次啟動時寫入系統日誌）
-logread | grep -i "initial password"
 ```
 
 - 安裝後自動啟用開機自動啟動並啟動服務，管理介面為 `http://<路由器位址>:16680`。設定目錄為 `/etc/gately`，刷寫韌體（sysupgrade）時自動保留；
@@ -122,16 +118,34 @@ cp gately.init /etc/init.d/gately && chmod +x /etc/init.d/gately
 ### 執行說明
 
 - 應用以 `root` 身分執行，可以監聽 80/443、透過 `docker.sock` 管理 Docker、使用真實的 Web 終端機。請只安裝在自己掌控的 NAS 上。
-- 首次啟動時 `admin` 的初始密碼寫在 `/var/apps/gately/var/gately.log`：`grep -i "initial password" /var/apps/gately/var/gately.log`。
 - 設定儲存在應用的 `var` 目錄，解除安裝時預設保留；在解除安裝精靈中選擇「全部刪除」才會清除。
-- 安裝包同時提供命令列入口 `/usr/local/bin/gately`，可使用 `gately ctl` 與 `gately mcp`。
+- 安裝包同時提供命令列入口 `/usr/local/bin/gately`，可使用 `gately ctl`、`gately mcp` 與 `gately reset-password`。
 - 16680 連接埠與 Docker 映像檔相同，啟動原生應用前請先停止 `gately` 容器。
 
 ## 初始登入
 
-管理介面預設監聽 `16680` 連接埠，使用者名稱 `admin`，初始密碼會在首次啟動時輸出到日誌。自動化部署時可用環境變數 `GATELY_INITIAL_PASSWORD` 指定初始密碼，此時不會產生隨機密碼。
+管理介面預設監聽 `16680` 連接埠，預設帳號 `admin`，預設密碼 `gately.cn`。自動化部署時可用環境變數 `GATELY_INITIAL_PASSWORD` 指定初始密碼取代預設密碼。
 
-首次登入會出現啟動引導，依序提示修改密碼、開啟兩步驟驗證或 Passkey、執行網路自檢、從 Lucky 匯入與設定通知。
+預設密碼是公開的，仍在使用時管理介面頂端會一直提示修改。首次登入會出現啟動引導，依序提示修改密碼、開啟兩步驟驗證或 Passkey、執行網路自檢、從 Lucky 匯入與設定通知。
+
+## 重設密碼與兩步驟驗證 {#reset}
+
+忘記管理員密碼、遺失兩步驟驗證器（TOTP）時，在執行 Gately 的伺服器上執行指令重設。指令需要讀寫設定目錄，等同於擁有伺服器權限，因此無法透過網路使用：
+
+- `gately reset-password`：將管理員密碼重設為預設密碼 `gately.cn`，用 `-p <新密碼>` 可直接指定新密碼；
+- `gately reset-totp`：關閉管理員的兩步驟驗證，登入後可重新啟用。
+
+執行前會顯示管理員使用者名稱和將要進行的操作，需要輸入 `yes` 確認，避免誤操作；指令碼等非互動環境加 `-y` 略過確認。執行中的 Gately 會在幾秒內自動生效，無需重新啟動；未在執行時，下次啟動時生效。重設後所有已登入的工作階段失效，登入失敗鎖定一併解除，使用者名稱、Passkey、唯讀帳號與其他設定保持不變。
+
+| 安裝方式 | 指令 |
+| --- | --- |
+| Docker | `docker exec -it gately gately reset-password` |
+| systemd | `sudo gately reset-password` |
+| OpenWrt / iStoreOS | `gately reset-password` |
+| 飛牛 fnOS | `sudo gately reset-password` |
+| 其他 | `./gately reset-password -c <設定目錄>` |
+
+未指定 `-c` 時依序尋找 `GATELY_CONFIG_DIR`、目前目錄下的 `data`、`/etc/gately` 與飛牛安裝包的設定目錄 `/var/apps/gately/var/config`，並顯示實際使用的目錄。重設操作會記入系統日誌與稽核日誌。
 
 ## 升級
 

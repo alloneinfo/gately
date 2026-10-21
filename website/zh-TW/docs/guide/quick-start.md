@@ -9,7 +9,6 @@ docker run -d --name gately --network host \
   -v ./gately-data:/etc/gately \
   -v /var/run/docker.sock:/var/run/docker.sock \
   ghcr.io/wangwanjie/gately:latest
-docker logs gately 2>&1 | grep -i "initial password"
 ```
 
 不需要 Docker 管理功能時，可以移除 `docker.sock` 掛載。連接埠轉發、STUN、Web 服務需要監聽主機的連接埠，建議使用 `--network host`。
@@ -20,7 +19,7 @@ docker logs gately 2>&1 | grep -i "initial password"
 
 ## 2. 登入
 
-瀏覽器開啟 `http://<裝置IP>:16680`，使用者名稱 `admin`，密碼為日誌中輸出的初始密碼（僅在首次啟動時列印一次）。
+瀏覽器開啟 `http://<裝置IP>:16680`，使用者名稱 `admin`，預設密碼 `gately.cn`。預設密碼是公開的，修改之前管理介面頂端會一直提示。
 
 ## 3. 完成基礎強化
 

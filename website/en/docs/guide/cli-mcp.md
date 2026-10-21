@@ -2,6 +2,8 @@
 
 The `gately` executable ships with two subcommands: `gately ctl` calls the management API of a running instance from the terminal, and `gately mcp` exposes the same endpoints to AI clients as MCP tools. Both reach the instance over HTTP with an [API token](/en/docs/reference/api). The endpoint list comes from the instance's `/api/openapi.json`, and the token determines the permissions.
 
+In addition, `gately reset-password` and `gately reset-totp` work directly on the local configuration directory without the API, to recover the admin account after a forgotten password or a lost authenticator; see [Reset password and two-factor authentication](/en/docs/guide/install#reset).
+
 ## Connection settings
 
 Connection details are resolved in the following order, with later sources overriding earlier ones:

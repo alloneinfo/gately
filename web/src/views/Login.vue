@@ -152,6 +152,8 @@
           <template v-else>{{ t('login.totpAuto') }}</template>
         </div>
         <el-button class="back" text @click="needCode = false"><ArrowLeft :size="14" />{{ t('login.backToAccount') }}</el-button>
+        <!-- 丢失验证器时只能在服务器上通过命令行关闭两步验证 -->
+        <p class="totp-lost">{{ t('login.totpLost') }}</p>
       </div>
     </el-dialog>
   </div>
@@ -716,6 +718,13 @@ h2 {
 .back {
   margin-top: 10px;
   gap: 4px;
+}
+.totp-lost {
+  margin: 12px 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: center;
+  color: var(--el-text-color-placeholder);
 }
 
 @keyframes rise {

@@ -4,13 +4,17 @@
 
 No. Gately does not connect to any project servers by default and does not report device information. Outbound addresses such as public IP lookup use third-party public services and can be changed in the corresponding tasks.
 
-## Where is the initial password?
+## What are the default username and password?
 
-It is printed to the log on first start, only once. For Docker deployments, run `docker logs gately 2>&1 | grep -i "initial password"`.
+The default account is `admin` and the default password is `gately.cn`. The default password is public, so change it under "Settings → Account & Security" right after signing in; until you do, the admin UI keeps showing a warning at the top. If the `GATELY_INITIAL_PASSWORD` environment variable was set at deployment, that password applies instead.
 
 ## What if I forget the administrator password?
 
-Stop Gately, delete `account.json` from the config directory, and start it again. The program recreates the `admin` account and prints a new initial password to the log. After signing in, review security settings such as two-factor authentication.
+Run `gately reset-password` on the server (`docker exec -it gately gately reset-password` for Docker) and type `yes` to confirm. The password is reset to the default `gately.cn`, and a running instance picks it up within seconds. See [Reset password and two-factor authentication](/en/docs/guide/install#reset).
+
+## What if I lose my two-factor authenticator?
+
+Run `gately reset-totp` on the server (`docker exec -it gately gately reset-totp` for Docker) and confirm. Two-factor authentication is turned off; sign in with your password and enable it again.
 
 ## Does it support fnOS?
 

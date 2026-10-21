@@ -92,10 +92,11 @@ docker run -d --name gately --network host \
   -v ./gately-data:/etc/gately \
   -v /var/run/docker.sock:/var/run/docker.sock \
   ghcr.io/wangwanjie/gately:latest
-docker logs gately 2>&1 | grep -i "initial password"
 ```
 
-Öffnen Sie `http://<Geräte-IP>:16680`, melden Sie sich mit `admin` und dem Anfangspasswort aus dem Log an und ändern Sie anschließend unter „Einstellungen“ das Passwort und aktivieren Sie die Zwei-Faktor-Authentifizierung. Ein vollständiges Compose-Beispiel finden Sie in [deploy/docker-compose.yml](deploy/docker-compose.yml).
+Öffnen Sie `http://<Geräte-IP>:16680`, melden Sie sich mit dem Standardkonto `admin` und dem Standardpasswort `gately.cn` an und ändern Sie anschließend unter „Einstellungen“ das Passwort und aktivieren Sie die Zwei-Faktor-Authentifizierung. Ein vollständiges Compose-Beispiel finden Sie in [deploy/docker-compose.yml](deploy/docker-compose.yml).
+
+Haben Sie das Passwort vergessen oder den Zwei-Faktor-Authenticator verloren, führen Sie auf dem Server `gately reset-password` bzw. `gately reset-totp` aus (bei Docker `docker exec -it gately gately reset-password`); nach der Bestätigung gilt die Änderung sofort. Siehe [Passwort und Zwei-Faktor-Authentifizierung zurücksetzen](https://gately.cn/de/docs/guide/install#reset).
 
 Portweiterleitung, STUN und Web-Dienste müssen Ports des Hosts belegen; empfohlen wird `--network host`. Wird die Docker-Verwaltung nicht benötigt, kann der `docker.sock`-Mount entfallen.
 
@@ -107,7 +108,7 @@ Laden Sie von [Releases](https://github.com/wangwanjie/gately/releases) das Arch
 ./gately -c /etc/gately
 ```
 
-Parameter: `-c` Konfigurationsverzeichnis (alternativ die Umgebungsvariable `GATELY_CONFIG_DIR`), `-listen` überschreibt die Listen-Adresse der Verwaltungsoberfläche, `-apply` wendet bei jedem Start die `<name>.json`-Dateien eines Verzeichnisses auf das Konfigurationsverzeichnis an (`GATELY_APPLY_DIR`, praktisch für GitOps und Kubernetes; Konto- und Token-Dateien können nicht überschrieben werden), `-version` gibt die Version aus. Für unbeaufsichtigte Installationen legen Sie mit `GATELY_INITIAL_PASSWORD` das initiale Admin-Passwort fest, statt ein zufälliges Passwort aus dem Log zu lesen.
+Parameter: `-c` Konfigurationsverzeichnis (alternativ die Umgebungsvariable `GATELY_CONFIG_DIR`), `-listen` überschreibt die Listen-Adresse der Verwaltungsoberfläche, `-apply` wendet bei jedem Start die `<name>.json`-Dateien eines Verzeichnisses auf das Konfigurationsverzeichnis an (`GATELY_APPLY_DIR`, praktisch für GitOps und Kubernetes; Konto- und Token-Dateien können nicht überschrieben werden), `-version` gibt die Version aus. Für unbeaufsichtigte Installationen legen Sie mit `GATELY_INITIAL_PASSWORD` das initiale Admin-Passwort anstelle des Standardpassworts `gately.cn` fest.
 
 Dienstvorlagen: [systemd](deploy/systemd/gately.service) und [OpenWrt procd](deploy/openwrt/gately.init). Wie Sie heruntergeladene Archive und Images prüfen (cosign-Signaturen, Build-Provenienz, SBOM), beschreibt [Release-Artefakte verifizieren](docs/de/VERIFY.md).
 
@@ -117,7 +118,7 @@ Jedes Release enthält Offline-`.fpk`-Pakete für fnOS: `gately_<version>_fnos_x
 
 - **Funktioniert mit dem einheitlichen fnOS-Gateway**: Ein Klick auf das Gately-Symbol auf dem fnOS-Desktop öffnet die Verwaltungsoberfläche über das einheitliche fnOS-Gateway unter `/app/gately/` – über denselben Zugang, den Sie bereits für fnOS nutzen. Sowohl die LAN-Adresse als auch Ihre Remote-Domain von fnOS funktionieren, ohne Port 16680 freizugeben oder weiterzuleiten. Den Zugriff über das Gateway kontrolliert fnOS (nur fnOS-Administratoren können es öffnen); „Sicherer Einstieg“ und „Nur LAN-Zugriff“ gelten deshalb nur für den direkten Zugriff auf Port 16680.
 - **Meldet fnOS-Administratoren mit ihrer fnOS-Sitzung an**: Aktivieren Sie **Einstellungen → Zugriffskontrolle → Mit fnOS anmelden**, dann gelangen bei fnOS angemeldete Administratoren über das Desktop-Symbol ohne Passwort und Bestätigungscode in Gately; normale fnOS-Benutzer melden sich weiterhin an. Nach dem Abmelden zeigt die Anmeldeseite eine Schaltfläche „Als fnOS-Benutzer &lt;Name&gt; anmelden“, statt Sie stillschweigend wieder anzumelden. Die Einstellung ist standardmäßig aus und wird nur im fnOS-Paket angezeigt.
-- Im LAN ist die Verwaltungsoberfläche außerdem unter `http://<NAS-Adresse>:16680` erreichbar. Beim ersten Start wird das initiale `admin`-Passwort in `/var/apps/gately/var/gately.log` geschrieben (`grep -i "initial password"`).
+- Im LAN ist die Verwaltungsoberfläche außerdem unter `http://<NAS-Adresse>:16680` erreichbar. Standardkonto `admin`, Standardpasswort `gately.cn`.
 - Die App läuft als `root`, damit sie auf 80/443 lauschen, Docker über `docker.sock` verwalten und ein echtes Web-Terminal öffnen kann. Installieren Sie sie nur auf einem NAS, das Sie selbst kontrollieren.
 - Die Konfiguration liegt im `var`-Verzeichnis der App und bleibt bei der Deinstallation erhalten, sofern Sie im Deinstallationsassistenten nicht „Alles löschen“ wählen. Ein Upgrade ist eine erneute manuelle Installation der neueren `.fpk`.
 - Das Paket installiert außerdem einen Befehl `gately` (`/usr/local/bin/gately`) für `gately ctl` und `gately mcp`.
@@ -128,7 +129,7 @@ Jedes Release enthält Offline-`.fpk`-Pakete für fnOS: `gately_<version>_fnos_x
 
 Jedes Release enthält OpenWrt-Pakete: `gately_<version>_openwrt_<Architektur>.ipk` für OpenWrt 24.10 und älter (einschließlich iStoreOS), installiert mit `opkg install`, und `.apk` für OpenWrt 25.12 und neuer, installiert mit `apk add --allow-untrusted`. Pakete gibt es für amd64 / arm64 / arm / mipsle / mips / riscv64; die Auswahl richtet sich nach `DISTRIB_ARCH` in `/etc/openwrt_release` (siehe Tabelle in der [Installationsanleitung](https://gately.cn/de/docs/guide/install#openwrt)).
 
-- Der Dienst wird bei der Installation aktiviert und gestartet; die Verwaltungsoberfläche ist unter `http://<Router-Adresse>:16680` erreichbar, `logread | grep -i "initial password"` zeigt das Initialpasswort.
+- Der Dienst wird bei der Installation aktiviert und gestartet; die Verwaltungsoberfläche ist unter `http://<Router-Adresse>:16680` erreichbar, Standardkonto `admin`, Standardpasswort `gately.cn`.
 - Die Konfiguration liegt in `/etc/gately` und bleibt bei Upgrades, Deinstallation und Firmware-Upgrades (sysupgrade) erhalten. Für ein Upgrade installieren Sie das neuere Paket; das Online-Upgrade auf der Seite „Über“ verweist dann auf den Paketmanager.
 - Die Binärdatei ist etwa 35 MB groß; die Pakete eignen sich daher für x86-Soft-Router, ARM64-Boxen und andere Geräte mit reichlich Speicher. Das arm-Paket erfordert ARMv7 mit Hardware-Gleitkommaeinheit.
 

@@ -1,7 +1,7 @@
 appname               = gately
 version               = @VERSION@
 display_name          = Gately
-desc                  = 开源网络网关工具集：端口转发、动态域名、STUN 穿透、反向代理与证书管理。点击桌面图标即可经 NAS 当前地址打开管理界面，局域网也可直接访问 16680 端口；首次启动的管理员初始密码见 /var/apps/gately/var/gately.log。
+desc                  = 开源网络网关工具集：端口转发、动态域名、STUN 穿透、反向代理与证书管理。点击桌面图标即可经 NAS 当前地址打开管理界面，局域网也可直接访问 16680 端口；默认账号 admin，默认密码 gately.cn，登录后请立即修改。
 source                = thirdparty
 platform              = @PLATFORM@
 maintainer            = wangwanjie

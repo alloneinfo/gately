@@ -9,7 +9,6 @@ docker run -d --name gately --network host \
   -v ./gately-data:/etc/gately \
   -v /var/run/docker.sock:/var/run/docker.sock \
   ghcr.io/wangwanjie/gately:latest
-docker logs gately 2>&1 | grep -i "initial password"
 ```
 
 不需要 Docker 管理功能时，可以去掉 `docker.sock` 挂载。端口转发、STUN、Web 服务需要监听宿主机端口，推荐使用 `--network host`。
@@ -20,7 +19,7 @@ docker logs gately 2>&1 | grep -i "initial password"
 
 ## 2. 登录
 
-浏览器打开 `http://<设备IP>:16680`，用户名 `admin`，密码为日志中输出的初始密码（仅在首次启动时打印一次）。
+浏览器打开 `http://<设备IP>:16680`，用户名 `admin`，默认密码 `gately.cn`。默认密码是公开的，修改之前管理界面顶部会一直提示。
 
 ## 3. 完成基础加固
 

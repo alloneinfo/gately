@@ -27,6 +27,10 @@ import (
 // CookieName 是会话 Cookie 名称。
 const CookieName = "gately_token"
 
+// DefaultPassword 是管理员账号的默认密码：全新安装（未指定 GATELY_INITIAL_PASSWORD）与命令行重置密码时使用。
+// 固定默认密码便于不查看日志的用户首次登录，仍在使用时管理界面会持续提醒修改。
+const DefaultPassword = "gately.cn"
+
 // 登录限流默认参数：窗口期内连续失败达到上限后锁定该 IP。上限与锁定时长可在设置中调整。
 const (
 	maxFailures  = 5
@@ -55,8 +59,10 @@ type Account struct {
 	Users []User `json:"users,omitempty"`
 	// Passkeys 是管理员注册的 Passkey（仅公钥）
 	Passkeys []webauthn.Credential `json:"passkeys,omitempty"`
-	// OnboardingPending 在全新安装（首次生成初始密码）时置位，完成或跳过首次引导后清除
+	// OnboardingPending 在全新安装（首次创建管理员账号）时置位，完成或跳过首次引导后清除
 	OnboardingPending bool `json:"onboardingPending,omitempty"`
+	// UsingDefaultPassword 表示主账号仍在使用默认密码 DefaultPassword，修改密码后清除
+	UsingDefaultPassword bool `json:"usingDefaultPassword,omitempty"`
 }
 
 // 角色
@@ -119,7 +125,7 @@ type Manager struct {
 	// maxFail / lockDur 为当前生效的限流参数
 	maxFail int
 	lockDur time.Duration
-	// bootstrapPassword 非空时，首次启动用它作为初始密码而不是随机生成
+	// bootstrapPassword 非空时，首次启动用它作为初始密码而不是默认密码
 	bootstrapPassword string
 }
 
@@ -178,9 +184,9 @@ func NewManager(acc Account, save func(Account) error) *Manager {
 	return &Manager{acc: acc, save: save, fails: map[string]*failState{}, now: time.Now, maxFail: maxFailures, lockDur: lockDuration}
 }
 
-// EnsureInitialized 在首次启动时创建 admin 账号与随机密码。
-// 返回值 generated 非空表示新生成的初始密码，调用方需要展示给用户。
-func (m *Manager) EnsureInitialized() (generated string, err error) {
+// EnsureInitialized 在首次启动时创建 admin 账号：未指定初始密码时使用默认密码 DefaultPassword。
+// 返回值 initial 非空表示本次使用了默认密码，调用方需要提示用户登录后修改；指定的初始密码不返回，避免写入日志。
+func (m *Manager) EnsureInitialized() (initial string, err error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	changed := false
@@ -195,8 +201,8 @@ func (m *Manager) EnsureInitialized() (generated string, err error) {
 	if m.acc.Username == "" || m.acc.PasswordHash == "" {
 		password := m.bootstrapPassword
 		if password == "" {
-			generated = randomString(12)
-			password = generated
+			initial = DefaultPassword
+			password = DefaultPassword
 		}
 		hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 		if err != nil {
@@ -205,6 +211,7 @@ func (m *Manager) EnsureInitialized() (generated string, err error) {
 		m.acc.Username = "admin"
 		m.acc.PasswordHash = string(hash)
 		m.acc.OnboardingPending = true
+		m.acc.UsingDefaultPassword = password == DefaultPassword
 		changed = true
 	}
 	if changed {
@@ -212,7 +219,7 @@ func (m *Manager) EnsureInitialized() (generated string, err error) {
 			return "", err
 		}
 	}
-	return generated, nil
+	return initial, nil
 }
 
 // Username 返回当前管理员用户名。
@@ -334,6 +341,8 @@ func (m *Manager) ChangeCredentials(oldPassword, newUsername, newPassword string
 	next.Username = newUsername
 	next.PasswordHash = string(hash)
 	next.SessionSecret = randomString(32)
+	// 改回默认密码时继续提醒
+	next.UsingDefaultPassword = newPassword == DefaultPassword
 	if err := m.save(next); err != nil {
 		return err
 	}
@@ -824,6 +833,13 @@ func (m *Manager) LoginPasskey(ip, credID string, verify func(webauthn.Credentia
 	ok = true
 	exp := m.now().Add(time.Duration(acc.TokenTTLHours) * time.Hour)
 	return m.sign(acc, exp, acc.Username, RoleAdmin, acc.PasswordHash), exp, nil
+}
+
+// UsingDefaultPassword 返回主账号是否仍在使用默认密码。
+func (m *Manager) UsingDefaultPassword() bool {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	return m.acc.UsingDefaultPassword
 }
 
 // OnboardingPending 返回是否需要展示首次启动引导。

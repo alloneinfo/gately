@@ -8,5 +8,7 @@
   "logoutTitle": "로그아웃",
   "logoutConfirm": "로그아웃하시겠습니까?",
   "logoutOk": "로그아웃",
-  "readonlyBadge": "읽기 전용"
+  "readonlyBadge": "읽기 전용",
+  "defaultPassword": "아직 기본 비밀번호 {password}를 사용 중입니다. 이 비밀번호를 아는 사람은 누구나 관리 화면에 로그인할 수 있으니 지금 변경하세요.",
+  "changeNow": "지금 변경"
 }

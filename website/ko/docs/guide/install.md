@@ -49,7 +49,6 @@ services:
 sudo install -m 0755 gately /usr/local/bin/gately
 sudo install -m 0644 gately.service /etc/systemd/system/gately.service
 sudo systemctl daemon-reload && sudo systemctl enable --now gately
-journalctl -u gately | grep -i "initial password"
 ```
 
 ### OpenWrt {#openwrt}
@@ -76,9 +75,6 @@ cd /tmp
 opkg install ./gately_<version>_openwrt_amd64.ipk
 # OpenWrt 25.12
 apk add --allow-untrusted ./gately_<version>_openwrt_amd64.apk
-
-# 초기 비밀번호 (최초 실행 시 시스템 로그에 기록됨)
-logread | grep -i "initial password"
 ```
 
 - 설치하면 부팅 시 자동 시작이 활성화되고 서비스가 바로 시작됩니다. 관리 UI는 `http://<라우터 주소>:16680`입니다. 설정은 `/etc/gately`에 저장되며 펌웨어 업그레이드(sysupgrade) 시에도 유지됩니다.
@@ -122,16 +118,34 @@ cp gately.init /etc/init.d/gately && chmod +x /etc/init.d/gately
 ### 참고 사항
 
 - 앱은 `root`로 실행되므로 80/443을 수신하고 `docker.sock`으로 Docker를 관리하며 실제 웹 터미널을 열 수 있습니다. 직접 관리하는 NAS에만 설치하세요.
-- 최초 실행 시 `admin`의 초기 비밀번호가 `/var/apps/gately/var/gately.log`에 기록됩니다: `grep -i "initial password" /var/apps/gately/var/gately.log`
 - 설정은 앱의 `var` 디렉터리에 저장되며, 제거 마법사에서 「모두 삭제」를 선택하지 않는 한 제거해도 유지됩니다.
-- 패키지는 `gately ctl`과 `gately mcp`용 `/usr/local/bin/gately` 명령도 추가합니다.
+- 패키지는 `gately ctl`, `gately mcp`, `gately reset-password`용 `/usr/local/bin/gately` 명령도 추가합니다.
 - 16680 포트는 Docker 이미지와 같습니다. 네이티브 앱을 시작하기 전에 `gately` 컨테이너를 중지하세요.
 
 ## 최초 로그인
 
-관리 UI는 기본적으로 `16680` 포트에서 대기하며 사용자 이름은 `admin`입니다. 초기 비밀번호는 최초 실행 시 로그에 출력됩니다. 자동화 배포에서는 환경 변수 `GATELY_INITIAL_PASSWORD`로 초기 비밀번호를 지정할 수 있으며, 이때는 무작위 비밀번호를 생성하지 않습니다.
+관리 UI는 기본적으로 `16680` 포트에서 대기하며 기본 계정은 `admin`, 기본 비밀번호는 `gately.cn`입니다. 자동화 배포에서는 환경 변수 `GATELY_INITIAL_PASSWORD`로 기본 비밀번호 대신 사용할 초기 비밀번호를 지정할 수 있습니다.
 
-처음 로그인하면 시작 안내가 나타나 비밀번호 변경, 2단계 인증 또는 패스키 설정, 네트워크 자가 점검 실행, Lucky에서 가져오기, 알림 설정을 차례로 안내합니다.
+기본 비밀번호는 공개되어 있으므로 사용하는 동안 관리 UI 상단에 변경 안내가 계속 표시됩니다. 처음 로그인하면 시작 안내가 나타나 비밀번호 변경, 2단계 인증 또는 패스키 설정, 네트워크 자가 점검 실행, Lucky에서 가져오기, 알림 설정을 차례로 안내합니다.
+
+## 비밀번호와 2단계 인증 재설정 {#reset}
+
+관리자 비밀번호를 잊었거나 2단계 인증기(TOTP)를 잃어버렸다면 Gately가 실행 중인 서버에서 명령으로 재설정합니다. 이 명령은 설정 디렉터리를 읽고 써야 하므로 서버 권한이 있는 것과 같으며, 네트워크를 통해서는 사용할 수 없습니다.
+
+- `gately reset-password`: 관리자 비밀번호를 기본 비밀번호 `gately.cn`으로 재설정합니다. `-p <새 비밀번호>`로 새 비밀번호를 바로 지정할 수도 있습니다.
+- `gately reset-totp`: 관리자의 2단계 인증을 끕니다. 로그인한 뒤 다시 켤 수 있습니다.
+
+실행하기 전에 관리자 사용자 이름과 수행할 작업을 표시하며, 실수를 막기 위해 `yes`를 입력해 확인해야 합니다. 스크립트 등 비대화형 환경에서는 `-y`를 붙여 확인을 건너뜁니다. 실행 중인 Gately에는 몇 초 안에 자동으로 적용되므로 재시작할 필요가 없고, 실행 중이 아니면 다음에 시작할 때 적용됩니다. 재설정하면 로그인된 모든 세션이 무효화되고 로그인 실패 잠금도 해제됩니다. 사용자 이름, 패스키, 읽기 전용 계정과 그 밖의 설정은 그대로 유지됩니다.
+
+| 설치 방식 | 명령 |
+| --- | --- |
+| Docker | `docker exec -it gately gately reset-password` |
+| systemd | `sudo gately reset-password` |
+| OpenWrt / iStoreOS | `gately reset-password` |
+| fnOS | `sudo gately reset-password` |
+| 기타 | `./gately reset-password -c <설정 디렉터리>` |
+
+`-c`를 지정하지 않으면 `GATELY_CONFIG_DIR`, 현재 디렉터리의 `data`, `/etc/gately`, fnOS 패키지의 설정 디렉터리 `/var/apps/gately/var/config` 순서로 찾고, 실제로 사용한 디렉터리를 표시합니다. 재설정 작업은 시스템 로그와 감사 로그에 기록됩니다.
 
 ## 업그레이드
 

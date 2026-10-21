@@ -13243,7 +13243,7 @@
     },
     "/api/session": {
       "get": {
-        "description": "任何有效的 API 權杖皆可存取，無需特定權限。",
+        "description": "回傳 `username`、`role`（`admin` 或 `readonly`）、`disabledModules`（已關閉的功能模組 ID）與 `defaultPassword`（管理員仍在使用預設密碼 `gately.cn` 時為 true，管理介面據此提醒修改）。\n\n任何有效的 API 權杖皆可存取，無需特定權限。",
         "responses": {
           "200": {
             "description": "成功"

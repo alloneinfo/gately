@@ -9,7 +9,6 @@ docker run -d --name gately --network host \
   -v ./gately-data:/etc/gately \
   -v /var/run/docker.sock:/var/run/docker.sock \
   ghcr.io/wangwanjie/gately:latest
-docker logs gately 2>&1 | grep -i "initial password"
 ```
 
 Se você não precisa do gerenciamento do Docker, remova a montagem do `docker.sock`. Redirecionamento de portas, STUN e serviços Web escutam nas portas do host, por isso recomendamos `--network host`.
@@ -20,7 +19,7 @@ Instale o aplicativo nativo: ele abre pelo ícone da área de trabalho através 
 
 ## 2. Entrar
 
-Abra `http://<ip-do-dispositivo>:16680` no navegador. O usuário é `admin` e a senha é a senha inicial exibida nos logs (mostrada apenas uma vez, na primeira inicialização).
+Abra `http://<ip-do-dispositivo>:16680` no navegador. O usuário é `admin` e a senha padrão é `gately.cn`. A senha padrão é pública; até você alterá-la, um aviso fica fixo no topo da interface de administração.
 
 ## 3. Aplicar o reforço básico de segurança
 

@@ -179,7 +179,7 @@ var apiCatalog = map[string]epDoc{
 	"POST /api/storage/files/{key}/mkdir":                {Summary: "创建存储目录", Body: true},
 	"POST /api/storage/files/{key}/rename":               {Summary: "重命名或移动存储文件", Body: true},
 	"DELETE /api/storage/files/{key}":                    {Summary: "删除存储文件"},
-	"GET /api/session":                                   {Summary: "查看当前认证身份"},
+	"GET /api/session":                                   {Summary: "查看当前认证身份", Desc: "返回 `username`、`role`（`admin` 或 `readonly`）、`disabledModules`（已关闭的功能模块 ID）与 `defaultPassword`（管理员仍在使用默认密码 `gately.cn` 时为 true，管理界面据此提醒修改）。"},
 	"GET /api/status":                                    {Summary: "查看系统与各模块状态", Desc: "包含主机资源、版本与模块摘要。"},
 	"GET /api/logs":                                      {Summary: "查看系统日志", Desc: "支持 `since` 参数增量拉取。"},
 	"GET /api/system/settings":                           {Summary: "读取全局设置", Desc: "仅登录会话可用。只读字段 `modules` 列出全部功能模块及依赖关系，`gatewayAvailable` 表示以飞牛统一网关方式运行。`updateProxy` 为检查更新与在线升级访问 GitHub 时使用的代理。"},

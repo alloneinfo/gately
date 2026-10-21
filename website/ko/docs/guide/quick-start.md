@@ -9,7 +9,6 @@ docker run -d --name gately --network host \
   -v ./gately-data:/etc/gately \
   -v /var/run/docker.sock:/var/run/docker.sock \
   ghcr.io/wangwanjie/gately:latest
-docker logs gately 2>&1 | grep -i "initial password"
 ```
 
 Docker 관리 기능이 필요 없다면 `docker.sock` 마운트를 생략해도 됩니다. 포트 포워딩, STUN, 웹 서비스는 호스트 포트를 직접 수신해야 하므로 `--network host`를 권장합니다.
@@ -20,7 +19,7 @@ Docker 관리 기능이 필요 없다면 `docker.sock` 마운트를 생략해도
 
 ## 2. 로그인
 
-브라우저에서 `http://<장치 IP>:16680`을 엽니다. 사용자 이름은 `admin`이고 비밀번호는 로그에 출력된 초기 비밀번호입니다(최초 실행 시 한 번만 출력됩니다).
+브라우저에서 `http://<장치 IP>:16680`을 엽니다. 사용자 이름은 `admin`, 기본 비밀번호는 `gately.cn`입니다. 기본 비밀번호는 공개되어 있으므로 변경하기 전까지 관리 UI 상단에 경고가 계속 표시됩니다.
 
 ## 3. 기본 보안 강화
 

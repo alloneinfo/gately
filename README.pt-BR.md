@@ -92,10 +92,11 @@ docker run -d --name gately --network host \
   -v ./gately-data:/etc/gately \
   -v /var/run/docker.sock:/var/run/docker.sock \
   ghcr.io/wangwanjie/gately:latest
-docker logs gately 2>&1 | grep -i "initial password"
 ```
 
-Abra `http://<IP do dispositivo>:16680`, entre com `admin` e a senha inicial exibida no log e, em seguida, altere a senha em "Configurações" e ative a autenticação em dois fatores. Um exemplo completo de Compose está em [deploy/docker-compose.yml](deploy/docker-compose.yml).
+Abra `http://<IP do dispositivo>:16680`, entre com a conta padrão `admin` e a senha padrão `gately.cn` e, em seguida, altere a senha em "Configurações" e ative a autenticação em dois fatores. Um exemplo completo de Compose está em [deploy/docker-compose.yml](deploy/docker-compose.yml).
+
+Se esquecer a senha ou perder o autenticador de dois fatores, execute `gately reset-password` ou `gately reset-totp` no servidor (no Docker, `docker exec -it gately gately reset-password`); depois da confirmação, a mudança vale na hora. Veja [Redefinir a senha e a autenticação em dois fatores](https://gately.cn/pt-BR/docs/guide/install#reset).
 
 Redirecionamento de portas, STUN e serviços Web precisam escutar portas do host, por isso recomenda-se `--network host`. Se você não precisa do gerenciamento do Docker, pode remover a montagem de `docker.sock`.
 
@@ -107,7 +108,7 @@ Baixe o pacote da sua plataforma em [Releases](https://github.com/wangwanjie/gat
 ./gately -c /etc/gately
 ```
 
-Parâmetros: `-c` diretório de configuração (também pode ser definido pela variável de ambiente `GATELY_CONFIG_DIR`), `-listen` substitui o endereço de escuta da interface de administração, `-apply` aplica a cada inicialização os arquivos `<nome>.json` de um diretório ao diretório de configuração (`GATELY_APPLY_DIR`, útil para GitOps e Kubernetes; os arquivos de contas e tokens não podem ser sobrescritos), `-version` exibe a versão. Em instalações automatizadas, defina `GATELY_INITIAL_PASSWORD` para escolher a senha inicial do administrador em vez de ler uma senha aleatória no log.
+Parâmetros: `-c` diretório de configuração (também pode ser definido pela variável de ambiente `GATELY_CONFIG_DIR`), `-listen` substitui o endereço de escuta da interface de administração, `-apply` aplica a cada inicialização os arquivos `<nome>.json` de um diretório ao diretório de configuração (`GATELY_APPLY_DIR`, útil para GitOps e Kubernetes; os arquivos de contas e tokens não podem ser sobrescritos), `-version` exibe a versão. Em instalações automatizadas, defina `GATELY_INITIAL_PASSWORD` para escolher a senha inicial do administrador em vez da senha padrão `gately.cn`.
 
 Modelos de serviço: [systemd](deploy/systemd/gately.service) e [OpenWrt procd](deploy/openwrt/gately.init). Para verificar os pacotes e imagens baixados (assinaturas cosign, proveniência do build, SBOM), consulte [Verificação dos artefatos de release](docs/pt-BR/VERIFY.md).
 
@@ -117,7 +118,7 @@ Cada Release inclui pacotes `.fpk` offline para o fnOS: `gately_<versão>_fnos_x
 
 - **Integrado ao gateway unificado do fnOS**: clique no ícone do Gately na área de trabalho do fnOS e a interface de administração abre pelo gateway unificado do fnOS em `/app/gately/`, compartilhando o ponto de entrada que você já usa para o fnOS. Tanto o endereço da rede local quanto o seu domínio remoto do fnOS funcionam, sem precisar abrir ou redirecionar a porta 16680. O acesso pelo gateway é controlado pelo fnOS (somente administradores do fnOS podem abri-lo), por isso a entrada segura e o acesso somente pela rede local valem apenas para o acesso direto pela porta 16680.
 - **Administradores do fnOS entram com a sessão do fnOS**: ative **Configurações → Controle de acesso → Entrar com o fnOS** e os administradores que já estão conectados ao fnOS entram no Gately pelo ícone da área de trabalho sem senha nem código de verificação em dois fatores; os usuários comuns do fnOS continuam fazendo login. Depois que você sai, a página de login mostra um botão "Entrar como usuário do fnOS &lt;nome&gt;" em vez de conectar você de novo silenciosamente. A opção vem desativada por padrão e só aparece no pacote do fnOS.
-- Na rede local, a interface de administração também fica em `http://<endereço do NAS>:16680`. Na primeira inicialização, a senha inicial do `admin` é gravada em `/var/apps/gately/var/gately.log` (`grep -i "initial password"`).
+- Na rede local, a interface de administração também fica em `http://<endereço do NAS>:16680`. Conta padrão `admin`, senha padrão `gately.cn`.
 - O aplicativo roda como `root`, então pode escutar nas portas 80/443, gerenciar o Docker pelo `docker.sock` e abrir um terminal Web de verdade. Instale-o somente em um NAS que você controla.
 - A configuração fica no diretório `var` do aplicativo e é mantida na desinstalação, a menos que você escolha "excluir tudo" no assistente de desinstalação. Para atualizar, instale manualmente o `.fpk` mais novo.
 - O pacote também adiciona o comando `gately` (`/usr/local/bin/gately`) para usar `gately ctl` e `gately mcp`.
@@ -128,7 +129,7 @@ Cada Release inclui pacotes `.fpk` offline para o fnOS: `gately_<versão>_fnos_x
 
 Cada Release inclui pacotes para OpenWrt: `gately_<versão>_openwrt_<arquitetura>.ipk` para o OpenWrt 24.10 e anteriores (incluindo o iStoreOS), instalado com `opkg install`, e `.apk` para o OpenWrt 25.12 e posteriores, instalado com `apk add --allow-untrusted`. Os pacotes cobrem amd64 / arm64 / arm / mipsle / mips / riscv64; escolha pelo `DISTRIB_ARCH` em `/etc/openwrt_release` (veja a tabela no [guia de instalação](https://gately.cn/pt-BR/docs/guide/install#openwrt)).
 
-- O serviço é ativado e iniciado na instalação; a interface de administração fica em `http://<endereço do roteador>:16680`, e `logread | grep -i "initial password"` mostra a senha inicial.
+- O serviço é ativado e iniciado na instalação; a interface de administração fica em `http://<endereço do roteador>:16680`, com a conta padrão `admin` e a senha padrão `gately.cn`.
 - A configuração fica em `/etc/gately` e é mantida em atualizações, desinstalações e atualizações de firmware (sysupgrade). Para atualizar, instale o pacote mais novo; a atualização online na página Sobre indica o gerenciador de pacotes.
 - O binário tem cerca de 35 MB, então os pacotes atendem soft routers x86, boxes ARM64 e outros dispositivos com bastante armazenamento; o pacote arm requer ARMv7 com ponto flutuante por hardware.
 

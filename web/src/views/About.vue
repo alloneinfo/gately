@@ -182,8 +182,7 @@ const REPO = 'https://github.com/wangwanjie/gately'
 const DOCKER_CMD = `docker run -d --name gately --network host \\
   -v ./gately-data:/etc/gately \\
   -v /var/run/docker.sock:/var/run/docker.sock \\
-  ghcr.io/wangwanjie/gately:latest
-docker logs gately 2>&1 | grep -i "initial password"`
+  ghcr.io/wangwanjie/gately:latest`
 
 const promises = computed(() => [
   { icon: Scale, title: t('about.promises.openSource.title'), desc: t('about.promises.openSource.desc') },

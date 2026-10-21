@@ -9,7 +9,6 @@ docker run -d --name gately --network host \
   -v ./gately-data:/etc/gately \
   -v /var/run/docker.sock:/var/run/docker.sock \
   ghcr.io/wangwanjie/gately:latest
-docker logs gately 2>&1 | grep -i "initial password"
 ```
 
 Если управление Docker не нужно, монтирование `docker.sock` можно убрать. Проброс портов, STUN и веб-службы слушают порты хоста, поэтому рекомендуется `--network host`.
@@ -20,7 +19,7 @@ docker logs gately 2>&1 | grep -i "initial password"
 
 ## 2. Вход
 
-Откройте в браузере `http://<IP устройства>:16680`, имя пользователя `admin`, пароль — начальный пароль из журнала (выводится только один раз, при первом запуске).
+Откройте в браузере `http://<IP устройства>:16680`, имя пользователя `admin`, пароль по умолчанию `gately.cn`. Пароль по умолчанию общеизвестен, поэтому, пока вы его не смените, вверху интерфейса управления будет постоянно отображаться предупреждение.
 
 ## 3. Базовая защита
 

@@ -8,5 +8,7 @@
   "logoutTitle": "ログアウト",
   "logoutConfirm": "ログアウトしてもよろしいですか？",
   "logoutOk": "ログアウト",
-  "readonlyBadge": "読み取り専用"
+  "readonlyBadge": "読み取り専用",
+  "defaultPassword": "デフォルトパスワード {password} のままです。このパスワードを知っている人は誰でも管理画面にログインできるため、すぐに変更してください。",
+  "changeNow": "今すぐ変更"
 }

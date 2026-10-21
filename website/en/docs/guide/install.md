@@ -49,7 +49,6 @@ The repository ships a complete service file, [deploy/systemd/gately.service](ht
 sudo install -m 0755 gately /usr/local/bin/gately
 sudo install -m 0644 gately.service /etc/systemd/system/gately.service
 sudo systemctl daemon-reload && sudo systemctl enable --now gately
-journalctl -u gately | grep -i "initial password"
 ```
 
 ### OpenWrt {#openwrt}
@@ -76,9 +75,6 @@ cd /tmp
 opkg install ./gately_<version>_openwrt_amd64.ipk
 # OpenWrt 25.12
 apk add --allow-untrusted ./gately_<version>_openwrt_amd64.apk
-
-# Initial password (written to the system log on the first start)
-logread | grep -i "initial password"
 ```
 
 - The service is enabled at boot and started right after install; the admin UI is at `http://<router address>:16680`. Config lives in `/etc/gately` and is kept across firmware upgrades (sysupgrade);
@@ -122,16 +118,34 @@ Turn on "Sign in with fnOS" under "Settings → Access control" and administrato
 ### Notes
 
 - The app runs as `root`, so it can listen on 80/443, manage Docker through `docker.sock` and open a real Web terminal. Install it only on a NAS you control.
-- On the first start the initial `admin` password is written to `/var/apps/gately/var/gately.log`: `grep -i "initial password" /var/apps/gately/var/gately.log`.
 - Config lives in the app's `var` directory and is kept on uninstall unless you choose "delete all" in the uninstall wizard.
-- The package also adds a `/usr/local/bin/gately` command for `gately ctl` and `gately mcp`.
+- The package also adds a `/usr/local/bin/gately` command for `gately ctl`, `gately mcp` and `gately reset-password`.
 - Port 16680 is shared with the Docker image. Stop the `gately` container before starting the native app.
 
 ## Initial sign-in
 
-The admin UI listens on port `16680` by default. The username is `admin`, and the initial password is written to the log on first start. For automated deployments, set the initial password with the `GATELY_INITIAL_PASSWORD` environment variable; no random password is generated in that case.
+The admin UI listens on port `16680` by default. The default account is `admin` and the default password is `gately.cn`. For automated deployments, set the `GATELY_INITIAL_PASSWORD` environment variable to choose your own password instead of the default.
 
-The first sign-in shows an onboarding guide that walks you through changing the password, enabling two-factor authentication or a Passkey, running the network self-check, importing from Lucky and setting up notifications.
+The default password is public; while it is still in use, the admin UI keeps showing a warning at the top asking you to change it. The first sign-in shows an onboarding guide that walks you through changing the password, enabling two-factor authentication or a Passkey, running the network self-check, importing from Lucky and setting up notifications.
+
+## Reset password and two-factor authentication {#reset}
+
+If you forget the administrator password or lose your two-factor authenticator (TOTP), reset it by running a command on the server where Gately runs. The command needs read and write access to the config directory, which is the same as having access to the server, so it cannot be used over the network:
+
+- `gately reset-password`: resets the administrator password to the default `gately.cn`; add `-p <new password>` to set a new password directly;
+- `gately reset-totp`: turns off two-factor authentication for the administrator; you can enable it again after signing in.
+
+Before doing anything, the command shows the administrator username and the action it is about to take, and asks you to type `yes` to confirm so a slip of the keyboard does no harm; in scripts and other non-interactive environments, add `-y` to skip the confirmation. A running Gately applies the change within seconds without a restart; if Gately is not running, the change applies on the next start. A reset invalidates all signed-in sessions and clears login lockouts; the username, Passkeys, read-only accounts and other configuration stay unchanged.
+
+| Install method | Command |
+| --- | --- |
+| Docker | `docker exec -it gately gately reset-password` |
+| systemd | `sudo gately reset-password` |
+| OpenWrt / iStoreOS | `gately reset-password` |
+| fnOS | `sudo gately reset-password` |
+| Other | `./gately reset-password -c <config dir>` |
+
+Without `-c`, the command looks in `GATELY_CONFIG_DIR`, `data` in the current directory, `/etc/gately` and the fnOS package config directory `/var/apps/gately/var/config`, in that order, and prints the directory it uses. Resets are recorded in the system log and the audit log.
 
 ## Upgrading
 

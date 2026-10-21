@@ -9,7 +9,6 @@ docker run -d --name gately --network host \
   -v ./gately-data:/etc/gately \
   -v /var/run/docker.sock:/var/run/docker.sock \
   ghcr.io/wangwanjie/gately:latest
-docker logs gately 2>&1 | grep -i "initial password"
 ```
 
 Docker 管理機能が不要な場合は、`docker.sock` のマウントを外せます。ポート転送、STUN、Web サービスはホストのポートを待ち受ける必要があるため、`--network host` を推奨します。
@@ -20,7 +19,7 @@ Docker 管理機能が不要な場合は、`docker.sock` のマウントを外�
 
 ## 2. ログイン
 
-ブラウザで `http://<デバイスのIP>:16680` を開き、ユーザー名は `admin`、パスワードはログインに出力された初期パスワードを使います（初回起動時に 1 度だけ出力されます）。
+ブラウザで `http://<デバイスのIP>:16680` を開き、ユーザー名 `admin`、デフォルトのパスワード `gately.cn` でログインします。デフォルトのパスワードは公開されているため、変更するまで管理画面の上部に警告が表示され続けます。
 
 ## 3. 基本的なハードニング
 

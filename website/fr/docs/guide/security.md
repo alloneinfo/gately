@@ -18,6 +18,7 @@ Gately fonctionne à la frontière du réseau et manipule des clés de fournisse
 ## Authentification et contrôle d'accès
 
 - Hachage des mots de passe avec bcrypt et jetons de session signés HMAC ;
+- Le mot de passe par défaut `gately.cn` est public : tant qu'il est utilisé, un avertissement permanent invite à le changer en haut de l'interface d'administration. En cas d'oubli du mot de passe ou de perte de l'application d'authentification, la réinitialisation se fait uniquement sur le serveur avec `gately reset-password` / `gately reset-totp` (accès en lecture et écriture au répertoire de configuration et confirmation par `yes` requis) ; elle invalide toutes les sessions et est consignée dans le journal d'audit. Consultez [Réinitialiser le mot de passe et l'authentification à deux facteurs](/fr/docs/guide/install#reset) ;
 - Connexion par passkey (WebAuthn) : seule la clé publique est stockée, la vérification de l'utilisateur (empreinte, visage ou code PIN) est obligatoire et le compteur de signatures empêche le clonage ; nécessite un accès par nom de domaine en HTTPS (ou localhost) ;
 - Authentification à deux facteurs (TOTP, vérifiée avec les vecteurs de test de la RFC 6238) ;
 - Comptes en lecture seule : ils voient l'état et la configuration, mais ne peuvent ni modifier, ni télécharger de sauvegarde, ni lire de secrets, ni ouvrir de terminal ; la réinitialisation de leur mot de passe ou leur suppression invalide immédiatement leurs sessions ;

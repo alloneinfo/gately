@@ -3,7 +3,7 @@
 #   cp gately /usr/bin/gately && chmod +x /usr/bin/gately
 #   cp gately.init /etc/init.d/gately && chmod +x /etc/init.d/gately
 #   /etc/init.d/gately enable && /etc/init.d/gately start
-#   logread | grep -i "initial password"
+#   默认账号 admin / gately.cn；忘记密码：gately reset-password
 
 START=99
 STOP=10

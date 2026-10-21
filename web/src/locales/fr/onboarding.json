@@ -5,8 +5,8 @@
   "later": "Me le rappeler plus tard",
   "done": "Terminé, ne plus afficher",
   "password": {
-    "title": "Changer le mot de passe initial",
-    "desc": "Le mot de passe initial a été affiché dans le journal de démarrage. Remplacez-le par le vôtre."
+    "title": "Changer le mot de passe par défaut",
+    "desc": "Le mot de passe par défaut gately.cn est public : remplacez-le par le vôtre."
   },
   "security": {
     "title": "Ajouter un second facteur",

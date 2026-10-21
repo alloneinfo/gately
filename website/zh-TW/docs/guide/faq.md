@@ -4,13 +4,17 @@
 
 不需要。Gately 預設不連線任何專案方伺服器，也不回報裝置資訊。公網 IP 查詢等對外位址使用第三方公共服務，可以在對應工作中修改。
 
-## 初始密碼在哪裡？
+## 預設帳號和密碼是什麼？
 
-首次啟動時輸出在日誌中，僅列印一次。Docker 部署請執行 `docker logs gately 2>&1 | grep -i "initial password"`。
+預設帳號 `admin`，預設密碼 `gately.cn`。預設密碼是公開的，登入後請立即在「設定 → 帳號與安全」修改，修改之前管理介面頂端會一直提示。部署時設定了環境變數 `GATELY_INITIAL_PASSWORD` 的，以該密碼為準。
 
 ## 忘記管理員密碼怎麼辦？
 
-停止 Gately，刪除設定目錄中的 `account.json`，再啟動：程式會重新建立 `admin` 帳號，並把新的初始密碼列印到日誌。登入後請檢查兩步驟驗證等安全設定。
+在伺服器上執行 `gately reset-password`（Docker 為 `docker exec -it gately gately reset-password`），輸入 `yes` 確認後，密碼會重設為預設密碼 `gately.cn`，執行中的實例幾秒內生效。詳見 [重設密碼與兩步驟驗證](/zh-TW/docs/guide/install#reset)。
+
+## 遺失了兩步驟驗證器怎麼辦？
+
+在伺服器上執行 `gately reset-totp`（Docker 為 `docker exec -it gately gately reset-totp`），確認後關閉兩步驟驗證，再用密碼登入並重新啟用。
 
 ## 支援飛牛 fnOS 嗎？
 

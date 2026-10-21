@@ -92,10 +92,11 @@ docker run -d --name gately --network host \
   -v ./gately-data:/etc/gately \
   -v /var/run/docker.sock:/var/run/docker.sock \
   ghcr.io/wangwanjie/gately:latest
-docker logs gately 2>&1 | grep -i "initial password"
 ```
 
-開啟 `http://<裝置IP>:16680`，使用 `admin` 與日誌中的初始密碼登入，然後在「設定」中修改密碼並開啟兩步驟驗證。完整的 Compose 範例見 [deploy/docker-compose.yml](deploy/docker-compose.yml)。
+開啟 `http://<裝置IP>:16680`，使用預設帳號 `admin` 與預設密碼 `gately.cn` 登入，然後在「設定」中修改密碼並開啟兩步驟驗證。完整的 Compose 範例見 [deploy/docker-compose.yml](deploy/docker-compose.yml)。
+
+忘記密碼或遺失兩步驟驗證器時，在伺服器上執行 `gately reset-password` 或 `gately reset-totp`（Docker 為 `docker exec -it gately gately reset-password`），確認後立即生效，詳見[重設密碼與兩步驟驗證](https://gately.cn/zh-TW/docs/guide/install#reset)。
 
 連接埠轉發、STUN、Web 服務需要監聽主機連接埠，建議使用 `--network host`。不需要 Docker 管理時可拿掉 `docker.sock` 掛載。
 
@@ -107,7 +108,7 @@ docker logs gately 2>&1 | grep -i "initial password"
 ./gately -c /etc/gately
 ```
 
-參數：`-c` 設定目錄（也可用環境變數 `GATELY_CONFIG_DIR`），`-listen` 覆寫管理介面監聽位址，`-apply` 每次啟動時將目錄中的 `<名稱>.json` 覆寫到設定目錄（環境變數 `GATELY_APPLY_DIR`，適合 GitOps 與 Kubernetes；帳號與權杖檔案不允許覆寫），`-version` 輸出版本。無人值守安裝時可設定環境變數 `GATELY_INITIAL_PASSWORD` 指定管理員初始密碼，免從日誌讀取隨機密碼。
+參數：`-c` 設定目錄（也可用環境變數 `GATELY_CONFIG_DIR`），`-listen` 覆寫管理介面監聽位址，`-apply` 每次啟動時將目錄中的 `<名稱>.json` 覆寫到設定目錄（環境變數 `GATELY_APPLY_DIR`，適合 GitOps 與 Kubernetes；帳號與權杖檔案不允許覆寫），`-version` 輸出版本。無人值守安裝時可設定環境變數 `GATELY_INITIAL_PASSWORD` 指定管理員初始密碼，取代預設密碼 `gately.cn`。
 
 服務範本：[systemd](deploy/systemd/gately.service)、[OpenWrt procd](deploy/openwrt/gately.init)。驗證下載的壓縮檔與映像檔（cosign 簽章、建置來源證明、SBOM）請見[驗證發布產物](docs/zh-TW/VERIFY.md)。
 
@@ -117,7 +118,7 @@ docker logs gately 2>&1 | grep -i "initial password"
 
 - **支援飛牛統一閘道**：點擊飛牛桌面上的 Gately 圖示，管理介面經飛牛統一閘道在 `/app/gately/` 下開啟，與飛牛共用同一個存取入口。區域網路位址、遠端存取飛牛的網域都能直接使用，無需額外開放或對應 16680 連接埠。經閘道存取時由飛牛負責存取控制（只有飛牛管理員能開啟），安全入口與「僅允許內網存取」只約束直接存取 16680 連接埠。
 - **支援飛牛管理員登入狀態直接登入**：在 **設定 → 存取控制 → 飛牛登入狀態自動登入** 開啟後，已登入飛牛的管理員點擊桌面圖示即可進入 Gately，無需密碼與兩步驟驗證碼；一般飛牛使用者仍需登入。主動登出後，登入頁會顯示「使用飛牛帳號 &lt;使用者名稱&gt; 登入」按鈕，不會靜默重新登入。該開關預設關閉，只在飛牛安裝包中顯示。
-- 區域網路內也可直接存取 `http://<NAS 位址>:16680`。首次啟動時 `admin` 的初始密碼寫在 `/var/apps/gately/var/gately.log`（`grep -i "initial password"`）。
+- 區域網路內也可直接存取 `http://<NAS 位址>:16680`。預設帳號 `admin`，預設密碼 `gately.cn`。
 - 應用以 `root` 身分執行，因此可以監聽 80/443、透過 `docker.sock` 管理 Docker、使用真實的 Web 終端機。請只安裝在自己掌控的 NAS 上。
 - 設定儲存在應用的 `var` 目錄，解除安裝時預設保留；在解除安裝精靈中選擇「全部刪除」才會清除。升級時手動安裝新版 `.fpk` 即可。
 - 安裝包同時提供命令列入口 `gately`（`/usr/local/bin/gately`），可使用 `gately ctl` 與 `gately mcp`。
@@ -128,7 +129,7 @@ docker logs gately 2>&1 | grep -i "initial password"
 
 每個 Release 附帶 OpenWrt 安裝包：`gately_<版本>_openwrt_<架構>.ipk` 用於 OpenWrt 24.10 及更早版本（含 iStoreOS），以 `opkg install` 安裝；`.apk` 用於 OpenWrt 25.12 起，以 `apk add --allow-untrusted` 安裝。架構有 amd64 / arm64 / arm / mipsle / mips / riscv64，依 `/etc/openwrt_release` 中的 `DISTRIB_ARCH` 選擇，對照表見[安裝文件](https://gately.cn/zh-TW/docs/guide/install#openwrt)。
 
-- 安裝後自動啟用開機自動啟動並啟動服務，管理介面為 `http://<路由器位址>:16680`，初始密碼以 `logread | grep -i "initial password"` 查看。
+- 安裝後自動啟用開機自動啟動並啟動服務，管理介面為 `http://<路由器位址>:16680`，預設帳號 `admin`，預設密碼 `gately.cn`。
 - 設定位於 `/etc/gately`，升級、解除安裝與刷寫韌體（sysupgrade）時都會保留。升級時安裝新版安裝包即可，「關於」頁的線上升級會提示改用套件管理器。
 - 程式約 35 MB，適合 x86 軟路由、ARM64 盒子等儲存空間較大的裝置；arm 安裝包需要 ARMv7 且具備硬體浮點運算。
 

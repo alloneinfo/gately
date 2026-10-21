@@ -49,7 +49,6 @@ services:
 sudo install -m 0755 gately /usr/local/bin/gately
 sudo install -m 0644 gately.service /etc/systemd/system/gately.service
 sudo systemctl daemon-reload && sudo systemctl enable --now gately
-journalctl -u gately | grep -i "initial password"
 ```
 
 ### OpenWrt {#openwrt}
@@ -76,9 +75,6 @@ cd /tmp
 opkg install ./gately_<version>_openwrt_amd64.ipk
 # OpenWrt 25.12
 apk add --allow-untrusted ./gately_<version>_openwrt_amd64.apk
-
-# 初期パスワード（初回起動時にシステムログへ出力）
-logread | grep -i "initial password"
 ```
 
 - インストール後に自動起動が有効になり、サービスがすぐに起動します。管理画面は `http://<ルーターのアドレス>:16680` です。設定は `/etc/gately` に保存され、ファームウェアの更新（sysupgrade）後も保持されます。
@@ -122,16 +118,34 @@ cp gately.init /etc/init.d/gately && chmod +x /etc/init.d/gately
 ### 注意事項
 
 - アプリは `root` で動作するため、80/443 の待ち受け、`docker.sock` を通じた Docker の管理、実際の Web ターミナルが利用できます。自分で管理している NAS にのみインストールしてください。
-- 初回起動時に `admin` の初期パスワードが `/var/apps/gately/var/gately.log` に書き込まれます：`grep -i "initial password" /var/apps/gately/var/gately.log`。
 - 設定はアプリの `var` ディレクトリに保存され、アンインストール時も保持されます。アンインストールウィザードで「すべて削除」を選んだ場合のみ消去されます。
-- パッケージには `/usr/local/bin/gately` コマンドも含まれ、`gately ctl` と `gately mcp` を使えます。
+- パッケージには `/usr/local/bin/gately` コマンドも含まれ、`gately ctl`、`gately mcp`、`gately reset-password` を使えます。
 - 16680 ポートは Docker イメージと共通です。ネイティブアプリを起動する前に `gately` コンテナを停止してください。
 
 ## 初回ログイン
 
-管理画面はデフォルトで `16680` ポートを待ち受けます。ユーザー名は `admin`、初期パスワードは初回起動時にログへ出力されます。自動デプロイでは環境変数 `GATELY_INITIAL_PASSWORD` で初期パスワードを指定でき、その場合はランダムなパスワードは生成されません。
+管理画面はデフォルトで `16680` ポートを待ち受けます。デフォルトのアカウントは `admin`、パスワードは `gately.cn` です。自動デプロイでは環境変数 `GATELY_INITIAL_PASSWORD` で、デフォルトのパスワードの代わりに使う初期パスワードを指定できます。
 
-初回ログイン時には初期設定ガイドが表示され、パスワードの変更、2 段階認証または Passkey の有効化、ネットワーク自己診断の実行、Lucky からのインポート、通知の設定を順に案内します。
+デフォルトのパスワードは公開されているため、使用している間は管理画面の上部に変更を促す警告が表示され続けます。初回ログイン時には初期設定ガイドが表示され、パスワードの変更、2 段階認証または Passkey の有効化、ネットワーク自己診断の実行、Lucky からのインポート、通知の設定を順に案内します。
+
+## パスワードと 2 段階認証のリセット {#reset}
+
+管理者パスワードを忘れたときや、2 段階認証（TOTP）のアプリを紛失したときは、Gately が稼働しているサーバー上でコマンドを実行してリセットします。コマンドは設定ディレクトリの読み書きが必要で、サーバーの権限を持つことと同等なため、ネットワーク経由では使えません。
+
+- `gately reset-password`：管理者パスワードをデフォルトの `gately.cn` にリセットします。`-p <新しいパスワード>` で新しいパスワードを直接指定することもできます。
+- `gately reset-totp`：管理者の 2 段階認証を無効にします。ログイン後に再び有効にできます。
+
+実行前に管理者のユーザー名と実行する操作が表示され、誤操作を防ぐため `yes` と入力して確認する必要があります。スクリプトなどの非対話環境では `-y` を付けると確認を省略できます。稼働中の Gately には再起動なしで数秒以内に反映され、稼働していない場合は次回起動時に反映されます。リセット後はログイン中のすべてのセッションが無効になり、ログイン失敗によるロックも解除されます。ユーザー名、Passkey、読み取り専用アカウント、その他の設定は変わりません。
+
+| インストール方法 | コマンド |
+| --- | --- |
+| Docker | `docker exec -it gately gately reset-password` |
+| systemd | `sudo gately reset-password` |
+| OpenWrt / iStoreOS | `gately reset-password` |
+| fnOS | `sudo gately reset-password` |
+| その他 | `./gately reset-password -c <設定ディレクトリ>` |
+
+`-c` を指定しない場合は、`GATELY_CONFIG_DIR`、カレントディレクトリの `data`、`/etc/gately`、fnOS パッケージの設定ディレクトリ `/var/apps/gately/var/config` の順に探し、実際に使ったディレクトリを表示します。リセット操作はシステムログと監査ログに記録されます。
 
 ## アップグレード
 

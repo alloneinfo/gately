@@ -59,7 +59,7 @@ type Options struct {
 	Certs CertProvider
 	// ApplyDir 非空时，每次启动把该目录下的 <名称>.json 覆盖到配置目录（声明式配置，适合 GitOps、Docker 与 Kubernetes）
 	ApplyDir string
-	// InitialPassword 非空时作为首次启动的管理员初始密码，不再随机生成也不写入日志
+	// InitialPassword 非空时作为首次启动的管理员初始密码，不使用默认密码也不写入日志
 	InitialPassword string
 	// GatewaySocket 非空时额外在该 Unix Socket 上提供管理界面，供飞牛 fnOS 统一网关等反向代理接入
 	GatewaySocket string
@@ -164,15 +164,17 @@ func New(opts Options) (*App, error) {
 	if err := a.auth.SetBootstrapPassword(opts.InitialPassword); err != nil {
 		return nil, err
 	}
-	generated, err := a.auth.EnsureInitialized()
+	initial, err := a.auth.EnsureInitialized()
 	if err != nil {
 		return nil, fmt.Errorf("初始化管理员账号失败: %w", err)
 	}
-	if generated != "" {
-		// 初始密码只在首次启动时打印一次，登录后应立即修改
+	if initial != "" {
+		// 默认密码只在首次启动时打印一次，登录后应立即修改
 		// 日志同时包含英文关键词 "initial password"，便于各语言用户统一用 grep -i "initial password" 检索
-		a.logger.Printf("==== 已创建管理员账号 admin / Admin account \"admin\" created, initial password: %s ，请登录后立即修改 / change it after your first login ====", generated)
+		a.logger.Printf("==== 已创建管理员账号 admin / Admin account \"admin\" created, initial password: %s ，请登录后立即修改 / change it after your first login ====", initial)
 	}
+	// 服务未运行期间通过命令行提交的重置请求，在启动时应用
+	a.applyAccountReset()
 
 	seen := map[string]bool{}
 	for _, m := range opts.Modules {
@@ -295,6 +297,7 @@ func (a *App) Run(parent context.Context) error {
 	if len(disabled) > 0 {
 		a.sysLogs.Add(logbuf.LevelInfo, "", "以下功能模块已关闭，未启动："+strings.Join(disabled, "、"))
 	}
+	go a.watchAccountReset(ctx)
 	s := a.settingsSnapshot()
 	handler := a.Handler()
 	servers := []*http.Server{{Addr: s.Listen, Handler: handler, ReadHeaderTimeout: 10 * time.Second}}
@@ -446,7 +449,9 @@ func (a *App) handleSession(w http.ResponseWriter, r *http.Request) {
 		role = auth.RoleAdmin
 	}
 	// disabledModules 为已关闭的功能模块，前端据此隐藏导航与页面
-	httpx.OK(w, map[string]any{"username": auth.UserFromContext(r.Context()), "role": role, "disabledModules": a.disabledModuleIDs()})
+	// defaultPassword 为主账号仍在使用默认密码，前端据此提醒管理员修改
+	httpx.OK(w, map[string]any{"username": auth.UserFromContext(r.Context()), "role": role, "disabledModules": a.disabledModuleIDs(),
+		"defaultPassword": role == auth.RoleAdmin && a.auth.UsingDefaultPassword()})
 }
 
 type moduleInfo struct {

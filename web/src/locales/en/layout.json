@@ -8,5 +8,7 @@
   "logoutTitle": "Sign out",
   "logoutConfirm": "Are you sure you want to sign out?",
   "logoutOk": "Sign out",
-  "readonlyBadge": "Read-only"
+  "readonlyBadge": "Read-only",
+  "defaultPassword": "You are still using the default password {password}. Anyone who knows it can sign in to the admin UI, so change it now.",
+  "changeNow": "Change now"
 }

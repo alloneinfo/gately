@@ -9,7 +9,6 @@ docker run -d --name gately --network host \
   -v ./gately-data:/etc/gately \
   -v /var/run/docker.sock:/var/run/docker.sock \
   ghcr.io/wangwanjie/gately:latest
-docker logs gately 2>&1 | grep -i "initial password"
 ```
 
 If you do not need Docker management, drop the `docker.sock` mount. Port forwarding, STUN and web services listen on host ports, so `--network host` is recommended.
@@ -20,7 +19,7 @@ Install the native app instead: it opens from the desktop icon through the fnOS 
 
 ## 2. Sign in
 
-Open `http://<device-ip>:16680` in a browser. The username is `admin` and the password is the initial password printed in the logs (shown only once, on first start).
+Open `http://<device-ip>:16680` in a browser. The username is `admin` and the default password is `gately.cn`. The default password is public, so the admin UI keeps showing a warning at the top until you change it.
 
 ## 3. Apply basic hardening
 

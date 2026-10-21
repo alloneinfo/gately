@@ -17,7 +17,7 @@ func newTestManager(t *testing.T) (*Manager, string) {
 		t.Fatal(err)
 	}
 	if pass == "" {
-		t.Fatal("首次初始化应生成密码")
+		t.Fatal("首次初始化应返回默认密码")
 	}
 	return m, pass
 }

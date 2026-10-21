@@ -48,6 +48,12 @@
         </div>
       </header>
       <main class="content">
+        <!-- 仍在使用公开的默认密码时持续提醒，修改密码后重新登录即消失 -->
+        <div v-if="defaultPassword" class="default-pw" role="alert">
+          <TriangleAlert :size="18" class="default-pw-icon" />
+          <span class="default-pw-text">{{ t('layout.defaultPassword', { password: DEFAULT_PASSWORD }) }}</span>
+          <el-button type="warning" size="small" @click="onCommand('password')">{{ t('layout.changeNow') }}</el-button>
+        </div>
         <router-view />
       </main>
     </div>
@@ -61,7 +67,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { ElMessageBox } from 'element-plus'
-import { ChevronDown, ChevronRight, KeyRound, LogOut, Menu, PanelLeftClose, PanelLeftOpen, Settings } from 'lucide-vue-next'
+import { ChevronDown, ChevronRight, KeyRound, LogOut, Menu, PanelLeftClose, PanelLeftOpen, Settings, TriangleAlert } from 'lucide-vue-next'
 import { api } from '../api'
 import SideNav from '../components/SideNav.vue'
 import AppLogo from '../components/AppLogo.vue'
@@ -76,6 +82,9 @@ const router = useRouter()
 const isMobile = useIsMobile()
 const username = ref('')
 const role = ref('admin')
+// 管理员账号的默认密码，与后端 auth.DefaultPassword 一致
+const DEFAULT_PASSWORD = 'gately.cn'
+const defaultPassword = ref(false)
 const drawer = ref(false)
 const collapsed = ref(localStorage.getItem('gately-collapsed') === '1')
 const group = computed(() => groupByPath(route.path))
@@ -115,9 +124,10 @@ async function onCommand(cmd: string) {
 }
 
 onMounted(async () => {
-  const s = await api.get<{ username: string; role?: string; disabledModules?: string[] }>('/api/session')
+  const s = await api.get<{ username: string; role?: string; disabledModules?: string[]; defaultPassword?: boolean }>('/api/session')
   username.value = s.username
   role.value = s.role ?? 'admin'
+  defaultPassword.value = s.defaultPassword ?? false
   disabledModules.value = s.disabledModules ?? []
   // 直接通过链接打开了已关闭模块的页面时，加载模块状态后再跳回总览
   if (!pathEnabled(route.path)) {
@@ -266,6 +276,26 @@ onMounted(async () => {
   max-width: 1440px;
   margin: 0 auto;
   padding: 20px 24px 32px;
+  min-width: 0;
+}
+.default-pw {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  border-radius: var(--g-radius);
+  border: 1px solid var(--el-color-danger-light-5);
+  background: var(--el-color-danger-light-9);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.default-pw-icon {
+  flex-shrink: 0;
+  color: var(--el-color-danger);
+}
+.default-pw-text {
+  flex: 1;
   min-width: 0;
 }
 @media (max-width: 767.98px) {

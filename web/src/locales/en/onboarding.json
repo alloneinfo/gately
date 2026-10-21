@@ -5,8 +5,8 @@
   "later": "Remind me later",
   "done": "Done, don't show again",
   "password": {
-    "title": "Change the initial password",
-    "desc": "The initial password was printed in the startup log. Replace it with your own."
+    "title": "Change the default password",
+    "desc": "The default password gately.cn is public; replace it with your own."
   },
   "security": {
     "title": "Add a second factor",

@@ -2,6 +2,8 @@
 
 `gately` 실행 파일에는 하위 명령이 두 개 내장되어 있습니다. `gately ctl`은 터미널에서 실행 중인 인스턴스의 관리 API를 호출하고, `gately mcp`는 같은 API를 MCP 도구로 AI 클라이언트에 제공합니다. 둘 다 HTTP와 [API 토큰](/ko/docs/reference/api)으로 인스턴스에 접근하며, 엔드포인트 목록은 인스턴스의 `/api/openapi.json`에서 가져오고 권한은 토큰이 결정합니다.
 
+이 밖에 `gately reset-password`와 `gately reset-totp`는 API를 거치지 않고 로컬 설정 디렉터리를 직접 다루며, 비밀번호를 잊었거나 인증 앱을 잃어버렸을 때 관리자 계정을 복구합니다. [비밀번호와 2단계 인증 재설정](/ko/docs/guide/install#reset)을 참고하세요.
+
 ## 연결 설정
 
 연결 정보는 다음 순서로 결정되며 뒤에 오는 항목이 앞의 항목을 덮어씁니다.

@@ -2,6 +2,8 @@
 
 O executável `gately` inclui dois subcomandos: `gately ctl` chama, no terminal, a API de administração de uma instância em execução, e `gately mcp` expõe os mesmos endpoints como ferramentas MCP para clientes de IA. Ambos acessam a instância por HTTP com um [token de API](/pt-BR/docs/reference/api); a lista de endpoints vem do `/api/openapi.json` da instância e as permissões são definidas pelo token.
 
+Além disso, `gately reset-password` e `gately reset-totp` atuam diretamente no diretório de configuração local, sem passar pela API, para recuperar a conta de administrador após esquecer a senha ou perder o autenticador; veja [Redefinir a senha e a autenticação em dois fatores](/pt-BR/docs/guide/install#reset).
+
 ## Configuração da conexão
 
 Os dados de conexão são definidos na ordem abaixo, e os itens seguintes substituem os anteriores:

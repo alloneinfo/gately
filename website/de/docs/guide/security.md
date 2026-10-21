@@ -18,6 +18,7 @@ Gately läuft am Netzwerkrand und verwaltet DNS-Anbieter-Schlüssel, private Zer
 ## Authentifizierung und Zugriffskontrolle
 
 - bcrypt-Passwort-Hashing und HMAC-signierte Sitzungstoken;
+- Das Standardpasswort `gately.cn` ist öffentlich bekannt; solange es verwendet wird, erinnert die Verwaltungsoberfläche oben dauerhaft daran, es zu ändern. Ein vergessenes Passwort oder ein verlorener Zwei-Faktor-Authenticator lässt sich nur auf dem Server mit `gately reset-password` / `gately reset-totp` zurücksetzen (erfordert Lese- und Schreibzugriff auf das Konfigurationsverzeichnis und eine Bestätigung mit `yes`); danach sind alle Sitzungen ungültig und der Vorgang steht im Audit-Protokoll. Siehe [Passwort und Zwei-Faktor-Authentifizierung zurücksetzen](/de/docs/guide/install#reset);
 - Anmeldung per Passkey (WebAuthn): Es wird nur der öffentliche Schlüssel gespeichert, eine Benutzerverifizierung (Fingerabdruck, Gesicht oder PIN) ist Pflicht, und ein Signaturzähler schützt vor geklonten Schlüsseln; erfordert den Zugriff über eine Domain mit HTTPS (oder localhost);
 - Zwei-Faktor-Authentifizierung (TOTP, gegen die Testvektoren aus RFC 6238 verifiziert);
 - Nur-Lese-Konten: können Status und Konfiguration einsehen, aber nichts ändern, keine Sicherungen herunterladen, keine Secrets lesen und kein Terminal öffnen; nach dem Zurücksetzen des Passworts oder dem Löschen werden ihre Sitzungen sofort ungültig;

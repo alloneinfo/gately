@@ -8,5 +8,7 @@
   "logoutTitle": "退出登录",
   "logoutConfirm": "确定要退出当前账号吗？",
   "logoutOk": "退出",
-  "readonlyBadge": "只读"
+  "readonlyBadge": "只读",
+  "defaultPassword": "当前仍在使用默认密码 {password}，知道它的人都能登录管理界面，请立即修改。",
+  "changeNow": "立即修改"
 }

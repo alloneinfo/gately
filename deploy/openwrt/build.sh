@@ -161,7 +161,7 @@ if [ "${PKG_UPGRADE}" = 1 ]; then
 fi
 /etc/init.d/gately enable
 start_or_restart
-echo "gately: 已启动，管理界面 http://<路由器地址>:16680，首次登录的初始密码可用 logread | grep -i \"initial password\" 查看"
+echo "gately: 已启动，管理界面 http://<路由器地址>:16680，默认账号 admin，默认密码 gately.cn"
 exit 0
 EOF
 } >"$SCRIPTS/postinst"

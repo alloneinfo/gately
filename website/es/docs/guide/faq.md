@@ -4,13 +4,17 @@
 
 No. Gately no se conecta a ningún servidor del proyecto por defecto y no envía información del dispositivo. Las direcciones salientes, como la consulta de IP pública, usan servicios públicos de terceros y se pueden cambiar en las tareas correspondientes.
 
-## ¿Dónde está la contraseña inicial?
+## ¿Cuáles son el usuario y la contraseña predeterminados?
 
-Se imprime en el registro en el primer arranque, una sola vez. En despliegues con Docker, ejecuta `docker logs gately 2>&1 | grep -i "initial password"`.
+El usuario predeterminado es `admin` y la contraseña predeterminada, `gately.cn`. Esta contraseña es pública: cámbiala en «Ajustes → Cuenta y seguridad» nada más iniciar sesión; hasta entonces, la interfaz de administración muestra un aviso en la parte superior. Si al desplegar definiste la variable de entorno `GATELY_INITIAL_PASSWORD`, la contraseña es la que indicaste.
 
 ## ¿Qué hago si olvido la contraseña del administrador?
 
-Detén Gately, elimina `account.json` del directorio de configuración y vuelve a iniciarlo. El programa recrea la cuenta `admin` e imprime una nueva contraseña inicial en el registro. Tras iniciar sesión, revisa los ajustes de seguridad, como la autenticación de dos factores.
+Ejecuta `gately reset-password` en el servidor (con Docker, `docker exec -it gately gately reset-password`) y escribe `yes` para confirmar. La contraseña vuelve a ser la predeterminada, `gately.cn`, y una instancia en ejecución aplica el cambio en pocos segundos. Consulta [Restablecer la contraseña y la autenticación de dos factores](/es/docs/guide/install#reset).
+
+## ¿Qué hago si pierdo el autenticador?
+
+Ejecuta `gately reset-totp` en el servidor (con Docker, `docker exec -it gately gately reset-totp`) y confirma. La autenticación de dos factores se desactiva; inicia sesión con la contraseña y vuelve a activarla.
 
 ## ¿Es compatible con fnOS?
 

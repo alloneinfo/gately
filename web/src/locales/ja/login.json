@@ -15,7 +15,7 @@
   "thirdParty": "または外部アカウントでログイン",
   "loginWith": "{name} でログイン",
   "redirecting": "{name} に移動しています…",
-  "initialPasswordHint": "初回起動時の初期パスワードはプログラムのログに出力されます。",
+  "initialPasswordHint": "デフォルトのアカウントは admin、パスワードは gately.cn です。ログイン後すぐに変更してください。パスワードを忘れた場合はサーバーで gately reset-password を実行してリセットできます。",
   "totpTitle": "2 段階認証",
   "totpPrompt": "認証アプリを開き、{user} の 6 桁のコードを入力してください",
   "code": "認証コード",
@@ -25,5 +25,6 @@
   "totpAuto": "入力が完了すると自動で確認されます",
   "or": "または",
   "passkey": "パスキーでログイン",
-  "fnos": "fnOS アカウント {user} でログイン"
+  "fnos": "fnOS アカウント {user} でログイン",
+  "totpLost": "認証アプリを紛失した場合は、サーバーで gately reset-totp を実行すると 2 段階認証を無効にできます。"
 }

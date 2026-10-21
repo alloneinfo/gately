@@ -15,7 +15,7 @@
   "thirdParty": "Ou use uma conta de terceiros",
   "loginWith": "Entrar com {name}",
   "redirecting": "Redirecionando para {name}…",
-  "initialPasswordHint": "No primeiro início, a senha inicial é exibida no log do programa.",
+  "initialPasswordHint": "A conta padrão é admin com a senha gately.cn; troque-a logo após entrar. Esqueceu a senha? Execute gately reset-password no servidor para redefini-la.",
   "totpTitle": "Autenticação em dois fatores",
   "totpPrompt": "Abra seu app autenticador e informe o código de 6 dígitos de {user}",
   "code": "Código de verificação",
@@ -25,5 +25,6 @@
   "totpAuto": "O código é verificado automaticamente ao ser concluído",
   "or": "ou",
   "passkey": "Entrar com passkey",
-  "fnos": "Entrar como usuário do fnOS {user}"
+  "fnos": "Entrar como usuário do fnOS {user}",
+  "totpLost": "Perdeu o autenticador? Execute gately reset-totp no servidor para desativar a autenticação em dois fatores."
 }

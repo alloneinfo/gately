@@ -2,6 +2,8 @@
 
 L'exécutable `gately` intègre deux sous-commandes : `gately ctl` appelle depuis le terminal l'API de gestion d'une instance en cours d'exécution, et `gately mcp` expose les mêmes API sous forme d'outils MCP pour les clients IA. Toutes deux accèdent à l'instance en HTTP avec des [jetons d'API](/fr/docs/reference/api) ; la liste des API provient du `/api/openapi.json` de l'instance et les permissions sont déterminées par le jeton.
 
+Par ailleurs, `gately reset-password` et `gately reset-totp` agissent directement sur le répertoire de configuration local, sans passer par l'API, pour récupérer le compte administrateur après un mot de passe oublié ou un authentificateur perdu ; consultez [Réinitialiser le mot de passe et l'authentification à deux facteurs](/fr/docs/guide/install#reset).
+
 ## Configuration de la connexion
 
 Les informations de connexion sont déterminées dans l'ordre suivant, chaque étape remplaçant la précédente :

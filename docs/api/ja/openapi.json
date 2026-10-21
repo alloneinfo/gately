@@ -13243,7 +13243,7 @@
     },
     "/api/session": {
       "get": {
-        "description": "有効な API トークンであれば、特定の権限なしでアクセスできます。",
+        "description": "返回 `username`、`role`（`admin` 或 `readonly`）、`disabledModules`（已关闭的功能模块 ID）与 `defaultPassword`（管理员仍在使用默认密码 `gately.cn` 时为 true，管理界面据此提醒）。\n\n有効な API トークンであれば、特定の権限なしでアクセスできます。 を更新",
         "responses": {
           "200": {
             "description": "成功"

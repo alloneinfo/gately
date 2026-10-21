@@ -2,6 +2,8 @@
 
 Die ausführbare Datei `gately` enthält zwei Unterbefehle: `gately ctl` ruft im Terminal die Verwaltungs-API einer laufenden Instanz auf, `gately mcp` stellt dieselben Schnittstellen KI-Clients als MCP-Tools bereit. Beide greifen per HTTP mit einem [API-Token](/de/docs/reference/api) auf die Instanz zu; die Liste der Schnittstellen stammt aus dem `/api/openapi.json` der Instanz, die Berechtigungen bestimmt das Token.
 
+Zusätzlich arbeiten `gately reset-password` und `gately reset-totp` direkt auf dem lokalen Konfigurationsverzeichnis, ohne die API, und stellen das Administratorkonto nach einem vergessenen Passwort oder verlorenen Authenticator wieder her; siehe [Passwort und Zwei-Faktor-Authentifizierung zurücksetzen](/de/docs/guide/install#reset).
+
 ## Verbindungskonfiguration
 
 Die Verbindungsdaten werden in dieser Reihenfolge ermittelt, wobei spätere Quellen frühere überschreiben:

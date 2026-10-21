@@ -1,12 +1,15 @@
 package app
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/wangwanjie/gately/internal/apitoken"
+	"github.com/wangwanjie/gately/internal/audit"
 	"github.com/wangwanjie/gately/internal/auth"
 	"github.com/wangwanjie/gately/internal/httpx"
 	"github.com/wangwanjie/gately/internal/logbuf"
@@ -95,4 +98,51 @@ func (a *App) handleOnboardingDismiss(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	httpx.OK(w, map[string]bool{"pending": false})
+}
+
+// resetPollInterval 是运行中的实例检查命令行重置请求的间隔。
+const resetPollInterval = 2 * time.Second
+
+// watchAccountReset 定期检查命令行（gately reset-password / reset-totp）提交的重置请求，
+// 运行中的实例无需重启即可生效。
+func (a *App) watchAccountReset(ctx context.Context) {
+	t := time.NewTicker(resetPollInterval)
+	defer t.Stop()
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-t.C:
+			if auth.ResetPending(a.opts.ConfigDir) {
+				a.applyAccountReset()
+			}
+		}
+	}
+}
+
+// applyAccountReset 应用配置目录中的重置请求，并记入系统日志与审计日志。
+func (a *App) applyAccountReset() {
+	req, err := auth.TakeResetRequest(a.opts.ConfigDir)
+	if err != nil {
+		a.sysLogs.Add(logbuf.LevelError, "auth", "读取账号重置请求失败: "+err.Error())
+		return
+	}
+	if req == nil {
+		return
+	}
+	if err := a.auth.ApplyReset(*req); err != nil {
+		a.sysLogs.Add(logbuf.LevelError, "auth", "应用账号重置请求失败: "+err.Error())
+		return
+	}
+	var msg string
+	switch {
+	case req.PasswordHash != "" && req.DisableTOTP:
+		msg = "已通过命令行重置管理员密码并关闭两步验证，所有已登录会话已失效"
+	case req.PasswordHash != "":
+		msg = "已通过命令行重置管理员密码，所有已登录会话已失效"
+	default:
+		msg = "已通过命令行关闭两步验证，所有已登录会话已失效"
+	}
+	a.sysLogs.Add(logbuf.LevelWarn, "auth", msg)
+	a.audit.Record(audit.Entry{Actor: "cli", Category: audit.CategoryChange, Detail: msg})
 }
