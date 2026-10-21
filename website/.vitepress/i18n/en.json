@@ -78,8 +78,8 @@
   "home": {
     "pill": "Open source · Auditable · Single binary",
     "announce": {
-      "text": "v0.5.3 is out: native fnOS app, unified gateway, sign in with fnOS →",
-      "link": "/en/news/v0.5.3"
+      "text": "v0.5.4 is out: online upgrade, no more recreating PVE LXC containers, OpenWrt packages →",
+      "link": "/en/news/v0.5.4"
     },
     "titleLine1": "A network gateway toolkit",
     "titleLine2": "you can see through",

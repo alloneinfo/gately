@@ -78,8 +78,8 @@
   "home": {
     "pill": "开源 · 可审计 · 单文件部署",
     "announce": {
-      "text": "v0.5.3 发布：飞牛原生应用、统一网关、飞牛登录态直接登录 →",
-      "link": "/news/v0.5.3"
+      "text": "v0.5.4 发布：在线升级、PVE LXC 无需重建、OpenWrt 安装包 →",
+      "link": "/news/v0.5.4"
     },
     "titleLine1": "看得见的",
     "titleLine2": "网络网关工具集",

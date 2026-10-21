@@ -78,8 +78,8 @@
   "home": {
     "pill": "Código abierto · Auditable · Binario único",
     "announce": {
-      "text": "Ya está v0.5.3: app nativa para fnOS, pasarela unificada e inicio de sesión con fnOS →",
-      "link": "/en/news/v0.5.3"
+      "text": "Ya está aquí v0.5.4: actualización en línea, sin recrear contenedores LXC de PVE y paquetes para OpenWrt →",
+      "link": "/en/news/v0.5.4"
     },
     "titleLine1": "Una pasarela de red",
     "titleLine2": "que puedes ver por dentro",

@@ -78,8 +78,8 @@
   "home": {
     "pill": "Código aberto · Auditável · Binário único",
     "announce": {
-      "text": "Saiu a v0.5.3: app nativo para fnOS, gateway unificado e login com o fnOS →",
-      "link": "/en/news/v0.5.3"
+      "text": "Saiu a v0.5.4: atualização online, sem recriar contêineres LXC do PVE e pacotes para OpenWrt →",
+      "link": "/en/news/v0.5.4"
     },
     "titleLine1": "Um kit de gateway de rede",
     "titleLine2": "que você enxerga por dentro",
