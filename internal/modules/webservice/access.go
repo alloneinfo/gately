@@ -60,6 +60,8 @@ type PathRule struct {
 	Auth   string   `json:"auth"`
 	IPMode string   `json:"ipMode"`
 	IPList []string `json:"ipList"`
+	// IPSets 为引用的订阅 IP 列表 key
+	IPSets []string `json:"ipSets"`
 }
 
 func (l *ShareLink) expired(now time.Time) bool {
@@ -143,6 +145,7 @@ func (s *Site) validateAccess() error {
 			return fmt.Errorf("路径规则 %s 的访问控制模式无效", r.Prefix)
 		}
 		r.IPList = cleanList(r.IPList)
+		r.IPSets = uniqueList(r.IPSets)
 		if _, err := parsePrefixes(r.IPList); err != nil {
 			return fmt.Errorf("路径规则 %s: %w", r.Prefix, err)
 		}
@@ -187,6 +190,7 @@ type compiledRule struct {
 	auth   string
 	ipMode string
 	ipList []netip.Prefix
+	ipSets []string
 }
 
 func compileRules(rules []PathRule) ([]compiledRule, error) {
@@ -196,7 +200,7 @@ func compileRules(rules []PathRule) ([]compiledRule, error) {
 		if err != nil {
 			return nil, err
 		}
-		out = append(out, compiledRule{prefix: r.Prefix, auth: r.Auth, ipMode: r.IPMode, ipList: list})
+		out = append(out, compiledRule{prefix: r.Prefix, auth: r.Auth, ipMode: r.IPMode, ipList: list, ipSets: r.IPSets})
 	}
 	// 最长前缀优先
 	sort.SliceStable(out, func(i, j int) bool { return len(out[i].prefix) > len(out[j].prefix) })

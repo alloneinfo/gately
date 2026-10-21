@@ -9,6 +9,7 @@
   "ipWhitelist": "IP allowlist",
   "ipBlacklist": "IP blocklist",
   "addRule": "Add rule",
+  "ipSetsPlaceholder": "Lists",
   "rulesHelp": "Matched by path prefix, the longest prefix wins. Paths are normalized first (../ and duplicate slashes removed) before matching",
   "countryFilter": "Country filter",
   "countryOff": "Off",

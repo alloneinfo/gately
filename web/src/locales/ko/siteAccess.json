@@ -9,6 +9,7 @@
   "ipWhitelist": "IP 허용 목록",
   "ipBlacklist": "IP 차단 목록",
   "addRule": "규칙 추가",
+  "ipSetsPlaceholder": "구독 목록",
   "rulesHelp": "경로 접두사로 일치시키며 가장 긴 접두사가 우선합니다. 경로는 정규화(../ 및 중복 슬래시 제거)한 뒤 일치시킵니다",
   "countryFilter": "국가 필터",
   "countryOff": "끄기",

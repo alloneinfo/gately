@@ -84,6 +84,8 @@ type Site struct {
 
 	IPMode string   `json:"ipMode"`
 	IPList []string `json:"ipList"`
+	// IPSets 为引用的订阅 IP 列表 key，与 IPList 一起参与黑白名单判断
+	IPSets []string `json:"ipSets"`
 
 	// CountryMode 为 ""（不限）、allow（仅允许列出的国家）、deny（拒绝列出的国家），需先在设置中导入 GeoIP 数据库
 	CountryMode string `json:"countryMode"`
@@ -163,12 +165,27 @@ type Settings struct {
 type fileConfig struct {
 	Settings  Settings   `json:"settings"`
 	Listeners []Listener `json:"listeners"`
+	// IPLists 为订阅的 IP 列表，供站点访问控制引用
+	IPLists []IPList `json:"ipLists"`
 }
 
 func cleanList(in []string) []string {
 	var out []string
 	for _, v := range in {
 		if v = strings.TrimSpace(v); v != "" {
+			out = append(out, v)
+		}
+	}
+	return out
+}
+
+// uniqueList 去除空白项与重复项，保持原有顺序。
+func uniqueList(in []string) []string {
+	var out []string
+	seen := map[string]bool{}
+	for _, v := range in {
+		if v = strings.TrimSpace(v); v != "" && !seen[v] {
+			seen[v] = true
 			out = append(out, v)
 		}
 	}
@@ -348,6 +365,7 @@ func (s *Site) validate(isDefault bool) error {
 	if _, err := parsePrefixes(s.IPList); err != nil {
 		return err
 	}
+	s.IPSets = uniqueList(s.IPSets)
 	for _, h := range append(append([]string{}, s.RequestHeaders...), s.ResponseHeaders...) {
 		if k, _, ok := strings.Cut(h, ":"); !ok || strings.TrimSpace(k) == "" {
 			return fmt.Errorf("请求头格式应为 Key: Value，实际 %q", h)

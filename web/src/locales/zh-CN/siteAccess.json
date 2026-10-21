@@ -9,6 +9,7 @@
   "ipWhitelist": "IP 白名单",
   "ipBlacklist": "IP 黑名单",
   "addRule": "添加规则",
+  "ipSetsPlaceholder": "订阅列表",
   "rulesHelp": "按路径前缀匹配，最长前缀优先；路径会先规范化（消除 ../ 与重复斜杠）再匹配",
   "countryFilter": "国家过滤",
   "countryOff": "关闭",

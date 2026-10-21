@@ -19,9 +19,12 @@
             <el-option :label="t('siteAccess.ipBlacklist')" value="blacklist" />
           </el-select>
           <ListInput v-if="r.ipMode" v-model="r.ipList" :split="splitCommasOrSpaces" separator=", " placeholder="192.168.1.0/24, 10.0.0.1" class="mono flex" />
+          <el-select v-if="r.ipMode && ipLists.length" v-model="r.ipSets" multiple collapse-tags :placeholder="t('siteAccess.ipSetsPlaceholder')" class="w-sets">
+            <el-option v-for="o in ipLists" :key="o.key" :label="o.name" :value="o.key" />
+          </el-select>
           <el-button text type="danger" :icon="Trash2" @click="site.rules.splice(i, 1)" />
         </div>
-        <el-button text :icon="Plus" @click="site.rules.push({ prefix: '/', auth: '', ipMode: '', ipList: [] })">{{ t('siteAccess.addRule') }}</el-button>
+        <el-button text :icon="Plus" @click="site.rules.push({ prefix: '/', auth: '', ipMode: '', ipList: [], ipSets: [] })">{{ t('siteAccess.addRule') }}</el-button>
         <div class="form-help">{{ t('siteAccess.rulesHelp') }}</div>
       </div>
     </el-form-item>
@@ -73,6 +76,8 @@ export interface PathRule {
   auth: string
   ipMode: string
   ipList: string[]
+  // ipSets 为引用的订阅 IP 列表 key
+  ipSets?: string[]
 }
 
 export interface ShareLink {
@@ -96,7 +101,7 @@ export interface AccessFields {
 }
 
 const { t } = useI18n()
-const props = defineProps<{ tls: boolean; port: number }>()
+const props = withDefaults(defineProps<{ tls: boolean; port: number; ipLists?: { key: string; name: string }[] }>(), { ipLists: () => [] })
 const site = defineModel<AccessFields>('site', { required: true })
 const geoLoaded = ref(true)
 
@@ -144,6 +149,9 @@ function copyLink(l: ShareLink) {
 .w-auth,
 .w-ip {
   width: 140px;
+}
+.w-sets {
+  width: 180px;
 }
 .w-name {
   width: 130px;

@@ -9,6 +9,7 @@
   "ipWhitelist": "IP 白名單",
   "ipBlacklist": "IP 黑名單",
   "addRule": "新增規則",
+  "ipSetsPlaceholder": "訂閱清單",
   "rulesHelp": "依路徑前綴比對，最長前綴優先；路徑會先正規化（消除 ../ 與重複斜線）再比對",
   "countryFilter": "國家篩選",
   "countryOff": "關閉",

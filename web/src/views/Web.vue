@@ -269,7 +269,16 @@
             <el-form-item v-if="site.ipMode" :label="t('web.ipRange')">
               <el-input v-model="ipText" type="textarea" :rows="3" class="mono" :placeholder="t('web.ipRangePlaceholder')" />
             </el-form-item>
-            <SiteAccess v-model:site="site" :tls="siteTls" :port="sitePort" />
+            <el-form-item v-if="site.ipMode" :label="t('web.ipSets')">
+              <el-select v-model="site.ipSets" multiple filterable :placeholder="t('web.ipSetsPlaceholder')" :no-data-text="t('web.ipSetsEmpty')" class="w-full">
+                <el-option v-for="o in ipLists" :key="o.key" :label="o.name" :value="o.key">
+                  <span>{{ o.name }}</span>
+                  <span v-if="!o.loaded" class="opt-warn">{{ t('web.ipSetNotLoaded') }}</span>
+                </el-option>
+              </el-select>
+              <div class="form-help">{{ site.ipMode === 'whitelist' ? t('web.ipSetsWhitelistHelp') : t('web.ipSetsHelp') }}</div>
+            </el-form-item>
+            <SiteAccess v-model:site="site" :tls="siteTls" :port="sitePort" :ip-lists="ipLists" />
             <el-form-item :label="t('web.wafInstance')">
               <el-select v-model="site.waf" clearable :placeholder="t('web.wafNone')" class="w-260">
                 <el-option v-for="w in wafInstances" :key="w.key" :label="w.name" :value="w.key" />
@@ -319,6 +328,7 @@
           <div class="form-help">{{ t('web.ssoDomainHelp') }}</div>
         </el-form-item>
         <AccessSettings v-if="settings" v-model:auto-ban-seconds="settings.autoBanSeconds" />
+        <IPListsManager v-if="settings" @changed="loadIPLists" />
       </el-form>
       <template #footer>
         <el-button @click="settingsVisible = false">{{ t('common.cancel') }}</el-button>
@@ -344,6 +354,7 @@ import OAuthProviders from '../components/OAuthProviders.vue'
 import SharedUsers from '../components/SharedUsers.vue'
 import { type AuthUser, fromAPI, toAPI } from '../sharedUsers'
 import AccessSettings from '../components/AccessSettings.vue'
+import IPListsManager from '../components/IPListsManager.vue'
 import SiteTraffic, { type Rewrite } from '../components/SiteTraffic.vue'
 import SiteStats from '../components/SiteStats.vue'
 import SiteAccess, { type PathRule, type ShareLink } from '../components/SiteAccess.vue'
@@ -386,6 +397,8 @@ interface Site {
   oauthUsers: string[] | null
   ipMode: string
   ipList: string[] | null
+  // ipSets 为引用的订阅 IP 列表 key
+  ipSets: string[] | null
   requestHeaders: string[] | null
   responseHeaders: string[] | null
   cors: boolean
@@ -450,6 +463,8 @@ const listeners = ref<ListenerView[]>([])
 const { isCollapsed, setCollapsed, setAll, allCollapsed } = useCollapsed('web')
 const allListenersCollapsed = allCollapsed(() => listeners.value.map((l) => l.key))
 const wafInstances = ref<{ key: string; name: string }[]>([])
+// ipLists 为订阅的 IP 列表，供站点与路径规则的访问控制引用
+const ipLists = ref<{ key: string; name: string; loaded: boolean }[]>([])
 const loading = ref(true)
 const saving = ref(false)
 const listenerVisible = ref(false)
@@ -542,6 +557,7 @@ function emptySite(): Site {
     oauthUsers: [],
     ipMode: '',
     ipList: [],
+    ipSets: [],
     requestHeaders: [],
     responseHeaders: [],
     cors: false,
@@ -703,6 +719,7 @@ function downCount(l: ListenerView, row: SiteRow) {
 }
 
 function openSite(l: ListenerView, row?: SiteRow) {
+  loadIPLists()
   siteOwner = l
   siteTls.value = l.tls
   sitePort.value = l.port
@@ -710,8 +727,9 @@ function openSite(l: ListenerView, row?: SiteRow) {
   siteIsDefault.value = !!row?.isDefault
   // 旧配置中新增字段为 null，合并默认值后保证数组可直接编辑
   const draft: Site = row ? JSON.parse(JSON.stringify(row.site)) : emptySite()
-  draft.rules = draft.rules ?? []
+  draft.rules = (draft.rules ?? []).map((r) => ({ ...r, ipSets: r.ipSets ?? [] }))
   draft.shareLinks = draft.shareLinks ?? []
+  draft.ipSets = draft.ipSets ?? []
   draft.countries = draft.countries ?? []
   draft.rewrites = draft.rewrites ?? []
   draft.locations = draft.locations ?? []
@@ -831,8 +849,18 @@ async function saveSettings() {
   }
 }
 
+// loadIPLists 读取订阅 IP 列表；读取失败时只是不显示可选项
+async function loadIPLists() {
+  try {
+    ipLists.value = await api.get('/api/webservice/iplists')
+  } catch {
+    ipLists.value = []
+  }
+}
+
 onMounted(async () => {
   fetchSettings()
+  loadIPLists()
   wafInstances.value = await api.get('/api/waf/instances')
   await load()
   timer = window.setInterval(load, 5000)
@@ -921,6 +949,14 @@ onBeforeUnmount(() => window.clearInterval(timer))
 }
 .w-120 {
   width: 120px;
+}
+.w-full {
+  width: 100%;
+}
+.opt-warn {
+  margin-left: 8px;
+  font-size: 12px;
+  color: var(--el-color-warning);
 }
 .w-260 {
   width: 260px;

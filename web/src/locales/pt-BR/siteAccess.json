@@ -9,6 +9,7 @@
   "ipWhitelist": "Lista de IPs permitidos",
   "ipBlacklist": "Lista de IPs bloqueados",
   "addRule": "Adicionar regra",
+  "ipSetsPlaceholder": "Listas",
   "rulesHelp": "A correspondência é feita pelo prefixo do caminho; vence o prefixo mais longo. Os caminhos são normalizados antes (../ e barras duplicadas removidas) e só então comparados",
   "countryFilter": "Filtro por país",
   "countryOff": "Desativado",

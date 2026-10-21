@@ -9,6 +9,7 @@
   "ipWhitelist": "IP 許可リスト",
   "ipBlacklist": "IP 拒否リスト",
   "addRule": "ルールを追加",
+  "ipSetsPlaceholder": "購読リスト",
   "rulesHelp": "パスの前方一致で照合し、最も長いプレフィックスを優先します。パスは正規化（../ や重複するスラッシュの除去）してから照合されます",
   "countryFilter": "国別フィルタ",
   "countryOff": "オフ",

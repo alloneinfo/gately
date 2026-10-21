@@ -39,11 +39,13 @@ type Module struct {
 	auth    *authenticator
 	runners map[string]*listenerRunner
 	errors  map[string]string
+	// ipListStates 为订阅 IP 列表的运行状态
+	ipListStates map[string]*ipListState
 }
 
 // New 创建模块。certs 为证书来源，可为 nil（此时不能启用 HTTPS）；waf 可为 nil（站点的 WAF 设置不生效）。
 func New(certs CertSource, waf WAFProvider) *Module {
-	return &Module{certs: certs, waf: waf, runners: map[string]*listenerRunner{}, errors: map[string]string{}}
+	return &Module{certs: certs, waf: waf, runners: map[string]*listenerRunner{}, errors: map[string]string{}, ipListStates: map[string]*ipListState{}}
 }
 
 // ID 实现 module.Module。
@@ -78,6 +80,8 @@ func (m *Module) Init(env module.Env) error {
 			m.logs.Add(logbuf.LevelWarn, "", err.Error())
 		}
 	}
+	// 订阅的 IP 列表先用缓存内容，启动后再按刷新间隔下载
+	m.loadIPListsLocked()
 	return nil
 }
 
@@ -95,6 +99,7 @@ func (m *Module) Start(ctx context.Context) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	m.ctx = ctx
+	go m.ipListRefresher(ctx)
 	if !m.cfg.Settings.Enable {
 		m.logs.Add(logbuf.LevelInfo, "", "Web 服务模块已禁用")
 		return nil
@@ -211,17 +216,23 @@ func (m *Module) viewLocked(l *Listener) any {
 // Routes 实现 module.Module。
 func (m *Module) Routes(r module.Router) {
 	listeners := &crud.Collection[Listener]{
-		Mu:       &m.mu,
-		Items:    &m.cfg.Listeners,
-		Save:     m.saveLocked,
-		Key:      func(l *Listener) *string { return &l.Key },
-		Enabled:  func(l *Listener) *bool { return &l.Enable },
-		Validate: func(l *Listener) error { return l.Validate() },
-		View:     m.viewLocked,
-		Changed:  m.restartLocked,
-		Removed:  m.stopLocked,
+		Mu:      &m.mu,
+		Items:   &m.cfg.Listeners,
+		Save:    m.saveLocked,
+		Key:     func(l *Listener) *string { return &l.Key },
+		Enabled: func(l *Listener) *bool { return &l.Enable },
+		Validate: func(l *Listener) error {
+			if err := l.Validate(); err != nil {
+				return err
+			}
+			return m.checkIPSetsLocked(l)
+		},
+		View:    m.viewLocked,
+		Changed: m.restartLocked,
+		Removed: m.stopLocked,
 	}
 	listeners.Register(r, "/listeners")
+	m.registerIPLists(r)
 	r.HandleFunc("GET /settings", func(w http.ResponseWriter, req *http.Request) {
 		m.mu.Lock()
 		defer m.mu.Unlock()

@@ -9,6 +9,7 @@
   "ipWhitelist": "Lista de IP permitidas",
   "ipBlacklist": "Lista de IP bloqueadas",
   "addRule": "Añadir regla",
+  "ipSetsPlaceholder": "Listas",
   "rulesHelp": "Se comparan por prefijo de ruta y gana el prefijo más largo. Las rutas se normalizan antes (se eliminan ../ y barras duplicadas) para comparar",
   "countryFilter": "Filtro por país",
   "countryOff": "Desactivado",

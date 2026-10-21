@@ -9,6 +9,7 @@
   "ipWhitelist": "IP-Zulassungsliste",
   "ipBlacklist": "IP-Sperrliste",
   "addRule": "Regel hinzufügen",
+  "ipSetsPlaceholder": "Listen",
   "rulesHelp": "Abgleich nach Pfadpräfix, das längste Präfix gewinnt. Pfade werden vor dem Abgleich normalisiert (../ und doppelte Schrägstriche entfernt)",
   "countryFilter": "Länderfilter",
   "countryOff": "Aus",

@@ -18,6 +18,7 @@ import (
 
 	"github.com/wangwanjie/gately/internal/geoip"
 	"github.com/wangwanjie/gately/internal/i18n"
+	"github.com/wangwanjie/gately/internal/iplist"
 	"github.com/wangwanjie/gately/internal/logbuf"
 )
 
@@ -372,10 +373,11 @@ func applyHeaders(h http.Header, list []string) {
 
 // allowedIP 按访问控制模式判断客户端是否允许访问。
 // 命中的路径规则设置了 IP 模式时，以规则的名单为准。
+// 引用的订阅 IP 列表尚未下载成功时视为空列表：白名单因此拒绝访问，黑名单不额外拦截。
 func (h *siteHandler) allowedIP(a netip.Addr, rule *compiledRule) bool {
-	mode, list := h.site.IPMode, h.ipList
+	mode, list, sets := h.site.IPMode, h.ipList, h.site.IPSets
 	if rule != nil && rule.ipMode != IPModeOff {
-		mode, list = rule.ipMode, rule.ipList
+		mode, list, sets = rule.ipMode, rule.ipList, rule.ipSets
 	}
 	if mode == IPModeOff {
 		return true
@@ -385,6 +387,14 @@ func (h *siteHandler) allowedIP(a netip.Addr, rule *compiledRule) bool {
 		if p.Contains(a) {
 			in = true
 			break
+		}
+	}
+	for _, key := range sets {
+		if in {
+			break
+		}
+		if set, ok := iplist.Default.Get(key); ok {
+			in = set.Contains(a)
 		}
 	}
 	if mode == IPModeWhitelist {
