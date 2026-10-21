@@ -16,6 +16,10 @@
 
 支援。每個版本附帶飛牛離線安裝包（`.fpk`），在應用中心手動安裝。它接入飛牛統一閘道，點擊桌面圖示即可開啟，遠端存取飛牛的網域同樣可用；在「設定 → 存取控制」開啟「飛牛登入狀態自動登入」後，已登入的飛牛管理員可直接進入，無需再輸入密碼與兩步驟驗證碼。詳見 [飛牛 fnOS 原生應用](/zh-TW/docs/guide/install#fnos)。
 
+## 支援 OpenWrt / iStoreOS 嗎？
+
+支援。每個版本附帶 OpenWrt 安裝套件：OpenWrt 24.10 及以前（含 iStoreOS）用 `.ipk`，執行 `opkg install` 安裝；OpenWrt 25.12 起用 `.apk`，執行 `apk add --allow-untrusted` 安裝。安裝後自動啟動，設定儲存在 `/etc/gately`，升級時安裝新版安裝套件即可。程式約 35 MB，適合儲存空間較大的軟路由。詳見 [OpenWrt](/zh-TW/docs/guide/install#openwrt)。
+
 ## 為什麼建議使用 `--network host`？
 
 連接埠轉發、STUN、Web 服務需要直接監聽主機的連接埠。使用橋接網路時，需要自行對應每一個用到的連接埠。

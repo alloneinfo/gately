@@ -276,7 +276,7 @@
       },
       {
         "q": "適合在哪些裝置上執行？",
-        "a": "家用 NAS、軟路由、雲端主機與各類伺服器都可以，提供 Linux（amd64 / arm64 / arm / mips / mipsle / riscv64）、macOS、Windows、FreeBSD 執行檔，amd64 / arm64 / arm/v7 的 Docker 映像檔，以及飛牛 fnOS 原生應用安裝包。"
+        "a": "家用 NAS、軟路由、雲端主機與各類伺服器都可以，提供 Linux（amd64 / arm64 / arm / mips / mipsle / riscv64）、macOS、Windows、FreeBSD 執行檔，amd64 / arm64 / arm/v7 的 Docker 映像檔、飛牛 fnOS 原生應用安裝包，以及 OpenWrt 安裝包（.ipk / .apk）。"
       },
       {
         "q": "支援飛牛 fnOS 嗎？",

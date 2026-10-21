@@ -276,7 +276,7 @@
       },
       {
         "q": "¿En qué dispositivos funciona?",
-        "a": "En NAS domésticos, routers software, servidores en la nube y servidores de todo tipo. Hay binarios para Linux (amd64 / arm64 / arm / mips / mipsle / riscv64), macOS, Windows y FreeBSD, además de imágenes Docker para amd64 / arm64 / arm/v7 y un paquete de aplicación nativa para fnOS."
+        "a": "En NAS domésticos, routers software, servidores en la nube y servidores de todo tipo. Hay binarios para Linux (amd64 / arm64 / arm / mips / mipsle / riscv64), macOS, Windows y FreeBSD, además de imágenes Docker para amd64 / arm64 / arm/v7, un paquete de aplicación nativa para fnOS y paquetes para OpenWrt (.ipk / .apk)."
       },
       {
         "q": "¿Es compatible con fnOS?",

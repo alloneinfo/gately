@@ -124,6 +124,14 @@ docker logs gately 2>&1 | grep -i "initial password"
 - 16680 端口与 Docker 镜像相同，启动原生应用前请先停止 `gately` 容器。
 - 下载后可按[校验发布产物](docs/VERIFY.md)校验，`.fpk` 的 SHA-256 同样列在 `checksums.txt`。
 
+### OpenWrt
+
+每个 Release 附带 OpenWrt 安装包：`gately_<版本>_openwrt_<架构>.ipk` 用于 OpenWrt 24.10 及以前（含 iStoreOS），执行 `opkg install` 安装；`.apk` 用于 OpenWrt 25.12 起，执行 `apk add --allow-untrusted` 安装。架构有 amd64 / arm64 / arm / mipsle / mips / riscv64，按 `/etc/openwrt_release` 中的 `DISTRIB_ARCH` 选择，对照表见[安装文档](https://gately.cn/docs/guide/install#openwrt)。
+
+- 安装后自动启用开机自启并启动，管理界面为 `http://<路由器地址>:16680`，初始密码用 `logread | grep -i "initial password"` 查看。
+- 配置在 `/etc/gately`，升级、卸载与刷写固件（sysupgrade）时都会保留。升级时安装新版安装包即可，「关于」页的在线升级会提示改用包管理器。
+- 程序约 35 MB，适合 x86 软路由、ARM64 盒子等存储较大的设备；arm 安装包需要 ARMv7 且带硬件浮点。
+
 ### 监控
 
 创建一个只有 `metrics:read` 权限的 API 令牌，让 Prometheus 抓取 `/api/metrics`。指标列表、告警示例与 Grafana 面板见[监控指标](docs/MONITORING.md)。

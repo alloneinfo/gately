@@ -1,6 +1,6 @@
 ---
 title: "下載"
-description: "下載 Gately 最新版本的執行檔與飛牛 fnOS 安裝包，或使用 Docker 映像檔部署。"
+description: "下載 Gately 最新版本的執行檔、飛牛 fnOS 與 OpenWrt 安裝包，或使用 Docker 映像檔部署。"
 ---
 
 # 下載 Gately
@@ -33,6 +33,12 @@ GitHub 在部分網路環境下存取較慢，NAS 與軟路由使用者可以先
 - 支援飛牛管理員登入狀態直接登入：開啟後已登入飛牛的管理員無需再輸入 Gately 密碼與兩步驟驗證碼。
 
 詳見 [安裝部署 · 飛牛 fnOS 原生應用](/zh-TW/docs/guide/install#fnos)。
+
+## OpenWrt 安裝包 {#openwrt}
+
+OpenWrt 使用者可以在上方清單的 OpenWrt 分組中下載安裝包：OpenWrt 24.10 及更早版本（含 iStoreOS）選 `.ipk`，執行 `opkg install` 安裝；OpenWrt 25.12 起選 `.apk`，執行 `apk add --allow-untrusted` 安裝。架構依 `/etc/openwrt_release` 中的 `DISTRIB_ARCH` 選擇，安裝後自動啟動，設定儲存在 `/etc/gately`。
+
+詳見 [安裝部署 · OpenWrt](/zh-TW/docs/guide/install#openwrt)。
 
 ## 從原始碼建置
 

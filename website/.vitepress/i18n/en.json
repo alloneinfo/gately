@@ -276,7 +276,7 @@
       },
       {
         "q": "Which devices can it run on?",
-        "a": "Home NAS, soft routers, cloud hosts and servers of all kinds. Binaries are provided for Linux (amd64 / arm64 / arm / mips / mipsle / riscv64), macOS, Windows and FreeBSD, plus Docker images for amd64 / arm64 / arm/v7 and a native app package for fnOS."
+        "a": "Home NAS, soft routers, cloud hosts and servers of all kinds. Binaries are provided for Linux (amd64 / arm64 / arm / mips / mipsle / riscv64), macOS, Windows and FreeBSD, plus Docker images for amd64 / arm64 / arm/v7, a native app package for fnOS, and OpenWrt packages (.ipk / .apk)."
       },
       {
         "q": "Does it support fnOS?",

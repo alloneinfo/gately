@@ -276,7 +276,7 @@
       },
       {
         "q": "どんなデバイスで動かせますか？",
-        "a": "自宅の NAS、ソフトルーター、クラウドホスト、各種サーバーで動作します。Linux（amd64 / arm64 / arm / mips / mipsle / riscv64）、macOS、Windows、FreeBSD のバイナリと、amd64 / arm64 / arm/v7 の Docker イメージ、さらに fnOS 向けのネイティブアプリパッケージを提供しています。"
+        "a": "自宅の NAS、ソフトルーター、クラウドホスト、各種サーバーで動作します。Linux（amd64 / arm64 / arm / mips / mipsle / riscv64）、macOS、Windows、FreeBSD のバイナリと、amd64 / arm64 / arm/v7 の Docker イメージ、fnOS 向けのネイティブアプリパッケージ、さらに OpenWrt 向けパッケージ（.ipk / .apk）を提供しています。"
       },
       {
         "q": "fnOS に対応していますか？",

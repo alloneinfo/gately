@@ -31,16 +31,19 @@ import (
 
 // ---- 在线升级 ----
 //
-// 只在 Linux 二进制部署（systemd、PVE LXC、OpenWrt 等）中开放：下载与本机平台对应的发布包，
+// 只在 Linux 二进制部署（systemd、PVE LXC、手动安装的 OpenWrt 等）中开放：下载与本机平台对应的发布包，
 // 核对 checksums.txt 中的 SHA-256，试运行新二进制确认能在本机执行并读出版本号，
 // 再原地替换可执行文件并以相同参数重启。旧版本保留为同目录下的 <文件名>.old，便于手动回滚。
-// Docker 镜像与飞牛 fnOS 安装包分别由镜像更新与应用中心负责升级，不提供在线升级。
+// Docker 镜像、飞牛 fnOS 安装包与 OpenWrt 的 ipk / apk 安装包分别由镜像更新、应用中心与包管理器负责升级，
+// 不提供在线升级：原地替换会让包管理器记录的版本与实际运行的版本不一致。
 
 // 不支持在线升级的原因，前端据此显示对应的升级方式
 const (
 	upgradeReasonOS       = "os"       // 非 Linux 系统
 	upgradeReasonDocker   = "docker"   // 运行在 Docker / Podman 容器中
 	upgradeReasonFnOS     = "fnos"     // 飞牛 fnOS 安装包
+	upgradeReasonOpkg     = "opkg"     // OpenWrt 24.10 及以前的 ipk 安装包
+	upgradeReasonApk      = "apk"      // OpenWrt 25.12 起的 apk 安装包
 	upgradeReasonReadonly = "readonly" // 可执行文件所在目录不可写
 )
 
@@ -60,6 +63,10 @@ var (
 	// containerMarkers 存在任一文件即视为运行在 Docker / Podman 容器中。
 	// 这两个文件由容器运行时在创建容器时生成，PVE 用 OCI 镜像创建的 LXC 中不存在，仍可在线升级
 	containerMarkers = []string{"/.dockerenv", "/run/.containerenv"}
+	// OpenWrt 安装包把程序装到 packagedExecutable，并分别在 opkg 的包信息目录与 apk 的已安装数据库中留下记录
+	packagedExecutable = "/usr/bin/gately"
+	opkgControlFile    = "/usr/lib/opkg/info/gately.control"
+	apkInstalledDB     = "/lib/apk/db/installed"
 )
 
 // upgradeReasonText 是拒绝在线升级时返回的说明。
@@ -67,6 +74,8 @@ var upgradeReasonText = map[string]string{
 	upgradeReasonOS:       "在线升级只支持 Linux，请下载新版本后手动替换程序",
 	upgradeReasonDocker:   "运行在容器中，请拉取新镜像后重建容器",
 	upgradeReasonFnOS:     "飞牛 fnOS 安装包请在应用中心手动安装新版 .fpk",
+	upgradeReasonOpkg:     "通过 OpenWrt 安装包安装，请下载新版 .ipk 后用 opkg install 升级",
+	upgradeReasonApk:      "通过 OpenWrt 安装包安装，请下载新版 .apk 后用 apk add --allow-untrusted 升级",
 	upgradeReasonReadonly: "程序所在目录不可写，无法在线升级",
 }
 
@@ -99,10 +108,44 @@ func (a *App) upgradeSupport() upgradeSupport {
 	if a.opts.GatewaySocket != "" || os.Getenv("TRIM_APPDEST") != "" || strings.HasPrefix(exe, "/var/apps/") {
 		return upgradeSupport{Reason: upgradeReasonFnOS, Executable: exe}
 	}
+	if reason := openwrtPackageReason(exe); reason != "" {
+		return upgradeSupport{Reason: reason, Executable: exe}
+	}
 	if !dirWritable(filepath.Dir(exe)) {
 		return upgradeSupport{Reason: upgradeReasonReadonly, Executable: exe}
 	}
 	return upgradeSupport{Supported: true, Executable: exe}
+}
+
+// openwrtPackageReason 判断程序是否由 OpenWrt 的 ipk / apk 安装包安装，是则返回对应的升级原因。
+// 只认安装包的程序路径，同一台设备上另行手动部署到其他目录的程序仍可在线升级。
+func openwrtPackageReason(exe string) string {
+	if exe != packagedExecutable {
+		return ""
+	}
+	if fileExists(opkgControlFile) {
+		return upgradeReasonOpkg
+	}
+	if apkInstalled("gately") {
+		return upgradeReasonApk
+	}
+	return ""
+}
+
+// apkInstalled 在 apk 的已安装数据库中查找软件包：每个包是以空行分隔的一段，包名写在 "P:" 行。
+func apkInstalled(name string) bool {
+	f, err := os.Open(apkInstalledDB)
+	if err != nil {
+		return false
+	}
+	defer f.Close()
+	sc := bufio.NewScanner(f)
+	for sc.Scan() {
+		if sc.Text() == "P:"+name {
+			return true
+		}
+	}
+	return false
 }
 
 // dirWritable 通过创建临时文件判断目录是否可写，比检查权限位更能反映只读挂载等情况。

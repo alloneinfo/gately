@@ -16200,7 +16200,7 @@
     },
     "/api/system/update": {
       "get": {
-        "description": "GitHub へのアクセスにはグローバル設定 `updateProxy` のプロキシを使います。`selfUpgrade.supported` は現在の導入方法でオンラインアップグレードできるかを示し、できない場合 `reason` は `os`、`docker`、`fnos`、`readonly` のいずれかです。\n\n必要な権限: `status:read`。",
+        "description": "GitHub へのアクセスにはグローバル設定 `updateProxy` のプロキシを使います。`selfUpgrade.supported` は現在の導入方法でオンラインアップグレードできるかを示し、できない場合 `reason` は `os`、`docker`、`fnos`、`opkg`、`apk`、`readonly` のいずれかです。\n\n必要な権限: `status:read`。",
         "responses": {
           "200": {
             "description": "成功"

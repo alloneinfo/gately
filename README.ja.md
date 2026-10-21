@@ -124,6 +124,14 @@ docker logs gately 2>&1 | grep -i "initial password"
 - 16680 ポートは Docker イメージと共通です。ネイティブアプリを起動する前に `gately` コンテナを停止してください。
 - ダウンロードしたファイルは [リリース成果物の検証](docs/en/VERIFY.md) の手順で検証できます。`.fpk` ファイルも `checksums.txt` に記載されています。
 
+### OpenWrt
+
+各 Release には OpenWrt 向けパッケージが含まれます。`gately_<version>_openwrt_<arch>.ipk` は OpenWrt 24.10 以前（iStoreOS を含む）向けで `opkg install` で、`.apk` は OpenWrt 25.12 以降向けで `apk add --allow-untrusted` でインストールします。アーキテクチャは amd64 / arm64 / arm / mipsle / mips / riscv64 で、`/etc/openwrt_release` の `DISTRIB_ARCH` に合わせて選びます（対応表は[インストールガイド](https://gately.cn/ja/docs/guide/install#openwrt)を参照）。
+
+- インストール時に自動起動が有効になり、サービスが起動します。管理画面は `http://<ルーターのアドレス>:16680` で、初期パスワードは `logread | grep -i "initial password"` で確認できます。
+- 設定は `/etc/gately` に保存され、アップグレード、アンインストール、ファームウェアの更新（sysupgrade）でも保持されます。アップグレードは新しいパッケージをインストールするだけです。「バージョン情報」ページのオンラインアップグレードでは、パッケージマネージャーを使うよう案内されます。
+- バイナリは約 35 MB のため、x86 のソフトルーターや ARM64 ボックスなどストレージに余裕のあるデバイス向けです。arm パッケージにはハードウェア浮動小数点に対応した ARMv7 が必要です。
+
 ### 監視
 
 `metrics:read` 権限だけを持つ API トークンを作成し、Prometheus から `/api/metrics` をスクレイプします。メトリクス、アラート例、Grafana ダッシュボードは[監視](docs/en/MONITORING.md)で説明しています。

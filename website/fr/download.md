@@ -1,6 +1,6 @@
 ---
 title: "Télécharger"
-description: "Téléchargez les derniers binaires et paquets fnOS de Gately, ou déployez-le avec l'image Docker."
+description: "Téléchargez les derniers binaires et paquets fnOS et OpenWrt de Gately, ou déployez-le avec l'image Docker."
 ---
 
 # Télécharger Gately
@@ -33,6 +33,12 @@ Les utilisateurs de fnOS peuvent installer directement l'application native : t�
 - Connexion des administrateurs fnOS avec leur session fnOS : une fois l'option activée, les administrateurs déjà connectés à fnOS se passent du mot de passe Gately et du code à deux facteurs.
 
 Voir [Installation · Application native fnOS](/fr/docs/guide/install#fnos).
+
+## Paquets OpenWrt {#openwrt}
+
+Les utilisateurs d'OpenWrt peuvent télécharger un paquet dans le groupe OpenWrt de la liste ci-dessus : le `.ipk` pour OpenWrt 24.10 et antérieur (y compris iStoreOS), à installer avec `opkg install`, ou le `.apk` pour OpenWrt 25.12 et ultérieur, à installer avec `apk add --allow-untrusted`. Choisissez l'architecture selon `DISTRIB_ARCH` dans `/etc/openwrt_release`. Le service démarre dès l'installation et conserve sa configuration dans `/etc/gately`.
+
+Voir [Installation · OpenWrt](/fr/docs/guide/install#openwrt).
 
 ## Compiler depuis les sources
 

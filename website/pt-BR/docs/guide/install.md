@@ -52,9 +52,43 @@ sudo systemctl daemon-reload && sudo systemctl enable --now gately
 journalctl -u gately | grep -i "initial password"
 ```
 
-### OpenWrt
+### OpenWrt {#openwrt}
 
-Use o script de inicialização procd [deploy/openwrt/gately.init](https://github.com/wangwanjie/gately/blob/main/deploy/openwrt/gately.init):
+Cada versão inclui pacotes para OpenWrt com o binário, o script de inicialização procd e uma regra que mantém a sua configuração nas atualizações de firmware:
+
+- OpenWrt 24.10 e anteriores (incluindo o iStoreOS e outros firmwares baseados na 24.10) usam o `.ipk`, instalado com `opkg install`;
+- OpenWrt 25.12 e posteriores usam o `.apk`, instalado com `apk add --allow-untrusted` (os pacotes não têm assinatura, por isso o `--allow-untrusted` é obrigatório).
+
+Execute `grep DISTRIB_ARCH /etc/openwrt_release` para descobrir a arquitetura do dispositivo e escolha o pacote no grupo OpenWrt da [página de download](/pt-BR/download):
+
+| DISTRIB_ARCH | Pacote |
+| --- | --- |
+| `x86_64` | `gately_<versão>_openwrt_amd64` |
+| `aarch64_*` | `gately_<versão>_openwrt_arm64` |
+| `arm_cortex-a*_*` (ARMv7 com VFP / NEON) | `gately_<versão>_openwrt_arm` |
+| `mipsel_*` | `gately_<versão>_openwrt_mipsle` |
+| `mips_*` | `gately_<versão>_openwrt_mips` |
+| `riscv64_*` | `gately_<versão>_openwrt_riscv64` |
+
+```bash
+cd /tmp
+# OpenWrt 24.10 / iStoreOS (exemplo com x86_64)
+opkg install ./gately_<versão>_openwrt_amd64.ipk
+# OpenWrt 25.12
+apk add --allow-untrusted ./gately_<versão>_openwrt_amd64.apk
+
+# Senha inicial (gravada no log do sistema na primeira inicialização)
+logread | grep -i "initial password"
+```
+
+- O serviço é ativado na inicialização e iniciado logo após a instalação; a interface de administração fica em `http://<endereço do roteador>:16680`. A configuração fica em `/etc/gately` e é mantida nas atualizações de firmware (sysupgrade);
+- Atualização: baixe o pacote mais novo e execute `opkg install` ou `apk add --allow-untrusted` de novo; a sua configuração é mantida. Se você desativou o serviço na inicialização, ele continua desativado após a atualização;
+- Desinstalação: `opkg remove gately` ou `apk del gately`. O diretório de configuração é mantido; execute `rm -rf /etc/gately` para removê-lo também;
+- A arquitetura do dispositivo é verificada antes da instalação. O opkg interrompe a instalação quando a arquitetura não corresponde; o apk do OpenWrt 25.12 instala o pacote mesmo assim, mas deixa o serviço parado, então execute `apk del gately` e instale o pacote correto;
+- O binário tem cerca de 35 MB e precisa do mesmo espaço livre (confira com `df -h /overlay`), o que atende soft routers x86, boxes ARM64 e outros dispositivos com bastante armazenamento; roteadores com 16 MB / 32 MB de flash são pequenos demais;
+- O pacote arm requer ARMv7 com ponto flutuante por hardware. Dispositivos ARMv5 / ARMv6 e núcleos sem FPU, como o `arm_cortex-a9`, ainda não são compatíveis.
+
+Você também pode implantar manualmente: baixe o arquivo compactado para Linux e use o script de inicialização procd [deploy/openwrt/gately.init](https://github.com/wangwanjie/gately/blob/main/deploy/openwrt/gately.init):
 
 ```bash
 cp gately /usr/bin/gately && chmod +x /usr/bin/gately
@@ -103,7 +137,7 @@ No primeiro acesso aparece um assistente de configuração inicial que sugere, e
 
 ### Atualização online {#online-upgrade}
 
-Instalações binárias no Linux (systemd, contêineres LXC do PVE, OpenWrt etc.) podem ser atualizadas online pela página Sobre do painel: clique em "Verificar atualizações" e, havendo versão nova, em "Atualizar agora". Isso vale também para contêineres LXC criados no PVE a partir da imagem OCI, sem precisar apagá-los e recriá-los. O Gately vai:
+Instalações binárias no Linux (systemd, contêineres LXC do PVE, OpenWrt implantado manualmente etc.) podem ser atualizadas online pela página Sobre do painel: clique em "Verificar atualizações" e, havendo versão nova, em "Atualizar agora". Isso vale também para contêineres LXC criados no PVE a partir da imagem OCI, sem precisar apagá-los e recriá-los. O Gately vai:
 
 1. Baixar do GitHub o `gately_<versão>_linux_<arquitetura>.tar.gz` desta plataforma;
 2. Conferir o SHA-256 com o `checksums.txt` da mesma versão;
@@ -129,6 +163,7 @@ Se você concedeu ao binário acesso a portas baixas com `setcap`, execute `setc
 
 - Docker: execute `docker pull` da nova imagem e recrie o contêiner (mantenha o diretório de configuração montado);
 - fnOS: instale manualmente o `.fpk` mais novo pela Central de aplicativos; a sua configuração é mantida;
+- Pacotes para OpenWrt: baixe o `.ipk` / `.apk` mais novo e execute `opkg install` / `apk add --allow-untrusted`; a sua configuração é mantida (veja [OpenWrt](#openwrt));
 - Windows, macOS, FreeBSD: substitua o executável e reinicie o serviço.
 
 Antes de atualizar, exporte um backup da configuração ou mantenha o diretório de configuração no git. As assinaturas dos arquivos e imagens baixados podem ser conferidas conforme [Verificar versões](/en/docs/guide/verify).

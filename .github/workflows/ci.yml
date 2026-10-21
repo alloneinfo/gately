@@ -33,8 +33,12 @@ jobs:
       - name: 交叉编译
         run: |
           for target in linux/amd64 linux/arm64 linux/arm linux/mipsle linux/mips linux/riscv64 windows/amd64 darwin/arm64 freebsd/amd64; do
-            GOOS=${target%/*} GOARCH=${target#*/} CGO_ENABLED=0 go build -o /dev/null ./cmd/gately
+            GOOS=${target%/*} GOARCH=${target#*/} GOMIPS=softfloat CGO_ENABLED=0 go build -o /dev/null ./cmd/gately
           done
+      - name: OpenWrt 安装包冒烟测试（opkg / apk）
+        run: |
+          GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o "$RUNNER_TEMP/gately" ./cmd/gately
+          deploy/openwrt/smoke-test.sh "$RUNNER_TEMP/gately"
       - name: ACME 端到端测试（Pebble）
         run: |
           GOBIN=$RUNNER_TEMP/bin go install github.com/letsencrypt/pebble/v2/cmd/pebble@v2.10.1 github.com/letsencrypt/pebble/v2/cmd/pebble-challtestsrv@v2.10.1

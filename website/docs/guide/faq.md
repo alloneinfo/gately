@@ -16,6 +16,10 @@
 
 支持。每个版本附带飞牛离线安装包（`.fpk`），在应用中心手动安装。它接入飞牛统一网关，点击桌面图标即可打开，远程访问飞牛的域名同样可用；在「设置 → 访问控制」开启「飞牛登录态自动登录」后，已登录的飞牛管理员可直接进入，无需再输入密码与两步验证码。详见 [飞牛 fnOS 原生应用](/docs/guide/install#fnos)。
 
+## 支持 OpenWrt / iStoreOS 吗？
+
+支持。每个版本附带 OpenWrt 安装包：OpenWrt 24.10 及以前（含 iStoreOS）用 `.ipk`，执行 `opkg install` 安装；OpenWrt 25.12 起用 `.apk`，执行 `apk add --allow-untrusted` 安装。安装后自动启动，配置保存在 `/etc/gately`，升级时安装新版安装包即可。程序约 35 MB，适合存储较大的软路由。详见 [OpenWrt](/docs/guide/install#openwrt)。
+
 ## 为什么推荐 `--network host`？
 
 端口转发、STUN、Web 服务需要直接监听宿主机端口。使用桥接网络时，需要自行映射每一个用到的端口。

@@ -23,6 +23,8 @@
       "os": "在线升级只支持 Linux，请下载新版本后手动替换程序。",
       "docker": "运行在容器中，请拉取新镜像后重建容器（配置目录保持挂载即可）。",
       "fnos": "飞牛 fnOS 安装包请在应用中心手动安装新版 .fpk，配置会自动保留。",
+      "opkg": "通过 OpenWrt 的 ipk 安装包安装，请下载新版 .ipk 后执行 opkg install 升级，配置会自动保留。",
+      "apk": "通过 OpenWrt 的 apk 安装包安装，请下载新版 .apk 后执行 apk add --allow-untrusted 升级，配置会自动保留。",
       "readonly": "程序所在目录不可写，无法在线升级，请手动替换程序。"
     },
     "found": "发现新版本",

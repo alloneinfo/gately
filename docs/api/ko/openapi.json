@@ -16200,7 +16200,7 @@
     },
     "/api/system/update": {
       "get": {
-        "description": "GitHub 접속 시 전역 설정 `updateProxy`의 프록시를 사용합니다. `selfUpgrade.supported`는 현재 설치 방식에서 온라인 업그레이드가 가능한지 나타내며, 불가능하면 `reason`은 `os`, `docker`, `fnos`, `readonly` 중 하나입니다.\n\n필요한 권한: `status:read`.",
+        "description": "GitHub 접속 시 전역 설정 `updateProxy`의 프록시를 사용합니다. `selfUpgrade.supported`는 현재 설치 방식에서 온라인 업그레이드가 가능한지 나타내며, 불가능하면 `reason`은 `os`, `docker`, `fnos`, `opkg`, `apk`, `readonly` 중 하나입니다.\n\n필요한 권한: `status:read`.",
         "responses": {
           "200": {
             "description": "성공"

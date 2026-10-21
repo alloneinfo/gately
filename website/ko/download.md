@@ -1,6 +1,6 @@
 ---
 title: "다운로드"
-description: "Gately 최신 바이너리와 fnOS 패키지를 내려받거나 Docker 이미지로 배포하세요."
+description: "Gately 최신 바이너리와 fnOS 및 OpenWrt 패키지를 내려받거나 Docker 이미지로 배포하세요."
 ---
 
 # Gately 다운로드
@@ -33,6 +33,12 @@ fnOS 사용자는 네이티브 앱을 바로 설치할 수 있습니다. 위 목
 - fnOS 로그인 상태로 관리자 자동 로그인: 켜 두면 fnOS에 이미 로그인한 관리자는 Gately 비밀번호와 2단계 인증 코드를 건너뜁니다.
 
 자세한 내용은 [설치 및 배포 · fnOS 네이티브 앱](/ko/docs/guide/install#fnos)을 참고하세요.
+
+## OpenWrt 패키지 {#openwrt}
+
+OpenWrt 사용자는 위 목록의 OpenWrt 그룹에서 패키지를 내려받을 수 있습니다. OpenWrt 24.10 이하(iStoreOS 포함)는 `.ipk`를 골라 `opkg install`로, OpenWrt 25.12 이상은 `.apk`를 골라 `apk add --allow-untrusted`로 설치합니다. 아키텍처는 `/etc/openwrt_release`의 `DISTRIB_ARCH`에 따라 고르세요. 설치하면 서비스가 바로 시작되며 설정은 `/etc/gately`에 저장됩니다.
+
+자세한 내용은 [설치 및 배포 · OpenWrt](/ko/docs/guide/install#openwrt)를 참고하세요.
 
 ## 소스에서 빌드
 

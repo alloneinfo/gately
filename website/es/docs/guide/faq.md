@@ -16,6 +16,10 @@ Detén Gately, elimina `account.json` del directorio de configuración y vuelve 
 
 Sí. Cada versión incluye paquetes sin conexión para fnOS (`.fpk`) que se instalan manualmente desde el Centro de aplicaciones. Gately se integra en la pasarela unificada de fnOS, de modo que se abre desde el icono del escritorio y también funciona a través de tu dominio remoto de fnOS. Activa «Iniciar sesión con fnOS» en «Ajustes → Control de acceso» y los administradores de fnOS con la sesión iniciada entran directamente, sin contraseña ni código de verificación en dos pasos. Consulta [Aplicación nativa para fnOS](/es/docs/guide/install#fnos).
 
+## ¿Es compatible con OpenWrt / iStoreOS?
+
+Sí. Cada versión incluye paquetes para OpenWrt: el `.ipk` para OpenWrt 24.10 y anteriores (incluido iStoreOS), que se instala con `opkg install`, y el `.apk` para OpenWrt 25.12 y posteriores, que se instala con `apk add --allow-untrusted`. El servicio arranca justo después de la instalación y guarda su configuración en `/etc/gately`; para actualizar, instala el paquete nuevo. El binario ocupa unos 35 MB, así que conviene un router software con almacenamiento de sobra. Consulta [OpenWrt](/es/docs/guide/install#openwrt).
+
 ## ¿Por qué se recomienda `--network host`?
 
 El reenvío de puertos, STUN y los servicios web escuchan directamente en puertos del host. Con una red bridge tienes que publicar tú mismo cada puerto en uso.

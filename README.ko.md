@@ -124,6 +124,14 @@ docker logs gately 2>&1 | grep -i "initial password"
 - 16680 포트는 Docker 이미지와 같습니다. 네이티브 앱을 시작하기 전에 `gately` 컨테이너를 중지하세요.
 - 내려받은 파일은 [릴리스 산출물 검증](docs/en/VERIFY.md)에 따라 검증하세요. `.fpk` 파일도 `checksums.txt`에 포함되어 있습니다.
 
+### OpenWrt
+
+각 Release에는 OpenWrt 패키지가 포함됩니다. `gately_<version>_openwrt_<arch>.ipk`는 OpenWrt 24.10 이하(iStoreOS 포함)용으로 `opkg install`로 설치하고, `.apk`는 OpenWrt 25.12 이상용으로 `apk add --allow-untrusted`로 설치합니다. 아키텍처는 amd64 / arm64 / arm / mipsle / mips / riscv64를 제공하며 `/etc/openwrt_release`의 `DISTRIB_ARCH`에 따라 고릅니다([설치 문서](https://gately.cn/ko/docs/guide/install#openwrt)의 표 참고).
+
+- 설치하면 부팅 시 자동 시작이 활성화되고 서비스가 시작됩니다. 관리 UI는 `http://<라우터 주소>:16680`이며 초기 비밀번호는 `logread | grep -i "initial password"`로 확인합니다.
+- 설정은 `/etc/gately`에 저장되며 업그레이드, 제거, 펌웨어 업그레이드(sysupgrade) 시에도 유지됩니다. 업그레이드하려면 새 버전 패키지를 설치하면 됩니다. 정보 페이지의 온라인 업그레이드는 패키지 관리자를 사용하도록 안내합니다.
+- 바이너리는 약 35 MB이므로 x86 소프트 라우터, ARM64 박스 등 저장 공간이 넉넉한 장치에 적합합니다. arm 패키지는 하드웨어 부동소수점을 지원하는 ARMv7이 필요합니다.
+
 ### 모니터링
 
 `metrics:read` 권한만 있는 API 토큰을 만들고 Prometheus가 `/api/metrics`를 수집하도록 설정하세요. 메트릭, 알림 예시, Grafana 대시보드는 [모니터링](docs/en/MONITORING.md)에서 설명합니다.

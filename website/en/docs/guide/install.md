@@ -52,9 +52,43 @@ sudo systemctl daemon-reload && sudo systemctl enable --now gately
 journalctl -u gately | grep -i "initial password"
 ```
 
-### OpenWrt
+### OpenWrt {#openwrt}
 
-Use the procd init script [deploy/openwrt/gately.init](https://github.com/wangwanjie/gately/blob/main/deploy/openwrt/gately.init):
+Every release ships OpenWrt packages that contain the binary, the procd init script and a rule that keeps your config across firmware upgrades:
+
+- OpenWrt 24.10 and earlier (including iStoreOS and other 24.10-based firmware) use the `.ipk`, installed with `opkg install`;
+- OpenWrt 25.12 and later use the `.apk`, installed with `apk add --allow-untrusted` (the packages are unsigned, so `--allow-untrusted` is required).
+
+Run `grep DISTRIB_ARCH /etc/openwrt_release` to find the device architecture, then pick the package from the OpenWrt group on the [download page](/en/download):
+
+| DISTRIB_ARCH | Package |
+| --- | --- |
+| `x86_64` | `gately_<version>_openwrt_amd64` |
+| `aarch64_*` | `gately_<version>_openwrt_arm64` |
+| `arm_cortex-a*_*` (ARMv7 with VFP / NEON) | `gately_<version>_openwrt_arm` |
+| `mipsel_*` | `gately_<version>_openwrt_mipsle` |
+| `mips_*` | `gately_<version>_openwrt_mips` |
+| `riscv64_*` | `gately_<version>_openwrt_riscv64` |
+
+```bash
+cd /tmp
+# OpenWrt 24.10 / iStoreOS (x86_64 shown)
+opkg install ./gately_<version>_openwrt_amd64.ipk
+# OpenWrt 25.12
+apk add --allow-untrusted ./gately_<version>_openwrt_amd64.apk
+
+# Initial password (written to the system log on the first start)
+logread | grep -i "initial password"
+```
+
+- The service is enabled at boot and started right after install; the admin UI is at `http://<router address>:16680`. Config lives in `/etc/gately` and is kept across firmware upgrades (sysupgrade);
+- Upgrade: download the newer package and run `opkg install` or `apk add --allow-untrusted` again; your config is kept. If you disabled the service at boot, it stays disabled after the upgrade;
+- Uninstall: `opkg remove gately` or `apk del gately`. The config directory is kept; run `rm -rf /etc/gately` to remove it as well;
+- The device architecture is checked before install. opkg aborts when the architecture does not match; the apk in OpenWrt 25.12 still installs the package but leaves the service stopped, so run `apk del gately` and install the right package;
+- The binary is about 35 MB and needs the same amount of free space (check with `df -h /overlay`), which suits x86 soft routers, ARM64 boxes and other devices with ample storage; routers with 16 MB / 32 MB of flash are too small;
+- The arm package needs ARMv7 with hardware floating point. ARMv5 / ARMv6 devices and FPU-less cores such as `arm_cortex-a9` are not supported yet.
+
+You can also deploy manually: download the Linux archive and use the procd init script [deploy/openwrt/gately.init](https://github.com/wangwanjie/gately/blob/main/deploy/openwrt/gately.init):
 
 ```bash
 cp gately /usr/bin/gately && chmod +x /usr/bin/gately
@@ -103,7 +137,7 @@ The first sign-in shows an onboarding guide that walks you through changing the 
 
 ### Online upgrade {#online-upgrade}
 
-Linux binary installs (systemd, PVE LXC containers, OpenWrt and so on) can upgrade online from the About page of the admin UI: click "Check for Updates", then "Upgrade now" when a new version is found. This also works for LXC containers created in PVE from the OCI image, so there is no need to delete and recreate them. Gately will:
+Linux binary installs (systemd, PVE LXC containers, manual OpenWrt installs and so on) can upgrade online from the About page of the admin UI: click "Check for Updates", then "Upgrade now" when a new version is found. This also works for LXC containers created in PVE from the OCI image, so there is no need to delete and recreate them. Gately will:
 
 1. Download `gately_<version>_linux_<arch>.tar.gz` for this platform from GitHub;
 2. Verify its SHA-256 against the `checksums.txt` of the same release;
@@ -129,6 +163,7 @@ If you granted low-port access to the binary with `setcap`, run `setcap` again a
 
 - Docker: `docker pull` the new image and recreate the container (keep the config directory mounted);
 - fnOS: manually install the newer `.fpk` from the App Center; your config is kept;
+- OpenWrt packages: download the newer `.ipk` / `.apk` and run `opkg install` / `apk add --allow-untrusted`; your config is kept (see [OpenWrt](#openwrt));
 - Windows, macOS, FreeBSD: replace the executable and restart the service.
 
 Before upgrading, export a configuration backup or keep the config directory in git. Downloaded archives and images can be checked against their signatures as described in [Verifying Releases](/en/docs/guide/verify).

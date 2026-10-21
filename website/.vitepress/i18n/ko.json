@@ -276,7 +276,7 @@
       },
       {
         "q": "어떤 장치에서 실행할 수 있나요?",
-        "a": "가정용 NAS, 소프트 라우터, 클라우드 호스트 등 모든 서버에서 실행됩니다. Linux(amd64 / arm64 / arm / mips / mipsle / riscv64), macOS, Windows, FreeBSD용 바이너리와 amd64 / arm64 / arm/v7 Docker 이미지, 그리고 fnOS용 네이티브 앱 패키지를 제공합니다."
+        "a": "가정용 NAS, 소프트 라우터, 클라우드 호스트 등 모든 서버에서 실행됩니다. Linux(amd64 / arm64 / arm / mips / mipsle / riscv64), macOS, Windows, FreeBSD용 바이너리와 amd64 / arm64 / arm/v7 Docker 이미지, fnOS용 네이티브 앱 패키지, OpenWrt 패키지(.ipk / .apk)를 제공합니다."
       },
       {
         "q": "fnOS를 지원하나요?",

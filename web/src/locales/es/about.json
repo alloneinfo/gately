@@ -23,6 +23,8 @@
       "os": "La actualización en línea solo funciona en Linux. Descarga la nueva versión y reemplaza el binario manualmente.",
       "docker": "Se ejecuta en un contenedor. Descarga la nueva imagen y vuelve a crear el contenedor (mantén montado el directorio de configuración).",
       "fnos": "Para el paquete de fnOS, instala manualmente el nuevo .fpk en el Centro de aplicaciones; la configuración se conserva.",
+      "opkg": "Instalado con el paquete .ipk de OpenWrt. Descarga el nuevo .ipk y actualiza con opkg install; la configuración se conserva.",
+      "apk": "Instalado con el paquete .apk de OpenWrt. Descarga el nuevo .apk y actualiza con apk add --allow-untrusted; la configuración se conserva.",
       "readonly": "El directorio del ejecutable no tiene permiso de escritura, así que no se puede actualizar en línea. Reemplaza el binario manualmente."
     },
     "found": "Nueva versión disponible",

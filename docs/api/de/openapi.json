@@ -16200,7 +16200,7 @@
     },
     "/api/system/update": {
       "get": {
-        "description": "Verwendet für den Zugriff auf GitHub den Proxy aus der globalen Einstellung `updateProxy`. `selfUpgrade.supported` gibt an, ob diese Installation online aktualisiert werden kann; andernfalls ist `reason` `os`, `docker`, `fnos` oder `readonly`.\n\nErforderliche Berechtigung: `status:read`.",
+        "description": "Verwendet für den Zugriff auf GitHub den Proxy aus der globalen Einstellung `updateProxy`. `selfUpgrade.supported` gibt an, ob diese Installation online aktualisiert werden kann; andernfalls ist `reason` `os`, `docker`, `fnos`, `opkg`, `apk` oder `readonly`.\n\nErforderliche Berechtigung: `status:read`.",
         "responses": {
           "200": {
             "description": "Erfolgreich"

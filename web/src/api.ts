@@ -213,10 +213,10 @@ export interface SystemInfo {
   selfUpgrade: SelfUpgrade
 }
 
-// SelfUpgrade 表示当前部署方式能否在线升级；不能时 reason 为 os / docker / fnos / readonly。
+// SelfUpgrade 表示当前部署方式能否在线升级；不能时 reason 为 os / docker / fnos / opkg / apk / readonly。
 export interface SelfUpgrade {
   supported: boolean
-  reason?: 'os' | 'docker' | 'fnos' | 'readonly'
+  reason?: 'os' | 'docker' | 'fnos' | 'opkg' | 'apk' | 'readonly'
   // 将被替换的可执行文件路径
   executable?: string
 }

@@ -52,9 +52,43 @@ sudo systemctl daemon-reload && sudo systemctl enable --now gately
 journalctl -u gately | grep -i "initial password"
 ```
 
-### OpenWrt
+### OpenWrt {#openwrt}
 
-使用 procd 启动脚本 [deploy/openwrt/gately.init](https://github.com/wangwanjie/gately/blob/main/deploy/openwrt/gately.init)：
+每个版本附带 OpenWrt 安装包，包含程序、procd 启动脚本和刷写固件时保留配置的规则：
+
+- OpenWrt 24.10 及以前（含 iStoreOS 等基于 24.10 的固件）使用 `.ipk`，执行 `opkg install` 安装；
+- OpenWrt 25.12 起使用 `.apk`，执行 `apk add --allow-untrusted` 安装（安装包没有签名，需要加 `--allow-untrusted`）。
+
+先执行 `grep DISTRIB_ARCH /etc/openwrt_release` 查看设备架构，再按下表在 [下载页](/download) 的 OpenWrt 分组中选择安装包：
+
+| DISTRIB_ARCH | 安装包 |
+| --- | --- |
+| `x86_64` | `gately_<版本>_openwrt_amd64` |
+| `aarch64_*` | `gately_<版本>_openwrt_arm64` |
+| `arm_cortex-a*_*`（ARMv7，带 VFP / NEON） | `gately_<版本>_openwrt_arm` |
+| `mipsel_*` | `gately_<版本>_openwrt_mipsle` |
+| `mips_*` | `gately_<版本>_openwrt_mips` |
+| `riscv64_*` | `gately_<版本>_openwrt_riscv64` |
+
+```bash
+cd /tmp
+# OpenWrt 24.10 / iStoreOS（以 x86_64 为例）
+opkg install ./gately_<版本>_openwrt_amd64.ipk
+# OpenWrt 25.12
+apk add --allow-untrusted ./gately_<版本>_openwrt_amd64.apk
+
+# 初始密码（首次启动时写入系统日志）
+logread | grep -i "initial password"
+```
+
+- 安装后自动启用开机自启并启动，管理界面为 `http://<路由器地址>:16680`。配置目录 `/etc/gately`，刷写固件（sysupgrade）时自动保留；
+- 升级：下载新版安装包，同样执行 `opkg install` 或 `apk add --allow-untrusted`，配置保留。停用了开机自启的，升级后保持停用；
+- 卸载：`opkg remove gately` 或 `apk del gately`。配置目录会保留，彻底删除再执行 `rm -rf /etc/gately`；
+- 安装前会核对设备架构。装错架构时 opkg 会中止安装；OpenWrt 25.12 的 apk 仍会装上但不启动服务，执行 `apk del gately` 后换用正确的安装包；
+- 程序约 35 MB，安装需要同等大小的可用空间（`df -h /overlay` 查看），适合 x86 软路由、ARM64 盒子等存储较大的设备，16 MB / 32 MB 闪存的路由器装不下；
+- arm 安装包需要 ARMv7 且带硬件浮点，ARMv5 / ARMv6 以及 `arm_cortex-a9` 这类没有浮点单元的设备暂不支持。
+
+也可以手动部署：下载 Linux 压缩包，配合 procd 启动脚本 [deploy/openwrt/gately.init](https://github.com/wangwanjie/gately/blob/main/deploy/openwrt/gately.init)：
 
 ```bash
 cp gately /usr/bin/gately && chmod +x /usr/bin/gately
@@ -103,7 +137,7 @@ cp gately.init /etc/init.d/gately && chmod +x /etc/init.d/gately
 
 ### 在线升级 {#online-upgrade}
 
-Linux 二进制部署（systemd、PVE LXC 容器、OpenWrt 等）可以在管理界面的「关于」页在线升级：点击「检查更新」，发现新版本后点击「立即升级」。在 PVE 中用 OCI 镜像创建的 LXC 容器同样适用，无需删除重建。Gately 会依次：
+Linux 二进制部署（systemd、PVE LXC 容器、手动部署的 OpenWrt 等）可以在管理界面的「关于」页在线升级：点击「检查更新」，发现新版本后点击「立即升级」。在 PVE 中用 OCI 镜像创建的 LXC 容器同样适用，无需删除重建。Gately 会依次：
 
 1. 从 GitHub 下载与本机平台对应的 `gately_<版本>_linux_<架构>.tar.gz`；
 2. 对照同一版本的 `checksums.txt` 校验 SHA-256；
@@ -129,6 +163,7 @@ systemctl restart gately
 
 - Docker：`docker pull` 新镜像后重建容器（配置目录保持挂载即可）；
 - 飞牛 fnOS：在应用中心手动安装新版 `.fpk`，配置自动保留；
+- OpenWrt 安装包：下载新版 `.ipk` / `.apk` 后执行 `opkg install` / `apk add --allow-untrusted`，配置自动保留（见 [OpenWrt](#openwrt)）；
 - Windows、macOS、FreeBSD：替换可执行文件并重启服务。
 
 升级前建议导出一份配置备份，或直接把配置目录纳入 git。下载的压缩包与镜像可按 [校验发布产物](/docs/guide/verify) 核对签名。

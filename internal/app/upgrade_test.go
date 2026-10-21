@@ -103,12 +103,22 @@ func setupUpgrade(t *testing.T) string {
 		t.Fatal(err)
 	}
 	oldGOOS, oldExe, oldMarkers, oldVer, oldAPI := upgradeGOOS, upgradeExecutable, containerMarkers, version.Version, releaseAPI
+	oldPkgExe, oldOpkg, oldApk := packagedExecutable, opkgControlFile, apkInstalledDB
 	upgradeGOOS = "linux"
 	upgradeExecutable = func() (string, error) { return exe, nil }
 	containerMarkers = nil
 	version.Version = "v0.1.0"
+	// 默认视为手动部署：安装包记录指向不存在的文件
+	// upgradeSupport 比较的是解析符号链接后的路径（macOS 的临时目录位于 /private 下）
+	packagedExecutable = exe
+	if real, err := filepath.EvalSymlinks(exe); err == nil {
+		packagedExecutable = real
+	}
+	opkgControlFile = filepath.Join(dir, "opkg", "gately.control")
+	apkInstalledDB = filepath.Join(dir, "apk", "installed")
 	t.Cleanup(func() {
 		upgradeGOOS, upgradeExecutable, containerMarkers, version.Version, releaseAPI = oldGOOS, oldExe, oldMarkers, oldVer, oldAPI
+		packagedExecutable, opkgControlFile, apkInstalledDB = oldPkgExe, oldOpkg, oldApk
 	})
 	return exe
 }
@@ -280,6 +290,59 @@ func TestUpgradeUnsupported(t *testing.T) {
 	code, body := doJSON(t, c, "GET", srv.URL+"/api/system/info", nil)
 	if code != 200 || !bytes.Contains(body, []byte(`"reason":"docker"`)) {
 		t.Fatalf("容器中应提示不支持在线升级: %d %s", code, body)
+	}
+}
+
+// OpenWrt 的 ipk / apk 安装包应提示用包管理器升级，并拒绝在线升级与上传升级
+func TestUpgradeOpenWrtPackage(t *testing.T) {
+	setupUpgrade(t)
+	_, srv, c := loginApp(t)
+	reason := func() string {
+		t.Helper()
+		code, body := doJSON(t, c, "GET", srv.URL+"/api/system/info", nil)
+		if code != 200 {
+			t.Fatalf("读取系统信息失败: %d %s", code, body)
+		}
+		var info struct {
+			SelfUpgrade upgradeSupport `json:"selfUpgrade"`
+		}
+		if err := json.Unmarshal(body, &info); err != nil {
+			t.Fatal(err)
+		}
+		return info.SelfUpgrade.Reason
+	}
+	if r := reason(); r != "" {
+		t.Fatalf("手动部署应支持在线升级，实际原因 %q", r)
+	}
+
+	// apk 数据库中有其他包、没有 gately 时仍按手动部署处理
+	_ = os.MkdirAll(filepath.Dir(apkInstalledDB), 0o755)
+	_ = os.WriteFile(apkInstalledDB, []byte("P:busybox\nV:1.37.0-r1\n\nP:gately-extra\nV:1\n"), 0o644)
+	if r := reason(); r != "" {
+		t.Fatalf("未安装 gately 包时不应拒绝在线升级，实际原因 %q", r)
+	}
+	_ = os.WriteFile(apkInstalledDB, []byte("P:busybox\nV:1.37.0-r1\n\nP:gately\nV:0.5.4-r1\nA:noarch\n"), 0o644)
+	if r := reason(); r != upgradeReasonApk {
+		t.Fatalf("apk 安装应提示用 apk 升级，实际 %q", r)
+	}
+	if code, _ := doJSON(t, c, "POST", srv.URL+"/api/system/upgrade", nil); code != http.StatusConflict {
+		t.Fatalf("安装包部署应拒绝在线升级，实际 %d", code)
+	}
+	code, _ := uploadFiles(t, c, srv.URL+"/api/system/upgrade/upload", "file", map[string][]byte{"gately": []byte("x")})
+	if code != http.StatusConflict {
+		t.Fatalf("安装包部署应拒绝上传升级，实际 %d", code)
+	}
+
+	_ = os.MkdirAll(filepath.Dir(opkgControlFile), 0o755)
+	_ = os.WriteFile(opkgControlFile, []byte("Package: gately\n"), 0o644)
+	if r := reason(); r != upgradeReasonOpkg {
+		t.Fatalf("opkg 安装应提示用 opkg 升级，实际 %q", r)
+	}
+
+	// 程序不在安装包路径时（另行手动部署的副本）仍可在线升级
+	packagedExecutable += ".pkg"
+	if r := reason(); r != "" {
+		t.Fatalf("手动部署的副本应支持在线升级，实际原因 %q", r)
 	}
 }
 

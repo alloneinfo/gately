@@ -38,10 +38,11 @@ jobs:
             os=${target%/*}; arch=${target#*/}
             out=gately_${GITHUB_REF_NAME}_${os}_${arch}
             ext=""; [ "$os" = windows ] && ext=".exe"
-            GOOS=$os GOARCH=$arch CGO_ENABLED=0 go build -trimpath -ldflags "$LDFLAGS" -o dist/gately$ext ./cmd/gately
-            # 飞牛 fpk 需要裸二进制，先留一份
-            if [ "$os" = linux ] && { [ "$arch" = amd64 ] || [ "$arch" = arm64 ]; }; then
-              mkdir -p "$RUNNER_TEMP/fpk-bin/$arch" && cp dist/gately "$RUNNER_TEMP/fpk-bin/$arch/gately"
+            # mips 路由器大多没有硬件浮点，使用软浮点以免运行时报非法指令
+            GOOS=$os GOARCH=$arch GOMIPS=softfloat CGO_ENABLED=0 go build -trimpath -ldflags "$LDFLAGS" -o dist/gately$ext ./cmd/gately
+            # 飞牛 fpk 与 OpenWrt 安装包需要裸二进制，先留一份
+            if [ "$os" = linux ]; then
+              mkdir -p "$RUNNER_TEMP/linux-bin/$arch" && cp dist/gately "$RUNNER_TEMP/linux-bin/$arch/gately"
             fi
             (cd dist && tar czf $out.tar.gz gately$ext LICENSE README.md && rm gately$ext)
           done
@@ -52,10 +53,17 @@ jobs:
           curl -fsSL -o fnpack https://static2.fnnas.com/fnpack/fnpack-1.2.3-linux-amd64
           echo "54b97fa7b70968c4d05c79840f5daeff508957d0bb2062fdb0376d00d9615c93  fnpack" | sha256sum -c -
           sudo install -m 0755 fnpack /usr/local/bin/fnpack
-          deploy/fnos/build.sh "$GITHUB_REF_NAME" x86 "$RUNNER_TEMP/fpk-bin/amd64/gately" dist
-          deploy/fnos/build.sh "$GITHUB_REF_NAME" arm "$RUNNER_TEMP/fpk-bin/arm64/gately" dist
+          deploy/fnos/build.sh "$GITHUB_REF_NAME" x86 "$RUNNER_TEMP/linux-bin/amd64/gately" dist
+          deploy/fnos/build.sh "$GITHUB_REF_NAME" arm "$RUNNER_TEMP/linux-bin/arm64/gately" dist
+      - name: 打包 OpenWrt 安装包（.ipk / .apk）
+        run: |
+          # 在固定摘要的 Alpine 容器中以 root 打包，使用其自带的 apk-tools v3 生成 OpenWrt 25.12 的 apk 包
+          docker run --rm -v "$PWD:/w" -v "$RUNNER_TEMP/linux-bin:/bin-in:ro" -w /w \
+            alpine:3.24@sha256:294b683cb724975bec92580e1e685676bd4b50bda910ddb8c51d4cabeaec77e6 \
+            sh -ec 'for arch in amd64 arm64 arm mipsle mips riscv64; do deploy/openwrt/build.sh "$1" "$arch" "/bin-in/$arch/gately" dist; done' sh "$GITHUB_REF_NAME"
+          sudo chown -R "$(id -u):$(id -g)" dist
       - name: 生成校验和
-        run: cd dist && sha256sum *.tar.gz *.fpk > checksums.txt
+        run: cd dist && sha256sum *.tar.gz *.fpk *.ipk *.apk > checksums.txt
       - name: 生成 SBOM
         uses: anchore/sbom-action@v0
         with:
@@ -75,6 +83,8 @@ jobs:
           subject-path: |
             dist/*.tar.gz
             dist/*.fpk
+            dist/*.ipk
+            dist/*.apk
       - uses: softprops/action-gh-release@v2
         with:
           files: dist/*

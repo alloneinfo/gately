@@ -1,6 +1,6 @@
 ---
 title: "ダウンロード"
-description: "Gately の最新バージョンのバイナリと fnOS パッケージをダウンロードするか、Docker イメージでデプロイします。"
+description: "Gately の最新バージョンのバイナリ、fnOS パッケージ、OpenWrt パッケージをダウンロードするか、Docker イメージでデプロイします。"
 ---
 
 # Gately のダウンロード
@@ -33,6 +33,12 @@ fnOS ユーザーはネイティブアプリを直接インストールできま
 - fnOS 管理者は fnOS のログイン状態でそのままログイン：有効にすると、fnOS にログイン済みの管理者は Gately のパスワードと 2 段階認証コードを省略できます
 
 詳しくは [インストールとデプロイ · fnOS ネイティブアプリ](/ja/docs/guide/install#fnos) を参照してください。
+
+## OpenWrt パッケージ {#openwrt}
+
+OpenWrt ユーザーは、上の一覧の OpenWrt グループからパッケージをダウンロードできます。OpenWrt 24.10 以前（iStoreOS を含む）は `.ipk` を選んで `opkg install` で、OpenWrt 25.12 以降は `.apk` を選んで `apk add --allow-untrusted` でインストールします。アーキテクチャは `/etc/openwrt_release` の `DISTRIB_ARCH` に合わせて選んでください。インストール後すぐにサービスが起動し、設定は `/etc/gately` に保存されます。
+
+詳しくは [インストールとデプロイ · OpenWrt](/ja/docs/guide/install#openwrt) を参照してください。
 
 ## ソースからビルド
 

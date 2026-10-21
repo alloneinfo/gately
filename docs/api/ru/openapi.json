@@ -16200,7 +16200,7 @@
     },
     "/api/system/update": {
       "get": {
-        "description": "Для доступа к GitHub использует прокси из глобальной настройки `updateProxy`. `selfUpgrade.supported` показывает, можно ли обновить эту установку онлайн; если нет, `reason` равен `os`, `docker`, `fnos` или `readonly`.\n\nТребуемое разрешение: `status:read`.",
+        "description": "Для доступа к GitHub использует прокси из глобальной настройки `updateProxy`. `selfUpgrade.supported` показывает, можно ли обновить эту установку онлайн; если нет, `reason` равен `os`, `docker`, `fnos`, `opkg`, `apk` или `readonly`.\n\nТребуемое разрешение: `status:read`.",
         "responses": {
           "200": {
             "description": "Успешно"

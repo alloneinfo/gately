@@ -23,6 +23,8 @@
       "os": "A atualização online só funciona no Linux. Baixe a nova versão e substitua o binário manualmente.",
       "docker": "Rodando em um contêiner. Baixe a nova imagem e recrie o contêiner (mantenha o diretório de configuração montado).",
       "fnos": "Para o pacote do fnOS, instale manualmente o novo .fpk na Central de Aplicativos; a configuração é mantida.",
+      "opkg": "Instalado pelo pacote .ipk do OpenWrt. Baixe o novo .ipk e atualize com opkg install; a configuração é mantida.",
+      "apk": "Instalado pelo pacote .apk do OpenWrt. Baixe o novo .apk e atualize com apk add --allow-untrusted; a configuração é mantida.",
       "readonly": "O diretório do executável não permite gravação, então a atualização online está indisponível. Substitua o binário manualmente."
     },
     "found": "Nova versão disponível",

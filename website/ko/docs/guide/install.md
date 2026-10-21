@@ -52,9 +52,43 @@ sudo systemctl daemon-reload && sudo systemctl enable --now gately
 journalctl -u gately | grep -i "initial password"
 ```
 
-### OpenWrt
+### OpenWrt {#openwrt}
 
-procd 시작 스크립트 [deploy/openwrt/gately.init](https://github.com/wangwanjie/gately/blob/main/deploy/openwrt/gately.init)를 사용합니다.
+모든 릴리스에는 OpenWrt 패키지가 포함됩니다. 패키지에는 바이너리, procd 시작 스크립트, 펌웨어 업그레이드 시 설정을 유지하는 규칙이 들어 있습니다.
+
+- OpenWrt 24.10 이하(iStoreOS 등 24.10 기반 펌웨어 포함)는 `.ipk`를 사용하며 `opkg install`로 설치합니다.
+- OpenWrt 25.12 이상은 `.apk`를 사용하며 `apk add --allow-untrusted`로 설치합니다(패키지에 서명이 없으므로 `--allow-untrusted`가 필요합니다).
+
+`grep DISTRIB_ARCH /etc/openwrt_release`로 장치 아키텍처를 확인한 뒤, 아래 표에 따라 [다운로드 페이지](/ko/download)의 OpenWrt 그룹에서 패키지를 고릅니다.
+
+| DISTRIB_ARCH | 패키지 |
+| --- | --- |
+| `x86_64` | `gately_<version>_openwrt_amd64` |
+| `aarch64_*` | `gately_<version>_openwrt_arm64` |
+| `arm_cortex-a*_*`(ARMv7, VFP / NEON 지원) | `gately_<version>_openwrt_arm` |
+| `mipsel_*` | `gately_<version>_openwrt_mipsle` |
+| `mips_*` | `gately_<version>_openwrt_mips` |
+| `riscv64_*` | `gately_<version>_openwrt_riscv64` |
+
+```bash
+cd /tmp
+# OpenWrt 24.10 / iStoreOS (x86_64 예시)
+opkg install ./gately_<version>_openwrt_amd64.ipk
+# OpenWrt 25.12
+apk add --allow-untrusted ./gately_<version>_openwrt_amd64.apk
+
+# 초기 비밀번호 (최초 실행 시 시스템 로그에 기록됨)
+logread | grep -i "initial password"
+```
+
+- 설치하면 부팅 시 자동 시작이 활성화되고 서비스가 바로 시작됩니다. 관리 UI는 `http://<라우터 주소>:16680`입니다. 설정은 `/etc/gately`에 저장되며 펌웨어 업그레이드(sysupgrade) 시에도 유지됩니다.
+- 업그레이드: 새 버전 패키지를 내려받아 `opkg install` 또는 `apk add --allow-untrusted`를 다시 실행합니다. 설정은 유지됩니다. 부팅 시 자동 시작을 꺼 두었다면 업그레이드 후에도 꺼진 상태로 유지됩니다.
+- 제거: `opkg remove gately` 또는 `apk del gately`. 설정 디렉터리는 남으므로 완전히 지우려면 `rm -rf /etc/gately`를 실행합니다.
+- 설치 전에 장치 아키텍처를 확인합니다. 아키텍처가 맞지 않으면 opkg는 설치를 중단합니다. OpenWrt 25.12의 apk는 패키지를 설치하지만 서비스를 시작하지 않으므로 `apk del gately`로 제거한 뒤 올바른 패키지를 설치하세요.
+- 바이너리는 약 35 MB이며 설치하려면 같은 크기의 여유 공간이 필요합니다(`df -h /overlay`로 확인). x86 소프트 라우터, ARM64 박스 등 저장 공간이 넉넉한 장치에 적합하며, 플래시가 16 MB / 32 MB인 라우터에는 설치할 수 없습니다.
+- arm 패키지는 하드웨어 부동소수점을 지원하는 ARMv7이 필요합니다. ARMv5 / ARMv6 장치와 `arm_cortex-a9`처럼 FPU가 없는 코어는 아직 지원하지 않습니다.
+
+수동으로 배포할 수도 있습니다. Linux 압축 파일을 내려받아 procd 시작 스크립트 [deploy/openwrt/gately.init](https://github.com/wangwanjie/gately/blob/main/deploy/openwrt/gately.init)와 함께 사용합니다.
 
 ```bash
 cp gately /usr/bin/gately && chmod +x /usr/bin/gately
@@ -103,7 +137,7 @@ cp gately.init /etc/init.d/gately && chmod +x /etc/init.d/gately
 
 ### 온라인 업그레이드 {#online-upgrade}
 
-Linux 바이너리 설치(systemd, PVE LXC 컨테이너, OpenWrt 등)는 관리 화면의 정보 페이지에서 온라인으로 업그레이드할 수 있습니다. "업데이트 확인"을 누르고 새 버전이 있으면 "지금 업그레이드"를 누르세요. PVE에서 OCI 이미지로 만든 LXC 컨테이너도 마찬가지이므로 삭제 후 다시 만들 필요가 없습니다. Gately는 다음 순서로 진행합니다.
+Linux 바이너리 설치(systemd, PVE LXC 컨테이너, 수동으로 배포한 OpenWrt 등)는 관리 화면의 정보 페이지에서 온라인으로 업그레이드할 수 있습니다. "업데이트 확인"을 누르고 새 버전이 있으면 "지금 업그레이드"를 누르세요. PVE에서 OCI 이미지로 만든 LXC 컨테이너도 마찬가지이므로 삭제 후 다시 만들 필요가 없습니다. Gately는 다음 순서로 진행합니다.
 
 1. 이 플랫폼에 맞는 `gately_<버전>_linux_<아키텍처>.tar.gz`를 GitHub에서 내려받습니다.
 2. 같은 릴리스의 `checksums.txt`와 SHA-256을 대조합니다.
@@ -129,6 +163,7 @@ systemctl restart gately
 
 - Docker: 새 이미지를 `docker pull`한 뒤 컨테이너를 다시 만듭니다(설정 디렉터리 마운트만 유지하면 됩니다).
 - fnOS: 앱 센터에서 새 버전의 `.fpk`를 수동으로 설치합니다. 설정은 유지됩니다.
+- OpenWrt 패키지: 새 버전 `.ipk` / `.apk`를 내려받아 `opkg install` / `apk add --allow-untrusted`를 실행합니다. 설정은 유지됩니다([OpenWrt](#openwrt) 참고).
 - Windows, macOS, FreeBSD: 실행 파일을 교체하고 서비스를 재시작합니다.
 
 업그레이드 전에 설정 백업을 내보내거나 설정 디렉터리를 git으로 관리해 두는 것을 권장합니다. 내려받은 압축 파일과 이미지는 [릴리스 검증](/en/docs/guide/verify)에 따라 서명을 확인할 수 있습니다.

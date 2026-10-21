@@ -124,6 +124,14 @@ Each Release ships offline `.fpk` packages for fnOS: `gately_<version>_fnos_x86.
 - Port 16680 is shared with the Docker image. Stop the `gately` container before starting the native app.
 - Verify the download as described in [Verifying release artifacts](docs/en/VERIFY.md); `.fpk` files are listed in `checksums.txt`.
 
+### OpenWrt
+
+Each Release ships OpenWrt packages: `gately_<version>_openwrt_<arch>.ipk` for OpenWrt 24.10 and earlier (including iStoreOS), installed with `opkg install`, and `.apk` for OpenWrt 25.12 and later, installed with `apk add --allow-untrusted`. Packages cover amd64 / arm64 / arm / mipsle / mips / riscv64; pick one by `DISTRIB_ARCH` in `/etc/openwrt_release` (see the table in the [install guide](https://gately.cn/en/docs/guide/install#openwrt)).
+
+- The service is enabled and started on install; the admin UI is at `http://<router address>:16680`, and `logread | grep -i "initial password"` shows the initial password.
+- Config lives in `/etc/gately` and is kept across upgrades, uninstalls and firmware upgrades (sysupgrade). To upgrade, install the newer package; the online upgrade on the About page points you to the package manager instead.
+- The binary is about 35 MB, so the packages suit x86 soft routers, ARM64 boxes and other devices with ample storage; the arm package needs ARMv7 with hardware floating point.
+
 ### Monitoring
 
 Create an API token with only the `metrics:read` permission and point Prometheus at `/api/metrics`. Metrics, alert examples and the Grafana dashboard are described in [Monitoring](docs/en/MONITORING.md).

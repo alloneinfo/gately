@@ -23,6 +23,8 @@
       "os": "Online upgrade is only supported on Linux. Download the new version and replace the binary manually.",
       "docker": "Running in a container. Pull the new image and recreate the container (keep the config directory mounted).",
       "fnos": "For the fnOS package, install the new .fpk manually in the App Center; your configuration is kept.",
+      "opkg": "Installed from the OpenWrt .ipk package. Download the new .ipk and upgrade with opkg install; your config is kept.",
+      "apk": "Installed from the OpenWrt .apk package. Download the new .apk and upgrade with apk add --allow-untrusted; your config is kept.",
       "readonly": "The directory of the executable is not writable, so online upgrade is unavailable. Replace the binary manually."
     },
     "found": "New version available",

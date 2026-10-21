@@ -1,6 +1,6 @@
 ---
 title: "Скачать"
-description: "Скачайте актуальные бинарные файлы Gately и пакеты для fnOS или разверните его с помощью образа Docker."
+description: "Скачайте актуальные бинарные файлы Gately, пакеты для fnOS и OpenWrt или разверните его с помощью образа Docker."
 ---
 
 # Скачать Gately
@@ -33,6 +33,12 @@ docker pull ghcr.io/wangwanjie/gately:latest
 - Вход администраторов fnOS по их сеансу fnOS: после включения администраторы, уже вошедшие в fnOS, не вводят пароль Gately и код двухэтапной проверки.
 
 Подробнее — [Установка · Нативное приложение для fnOS](/ru/docs/guide/install#fnos).
+
+## Пакеты для OpenWrt {#openwrt}
+
+Пользователи OpenWrt могут скачать пакет из группы OpenWrt в списке выше: для OpenWrt 24.10 и более ранних версий (включая iStoreOS) выберите `.ipk` и установите его командой `opkg install`, для OpenWrt 25.12 и новее — `.apk` и установите его командой `apk add --allow-untrusted`. Архитектуру выбирайте по `DISTRIB_ARCH` в `/etc/openwrt_release`. Служба запускается сразу после установки и хранит конфигурацию в `/etc/gately`.
+
+Подробнее — [Установка · OpenWrt](/ru/docs/guide/install#openwrt).
 
 ## Сборка из исходного кода
 

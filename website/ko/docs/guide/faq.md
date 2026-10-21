@@ -16,6 +16,10 @@ Gately를 중지하고 설정 디렉터리의 `account.json`을 삭제한 뒤 �
 
 지원합니다. 모든 릴리스에 fnOS용 오프라인 패키지(`.fpk`)가 포함되며 앱 센터에서 수동으로 설치합니다. Gately는 fnOS 통합 게이트웨이에 연결되므로 바탕 화면 아이콘으로 열 수 있고 fnOS 원격 도메인으로도 접속할 수 있습니다. 「설정 → 접근 제어」에서 「fnOS 로그인 상태로 자동 로그인」을 켜면 로그인한 fnOS 관리자는 비밀번호나 2단계 인증 코드 없이 바로 들어갑니다. 자세한 내용은 [fnOS 네이티브 앱](/ko/docs/guide/install#fnos)을 참고하세요.
 
+## OpenWrt / iStoreOS를 지원하나요?
+
+지원합니다. 모든 릴리스에 OpenWrt 패키지가 포함됩니다. OpenWrt 24.10 이하(iStoreOS 포함)는 `.ipk`를 `opkg install`로, OpenWrt 25.12 이상은 `.apk`를 `apk add --allow-untrusted`로 설치합니다. 설치 후 바로 시작되며 설정은 `/etc/gately`에 저장되고, 업그레이드는 새 패키지를 설치하면 됩니다. 바이너리가 약 35 MB이므로 저장 공간이 넉넉한 소프트 라우터에 적합합니다. 자세한 내용은 [OpenWrt](/ko/docs/guide/install#openwrt)를 참고하세요.
+
 ## 왜 `--network host`를 권장하나요?
 
 포트 포워딩, STUN, 웹 서비스는 호스트 포트를 직접 수신해야 합니다. 브리지 네트워크를 쓰면 사용하는 포트를 모두 직접 매핑해야 합니다.

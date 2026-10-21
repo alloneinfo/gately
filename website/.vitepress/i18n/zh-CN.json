@@ -276,7 +276,7 @@
       },
       {
         "q": "适合在哪些设备上运行？",
-        "a": "家庭 NAS、软路由、云主机与各类服务器均可，提供 Linux（amd64 / arm64 / arm / mips / mipsle / riscv64）、macOS、Windows、FreeBSD 二进制，amd64 / arm64 / arm/v7 的 Docker 镜像，以及飞牛 fnOS 原生应用安装包。"
+        "a": "家庭 NAS、软路由、云主机与各类服务器均可，提供 Linux（amd64 / arm64 / arm / mips / mipsle / riscv64）、macOS、Windows、FreeBSD 二进制，amd64 / arm64 / arm/v7 的 Docker 镜像，以及飞牛 fnOS 原生应用安装包和 OpenWrt 安装包（.ipk / .apk）。"
       },
       {
         "q": "支持飞牛 fnOS 吗？",

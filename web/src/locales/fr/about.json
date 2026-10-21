@@ -23,6 +23,8 @@
       "os": "La mise à niveau en ligne ne fonctionne que sous Linux. Téléchargez la nouvelle version et remplacez le binaire manuellement.",
       "docker": "Exécution dans un conteneur. Récupérez la nouvelle image et recréez le conteneur (gardez le répertoire de configuration monté).",
       "fnos": "Pour le paquet fnOS, installez manuellement le nouveau .fpk dans le Centre d’applications ; la configuration est conservée.",
+      "opkg": "Installé via le paquet .ipk d'OpenWrt. Téléchargez le nouveau .ipk et mettez à jour avec opkg install ; la configuration est conservée.",
+      "apk": "Installé via le paquet .apk d'OpenWrt. Téléchargez le nouveau .apk et mettez à jour avec apk add --allow-untrusted ; la configuration est conservée.",
       "readonly": "Le répertoire de l’exécutable n’est pas accessible en écriture : mise à niveau en ligne impossible. Remplacez le binaire manuellement."
     },
     "found": "Nouvelle version disponible",

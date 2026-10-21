@@ -276,7 +276,7 @@
       },
       {
         "q": "Em quais dispositivos ele roda?",
-        "a": "NAS domésticos, soft routers, servidores em nuvem e servidores de todo tipo. Há binários para Linux (amd64 / arm64 / arm / mips / mipsle / riscv64), macOS, Windows e FreeBSD, além de imagens Docker para amd64 / arm64 / arm/v7 e um pacote de aplicativo nativo para o fnOS."
+        "a": "NAS domésticos, soft routers, servidores em nuvem e servidores de todo tipo. Há binários para Linux (amd64 / arm64 / arm / mips / mipsle / riscv64), macOS, Windows e FreeBSD, além de imagens Docker para amd64 / arm64 / arm/v7, um pacote de aplicativo nativo para o fnOS e pacotes para OpenWrt (.ipk / .apk)."
       },
       {
         "q": "Ele é compatível com o fnOS?",

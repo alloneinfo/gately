@@ -52,9 +52,43 @@ sudo systemctl daemon-reload && sudo systemctl enable --now gately
 journalctl -u gately | grep -i "initial password"
 ```
 
-### OpenWrt
+### OpenWrt {#openwrt}
 
-Используйте скрипт запуска procd [deploy/openwrt/gately.init](https://github.com/wangwanjie/gately/blob/main/deploy/openwrt/gately.init):
+К каждому релизу прилагаются пакеты для OpenWrt, в которых есть бинарный файл, скрипт запуска procd и правило, сохраняющее конфигурацию при обновлении прошивки:
+
+- OpenWrt 24.10 и более ранние версии (включая iStoreOS и другие прошивки на базе 24.10) используют `.ipk`, установка — командой `opkg install`;
+- OpenWrt 25.12 и новее используют `.apk`, установка — командой `apk add --allow-untrusted` (пакеты не подписаны, поэтому `--allow-untrusted` обязателен).
+
+Выполните `grep DISTRIB_ARCH /etc/openwrt_release`, чтобы узнать архитектуру устройства, и выберите пакет в группе OpenWrt на [странице загрузки](/ru/download):
+
+| DISTRIB_ARCH | Пакет |
+| --- | --- |
+| `x86_64` | `gately_<version>_openwrt_amd64` |
+| `aarch64_*` | `gately_<version>_openwrt_arm64` |
+| `arm_cortex-a*_*` (ARMv7 с VFP / NEON) | `gately_<version>_openwrt_arm` |
+| `mipsel_*` | `gately_<version>_openwrt_mipsle` |
+| `mips_*` | `gately_<version>_openwrt_mips` |
+| `riscv64_*` | `gately_<version>_openwrt_riscv64` |
+
+```bash
+cd /tmp
+# OpenWrt 24.10 / iStoreOS (пример для x86_64)
+opkg install ./gately_<version>_openwrt_amd64.ipk
+# OpenWrt 25.12
+apk add --allow-untrusted ./gately_<version>_openwrt_amd64.apk
+
+# Начальный пароль (записывается в системный журнал при первом запуске)
+logread | grep -i "initial password"
+```
+
+- служба добавляется в автозагрузку и запускается сразу после установки; интерфейс управления доступен по адресу `http://<адрес роутера>:16680`. Конфигурация хранится в `/etc/gately` и сохраняется при обновлении прошивки (sysupgrade);
+- обновление: скачайте более новый пакет и снова выполните `opkg install` или `apk add --allow-untrusted`, конфигурация сохранится. Если вы отключили автозагрузку службы, после обновления она останется отключённой;
+- удаление: `opkg remove gately` или `apk del gately`. Каталог конфигурации сохраняется; чтобы удалить и его, выполните `rm -rf /etc/gately`;
+- перед установкой проверяется архитектура устройства. При несовпадении архитектуры opkg прерывает установку; apk в OpenWrt 25.12 всё равно устанавливает пакет, но оставляет службу остановленной — выполните `apk del gately` и установите подходящий пакет;
+- бинарный файл занимает около 35 МБ, и столько же нужно свободного места (проверьте командой `df -h /overlay`), поэтому пакеты рассчитаны на программные роутеры на x86, приставки на ARM64 и другие устройства с большим объёмом памяти; роутерам с флеш-памятью 16 МБ / 32 МБ места не хватит;
+- пакету arm нужен ARMv7 с аппаратной поддержкой операций с плавающей точкой. Устройства ARMv5 / ARMv6 и ядра без FPU, например `arm_cortex-a9`, пока не поддерживаются.
+
+Можно развернуть Gately и вручную: скачайте архив для Linux и используйте скрипт запуска procd [deploy/openwrt/gately.init](https://github.com/wangwanjie/gately/blob/main/deploy/openwrt/gately.init):
 
 ```bash
 cp gately /usr/bin/gately && chmod +x /usr/bin/gately
@@ -103,7 +137,7 @@ cp gately.init /etc/init.d/gately && chmod +x /etc/init.d/gately
 
 ### Онлайн-обновление {#online-upgrade}
 
-Бинарные установки в Linux (systemd, LXC-контейнеры PVE, OpenWrt и т. п.) можно обновить онлайн на странице «О программе» в панели управления: нажмите «Проверить обновления», а при наличии новой версии — «Обновить». Это работает и для LXC-контейнеров, созданных в PVE из OCI-образа, удалять и пересоздавать их не нужно. Gately по очереди:
+Бинарные установки в Linux (systemd, LXC-контейнеры PVE, OpenWrt при ручном развёртывании и т. п.) можно обновить онлайн на странице «О программе» в панели управления: нажмите «Проверить обновления», а при наличии новой версии — «Обновить». Это работает и для LXC-контейнеров, созданных в PVE из OCI-образа, удалять и пересоздавать их не нужно. Gately по очереди:
 
 1. скачивает с GitHub `gately_<версия>_linux_<архитектура>.tar.gz` для этой платформы;
 2. сверяет SHA-256 с `checksums.txt` того же релиза;
@@ -129,6 +163,7 @@ systemctl restart gately
 
 - Docker: выполните `docker pull` для нового образа и пересоздайте контейнер (каталог конфигурации должен оставаться смонтированным);
 - fnOS: вручную установите более новый `.fpk` через Центр приложений, конфигурация сохранится;
+- Пакеты для OpenWrt: скачайте более новый `.ipk` / `.apk` и выполните `opkg install` / `apk add --allow-untrusted`, конфигурация сохранится (см. [OpenWrt](#openwrt));
 - Windows, macOS, FreeBSD: замените исполняемый файл и перезапустите службу.
 
 Перед обновлением рекомендуется экспортировать резервную копию конфигурации или просто вести каталог конфигурации в git. Подписи загруженных архивов и образов можно проверить по инструкции [Проверка релизов](/en/docs/guide/verify).

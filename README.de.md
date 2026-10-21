@@ -124,6 +124,14 @@ Jedes Release enthält Offline-`.fpk`-Pakete für fnOS: `gately_<version>_fnos_x
 - Port 16680 wird mit dem Docker-Image geteilt. Stoppen Sie den `gately`-Container, bevor Sie die native App starten.
 - Prüfen Sie den Download wie in [Release-Artefakte verifizieren](docs/en/VERIFY.md) beschrieben; `.fpk`-Dateien sind in `checksums.txt` aufgeführt.
 
+### OpenWrt
+
+Jedes Release enthält OpenWrt-Pakete: `gately_<version>_openwrt_<Architektur>.ipk` für OpenWrt 24.10 und älter (einschließlich iStoreOS), installiert mit `opkg install`, und `.apk` für OpenWrt 25.12 und neuer, installiert mit `apk add --allow-untrusted`. Pakete gibt es für amd64 / arm64 / arm / mipsle / mips / riscv64; die Auswahl richtet sich nach `DISTRIB_ARCH` in `/etc/openwrt_release` (siehe Tabelle in der [Installationsanleitung](https://gately.cn/de/docs/guide/install#openwrt)).
+
+- Der Dienst wird bei der Installation aktiviert und gestartet; die Verwaltungsoberfläche ist unter `http://<Router-Adresse>:16680` erreichbar, `logread | grep -i "initial password"` zeigt das Initialpasswort.
+- Die Konfiguration liegt in `/etc/gately` und bleibt bei Upgrades, Deinstallation und Firmware-Upgrades (sysupgrade) erhalten. Für ein Upgrade installieren Sie das neuere Paket; das Online-Upgrade auf der Seite „Über“ verweist dann auf den Paketmanager.
+- Die Binärdatei ist etwa 35 MB groß; die Pakete eignen sich daher für x86-Soft-Router, ARM64-Boxen und andere Geräte mit reichlich Speicher. Das arm-Paket erfordert ARMv7 mit Hardware-Gleitkommaeinheit.
+
 ### Monitoring
 
 Erstellen Sie ein API-Token nur mit der Berechtigung `metrics:read` und lassen Sie Prometheus `/api/metrics` abfragen. Metriken, Alarmbeispiele und das Grafana-Dashboard beschreibt [Monitoring](docs/en/MONITORING.md).

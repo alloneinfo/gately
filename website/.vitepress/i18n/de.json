@@ -276,7 +276,7 @@
       },
       {
         "q": "Auf welchen Geräten läuft Gately?",
-        "a": "Auf Heim-NAS, Soft-Routern, Cloud-Hosts und Servern aller Art. Es gibt Binärdateien für Linux (amd64 / arm64 / arm / mips / mipsle / riscv64), macOS, Windows und FreeBSD, Docker-Images für amd64 / arm64 / arm/v7 sowie ein natives App-Paket für fnOS."
+        "a": "Auf Heim-NAS, Soft-Routern, Cloud-Hosts und Servern aller Art. Es gibt Binärdateien für Linux (amd64 / arm64 / arm / mips / mipsle / riscv64), macOS, Windows und FreeBSD, Docker-Images für amd64 / arm64 / arm/v7, ein natives App-Paket für fnOS sowie OpenWrt-Pakete (.ipk / .apk)."
       },
       {
         "q": "Unterstützt Gately fnOS?",

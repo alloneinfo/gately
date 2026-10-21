@@ -16200,7 +16200,7 @@
     },
     "/api/system/update": {
       "get": {
-        "description": "访问 GitHub 时使用全局设置 `updateProxy` 中的代理。`selfUpgrade.supported` 表示当前部署方式能否在线升级，不能时 `reason` 为 `os`、`docker`、`fnos` 或 `readonly`。\n\n所需权限：`status:read`。",
+        "description": "访问 GitHub 时使用全局设置 `updateProxy` 中的代理。`selfUpgrade.supported` 表示当前部署方式能否在线升级，不能时 `reason` 为 `os`、`docker`、`fnos`、`opkg`、`apk` 或 `readonly`。\n\n所需权限：`status:read`。",
         "responses": {
           "200": {
             "description": "成功"
