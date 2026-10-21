@@ -16251,7 +16251,7 @@
     },
     "/api/system/upgrade": {
       "post": {
-        "description": "僅登入工作階段（管理員）可用，只支援 Linux 二進位部署。下載與本機平台對應的發佈包，核對 checksums.txt 中的 SHA-256 並試執行新程式，替換執行檔後重新啟動；舊版本保留為同目錄下的 `\u003c檔名\u003e.old`。\n\n**僅限登入工作階段使用，API 權杖無法存取此介面。**",
+        "description": "僅登入工作階段（管理員）可用，只支援 Linux 二進位部署。在背景下載與本機平台對應的發佈包，核對 checksums.txt 中的 SHA-256 並試執行新程式，替換執行檔後重新啟動；舊版本保留為同目錄下的 `\u003c檔名\u003e.old`。立即回傳 202，進度見 `GET /api/system/upgrade/status`。\n\n**僅限登入工作階段使用，API 權杖無法存取此介面。**",
         "responses": {
           "200": {
             "description": "成功"
@@ -16288,6 +16288,98 @@
           }
         },
         "summary": "線上升級到最新版本",
+        "tags": [
+          "系統"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
+      }
+    },
+    "/api/system/upgrade/cancel": {
+      "post": {
+        "description": "僅登入工作階段（管理員）可用。只能在替換執行檔之前（`checking`、`downloading`、`verifying`）取消，安裝階段或沒有進行中的升級時回傳 409。\n\n**僅限登入工作階段使用，API 權杖無法存取此介面。**",
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "請求參數錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖無效、已過期或未登入"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖缺少所需權限"
+          }
+        },
+        "summary": "取消線上升級",
+        "tags": [
+          "系統"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
+      }
+    },
+    "/api/system/upgrade/status": {
+      "get": {
+        "description": "僅登入工作階段可用。`state` 依序為 `checking`、`downloading`、`verifying`、`installing`、`restarting`；失敗時為 `failed` 並在 `error` 中說明原因，被取消時為 `canceled`。`downloaded` / `total` 為升級包已下載與總位元組數。\n\n**僅限登入工作階段使用，API 權杖無法存取此介面。**",
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "請求參數錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖無效、已過期或未登入"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖缺少所需權限"
+          }
+        },
+        "summary": "查看線上升級進度",
         "tags": [
           "系統"
         ],

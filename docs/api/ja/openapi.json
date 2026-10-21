@@ -16251,7 +16251,7 @@
     },
     "/api/system/upgrade": {
       "post": {
-        "description": "ログインセッション（管理者）のみ利用可能で、Linux バイナリ導入のみ対応。このプラットフォーム用のリリースパッケージをダウンロードし、checksums.txt の SHA-256 を照合して新しいバイナリを試験実行し、実行ファイルを置き換えて再起動します。旧バージョンは同じディレクトリに `\u003cファイル名\u003e.old` として保存されます。\n\n**ログインセッションでのみ利用できます。API トークンではこのエンドポイントにアクセスできません。**",
+        "description": "ログインセッション（管理者）のみ利用可能で、Linux バイナリ導入のみ対応。このプラットフォーム用のリリースパッケージをバックグラウンドでダウンロードし、checksums.txt の SHA-256 を照合して新しいバイナリを試験実行し、実行ファイルを置き換えて再起動します。旧バージョンは同じディレクトリに `\u003cファイル名\u003e.old` として保存されます。すぐに 202 を返し、進捗は `GET /api/system/upgrade/status` で確認できます。\n\n**ログインセッションでのみ利用できます。API トークンではこのエンドポイントにアクセスできません。**",
         "responses": {
           "200": {
             "description": "成功"
@@ -16288,6 +16288,98 @@
           }
         },
         "summary": "最新バージョンへオンラインアップグレード",
+        "tags": [
+          "システム"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
+      }
+    },
+    "/api/system/upgrade/cancel": {
+      "post": {
+        "description": "ログインセッション（管理者）のみ利用可能。実行ファイルを置き換える前（`checking`、`downloading`、`verifying`）にのみ取消できます。インストール中、または進行中のアップグレードがない場合は 409 を返します。\n\n**ログインセッションでのみ利用できます。API トークンではこのエンドポイントにアクセスできません。**",
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "リクエストパラメーターが不正です"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンが無効、期限切れ、または未ログインです"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンに必要な権限がありません"
+          }
+        },
+        "summary": "オンラインアップグレードを取消",
+        "tags": [
+          "システム"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
+      }
+    },
+    "/api/system/upgrade/status": {
+      "get": {
+        "description": "ログインセッションのみ利用可能。`state` は `checking`、`downloading`、`verifying`、`installing`、`restarting` の順に進み、失敗すると `failed` になり `error` に理由が入ります。取消された場合は `canceled` です。`downloaded` / `total` はアップグレードパッケージのダウンロード済みバイト数と総バイト数です。\n\n**ログインセッションでのみ利用できます。API トークンではこのエンドポイントにアクセスできません。**",
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "リクエストパラメーターが不正です"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンが無効、期限切れ、または未ログインです"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンに必要な権限がありません"
+          }
+        },
+        "summary": "オンラインアップグレードの進捗を確認",
         "tags": [
           "システム"
         ],

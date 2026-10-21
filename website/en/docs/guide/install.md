@@ -110,6 +110,8 @@ Linux binary installs (systemd, PVE LXC containers, OpenWrt and so on) can upgra
 3. Test-run the new binary with `-version` to make sure it runs on this machine;
 4. Replace the executable and restart with the same arguments, keeping the previous version as `gately.old` in the same directory.
 
+Everything happens in a dialog: it first shows the release notes, then the current step, download progress and speed once the upgrade starts. Until the binary is replaced (fetching, downloading and verifying) you can click "Cancel upgrade" at any time, which leaves the current binary untouched.
+
 If GitHub is hard to reach, set an **update proxy** on the About page or under Settings → Network & Runtime. It supports `http://`, `https://` and `socks5://`, and both the update check and the download go through it. When empty, Gately connects directly and still honors the `HTTPS_PROXY` environment variable.
 
 Without internet access, get the tar.gz from the [download page](/en/download) and click "Upload upgrade package" on the About page. Uploads accept any version, so you can also roll back to an older release.

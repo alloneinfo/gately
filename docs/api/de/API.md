@@ -475,6 +475,8 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | GET | `/api/system/info` | `status:read` | Systeminformationen anzeigen |
 | GET | `/api/system/update` | `status:read` | Nach neuer Version suchen |
 | POST | `/api/system/upgrade` | Nur Anmeldesitzung | Online auf die neueste Version aktualisieren |
+| GET | `/api/system/upgrade/status` | Nur Anmeldesitzung | Fortschritt des Online-Upgrades anzeigen |
+| POST | `/api/system/upgrade/cancel` | Nur Anmeldesitzung | Online-Upgrade abbrechen |
 | POST | `/api/system/upgrade/upload` | Nur Anmeldesitzung | Mit hochgeladenem Paket aktualisieren |
 | GET | `/api/system/backup` | Nur Anmeldesitzung | Konfigurations-Backup herunterladen |
 | GET | `/api/system/diagnostics` | Nur Anmeldesitzung | Anonymisiertes Diagnosepaket exportieren |

@@ -475,6 +475,8 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | GET | `/api/system/info` | `status:read` | Ver informações do sistema |
 | GET | `/api/system/update` | `status:read` | Verificar nova versão |
 | POST | `/api/system/upgrade` | Somente sessão de login | Atualizar online para a versão mais recente |
+| GET | `/api/system/upgrade/status` | Somente sessão de login | Ver o progresso da atualização online |
+| POST | `/api/system/upgrade/cancel` | Somente sessão de login | Cancelar a atualização online |
 | POST | `/api/system/upgrade/upload` | Somente sessão de login | Atualizar com um pacote enviado |
 | GET | `/api/system/backup` | Somente sessão de login | Baixar backup da configuração |
 | GET | `/api/system/diagnostics` | Somente sessão de login | Exportar pacote de diagnóstico anonimizado |

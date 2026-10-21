@@ -12,7 +12,7 @@
   "viewRelease": "Voir la page de la version",
   "updateHint": "La recherche de mises à jour et la mise à niveau en ligne ne contactent GitHub que lorsque vous cliquez ; Gately ne se connecte jamais de lui-même.",
   "upgrade": {
-    "now": "Mettre à niveau vers {latest}",
+    "now": "Mettre à niveau",
     "title": "Mise à niveau en ligne",
     "confirm": "Gately va télécharger {latest} depuis GitHub, vérifier son SHA-256, le tester, remplacer {exe} puis redémarrer. La version précédente est conservée sous {exe}.old. Exportez une sauvegarde de la configuration avant la mise à niveau.",
     "confirmButton": "Mettre à niveau et redémarrer",
@@ -24,7 +24,34 @@
       "docker": "Exécution dans un conteneur. Récupérez la nouvelle image et recréez le conteneur (gardez le répertoire de configuration monté).",
       "fnos": "Pour le paquet fnOS, installez manuellement le nouveau .fpk dans le Centre d’applications ; la configuration est conservée.",
       "readonly": "Le répertoire de l’exécutable n’est pas accessible en écriture : mise à niveau en ligne impossible. Remplacez le binaire manuellement."
-    }
+    },
+    "found": "Nouvelle version disponible",
+    "currentVersion": "Version actuelle {current}",
+    "notes": "Nouveautés",
+    "noNotes": "Cette version n’a pas de notes.",
+    "later": "Plus tard",
+    "retry": "Réessayer",
+    "failed": "Échec de la mise à niveau",
+    "progressTitle": "Mise à niveau vers {version}",
+    "keepOpen": "Gardez cette page ouverte ; Gately redémarre et recharge la page automatiquement à la fin.",
+    "steps": {
+      "download": "Téléchargement",
+      "verify": "Vérification",
+      "install": "Installation",
+      "restart": "Redémarrage",
+      "upload": "Téléversement"
+    },
+    "phase": {
+      "checking": "Récupération des informations de version…",
+      "downloading": "Téléchargement {done} / {total}",
+      "downloadingUnknown": "{done} téléchargés",
+      "verifying": "Vérification du SHA-256…",
+      "installing": "Test et remplacement du binaire…",
+      "uploading": "Téléversement {pct} %"
+    },
+    "gotIt": "Compris",
+    "cancel": "Annuler la mise à niveau",
+    "canceled": "Mise à niveau annulée"
   },
   "proxy": {
     "label": "Proxy de mise à jour : ",

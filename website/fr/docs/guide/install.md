@@ -110,6 +110,8 @@ Les installations binaires Linux (systemd, conteneurs LXC de PVE, OpenWrt, etc.)
 3. Tester le nouveau binaire avec `-version` pour s'assurer qu'il s'exécute sur cette machine ;
 4. Remplacer l'exécutable et redémarrer avec les mêmes arguments, en conservant la version précédente sous `gately.old` dans le même répertoire.
 
+Tout se déroule dans une boîte de dialogue : elle affiche d’abord les notes de version, puis, une fois la mise à niveau lancée, l’étape en cours, la progression et la vitesse du téléchargement. Tant que le binaire n’est pas remplacé (récupération, téléchargement et vérification), vous pouvez cliquer sur « Annuler la mise à niveau » à tout moment ; le binaire actuel reste intact.
+
 Si GitHub est difficile à joindre, définissez un **proxy de mise à jour** sur la page À propos ou dans Réglages → Réseau et exécution. Il prend en charge `http://`, `https://` et `socks5://`, et la recherche comme le téléchargement passent par lui. Vide, Gately se connecte directement et tient toujours compte de la variable d'environnement `HTTPS_PROXY`.
 
 Sans accès à Internet, récupérez le tar.gz sur la [page de téléchargement](/fr/download) et cliquez sur « Téléverser un paquet de mise à niveau » dans la page À propos. Toute version est acceptée, ce qui permet aussi de revenir à une version antérieure.

@@ -16251,7 +16251,7 @@
     },
     "/api/system/upgrade": {
       "post": {
-        "description": "Solo sesión (administrador) y solo instalaciones binarias en Linux. Descarga el paquete de esta plataforma, verifica su SHA-256 con checksums.txt, prueba el nuevo binario, reemplaza el ejecutable y reinicia. La versión anterior se conserva como `\u003cnombre de archivo\u003e.old` en el mismo directorio.\n\n**Solo disponible para sesiones de inicio de sesión; los tokens de API no pueden acceder a este endpoint.**",
+        "description": "Solo sesión (administrador) y solo instalaciones binarias en Linux. Descarga en segundo plano el paquete de esta plataforma, verifica su SHA-256 con checksums.txt, prueba el nuevo binario, reemplaza el ejecutable y reinicia. La versión anterior se conserva como `\u003cnombre de archivo\u003e.old` en el mismo directorio. Devuelve 202 de inmediato; el progreso está en `GET /api/system/upgrade/status`.\n\n**Solo disponible para sesiones de inicio de sesión; los tokens de API no pueden acceder a este endpoint.**",
         "responses": {
           "200": {
             "description": "Correcto"
@@ -16288,6 +16288,98 @@
           }
         },
         "summary": "Actualizar en línea a la última versión",
+        "tags": [
+          "Sistema"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
+      }
+    },
+    "/api/system/upgrade/cancel": {
+      "post": {
+        "description": "Solo sesión (administrador). Solo se puede cancelar antes de reemplazar el ejecutable (`checking`, `downloading`, `verifying`); devuelve 409 durante la instalación o si no hay ninguna actualización en curso.\n\n**Solo disponible para sesiones de inicio de sesión; los tokens de API no pueden acceder a este endpoint.**",
+        "responses": {
+          "200": {
+            "description": "Correcto"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parámetros de solicitud incorrectos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token no válido, caducado o sin sesión iniciada"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Al token le falta el permiso necesario"
+          }
+        },
+        "summary": "Cancelar la actualización en línea",
+        "tags": [
+          "Sistema"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
+      }
+    },
+    "/api/system/upgrade/status": {
+      "get": {
+        "description": "Solo sesión. `state` pasa por `checking`, `downloading`, `verifying`, `installing` y `restarting`; si falla es `failed` y `error` indica el motivo, y es `canceled` si se cancela. `downloaded` / `total` son los bytes descargados y totales del paquete de actualización.\n\n**Solo disponible para sesiones de inicio de sesión; los tokens de API no pueden acceder a este endpoint.**",
+        "responses": {
+          "200": {
+            "description": "Correcto"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parámetros de solicitud incorrectos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token no válido, caducado o sin sesión iniciada"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Al token le falta el permiso necesario"
+          }
+        },
+        "summary": "Ver el progreso de la actualización en línea",
         "tags": [
           "Sistema"
         ],

@@ -16251,7 +16251,7 @@
     },
     "/api/system/upgrade": {
       "post": {
-        "description": "仅登录会话（管理员）可用，只支持 Linux 二进制部署。下载与本机平台对应的发布包，核对 checksums.txt 中的 SHA-256 并试运行新程序，替换可执行文件后重启；旧版本保留为同目录下的 `\u003c文件名\u003e.old`。\n\n**仅登录会话可用，API 令牌无法访问此接口。**",
+        "description": "仅登录会话（管理员）可用，只支持 Linux 二进制部署。在后台下载与本机平台对应的发布包，核对 checksums.txt 中的 SHA-256 并试运行新程序，替换可执行文件后重启；旧版本保留为同目录下的 `\u003c文件名\u003e.old`。立即返回 202，进度见 `GET /api/system/upgrade/status`。\n\n**仅登录会话可用，API 令牌无法访问此接口。**",
         "responses": {
           "200": {
             "description": "成功"
@@ -16288,6 +16288,98 @@
           }
         },
         "summary": "在线升级到最新版本",
+        "tags": [
+          "系统"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
+      }
+    },
+    "/api/system/upgrade/cancel": {
+      "post": {
+        "description": "仅登录会话（管理员）可用。只能在替换可执行文件之前（`checking`、`downloading`、`verifying`）取消，安装阶段或没有进行中的升级时返回 409。\n\n**仅登录会话可用，API 令牌无法访问此接口。**",
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "请求参数错误"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌无效、已过期或未登录"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌缺少所需权限"
+          }
+        },
+        "summary": "取消在线升级",
+        "tags": [
+          "系统"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
+      }
+    },
+    "/api/system/upgrade/status": {
+      "get": {
+        "description": "仅登录会话可用。`state` 依次为 `checking`、`downloading`、`verifying`、`installing`、`restarting`；失败时为 `failed` 并在 `error` 中说明原因，被取消时为 `canceled`。`downloaded` / `total` 为升级包已下载与总字节数。\n\n**仅登录会话可用，API 令牌无法访问此接口。**",
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "请求参数错误"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌无效、已过期或未登录"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌缺少所需权限"
+          }
+        },
+        "summary": "查看在线升级进度",
         "tags": [
           "系统"
         ],

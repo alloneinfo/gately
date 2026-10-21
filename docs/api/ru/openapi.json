@@ -16251,7 +16251,7 @@
     },
     "/api/system/upgrade": {
       "post": {
-        "description": "Только для сеанса входа (администратор), только для бинарной установки в Linux. Скачивает пакет релиза для этой платформы, сверяет SHA-256 с checksums.txt, пробно запускает новый бинарный файл, заменяет исполняемый файл и перезапускается. Предыдущая версия сохраняется как `\u003cимя файла\u003e.old` в том же каталоге.\n\n**Доступно только для сессий входа; API-токены не имеют доступа к этому эндпоинту.**",
+        "description": "Только для сеанса входа (администратор), только для бинарной установки в Linux. В фоне скачивает пакет релиза для этой платформы, сверяет SHA-256 с checksums.txt, пробно запускает новый бинарный файл, заменяет исполняемый файл и перезапускается. Предыдущая версия сохраняется как `\u003cимя файла\u003e.old` в том же каталоге. Сразу возвращает 202; ход выполнения — в `GET /api/system/upgrade/status`.\n\n**Доступно только для сессий входа; API-токены не имеют доступа к этому эндпоинту.**",
         "responses": {
           "200": {
             "description": "Успешно"
@@ -16288,6 +16288,98 @@
           }
         },
         "summary": "Обновить онлайн до последней версии",
+        "tags": [
+          "Система"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
+      }
+    },
+    "/api/system/upgrade/cancel": {
+      "post": {
+        "description": "Только для сеанса входа (администратор). Отменить можно только до замены исполняемого файла (`checking`, `downloading`, `verifying`); во время установки или если обновление не выполняется, возвращается 409.\n\n**Доступно только для сессий входа; API-токены не имеют доступа к этому эндпоинту.**",
+        "responses": {
+          "200": {
+            "description": "Успешно"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка параметров запроса"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Токен недействителен, истёк или вход не выполнен"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "У токена нет необходимого права"
+          }
+        },
+        "summary": "Отменить онлайн-обновление",
+        "tags": [
+          "Система"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
+      }
+    },
+    "/api/system/upgrade/status": {
+      "get": {
+        "description": "Только для сеанса входа. `state` проходит этапы `checking`, `downloading`, `verifying`, `installing` и `restarting`; при ошибке — `failed`, причина в `error`, при отмене — `canceled`. `downloaded` / `total` — скачанные и общие байты пакета обновления.\n\n**Доступно только для сессий входа; API-токены не имеют доступа к этому эндпоинту.**",
+        "responses": {
+          "200": {
+            "description": "Успешно"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка параметров запроса"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Токен недействителен, истёк или вход не выполнен"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "У токена нет необходимого права"
+          }
+        },
+        "summary": "Показать ход онлайн-обновления",
         "tags": [
           "Система"
         ],

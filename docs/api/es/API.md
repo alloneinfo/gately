@@ -475,6 +475,8 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | GET | `/api/system/info` | `status:read` | Ver la información del sistema |
 | GET | `/api/system/update` | `status:read` | Buscar nueva versión |
 | POST | `/api/system/upgrade` | Solo sesión iniciada | Actualizar en línea a la última versión |
+| GET | `/api/system/upgrade/status` | Solo sesión iniciada | Ver el progreso de la actualización en línea |
+| POST | `/api/system/upgrade/cancel` | Solo sesión iniciada | Cancelar la actualización en línea |
 | POST | `/api/system/upgrade/upload` | Solo sesión iniciada | Actualizar con un paquete subido |
 | GET | `/api/system/backup` | Solo sesión iniciada | Descargar la copia de seguridad de la configuración |
 | GET | `/api/system/diagnostics` | Solo sesión iniciada | Exportar paquete de diagnóstico anonimizado |

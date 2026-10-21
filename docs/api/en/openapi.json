@@ -16251,7 +16251,7 @@
     },
     "/api/system/upgrade": {
       "post": {
-        "description": "Session (admin) only, Linux binary installs only. Downloads the release package for this platform, checks its SHA-256 against checksums.txt, test-runs the new binary, replaces the executable and restarts. The previous version is kept as `\u003cfile name\u003e.old` in the same directory.\n\n**Available only to login sessions; API tokens cannot access this endpoint.**",
+        "description": "Session (admin) only, Linux binary installs only. Downloads the release package for this platform in the background, checks its SHA-256 against checksums.txt, test-runs the new binary, replaces the executable and restarts. The previous version is kept as `\u003cfile name\u003e.old` in the same directory. Returns 202 immediately; see `GET /api/system/upgrade/status` for progress.\n\n**Available only to login sessions; API tokens cannot access this endpoint.**",
         "responses": {
           "200": {
             "description": "Success"
@@ -16288,6 +16288,98 @@
           }
         },
         "summary": "Upgrade online to the latest version",
+        "tags": [
+          "System"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
+      }
+    },
+    "/api/system/upgrade/cancel": {
+      "post": {
+        "description": "Session (admin) only. Can only cancel before the executable is replaced (`checking`, `downloading`, `verifying`); returns 409 during installation or when no upgrade is running.\n\n**Available only to login sessions; API tokens cannot access this endpoint.**",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Invalid request parameters"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token is invalid, expired or not signed in"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token lacks the required permission"
+          }
+        },
+        "summary": "Cancel online upgrade",
+        "tags": [
+          "System"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
+      }
+    },
+    "/api/system/upgrade/status": {
+      "get": {
+        "description": "Session only. `state` goes through `checking`, `downloading`, `verifying`, `installing` and `restarting`; on failure it is `failed` with the reason in `error`, and `canceled` when canceled. `downloaded` / `total` are the bytes of the upgrade package downloaded so far and in total.\n\n**Available only to login sessions; API tokens cannot access this endpoint.**",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Invalid request parameters"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token is invalid, expired or not signed in"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token lacks the required permission"
+          }
+        },
+        "summary": "Show online upgrade progress",
         "tags": [
           "System"
         ],

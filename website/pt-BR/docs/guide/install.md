@@ -110,6 +110,8 @@ Instalações binárias no Linux (systemd, contêineres LXC do PVE, OpenWrt etc.
 3. Executar o novo binário em teste com `-version` para confirmar que roda nesta máquina;
 4. Substituir o executável e reiniciar com os mesmos argumentos, guardando a versão anterior como `gately.old` no mesmo diretório.
 
+Tudo acontece em uma caixa de diálogo: primeiro ela mostra as notas da versão e, ao iniciar, a etapa atual, o progresso e a velocidade do download. Até o binário ser substituído (obtenção, download e verificação) você pode clicar em "Cancelar atualização" a qualquer momento, sem alterar o binário atual.
+
 Se o GitHub estiver difícil de acessar, defina um **proxy de atualização** na página Sobre ou em Configurações → Rede e execução. Ele suporta `http://`, `https://` e `socks5://`, e tanto a verificação quanto o download passam por ele. Vazio, o Gately conecta diretamente e continua respeitando a variável de ambiente `HTTPS_PROXY`.
 
 Sem acesso à internet, baixe o tar.gz na [página de download](/pt-BR/download) e clique em "Enviar pacote de atualização" na página Sobre. Qualquer versão é aceita, então também dá para voltar a uma anterior.

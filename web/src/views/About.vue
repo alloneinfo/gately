@@ -22,32 +22,17 @@
         <el-button tag="a" :href="`${REPO}/issues`" target="_blank" rel="noopener" :icon="MessageSquare">{{ t('about.feedback') }}</el-button>
         <el-button :icon="RefreshCw" :loading="checking" @click="checkUpdate">{{ t('about.checkUpdate') }}</el-button>
       </div>
-      <el-alert v-if="update" :type="update.hasUpdate ? 'success' : 'info'" :closable="false" show-icon class="update">
-        <template #title>
-          <template v-if="update.hasUpdate">{{ t('about.newVersion', { latest: update.latest, current: update.current }) }}</template>
-          <template v-else>{{ t('about.upToDate') }}{{ update.latest ? t('about.latestRelease', { latest: update.latest }) : '' }}</template>
-        </template>
-        <template #default>
-          <div v-if="update.publishedAt && update.latest" class="meta">{{ t('about.publishedAt', { time: new Date(update.publishedAt).toLocaleString() }) }}</div>
-          <pre v-if="update.hasUpdate && update.notes" class="notes">{{ update.notes }}</pre>
-          <div class="update-actions">
-            <el-button v-if="update.hasUpdate && update.selfUpgrade?.supported && isAdmin" type="primary" size="small" :icon="Download" :loading="upgrading" @click="upgradeOnline">
-              {{ t('about.upgrade.now', { latest: update.latest }) }}
-            </el-button>
-            <a v-if="update.url" :href="update.url" target="_blank" rel="noopener">{{ t('about.viewRelease') }}</a>
-          </div>
-          <div v-if="update.hasUpdate && update.selfUpgrade && !update.selfUpgrade.supported && update.selfUpgrade.reason" class="meta">
-            {{ t(`about.upgrade.reason.${update.selfUpgrade.reason}`) }}
-          </div>
-        </template>
-      </el-alert>
+      <div v-if="update?.hasUpdate" class="update-hint">
+        {{ t('about.newVersion', { latest: update.latest, current: update.current }) }}
+        <el-button link type="primary" @click="dialog?.showRelease(update)">{{ t('common.details') }}</el-button>
+      </div>
       <!-- 在线升级工具：更新代理与手动上传升级包，仅管理员可见 -->
       <div v-if="isAdmin" class="upgrade-tools">
         <span>
           {{ t('about.proxy.label') }}<span class="mono">{{ proxy || t('about.proxy.none') }}</span>
           <el-button link type="primary" @click="openProxy">{{ t('common.edit') }}</el-button>
         </span>
-        <el-button v-if="info?.selfUpgrade?.supported" link type="primary" :icon="Upload" :disabled="upgrading" @click="fileInput?.click()">
+        <el-button v-if="info?.selfUpgrade?.supported" link type="primary" :icon="Upload" @click="fileInput?.click()">
           {{ t('about.upgrade.upload') }}
         </el-button>
         <input ref="fileInput" type="file" accept=".gz,.tgz,application/gzip,application/octet-stream" hidden @change="upgradeUpload" />
@@ -62,7 +47,7 @@
           <el-button type="primary" :loading="proxySaving" @click="saveProxy">{{ t('common.save') }}</el-button>
         </template>
       </el-dialog>
-      <RestartOverlay ref="overlay" />
+      <UpdateDialog ref="dialog" :is-admin="isAdmin" />
     </section>
 
     <!-- ============ 透明度承诺 ============ -->
@@ -165,7 +150,6 @@ import {
   CalendarClock,
   Container,
   Copy,
-  Download,
   Eye,
   FileBraces,
   FolderSync,
@@ -188,9 +172,9 @@ import {
   Upload,
   WifiOff,
 } from 'lucide-vue-next'
-import { api, type SystemSettings, type SystemInfo, type UpdateInfo, type UpgradeResult } from '../api'
+import { api, type SystemSettings, type SystemInfo, type UpdateInfo, type UpgradeStatus } from '../api'
 import AppLogo from '../components/AppLogo.vue'
-import RestartOverlay from '../components/RestartOverlay.vue'
+import UpdateDialog from '../components/UpdateDialog.vue'
 
 const { t } = useI18n()
 
@@ -231,10 +215,17 @@ const info = ref<SystemInfo>()
 const update = ref<UpdateInfo>()
 const checking = ref(false)
 
+// checkUpdate 有新版本时弹出更新弹窗，否则只提示已是最新
 async function checkUpdate() {
   checking.value = true
   try {
-    update.value = await api.get<UpdateInfo>('/api/system/update')
+    const u = await api.get<UpdateInfo>('/api/system/update')
+    update.value = u
+    if (u.hasUpdate) {
+      dialog.value?.showRelease(u)
+    } else {
+      ElMessage.success(t('about.upToDate') + (u.latest ? t('about.latestRelease', { latest: u.latest }) : ''))
+    }
   } catch (e) {
     ElMessage.error((e as Error).message)
   } finally {
@@ -250,9 +241,8 @@ const proxy = ref('')
 const proxyDialog = ref(false)
 const proxyDraft = ref('')
 const proxySaving = ref(false)
-const upgrading = ref(false)
 const fileInput = ref<HTMLInputElement>()
-const overlay = ref<InstanceType<typeof RestartOverlay>>()
+const dialog = ref<InstanceType<typeof UpdateDialog>>()
 
 async function loadProxy() {
   try {
@@ -261,6 +251,16 @@ async function loadProxy() {
     isAdmin.value = true
   } catch {
     // 只读账号无权读取设置，不显示升级工具
+    return
+  }
+  // 有进行中的在线升级（例如升级时刷新了页面）则直接显示进度
+  try {
+    const st = await api.get<UpgradeStatus>('/api/system/upgrade/status')
+    if (['checking', 'downloading', 'verifying', 'installing'].includes(st.state)) {
+      dialog.value?.resume(st)
+    }
+  } catch {
+    // 读取失败不影响页面其他功能
   }
 }
 
@@ -285,30 +285,6 @@ async function saveProxy() {
   }
 }
 
-async function upgradeOnline() {
-  if (!update.value) {
-    return
-  }
-  try {
-    await ElMessageBox.confirm(
-      t('about.upgrade.confirm', { latest: update.value.latest, exe: update.value.selfUpgrade?.executable ?? 'gately' }),
-      t('about.upgrade.title'),
-      { type: 'warning', confirmButtonText: t('about.upgrade.confirmButton'), cancelButtonText: t('common.cancel') },
-    )
-  } catch {
-    return
-  }
-  upgrading.value = true
-  try {
-    const r = await api.post<UpgradeResult>('/api/system/upgrade')
-    overlay.value?.start(t('about.upgrade.restarting', { version: r.to }))
-  } catch (e) {
-    ElMessage.error((e as Error).message)
-  } finally {
-    upgrading.value = false
-  }
-}
-
 // upgradeUpload 用发布页的 tar.gz 或解压后的 gately 程序升级，不限制版本高低
 async function upgradeUpload(ev: Event) {
   const input = ev.target as HTMLInputElement
@@ -327,17 +303,7 @@ async function upgradeUpload(ev: Event) {
   } catch {
     return
   }
-  upgrading.value = true
-  try {
-    const fd = new FormData()
-    fd.append('file', file)
-    const r = await api.post<UpgradeResult>('/api/system/upgrade/upload', fd)
-    overlay.value?.start(t('about.upgrade.restarting', { version: r.to }))
-  } catch (e) {
-    ElMessage.error((e as Error).message)
-  } finally {
-    upgrading.value = false
-  }
+  dialog.value?.upload(file)
 }
 
 async function copy(text: string) {
@@ -452,25 +418,10 @@ h1 {
 .actions a.el-button {
   text-decoration: none;
 }
-.update {
-  max-width: 560px;
-  margin: 20px auto 0;
-  text-align: left;
-}
-.notes {
-  white-space: pre-wrap;
-  font-family: inherit;
-  font-size: 12px;
-  margin: 6px 0;
-  max-height: 200px;
-  overflow: auto;
-}
-.update-actions {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 6px;
+.update-hint {
+  margin-top: 16px;
+  font-size: 13px;
+  color: var(--el-color-success);
 }
 .upgrade-tools {
   display: flex;

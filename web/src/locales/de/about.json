@@ -12,7 +12,7 @@
   "viewRelease": "Release-Seite ansehen",
   "updateHint": "Update-Prüfung und Online-Upgrade greifen nur beim Klicken auf GitHub zu; Gately geht nie von selbst online.",
   "upgrade": {
-    "now": "Jetzt auf {latest} aktualisieren",
+    "now": "Jetzt aktualisieren",
     "title": "Online-Upgrade",
     "confirm": "Gately lädt {latest} von GitHub, prüft die SHA-256, startet die neue Version testweise, ersetzt {exe} und startet neu. Die vorherige Version bleibt als {exe}.old erhalten. Exportieren Sie vor dem Upgrade eine Konfigurationssicherung.",
     "confirmButton": "Aktualisieren und neu starten",
@@ -24,7 +24,34 @@
       "docker": "Läuft in einem Container. Ziehen Sie das neue Image und erstellen Sie den Container neu (Konfigurationsverzeichnis bleibt eingehängt).",
       "fnos": "Für das fnOS-Paket installieren Sie die neue .fpk manuell im App-Center; die Konfiguration bleibt erhalten.",
       "readonly": "Das Verzeichnis der ausführbaren Datei ist nicht beschreibbar, daher ist kein Online-Upgrade möglich. Ersetzen Sie die Binärdatei manuell."
-    }
+    },
+    "found": "Neue Version verfügbar",
+    "currentVersion": "Aktuelle Version {current}",
+    "notes": "Neuerungen",
+    "noNotes": "Für dieses Release gibt es keine Hinweise.",
+    "later": "Später",
+    "retry": "Erneut versuchen",
+    "failed": "Upgrade fehlgeschlagen",
+    "progressTitle": "Aktualisierung auf {version}",
+    "keepOpen": "Lassen Sie diese Seite geöffnet; Gately startet danach automatisch neu und lädt die Seite neu.",
+    "steps": {
+      "download": "Download",
+      "verify": "Prüfung",
+      "install": "Installation",
+      "restart": "Neustart",
+      "upload": "Upload"
+    },
+    "phase": {
+      "checking": "Release-Informationen werden abgerufen…",
+      "downloading": "Lade {done} / {total}",
+      "downloadingUnknown": "{done} geladen",
+      "verifying": "SHA-256 wird geprüft…",
+      "installing": "Neue Version wird getestet und ersetzt…",
+      "uploading": "Lade hoch {pct} %"
+    },
+    "gotIt": "Verstanden",
+    "cancel": "Upgrade abbrechen",
+    "canceled": "Upgrade abgebrochen"
   },
   "proxy": {
     "label": "Update-Proxy: ",

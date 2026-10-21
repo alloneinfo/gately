@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/wangwanjie/gately/internal/httpx"
+	"github.com/wangwanjie/gately/internal/i18n"
 	"github.com/wangwanjie/gately/internal/logbuf"
 	"github.com/wangwanjie/gately/internal/version"
 )
@@ -190,8 +191,25 @@ func fetchLatestRelease(ctx context.Context, client *http.Client) (*releaseInfo,
 	return &rel, nil
 }
 
+// progressReader 在读取时累计字节数并回调，用于报告下载进度。
+type progressReader struct {
+	r    io.Reader
+	n    int64
+	tick func(n int64)
+}
+
+func (p *progressReader) Read(b []byte) (int, error) {
+	n, err := p.r.Read(b)
+	if n > 0 {
+		p.n += int64(n)
+		p.tick(p.n)
+	}
+	return n, err
+}
+
 // downloadBytes 下载文件到内存，超过 limit 字节视为异常。
-func downloadBytes(ctx context.Context, client *http.Client, rawURL string, limit int64) ([]byte, error) {
+// progress 非空时随下载回调已下载与总字节数（服务器未给出长度时 total 为 0）。
+func downloadBytes(ctx context.Context, client *http.Client, rawURL string, limit int64, progress func(done, total int64)) ([]byte, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, rawURL, nil)
 	if err != nil {
 		return nil, err
@@ -204,7 +222,13 @@ func downloadBytes(ctx context.Context, client *http.Client, rawURL string, limi
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("下载 %s 失败: %s", urlBase(rawURL), resp.Status)
 	}
-	data, err := io.ReadAll(io.LimitReader(resp.Body, limit+1))
+	var body io.Reader = resp.Body
+	if progress != nil {
+		total := max(resp.ContentLength, 0)
+		progress(0, total)
+		body = &progressReader{r: body, tick: func(n int64) { progress(n, total) }}
+	}
+	data, err := io.ReadAll(io.LimitReader(body, limit+1))
 	if err != nil {
 		return nil, fmt.Errorf("下载 %s 失败: %v", urlBase(rawURL), err)
 	}
@@ -382,62 +406,172 @@ func (a *App) finishUpgrade(w http.ResponseWriter, exe, to string) {
 	a.scheduleRestart()
 }
 
-// handleUpgrade 在线升级到 GitHub 上的最新版本。
+// 在线升级任务的阶段
+const (
+	upgradeStateChecking    = "checking"    // 查询最新版本
+	upgradeStateDownloading = "downloading" // 下载升级包
+	upgradeStateVerifying   = "verifying"   // 校验 SHA-256 并解压
+	upgradeStateInstalling  = "installing"  // 试运行并替换可执行文件
+	upgradeStateRestarting  = "restarting"  // 已替换，正在重启
+	upgradeStateFailed      = "failed"      // 失败，Error 为原因
+	upgradeStateCanceled    = "canceled"    // 已被用户取消
+)
+
+// upgradeStatus 是在线升级任务的进度，前端轮询 GET /api/system/upgrade/status 获取。
+type upgradeStatus struct {
+	// State 为空表示没有执行过在线升级
+	State string `json:"state"`
+	From  string `json:"from"`
+	To    string `json:"to,omitempty"`
+	// Downloaded / Total 为升级包已下载与总字节数，Total 为 0 表示未知
+	Downloaded int64     `json:"downloaded"`
+	Total      int64     `json:"total"`
+	Error      string    `json:"error,omitempty"`
+	StartedAt  time.Time `json:"startedAt"`
+}
+
+// setUpgradeStatus 在锁内修改升级进度。
+func (a *App) setUpgradeStatus(fn func(st *upgradeStatus)) {
+	a.upgradeMu.Lock()
+	defer a.upgradeMu.Unlock()
+	fn(&a.upgradeSt)
+}
+
+// handleUpgrade 在后台开始在线升级到 GitHub 上的最新版本，立即返回；进度见 handleUpgradeStatus。
 func (a *App) handleUpgrade(w http.ResponseWriter, r *http.Request) {
 	sup, ok := a.beginUpgrade(w)
 	if !ok {
 		return
 	}
-	defer a.upgrading.Store(false)
-	ctx, cancel := context.WithTimeout(r.Context(), upgradeTimeout)
+	a.setUpgradeStatus(func(st *upgradeStatus) {
+		*st = upgradeStatus{State: upgradeStateChecking, From: version.Version, StartedAt: time.Now()}
+	})
+	go a.runUpgrade(sup.Executable)
+	httpx.WriteJSON(w, http.StatusAccepted, a.upgradeSnapshot())
+}
+
+func (a *App) upgradeSnapshot() upgradeStatus {
+	a.upgradeMu.Lock()
+	defer a.upgradeMu.Unlock()
+	return a.upgradeSt
+}
+
+// handleUpgradeStatus 返回在线升级进度；失败原因按请求语言翻译。
+func (a *App) handleUpgradeStatus(w http.ResponseWriter, r *http.Request) {
+	st := a.upgradeSnapshot()
+	if st.Error != "" {
+		st.Error = i18n.Tr(i18n.RequestLang(r), st.Error)
+	}
+	httpx.OK(w, st)
+}
+
+// handleUpgradeCancel 取消进行中的在线升级。只能在替换可执行文件之前取消：
+// 安装阶段（试运行与替换）很短且需要完整执行，此时返回 409。
+func (a *App) handleUpgradeCancel(w http.ResponseWriter, r *http.Request) {
+	a.upgradeMu.Lock()
+	state, cancel := a.upgradeSt.State, a.upgradeCancel
+	switch state {
+	case upgradeStateChecking, upgradeStateDownloading, upgradeStateVerifying:
+		if cancel != nil {
+			cancel()
+		}
+	}
+	a.upgradeMu.Unlock()
+	switch state {
+	case upgradeStateChecking, upgradeStateDownloading, upgradeStateVerifying:
+		httpx.OK(w, map[string]bool{"ok": true})
+	case upgradeStateInstalling, upgradeStateRestarting:
+		httpx.Error(w, http.StatusConflict, "正在安装新版本，无法取消")
+	default:
+		httpx.Error(w, http.StatusConflict, "当前没有进行中的在线升级")
+	}
+}
+
+// runUpgrade 执行在线升级；失败时记录原因并释放升级锁，成功后安排重启（升级锁保持到进程重启）。
+func (a *App) runUpgrade(exe string) {
+	ctx, cancel := context.WithTimeout(context.Background(), upgradeTimeout)
 	defer cancel()
+	a.setUpgradeStatus(func(*upgradeStatus) { a.upgradeCancel = cancel })
+	to, err := a.downloadAndInstall(ctx, exe)
+	if err != nil {
+		canceled := errors.Is(ctx.Err(), context.Canceled)
+		a.setUpgradeStatus(func(st *upgradeStatus) {
+			a.upgradeCancel = nil
+			if canceled {
+				st.State, st.Error = upgradeStateCanceled, ""
+			} else {
+				st.State, st.Error = upgradeStateFailed, err.Error()
+			}
+		})
+		if canceled {
+			a.sysLogs.Add(logbuf.LevelInfo, "system", "已取消在线升级")
+		} else {
+			a.sysLogs.Add(logbuf.LevelWarn, "system", fmt.Sprintf("在线升级失败: %v", err))
+		}
+		a.upgrading.Store(false)
+		return
+	}
+	a.setUpgradeStatus(func(*upgradeStatus) { a.upgradeCancel = nil })
+	a.setUpgradeStatus(func(st *upgradeStatus) {
+		st.State, st.To = upgradeStateRestarting, to
+	})
+	a.sysLogs.Add(logbuf.LevelWarn, "system", fmt.Sprintf("已升级 %s → %s，旧版本保留为 %s，正在重启", version.Version, to, exe+".old"))
+	a.scheduleRestart()
+}
+
+// downloadAndInstall 下载最新版本、校验并替换可执行文件，返回新版本号。
+func (a *App) downloadAndInstall(ctx context.Context, exe string) (string, error) {
 	client := a.updateClient()
 	rel, err := fetchLatestRelease(ctx, client)
 	if err != nil {
-		httpx.Error(w, http.StatusBadGateway, "%v", err)
-		return
+		return "", err
 	}
 	if !versionNewer(rel.TagName, version.Version) {
-		httpx.Error(w, http.StatusConflict, "当前版本 %s 已是最新，无需升级", version.Version)
-		return
+		return "", fmt.Errorf("当前版本 %s 已是最新，无需升级", version.Version)
 	}
 	name := fmt.Sprintf("gately_%s_%s_%s.tar.gz", rel.TagName, upgradeGOOS, upgradeGOARCH)
 	pkg, sums := rel.asset(name), rel.asset("checksums.txt")
 	if pkg == nil || sums == nil {
-		httpx.Error(w, http.StatusBadGateway, "版本 %s 中缺少 %s 或 checksums.txt", rel.TagName, name)
-		return
+		return "", fmt.Errorf("版本 %s 中缺少 %s 或 checksums.txt", rel.TagName, name)
 	}
-	sumData, err := downloadBytes(ctx, client, sums.URL, 1<<20)
+	sumData, err := downloadBytes(ctx, client, sums.URL, 1<<20, nil)
 	if err != nil {
-		httpx.Error(w, http.StatusBadGateway, "%v", err)
-		return
+		return "", err
 	}
 	want, ok := checksumFor(sumData, name)
 	if !ok {
-		httpx.Error(w, http.StatusBadGateway, "checksums.txt 中没有 %s 的校验值", name)
-		return
+		return "", fmt.Errorf("checksums.txt 中没有 %s 的校验值", name)
 	}
-	data, err := downloadBytes(ctx, client, pkg.URL, maxUpgradeArchive)
+	a.setUpgradeStatus(func(st *upgradeStatus) {
+		st.State, st.To, st.Total = upgradeStateDownloading, rel.TagName, pkg.Size
+	})
+	data, err := downloadBytes(ctx, client, pkg.URL, maxUpgradeArchive, func(done, total int64) {
+		a.setUpgradeStatus(func(st *upgradeStatus) {
+			st.Downloaded = done
+			// 服务器未返回长度时沿用发布信息中的文件大小
+			if total > 0 {
+				st.Total = total
+			}
+		})
+	})
 	if err != nil {
-		httpx.Error(w, http.StatusBadGateway, "%v", err)
-		return
+		return "", err
 	}
+	a.setUpgradeStatus(func(st *upgradeStatus) { st.State = upgradeStateVerifying })
 	sum := sha256.Sum256(data)
 	if got := hex.EncodeToString(sum[:]); got != want {
-		httpx.Error(w, http.StatusBadGateway, "%s 的 SHA-256 校验失败，下载内容可能被篡改或不完整", name)
-		return
+		return "", fmt.Errorf("%s 的 SHA-256 校验失败，下载内容可能被篡改或不完整", name)
 	}
 	bin, err := extractBinary(data)
 	if err != nil {
-		httpx.Error(w, http.StatusBadGateway, "%v", err)
-		return
+		return "", err
 	}
-	to, err := installBinary(ctx, sup.Executable, bin)
-	if err != nil {
-		httpx.Error(w, http.StatusInternalServerError, "%v", err)
-		return
+	// 进入安装阶段后不再响应取消，这里先确认此前没有被取消
+	if err := ctx.Err(); err != nil {
+		return "", err
 	}
-	a.finishUpgrade(w, sup.Executable, to)
+	a.setUpgradeStatus(func(st *upgradeStatus) { st.State = upgradeStateInstalling })
+	return installBinary(ctx, exe, bin)
 }
 
 // handleUpgradeUpload 用上传的升级包（发布页的 tar.gz 或解压后的 gately 二进制）升级。

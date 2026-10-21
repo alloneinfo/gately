@@ -12,7 +12,7 @@
   "viewRelease": "查看發佈頁",
   "updateHint": "檢查更新與線上升級只在點擊時存取 GitHub，平時不會主動連網。",
   "upgrade": {
-    "now": "立即升級到 {latest}",
+    "now": "立即升級",
     "title": "線上升級",
     "confirm": "將從 GitHub 下載 {latest}，核對 SHA-256 並試執行後替換 {exe}，隨後自動重新啟動。舊版本保留為 {exe}.old，升級前建議先匯出設定備份。",
     "confirmButton": "升級並重新啟動",
@@ -24,7 +24,34 @@
       "docker": "執行在容器中，請拉取新映像後重建容器（設定目錄保持掛載即可）。",
       "fnos": "飛牛 fnOS 安裝包請在應用中心手動安裝新版 .fpk，設定會自動保留。",
       "readonly": "程式所在目錄不可寫入，無法線上升級，請手動替換程式。"
-    }
+    },
+    "found": "發現新版本",
+    "currentVersion": "目前版本 {current}",
+    "notes": "更新內容",
+    "noNotes": "此版本沒有填寫更新說明。",
+    "later": "稍後",
+    "retry": "重試",
+    "failed": "升級失敗",
+    "progressTitle": "正在升級到 {version}",
+    "keepOpen": "請保持頁面開啟，升級完成後會自動重新啟動並重新整理。",
+    "steps": {
+      "download": "下載",
+      "verify": "校驗",
+      "install": "安裝",
+      "restart": "重新啟動",
+      "upload": "上傳"
+    },
+    "phase": {
+      "checking": "正在取得版本資訊…",
+      "downloading": "正在下載 {done} / {total}",
+      "downloadingUnknown": "已下載 {done}",
+      "verifying": "正在校驗 SHA-256…",
+      "installing": "正在試執行並替換程式…",
+      "uploading": "正在上傳 {pct}%"
+    },
+    "gotIt": "知道了",
+    "cancel": "取消升級",
+    "canceled": "已取消升級"
   },
   "proxy": {
     "label": "更新代理：",

@@ -85,11 +85,15 @@ type App struct {
 	// restartPending 表示有设置需要重启后生效；httpsReady 表示 HTTPS 管理服务已启动
 	restartPending atomic.Bool
 	httpsReady     atomic.Bool
-	// upgrading 防止同时执行多个在线升级
+	// upgrading 防止同时执行多个在线升级；upgradeSt 为在线升级任务的进度，由 upgradeMu 保护
 	upgrading atomic.Bool
-	restartCh chan struct{}
-	auth      *auth.Manager
-	tokens    *apitoken.Manager
+	upgradeMu sync.Mutex
+	upgradeSt upgradeStatus
+	// upgradeCancel 取消进行中的在线升级，同样由 upgradeMu 保护
+	upgradeCancel context.CancelFunc
+	restartCh     chan struct{}
+	auth          *auth.Manager
+	tokens        *apitoken.Manager
 	// audit 记录管理后台的操作审计日志
 	audit *audit.Log
 	// routes 为最近一次构建处理器时登记的全部接口，用于生成 API 文档
@@ -228,6 +232,8 @@ func (a *App) Handler() http.Handler {
 	rec.add("GET /api/system/info", a.handleSystemInfo, "")
 	rec.add("GET /api/system/update", a.handleCheckUpdate, "")
 	rec.add("POST /api/system/upgrade", a.handleUpgrade, "")
+	rec.add("GET /api/system/upgrade/status", a.handleUpgradeStatus, "")
+	rec.add("POST /api/system/upgrade/cancel", a.handleUpgradeCancel, "")
 	rec.add("POST /api/system/upgrade/upload", a.handleUpgradeUpload, "")
 	rec.add("GET /api/system/backup", a.handleBackup, "")
 	rec.add("GET /api/system/diagnostics", a.handleDiagnostics, "")

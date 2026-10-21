@@ -16251,7 +16251,7 @@
     },
     "/api/system/upgrade": {
       "post": {
-        "description": "로그인 세션(관리자)에서만 사용할 수 있으며 Linux 바이너리 설치만 지원합니다. 이 플랫폼용 릴리스 패키지를 내려받아 checksums.txt의 SHA-256을 대조하고 새 바이너리를 시험 실행한 뒤 실행 파일을 교체하고 재시작합니다. 이전 버전은 같은 디렉터리에 `\u003c파일 이름\u003e.old`로 보관됩니다.\n\n**로그인 세션에서만 사용할 수 있으며, API 토큰으로는 이 엔드포인트에 접근할 수 없습니다.**",
+        "description": "로그인 세션(관리자)에서만 사용할 수 있으며 Linux 바이너리 설치만 지원합니다. 이 플랫폼용 릴리스 패키지를 백그라운드에서 내려받아 checksums.txt의 SHA-256을 대조하고 새 바이너리를 시험 실행한 뒤 실행 파일을 교체하고 재시작합니다. 이전 버전은 같은 디렉터리에 `\u003c파일 이름\u003e.old`로 보관됩니다. 즉시 202를 반환하며 진행 상황은 `GET /api/system/upgrade/status`로 확인합니다.\n\n**로그인 세션에서만 사용할 수 있으며, API 토큰으로는 이 엔드포인트에 접근할 수 없습니다.**",
         "responses": {
           "200": {
             "description": "성공"
@@ -16288,6 +16288,98 @@
           }
         },
         "summary": "최신 버전으로 온라인 업그레이드",
+        "tags": [
+          "시스템"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
+      }
+    },
+    "/api/system/upgrade/cancel": {
+      "post": {
+        "description": "로그인 세션(관리자)에서만 사용할 수 있습니다. 실행 파일을 교체하기 전(`checking`, `downloading`, `verifying`)에만 취소할 수 있으며, 설치 중이거나 진행 중인 업그레이드가 없으면 409를 반환합니다.\n\n**로그인 세션에서만 사용할 수 있으며, API 토큰으로는 이 엔드포인트에 접근할 수 없습니다.**",
+        "responses": {
+          "200": {
+            "description": "성공"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "요청 매개변수 오류"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰이 유효하지 않거나 만료되었거나 로그인하지 않음"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰에 필요한 권한이 없음"
+          }
+        },
+        "summary": "온라인 업그레이드 취소",
+        "tags": [
+          "시스템"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
+      }
+    },
+    "/api/system/upgrade/status": {
+      "get": {
+        "description": "로그인 세션에서만 사용할 수 있습니다. `state`는 `checking`, `downloading`, `verifying`, `installing`, `restarting` 순서로 진행되며, 실패하면 `failed`가 되고 `error`에 이유가 담기며, 취소되면 `canceled`입니다. `downloaded` / `total`은 업그레이드 패키지의 다운로드된 바이트 수와 전체 바이트 수입니다.\n\n**로그인 세션에서만 사용할 수 있으며, API 토큰으로는 이 엔드포인트에 접근할 수 없습니다.**",
+        "responses": {
+          "200": {
+            "description": "성공"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "요청 매개변수 오류"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰이 유효하지 않거나 만료되었거나 로그인하지 않음"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰에 필요한 권한이 없음"
+          }
+        },
+        "summary": "온라인 업그레이드 진행 상황 보기",
         "tags": [
           "시스템"
         ],

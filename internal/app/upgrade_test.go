@@ -13,6 +13,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"testing"
 	"time"
 
@@ -145,19 +146,47 @@ func fakeRelease(t *testing.T, tag string, pkg []byte, sumOverride string) *http
 	return srv
 }
 
+// waitUpgrade 轮询在线升级进度，直到进入重启、失败或取消状态。
+func waitUpgrade(t *testing.T, c *http.Client, base string) upgradeStatus {
+	t.Helper()
+	deadline := time.Now().Add(10 * time.Second)
+	for time.Now().Before(deadline) {
+		code, body := doJSON(t, c, "GET", base+"/api/system/upgrade/status", nil)
+		if code != 200 {
+			t.Fatalf("读取升级进度失败: %d %s", code, body)
+		}
+		var st upgradeStatus
+		_ = json.Unmarshal(body, &st)
+		if st.State == upgradeStateRestarting || st.State == upgradeStateFailed || st.State == upgradeStateCanceled {
+			return st
+		}
+		time.Sleep(50 * time.Millisecond)
+	}
+	t.Fatal("在线升级没有在限定时间内结束")
+	return upgradeStatus{}
+}
+
 func TestUpgradeOnline(t *testing.T) {
 	exe := setupUpgrade(t)
 	a, srv, c := loginApp(t)
 	newBin := fakeBinary("v0.2.0")
-	fakeRelease(t, "v0.2.0", tarGz(t, map[string][]byte{"gately": newBin, "LICENSE": []byte("x")}), "")
+	pkg := tarGz(t, map[string][]byte{"gately": newBin, "LICENSE": []byte("x")})
+	fakeRelease(t, "v0.2.0", pkg, "")
 
 	code, body := doJSON(t, c, "GET", srv.URL+"/api/system/update", nil)
 	if code != 200 || !bytes.Contains(body, []byte(`"hasUpdate":true`)) || !bytes.Contains(body, []byte(`"supported":true`)) {
 		t.Fatalf("检查更新应提示可在线升级: %d %s", code, body)
 	}
 	code, body = doJSON(t, c, "POST", srv.URL+"/api/system/upgrade", nil)
-	if code != 200 || !bytes.Contains(body, []byte(`"to":"v0.2.0"`)) {
-		t.Fatalf("在线升级失败: %d %s", code, body)
+	if code != http.StatusAccepted || !bytes.Contains(body, []byte(`"state":"checking"`)) {
+		t.Fatalf("在线升级应在后台开始: %d %s", code, body)
+	}
+	st := waitUpgrade(t, c, srv.URL)
+	if st.State != upgradeStateRestarting || st.To != "v0.2.0" || st.From != "v0.1.0" {
+		t.Fatalf("在线升级失败: %+v", st)
+	}
+	if st.Downloaded != int64(len(pkg)) || st.Total != int64(len(pkg)) {
+		t.Fatalf("下载进度应为 %d/%d，实际 %d/%d", len(pkg), len(pkg), st.Downloaded, st.Total)
 	}
 	if got, _ := os.ReadFile(exe); !bytes.Equal(got, newBin) {
 		t.Fatal("可执行文件应被替换为新版本")
@@ -170,19 +199,38 @@ func TestUpgradeOnline(t *testing.T) {
 	case <-time.After(3 * time.Second):
 		t.Fatal("升级后应请求重启")
 	}
-	// 已是最新版本时拒绝升级
-	version.Version = "v0.2.0"
-	if code, body := doJSON(t, c, "POST", srv.URL+"/api/system/upgrade", nil); code != http.StatusConflict {
-		t.Fatalf("已是最新版本时应返回 409，实际 %d %s", code, body)
+	// 升级完成等待重启期间，不再接受新的升级请求
+	if code, _ := doJSON(t, c, "POST", srv.URL+"/api/system/upgrade", nil); code != http.StatusConflict {
+		t.Fatalf("重启前重复升级应返回 409，实际 %d", code)
 	}
+}
+
+func TestUpgradeAlreadyLatest(t *testing.T) {
+	setupUpgrade(t)
+	_, srv, c := loginApp(t)
+	fakeRelease(t, "v0.1.0", tarGz(t, map[string][]byte{"gately": fakeBinary("v0.1.0")}), "")
+	if code, body := doJSON(t, c, "POST", srv.URL+"/api/system/upgrade", nil); code != http.StatusAccepted {
+		t.Fatalf("应在后台开始: %d %s", code, body)
+	}
+	if st := waitUpgrade(t, c, srv.URL); st.State != upgradeStateFailed || !strings.Contains(st.Error, "v0.1.0") {
+		t.Fatalf("已是最新版本时应失败并说明原因: %+v", st)
+	}
+	// 失败后释放升级锁，可以再次发起
+	if code, _ := doJSON(t, c, "POST", srv.URL+"/api/system/upgrade", nil); code != http.StatusAccepted {
+		t.Fatalf("失败后应允许重试，实际 %d", code)
+	}
+	waitUpgrade(t, c, srv.URL)
 }
 
 func TestUpgradeRejectsBadChecksum(t *testing.T) {
 	exe := setupUpgrade(t)
 	_, srv, c := loginApp(t)
 	fakeRelease(t, "v0.2.0", tarGz(t, map[string][]byte{"gately": fakeBinary("v0.2.0")}), "0000")
-	if code, body := doJSON(t, c, "POST", srv.URL+"/api/system/upgrade", nil); code != http.StatusBadGateway || !bytes.Contains(body, []byte("SHA-256")) {
-		t.Fatalf("校验值不符时应拒绝升级: %d %s", code, body)
+	if code, body := doJSON(t, c, "POST", srv.URL+"/api/system/upgrade", nil); code != http.StatusAccepted {
+		t.Fatalf("应在后台开始: %d %s", code, body)
+	}
+	if st := waitUpgrade(t, c, srv.URL); st.State != upgradeStateFailed || !strings.Contains(st.Error, "SHA-256") {
+		t.Fatalf("校验值不符时应拒绝升级: %+v", st)
 	}
 	if got, _ := os.ReadFile(exe); string(got) != "old-binary" {
 		t.Fatal("校验失败时不应改动可执行文件")
@@ -275,4 +323,72 @@ func TestUpdateUsesProxy(t *testing.T) {
 	default:
 		t.Fatal("请求没有经过代理")
 	}
+}
+
+// 下载过程中可以取消：可执行文件保持不变，升级锁释放后可以重新发起
+func TestUpgradeCancel(t *testing.T) {
+	exe := setupUpgrade(t)
+	_, srv, c := loginApp(t)
+	pkg := tarGz(t, map[string][]byte{"gately": fakeBinary("v0.2.0")})
+	name := fmt.Sprintf("gately_v0.2.0_linux_%s.tar.gz", upgradeGOARCH)
+	sum := sha256.Sum256(pkg)
+	var rel *httptest.Server
+	rel = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/latest":
+			_ = json.NewEncoder(w).Encode(map[string]any{"tag_name": "v0.2.0", "assets": []map[string]any{
+				{"name": name, "browser_download_url": rel.URL + "/pkg", "size": len(pkg)},
+				{"name": "checksums.txt", "browser_download_url": rel.URL + "/sums"},
+			}})
+		case "/sums":
+			fmt.Fprintf(w, "%s  %s\n", hex.EncodeToString(sum[:]), name)
+		case "/pkg":
+			// 只发出一部分内容后挂起，模拟缓慢的下载
+			w.Header().Set("Content-Length", fmt.Sprint(len(pkg)))
+			_, _ = w.Write(pkg[:len(pkg)/2])
+			w.(http.Flusher).Flush()
+			<-r.Context().Done()
+		}
+	}))
+	t.Cleanup(rel.Close)
+	releaseAPI = rel.URL + "/latest"
+
+	if code, _ := doJSON(t, c, "POST", srv.URL+"/api/system/upgrade/cancel", nil); code != http.StatusConflict {
+		t.Fatalf("没有进行中的升级时取消应返回 409，实际 %d", code)
+	}
+	if code, body := doJSON(t, c, "POST", srv.URL+"/api/system/upgrade", nil); code != http.StatusAccepted {
+		t.Fatalf("应在后台开始: %d %s", code, body)
+	}
+	// 等到开始下载
+	deadline := time.Now().Add(5 * time.Second)
+	for {
+		_, body := doJSON(t, c, "GET", srv.URL+"/api/system/upgrade/status", nil)
+		var st upgradeStatus
+		_ = json.Unmarshal(body, &st)
+		if st.State == upgradeStateDownloading && st.Downloaded > 0 {
+			break
+		}
+		if time.Now().After(deadline) {
+			t.Fatalf("没有进入下载阶段: %s", body)
+		}
+		time.Sleep(20 * time.Millisecond)
+	}
+	if code, body := doJSON(t, c, "POST", srv.URL+"/api/system/upgrade/cancel", nil); code != 200 {
+		t.Fatalf("取消失败: %d %s", code, body)
+	}
+	if st := waitUpgrade(t, c, srv.URL); st.State != upgradeStateCanceled || st.Error != "" {
+		t.Fatalf("应进入已取消状态: %+v", st)
+	}
+	if got, _ := os.ReadFile(exe); string(got) != "old-binary" {
+		t.Fatal("取消后不应改动可执行文件")
+	}
+	entries, _ := os.ReadDir(filepath.Dir(exe))
+	if len(entries) != 1 {
+		t.Fatalf("取消后不应留下其他文件，目录中有 %d 个文件", len(entries))
+	}
+	if code, _ := doJSON(t, c, "POST", srv.URL+"/api/system/upgrade", nil); code != http.StatusAccepted {
+		t.Fatalf("取消后应允许重新发起，实际 %d", code)
+	}
+	_, _ = doJSON(t, c, "POST", srv.URL+"/api/system/upgrade/cancel", nil)
+	waitUpgrade(t, c, srv.URL)
 }

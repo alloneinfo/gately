@@ -12,7 +12,7 @@
   "viewRelease": "View release page",
   "updateHint": "Checking for updates and upgrading online reach GitHub only when you click; Gately never goes online on its own.",
   "upgrade": {
-    "now": "Upgrade to {latest} now",
+    "now": "Upgrade now",
     "title": "Online upgrade",
     "confirm": "Gately will download {latest} from GitHub, verify its SHA-256, test-run it, replace {exe} and restart. The previous version is kept as {exe}.old. Export a configuration backup before upgrading.",
     "confirmButton": "Upgrade and restart",
@@ -24,7 +24,34 @@
       "docker": "Running in a container. Pull the new image and recreate the container (keep the config directory mounted).",
       "fnos": "For the fnOS package, install the new .fpk manually in the App Center; your configuration is kept.",
       "readonly": "The directory of the executable is not writable, so online upgrade is unavailable. Replace the binary manually."
-    }
+    },
+    "found": "New version available",
+    "currentVersion": "Current version {current}",
+    "notes": "What’s new",
+    "noNotes": "This release has no notes.",
+    "later": "Later",
+    "retry": "Retry",
+    "failed": "Upgrade failed",
+    "progressTitle": "Upgrading to {version}",
+    "keepOpen": "Keep this page open; Gately restarts and reloads automatically when done.",
+    "steps": {
+      "download": "Download",
+      "verify": "Verify",
+      "install": "Install",
+      "restart": "Restart",
+      "upload": "Upload"
+    },
+    "phase": {
+      "checking": "Fetching release info…",
+      "downloading": "Downloading {done} / {total}",
+      "downloadingUnknown": "Downloaded {done}",
+      "verifying": "Verifying SHA-256…",
+      "installing": "Test-running and replacing the binary…",
+      "uploading": "Uploading {pct}%"
+    },
+    "gotIt": "Got it",
+    "cancel": "Cancel upgrade",
+    "canceled": "Upgrade canceled"
   },
   "proxy": {
     "label": "Update proxy: ",

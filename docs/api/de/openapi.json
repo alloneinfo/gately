@@ -16251,7 +16251,7 @@
     },
     "/api/system/upgrade": {
       "post": {
-        "description": "Nur mit Sitzung (Administrator) und nur für Linux-Binärinstallationen. Lädt das Release-Paket für diese Plattform, prüft die SHA-256 gegen checksums.txt, startet die neue Binärdatei testweise, ersetzt die ausführbare Datei und startet neu. Die vorherige Version bleibt als `\u003cDateiname\u003e.old` im selben Verzeichnis erhalten.\n\n**Nur für Anmeldesitzungen verfügbar; API-Tokens können auf diesen Endpunkt nicht zugreifen.**",
+        "description": "Nur mit Sitzung (Administrator) und nur für Linux-Binärinstallationen. Lädt das Release-Paket für diese Plattform im Hintergrund, prüft die SHA-256 gegen checksums.txt, startet die neue Binärdatei testweise, ersetzt die ausführbare Datei und startet neu. Die vorherige Version bleibt als `\u003cDateiname\u003e.old` im selben Verzeichnis erhalten. Gibt sofort 202 zurück; den Fortschritt liefert `GET /api/system/upgrade/status`.\n\n**Nur für Anmeldesitzungen verfügbar; API-Tokens können auf diesen Endpunkt nicht zugreifen.**",
         "responses": {
           "200": {
             "description": "Erfolgreich"
@@ -16288,6 +16288,98 @@
           }
         },
         "summary": "Online auf die neueste Version aktualisieren",
+        "tags": [
+          "System"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
+      }
+    },
+    "/api/system/upgrade/cancel": {
+      "post": {
+        "description": "Nur mit Sitzung (Administrator). Abbrechen ist nur möglich, bevor die ausführbare Datei ersetzt wird (`checking`, `downloading`, `verifying`); während der Installation oder ohne laufendes Upgrade wird 409 zurückgegeben.\n\n**Nur für Anmeldesitzungen verfügbar; API-Tokens können auf diesen Endpunkt nicht zugreifen.**",
+        "responses": {
+          "200": {
+            "description": "Erfolgreich"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Anfrageparameter fehlerhaft"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token ungültig, abgelaufen oder nicht angemeldet"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Dem Token fehlt die erforderliche Berechtigung"
+          }
+        },
+        "summary": "Online-Upgrade abbrechen",
+        "tags": [
+          "System"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
+      }
+    },
+    "/api/system/upgrade/status": {
+      "get": {
+        "description": "Nur mit Sitzung. `state` durchläuft `checking`, `downloading`, `verifying`, `installing` und `restarting`; bei einem Fehler ist es `failed` und `error` nennt den Grund, nach einem Abbruch `canceled`. `downloaded` / `total` sind die bisher geladenen und die gesamten Bytes des Upgrade-Pakets.\n\n**Nur für Anmeldesitzungen verfügbar; API-Tokens können auf diesen Endpunkt nicht zugreifen.**",
+        "responses": {
+          "200": {
+            "description": "Erfolgreich"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Anfrageparameter fehlerhaft"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token ungültig, abgelaufen oder nicht angemeldet"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Dem Token fehlt die erforderliche Berechtigung"
+          }
+        },
+        "summary": "Fortschritt des Online-Upgrades anzeigen",
         "tags": [
           "System"
         ],

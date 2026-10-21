@@ -475,6 +475,8 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | GET | `/api/system/info` | `status:read` | 查看系统信息 |
 | GET | `/api/system/update` | `status:read` | 检查新版本 |
 | POST | `/api/system/upgrade` | 仅登录会话 | 在线升级到最新版本 |
+| GET | `/api/system/upgrade/status` | 仅登录会话 | 查看在线升级进度 |
+| POST | `/api/system/upgrade/cancel` | 仅登录会话 | 取消在线升级 |
 | POST | `/api/system/upgrade/upload` | 仅登录会话 | 上传升级包升级 |
 | GET | `/api/system/backup` | 仅登录会话 | 下载配置备份 |
 | GET | `/api/system/diagnostics` | 仅登录会话 | 导出脱敏诊断包 |

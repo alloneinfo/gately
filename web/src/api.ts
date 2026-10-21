@@ -221,7 +221,20 @@ export interface SelfUpgrade {
   executable?: string
 }
 
-// UpgradeResult 对应在线升级与上传升级包的返回。
+// UpgradeStatus 对应 GET /api/system/upgrade/status：在线升级任务的进度。
+export interface UpgradeStatus {
+  // 为空表示没有执行过在线升级
+  state: '' | 'checking' | 'downloading' | 'verifying' | 'installing' | 'restarting' | 'failed' | 'canceled'
+  from: string
+  to?: string
+  downloaded: number
+  // 升级包总字节数，0 表示未知
+  total: number
+  error?: string
+  startedAt: string
+}
+
+// UpgradeResult 对应上传升级包的返回。
 export interface UpgradeResult {
   from: string
   to: string

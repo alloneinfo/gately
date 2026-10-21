@@ -110,6 +110,8 @@ Linux-Binärinstallationen (systemd, PVE-LXC-Container, OpenWrt usw.) lassen sic
 3. die neue Binärdatei mit `-version` testweise starten, um sicherzustellen, dass sie auf diesem Rechner läuft;
 4. die ausführbare Datei ersetzen und mit denselben Argumenten neu starten; die vorherige Version bleibt als `gately.old` im selben Verzeichnis.
 
+Alles läuft in einem Dialog ab: Er zeigt zuerst die Versionshinweise und nach dem Start den aktuellen Schritt sowie Fortschritt und Geschwindigkeit des Downloads. Bis die Binärdatei ersetzt wird (Abruf, Download und Prüfung), können Sie jederzeit auf „Upgrade abbrechen“ klicken; die aktuelle Binärdatei bleibt dabei unverändert.
+
 Ist GitHub schlecht erreichbar, legen Sie auf der Seite „Über“ oder unter Einstellungen → Netzwerk & Laufzeit einen **Update-Proxy** fest. Unterstützt werden `http://`, `https://` und `socks5://`; Update-Prüfung und Download laufen beide darüber. Ist das Feld leer, verbindet Gately direkt und beachtet weiterhin die Umgebungsvariable `HTTPS_PROXY`.
 
 Ohne Internetzugang laden Sie das tar.gz von der [Download-Seite](/de/download) und klicken auf der Seite „Über“ auf „Upgrade-Paket hochladen“. Jede Version wird akzeptiert, sodass Sie auch auf eine ältere zurückgehen können.

@@ -12,7 +12,7 @@
   "viewRelease": "Ver página de la versión",
   "updateHint": "Buscar actualizaciones y actualizar en línea solo accede a GitHub cuando haces clic; Gately nunca se conecta por su cuenta.",
   "upgrade": {
-    "now": "Actualizar ahora a {latest}",
+    "now": "Actualizar ahora",
     "title": "Actualización en línea",
     "confirm": "Gately descargará {latest} desde GitHub, verificará su SHA-256, lo probará, reemplazará {exe} y se reiniciará. La versión anterior se conserva como {exe}.old. Exporta una copia de seguridad de la configuración antes de actualizar.",
     "confirmButton": "Actualizar y reiniciar",
@@ -24,7 +24,34 @@
       "docker": "Se ejecuta en un contenedor. Descarga la nueva imagen y vuelve a crear el contenedor (mantén montado el directorio de configuración).",
       "fnos": "Para el paquete de fnOS, instala manualmente el nuevo .fpk en el Centro de aplicaciones; la configuración se conserva.",
       "readonly": "El directorio del ejecutable no tiene permiso de escritura, así que no se puede actualizar en línea. Reemplaza el binario manualmente."
-    }
+    },
+    "found": "Nueva versión disponible",
+    "currentVersion": "Versión actual {current}",
+    "notes": "Novedades",
+    "noNotes": "Esta versión no incluye notas.",
+    "later": "Más tarde",
+    "retry": "Reintentar",
+    "failed": "La actualización falló",
+    "progressTitle": "Actualizando a {version}",
+    "keepOpen": "Mantén esta página abierta; Gately se reiniciará y recargará automáticamente al terminar.",
+    "steps": {
+      "download": "Descargar",
+      "verify": "Verificar",
+      "install": "Instalar",
+      "restart": "Reiniciar",
+      "upload": "Subir"
+    },
+    "phase": {
+      "checking": "Obteniendo información de la versión…",
+      "downloading": "Descargando {done} / {total}",
+      "downloadingUnknown": "Descargado {done}",
+      "verifying": "Verificando SHA-256…",
+      "installing": "Probando y reemplazando el binario…",
+      "uploading": "Subiendo {pct}%"
+    },
+    "gotIt": "Entendido",
+    "cancel": "Cancelar actualización",
+    "canceled": "Actualización cancelada"
   },
   "proxy": {
     "label": "Proxy de actualización: ",

@@ -475,6 +475,8 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | GET | `/api/system/info` | `status:read` | Consulter les informations système |
 | GET | `/api/system/update` | `status:read` | Rechercher une nouvelle version |
 | POST | `/api/system/upgrade` | Session connectée uniquement | Mettre à niveau en ligne vers la dernière version |
+| GET | `/api/system/upgrade/status` | Session connectée uniquement | Voir la progression de la mise à niveau en ligne |
+| POST | `/api/system/upgrade/cancel` | Session connectée uniquement | Annuler la mise à niveau en ligne |
 | POST | `/api/system/upgrade/upload` | Session connectée uniquement | Mettre à niveau avec un paquet téléversé |
 | GET | `/api/system/backup` | Session connectée uniquement | Télécharger la sauvegarde de configuration |
 | GET | `/api/system/diagnostics` | Session connectée uniquement | Exporter le paquet de diagnostic anonymisé |

@@ -12,7 +12,7 @@
   "viewRelease": "Ver página da versão",
   "updateHint": "Verificar atualizações e atualizar online só acessa o GitHub quando você clica; o Gately nunca se conecta por conta própria.",
   "upgrade": {
-    "now": "Atualizar agora para {latest}",
+    "now": "Atualizar agora",
     "title": "Atualização online",
     "confirm": "O Gately vai baixar {latest} do GitHub, conferir o SHA-256, executar em teste, substituir {exe} e reiniciar. A versão anterior fica guardada como {exe}.old. Exporte um backup da configuração antes de atualizar.",
     "confirmButton": "Atualizar e reiniciar",
@@ -24,7 +24,34 @@
       "docker": "Rodando em um contêiner. Baixe a nova imagem e recrie o contêiner (mantenha o diretório de configuração montado).",
       "fnos": "Para o pacote do fnOS, instale manualmente o novo .fpk na Central de Aplicativos; a configuração é mantida.",
       "readonly": "O diretório do executável não permite gravação, então a atualização online está indisponível. Substitua o binário manualmente."
-    }
+    },
+    "found": "Nova versão disponível",
+    "currentVersion": "Versão atual {current}",
+    "notes": "Novidades",
+    "noNotes": "Esta versão não tem notas.",
+    "later": "Depois",
+    "retry": "Tentar novamente",
+    "failed": "Falha na atualização",
+    "progressTitle": "Atualizando para {version}",
+    "keepOpen": "Mantenha esta página aberta; o Gately reinicia e recarrega automaticamente ao terminar.",
+    "steps": {
+      "download": "Download",
+      "verify": "Verificação",
+      "install": "Instalação",
+      "restart": "Reinício",
+      "upload": "Envio"
+    },
+    "phase": {
+      "checking": "Obtendo informações da versão…",
+      "downloading": "Baixando {done} / {total}",
+      "downloadingUnknown": "Baixado {done}",
+      "verifying": "Conferindo SHA-256…",
+      "installing": "Testando e substituindo o binário…",
+      "uploading": "Enviando {pct}%"
+    },
+    "gotIt": "Entendi",
+    "cancel": "Cancelar atualização",
+    "canceled": "Atualização cancelada"
   },
   "proxy": {
     "label": "Proxy de atualização: ",

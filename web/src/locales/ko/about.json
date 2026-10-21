@@ -12,7 +12,7 @@
   "viewRelease": "릴리스 페이지 보기",
   "updateHint": "업데이트 확인과 온라인 업그레이드는 클릭할 때만 GitHub에 접속하며, 평소에는 스스로 통신하지 않습니다.",
   "upgrade": {
-    "now": "지금 {latest}(으)로 업그레이드",
+    "now": "지금 업그레이드",
     "title": "온라인 업그레이드",
     "confirm": "GitHub에서 {latest}을(를) 내려받아 SHA-256을 대조하고 시험 실행한 뒤 {exe}을(를) 교체하고 자동으로 재시작합니다. 이전 버전은 {exe}.old로 보관됩니다. 업그레이드 전에 설정 백업을 내보내 두세요.",
     "confirmButton": "업그레이드 후 재시작",
@@ -24,7 +24,34 @@
       "docker": "컨테이너에서 실행 중입니다. 새 이미지를 pull한 뒤 컨테이너를 다시 만드세요(설정 디렉터리는 그대로 마운트).",
       "fnos": "fnOS 패키지는 앱 센터에서 새 .fpk를 직접 설치하세요. 설정은 유지됩니다.",
       "readonly": "실행 파일 디렉터리에 쓸 수 없어 온라인 업그레이드를 할 수 없습니다. 직접 교체하세요."
-    }
+    },
+    "found": "새 버전이 있습니다",
+    "currentVersion": "현재 버전 {current}",
+    "notes": "업데이트 내용",
+    "noNotes": "이 릴리스에는 업데이트 설명이 없습니다.",
+    "later": "나중에",
+    "retry": "다시 시도",
+    "failed": "업그레이드 실패",
+    "progressTitle": "{version}(으)로 업그레이드 중",
+    "keepOpen": "이 페이지를 열어 두세요. 완료되면 자동으로 재시작하고 새로고침합니다.",
+    "steps": {
+      "download": "다운로드",
+      "verify": "검증",
+      "install": "설치",
+      "restart": "재시작",
+      "upload": "업로드"
+    },
+    "phase": {
+      "checking": "릴리스 정보를 가져오는 중…",
+      "downloading": "다운로드 중 {done} / {total}",
+      "downloadingUnknown": "{done} 다운로드됨",
+      "verifying": "SHA-256 검증 중…",
+      "installing": "시험 실행 후 프로그램을 교체하는 중…",
+      "uploading": "업로드 중 {pct}%"
+    },
+    "gotIt": "확인",
+    "cancel": "업그레이드 취소",
+    "canceled": "업그레이드를 취소했습니다"
   },
   "proxy": {
     "label": "업데이트 프록시: ",
