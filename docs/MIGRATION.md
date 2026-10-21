@@ -4,6 +4,10 @@
 
 Gately 可以直接读取 Lucky 的 `.lkcf` 配置文件或 Lucky「备份配置」导出的整站 zip，把规则、任务、证书迁移过来。整个过程不需要卸载 Lucky，可以两边并存、逐个模块切换。
 
+::: tip 从 nginx 迁移
+本文介绍从 Lucky 迁移。现有的 nginx 站点可以在「Web 服务 → 导入 nginx」中直接导入，见 [Web 服务 · 导入 nginx 配置](/docs/modules/web#import-nginx)。
+:::
+
 ## 1. 准备
 
 1. 找到 Lucky 的配置目录：Docker 部署通常是映射到容器 `/app/conf` 的宿主机目录，里面有 `lucky_base.lkcf`、`lucky_ddns.lkcf` 等文件。

@@ -94,7 +94,16 @@ https://auth.example.com/__gately_auth/oauth/callback
 
 ### IP 黑白名单
 
-站点「安全」页的「IP 访问控制」可选关闭、白名单、黑名单，列表每行一个 IP 或网段（如 `192.168.1.0/24`）。
+站点「安全」页的「IP 访问控制」可选关闭、白名单、黑名单，列表每行一个 IP 或网段（如 `192.168.1.0/24`），还可以同时引用订阅的 IP 列表。
+
+### 订阅 IP 列表
+
+在「全局设置 → 订阅 IP 列表」添加列表：填写下载地址与刷新间隔（默认 24 小时），Gately 会定时下载并缓存到配置目录，重启后无需联网即可使用。内容每行一个 IP、CIDR 或 `起始-结束` 范围，`#`、`;`、`//` 之后为注释。例如省市 IP 段可使用 [metowolf/iplist](https://github.com/metowolf/iplist) 的 `https://metowolf.github.io/iplist/data/cncity/440000.txt`（广东省）。
+
+- 站点与路径规则的白名单、黑名单可以引用多个列表，与手填的 IP 段一起判断，命中任意一项即视为在名单中；
+- 下载内容无法识别（例如返回了错误页面）时保留上次的列表，并在列表上显示原因，一小时后重试；
+- 列表下载成功前按空列表处理：白名单因此拒绝访问，黑名单不额外拦截；
+- 仍被站点引用的列表不能删除。
 
 ### 路径规则
 
@@ -289,6 +298,18 @@ curl -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/webservice/m
 | `gately_upstream_up` | gauge | 后端是否健康，1 健康、0 不可用（附标签 `upstream`） |
 
 所有指标带标签 `listener`（监听名称#监听 key）与 `site`（站点名称，未命名时取第一个域名）。
+
+## 导入 nginx 配置 {#import-nginx}
+
+页面顶部的「导入 nginx」可以把现有 nginx 站点转换为 Gately 的监听与站点。推荐在 nginx 所在主机执行 `nginx -T`，把完整输出粘贴进来：输出中包含 include 的所有文件，Gately 会像 nginx 一样展开 include。
+
+- 先预览：按监听端口分组列出每个站点的类型、后端或目录、来源文件与行号，以及需要注意的地方（使用了变量的指令、正则 location、缺少证书的域名等），无法转换的站点会说明原因；
+- 相同端口的站点合并到已有监听，否则新建监听；已存在的域名会跳过，可以重复导入；
+- 默认导入为停用状态，便于与 nginx 并行逐个核对后再启用；勾选「导入后立即启用」则立即生效（nginx 仍占用同一端口时新建的监听会启动失败）；
+- 能转换的内容：`proxy_pass`（含 upstream 的权重、备用与负载均衡策略）、`root` / `alias` 静态目录（`autoindex`、`try_files $uri.html`、`error_page 404`）、`return` 跳转与固定内容、整站 `rewrite` 跳转、`add_header`、`proxy_set_header`、`gzip`、`allow` / `deny`、location 级的分路径后端、访问控制与跳转、`listen ... proxy_protocol` 与 `quic`；
+- `auth_request` 会转换为转发认证：认证地址取自认证子请求 location 的 `proxy_pass`（支持 `set` 变量），登录跳转取自 `error_page 401 =302`，Authelia 的常见写法可以直接转换；只在部分 location 启用时转换为「仅对指定路径认证」；
+- `auth_basic` 转换为使用共享用户的基本认证，nginx 的用户文件不会被读取，补齐用户前任何人都无法通过；
+- `stream` 中的 TCP/UDP 转发请在[端口转发](/docs/modules/portforward)中配置；证书不会导入，HTTPS 站点缺少证书时预览会列出 nginx 使用的证书文件，可在[证书](/docs/modules/ssl)页按文件路径添加。
 
 ## 替换 haproxy 与 nginx
 

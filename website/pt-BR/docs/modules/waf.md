@@ -7,6 +7,8 @@ Um firewall de aplicações web baseado no [Coraza](https://coraza.io/) e no OWA
 - Conjunto de regras OWASP CRS v4 embutido, com arquivos de regras que podem ser ativados individualmente;
 - Regras SecLang personalizadas;
 - Modo de bloqueio e modo apenas de detecção;
+- Limite de inspeção do corpo da requisição ajustável: acima do limite, a requisição é rejeitada ou só a parte inicial é inspecionada; a inspeção do corpo pode ser pulada por caminho;
+- Modo de compatibilidade com WebDAV: libera os métodos, os cabeçalhos e qualquer tipo de conteúdo de upload usados por nuvens pessoais e WebDAV;
 - Várias instâncias, referenciadas pelos sites conforme necessário.
 
 ## Recomendações
@@ -14,6 +16,19 @@ Um firewall de aplicações web baseado no [Coraza](https://coraza.io/) e no OWA
 1. Em um site novo, comece com "Apenas detectar" e acompanhe os logs por algum tempo para confirmar que não há falsos positivos;
 2. Ajuste os arquivos de regras ou adicione exceções personalizadas para os falsos positivos;
 3. Depois mude para "Bloquear".
+
+## Sites com upload de arquivos grandes
+
+Por padrão, o WAF só inspeciona corpos de requisição de até 12,5 MB e rejeita requisições maiores (413), o que impede o upload de arquivos grandes em nuvens pessoais, WebDAV e gerenciadores de arquivos. Ajuste isso em "Inspeção do corpo da requisição" da instância:
+
+- **Limite de inspeção**: 0 significa o padrão de 12,5 MB, até 1024 MB;
+- **Acima do limite**: "Rejeitar a requisição" mantém o comportamento anterior; "Inspecionar só a parte inicial" inspeciona apenas a parte dentro do limite e envia o resto inalterado ao backend, o que é indicado para sites com uploads grandes;
+- **Compatível com WebDAV e uploads**: por padrão, o OWASP CRS só permite GET, HEAD, POST e OPTIONS e bloqueia os cabeçalhos `Lock-Token`, `If` e `Content-Range` e os tipos de conteúdo fora da sua lista permitida, por isso clientes WebDAV não conseguem listar pastas, fazer upload nem bloquear arquivos. Ao ativar, PUT, DELETE, PROPFIND, PROPPATCH, MKCOL, COPY, MOVE, LOCK, UNLOCK e outros métodos, além desses cabeçalhos, são liberados, e o tipo de conteúdo dos uploads deixa de ser restringido; o corpo de PUT e de `application/octet-stream` é tratado como conteúdo de arquivo e deixa de ser inspecionado como parâmetros de formulário. As verificações de injeção, path traversal e outros ataques continuam ativas;
+- **Caminhos sem inspeção do corpo**: um prefixo de caminho por linha (como `/api/upload` ou `/remote.php/dav/`). Requisições correspondentes não têm o corpo inspecionado; cabeçalhos, URL e parâmetros continuam sendo inspecionados normalmente.
+
+Recomendamos criar uma instância separada para nuvens pessoais e sites WebDAV, com "Compatível com WebDAV e uploads" ativado e "Inspecionar só a parte inicial" selecionado; se necessário, adicione as rotas de upload em "Caminhos sem inspeção do corpo". Mantenha os demais sites com as configurações padrão.
+
+curl, rclone e outros clientes enviam o cabeçalho `Expect: 100-continue` ao fazer upload de conteúdos maiores, e o CRS 4 o bloqueia por padrão. Todas as instâncias do Gately liberam esse cabeçalho (o próprio Gately trata o 100-continue), sem necessidade de configuração extra.
 
 ## Verificação
 

@@ -36,12 +36,12 @@ Gately 完全开源，用户和社区可以直接审阅源码与配置。对于�
 | 动态域名 | 阿里云、Cloudflare、腾讯云、DNSPod、华为云、GoDaddy、Porkbun、dynv6、DuckDNS、Amazon Route 53、OVHcloud、Gandi、NS1、Bunny DNS、Namecheap、DynDNS2（No-IP、Dynu 等）、自定义回调；URL/网卡/命令取 IP；IPv4/IPv6；Webhook |
 | STUN 穿透 | TCP/UDP、保活、UPnP/NAT-PMP、内置转发、地址变化时触发 Webhook 与脚本 |
 | 端口转发 | TCP/UDP、IPv4/IPv6、端口段、多目标故障转移、连接数限制、流量统计、PROXY 协议（v1/v2）；SNI 分流，让多个服务共用 443 等同一个端口（按域名 TLS 透传、默认目标、每条路由单独设置 PROXY 协议） |
-| SSL 证书 | ACME 自动签发与续期，支持 DNS-01（通配符）与 HTTP-01（无需 DNS 服务商）、EAB、上传、读取文件、映射到目录并执行脚本 |
+| SSL 证书 | ACME 自动签发与续期，支持 DNS-01（通配符）与 HTTP-01（无需 DNS 服务商）、EAB、上传、读取文件、映射到目录并执行脚本；证书更新后经 SSH 推送到其他主机并执行命令，或重启使用证书的 Docker 容器 |
 | Tailscale | 托管 tailscaled（用户态网络，容器友好）或接入系统已有守护进程；认证密钥/登录链接、Headscale、子网路由、出口节点、节点列表与 SOCKS5 代理、固定端口、tailscaled 额外参数与环境变量 |
 | frp | frpc 客户端（tcp/udp/http/https/stcp/xtcp 代理，增删即生效）与 frps 服务端（端口白名单、子域名、控制台），可一键导入旧版 ini / 新版 toml 配置 |
 | Cloudflare 隧道 | cloudflared 令牌隧道与 trycloudflare 临时隧道，多隧道、自动重启、公网地址展示 |
-| Web 服务 | 按域名反向代理/重定向/静态文件/固定文本；HTTPS 与 HTTP/3（QUIC）；WebSocket；PROXY 协议收发；基本认证、网页认证、GitHub/Google/QQ/OIDC 登录、带 TOTP 二次验证并可跨子域名单点登录的共享用户、转发认证到 Authelia 等外部服务；IP 黑白名单、路径规则、临时分享链接、认证失败自动封禁、GeoIP 国家过滤；按路径分流后端、HTTPS 后端按访问域名发送 SNI、后端权重/备用/负载均衡策略、主动与被动健康检查、压缩、限流、响应缓存、路径重写；静态站点支持无扩展名地址与自定义 404 页；修改站点不会断开已有连接；分钟级访问统计与 Prometheus 指标 |
-| WAF 防火墙 | Coraza + OWASP CRS v4，可按文件启用规则、自定义 SecLang、拦截/仅检测 |
+| Web 服务 | 按域名反向代理/重定向/静态文件/固定文本；HTTPS 与 HTTP/3（QUIC）；WebSocket；PROXY 协议收发；基本认证、网页认证、GitHub/Google/QQ/OIDC 登录、带 TOTP 二次验证并可跨子域名单点登录的共享用户、转发认证到 Authelia 等外部服务；IP 黑白名单与定时刷新的订阅 IP 列表（如省市 IP 段）、路径规则、临时分享链接、认证失败自动封禁、GeoIP 国家过滤；按路径分流后端、HTTPS 后端按访问域名发送 SNI、后端权重/备用/负载均衡策略、主动与被动健康检查、压缩、限流、响应缓存、路径重写；静态站点支持无扩展名地址与自定义 404 页；修改站点不会断开已有连接；分钟级访问统计与 Prometheus 指标 |
+| WAF 防火墙 | Coraza + OWASP CRS v4，可按文件启用规则、自定义 SecLang、拦截/仅检测；请求体检查上限可调，超限时只检查前段或按路径跳过，网盘、WebDAV 等上传站点也能挂 WAF |
 | Docker 管理 | 容器创建与编辑、日志与终端、Compose、镜像更新检查与一键升级（失败自动回滚）、网络与卷 |
 | Web 终端 | SSH（主机密钥首次信任）、Telnet、本机 Shell（默认关闭）；代理、持久会话、SFTP 文件管理、2FA 与协议确认、快捷命令、分屏 |
 | 网络诊断 | Ping、路由追踪、端口探测、DNS 查询、测速、局域网扫描 |
@@ -56,8 +56,8 @@ Gately 完全开源，用户和社区可以直接审阅源码与配置。对于�
 | 安全与设置 | Passkey（WebAuthn）登录、两步验证（TOTP）、只读账号、登录失败限流、安全入口、仅内网访问、管理界面 HTTPS、多 API 令牌（按模块读写授权）、自定义 DNS（支持 DoH）、时区、配置备份与恢复、信任本机反向代理传来的真实客户端地址、按需开关功能模块（关闭的模块不启动服务、不提供接口） |
 | 飞牛原生应用 | 离线 `.fpk` 安装包（x86 / ARM）；接入飞牛统一网关，从飞牛桌面图标打开，远程域名同样可用；飞牛管理员可凭飞牛登录态直接登录（默认关闭）；以 root 运行，可监听 80/443 并管理 Docker |
 | 审计与历史 | 操作审计日志：登录、配置变更、访问敏感内容（不记录请求体与任何密钥）；每次覆盖配置文件前保留旧版本，可对比差异并一键回滚；声明式配置目录（`-apply`），便于 GitOps |
-| 监控与自检 | 全局 Prometheus 指标 `/api/metrics`（证书、DDNS、STUN、端口转发、Web 服务），附 Grafana 面板；一键网络自检（公网 IP、运营商 NAT、系统时间、80/443 端口、DDNS 解析、证书到期） |
-| 迁移 | 导入 Lucky 的 `.lkcf` 或整站配置 zip：端口转发、DDNS、STUN、证书、反向代理、WAF、网络唤醒、Web 终端、WebDAV、基础设置 |
+| 监控与自检 | 全局 Prometheus 指标 `/api/metrics`（证书、DDNS、STUN、端口转发、Web 服务），附 Grafana 面板；一键网络自检（公网 IP、运营商 NAT、系统时间、80/443 端口、DDNS 解析、证书到期、HTTPS 站点缺少证书、frp 代理冲突） |
+| 迁移 | 导入 Lucky 的 `.lkcf` 或整站配置 zip：端口转发、DDNS、STUN、证书、反向代理、WAF、网络唤醒、Web 终端、WebDAV、基础设置；导入 nginx 配置（支持 `nginx -T` 输出）：反向代理与 upstream、静态目录、跳转、分路径后端、访问控制，`auth_request` 转换为转发认证 |
 
 ## 性能
 

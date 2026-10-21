@@ -94,7 +94,16 @@ Comportement :
 
 ### Liste d'autorisation et liste de blocage d'IP
 
-Le « Contrôle d'accès par IP » de la page « Sécurité » du site peut être désactivé, en liste d'autorisation ou en liste de blocage. La liste accepte une IP ou un sous-réseau par ligne (comme `192.168.1.0/24`).
+Le « Contrôle d'accès par IP » de la page « Sécurité » du site peut être désactivé, en liste d'autorisation ou en liste de blocage. La liste accepte une IP ou un sous-réseau par ligne (comme `192.168.1.0/24`), et peut aussi référencer des listes d'IP abonnées.
+
+### Listes d'IP abonnées
+
+Ajoutez des listes dans « Paramètres globaux → Listes d'IP abonnées » : indiquez l'URL de téléchargement et l'intervalle d'actualisation (24 heures par défaut). Gately télécharge la liste périodiquement et la met en cache dans le répertoire de configuration, elle reste donc utilisable après un redémarrage sans accès à Internet. Le contenu comporte une IP, un CIDR ou une plage `début-fin` par ligne ; tout ce qui suit `#`, `;` ou `//` est un commentaire. Pour les plages d'IP des provinces et villes chinoises, vous pouvez par exemple utiliser `https://metowolf.github.io/iplist/data/cncity/440000.txt` (province du Guangdong) de [metowolf/iplist](https://github.com/metowolf/iplist).
+
+- Les listes d'autorisation et de blocage des sites et des règles de chemin peuvent référencer plusieurs listes, vérifiées avec les plages saisies à la main : correspondre à l'une d'elles suffit pour être dans la liste ;
+- Si le contenu téléchargé est illisible (par exemple une page d'erreur), la liste précédente est conservée, la raison est affichée sur la liste et un nouvel essai a lieu une heure plus tard ;
+- Tant qu'une liste n'a pas été téléchargée, elle est traitée comme vide : une liste d'autorisation refuse alors l'accès, et une liste de blocage ne bloque rien de plus ;
+- Une liste encore référencée par un site ne peut pas être supprimée.
 
 ### Règles de chemin
 
@@ -289,6 +298,18 @@ curl -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/webservice/m
 | `gately_upstream_up` | gauge | Indique si un backend est sain : 1 sain, 0 indisponible (avec l'étiquette `upstream`) |
 
 Toutes les métriques portent les étiquettes `listener` (nom de l'écouteur#clé de l'écouteur) et `site` (nom du site, ou premier domaine s'il n'a pas de nom).
+
+## Importer une configuration nginx {#import-nginx}
+
+Le bouton « Importer nginx » en haut de la page convertit des sites nginx existants en écouteurs et sites Gately. Le plus simple est d'exécuter `nginx -T` sur l'hôte nginx et d'en coller la sortie complète : elle contient tous les fichiers chargés par include, et Gately développe les include comme nginx.
+
+- Aperçu d'abord : les sites sont regroupés par port d'écoute, avec pour chacun le type, le backend ou le répertoire, le fichier source et le numéro de ligne, ainsi que les points d'attention (directives utilisant des variables, location en expression régulière, domaines sans certificat, etc.) ; les sites non convertibles sont listés avec la raison ;
+- Les sites d'un même port sont ajoutés à l'écouteur existant, sinon un nouvel écouteur est créé ; les domaines déjà présents sont ignorés, l'import peut donc être relancé sans risque ;
+- Par défaut, les sites sont importés désactivés, pour être vérifiés un par un en parallèle de nginx avant activation ; cochez « Activer dès l'import » pour qu'ils s'appliquent immédiatement (si nginx occupe encore le même port, le nouvel écouteur ne démarre pas) ;
+- Éléments convertis : `proxy_pass` (y compris poids, secours et politique de répartition de charge des upstream), répertoires statiques `root` / `alias` (`autoindex`, `try_files $uri.html`, `error_page 404`), redirections et contenu fixe `return`, redirections `rewrite` de tout le site, `add_header`, `proxy_set_header`, `gzip`, `allow` / `deny`, backends par chemin, contrôle d'accès et redirections au niveau des location, `listen ... proxy_protocol` et `quic` ;
+- `auth_request` est converti en authentification déléguée : l'adresse de vérification est reprise du `proxy_pass` de la location de la sous-requête d'authentification (variables `set` prises en charge), et la redirection de connexion de `error_page 401 =302` ; les configurations Authelia courantes se convertissent directement. Si l'authentification n'est active que sur certaines location, le « Périmètre d'authentification » est limité aux chemins concernés ;
+- `auth_basic` est converti en authentification Basic avec les utilisateurs partagés ; le fichier d'utilisateurs de nginx n'est pas lu, et personne ne peut passer tant que les utilisateurs n'ont pas été ajoutés ;
+- Les redirections TCP/UDP du bloc `stream` se configurent dans la [Redirection de ports](/fr/docs/modules/portforward) ; les certificats ne sont pas importés : quand un site HTTPS n'a pas de certificat, l'aperçu indique les fichiers de certificat utilisés par nginx, que vous pouvez ajouter par chemin de fichier dans la page [Certificats](/fr/docs/modules/ssl).
 
 ## Remplacer haproxy et nginx
 

@@ -106,6 +106,8 @@ The "Self-check" button on the overview page (also offered in the first-start on
 | Ports 80 / 443 | Whether each port is free, already in use, or cannot be listened on due to missing permission |
 | DDNS resolution | For records that use a dynamic address, whether the domain currently resolves to this machine's outbound address |
 | Certificates | Certificates that have expired or expire within 14 days |
+| HTTPS site certificates | Sites on enabled HTTPS listeners whose domains have no matching certificate (these domains fail during the TLS handshake) |
+| frp conflicts | Duplicate proxy names in frpc, and proxy name, domain or remote port conflicts reported by frps in the last 30 minutes of logs (common when several devices copy the same frpc config) |
 | Module status | Modules in a warning or error state on the overview |
 
 The self-check queries the configured public IP lookup services and runs only when you click it. Read-only accounts and API tokens cannot use it.

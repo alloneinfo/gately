@@ -36,12 +36,12 @@ Gately 完全開源，使用者和社群可以直接檢視原始碼與設定。�
 | 動態網域 | Alibaba Cloud、Cloudflare、Tencent Cloud、DNSPod、Huawei Cloud、GoDaddy、Porkbun、dynv6、DuckDNS、Amazon Route 53、OVHcloud、Gandi、NS1、Bunny DNS、Namecheap、DynDNS2（No-IP、Dynu 等）、自訂回呼；以 URL／網路卡／指令取得 IP；IPv4/IPv6；Webhook |
 | STUN 穿透 | TCP/UDP、保活、UPnP/NAT-PMP、內建轉發、位址變更時觸發 Webhook 與腳本 |
 | 連接埠轉發 | TCP/UDP、IPv4/IPv6、連接埠範圍、多目標故障轉移、連線數限制、流量統計、PROXY 協定（v1/v2）；SNI 分流，讓多個服務共用 443 等同一個連接埠（依網域 TLS 透傳、預設目標、每條路由可單獨設定 PROXY 協定） |
-| SSL 憑證 | ACME 自動簽發與續期，支援 DNS-01（萬用字元）與 HTTP-01（無需 DNS 服務商）、EAB、上傳、讀取檔案、對應到目錄並執行腳本 |
+| SSL 憑證 | ACME 自動簽發與續期，支援 DNS-01（萬用字元）與 HTTP-01（無需 DNS 服務商）、EAB、上傳、讀取檔案、對應到目錄並執行腳本；憑證更新後經 SSH 推送到其他主機並執行指令，或重新啟動使用憑證的 Docker 容器 |
 | Tailscale | 託管 tailscaled（使用者空間網路，容器友善）或接入系統既有的常駐程式；驗證金鑰／登入連結、Headscale、子網路由、出口節點、節點清單與 SOCKS5 代理、固定連接埠、tailscaled 額外參數與環境變數 |
 | frp | frpc 用戶端（tcp/udp/http/https/stcp/xtcp 代理，新增刪除即時生效）與 frps 伺服器端（連接埠白名單、子網域、主控台），可一鍵匯入舊版 ini／新版 toml 設定 |
 | Cloudflare 通道 | cloudflared 權杖通道與 trycloudflare 臨時通道，多通道、自動重啟、公開位址顯示 |
-| Web 服務 | 依網域反向代理／重新導向／靜態檔案／固定文字；HTTPS 與 HTTP/3（QUIC）；WebSocket；PROXY 協定收發；基本驗證、網頁驗證、GitHub/Google/QQ/OIDC 登入、支援 TOTP 二次驗證並可跨子網域單一登入的共用使用者、轉發認證到 Authelia 等外部服務；IP 黑白名單、路徑規則、臨時分享連結、驗證失敗自動封鎖、GeoIP 國家過濾；依路徑分流後端、HTTPS 後端依造訪網域傳送 SNI、後端權重／備援／負載平衡策略、主動與被動健康檢查、壓縮、限流、回應快取、路徑改寫；靜態站台支援無副檔名網址與自訂 404 頁面；修改站台不會中斷既有連線；分鐘級存取統計與 Prometheus 指標 |
-| WAF 防火牆 | Coraza + OWASP CRS v4，可依檔案啟用規則、自訂 SecLang、攔截／僅偵測 |
+| Web 服務 | 依網域反向代理／重新導向／靜態檔案／固定文字；HTTPS 與 HTTP/3（QUIC）；WebSocket；PROXY 協定收發；基本驗證、網頁驗證、GitHub/Google/QQ/OIDC 登入、支援 TOTP 二次驗證並可跨子網域單一登入的共用使用者、轉發認證到 Authelia 等外部服務；IP 黑白名單與定時重新整理的訂閱 IP 清單（如省市 IP 段）、路徑規則、臨時分享連結、驗證失敗自動封鎖、GeoIP 國家過濾；依路徑分流後端、HTTPS 後端依造訪網域傳送 SNI、後端權重／備援／負載平衡策略、主動與被動健康檢查、壓縮、限流、回應快取、路徑改寫；靜態站台支援無副檔名網址與自訂 404 頁面；修改站台不會中斷既有連線；分鐘級存取統計與 Prometheus 指標 |
+| WAF 防火牆 | Coraza + OWASP CRS v4，可依檔案啟用規則、自訂 SecLang、攔截／僅偵測；請求內容檢查上限可調，超過上限時只檢查前段或依路徑略過，網盤、WebDAV 等上傳站台也能掛上 WAF |
 | Docker 管理 | 容器建立與編輯、日誌與終端機、Compose、映像檔更新檢查與一鍵升級（失敗自動還原）、網路與磁碟區 |
 | Web 終端機 | SSH（主機金鑰首次信任）、Telnet、本機 Shell（預設關閉）；代理、持久工作階段、SFTP 檔案管理、2FA 與協定確認、快捷指令、分割畫面 |
 | 網路診斷 | Ping、路由追蹤、連接埠探測、DNS 查詢、測速、區域網路掃描 |
@@ -56,8 +56,8 @@ Gately 完全開源，使用者和社群可以直接檢視原始碼與設定。�
 | 安全與設定 | Passkey（WebAuthn）登入、兩步驟驗證（TOTP）、唯讀帳號、登入失敗限流、安全入口、僅內網存取、管理介面 HTTPS、多組 API 權杖（依模組讀寫授權）、自訂 DNS（支援 DoH）、時區、設定備份與還原、信任本機反向代理傳來的真實用戶端位址、依需求開關功能模組（關閉的模組不啟動服務、不提供介面） |
 | 飛牛原生應用 | 離線 `.fpk` 安裝包（x86 / ARM）；接入飛牛統一閘道，從飛牛桌面圖示開啟，遠端網域同樣可用；飛牛管理員可憑飛牛登入狀態直接登入（預設關閉）；以 root 執行，可監聽 80/443 並管理 Docker |
 | 稽核與歷史 | 操作稽核日誌：登入、設定變更、存取敏感內容（不記錄請求內容與任何金鑰）；每次覆寫設定檔前保留舊版本，可比對差異並一鍵回滾；宣告式設定目錄（`-apply`），便於 GitOps |
-| 監控與自檢 | 全域 Prometheus 指標 `/api/metrics`（憑證、DDNS、STUN、連接埠轉發、Web 服務），附 Grafana 儀表板；一鍵網路自檢（公網 IP、電信商 NAT（CGNAT）、系統時間、80/443 連接埠、DDNS 解析、憑證到期） |
-| 遷移 | 匯入 Lucky 的 `.lkcf` 或整站設定 zip：連接埠轉發、DDNS、STUN、憑證、反向代理、WAF、網路喚醒、Web 終端機、WebDAV、基礎設定 |
+| 監控與自檢 | 全域 Prometheus 指標 `/api/metrics`（憑證、DDNS、STUN、連接埠轉發、Web 服務），附 Grafana 儀表板；一鍵網路自檢（公網 IP、電信商 NAT（CGNAT）、系統時間、80/443 連接埠、DDNS 解析、憑證到期、HTTPS 站台缺少憑證、frp 代理衝突） |
+| 遷移 | 匯入 Lucky 的 `.lkcf` 或整站設定 zip：連接埠轉發、DDNS、STUN、憑證、反向代理、WAF、網路喚醒、Web 終端機、WebDAV、基礎設定；匯入 nginx 設定（支援 `nginx -T` 輸出）：反向代理與 upstream、靜態目錄、跳轉、分路徑後端、存取控制，`auth_request` 轉換為轉發認證 |
 
 ## 效能
 

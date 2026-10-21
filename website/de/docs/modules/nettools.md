@@ -106,6 +106,8 @@ Die Schaltfläche „Selbsttest“ auf der Übersichtsseite (auch im Einrichtung
 | Ports 80 / 443 | Ob sie frei, bereits belegt oder mangels Berechtigung nicht nutzbar sind |
 | DDNS-Auflösung | Ob die Domain von Einträgen mit dynamischer Adresse aktuell auf die ausgehende Adresse dieses Hosts auflöst |
 | Zertifikate | Abgelaufene oder innerhalb von 14 Tagen ablaufende Zertifikate |
+| Zertifikate der HTTPS-Sites | Welche Domains von Sites auf aktivierten HTTPS-Listenern kein passendes Zertifikat haben (diese Domains scheitern beim TLS-Handshake) |
+| frp-Konflikte | Doppelt benannte Proxys in frpc sowie Konflikte bei Proxy-Name, Domain oder Remote-Port, die frps in den Logs der letzten 30 Minuten meldet (häufig, wenn mehrere Geräte dieselbe frpc-Konfiguration kopiert haben) |
 | Modulstatus | Module, die in der Übersicht im Status Warnung oder Fehler stehen |
 
 Der Selbsttest ruft die konfigurierten Dienste zur Abfrage der öffentlichen IP auf, läuft nur auf Klick und steht Nur-Lese-Konten und API-Token nicht zur Verfügung.

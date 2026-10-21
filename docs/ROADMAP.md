@@ -55,6 +55,7 @@ web/                   前端工程，构建产物由 web/embed.go 嵌入
 | ✅ M7.5 组网穿透 | Tailscale、frp（frpc + frps）、cloudflared，以进程托管方式集成官方二进制 | 配置生成、进程守护与日志采集有单元测试；不内置上游程序 |
 | ✅ M8 可信与运维 | 操作审计日志、配置历史与回滚、声明式配置目录；Passkey 登录与只读账号；ACME HTTP-01；HTTP/3；全局 Prometheus 指标与 Grafana 面板；网络自检与首次启动引导；DDNS 新增 Route 53、OVH、Gandi、NS1、Bunny、Namecheap、DynDNS2；通知新增 ntfy、Gotify、Pushover、Discord、Slack、Server酱、PushPlus 与规则模板；发布产物 cosign 签名、构建来源证明与 SBOM；systemd 与 OpenWrt 服务模板 | WebAuthn 用软件验证器端到端测试；Route 53 签名经 AWS 官方 SigV4 测试向量校验；HTTP/3 用 quic-go 客户端实测 |
 | ✅ M8.5 安装与升级 | 飞牛 fnOS 原生应用（.fpk，接入统一网关与飞牛登录态）；Linux 二进制在线升级；OpenWrt 安装包（24.10 及以前的 .ipk、25.12 起的 .apk） | fpk 在飞牛虚拟机实测；OpenWrt 安装包在 24.10 / 25.12 官方 rootfs 容器与 iStoreOS 实测，CI 冒烟测试覆盖安装与卸载 |
+| ✅ M8.6 迁移与运维 | 导入 nginx 配置（`nginx -T`，含 include 展开、upstream、Authelia 的 `auth_request`）；证书自动部署（经 SSH 推送并执行命令、重启 Docker 容器）；WAF 请求体检查上限、超限只检查前段与按路径跳过；订阅 IP 列表（定时刷新、站点与路径规则引用）；自检增加 HTTPS 站点证书覆盖与 frp 代理冲突；在线升级支持四段版本号 | nginx 导入用真实生产配置（77 个站点、Authelia、upstream）验证；SSH 推送用 SFTP 测试服务端端到端测试；WAF 用 2 MB 请求体验证拒绝、只检查前段与跳过路径 |
 | M9 待定 | 全局 IP 过滤、多管理员与细粒度角色 | 视社区需求排期 |
 
 ## 设计取舍

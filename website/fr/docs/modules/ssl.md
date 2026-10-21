@@ -8,7 +8,8 @@
 - **ACME HTTP-01** : aucun fournisseur DNS requis, mais le port 80 de chaque domaine doit être joignable depuis Internet ; les certificats génériques ne sont pas pris en charge ;
 - Certificats génériques (joker) et EAB (par exemple ZeroSSL) ;
 - Import d'un certificat existant, ou lecture depuis des fichiers ;
-- Mappage vers un répertoire : après un changement de certificat, les fichiers sont écrits dans le répertoire indiqué et un script est exécuté, afin que les autres services puissent se recharger.
+- Mappage vers un répertoire : après un changement de certificat, les fichiers sont écrits dans le répertoire indiqué et un script est exécuté, afin que les autres services puissent se recharger ;
+- Déploiement automatique : après un changement de certificat, il est envoyé par SSH vers d'autres hôtes avec exécution d'une commande, ou les conteneurs Docker qui l'utilisent sont redémarrés.
 
 ## Validation HTTP-01
 
@@ -23,6 +24,17 @@ De nombreux accès Internet résidentiels (en Chine continentale notamment) bloq
 ## Mappage de certificat
 
 Une fois un certificat activé, Gately écrit `.crt`, `.key`, `.pem` et `_issuerCertificate.crt` dans le répertoire de mappage et exécute le script de changement.
+
+## Déploiement automatique
+
+Dans « Déploiement automatique » d'un certificat, vous pouvez ajouter plusieurs cibles de déploiement, exécutées automatiquement après l'émission, le renouvellement ou la mise à jour du certificat :
+
+- **Envoyer vers un hôte SSH** : choisissez une connexion SSH existante du [terminal web](/fr/docs/modules/terminal), dont l'adresse, la méthode d'authentification et le proxy sont réutilisés. Les fichiers du certificat (`<note>.crt`, `.key`, `.pem`, `_issuerCertificate.crt`, comme pour le mappage de certificat : la note est donc obligatoire) sont écrits dans le « Répertoire distant », puis la commande « Exécuter après l'envoi » s'exécute sur l'hôte distant, par exemple `systemctl reload nginx` ; elle peut utiliser `$certName`, `$certDir`, `$certFile` et `$keyFile`. Chaque fichier est d'abord écrit dans un fichier temporaire avec ses permissions, puis renommé pour remplacer l'ancien ; la clé privée a les permissions 0600 ;
+- **Redémarrer des conteneurs locaux** : après un changement de certificat, les conteneurs Docker choisis sont redémarrés l'un après l'autre. Utile pour les services dont le conteneur monte le répertoire de mappage et doit redémarrer pour charger le nouveau certificat.
+
+Le déploiement automatique ne fait jamais confiance à un hôte inconnu : connectez-vous une fois à la connexion SSH choisie depuis le terminal web pour enregistrer sa clé d'hôte avant tout envoi. En cas d'échec, le déploiement est retenté toutes les heures et déclenche l'événement « Certificat : échec du déploiement », auquel vous pouvez vous abonner dans le [Centre de notifications](/fr/docs/modules/notify). Le bouton « Déployer maintenant » de la carte du certificat ignore l'intervalle de nouvel essai, déploie immédiatement vers toutes les cibles activées et affiche le résultat de chacune.
+
+Lors de la modification d'un certificat, les déploiements dont les réglages de cible n'ont pas changé ne sont pas réexécutés ; modifier le répertoire distant, la commande ou les conteneurs déclenche un nouveau déploiement.
 
 ## Note de sécurité
 

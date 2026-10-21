@@ -106,6 +106,8 @@ Le bouton « Auto-diagnostic » de la page « Vue d'ensemble » (également acce
 | Ports 80 / 443 | Libres, déjà utilisés ou sans permission d'écoute |
 | Résolution DDNS | Vérifie que le domaine de chaque enregistrement à adresse dynamique se résout actuellement vers l'adresse de sortie de la machine |
 | Certificats | Certificats expirés ou expirant dans les 14 jours |
+| Certificats des sites HTTPS | Sur les écouteurs HTTPS activés, les sites dont des domaines n'ont aucun certificat correspondant (ces domaines échouent lors de la négociation TLS) |
+| Conflits frp | Proxys frpc portant le même nom, et conflits de nom de proxy, de domaine ou de port distant signalés par frps dans les journaux des 30 dernières minutes (fréquent quand plusieurs appareils copient la même configuration frpc) |
 | État des modules | Modules en état d'avertissement ou d'erreur dans la vue d'ensemble |
 
 L'auto-diagnostic interroge les services d'IP publique configurés, ne s'exécute que lors d'un clic et n'est pas disponible pour les comptes en lecture seule ni les jetons d'API.

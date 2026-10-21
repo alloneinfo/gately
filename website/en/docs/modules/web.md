@@ -94,7 +94,16 @@ Behavior:
 
 ### IP allowlist and blocklist
 
-"IP access control" on the site's "Security" page can be off, allowlist or blocklist. The list takes one IP or subnet per line (such as `192.168.1.0/24`).
+"IP access control" on the site's "Security" page can be off, allowlist or blocklist. The list takes one IP or subnet per line (such as `192.168.1.0/24`), and can also reference subscribed IP lists.
+
+### Subscribed IP lists
+
+Add lists under "Global settings → Subscribed IP lists": enter the URL and refresh interval (24 hours by default). Gately downloads each list on schedule and caches it in the configuration directory, so it works after a restart without network access. The content has one IP, CIDR or `start-end` range per line; anything after `#`, `;` or `//` is a comment. For Chinese provinces and cities you can use [metowolf/iplist](https://github.com/metowolf/iplist), for example `https://metowolf.github.io/iplist/data/cncity/440000.txt` (Guangdong).
+
+- Allowlists and blocklists of sites and path rules can reference several lists, checked together with the manually entered ranges; matching any of them counts as being on the list;
+- If downloaded content cannot be parsed (for example an error page was returned), the previous list is kept, the reason is shown on the list, and the download is retried an hour later;
+- Until a list has downloaded successfully it counts as empty: an allowlist therefore denies access, and a blocklist blocks nothing extra;
+- A list still referenced by a site cannot be deleted.
 
 ### Path rules
 
@@ -289,6 +298,18 @@ curl -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/webservice/m
 | `gately_upstream_up` | gauge | Whether a backend is healthy: 1 healthy, 0 unavailable (with label `upstream`) |
 
 All metrics carry the labels `listener` (listener name#listener key) and `site` (site name, or the first domain when unnamed).
+
+## Import nginx config {#import-nginx}
+
+"Import nginx" at the top of the page converts existing nginx sites into Gately listeners and sites. We recommend running `nginx -T` on the nginx host and pasting the full output: it contains every file pulled in by include, and Gately expands include the same way nginx does.
+
+- Preview first: sites are grouped by listening port, each with its type, backend or directory, source file and line number, plus anything that needs attention (directives using variables, regex locations, domains without a certificate, and so on). Sites that cannot be converted come with the reason;
+- Sites on the same port are merged into the existing listener, otherwise a new listener is created; domains that already exist are skipped, so importing again is safe;
+- Imports are disabled by default, so you can run alongside nginx and review them one by one before enabling. Tick "Enable right after import" to apply them immediately (a new listener fails to start while nginx still holds the same port);
+- What is converted: `proxy_pass` (including upstream weights, backup servers and load-balancing policies), `root` / `alias` static directories (`autoindex`, `try_files $uri.html`, `error_page 404`), `return` redirects and fixed content, whole-site `rewrite` redirects, `add_header`, `proxy_set_header`, `gzip`, `allow` / `deny`, location-level path backends, access control and redirects, and `listen ... proxy_protocol` and `quic`;
+- `auth_request` becomes forward auth: the auth endpoint comes from the `proxy_pass` of the auth subrequest location (`set` variables are supported) and the login redirect from `error_page 401 =302`, so common Authelia setups convert directly. When it is enabled only in some locations, the site's "Authentication scope" is limited to those paths, which become path rules set to "Authentication required";
+- `auth_basic` becomes basic authentication with shared users. nginx user files are not read, so nobody can get through until you add the users;
+- Configure TCP/UDP forwarding from `stream` in [Port Forwarding](/en/docs/modules/portforward). Certificates are not imported: when an HTTPS site has no certificate, the preview lists the certificate files nginx uses, and you can add them by file path on the [SSL Certificates](/en/docs/modules/ssl) page.
 
 ## Replacing haproxy and nginx
 

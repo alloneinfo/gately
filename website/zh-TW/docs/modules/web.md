@@ -94,7 +94,16 @@ https://auth.example.com/__gately_auth/oauth/callback
 
 ### IP 黑白名單
 
-站台「安全」頁的「IP 存取控制」可選關閉、白名單、黑名單，清單每行一個 IP 或網段（如 `192.168.1.0/24`）。
+站台「安全」頁的「IP 存取控制」可選關閉、白名單、黑名單，清單每行一個 IP 或網段（如 `192.168.1.0/24`），還可以同時引用訂閱的 IP 清單。
+
+### 訂閱 IP 清單
+
+在「全域設定 → 訂閱 IP 清單」新增清單：填寫下載網址與重新整理間隔（預設 24 小時），Gately 會定時下載並快取到設定目錄，重新啟動後無需連網即可使用。內容每行一個 IP、CIDR 或 `起始-結束` 範圍，`#`、`;`、`//` 之後為註解。例如省市 IP 段可使用 [metowolf/iplist](https://github.com/metowolf/iplist) 的 `https://metowolf.github.io/iplist/data/cncity/440000.txt`（廣東省）。
+
+- 站台與路徑規則的白名單、黑名單可以引用多個清單，與手動填寫的 IP 段一起判斷，符合任一項即視為在名單中；
+- 下載內容無法辨識（例如回傳了錯誤頁面）時保留上次的清單，並在清單上顯示原因，一小時後重試；
+- 清單下載成功前視為空清單：白名單因此拒絕存取，黑名單不額外攔截；
+- 仍被站台引用的清單無法刪除。
 
 ### 路徑規則
 
@@ -289,6 +298,18 @@ curl -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/webservice/m
 | `gately_upstream_up` | gauge | 後端是否健康，1 健康、0 無法使用（附標籤 `upstream`） |
 
 所有指標帶有標籤 `listener`（監聽名稱#監聽 key）與 `site`（站台名稱，未命名時取第一個網域）。
+
+## 匯入 nginx 設定 {#import-nginx}
+
+頁面頂端的「匯入 nginx」可以把現有的 nginx 站台轉換為 Gately 的監聽與站台。建議在 nginx 所在主機執行 `nginx -T`，把完整輸出貼上：輸出中包含 include 的所有檔案，Gately 會像 nginx 一樣展開 include。
+
+- 先預覽：依監聽連接埠分組列出每個站台的類型、後端或目錄、來源檔案與行號，以及需要留意的地方（使用了變數的指令、正規表示式 location、缺少憑證的網域等），無法轉換的站台會說明原因；
+- 相同連接埠的站台合併到既有監聽，否則新增監聽；已存在的網域會略過，可以重複匯入；
+- 預設匯入為停用狀態，方便與 nginx 並行逐一核對後再啟用；勾選「匯入後立即啟用」則立即生效（nginx 仍佔用相同連接埠時，新增的監聽會啟動失敗）；
+- 可轉換的內容：`proxy_pass`（含 upstream 的權重、備用與負載平衡策略）、`root` / `alias` 靜態目錄（`autoindex`、`try_files $uri.html`、`error_page 404`）、`return` 跳轉與固定內容、整站 `rewrite` 跳轉、`add_header`、`proxy_set_header`、`gzip`、`allow` / `deny`、location 層級的分路徑後端、存取控制與跳轉、`listen ... proxy_protocol` 與 `quic`；
+- `auth_request` 會轉換為轉發認證：驗證位址取自驗證子請求 location 的 `proxy_pass`（支援 `set` 變數），登入跳轉取自 `error_page 401 =302`，Authelia 的常見寫法可以直接轉換；只在部分 location 啟用時，轉換為只對指定路徑驗證（「驗證範圍」）；
+- `auth_basic` 轉換為使用共用使用者的基本驗證，nginx 的使用者檔案不會被讀取，補齊使用者之前任何人都無法通過；
+- `stream` 中的 TCP/UDP 轉發請在 [連接埠轉發](/zh-TW/docs/modules/portforward) 中設定；憑證不會匯入，HTTPS 站台缺少憑證時，預覽會列出 nginx 使用的憑證檔案，可在 [憑證](/zh-TW/docs/modules/ssl) 頁依檔案路徑新增。
 
 ## 取代 haproxy 與 nginx
 

@@ -36,12 +36,12 @@ Gately는 완전한 오픈소스로, 사용자와 커뮤니티가 소스 코드�
 | 동적 도메인 | Alibaba Cloud, Cloudflare, Tencent Cloud, DNSPod, Huawei Cloud, GoDaddy, Porkbun, dynv6, DuckDNS, Amazon Route 53, OVHcloud, Gandi, NS1, Bunny DNS, Namecheap, DynDNS2(No-IP, Dynu 등), 사용자 지정 콜백. URL/네트워크 카드/명령으로 IP 조회. IPv4/IPv6. Webhook |
 | STUN 터널링 | TCP/UDP, keep-alive, UPnP/NAT-PMP, 내장 포워딩, 주소 변경 시 Webhook 및 스크립트 실행 |
 | 포트 포워딩 | TCP/UDP, IPv4/IPv6, 포트 범위, 다중 대상 장애 조치, 연결 수 제한, 트래픽 통계, PROXY 프로토콜(v1/v2). SNI 라우팅으로 여러 서비스가 443 같은 포트 하나를 함께 사용(도메인별 TLS 패스스루, 기본 대상, 라우트별 PROXY 프로토콜 설정) |
-| SSL 인증서 | DNS-01(와일드카드) 또는 HTTP-01(DNS 제공업체 불필요) 방식의 ACME 자동 발급 및 갱신, EAB, 업로드, 파일 읽기, 디렉터리 매핑 및 스크립트 실행 |
+| SSL 인증서 | DNS-01(와일드카드) 또는 HTTP-01(DNS 제공업체 불필요) 방식의 ACME 자동 발급 및 갱신, EAB, 업로드, 파일 읽기, 디렉터리 매핑 및 스크립트 실행. 인증서가 갱신되면 SSH로 다른 호스트에 업로드하고 명령 실행, 또는 인증서를 쓰는 Docker 컨테이너 재시작 |
 | Tailscale | tailscaled 관리(유저스페이스 네트워킹, 컨테이너 친화적) 또는 시스템에 이미 있는 데몬에 연결. 인증 키/로그인 링크, Headscale, 서브넷 라우트, 출구 노드, 노드 목록과 SOCKS5 프록시, 고정 포트, tailscaled 추가 인수 및 환경 변수 |
 | frp | frpc 클라이언트(tcp/udp/http/https/stcp/xtcp 프록시, 추가·삭제 즉시 적용)와 frps 서버(포트 허용 목록, 서브도메인, 대시보드). 기존 ini / 신규 toml 설정을 한 번에 가져올 수 있음 |
 | Cloudflare 터널 | cloudflared 토큰 터널과 trycloudflare 임시 터널, 다중 터널, 자동 재시작, 공개 주소 표시 |
-| 웹 서비스 | 도메인별 리버스 프록시/리디렉션/정적 파일/고정 텍스트. HTTPS 및 HTTP/3(QUIC). WebSocket. PROXY 프로토콜 송수신. 기본 인증, 웹 인증, GitHub/Google/QQ/OIDC 로그인, TOTP 2단계 인증과 하위 도메인 간 통합 로그인(SSO)을 지원하는 공유 사용자, Authelia 같은 외부 서비스로의 포워드 인증. IP 허용/차단 목록, 경로 규칙, 임시 공유 링크, 인증 실패 시 자동 차단, GeoIP 국가 필터링. 경로별 백엔드, 방문한 도메인을 SNI로 보내는 HTTPS 백엔드, 백엔드 가중치/백업/로드 밸런싱 정책, 능동·수동 헬스 체크, 압축, 속도 제한, 응답 캐시, 경로 재작성. 확장자 없는 URL과 사용자 지정 404 페이지를 지원하는 정적 사이트. 사이트를 수정해도 기존 연결이 끊기지 않음. 분 단위 접속 통계와 Prometheus 메트릭 |
-| WAF 방화벽 | Coraza + OWASP CRS v4, 파일 단위 규칙 활성화, 사용자 지정 SecLang, 차단/탐지 전용 |
+| 웹 서비스 | 도메인별 리버스 프록시/리디렉션/정적 파일/고정 텍스트. HTTPS 및 HTTP/3(QUIC). WebSocket. PROXY 프로토콜 송수신. 기본 인증, 웹 인증, GitHub/Google/QQ/OIDC 로그인, TOTP 2단계 인증과 하위 도메인 간 통합 로그인(SSO)을 지원하는 공유 사용자, Authelia 같은 외부 서비스로의 포워드 인증. IP 허용/차단 목록과 주기적으로 갱신되는 구독 IP 목록(예: 지역별 IP 대역), 경로 규칙, 임시 공유 링크, 인증 실패 시 자동 차단, GeoIP 국가 필터링. 경로별 백엔드, 방문한 도메인을 SNI로 보내는 HTTPS 백엔드, 백엔드 가중치/백업/로드 밸런싱 정책, 능동·수동 헬스 체크, 압축, 속도 제한, 응답 캐시, 경로 재작성. 확장자 없는 URL과 사용자 지정 404 페이지를 지원하는 정적 사이트. 사이트를 수정해도 기존 연결이 끊기지 않음. 분 단위 접속 통계와 Prometheus 메트릭 |
+| WAF 방화벽 | Coraza + OWASP CRS v4, 파일 단위 규칙 활성화, 사용자 지정 SecLang, 차단/탐지 전용. 요청 본문 검사 한도를 조정할 수 있고 한도 초과 시 앞부분만 검사하거나 경로별로 건너뛸 수 있어 클라우드 드라이브, WebDAV 같은 업로드 사이트에도 WAF 적용 가능 |
 | Docker 관리 | 컨테이너 생성 및 편집, 로그와 터미널, Compose, 이미지 업데이트 확인 및 원클릭 업그레이드(실패 시 자동 롤백), 네트워크와 볼륨 |
 | 웹 터미널 | SSH(호스트 키 최초 신뢰), Telnet, 로컬 셸(기본 비활성). 프록시, 지속 세션, SFTP 파일 관리, 2FA 및 프로토콜 확인, 빠른 명령, 화면 분할 |
 | 네트워크 진단 | Ping, 경로 추적, 포트 탐색, DNS 조회, 속도 측정, LAN 스캔 |
@@ -56,8 +56,8 @@ Gately는 완전한 오픈소스로, 사용자와 커뮤니티가 소스 코드�
 | 보안 및 설정 | 패스키(WebAuthn) 로그인, 2단계 인증(TOTP), 읽기 전용 계정, 로그인 실패 속도 제한, 보안 진입점, 내부망 전용 접속, 관리 UI의 HTTPS, 다중 API 토큰(모듈별 읽기/쓰기 권한), 사용자 지정 DNS(DoH 지원), 시간대, 설정 백업 및 복원, 로컬 리버스 프록시가 전달한 실제 클라이언트 주소 신뢰, 기능 모듈 켜기/끄기(비활성 모듈은 서비스를 시작하지 않고 API도 제공하지 않음) |
 | fnOS 네이티브 앱 | 오프라인 `.fpk` 패키지(x86 / ARM). fnOS 통합 게이트웨이와 연동되어 fnOS 바탕 화면 아이콘으로 열고 fnOS 원격 도메인으로도 접속. fnOS 관리자는 fnOS 로그인 상태로 로그인 가능(기본 비활성). 80/443 수신과 Docker 관리를 위해 root로 실행 |
 | 감사 및 이력 | 로그인, 설정 변경, 민감한 콘텐츠 접근을 기록하는 감사 로그(요청 본문과 비밀 값은 기록하지 않음). 덮어쓴 설정 파일마다 이전 버전을 보관하며 차이 비교와 원클릭 롤백 지원. GitOps용 선언적 설정 디렉터리(`-apply`) |
-| 모니터링 및 자가 점검 | 전역 Prometheus 엔드포인트 `/api/metrics`(인증서, DDNS, STUN, 포트 포워딩, 웹 서비스)와 바로 쓸 수 있는 Grafana 대시보드. 원클릭 네트워크 자가 점검(공인 IP, CGNAT, 시스템 시간, 80/443 포트, DDNS 해석, 인증서 만료) |
-| 마이그레이션 | Lucky의 `.lkcf` 또는 전체 사이트 설정 zip 가져오기: 포트 포워딩, DDNS, STUN, 인증서, 리버스 프록시, WAF, Wake-on-LAN, 웹 터미널, WebDAV, 기본 설정 |
+| 모니터링 및 자가 점검 | 전역 Prometheus 엔드포인트 `/api/metrics`(인증서, DDNS, STUN, 포트 포워딩, 웹 서비스)와 바로 쓸 수 있는 Grafana 대시보드. 원클릭 네트워크 자가 점검(공인 IP, CGNAT, 시스템 시간, 80/443 포트, DDNS 해석, 인증서 만료, 인증서가 없는 HTTPS 사이트, frp 프록시 충돌) |
+| 마이그레이션 | Lucky의 `.lkcf` 또는 전체 사이트 설정 zip 가져오기: 포트 포워딩, DDNS, STUN, 인증서, 리버스 프록시, WAF, Wake-on-LAN, 웹 터미널, WebDAV, 기본 설정. nginx 설정 가져오기(`nginx -T` 출력 지원): 리버스 프록시와 upstream, 정적 디렉터리, 리디렉션, 경로별 백엔드, 접근 제어, `auth_request`는 포워드 인증으로 변환 |
 
 ## 성능
 

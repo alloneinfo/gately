@@ -106,6 +106,8 @@ El botón «Autodiagnóstico» de la página «Resumen» (también disponible en
 | Puertos 80 / 443 | Si están libres, ya ocupados o sin permiso para escuchar |
 | Resolución DDNS | Si el dominio de cada registro con dirección dinámica resuelve ahora a la dirección de salida de este equipo |
 | Certificados | Certificados caducados o que caducan en los próximos 14 días |
+| Certificados de sitios HTTPS | En los listeners HTTPS activados, qué dominios de sitio no tienen un certificado que los cubra (esos dominios fallan en el handshake TLS) |
+| Conflictos de frp | Proxies de frpc con nombres repetidos, y conflictos de nombre de proxy, dominio o puerto remoto que frps haya notificado en los registros de los últimos 30 minutos (habitual cuando varios equipos copian la misma configuración de frpc) |
 | Estado de los módulos | Módulos en estado de advertencia o error en el resumen |
 
 El autodiagnóstico consulta los servicios de IP pública configurados, solo se ejecuta al pulsar el botón y no está disponible para cuentas de solo lectura ni tokens de API.

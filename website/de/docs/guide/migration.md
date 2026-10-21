@@ -4,6 +4,10 @@
 
 Gately liest die `.lkcf`-Konfigurationsdateien von Lucky oder das Zip der gesamten Site, das Lucky über „Konfiguration sichern“ exportiert, und übernimmt Regeln, Aufgaben und Zertifikate. Lucky muss dafür nicht deinstalliert werden; beide lassen sich parallel betreiben und Modul für Modul umschalten.
 
+::: tip Migration von nginx
+Diese Anleitung beschreibt die Migration von Lucky. Bestehende nginx-Sites lassen sich direkt unter „Web-Dienste → nginx importieren“ übernehmen, siehe [Web-Dienste · nginx-Konfiguration importieren](/de/docs/modules/web#import-nginx).
+:::
+
 ## 1. Vorbereitung
 
 1. Suchen Sie das Konfigurationsverzeichnis von Lucky: Bei Docker-Bereitstellungen ist es meist das Host-Verzeichnis, das auf `/app/conf` im Container abgebildet ist; darin liegen Dateien wie `lucky_base.lkcf` und `lucky_ddns.lkcf`.

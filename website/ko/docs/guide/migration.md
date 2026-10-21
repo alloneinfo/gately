@@ -4,6 +4,10 @@
 
 Gately는 Lucky의 `.lkcf` 설정 파일이나 Lucky의 「설정 백업」으로 내보낸 사이트 전체 zip을 직접 읽어 규칙, 작업, 인증서를 가져옵니다. Lucky를 삭제할 필요가 없으므로 두 프로그램을 함께 두고 모듈 단위로 하나씩 전환할 수 있습니다.
 
+::: tip nginx에서 마이그레이션
+이 문서는 Lucky에서 옮기는 방법을 설명합니다. 기존 nginx 사이트는 「웹 서비스 → nginx 가져오기」에서 바로 가져올 수 있습니다. [웹 서비스 · nginx 설정 가져오기](/ko/docs/modules/web#import-nginx)를 참고하세요.
+:::
+
 ## 1. 준비
 
 1. Lucky의 설정 디렉터리를 찾습니다. Docker 배포라면 보통 컨테이너의 `/app/conf`에 매핑된 호스트 디렉터리이며 `lucky_base.lkcf`, `lucky_ddns.lkcf` 등의 파일이 들어 있습니다.

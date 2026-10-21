@@ -94,7 +94,16 @@ Verhalten:
 
 ### IP-Allowlist und -Blocklist
 
-„IP-Zugriffskontrolle“ auf der Seite „Sicherheit“ der Site kann aus, Allowlist oder Blocklist sein. Die Liste nimmt je Zeile eine IP oder ein Subnetz auf (etwa `192.168.1.0/24`).
+„IP-Zugriffskontrolle“ auf der Seite „Sicherheit“ der Site kann aus, Allowlist oder Blocklist sein. Die Liste nimmt je Zeile eine IP oder ein Subnetz auf (etwa `192.168.1.0/24`); zusätzlich lassen sich abonnierte IP-Listen einbinden.
+
+### Abonnierte IP-Listen
+
+Legen Sie Listen unter „Globale Einstellungen → Abonnierte IP-Listen“ an: Geben Sie die URL und das Aktualisierungsintervall an (standardmäßig 24 Stunden). Gately lädt die Liste regelmäßig herunter und speichert sie im Konfigurationsverzeichnis, sodass sie nach einem Neustart auch ohne Internetverbindung verfügbar ist. Der Inhalt enthält je Zeile eine IP, ein CIDR oder einen Bereich `Start-Ende`; alles nach `#`, `;` oder `//` gilt als Kommentar. IP-Bereiche chinesischer Provinzen und Städte liefert etwa [metowolf/iplist](https://github.com/metowolf/iplist), zum Beispiel `https://metowolf.github.io/iplist/data/cncity/440000.txt` (Provinz Guangdong).
+
+- Allowlist und Blocklist von Sites und Pfadregeln können mehrere Listen verwenden; sie werden zusammen mit den manuell eingetragenen Bereichen geprüft, ein Treffer in einem beliebigen Eintrag genügt;
+- Lässt sich der heruntergeladene Inhalt nicht lesen (etwa weil eine Fehlerseite zurückkam), bleibt die vorherige Liste erhalten, der Grund wird an der Liste angezeigt und nach einer Stunde erneut versucht;
+- Bis eine Liste erfolgreich heruntergeladen ist, gilt sie als leer: Eine Allowlist verweigert dann den Zugriff, eine Blocklist sperrt nichts zusätzlich;
+- Listen, die noch von einer Site verwendet werden, lassen sich nicht löschen.
 
 ### Pfadregeln
 
@@ -289,6 +298,18 @@ curl -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/webservice/m
 | `gately_upstream_up` | gauge | Ob ein Backend gesund ist: 1 gesund, 0 nicht verfügbar (mit Label `upstream`) |
 
 Alle Metriken tragen die Labels `listener` (Listener-Name#Listener-Schlüssel) und `site` (Site-Name oder, falls unbenannt, die erste Domain).
+
+## nginx-Konfiguration importieren {#import-nginx}
+
+Mit „nginx importieren“ oben auf der Seite lassen sich bestehende nginx-Sites in Listener und Sites von Gately umwandeln. Empfohlen ist, auf dem nginx-Host `nginx -T` auszuführen und die vollständige Ausgabe einzufügen: Sie enthält alle per include eingebundenen Dateien, und Gately löst die includes genauso auf wie nginx.
+
+- Zuerst die Vorschau: Gruppiert nach Port zeigt sie für jede Site Typ, Backend oder Verzeichnis, Quelldatei mit Zeilennummer und Punkte, die Aufmerksamkeit brauchen (Direktiven mit Variablen, Regex-locations, Domains ohne Zertifikat usw.); bei Sites, die sich nicht umwandeln lassen, wird der Grund genannt;
+- Sites auf einem bereits vorhandenen Port werden dem bestehenden Listener hinzugefügt, sonst entsteht ein neuer Listener; vorhandene Domains werden übersprungen, sodass sich der Import wiederholen lässt;
+- Standardmäßig wird deaktiviert importiert, damit Sie parallel zu nginx eine Site nach der anderen prüfen und dann aktivieren können. Mit „Nach dem Import sofort aktivieren“ gilt alles sofort (belegt nginx denselben Port noch, startet ein neuer Listener nicht);
+- Umgewandelt werden: `proxy_pass` (einschließlich Gewichtung, Backup und Lastverteilungsstrategie aus upstream), statische Verzeichnisse per `root` / `alias` (`autoindex`, `try_files $uri.html`, `error_page 404`), Weiterleitungen und feste Inhalte per `return`, seitenweite `rewrite`-Weiterleitungen, `add_header`, `proxy_set_header`, `gzip`, `allow` / `deny`, Backends, Zugriffskontrolle und Weiterleitungen pro location sowie `listen ... proxy_protocol` und `quic`;
+- `auth_request` wird zu Forward-Auth: Die Authentifizierungsadresse stammt aus dem `proxy_pass` der location für die Auth-Subanfrage (`set`-Variablen werden unterstützt), die Anmeldeweiterleitung aus `error_page 401 =302`; gängige Authelia-Konfigurationen lassen sich direkt übernehmen. Ist es nur in einzelnen locations aktiv, wird daraus eine Authentifizierung nur für die betreffenden Pfade;
+- `auth_basic` wird zu Basic-Authentifizierung mit gemeinsamen Benutzern. Die Benutzerdatei von nginx wird nicht gelesen; bis Sie Benutzer anlegen, kommt niemand durch;
+- TCP/UDP-Weiterleitungen aus `stream` richten Sie in der [Portweiterleitung](/de/docs/modules/portforward) ein. Zertifikate werden nicht importiert: Fehlt einer HTTPS-Site ein Zertifikat, nennt die Vorschau die von nginx verwendeten Zertifikatsdateien, die Sie auf der Seite [Zertifikate](/de/docs/modules/ssl) per Dateipfad hinzufügen können.
 
 ## haproxy und nginx ersetzen
 
