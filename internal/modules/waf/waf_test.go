@@ -192,3 +192,137 @@ func TestJSONFieldNamesNotLFI(t *testing.T) {
 		t.Fatalf("查询参数名中的敏感文件名应被拦截: %d", c)
 	}
 }
+
+// post 以 POST 提交请求体，并确认后端收到的请求体完整无缺。
+func post(t *testing.T, h http.Handler, target, body string) int {
+	t.Helper()
+	req := httptest.NewRequest("POST", target, strings.NewReader(body))
+	req.Header.Set("User-Agent", "Mozilla/5.0")
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.RemoteAddr = "203.0.113.7:4000"
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+	if rec.Code == http.StatusOK && rec.Body.String() != body {
+		t.Fatalf("后端收到的请求体不完整: %d / %d 字节", rec.Body.Len(), len(body))
+	}
+	return rec.Code
+}
+
+// echo 原样返回请求体，用于检查经过 WAF 后请求体是否完整。
+var echo = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { _, _ = io.Copy(w, r.Body) })
+
+func TestRequestBodyLimit(t *testing.T) {
+	crs := []RuleSet{{Enable: true, Type: RuleCRS}}
+	big := "data=" + strings.Repeat("a", 2<<20)
+	attack := "q=" + url.QueryEscape("1' OR '1'='1' UNION SELECT password FROM users--") + "&"
+	m := newModule(t,
+		Instance{Key: "reject", Name: "reject", Enable: true, BodyLimitMB: 1, RuleSets: crs},
+		Instance{Key: "partial", Name: "partial", Enable: true, BodyLimitMB: 1, BodyLimitAction: BodyLimitPartial, RuleSets: crs},
+		Instance{Key: "skip", Name: "skip", Enable: true, BodyLimitMB: 1, SkipBodyPaths: "/upload\n/dav/", RuleSets: crs},
+	)
+	if c := post(t, m.Middleware("reject", echo), "/", big); c != http.StatusRequestEntityTooLarge {
+		t.Fatalf("超过上限且为 reject 时应返回 413: %d", c)
+	}
+	h := m.Middleware("partial", echo)
+	if c := post(t, h, "/", big); c != http.StatusOK {
+		t.Fatalf("partial 模式应放行超过上限的请求体: %d", c)
+	}
+	if c := post(t, h, "/", attack+big); c != http.StatusForbidden {
+		t.Fatalf("partial 模式仍应检查前面的部分: %d", c)
+	}
+	h = m.Middleware("skip", echo)
+	if c := post(t, h, "/upload/file", attack+big); c != http.StatusOK {
+		t.Fatalf("跳过路径下不应检查请求体: %d", c)
+	}
+	if c := post(t, h, "/other", attack); c != http.StatusForbidden {
+		t.Fatalf("其他路径仍应检查请求体: %d", c)
+	}
+	if c := status(t, h, "/upload/?id="+url.QueryEscape("1' OR '1'='1' UNION SELECT password FROM users--")); c != http.StatusForbidden {
+		t.Fatalf("跳过路径下仍应检查 URL 参数: %d", c)
+	}
+}
+
+func TestBodyLimitValidate(t *testing.T) {
+	bad := []Instance{
+		{Name: "a", BodyLimitMB: -1},
+		{Name: "a", BodyLimitMB: maxBodyLimitMB + 1},
+		{Name: "a", BodyLimitAction: "drop"},
+		{Name: "a", SkipBodyPaths: "upload"},
+		{Name: "a", SkipBodyPaths: "/a\"b"},
+	}
+	for _, in := range bad {
+		if err := in.Validate(); err == nil {
+			t.Errorf("应拒绝无效配置: %+v", in)
+		}
+	}
+	in := Instance{Name: "a", SkipBodyPaths: "  /upload \n\n/dav/"}
+	if err := in.Validate(); err != nil || in.SkipBodyPaths != "/upload\n/dav/" || in.BodyLimitAction != BodyLimitReject {
+		t.Fatalf("应整理路径并补全默认值: %v %+v", err, in)
+	}
+}
+
+// do 发送指定方法、请求头与请求体，返回状态码。
+func do(t *testing.T, h http.Handler, method, target string, hdr map[string]string, body string) int {
+	t.Helper()
+	req := httptest.NewRequest(method, target, strings.NewReader(body))
+	req.Header.Set("User-Agent", "Mozilla/5.0")
+	req.Header.Set("Accept", "*/*")
+	for k, v := range hdr {
+		req.Header.Set(k, v)
+	}
+	req.RemoteAddr = "203.0.113.7:4000"
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+	return rec.Code
+}
+
+func TestExpectAndWebDAV(t *testing.T) {
+	crs := []RuleSet{{Enable: true, Type: RuleCRS}}
+	m := newModule(t,
+		Instance{Key: "plain", Name: "plain", Enable: true, RuleSets: crs},
+		Instance{Key: "dav", Name: "dav", Enable: true, WebDAV: true, BodyLimitMB: 1, BodyLimitAction: BodyLimitPartial, RuleSets: crs},
+	)
+	plain, dav := m.Middleware("plain", echo), m.Middleware("dav", echo)
+	form := map[string]string{"Content-Type": "application/x-www-form-urlencoded", "Expect": "100-continue"}
+	// curl 等客户端上传时带的 Expect: 100-continue 不应被当作受限请求头拦截
+	if c := do(t, plain, "POST", "/", form, "a=1"); c != http.StatusOK {
+		t.Fatalf("带 Expect 头的普通上传应放行: %d", c)
+	}
+	davHdr := map[string]string{"Content-Type": "application/xml", "Depth": "1", "Lock-Token": "<opaquelocktoken:1>", "If": "(<opaquelocktoken:1>)"}
+	if c := do(t, plain, "PROPFIND", "/dav/", davHdr, "<propfind/>"); c != http.StatusForbidden {
+		t.Fatalf("默认实例应拦截 WebDAV 方法与锁请求头: %d", c)
+	}
+	if c := do(t, dav, "PROPFIND", "/dav/", davHdr, "<propfind/>"); c != http.StatusOK {
+		t.Fatalf("WebDAV 兼容模式应放行 PROPFIND 与锁请求头: %d", c)
+	}
+	for _, method := range []string{"MKCOL", "MOVE", "COPY", "LOCK", "UNLOCK", "DELETE"} {
+		if c := do(t, dav, method, "/dav/a", map[string]string{"Destination": "/dav/b"}, ""); c != http.StatusOK {
+			t.Fatalf("WebDAV 兼容模式应放行 %s: %d", method, c)
+		}
+	}
+	upload := map[string]string{"Content-Type": "image/jpeg", "Content-Range": "bytes 0-9/100", "Expect": "100-continue"}
+	if c := do(t, plain, "PUT", "/dav/a.jpg", upload, strings.Repeat("x", 10)); c != http.StatusForbidden {
+		t.Fatalf("默认实例应拦截 PUT 与非白名单内容类型: %d", c)
+	}
+	if c := do(t, dav, "PUT", "/dav/a.jpg", upload, strings.Repeat("x", 3<<20)); c != http.StatusOK {
+		t.Fatalf("WebDAV 兼容模式应放行任意内容类型的大文件上传: %d", c)
+	}
+	// 二进制文件内容里难免出现像注入语句的片段，WebDAV 模式下 PUT 与 octet-stream 不检查请求体
+	binary := "a=1&q=" + url.QueryEscape("1' OR '1'='1' UNION SELECT password FROM users--") + "&<script>alert(1)</script>"
+	if c := do(t, dav, "PUT", "/dav/a.bin", map[string]string{"Content-Type": "application/octet-stream"}, binary); c != http.StatusOK {
+		t.Fatalf("WebDAV 兼容模式不应检查 PUT 的文件内容: %d", c)
+	}
+	if c := do(t, dav, "PUT", "/dav/noctype.bin", nil, binary); c != http.StatusOK {
+		t.Fatalf("WebDAV 兼容模式应放行不带 Content-Type 的 PUT: %d", c)
+	}
+	if c := do(t, dav, "POST", "/dav/raw", map[string]string{"Content-Type": "application/octet-stream"}, binary); c != http.StatusOK {
+		t.Fatalf("WebDAV 兼容模式不应检查 octet-stream 请求体: %d", c)
+	}
+	attack := map[string]string{"Content-Type": "application/x-www-form-urlencoded"}
+	if c := do(t, dav, "POST", "/form", attack, binary); c != http.StatusForbidden {
+		t.Fatalf("WebDAV 兼容模式仍应检查表单请求体: %d", c)
+	}
+	if c := do(t, dav, "POST", "/?id="+url.QueryEscape("1' OR '1'='1' UNION SELECT password FROM users--"), attack, "a=1"); c != http.StatusForbidden {
+		t.Fatalf("WebDAV 兼容模式仍应拦截注入攻击: %d", c)
+	}
+}

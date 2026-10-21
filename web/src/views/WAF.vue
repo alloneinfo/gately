@@ -28,6 +28,7 @@
           <span v-if="!(w.ruleSets ?? []).length" class="muted">{{ t('common.none') }}</span>
         </Field>
         <Field :label="t('waf.thresholdParanoia')">{{ t('waf.thresholdValue', { inbound: w.inboundThreshold, outbound: w.outboundThreshold, level: w.paranoia }) }}</Field>
+        <Field :label="t('waf.bodyCheck')">{{ bodySummary(w) }}</Field>
         <Field :label="t('waf.blocked')"><span :class="{ 'text-danger': w.blocked > 0 }">{{ w.blocked }}</span></Field>
         <Field :label="t('waf.matched')">{{ w.matched }}</Field>
         <template v-if="w.error && w.enable" #extra>
@@ -61,6 +62,27 @@
         </el-form-item>
         <el-form-item :label="t('waf.inbound')"><el-input-number v-model="editing.inboundThreshold" :min="1" :max="100" /></el-form-item>
         <el-form-item :label="t('waf.outbound')"><el-input-number v-model="editing.outboundThreshold" :min="1" :max="100" /></el-form-item>
+        <el-divider content-position="left">{{ t('waf.bodyCheck') }}</el-divider>
+        <el-form-item :label="t('waf.bodyLimit')">
+          <el-input-number v-model="editing.bodyLimitMB" :min="0" :max="1024" />
+          <span class="unit">MB</span>
+          <span class="help">{{ t('waf.bodyLimitHelp') }}</span>
+        </el-form-item>
+        <el-form-item :label="t('waf.bodyLimitAction')">
+          <el-radio-group v-model="editing.bodyLimitAction">
+            <el-radio-button value="reject">{{ t('waf.bodyLimitReject') }}</el-radio-button>
+            <el-radio-button value="partial">{{ t('waf.bodyLimitPartial') }}</el-radio-button>
+          </el-radio-group>
+          <div class="help block">{{ editing.bodyLimitAction === 'partial' ? t('waf.bodyLimitPartialHelp') : t('waf.bodyLimitRejectHelp') }}</div>
+        </el-form-item>
+        <el-form-item :label="t('waf.webdav')">
+          <el-switch v-model="editing.webdav" />
+          <div class="help block">{{ t('waf.webdavHelp') }}</div>
+        </el-form-item>
+        <el-form-item :label="t('waf.skipBodyPaths')">
+          <el-input v-model="editing.skipBodyPaths" type="textarea" :rows="3" class="mono" :placeholder="'/api/upload\n/remote.php/dav/'" />
+          <div class="help block">{{ t('waf.skipBodyPathsHelp') }}</div>
+        </el-form-item>
         <el-divider content-position="left">{{ t('waf.ruleSets') }}</el-divider>
         <div v-for="(r, i) in editing.ruleSets" :key="i" class="ruleset">
           <div class="ruleset-head">
@@ -130,6 +152,10 @@ interface Instance {
   inboundThreshold: number
   outboundThreshold: number
   ruleSets: RuleSet[]
+  bodyLimitMB: number
+  bodyLimitAction: string
+  skipBodyPaths: string
+  webdav: boolean
   remark: string
 }
 
@@ -151,7 +177,15 @@ const editing = ref<Instance>(empty())
 let timer: number | undefined
 
 function empty(): Instance {
-  return { name: '', enable: true, mode: 'block', paranoia: 1, inboundThreshold: 5, outboundThreshold: 4, ruleSets: [{ enable: true, remark: t('waf.defaultRuleSetRemark'), type: 'crs', param: '' }], remark: '' }
+  return { name: '', enable: true, mode: 'block', paranoia: 1, inboundThreshold: 5, outboundThreshold: 4, ruleSets: [{ enable: true, remark: t('waf.defaultRuleSetRemark'), type: 'crs', param: '' }], bodyLimitMB: 0, bodyLimitAction: 'reject', skipBodyPaths: '', webdav: false, remark: '' }
+}
+
+// bodySummary 概括请求体检查设置：上限、超限处理方式与跳过的路径数
+function bodySummary(w: InstanceView) {
+  const limit = w.bodyLimitMB ? `${w.bodyLimitMB} MB` : t('waf.bodyLimitDefault')
+  const action = w.bodyLimitAction === 'partial' ? t('waf.bodyLimitPartial') : t('waf.bodyLimitReject')
+  const skipped = (w.skipBodyPaths ?? '').split('\n').filter(Boolean).length
+  return t('waf.bodySummary', { limit, action }) + (skipped ? t('waf.bodySummarySkip', { count: skipped }) : '') + (w.webdav ? t('waf.bodySummaryWebdav') : '')
 }
 
 // instStatus 计算实例展示状态：停用的实例只显示“已停用”
@@ -178,6 +212,9 @@ function openEditor(row?: InstanceView) {
     const { error: _e, blocked: _b, matched: _m, ...inst } = row
     editing.value = JSON.parse(JSON.stringify(inst))
     editing.value.ruleSets = editing.value.ruleSets ?? []
+    editing.value.bodyLimitAction = editing.value.bodyLimitAction || 'reject'
+    editing.value.skipBodyPaths = editing.value.skipBodyPaths ?? ''
+    editing.value.bodyLimitMB = editing.value.bodyLimitMB ?? 0
   } else {
     editing.value = empty()
   }
@@ -275,6 +312,10 @@ onBeforeUnmount(() => window.clearInterval(timer))
 }
 .remark {
   margin-top: 16px;
+}
+.unit {
+  margin: 0 10px 0 6px;
+  color: var(--el-text-color-secondary);
 }
 @media (max-width: 767.98px) {
   .slider {

@@ -44,6 +44,36 @@ const (
 	ModeDetect = "detect"
 )
 
+// 请求体超过检查上限时的处理方式
+const (
+	// BodyLimitReject 直接拒绝（413），与 Coraza 默认行为一致
+	BodyLimitReject = "reject"
+	// BodyLimitPartial 只检查前面不超过上限的部分，其余内容原样转发，适合上传大文件的站点
+	BodyLimitPartial = "partial"
+)
+
+// 请求体检查上限（MB）：0 表示沿用 Coraza 默认的 12.5 MB；Coraza 硬性上限为 1 GiB
+const (
+	defaultBodyLimitBytes = 13107200
+	maxBodyLimitMB        = 1024
+)
+
+// CRS 4 默认的受限请求头（REQUEST-901 中 tx.restricted_headers_basic 的默认值）。
+// Expect 始终放行：curl、WebDAV 客户端上传较大的内容时会带 Expect: 100-continue，Go 的 HTTP 服务会自行处理；
+// WebDAV 兼容模式另外放行锁与断点续传用到的 Lock-Token、If、Content-Range。
+var (
+	restrictedHeaders       = "/content-encoding/ /proxy/ /lock-token/ /content-range/ /if/ /x-http-method-override/ /x-http-method/ /x-method-override/ /x-middleware-subrequest/"
+	restrictedHeadersWebDAV = "/content-encoding/ /proxy/ /x-http-method-override/ /x-http-method/ /x-method-override/ /x-middleware-subrequest/"
+	webdavMethods           = "GET HEAD POST OPTIONS PUT PATCH DELETE PROPFIND PROPPATCH MKCOL COPY MOVE LOCK UNLOCK"
+)
+
+// skipBodyRuleBaseID 是“按路径跳过请求体检查”生成规则的起始 ID，webdavRuleBaseID 是 WebDAV 兼容模式规则的起始 ID，
+// 都避开 CRS 使用的 9xxxxx 段
+const (
+	skipBodyRuleBaseID = 8810000
+	webdavRuleBaseID   = 8811000
+)
+
 // RuleSet 是实例中的一组规则。
 type RuleSet struct {
 	Enable bool   `json:"enable"`
@@ -64,7 +94,15 @@ type Instance struct {
 	InboundThreshold  int       `json:"inboundThreshold"`
 	OutboundThreshold int       `json:"outboundThreshold"`
 	RuleSets          []RuleSet `json:"ruleSets"`
-	Remark            string    `json:"remark"`
+	// BodyLimitMB 是请求体检查上限（MB），0 表示默认 12.5 MB
+	BodyLimitMB int `json:"bodyLimitMB"`
+	// BodyLimitAction 是请求体超过上限时的处理方式：reject（默认）或 partial
+	BodyLimitAction string `json:"bodyLimitAction"`
+	// SkipBodyPaths 是不检查请求体的路径前缀，每行一个（如 /api/upload）；请求头、URL 与参数仍照常检查
+	SkipBodyPaths string `json:"skipBodyPaths"`
+	// WebDAV 为 true 时放行 WebDAV 与上传用到的方法、请求头与任意内容类型，供网盘、WebDAV 等站点使用
+	WebDAV bool   `json:"webdav"`
+	Remark string `json:"remark"`
 }
 
 type fileConfig struct {
@@ -108,6 +146,24 @@ func (in *Instance) Validate() error {
 	if in.OutboundThreshold <= 0 {
 		in.OutboundThreshold = 4
 	}
+	if in.BodyLimitMB < 0 || in.BodyLimitMB > maxBodyLimitMB {
+		return fmt.Errorf("请求体检查上限应为 0~%d MB", maxBodyLimitMB)
+	}
+	switch in.BodyLimitAction {
+	case "":
+		in.BodyLimitAction = BodyLimitReject
+	case BodyLimitReject, BodyLimitPartial:
+	default:
+		return fmt.Errorf("未知的请求体超限处理方式 %q", in.BodyLimitAction)
+	}
+	paths := splitLines(in.SkipBodyPaths)
+	for _, p := range paths {
+		// 路径会写进 SecRule 的操作符参数，只允许不含空白、引号与反斜杠的绝对路径
+		if !strings.HasPrefix(p, "/") || strings.ContainsAny(p, " \t\"\\'") {
+			return fmt.Errorf("跳过请求体检查的路径 %q 无效，应以 / 开头且不含空格、引号或反斜杠", p)
+		}
+	}
+	in.SkipBodyPaths = strings.Join(paths, "\n")
 	known := map[string]bool{}
 	for _, f := range CRSFiles() {
 		known[f] = true
@@ -169,6 +225,26 @@ func (in *Instance) directives() (string, error) {
 	}
 	// 响应体检查开销较大，只检查请求
 	b.WriteString("SecResponseBodyAccess Off\n")
+	// 请求体检查上限与超限处理方式；partial 只检查前面的部分，其余内容由 Coraza 原样转发给后端
+	limit := int64(defaultBodyLimitBytes)
+	if in.BodyLimitMB > 0 {
+		limit = int64(in.BodyLimitMB) << 20
+	}
+	fmt.Fprintf(&b, "SecRequestBodyLimit %d\n", limit)
+	if in.BodyLimitAction == BodyLimitPartial {
+		b.WriteString("SecRequestBodyLimitAction ProcessPartial\n")
+	} else {
+		b.WriteString("SecRequestBodyLimitAction Reject\n")
+	}
+	// WebDAV 兼容模式：PUT 与 application/octet-stream 的请求体是文件内容，按表单参数解析只会产生误报，不再检查
+	if in.WebDAV {
+		fmt.Fprintf(&b, "SecRule REQUEST_METHOD \"@streq PUT\" \"id:%d,phase:1,pass,t:none,nolog,ctl:requestBodyAccess=Off\"\n", webdavRuleBaseID)
+		fmt.Fprintf(&b, "SecRule REQUEST_HEADERS:Content-Type \"@beginsWith application/octet-stream\" \"id:%d,phase:1,pass,t:none,nolog,ctl:requestBodyAccess=Off\"\n", webdavRuleBaseID+1)
+	}
+	// 按路径关闭请求体检查：在阶段 1 用 ctl 关掉请求体访问，Coraza 便不再缓冲和检查请求体
+	for i, p := range splitLines(in.SkipBodyPaths) {
+		fmt.Fprintf(&b, "SecRule REQUEST_FILENAME \"@beginsWith %s\" \"id:%d,phase:1,pass,t:none,nolog,ctl:requestBodyAccess=Off\"\n", p, skipBodyRuleBaseID+i)
+	}
 	hasCRS := false
 	for _, rs := range in.RuleSets {
 		if rs.Enable && rs.Type == RuleCRS {
@@ -180,6 +256,13 @@ func (in *Instance) directives() (string, error) {
 		fmt.Fprintf(&b, "SecAction \"id:900000,phase:1,pass,t:none,nolog,setvar:tx.blocking_paranoia_level=%d\"\n", in.Paranoia)
 		fmt.Fprintf(&b, "SecAction \"id:900110,phase:1,pass,t:none,nolog,setvar:tx.inbound_anomaly_score_threshold=%d,setvar:tx.outbound_anomaly_score_threshold=%d\"\n",
 			in.InboundThreshold, in.OutboundThreshold)
+		// 以下变量须在 REQUEST-901 初始化之前设置，CRS 只在未设置时才写入默认值
+		headers := restrictedHeaders
+		if in.WebDAV {
+			headers = restrictedHeadersWebDAV
+			fmt.Fprintf(&b, "SecAction \"id:900200,phase:1,pass,t:none,nolog,setvar:'tx.allowed_methods=%s'\"\n", webdavMethods)
+		}
+		fmt.Fprintf(&b, "SecAction \"id:900250,phase:1,pass,t:none,nolog,setvar:'tx.restricted_headers_basic=%s'\"\n", headers)
 	}
 	included := map[string]bool{}
 	include := func(f string) {
@@ -214,6 +297,11 @@ func (in *Instance) directives() (string, error) {
 		for _, f := range files {
 			include(f)
 		}
+	}
+	if hasCRS && in.WebDAV {
+		// 上传的文件可能是任意内容类型（图片、压缩包等），部分客户端 PUT 时也不带 Content-Type，
+		// 不再按 CRS 的内容类型白名单（920420）与缺少 Content-Type（920340）拦截
+		b.WriteString("SecRuleRemoveById 920420 920340\n")
 	}
 	return b.String(), nil
 }
