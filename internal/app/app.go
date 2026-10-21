@@ -149,6 +149,9 @@ func New(opts Options) (*App, error) {
 		return nil, err
 	}
 	a.settings.normalize()
+	// 先按设置开启日志落盘并恢复上次的日志，后续初始化过程中的日志也能写入文件
+	a.sysLogs.Resize(a.settings.LogLines)
+	a.persistLogs(a.sysLogs, settingsName, a.settings)
 	a.fileListen = a.settings.Listen
 	if opts.Listen != "" {
 		a.settings.Listen = opts.Listen
@@ -182,7 +185,8 @@ func New(opts Options) (*App, error) {
 			return nil, fmt.Errorf("模块 ID 冲突: %s", m.ID())
 		}
 		seen[m.ID()] = true
-		entry := &moduleEntry{mod: m, logs: logbuf.New(defaultLogLines, logger)}
+		entry := &moduleEntry{mod: m, logs: logbuf.New(a.settings.LogLines, logger)}
+		a.persistLogs(entry.logs, m.ID(), a.settings)
 		if err := m.Init(module.Env{Store: store, Logs: entry.logs}); err != nil {
 			return nil, fmt.Errorf("模块 %s 初始化失败: %w", m.ID(), err)
 		}
@@ -355,6 +359,7 @@ func (a *App) Run(parent context.Context) error {
 			}
 			cancelModules()
 			a.stopModules()
+			a.closeLogs()
 			return err
 		}
 	}
@@ -367,6 +372,8 @@ func (a *App) Run(parent context.Context) error {
 	a.stopModules()
 	// 把节流中的令牌最近使用信息写入磁盘
 	a.tokens.Flush()
+	// 模块停止过程中的日志也要写入文件，再重启或退出
+	a.closeLogs()
 	if restart {
 		a.logger.Printf("正在重启…")
 		restartProcess()

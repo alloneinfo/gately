@@ -1,5 +1,5 @@
 {
   "title": "Journaux système",
-  "desc": "Consultez au même endroit les journaux d'exécution de Gately et ceux de chaque module. Les journaux restent en mémoire uniquement et sont effacés au redémarrage.",
+  "desc": "Consultez au même endroit les journaux d'exécution de Gately et ceux de chaque module. Par défaut, ils sont écrits dans logs/ du répertoire de configuration et survivent aux redémarrages ; la persistance peut être désactivée dans les paramètres.",
   "system": "Système"
 }

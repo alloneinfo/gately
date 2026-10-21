@@ -172,6 +172,10 @@ export interface SystemSettings {
   // 检查更新与在线升级访问 GitHub 时使用的代理，为空直连
   updateProxy: string
   logLines: number
+  // 为 true 时运行日志只保留在内存；默认写入配置目录下的 logs/
+  disableLogPersist: boolean
+  // 每个日志文件的大小上限（MB），0 为默认 2 MB
+  logFileMB: number
   gcPercent: number
   maxProcs: number
   thirdLogin: ThirdLogin

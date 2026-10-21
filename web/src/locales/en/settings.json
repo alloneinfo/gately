@@ -147,7 +147,11 @@
   "runtime": {
     "title": "Runtime parameters",
     "logLines": "Log retention lines",
-    "logLinesHelp": "Number of log lines each module keeps in memory",
+    "logLinesHelp": "Number of log lines each module keeps in memory; with log persistence on they are restored from disk after a restart",
+    "logPersist": "Persist logs",
+    "logPersistHelp": "Write runtime logs to logs/ in the config directory so they survive restarts; when off, logs are kept in memory only",
+    "logFileMB": "Log file limit (MB)",
+    "logFileMBHelp": "Each module's log file is rotated when full and one previous file is kept, so it uses at most twice this size; 0 means the default of 2 MB",
     "gcPercent": "GC percent",
     "gcPercentHelp": "0 means default (100); lowering it reduces memory use but increases CPU overhead",
     "maxProcs": "Max CPU cores",

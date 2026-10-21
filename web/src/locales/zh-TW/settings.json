@@ -147,7 +147,11 @@
   "runtime": {
     "title": "執行參數",
     "logLines": "日誌保留筆數",
-    "logLinesHelp": "每個模組在記憶體中保留的日誌筆數",
+    "logLinesHelp": "每個模組在記憶體中保留的日誌筆數，開啟日誌落盤後重新啟動時從檔案還原",
+    "logPersist": "日誌落盤",
+    "logPersistHelp": "執行日誌寫入設定目錄下的 logs/，重新啟動後仍可查看；關閉後只保存在記憶體",
+    "logFileMB": "日誌檔上限 (MB)",
+    "logFileMBHelp": "每個模組的日誌檔寫滿後輪替並保留一份歷史，即最多占用兩倍空間；0 為預設 2 MB",
     "gcPercent": "GC 百分比",
     "gcPercentHelp": "0 為預設（100）；調小可降低記憶體占用，但增加 CPU 開銷",
     "maxProcs": "最大 CPU 核心數",

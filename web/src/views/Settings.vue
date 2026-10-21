@@ -296,6 +296,14 @@
                 <el-input-number v-model="form.logLines" :min="100" :max="20000" :step="500" />
                 <span class="help">{{ t('settings.runtime.logLinesHelp') }}</span>
               </el-form-item>
+              <el-form-item :label="t('settings.runtime.logPersist')">
+                <el-switch v-model="logPersist" />
+                <span class="help">{{ t('settings.runtime.logPersistHelp') }}</span>
+              </el-form-item>
+              <el-form-item v-if="logPersist" :label="t('settings.runtime.logFileMB')">
+                <el-input-number v-model="form.logFileMB" :min="0" :max="100" />
+                <span class="help">{{ t('settings.runtime.logFileMBHelp') }}</span>
+              </el-form-item>
               <el-form-item :label="t('settings.runtime.gcPercent')">
                 <el-input-number v-model="form.gcPercent" :min="0" :max="1000" :step="10" />
                 <span class="help">{{ t('settings.runtime.gcPercentHelp') }}</span>
@@ -576,6 +584,16 @@ const dnsServers = computed({
   set: (v: string[]) => {
     if (form.value) {
       form.value.dnsServers = v.map((s) => s.trim()).filter(Boolean)
+    }
+  },
+})
+
+// 界面上用"日志落盘"开关，配置中存的是关闭标志（默认落盘）
+const logPersist = computed({
+  get: () => !form.value?.disableLogPersist,
+  set: (v: boolean) => {
+    if (form.value) {
+      form.value.disableLogPersist = !v
     }
   },
 })

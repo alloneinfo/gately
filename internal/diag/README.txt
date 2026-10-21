@@ -12,8 +12,8 @@ Included / 包含
                  模块列表及总览页的状态摘要
 - config/*.json  configuration structure: field names, numbers, booleans, protocol/mode enums; every other string is replaced by "<redacted>"
                  配置的结构视图：字段名、数字、布尔值、协议/模式等枚举；其余字符串全部替换为 "<redacted>"
-- logs/*.log     recent in-memory logs (only if enabled), with IPs, domains, e-mails, URLs, secrets, MAC addresses and user directories masked
-                 最近的内存日志（仅在勾选时导出），其中 IP、域名、邮箱、URL、密钥、MAC 地址和用户目录已被替换
+- logs/*.log     recent runtime logs, including those persisted before a restart (only if enabled), with IPs, domains, e-mails, URLs, secrets, MAC addresses and user directories masked
+                 最近的运行日志，包括重启前已落盘的部分（仅在勾选时导出），其中 IP、域名、邮箱、URL、密钥、MAC 地址和用户目录已被替换
 
 Never included / 绝不包含
 - Passwords, password hashes, API tokens, TOTP secrets, session keys, OAuth client secrets, DNS provider keys, SSH passwords/private keys, certificates and private keys

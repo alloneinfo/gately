@@ -60,6 +60,10 @@ type Settings struct {
 	UpdateProxy string `json:"updateProxy"`
 	// LogLines 为每个模块保留的日志条数
 	LogLines int `json:"logLines"`
+	// DisableLogPersist 为 true 时运行日志只保留在内存，重启后丢失；默认写入配置目录下的 logs/
+	DisableLogPersist bool `json:"disableLogPersist"`
+	// LogFileMB 为每个日志文件的大小上限（MB），超过后轮转并保留一份历史，0 表示默认 2 MB
+	LogFileMB int `json:"logFileMB"`
 	// GCPercent / MaxProcs 为运行时调优参数，0 表示默认
 	GCPercent int `json:"gcPercent"`
 	MaxProcs  int `json:"maxProcs"`
@@ -74,6 +78,7 @@ type Settings struct {
 const (
 	defaultLogLines = 2000
 	maxLogLines     = 20000
+	maxLogFileMB    = 100
 )
 
 func (s *Settings) normalize() {
@@ -166,6 +171,9 @@ func (s *Settings) Validate() error {
 	if s.LogLines > maxLogLines {
 		return fmt.Errorf("日志条数不能超过 %d", maxLogLines)
 	}
+	if s.LogFileMB < 0 || s.LogFileMB > maxLogFileMB {
+		return fmt.Errorf("日志文件上限应在 1~%d MB 之间", maxLogFileMB)
+	}
 	if s.GCPercent < 0 || s.GCPercent > 1000 || s.MaxProcs < 0 || s.MaxProcs > 1024 {
 		return errors.New("运行时参数超出范围")
 	}
@@ -185,7 +193,8 @@ func (a *App) applyRuntime() {
 	// 已通过 Validate，解析不会失败
 	extra, _ := httpx.ParsePrefixes(s.TrustedProxies)
 	httpx.SetProxyTrust(!s.DisableProxyHeaders, extra)
-	if s.TimeZone != "" {
+	// 时区变化时才替换 time.Local：它是全局变量，其他协程随时在读，未改时不重复写
+	if s.TimeZone != "" && time.Local.String() != s.TimeZone {
 		if loc, err := time.LoadLocation(s.TimeZone); err == nil {
 			time.Local = loc
 		}
@@ -197,6 +206,7 @@ func (a *App) applyRuntime() {
 	for _, e := range a.modules {
 		e.logs.Resize(s.LogLines)
 	}
+	a.applyLogPersist(s)
 	if s.GCPercent > 0 {
 		debug.SetGCPercent(s.GCPercent)
 	} else {

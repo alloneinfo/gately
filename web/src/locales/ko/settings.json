@@ -147,7 +147,11 @@
   "runtime": {
     "title": "실행 매개변수",
     "logLines": "로그 보관 줄 수",
-    "logLinesHelp": "모듈마다 메모리에 보관하는 로그 줄 수",
+    "logLinesHelp": "모듈마다 메모리에 보관하는 로그 줄 수. 로그 영구 저장을 켜면 재시작 후 파일에서 복원됩니다",
+    "logPersist": "로그 영구 저장",
+    "logPersistHelp": "실행 로그를 설정 디렉터리의 logs/에 기록해 재시작 후에도 볼 수 있습니다. 끄면 메모리에만 보관합니다",
+    "logFileMB": "로그 파일 상한 (MB)",
+    "logFileMBHelp": "모듈별 로그 파일이 가득 차면 교체하고 이전 파일 하나를 보관하므로 최대 이 크기의 두 배를 사용합니다. 0이면 기본값 2 MB",
     "gcPercent": "GC 비율",
     "gcPercentHelp": "0이면 기본값(100)입니다. 낮추면 메모리 사용량은 줄지만 CPU 부하가 늘어납니다",
     "maxProcs": "최대 CPU 코어 수",

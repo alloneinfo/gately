@@ -1,5 +1,5 @@
 {
   "title": "Systemprotokolle",
-  "desc": "Laufzeitprotokolle von Gately und Protokolle einzelner Module an einem Ort ansehen. Protokolle liegen nur im Arbeitsspeicher und werden beim Neustart gelöscht.",
+  "desc": "Laufzeitprotokolle von Gately und Protokolle einzelner Module an einem Ort ansehen. Standardmäßig werden sie nach logs/ im Konfigurationsverzeichnis geschrieben und überstehen Neustarts; die Speicherung lässt sich in den Einstellungen abschalten.",
   "system": "System"
 }

@@ -147,7 +147,11 @@
   "runtime": {
     "title": "Parâmetros de execução",
     "logLines": "Linhas de log retidas",
-    "logLinesHelp": "Número de linhas de log que cada módulo mantém na memória",
+    "logLinesHelp": "Número de linhas de log que cada módulo mantém na memória; com a persistência ativada elas são restauradas do disco após reiniciar",
+    "logPersist": "Salvar logs em disco",
+    "logPersistHelp": "Grava os logs de execução em logs/ no diretório de configuração para que sobrevivam a reinícios; desativado, ficam apenas na memória",
+    "logFileMB": "Limite do arquivo de log (MB)",
+    "logFileMBHelp": "O arquivo de log de cada módulo é rotacionado ao encher e um arquivo anterior é mantido, ocupando no máximo o dobro deste tamanho; 0 significa o padrão de 2 MB",
     "gcPercent": "Percentual de GC",
     "gcPercentHelp": "0 significa o padrão (100); reduzi-lo diminui o uso de memória, mas aumenta o consumo de CPU",
     "maxProcs": "Máximo de núcleos de CPU",

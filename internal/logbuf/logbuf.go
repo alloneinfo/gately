@@ -1,4 +1,6 @@
 // Package logbuf 提供带序号的内存环形日志缓冲，供前端增量拉取。
+//
+// 开启落盘（Persist）后，日志同时以 JSON Lines 批量追加到文件，重启后从文件恢复最近的日志。
 package logbuf
 
 import (
@@ -34,6 +36,8 @@ type Buffer struct {
 	nextSeq uint64
 	// echo 不为 nil 时同时输出到标准日志，便于 docker logs 查看
 	echo *log.Logger
+	// sink 不为 nil 时日志同时写入文件，见 Persist
+	sink *fileSink
 }
 
 // New 创建容量为 size 的缓冲。
@@ -55,6 +59,10 @@ func (b *Buffer) Add(level, source, msg string) {
 		b.count++
 	} else {
 		b.start = (b.start + 1) % len(b.entries)
+	}
+	// 在锁内交给落盘，保证文件中的顺序与序号一致
+	if b.sink != nil {
+		b.sink.add(e)
 	}
 	b.mu.Unlock()
 	if b.echo != nil {
@@ -80,12 +88,16 @@ func (b *Buffer) Since(seq uint64) []Entry {
 	return out
 }
 
-// Clear 清空缓冲，序号继续递增，保证前端增量拉取不会错乱。
+// Clear 清空缓冲（开启落盘时同时删除日志文件），序号继续递增，保证前端增量拉取不会错乱。
 func (b *Buffer) Clear() {
 	b.mu.Lock()
 	b.start = 0
 	b.count = 0
+	sink := b.sink
 	b.mu.Unlock()
+	if sink != nil {
+		sink.clear()
+	}
 }
 
 // Logger 是绑定了来源标签的便捷写入器。

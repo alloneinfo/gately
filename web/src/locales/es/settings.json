@@ -147,7 +147,11 @@
   "runtime": {
     "title": "Parámetros de ejecución",
     "logLines": "Líneas de registro conservadas",
-    "logLinesHelp": "Número de líneas de registro que cada módulo guarda en memoria",
+    "logLinesHelp": "Número de líneas de registro que cada módulo guarda en memoria; con la persistencia activada se restauran desde el disco tras un reinicio",
+    "logPersist": "Guardar registros en disco",
+    "logPersistHelp": "Escribe los registros de ejecución en logs/ dentro del directorio de configuración para que se conserven tras reiniciar; si se desactiva, solo se guardan en memoria",
+    "logFileMB": "Límite del archivo de registro (MB)",
+    "logFileMBHelp": "El archivo de registro de cada módulo se rota al llenarse y se conserva uno anterior, por lo que ocupa como máximo el doble; 0 equivale al valor por defecto de 2 MB",
     "gcPercent": "Porcentaje de GC",
     "gcPercentHelp": "0 significa el valor por defecto (100); reducirlo disminuye el uso de memoria pero aumenta la carga de CPU",
     "maxProcs": "Máx. de núcleos de CPU",

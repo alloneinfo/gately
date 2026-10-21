@@ -1,5 +1,5 @@
 {
   "title": "Registros del sistema",
-  "desc": "Consulta en un solo lugar los registros de ejecución de Gately y los de cada módulo. Los registros solo se guardan en memoria y se borran al reiniciar.",
+  "desc": "Consulta en un solo lugar los registros de ejecución de Gately y los de cada módulo. Por defecto se escriben en logs/ dentro del directorio de configuración y se conservan tras reiniciar; la persistencia se puede desactivar en Ajustes.",
   "system": "Sistema"
 }

@@ -1,5 +1,5 @@
 {
   "title": "System Logs",
-  "desc": "View Gately runtime logs and per-module logs in one place. Logs are kept in memory only and cleared on restart.",
+  "desc": "View Gately runtime logs and per-module logs in one place. Logs are written to logs/ in the config directory by default and survive restarts; persistence can be turned off in Settings.",
   "system": "System"
 }

@@ -1,5 +1,5 @@
 {
   "title": "Logs do sistema",
-  "desc": "Veja em um só lugar os logs de execução do Gately e os logs de cada módulo. Os logs ficam apenas na memória e são apagados ao reiniciar.",
+  "desc": "Veja em um só lugar os logs de execução do Gately e os logs de cada módulo. Por padrão eles são gravados em logs/ no diretório de configuração e sobrevivem a reinícios; a persistência pode ser desativada nas configurações.",
   "system": "Sistema"
 }

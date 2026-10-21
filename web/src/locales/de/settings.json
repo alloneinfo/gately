@@ -147,7 +147,11 @@
   "runtime": {
     "title": "Laufzeitparameter",
     "logLines": "Aufbewahrte Protokollzeilen",
-    "logLinesHelp": "Anzahl der Protokollzeilen, die jedes Modul im Arbeitsspeicher hält",
+    "logLinesHelp": "Anzahl der Protokollzeilen, die jedes Modul im Arbeitsspeicher hält; bei aktivierter Speicherung werden sie nach einem Neustart von der Festplatte wiederhergestellt",
+    "logPersist": "Protokolle speichern",
+    "logPersistHelp": "Schreibt Laufzeitprotokolle nach logs/ im Konfigurationsverzeichnis, damit sie Neustarts überstehen; deaktiviert bleiben sie nur im Arbeitsspeicher",
+    "logFileMB": "Protokolldatei-Limit (MB)",
+    "logFileMBHelp": "Die Protokolldatei jedes Moduls wird bei Erreichen des Limits rotiert und eine vorherige Datei behalten, also höchstens das Doppelte dieser Größe; 0 bedeutet den Standard von 2 MB",
     "gcPercent": "GC-Prozentsatz",
     "gcPercentHelp": "0 bedeutet Standard (100); ein niedrigerer Wert senkt den Speicherverbrauch, erhöht aber den CPU-Aufwand",
     "maxProcs": "Max. CPU-Kerne",

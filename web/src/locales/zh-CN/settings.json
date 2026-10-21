@@ -147,7 +147,11 @@
   "runtime": {
     "title": "运行参数",
     "logLines": "日志保留条数",
-    "logLinesHelp": "每个模块在内存中保留的日志条数",
+    "logLinesHelp": "每个模块在内存中保留的日志条数，开启日志落盘后重启时从文件恢复",
+    "logPersist": "日志落盘",
+    "logPersistHelp": "运行日志写入配置目录下的 logs/，重启后仍可查看；关闭后只保存在内存",
+    "logFileMB": "日志文件上限 (MB)",
+    "logFileMBHelp": "每个模块的日志文件写满后轮转并保留一份历史，即最多占用两倍空间；0 为默认 2 MB",
     "gcPercent": "GC 百分比",
     "gcPercentHelp": "0 为默认（100）；调小可降低内存占用，但增加 CPU 开销",
     "maxProcs": "最大 CPU 核数",
