@@ -7,6 +7,10 @@ description: Gately 各版本的发布公告与更新说明。
 
 重要版本的发布公告如下，每个版本的完整变更与下载文件见 [GitHub Releases](https://github.com/wangwanjie/gately/releases)。
 
+## [v0.5.5.2](/news/v0.5.5.2)
+
+2026 年 10 月 22 日 · 修复飞牛 fnOS 等文件系统上配置目录中的敏感文件可被本机其他用户读取的问题。
+
 ## [v0.5.5.1](/news/v0.5.5.1)
 
 2026 年 10 月 21 日 · 运行日志写入磁盘，重启、升级后仍可查看。

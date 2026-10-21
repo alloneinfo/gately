@@ -7,6 +7,10 @@ description: Release-Ankündigungen und Versionshinweise zu jeder Gately-Version
 
 Unten stehen die Ankündigungen zu wichtigen Releases. Alle Änderungen und Downloads jeder Version finden Sie unter [GitHub Releases](https://github.com/wangwanjie/gately/releases).
 
+## [v0.5.5.2](/de/news/v0.5.5.2)
+
+22. Oktober 2026 · Behebt, dass andere lokale Benutzer auf fnOS und ähnlichen Dateisystemen sensible Dateien im Konfigurationsverzeichnis lesen konnten.
+
 ## [v0.5.5.1](/de/news/v0.5.5.1)
 
 21. Oktober 2026 · Laufzeitprotokolle werden auf die Festplatte geschrieben und überstehen Neustarts und Upgrades.

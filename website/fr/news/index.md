@@ -7,6 +7,10 @@ description: Annonces et notes de version de chaque version de Gately.
 
 Les annonces des versions majeures sont listées ci-dessous. Consultez [GitHub Releases](https://github.com/wangwanjie/gately/releases) pour la liste complète des changements et les téléchargements de chaque version.
 
+## [v0.5.5.2](/fr/news/v0.5.5.2)
+
+22 octobre 2026 · Corrige la lecture possible par d'autres utilisateurs locaux des fichiers sensibles du répertoire de configuration sur fnOS et les systèmes de fichiers similaires.
+
 ## [v0.5.5.1](/fr/news/v0.5.5.1)
 
 21 octobre 2026 · Les journaux d'exécution sont écrits sur disque et survivent aux redémarrages et mises à jour.
