@@ -1,7 +1,7 @@
 {
   "title": "Network & configuration check",
   "run": "Self-check",
-  "intro": "Checks your public address, NAT, clock, ports 80/443, DDNS resolution and certificate validity. It queries the public IP lookup services configured for DDNS.",
+  "intro": "Checks your public address, NAT, clock, ports 80/443, DDNS resolution, certificate validity, certificate coverage of HTTPS sites and frp proxy conflicts. It queries the public IP lookup services configured for DDNS.",
   "empty": "Nothing to report",
   "rerun": "Run again",
   "issues": "{count} item(s) need attention",
@@ -30,7 +30,12 @@
     "certExpiring": "Certificate {cert} expires in {days} days",
     "certExpired": "Certificate {cert} has expired",
     "moduleIssue": "{module}: {label} {value}",
-    "direct6": "This machine holds the public IPv6 address {ip} directly"
+    "direct6": "This machine holds the public IPv6 address {ip} directly",
+    "webCertOk": "All {count} HTTPS sites have a matching certificate",
+    "webCertMissing": "Site {site} (port {port}) has no matching certificate for: {domains}",
+    "frpOk": "No conflicts found for {count} frpc proxies",
+    "frpDuplicate": "Several enabled frpc proxies are named {proxy}; only the first one takes effect",
+    "frpConflict": "{role} reports a conflict for proxy {proxy}: {reason}"
   },
   "h": {
     "publicIPv4Fail": "Check outbound connectivity and DNS, or change the IP lookup URLs in the DDNS settings.",
@@ -43,6 +48,9 @@
     "ddnsUnresolved": "Create the record at your DNS provider or check the DDNS task log.",
     "certExpiring": "Check the certificate renewal log; make sure DNS credentials or port 80 are reachable.",
     "certExpired": "Renew the certificate now from the SSL page and check the renewal log.",
-    "direct6": "Services on this machine are reachable over IPv6 without port forwarding, as long as the router and local firewall allow the ports."
+    "direct6": "Services on this machine are reachable over IPv6 without port forwarding, as long as the router and local firewall allow the ports.",
+    "webCertMissing": "Requests to these domains fail during the TLS handshake. Add a certificate that covers them on the Certificates page (a wildcard covers one subdomain level), or remove the domains from the site.",
+    "frpDuplicate": "frp requires unique proxy names; rename the duplicates.",
+    "frpConflict": "The frps server already has a proxy with this name, or the domain or remote port is taken. This usually happens when several devices share a copy of the same frpc config. Give each device's frpc a different user, or change the proxy names, domains and remote ports; sites behind a conflicting proxy time out."
   }
 }

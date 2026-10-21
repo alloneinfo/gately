@@ -1,7 +1,7 @@
 {
   "title": "Comprobación de red y configuración",
   "run": "Autodiagnóstico",
-  "intro": "Comprueba la dirección pública, NAT, reloj, puertos 80/443, resolución DDNS y validez de certificados. Consulta los servicios de IP pública configurados para DDNS.",
+  "intro": "Comprueba la dirección pública, NAT, la hora, los puertos 80/443, la resolución DDNS, la validez de los certificados, la cobertura de certificados de los sitios HTTPS y los conflictos de proxies frp. Consulta los servicios de IP pública configurados para DDNS.",
   "empty": "Nada que informar",
   "rerun": "Repetir",
   "issues": "{count} elemento(s) requieren atención",
@@ -30,7 +30,12 @@
     "certExpiring": "El certificado {cert} caduca en {days} días",
     "certExpired": "El certificado {cert} ha caducado",
     "moduleIssue": "{module}: {label} {value}",
-    "direct6": "Este equipo tiene directamente la dirección IPv6 pública {ip}"
+    "direct6": "Este equipo tiene directamente la dirección IPv6 pública {ip}",
+    "webCertOk": "Los {count} sitios HTTPS tienen un certificado válido",
+    "webCertMissing": "El sitio {site} (puerto {port}) no tiene certificado para: {domains}",
+    "frpOk": "Sin conflictos en los {count} proxies de frpc",
+    "frpDuplicate": "Varios proxies activos de frpc se llaman {proxy}; solo el primero tiene efecto",
+    "frpConflict": "{role} informa un conflicto en el proxy {proxy}: {reason}"
   },
   "h": {
     "publicIPv4Fail": "Comprueba la conectividad de salida y el DNS, o cambia las URL de consulta de IP en la configuración de DDNS.",
@@ -43,6 +48,9 @@
     "ddnsUnresolved": "Crea el registro en tu proveedor DNS o revisa el registro de la tarea DDNS.",
     "certExpiring": "Revisa el registro de renovación; asegúrate de que las credenciales DNS o el puerto 80 estén accesibles.",
     "certExpired": "Renueva el certificado ahora desde la página SSL y revisa el registro.",
-    "direct6": "Los servicios de este equipo son accesibles por IPv6 sin redirección de puertos, siempre que el router y el cortafuegos local permitan los puertos."
+    "direct6": "Los servicios de este equipo son accesibles por IPv6 sin redirección de puertos, siempre que el router y el cortafuegos local permitan los puertos.",
+    "webCertMissing": "Las solicitudes a estos dominios fallan en el handshake TLS. Añade en la página de certificados uno que los cubra (un comodín cubre un nivel de subdominio) o quita los dominios del sitio.",
+    "frpDuplicate": "frp exige nombres de proxy únicos; renombra los duplicados.",
+    "frpConflict": "El servidor frps ya tiene un proxy con ese nombre, o el dominio o puerto remoto está ocupado. Suele pasar cuando varios equipos copian la misma configuración de frpc. Asigna un user distinto al frpc de cada equipo o cambia nombres, dominios y puertos remotos; los sitios tras un proxy en conflicto agotan el tiempo de espera."
   }
 }

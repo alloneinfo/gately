@@ -1,7 +1,7 @@
 {
   "title": "Vérification réseau et configuration",
   "run": "Auto-diagnostic",
-  "intro": "Vérifie l’adresse publique, le NAT, l’horloge, les ports 80/443, la résolution DDNS et la validité des certificats. Interroge les services d’IP publique configurés pour DDNS.",
+  "intro": "Vérifie l'adresse publique, le NAT, l'horloge, les ports 80/443, la résolution DDNS, la validité des certificats, la couverture des sites HTTPS par un certificat et les conflits de proxys frp. Interroge les services d'IP publique configurés pour le DDNS.",
   "empty": "Rien à signaler",
   "rerun": "Relancer",
   "issues": "{count} élément(s) à examiner",
@@ -30,7 +30,12 @@
     "certExpiring": "Le certificat {cert} expire dans {days} jours",
     "certExpired": "Le certificat {cert} a expiré",
     "moduleIssue": "{module} : {label} {value}",
-    "direct6": "Cette machine détient directement l’adresse IPv6 publique {ip}"
+    "direct6": "Cette machine détient directement l’adresse IPv6 publique {ip}",
+    "webCertOk": "Les {count} sites HTTPS ont un certificat correspondant",
+    "webCertMissing": "Le site {site} (port {port}) n'a pas de certificat pour : {domains}",
+    "frpOk": "Aucun conflit pour les {count} proxys frpc",
+    "frpDuplicate": "Plusieurs proxys frpc actifs s'appellent {proxy} ; seul le premier s'applique",
+    "frpConflict": "{role} signale un conflit pour le proxy {proxy} : {reason}"
   },
   "h": {
     "publicIPv4Fail": "Vérifiez la connectivité sortante et le DNS, ou changez les URL de requête d’IP dans les réglages DDNS.",
@@ -43,6 +48,9 @@
     "ddnsUnresolved": "Créez l’enregistrement chez votre fournisseur DNS ou consultez le journal de la tâche DDNS.",
     "certExpiring": "Consultez le journal de renouvellement ; vérifiez que les identifiants DNS ou le port 80 sont accessibles.",
     "certExpired": "Renouvelez le certificat maintenant depuis la page SSL et consultez le journal.",
-    "direct6": "Les services de cette machine sont joignables en IPv6 sans redirection de ports, si le routeur et le pare-feu local autorisent les ports."
+    "direct6": "Les services de cette machine sont joignables en IPv6 sans redirection de ports, si le routeur et le pare-feu local autorisent les ports.",
+    "webCertMissing": "Les requêtes vers ces domaines échouent lors de la négociation TLS. Ajoutez un certificat qui les couvre (un joker couvre un niveau de sous-domaine) ou retirez-les du site.",
+    "frpDuplicate": "frp exige des noms de proxy uniques ; renommez les doublons.",
+    "frpConflict": "Le serveur frps a déjà un proxy de ce nom, ou le domaine ou le port distant est pris. Cela arrive souvent quand plusieurs appareils copient la même configuration frpc. Donnez un user différent au frpc de chaque appareil ou changez noms, domaines et ports distants ; les sites derrière un proxy en conflit expirent."
   }
 }

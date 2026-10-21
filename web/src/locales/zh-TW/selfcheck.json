@@ -1,7 +1,7 @@
 {
   "title": "網路與設定自檢",
   "run": "網路自檢",
-  "intro": "檢查公網位址、NAT、系統時間、80/443 埠、DDNS 解析與憑證有效期。會存取 DDNS 使用的公網 IP 查詢服務。",
+  "intro": "檢查公網位址、NAT、系統時間、80/443 連接埠、DDNS 解析、憑證有效期、HTTPS 站點的憑證涵蓋與 frp 代理衝突。會存取 DDNS 使用的公網 IP 查詢服務。",
   "empty": "沒有可回報的內容",
   "rerun": "重新檢查",
   "issues": "{count} 項需要留意",
@@ -30,7 +30,12 @@
     "certExpiring": "憑證 {cert} 將在 {days} 天後到期",
     "certExpired": "憑證 {cert} 已過期",
     "moduleIssue": "{module}：{label} {value}",
-    "direct6": "本機直接持有公網 IPv6 位址 {ip}"
+    "direct6": "本機直接持有公網 IPv6 位址 {ip}",
+    "webCertOk": "{count} 個 HTTPS 站點都有相符的憑證",
+    "webCertMissing": "站點 {site}（連接埠 {port}）沒有相符的憑證：{domains}",
+    "frpOk": "frpc 的 {count} 個代理未發現衝突",
+    "frpDuplicate": "frpc 中有多個啟用的代理都叫 {proxy}，只有第一個生效",
+    "frpConflict": "{role} 回報代理 {proxy} 衝突：{reason}"
   },
   "h": {
     "publicIPv4Fail": "檢查對外連線與 DNS，或在 DDNS 設定中更換 IP 查詢位址。",
@@ -43,6 +48,9 @@
     "ddnsUnresolved": "請在 DNS 服務商建立該記錄，或查看 DDNS 任務日誌。",
     "certExpiring": "請查看憑證續期日誌，確認 DNS 憑證或 80 埠可用。",
     "certExpired": "請立即在憑證頁續期，並查看續期日誌。",
-    "direct6": "外部可透過 IPv6 直接存取本機的服務（需在路由器與本機防火牆放行對應連接埠），不需要連接埠轉發。"
+    "direct6": "外部可透過 IPv6 直接存取本機的服務（需在路由器與本機防火牆放行對應連接埠），不需要連接埠轉發。",
+    "webCertMissing": "存取這些網域會在 TLS 交握時失敗。請在憑證頁新增涵蓋它們的憑證（萬用字元憑證可涵蓋一級子網域），或將網域從站點中移除。",
+    "frpDuplicate": "frp 要求代理名稱唯一，請修改重名代理的名稱。",
+    "frpConflict": "同一個 frps 上已有同名代理，或網域、遠端連接埠已被佔用，常見於多台裝置複製了同一份 frpc 設定。為每台裝置的 frpc 設定不同的使用者（user），或修改代理名稱、網域與遠端連接埠；衝突的代理對應的網站會逾時。"
   }
 }

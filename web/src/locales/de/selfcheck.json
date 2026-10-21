@@ -1,7 +1,7 @@
 {
   "title": "Netzwerk- und Konfigurationsprüfung",
   "run": "Selbsttest",
-  "intro": "Prüft öffentliche Adresse, NAT, Systemzeit, Ports 80/443, DDNS-Auflösung und Zertifikatsgültigkeit. Dabei werden die für DDNS konfigurierten IP-Abfragedienste kontaktiert.",
+  "intro": "Prüft öffentliche Adresse, NAT, Uhrzeit, Ports 80/443, DDNS-Auflösung, Zertifikatsgültigkeit, Zertifikatsabdeckung der HTTPS-Sites und frp-Proxy-Konflikte. Fragt die für DDNS konfigurierten Dienste zur Ermittlung der öffentlichen IP ab.",
   "empty": "Nichts zu melden",
   "rerun": "Erneut prüfen",
   "issues": "{count} Punkt(e) erfordern Aufmerksamkeit",
@@ -30,7 +30,12 @@
     "certExpiring": "Zertifikat {cert} läuft in {days} Tagen ab",
     "certExpired": "Zertifikat {cert} ist abgelaufen",
     "moduleIssue": "{module}: {label} {value}",
-    "direct6": "Dieser Rechner besitzt die öffentliche IPv6-Adresse {ip} direkt"
+    "direct6": "Dieser Rechner besitzt die öffentliche IPv6-Adresse {ip} direkt",
+    "webCertOk": "Alle {count} HTTPS-Sites haben ein passendes Zertifikat",
+    "webCertMissing": "Site {site} (Port {port}) hat kein passendes Zertifikat für: {domains}",
+    "frpOk": "Keine Konflikte bei {count} frpc-Proxys",
+    "frpDuplicate": "Mehrere aktive frpc-Proxys heißen {proxy}; nur der erste wird verwendet",
+    "frpConflict": "{role} meldet einen Konflikt für Proxy {proxy}: {reason}"
   },
   "h": {
     "publicIPv4Fail": "Ausgehende Verbindung und DNS prüfen oder die IP-Abfrage-URLs in den DDNS-Einstellungen ändern.",
@@ -43,6 +48,9 @@
     "ddnsUnresolved": "Eintrag beim DNS-Anbieter anlegen oder das Protokoll der DDNS-Aufgabe prüfen.",
     "certExpiring": "Erneuerungsprotokoll prüfen; DNS-Zugangsdaten oder Port 80 müssen erreichbar sein.",
     "certExpired": "Zertifikat jetzt auf der SSL-Seite erneuern und das Protokoll prüfen.",
-    "direct6": "Dienste auf diesem Rechner sind ohne Portweiterleitung per IPv6 erreichbar, sofern Router und lokale Firewall die Ports freigeben."
+    "direct6": "Dienste auf diesem Rechner sind ohne Portweiterleitung per IPv6 erreichbar, sofern Router und lokale Firewall die Ports freigeben.",
+    "webCertMissing": "Anfragen an diese Domains scheitern beim TLS-Handshake. Fügen Sie auf der Zertifikatsseite ein passendes Zertifikat hinzu (ein Wildcard deckt eine Subdomain-Ebene ab) oder entfernen Sie die Domains aus der Site.",
+    "frpDuplicate": "frp verlangt eindeutige Proxy-Namen; benennen Sie die Duplikate um.",
+    "frpConflict": "Auf dem frps gibt es bereits einen Proxy mit diesem Namen, oder Domain bzw. Remote-Port sind belegt. Das passiert oft, wenn mehrere Geräte dieselbe frpc-Konfiguration nutzen. Geben Sie dem frpc jedes Geräts einen eigenen user oder ändern Sie Proxy-Namen, Domains und Remote-Ports; Sites hinter einem kollidierenden Proxy laufen in Timeouts."
   }
 }

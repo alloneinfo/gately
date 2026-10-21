@@ -68,6 +68,11 @@ const MESSAGES: Record<string, string> = {
   'cert.ok.ok': 'selfcheck.r.certOk',
   'cert.expiring.warn': 'selfcheck.r.certExpiring',
   'cert.expired.fail': 'selfcheck.r.certExpired',
+  'web.certOk.ok': 'selfcheck.r.webCertOk',
+  'web.certMissing.warn': 'selfcheck.r.webCertMissing',
+  'frp.ok.ok': 'selfcheck.r.frpOk',
+  'frp.duplicate.warn': 'selfcheck.r.frpDuplicate',
+  'frp.conflict.warn': 'selfcheck.r.frpConflict',
   'module.summary.warn': 'selfcheck.r.moduleIssue',
   'module.summary.fail': 'selfcheck.r.moduleIssue',
 }
@@ -86,6 +91,9 @@ const HINTS: Record<string, string> = {
   'ddns.unresolved.warn': 'selfcheck.h.ddnsUnresolved',
   'cert.expiring.warn': 'selfcheck.h.certExpiring',
   'cert.expired.fail': 'selfcheck.h.certExpired',
+  'web.certMissing.warn': 'selfcheck.h.webCertMissing',
+  'frp.duplicate.warn': 'selfcheck.h.frpDuplicate',
+  'frp.conflict.warn': 'selfcheck.h.frpConflict',
 }
 
 function message(r: CheckResult): string {
