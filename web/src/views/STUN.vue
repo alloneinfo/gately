@@ -213,6 +213,7 @@ import Field from '../components/Field.vue'
 import StatusBadge, { type StatusType } from '../components/StatusBadge.vue'
 import LogCard from '../components/LogCard.vue'
 import { useFormLayout } from '../composables/useIsMobile'
+import { useListText, splitLinesOrCommas } from '../composables/useListText'
 import WebhookEditor, { type WebhookConfig } from '../components/WebhookEditor.vue'
 import type { NetInterface } from '../components/IPSourceEditor.vue'
 
@@ -291,27 +292,29 @@ const settingsVisible = ref(false)
 const settings = ref<Settings>()
 let timer: number | undefined
 
-const lines = (v: string) => v.split(/[\n,]/).map((s) => s.trim()).filter(Boolean)
-const targetsText = computed({
-  get: () => (editing.value.targetAddresses ?? []).join(', '),
-  set: (v: string) => (editing.value.targetAddresses = lines(v)),
-})
-const serversText = computed({
-  get: () => (editing.value.stunServers ?? []).join('\n'),
-  set: (v: string) => (editing.value.stunServers = lines(v)),
-})
-const keepAliveText = computed({
-  get: () => (editing.value.keepAliveServers ?? []).join('\n'),
-  set: (v: string) => (editing.value.keepAliveServers = lines(v)),
-})
-const settingsServers = computed({
-  get: () => (settings.value?.stunServers ?? []).join('\n'),
-  set: (v: string) => settings.value && (settings.value.stunServers = lines(v)),
-})
-const settingsKeepAlive = computed({
-  get: () => (settings.value?.keepAliveServers ?? []).join('\n'),
-  set: (v: string) => settings.value && (settings.value.keepAliveServers = lines(v)),
-})
+// 输入框保留原始文本，回车、逗号可正常输入（见 useListText）
+const lines = { split: splitLinesOrCommas }
+const targetsText = useListText(() => editing.value.targetAddresses, (v) => (editing.value.targetAddresses = v), { ...lines, separator: ', ' })
+const serversText = useListText(() => editing.value.stunServers, (v) => (editing.value.stunServers = v), lines)
+const keepAliveText = useListText(() => editing.value.keepAliveServers, (v) => (editing.value.keepAliveServers = v), lines)
+const settingsServers = useListText(
+  () => settings.value?.stunServers,
+  (v) => {
+    if (settings.value) {
+      settings.value.stunServers = v
+    }
+  },
+  lines,
+)
+const settingsKeepAlive = useListText(
+  () => settings.value?.keepAliveServers,
+  (v) => {
+    if (settings.value) {
+      settings.value.keepAliveServers = v
+    }
+  },
+  lines,
+)
 
 function emptyRule(): Rule {
   return {

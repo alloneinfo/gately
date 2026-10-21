@@ -207,6 +207,7 @@ import Field from '../components/Field.vue'
 import StatusBadge, { type StatusType } from '../components/StatusBadge.vue'
 import LogCard from '../components/LogCard.vue'
 import { useFormLayout } from '../composables/useIsMobile'
+import { useListText, splitLinesOrCommas } from '../composables/useListText'
 
 interface ProviderMeta {
   name: string
@@ -278,14 +279,11 @@ const { isMobile, labelPosition } = useFormLayout()
 let timer: number | undefined
 
 const currentProvider = computed(() => providers.value.find((p) => p.name === editing.value.acme.provider))
-const splitList = (v: string) => v.split(/[\n,]/).map((s) => s.trim()).filter(Boolean)
-const domainsText = computed({
-  get: () => (editing.value.acme.domains ?? []).join('\n'),
-  set: (v: string) => (editing.value.acme.domains = splitList(v)),
-})
-const resolversText = computed({
-  get: () => (editing.value.acme.resolvers ?? []).join(', '),
-  set: (v: string) => (editing.value.acme.resolvers = splitList(v)),
+// 输入框保留原始文本，回车、逗号可正常输入（见 useListText）
+const domainsText = useListText(() => editing.value.acme.domains, (v) => (editing.value.acme.domains = v), { split: splitLinesOrCommas })
+const resolversText = useListText(() => editing.value.acme.resolvers, (v) => (editing.value.acme.resolvers = v), {
+  split: splitLinesOrCommas,
+  separator: ', ',
 })
 
 function emptyCert(): Cert {

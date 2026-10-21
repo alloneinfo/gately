@@ -138,6 +138,7 @@ import Field from '../components/Field.vue'
 import StatusBadge, { type StatusType } from '../components/StatusBadge.vue'
 import LogCard from '../components/LogCard.vue'
 import { useFormLayout } from '../composables/useIsMobile'
+import { useListText, splitCommasOrSpaces } from '../composables/useListText'
 
 interface Settings {
   enable: boolean
@@ -213,9 +214,10 @@ const saving = ref(false)
 const restarting = ref(false)
 let timer: number | undefined
 
-const routesText = computed({
-  get: () => settings.advertiseRoutes.join(', '),
-  set: (v: string) => (settings.advertiseRoutes = v.split(/[,\s]+/).filter(Boolean)),
+// 输入框保留原始文本，逗号、空格可正常输入（见 useListText）
+const routesText = useListText(() => settings.advertiseRoutes, (v) => (settings.advertiseRoutes = v), {
+  split: splitCommasOrSpaces,
+  separator: ', ',
 })
 
 // badge 把 tailscale 的后端状态映射为状态徽标

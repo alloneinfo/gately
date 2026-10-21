@@ -43,6 +43,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useListText, splitLines } from '../composables/useListText'
 
 export interface WebhookConfig {
   enable: boolean
@@ -60,14 +61,9 @@ const props = defineProps<{ variables: string[] }>()
 const model = defineModel<WebhookConfig>({ required: true })
 
 // 多行文本与数组互转
-const headersText = computed({
-  get: () => (model.value.headers ?? []).join('\n'),
-  set: (v: string) => (model.value.headers = v.split('\n').map((s) => s.trim()).filter(Boolean)),
-})
-const successText = computed({
-  get: () => (model.value.successContent ?? []).join('\n'),
-  set: (v: string) => (model.value.successContent = v.split('\n').map((s) => s.trim()).filter(Boolean)),
-})
+// 输入框保留原始文本，回车可正常换行（见 useListText）
+const headersText = useListText(() => model.value.headers, (v) => (model.value.headers = v), { split: splitLines })
+const successText = useListText(() => model.value.successContent, (v) => (model.value.successContent = v), { split: splitLines })
 const variables = computed(() => props.variables)
 </script>
 

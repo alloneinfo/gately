@@ -56,7 +56,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
+import { onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useI18n } from 'vue-i18n'
 import { Monitor, Pencil, Plus, Power, Trash2, Zap } from 'lucide-vue-next'
@@ -67,6 +67,7 @@ import Field from '../components/Field.vue'
 import StatusBadge, { type StatusType } from '../components/StatusBadge.vue'
 import LogCard from '../components/LogCard.vue'
 import { useFormLayout } from '../composables/useIsMobile'
+import { useListText, splitLinesOrCommas } from '../composables/useListText'
 
 interface Device {
   key?: string
@@ -89,13 +90,11 @@ const editorVisible = ref(false)
 const editing = ref<Device>(empty())
 let timer: number | undefined
 
-const macsText = computed({
-  get: () => editing.value.macs.join('\n'),
-  set: (v: string) => (editing.value.macs = v.split(/[\n,]/).map((s) => s.trim()).filter(Boolean)),
-})
-const bcText = computed({
-  get: () => (editing.value.broadcastIps ?? []).join(', '),
-  set: (v: string) => (editing.value.broadcastIps = v.split(',').map((s) => s.trim()).filter(Boolean)),
+// 输入框保留原始文本，回车、逗号可正常输入（见 useListText）
+const macsText = useListText(() => editing.value.macs, (v) => (editing.value.macs = v), { split: splitLinesOrCommas })
+const bcText = useListText(() => editing.value.broadcastIps, (v) => (editing.value.broadcastIps = v), {
+  split: (v) => v.split(',').map((s) => s.trim()).filter(Boolean),
+  separator: ', ',
 })
 
 function empty(): Device {

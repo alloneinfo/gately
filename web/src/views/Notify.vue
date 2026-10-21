@@ -223,6 +223,7 @@ import Field from '../components/Field.vue'
 import StatusBadge from '../components/StatusBadge.vue'
 import LogCard from '../components/LogCard.vue'
 import { useFormLayout } from '../composables/useIsMobile'
+import { useListText, splitLines } from '../composables/useListText'
 
 interface WebhookCfg {
   enable: boolean
@@ -328,10 +329,8 @@ const editingRule = ref<Rule>(emptyRule())
 let timer: number | undefined
 
 const secretHint = computed(() => (editingChannel.value.hasSecret ? t('notify.secretSet') : ''))
-const headersText = computed({
-  get: () => (editingChannel.value.webhook.headers ?? []).join('\n'),
-  set: (v: string) => (editingChannel.value.webhook.headers = v.split('\n').map((s) => s.trim()).filter(Boolean)),
-})
+// 输入框保留原始文本，回车可正常换行（见 useListText）
+const headersText = useListText(() => editingChannel.value.webhook.headers, (v) => (editingChannel.value.webhook.headers = v), { split: splitLines })
 
 function emptyChannel(): Channel {
   return {

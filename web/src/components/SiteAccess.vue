@@ -18,7 +18,7 @@
             <el-option :label="t('siteAccess.ipWhitelist')" value="whitelist" />
             <el-option :label="t('siteAccess.ipBlacklist')" value="blacklist" />
           </el-select>
-          <el-input v-if="r.ipMode" :model-value="(r.ipList ?? []).join(', ')" placeholder="192.168.1.0/24, 10.0.0.1" class="mono flex" @update:model-value="(v: string) => (r.ipList = v.split(/[,\s]+/).filter(Boolean))" />
+          <ListInput v-if="r.ipMode" v-model="r.ipList" :split="splitCommasOrSpaces" separator=", " placeholder="192.168.1.0/24, 10.0.0.1" class="mono flex" />
           <el-button text type="danger" :icon="Trash2" @click="site.rules.splice(i, 1)" />
         </div>
         <el-button text :icon="Plus" @click="site.rules.push({ prefix: '/', auth: '', ipMode: '', ipList: [] })">{{ t('siteAccess.addRule') }}</el-button>
@@ -34,7 +34,7 @@
       </el-radio-group>
     </el-form-item>
     <el-form-item v-if="site.countryMode" :label="t('siteAccess.countryCodes')">
-      <el-input :model-value="(site.countries ?? []).join(', ')" class="mono" :placeholder="t('siteAccess.countryCodesPlaceholder')" @update:model-value="(v: string) => (site.countries = v.split(/[,\s]+/).filter(Boolean))" />
+      <ListInput v-model="site.countries" :split="splitCommasOrSpaces" separator=", " class="mono" :placeholder="t('siteAccess.countryCodesPlaceholder')" />
       <div class="form-help">
         {{ t('siteAccess.lanAlwaysAllowed') }}
         <span v-if="geoLoaded">{{ t('siteAccess.geoLoaded') }}</span>
@@ -65,6 +65,8 @@ import { useI18n } from 'vue-i18n'
 import { Copy, Plus, Trash2 } from 'lucide-vue-next'
 import { api } from '../api'
 import { copyText } from '../composables/useClipboard'
+import { splitCommasOrSpaces } from '../composables/useListText'
+import ListInput from './ListInput.vue'
 
 export interface PathRule {
   prefix: string

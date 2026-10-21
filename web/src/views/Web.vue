@@ -179,19 +179,19 @@
                 <div class="locations">
                   <div v-for="(loc, i) in site.locations" :key="i" class="location-row">
                     <el-input v-model="loc.prefix" class="mono location-prefix" placeholder="/api/" />
-                    <el-input
-                      :model-value="(loc.targets ?? []).join(', ')"
+                    <ListInput
+                      v-model="loc.targets"
+                      :split="splitCsv"
+                      separator=", "
                       class="mono location-targets"
                       :placeholder="t('web.locationTargetsPlaceholder')"
-                      @update:model-value="(v: string) => (loc.targets = splitCsv(v))"
                     />
-                    <el-input
-                      :model-value="(loc.requestHeaders ?? []).join('\n')"
+                    <ListInput
+                      v-model="loc.requestHeaders"
                       type="textarea"
                       :autosize="{ minRows: 1, maxRows: 4 }"
                       class="mono location-headers"
                       :placeholder="t('web.locationHeadersPlaceholder')"
-                      @update:model-value="(v: string) => (loc.requestHeaders = lines(v))"
                     />
                     <el-button text type="danger" :icon="Trash2" @click="site.locations.splice(i, 1)" />
                   </div>
@@ -350,6 +350,8 @@ import SiteAccess, { type PathRule, type ShareLink } from '../components/SiteAcc
 import StatusBadge, { type StatusType } from '../components/StatusBadge.vue'
 import LogCard from '../components/LogCard.vue'
 import { useFormLayout } from '../composables/useIsMobile'
+import { useListText, splitLines } from '../composables/useListText'
+import ListInput from '../components/ListInput.vue'
 
 interface Site {
   key?: string
@@ -479,9 +481,14 @@ interface WebSettings {
 const settings = ref<WebSettings>()
 let timer: number | undefined
 
-const lines = (v: string) => v.split('\n').map((s) => s.trim()).filter(Boolean)
-const bind = (get: () => string[] | null | undefined, set: (v: string[]) => void) =>
-  computed({ get: () => (get() ?? []).join('\n'), set: (v: string) => set(lines(v)) })
+// 按逗号（含中文逗号）或空白拆分
+const splitCsv = (v: string) =>
+  v
+    .split(/[\s,，]+/)
+    .map((x) => x.trim())
+    .filter(Boolean)
+// 输入框保留原始文本，回车可正常换行（见 useListText）
+const bind = (get: () => string[] | null | undefined, set: (v: string[]) => void) => useListText(get, set, { split: splitLines })
 const domainsText = bind(() => site.value.domains, (v) => (site.value.domains = v))
 const targetsText = bind(() => site.value.targets, (v) => (site.value.targets = v))
 const usersText = bind(() => site.value.users, (v) => (site.value.users = v))
@@ -489,18 +496,20 @@ const oauthUsersText = bind(() => site.value.oauthUsers, (v) => (site.value.oaut
 const ipText = bind(() => site.value.ipList, (v) => (site.value.ipList = v))
 const reqHeadersText = bind(() => site.value.requestHeaders, (v) => (site.value.requestHeaders = v))
 const respHeadersText = bind(() => site.value.responseHeaders, (v) => (site.value.responseHeaders = v))
-const fwdHeadersText = computed({
-  get: () => (site.value.forwardAuth?.copyHeaders ?? []).join(', '),
-  set: (v: string) => (site.value.forwardAuth.copyHeaders = splitCsv(v)),
+const fwdHeadersText = useListText(() => site.value.forwardAuth?.copyHeaders, (v) => (site.value.forwardAuth.copyHeaders = v), {
+  split: splitCsv,
+  separator: ', ',
 })
 // 转发认证以地址非空表示启用，勾选框单独记录，取消勾选时保存为空地址
 const forwardAuthOn = ref(false)
-const splitCsv = (v: string) =>
-  v
-    .split(/[\s,，]+/)
-    .map((x) => x.trim())
-    .filter(Boolean)
-const trustedText = bind(() => settings.value?.trustedProxies, (v) => settings.value && (settings.value.trustedProxies = v))
+const trustedText = bind(
+  () => settings.value?.trustedProxies,
+  (v) => {
+    if (settings.value) {
+      settings.value.trustedProxies = v
+    }
+  },
+)
 
 function emptySite(): Site {
   return {

@@ -200,6 +200,7 @@ import Field from '../components/Field.vue'
 import StatusBadge, { type StatusType } from '../components/StatusBadge.vue'
 import LogCard from '../components/LogCard.vue'
 import { useFormLayout } from '../composables/useIsMobile'
+import { useListText, splitCommasOrSpaces } from '../composables/useListText'
 
 interface ClientSettings {
   enable: boolean
@@ -274,9 +275,10 @@ const importPreview = ref<ImportResult>()
 const fileInput = ref<HTMLInputElement>()
 const importDoneText = computed(() => (tab.value === 'client' ? t('frp.importedClient', { count: importPreview.value?.added ?? 0 }) : t('frp.importedServer')))
 
-const domainsText = computed({
-  get: () => (editing.value.customDomains ?? []).join(', '),
-  set: (v: string) => (editing.value.customDomains = v.split(/[,\s]+/).filter(Boolean)),
+// 输入框保留原始文本，逗号、空格可正常输入（见 useListText）
+const domainsText = useListText(() => editing.value.customDomains, (v) => (editing.value.customDomains = v), {
+  split: splitCommasOrSpaces,
+  separator: ', ',
 })
 
 function empty(): Proxy {

@@ -495,6 +495,7 @@ import {
 } from 'lucide-vue-next'
 import { api, type ImportFileResult, type SystemInfo, type SystemSettings } from '../api'
 import PageHeader from '../components/PageHeader.vue'
+import { useListText, splitLines } from '../composables/useListText'
 import OtpInput from '../components/OtpInput.vue'
 import PasskeyManager from '../components/PasskeyManager.vue'
 import ReadonlyUsers from '../components/ReadonlyUsers.vue'
@@ -555,28 +556,15 @@ function normalizedLogin(t?: SystemSettings['thirdLogin']): SystemSettings['thir
 // 第三方登录设置（模板中仅在表单加载后渲染）
 const login = computed(() => form.value?.thirdLogin ?? normalizedLogin())
 
-// 允许的身份：输入框保留用户原始文本（含空行、行尾换行），只把解析后的列表写回表单。
-// 若直接用 computed 往返 join/filter，回车产生的空行会被立即过滤掉，导致无法换行。
-const parseAllowed = (v: string) => v.split('\n').map((s) => s.trim()).filter(Boolean)
-const allowedRaw = ref('')
-const allowedText = computed({
-  get: () => allowedRaw.value,
-  set: (v: string) => {
-    allowedRaw.value = v
-    if (form.value) {
-      form.value.thirdLogin.allowed = parseAllowed(v)
-    }
-  },
-})
-// 表单被外部替换（加载、重置）时，若列表与当前文本解析结果不一致，则同步文本
-watch(
+// 允许的身份：输入框保留用户原始文本（含空行、行尾换行），只把解析后的列表写回表单（见 useListText）
+const allowedText = useListText(
   () => login.value.allowed,
-  (list) => {
-    if (JSON.stringify(parseAllowed(allowedRaw.value)) !== JSON.stringify(list)) {
-      allowedRaw.value = list.join('\n')
+  (v) => {
+    if (form.value) {
+      form.value.thirdLogin.allowed = v
     }
   },
-  { immediate: true },
+  { split: splitLines },
 )
 
 const dnsServers = computed({

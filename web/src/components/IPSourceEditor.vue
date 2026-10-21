@@ -40,6 +40,7 @@
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { api } from '../api'
+import { useListText, splitLines } from '../composables/useListText'
 
 export interface IPSource {
   enable: boolean
@@ -63,10 +64,8 @@ const result = ref('')
 const resultError = ref(false)
 const interfaces = computed(() => props.interfaces)
 
-const urlsText = computed({
-  get: () => (model.value.urls ?? []).join('\n'),
-  set: (v: string) => (model.value.urls = v.split('\n').map((s) => s.trim()).filter(Boolean)),
-})
+// 输入框保留原始文本，回车可正常换行（见 useListText）
+const urlsText = useListText(() => model.value.urls, (v) => (model.value.urls = v), { split: splitLines })
 
 async function test() {
   testing.value = true
