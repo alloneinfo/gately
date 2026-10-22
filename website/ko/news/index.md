@@ -7,6 +7,10 @@ description: Gately 각 버전의 릴리스 공지와 변경 사항입니다.
 
 주요 버전의 릴리스 공지는 아래와 같습니다. 모든 버전의 전체 변경 사항과 다운로드 파일은 [GitHub Releases](https://github.com/wangwanjie/gately/releases)에서 확인하세요.
 
+## [v0.5.6.1](/ko/news/v0.5.6.1)
+
+2026년 10월 22일 · Docker 이미지가 기록한 방화벽 규칙 때문에 호스트의 구버전 nft가 충돌하던 문제를 수정했습니다.
+
 ## [v0.5.6](/ko/news/v0.5.6)
 
 2026년 10월 22일 · 침입 방지 추가: fail2ban 방식 로그 규칙, 미끼 포트, 포트 스캔 탐지와 nftables 차단 동기화.

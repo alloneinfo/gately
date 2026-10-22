@@ -7,6 +7,10 @@ description: Gately 各版本的发布公告与更新说明。
 
 重要版本的发布公告如下，每个版本的完整变更与下载文件见 [GitHub Releases](https://github.com/wangwanjie/gately/releases)。
 
+## [v0.5.6.1](/news/v0.5.6.1)
+
+2026 年 10 月 22 日 · 修复 Docker 镜像写入的防火墙规则让宿主机上旧版 nft 崩溃的问题。
+
 ## [v0.5.6](/news/v0.5.6)
 
 2026 年 10 月 22 日 · 新增入侵防护：类似 fail2ban 的日志规则、诱饵端口与端口扫描检测，封禁同步到 nftables。

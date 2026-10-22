@@ -7,6 +7,10 @@ description: Release-Ankündigungen und Versionshinweise zu jeder Gately-Version
 
 Unten stehen die Ankündigungen zu wichtigen Releases. Alle Änderungen und Downloads jeder Version finden Sie unter [GitHub Releases](https://github.com/wangwanjie/gately/releases).
 
+## [v0.5.6.1](/de/news/v0.5.6.1)
+
+22. Oktober 2026 · Behebt, dass vom Docker-Image geschriebene Firewall-Regeln ein älteres nft auf dem Host abstürzen ließen.
+
 ## [v0.5.6](/de/news/v0.5.6)
 
 22. Oktober 2026 · Neu: Einbruchschutz mit Protokollregeln wie bei fail2ban, Köderports und Portscan-Erkennung; Sperren werden in nftables übertragen.

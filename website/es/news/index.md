@@ -7,6 +7,10 @@ description: Anuncios y notas de cada versión de Gately.
 
 A continuación se listan los anuncios de las versiones principales. Consulta [GitHub Releases](https://github.com/wangwanjie/gately/releases) para ver todos los cambios y las descargas de cada versión.
 
+## [v0.5.6.1](/es/news/v0.5.6.1)
+
+22 de octubre de 2026 · Corrige que las reglas del cortafuegos escritas por la imagen Docker hicieran fallar un nft antiguo en el anfitrión.
+
 ## [v0.5.6](/es/news/v0.5.6)
 
 22 de octubre de 2026 · Añade prevención de intrusiones: reglas de registros al estilo fail2ban, puertos trampa y detección de escaneos, con bloqueos sincronizados en nftables.
