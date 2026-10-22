@@ -64,7 +64,7 @@ Compose プロジェクトは、コンテナのラベル `com.docker.compose.pro
 | フィールド | 説明 |
 | --- | --- |
 | `host` | Docker のアドレス。デフォルトは `unix:///var/run/docker.sock` |
-| `mirrors` | ミラーのアドレス一覧。直接の pull に失敗したときに順に試します |
+| `mirrors` | ミラーのアドレス一覧。直接の pull に失敗したときに順に試します。`/etc/docker/daemon.json` の `registry-mirrors` とは独立しており、後者は Docker が自動で使用し、設定ページに「デーモンのミラー」として読み取り専用で表示されます |
 | `registries` | プライベートレジストリのログイン情報（`server`、`username`、`password`）。パスワードは画面上でマスクされます |
 | `autoCheckHours` | 0 より大きい場合、その時間間隔でコンテナイメージの更新を自動チェックします。0 でオフ |
 

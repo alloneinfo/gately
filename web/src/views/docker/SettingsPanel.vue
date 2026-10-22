@@ -14,6 +14,16 @@
           <el-input-number v-model="s.autoCheckHours" :min="0" :max="720" />
           <span class="help">{{ t('docker.settings.autoCheckHelp') }}</span>
         </el-form-item>
+        <!-- 守护进程自身的加速地址（daemon.json）只读展示，读取 /info 失败时不显示 -->
+        <el-form-item v-if="daemonMirrors" :label="t('docker.settings.daemonMirrors')">
+          <div class="full">
+            <div v-if="daemonMirrors.length" class="tags">
+              <el-tag v-for="m in daemonMirrors" :key="m" type="info" class="mono">{{ m }}</el-tag>
+            </div>
+            <span v-else class="help">{{ t('docker.settings.daemonMirrorsNone') }}</span>
+            <div class="form-help">{{ t('docker.settings.daemonMirrorsHelp') }}</div>
+          </div>
+        </el-form-item>
         <el-form-item :label="t('docker.settings.mirrors')">
           <div class="full">
             <div v-for="(m, idx) in s.mirrors" :key="idx" class="row">
@@ -48,7 +58,7 @@ import { ElMessage } from 'element-plus'
 import { Plus, Save, SlidersHorizontal, Trash2 } from 'lucide-vue-next'
 import { api } from '../../api'
 import { useFormLayout } from '../../composables/useIsMobile'
-import type { DockerSettings } from './types'
+import type { DockerInfo, DockerSettings } from './types'
 
 const { t } = useI18n()
 
@@ -58,9 +68,22 @@ const s = reactive<DockerSettings>({ host: '', mirrors: [], registries: [], auto
 const loaded = ref(false)
 const loading = ref(false)
 const saving = ref(false)
+// Docker 守护进程已配置的镜像加速；null 表示未能读取（Docker 不可达等）
+const daemonMirrors = ref<string[] | null>(null)
+
+// loadDaemonMirrors 读取守护进程的镜像加速，失败时静默隐藏，不影响设置本身
+async function loadDaemonMirrors() {
+  try {
+    const info = await api.get<DockerInfo>('/api/docker/info')
+    daemonMirrors.value = info.daemonMirrors ?? []
+  } catch {
+    daemonMirrors.value = null
+  }
+}
 
 async function load() {
   loading.value = true
+  void loadDaemonMirrors()
   try {
     const r = await api.get<DockerSettings>('/api/docker/settings')
     Object.assign(s, { ...r, mirrors: r.mirrors ?? [], registries: r.registries ?? [] })
@@ -96,6 +119,16 @@ onMounted(load)
 <style scoped>
 .full {
   width: 100%;
+}
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.tags .el-tag {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .row {
   display: flex;

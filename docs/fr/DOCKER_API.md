@@ -7,7 +7,7 @@ Les opérations longues (récupération/envoi/construction d'images, compose up,
 
 | Méthode | Chemin | Description |
 | --- | --- | --- |
-| GET | `/info` | `{version,apiVersion,os,arch,kernel,name,cpus,memTotal,storageDriver,rootDir,containers:{total,running,paused,stopped},images,composeCli:bool,composeCliVersion}` |
+| GET | `/info` | `{version,apiVersion,os,arch,kernel,name,cpus,memTotal,storageDriver,rootDir,containers:{total,running,paused,stopped},images,composeCli:bool,composeCliVersion,daemonMirrors:string[]}` |
 | GET | `/disk-usage` | `{images:{count,size,reclaimable},containers:{count,size,reclaimable},volumes:{count,size,reclaimable},buildCache:{count,size,reclaimable}}` |
 | POST | `/prune` | `{target:"containers"|"images"|"networks"|"volumes"|"buildcache", all?:bool}` → `{deleted:number,spaceReclaimed:number}` ; pour les images, `all=true` supprime toutes les images inutilisées, sinon seulement les images orphelines (dangling) |
 | GET/PUT | `/settings` | `{host, mirrors:string[], registries:[{server,username,password}], autoCheckHours:number}`. GET renvoie registries[].password sous la forme `"******"` ; quand PUT reçoit `"******"`, la valeur existante est conservée |

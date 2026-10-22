@@ -7,7 +7,7 @@ Lang laufende Vorgänge (Images ziehen/pushen/bauen, compose up usw.) liefern `{
 
 | Methode | Pfad | Beschreibung |
 | --- | --- | --- |
-| GET | `/info` | `{version,apiVersion,os,arch,kernel,name,cpus,memTotal,storageDriver,rootDir,containers:{total,running,paused,stopped},images,composeCli:bool,composeCliVersion}` |
+| GET | `/info` | `{version,apiVersion,os,arch,kernel,name,cpus,memTotal,storageDriver,rootDir,containers:{total,running,paused,stopped},images,composeCli:bool,composeCliVersion,daemonMirrors:string[]}` |
 | GET | `/disk-usage` | `{images:{count,size,reclaimable},containers:{count,size,reclaimable},volumes:{count,size,reclaimable},buildCache:{count,size,reclaimable}}` |
 | POST | `/prune` | `{target:"containers"|"images"|"networks"|"volumes"|"buildcache", all?:bool}` → `{deleted:number,spaceReclaimed:number}`; bei Images entfernt `all=true` alle ungenutzten Images, sonst nur verwaiste (dangling) Images |
 | GET/PUT | `/settings` | `{host, mirrors:string[], registries:[{server,username,password}], autoCheckHours:number}`. GET liefert registries[].password als `"******"`; erhält PUT `"******"`, bleibt der bisherige Wert erhalten |

@@ -64,7 +64,7 @@ L'onglet « Système » contient :
 | Champ | Description |
 | --- | --- |
 | `host` | Adresse Docker, par défaut `unix:///var/run/docker.sock` |
-| `mirrors` | Liste d'adresses de miroir, essayées dans l'ordre lorsqu'un pull direct échoue |
+| `mirrors` | Liste d'adresses de miroir, essayées dans l'ordre lorsqu'un pull direct échoue. Indépendante de `registry-mirrors` dans `/etc/docker/daemon.json`, que Docker utilise automatiquement et que la page des réglages affiche en lecture seule sous « Miroirs du démon » |
 | `registries` | Identifiants de registres privés (`server`, `username`, `password`) ; le mot de passe est masqué dans l'interface |
 | `autoCheckHours` | Si supérieur à 0, les mises à jour des images des conteneurs sont vérifiées automatiquement à cet intervalle en heures ; 0 désactive la vérification |
 

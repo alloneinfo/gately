@@ -64,7 +64,7 @@ Compose 프로젝트는 컨테이너 레이블 `com.docker.compose.project` 등�
 | 필드 | 설명 |
 | --- | --- |
 | `host` | Docker 주소, 기본값 `unix:///var/run/docker.sock` |
-| `mirrors` | 미러 주소 목록. 직접 pull이 실패하면 차례로 시도합니다 |
+| `mirrors` | 미러 주소 목록. 직접 pull이 실패하면 차례로 시도합니다. `/etc/docker/daemon.json`의 `registry-mirrors`와는 독립적이며, 후자는 Docker가 자동으로 사용하고 설정 페이지에 「데몬 미러」로 읽기 전용 표시됩니다 |
 | `registries` | 프라이빗 레지스트리 로그인 정보(`server`, `username`, `password`). 비밀번호는 UI에서 마스킹됩니다 |
 | `autoCheckHours` | 0보다 크면 해당 시간 간격으로 컨테이너 이미지 업데이트를 자동 확인하며 0이면 끕니다 |
 

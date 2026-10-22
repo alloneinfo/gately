@@ -64,7 +64,7 @@ A aba "Sistema" contém:
 | Campo | Descrição |
 | --- | --- |
 | `host` | Endereço do Docker, padrão `unix:///var/run/docker.sock` |
-| `mirrors` | Lista de endereços de mirror, tentados em ordem quando o pull direto falha |
+| `mirrors` | Lista de endereços de mirror, tentados em ordem quando o pull direto falha. Independentes de `registry-mirrors` em `/etc/docker/daemon.json`, que o Docker usa automaticamente e a página de configurações mostra somente leitura como "Espelhos do daemon" |
 | `registries` | Credenciais de registries privados (`server`, `username`, `password`); a senha é mascarada na interface |
 | `autoCheckHours` | Quando maior que 0, as atualizações de imagens dos contêineres são verificadas automaticamente nesse intervalo em horas; 0 desativa |
 

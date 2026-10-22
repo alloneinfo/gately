@@ -129,6 +129,7 @@ export interface DockerInfo {
   images: number
   composeCli: boolean
   composeCliVersion: string
+  daemonMirrors: string[]
 }
 
 export interface DiskItem {

@@ -1010,7 +1010,8 @@ func TestInfoDiskPruneAPI(t *testing.T) {
 	_, host := newCtrFake(t, map[string]http.HandlerFunc{
 		"GET /info": ctrJSON(map[string]any{"ServerVersion": "27.0.1", "OSType": "linux", "Architecture": "x86_64", "KernelVersion": "6.1", "Name": "nas",
 			"NCPU": 4, "MemTotal": 8 << 30, "Driver": "overlay2", "DockerRootDir": "/var/lib/docker", "Containers": 5, "ContainersRunning": 3,
-			"ContainersPaused": 1, "ContainersStopped": 1, "Images": 9}),
+			"ContainersPaused": 1, "ContainersStopped": 1, "Images": 9,
+			"RegistryConfig": map[string]any{"Mirrors": []string{"https://mirror.example.com/"}}}),
 		"GET /version":       ctrJSON(map[string]string{"ApiVersion": "1.46"}),
 		"GET /system/df":     ctrJSON(map[string]any{"LayersSize": 10, "Images": []map[string]any{{"Size": 10, "Containers": 0}}}),
 		"POST /images/prune": ctrJSON(map[string]any{"ImagesDeleted": []map[string]string{{"Deleted": "a"}}, "SpaceReclaimed": 4096}),
@@ -1023,6 +1024,9 @@ func TestInfoDiskPruneAPI(t *testing.T) {
 	if info["version"] != "27.0.1" || info["apiVersion"] != "1.46" || info["composeCli"] != true || info["composeCliVersion"] != "2.30.1" ||
 		cs["running"].(float64) != 3 || cs["stopped"].(float64) != 1 || info["storageDriver"] != "overlay2" || info["cpus"].(float64) != 4 {
 		t.Errorf("info 错误: %s", rec.Body)
+	}
+	if !strings.Contains(rec.Body.String(), `"daemonMirrors":["https://mirror.example.com/"]`) {
+		t.Errorf("info 缺少守护进程镜像加速: %s", rec.Body)
 	}
 	rec = api("GET", "/disk-usage", "", nil)
 	if !strings.Contains(rec.Body.String(), `"images":{"count":1,"size":10,"reclaimable":10}`) {

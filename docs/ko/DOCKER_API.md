@@ -7,7 +7,7 @@
 
 | 메서드 | 경로 | 설명 |
 | --- | --- | --- |
-| GET | `/info` | `{version,apiVersion,os,arch,kernel,name,cpus,memTotal,storageDriver,rootDir,containers:{total,running,paused,stopped},images,composeCli:bool,composeCliVersion}` |
+| GET | `/info` | `{version,apiVersion,os,arch,kernel,name,cpus,memTotal,storageDriver,rootDir,containers:{total,running,paused,stopped},images,composeCli:bool,composeCliVersion,daemonMirrors:string[]}` |
 | GET | `/disk-usage` | `{images:{count,size,reclaimable},containers:{count,size,reclaimable},volumes:{count,size,reclaimable},buildCache:{count,size,reclaimable}}` |
 | POST | `/prune` | `{target:"containers"|"images"|"networks"|"volumes"|"buildcache", all?:bool}` → `{deleted:number,spaceReclaimed:number}`; images에서 `all=true`이면 사용하지 않는 이미지를 모두 정리하고, 그렇지 않으면 dangling 이미지만 정리합니다 |
 | GET/PUT | `/settings` | `{host, mirrors:string[], registries:[{server,username,password}], autoCheckHours:number}`. GET은 registries[].password를 `"******"`로 반환하고, PUT에서 `"******"`를 받으면 기존 값을 유지합니다 |

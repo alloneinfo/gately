@@ -49,6 +49,9 @@ type InfoView struct {
 	Images            int    `json:"images"`
 	ComposeCli        bool   `json:"composeCli"`
 	ComposeCliVersion string `json:"composeCliVersion"`
+	// DaemonMirrors 是 Docker 守护进程自身的镜像加速地址（daemon.json 的 registry-mirrors），
+	// 由 dockerd 拉取 Docker Hub 镜像时自动使用，与 Gately 设置中的回退加速地址相互独立
+	DaemonMirrors []string `json:"daemonMirrors"`
 }
 
 func (m *Module) handleInfo(w http.ResponseWriter, r *http.Request) {
@@ -73,6 +76,9 @@ func (m *Module) handleInfo(w http.ResponseWriter, r *http.Request) {
 		ContainersPaused  int    `json:"ContainersPaused"`
 		ContainersStopped int    `json:"ContainersStopped"`
 		Images            int    `json:"Images"`
+		RegistryConfig    struct {
+			Mirrors []string `json:"Mirrors"`
+		} `json:"RegistryConfig"`
 	}
 	if err := c.do(ctx, http.MethodGet, "/info", nil, &info); err != nil {
 		httpx.Error(w, http.StatusBadGateway, "无法连接 Docker：%v", err)
@@ -88,6 +94,7 @@ func (m *Module) handleInfo(w http.ResponseWriter, r *http.Request) {
 		Name: info.Name, CPUs: info.NCPU, MemTotal: info.MemTotal, StorageDriver: info.Driver, RootDir: info.DockerRootDir, Images: info.Images}
 	v.Containers.Total, v.Containers.Running, v.Containers.Paused, v.Containers.Stopped =
 		info.Containers, info.ContainersRunning, info.ContainersPaused, info.ContainersStopped
+	v.DaemonMirrors = nonNil(info.RegistryConfig.Mirrors)
 	v.ComposeCli, v.ComposeCliVersion = m.composeCLI()
 	httpx.OK(w, v)
 }
