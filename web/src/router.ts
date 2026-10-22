@@ -52,8 +52,34 @@ function updateTitle() {
   document.title = key ? `${t(key)} - Gately` : 'Gately'
 }
 
-// 已关闭模块的页面不可访问，直接回到总览（首次进入时模块状态尚未加载，由 Layout 加载后再检查一次）
-router.beforeEach((to) => {
+// 会话保存在 HttpOnly Cookie 中，前端无法直接判断是否已登录。首次进入登录页以外的页面前先请求一次
+// /api/session，未登录时直接跳到登录页，避免先渲染主界面再因接口 401 跳转造成闪屏。
+// 确认登录后不再重复检查（会话中途过期由接口的 401 处理）；进入登录页时清除标记，退出登录后会重新检查。
+let sessionChecked = false
+
+async function hasSession(): Promise<boolean> {
+  try {
+    // 直接用 fetch：api.ts 依赖本模块，这里引用它会形成循环依赖；子路径前缀由 basePath.ts 统一补上
+    const resp = await fetch('/api/session', { credentials: 'same-origin' })
+    // 只有明确的 401 视为未登录，网络错误等交给页面自身的接口处理
+    return resp.status !== 401
+  } catch {
+    return true
+  }
+}
+
+router.beforeEach(async (to) => {
+  if (to.name === 'login') {
+    sessionChecked = false
+    return
+  }
+  if (!sessionChecked) {
+    if (!(await hasSession())) {
+      return { name: 'login', query: { redirect: to.fullPath } }
+    }
+    sessionChecked = true
+  }
+  // 已关闭模块的页面不可访问，直接回到总览（首次进入时模块状态尚未加载，由 Layout 加载后再检查一次）
   if (!pathEnabled(to.path)) {
     return '/overview'
   }
