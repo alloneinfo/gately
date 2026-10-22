@@ -11,7 +11,9 @@ import (
 	"strings"
 )
 
-// Cloudflare API v4。Secret 为 API Token；若同时填写 ID（账号邮箱），则 Secret 视为 Global API Key。
+// Cloudflare API v4。Secret 为 API Token；若 ID 填写账号邮箱，则 Secret 视为 Global API Key。
+// ID 不是邮箱时忽略：Lucky 的 Cloudflare 只用 API Token，导入的配置里 ID 常残留其他服务商的 AccessKey，
+// 按邮箱发送会被 Cloudflare 以 6003 Invalid request headers 拒绝。
 // 文档：https://developers.cloudflare.com/api/resources/dns/subresources/records/
 func init() {
 	register(Meta{
@@ -68,7 +70,7 @@ func (c *cloudflare) call(ctx context.Context, method, path string, body any, ou
 		return err
 	}
 	req.Header.Set("Content-Type", "application/json")
-	if c.creds.ID != "" {
+	if c.globalKey() {
 		req.Header.Set("X-Auth-Email", c.creds.ID)
 		req.Header.Set("X-Auth-Key", c.creds.Secret)
 	} else {
@@ -96,6 +98,11 @@ func (c *cloudflare) call(ctx context.Context, method, path string, body any, ou
 		return json.Unmarshal(env.Result, out)
 	}
 	return nil
+}
+
+// globalKey 判断是否使用 Global API Key 认证：只有 ID 是邮箱时才是。
+func (c *cloudflare) globalKey() bool {
+	return strings.Contains(c.creds.ID, "@")
 }
 
 func (c *cloudflare) zoneID(ctx context.Context, zone string) (string, error) {

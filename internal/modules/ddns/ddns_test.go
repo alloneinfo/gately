@@ -158,7 +158,7 @@ func TestSyncFlow(t *testing.T) {
 	if err := task.Validate(); err != nil {
 		t.Fatal(err)
 	}
-	r := newRunner(task, testLogger(), nil)
+	r := newRunner(task, testLogger(), nil, nil)
 	ctx := context.Background()
 
 	// 首次：两条启用记录都被创建，禁用记录不处理
@@ -212,7 +212,7 @@ func TestSyncErrors(t *testing.T) {
 	fp, ips := setupFakes(t)
 	task := sampleTask()
 	_ = task.Validate()
-	r := newRunner(task, testLogger(), nil)
+	r := newRunner(task, testLogger(), nil, nil)
 
 	// IP 获取失败：不调用服务商，记录错误
 	ips.mu.Lock()
@@ -244,7 +244,7 @@ func TestRunnerLoopAndManualSync(t *testing.T) {
 	fp, _ := setupFakes(t)
 	task := sampleTask()
 	_ = task.Validate()
-	r := newRunner(task, testLogger(), nil)
+	r := newRunner(task, testLogger(), nil, nil)
 	r.start(context.Background(), time.Hour)
 	defer r.stop()
 	r.requestSync(false)
@@ -397,5 +397,31 @@ func TestImportRealSample(t *testing.T) {
 	}
 	if rep.Imported != rep.Found {
 		t.Fatal("有任务未能导入")
+	}
+}
+
+// 修改任务时，改了域名的记录不能沿用旧状态，否则会被当作已同步而不创建新解析
+func TestRenamedRecordResyncs(t *testing.T) {
+	fp, _ := setupFakes(t)
+	task := sampleTask()
+	_ = task.Validate()
+	r := newRunner(task, testLogger(), nil, nil)
+	r.syncOnce(context.Background(), false)
+	prev := r.snapshot()
+	before := fp.callCount()
+
+	renamed := sampleTask()
+	_ = renamed.Validate()
+	renamed.Records[1].Sub = "gately"
+	r2 := newRunner(renamed, testLogger(), &prev, &task)
+	if _, ok := r2.snapshot().Records["b"]; ok {
+		t.Fatal("改名记录不应保留旧状态")
+	}
+	if _, ok := r2.snapshot().Records["a"]; !ok {
+		t.Fatal("未改动的记录应保留状态")
+	}
+	r2.syncOnce(context.Background(), false)
+	if fp.callCount() != before+1 {
+		t.Fatalf("只应重新同步改名的记录，实际调用 %d 次", fp.callCount()-before)
 	}
 }

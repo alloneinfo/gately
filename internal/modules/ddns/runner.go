@@ -57,19 +57,38 @@ type runner struct {
 	state TaskState
 }
 
-func newRunner(t Task, log *logbuf.Logger, prev *TaskState) *runner {
+// prevTask 为修改前的任务配置，与 prev 一起用于判断哪些记录的同步状态仍然有效。
+func newRunner(t Task, log *logbuf.Logger, prev *TaskState, prevTask *Task) *runner {
 	r := &runner{task: t, log: log, trigger: make(chan bool, 1), done: make(chan struct{})}
 	r.state.Records = map[string]RecordState{}
-	// 修改任务后保留仍存在记录的状态，避免无谓的重复同步
+	// 修改任务后保留仍存在且未改动记录的状态，避免无谓的重复同步
 	if prev != nil {
 		r.state.IPv4, r.state.IPv6 = prev.IPv4, prev.IPv6
-		for _, rec := range t.Records {
-			if st, ok := prev.Records[rec.Key]; ok {
-				r.state.Records[rec.Key] = st
+		old := map[string]Record{}
+		if prevTask != nil && prevTask.Provider == t.Provider {
+			for _, rec := range prevTask.Records {
+				old[rec.Key] = rec
 			}
+		}
+		for _, rec := range t.Records {
+			st, ok := prev.Records[rec.Key]
+			if !ok {
+				continue
+			}
+			// 改了域名、类型、线路或 TTL（例如把 lucky.example.com 改成 gately.example.com）的记录，
+			// 旧状态对应的是另一条解析，保留会被当作“已同步”而永远不创建新记录
+			if o, found := old[rec.Key]; prevTask != nil && (!found || !sameTarget(o, rec)) {
+				continue
+			}
+			r.state.Records[rec.Key] = st
 		}
 	}
 	return r
+}
+
+// sameTarget 判断两条记录是否指向服务商处的同一条解析（记录值由每轮渲染比较，不在此判断）。
+func sameTarget(a, b Record) bool {
+	return strings.EqualFold(a.Zone, b.Zone) && strings.EqualFold(a.Sub, b.Sub) && a.Type == b.Type && a.Line == b.Line && a.TTL == b.TTL
 }
 
 func (r *runner) start(parent context.Context, firstDelay time.Duration) {

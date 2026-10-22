@@ -86,6 +86,14 @@ func TestCloudflare(t *testing.T) {
 	p.(*cloudflare).endpoint = srv.URL
 	runUpsertSequence(t, p, Record{Zone: "example.com", Sub: "home", Type: "A"})
 
+	// ID 不是邮箱（例如 Lucky 配置中残留的其他服务商 AccessKey）时仍按 API Token 认证
+	value = ""
+	p2, _ := New("cloudflare", Credentials{ID: "LTAI5tExample", Secret: "tok"}, srv.Client())
+	p2.(*cloudflare).endpoint = srv.URL
+	if _, err := p2.Upsert(context.Background(), Record{Zone: "example.com", Sub: "home", Type: "A", Value: "1.1.1.1"}); err != nil {
+		t.Fatalf("非邮箱 ID 应使用 API Token: %v", err)
+	}
+
 	bad, _ := New("cloudflare", Credentials{Secret: "x"}, srv.Client())
 	bad.(*cloudflare).endpoint = srv.URL
 	if _, err := bad.Upsert(context.Background(), Record{Zone: "example.com", Sub: "home", Type: "A", Value: "1.1.1.1"}); err == nil || !strings.Contains(err.Error(), "Invalid access token") {
