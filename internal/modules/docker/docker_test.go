@@ -35,7 +35,7 @@ type fakeDocker struct {
 func (f *fakeDocker) handler(w http.ResponseWriter, r *http.Request) {
 	f.mu.Lock()
 	defer f.mu.Unlock()
-	p := strings.TrimPrefix(r.URL.Path, "/"+apiVersion)
+	p := strings.TrimPrefix(r.URL.Path, "/v"+apiVersion)
 	f.calls = append(f.calls, r.Method+" "+p)
 	parts := strings.Split(strings.Trim(p, "/"), "/")
 	switch {
@@ -262,5 +262,19 @@ func TestUpgradeRollbackOnStartFailure(t *testing.T) {
 	last := f.calls[len(f.calls)-1]
 	if last != "POST /containers/"+oldID+"/start" {
 		t.Fatalf("应重新启动旧容器，最后一次调用 %s", last)
+	}
+}
+
+func TestNegotiateVersion(t *testing.T) {
+	cases := []struct{ max, min, want string }{
+		{"1.52", "1.44", "1.44"}, // Docker 29 不再支持 1.41
+		{"1.45", "1.24", "1.41"}, // 支持首选版本时保持不变
+		{"1.40", "1.12", "1.40"}, // 旧版 Docker 用服务端版本
+		{"", "", "1.41"},         // 读不到版本
+	}
+	for _, c := range cases {
+		if got := negotiateVersion(c.max, c.min); got != c.want {
+			t.Errorf("negotiateVersion(%q, %q) = %q，期望 %q", c.max, c.min, got, c.want)
+		}
 	}
 }

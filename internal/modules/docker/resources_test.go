@@ -258,7 +258,7 @@ func newResEnv(t *testing.T, f *resFake) (*Module, func(method, path, ctype stri
 	t.Helper()
 	f.bodies = map[string][]byte{}
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		p := strings.TrimPrefix(r.URL.Path, "/"+apiVersion)
+		p := strings.TrimPrefix(r.URL.Path, "/v"+apiVersion)
 		key := r.Method + " " + p
 		b, _ := io.ReadAll(r.Body)
 		f.mu.Lock()

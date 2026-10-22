@@ -710,7 +710,7 @@ func newCtrFake(t *testing.T, routes map[string]http.HandlerFunc) (*ctrFake, str
 	t.Helper()
 	f := &ctrFake{bodies: map[string][]byte{}, routes: routes}
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		p := strings.TrimPrefix(r.URL.Path, "/"+apiVersion)
+		p := strings.TrimPrefix(r.URL.Path, "/v"+apiVersion)
 		key := r.Method + " " + p
 		h, ok := f.routes[key]
 		if ok && !strings.HasSuffix(key, "/start") {

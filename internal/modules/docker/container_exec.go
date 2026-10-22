@@ -153,6 +153,10 @@ func (c *Client) hijack(ctx context.Context, method, path string, body any) (net
 	if c.network == "" || c.addr == "" {
 		return nil, nil, errors.New("客户端缺少拨号信息")
 	}
+	base, err := c.endpoint(ctx)
+	if err != nil {
+		return nil, nil, err
+	}
 	var d net.Dialer
 	conn, err := d.DialContext(ctx, c.network, c.addr)
 	if err != nil {
@@ -163,7 +167,7 @@ func (c *Client) hijack(ctx context.Context, method, path string, body any) (net
 		conn.Close()
 		return nil, nil, err
 	}
-	req, err := http.NewRequestWithContext(ctx, method, c.base+path, bytes.NewReader(payload))
+	req, err := http.NewRequestWithContext(ctx, method, base+path, bytes.NewReader(payload))
 	if err != nil {
 		conn.Close()
 		return nil, nil, err

@@ -15,16 +15,24 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
-// apiVersion 为请求使用的 Engine API 版本，1.41 对应 Docker 20.10，兼容绝大多数部署。
-const apiVersion = "v1.41"
+// apiVersion 为首选的 Engine API 版本，1.41 对应 Docker 20.10，兼容绝大多数部署。
+// 实际版本在首次请求前协商：Docker 25 起最低版本逐步提高（Docker 29 要求至少 1.44），
+// 服务端最低版本高于首选时改用服务端最低版本；服务端低于首选时改用服务端版本。
+const apiVersion = "1.41"
 
 // Client 是精简的 Docker Engine API 客户端。
 type Client struct {
-	hc   *http.Client
+	hc *http.Client
+	// root 为不带版本前缀的地址，例如 http://docker
+	root string
+	// mu 保护协商得到的 API 版本前缀 base（例如 http://docker/v1.44），协商成功前为空
+	mu   sync.Mutex
 	base string
 	// network 与 addr 记录底层拨号信息（unix 套接字路径或 tcp 地址），连接劫持（终端）需要直接拨号
 	network string
@@ -47,9 +55,9 @@ func NewClient(host string) (*Client, error) {
 			var d net.Dialer
 			return d.DialContext(ctx, "unix", path)
 		}}
-		return &Client{hc: &http.Client{Transport: tr}, base: "http://docker/" + apiVersion, network: "unix", addr: path}, nil
+		return &Client{hc: &http.Client{Transport: tr}, root: "http://docker", network: "unix", addr: path}, nil
 	case "tcp", "http":
-		return &Client{hc: &http.Client{}, base: "http://" + u.Host + "/" + apiVersion, network: "tcp", addr: u.Host}, nil
+		return &Client{hc: &http.Client{}, root: "http://" + u.Host, network: "tcp", addr: u.Host}, nil
 	}
 	return nil, fmt.Errorf("不支持的 Docker 地址 %q", host)
 }
@@ -64,7 +72,72 @@ func (e *APIError) Error() string {
 	return fmt.Sprintf("Docker %d: %s", e.Status, e.Message)
 }
 
+// endpoint 返回带 API 版本前缀的地址，首次调用时与服务端协商版本；协商失败（Docker 未就绪等）不缓存，下次重试。
+func (c *Client) endpoint(ctx context.Context) (string, error) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if c.base != "" {
+		return c.base, nil
+	}
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.root+"/version", nil)
+	if err != nil {
+		return "", err
+	}
+	resp, err := c.hc.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+	var v struct {
+		APIVersion    string `json:"ApiVersion"`
+		MinAPIVersion string `json:"MinAPIVersion"`
+	}
+	// 读不到版本（例如经过屏蔽了 /version 的套接字代理）时按首选版本请求，与协商前的行为一致
+	if resp.StatusCode == http.StatusOK {
+		_ = json.NewDecoder(resp.Body).Decode(&v)
+	}
+	c.base = c.root + "/v" + negotiateVersion(v.APIVersion, v.MinAPIVersion)
+	return c.base, nil
+}
+
+// negotiateVersion 在服务端支持的范围 [min, max] 内选择最接近首选版本 apiVersion 的版本。
+func negotiateVersion(max, min string) string {
+	ver := apiVersion
+	if min != "" && compareVersion(min, ver) > 0 {
+		ver = min
+	}
+	if max != "" && compareVersion(max, ver) < 0 {
+		ver = max
+	}
+	return ver
+}
+
+// compareVersion 比较形如 1.41 的版本号。
+func compareVersion(a, b string) int {
+	pa, pb := strings.Split(a, "."), strings.Split(b, ".")
+	for i := 0; i < len(pa) || i < len(pb); i++ {
+		var x, y int
+		if i < len(pa) {
+			x, _ = strconv.Atoi(pa[i])
+		}
+		if i < len(pb) {
+			y, _ = strconv.Atoi(pb[i])
+		}
+		if x != y {
+			if x < y {
+				return -1
+			}
+			return 1
+		}
+	}
+	return 0
+}
+
 func (c *Client) do(ctx context.Context, method, path string, body any, out any) error {
+	base, err := c.endpoint(ctx)
+	if err != nil {
+		return err
+	}
 	var rd io.Reader
 	if body != nil {
 		b, err := json.Marshal(body)
@@ -73,7 +146,7 @@ func (c *Client) do(ctx context.Context, method, path string, body any, out any)
 		}
 		rd = bytes.NewReader(b)
 	}
-	req, err := http.NewRequestWithContext(ctx, method, c.base+path, rd)
+	req, err := http.NewRequestWithContext(ctx, method, base+path, rd)
 	if err != nil {
 		return err
 	}
@@ -168,7 +241,11 @@ func (c *Client) LogsWith(ctx context.Context, id string, tail int, timestamps b
 	if timestamps {
 		q.Set("timestamps", "1")
 	}
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.base+"/containers/"+url.PathEscape(id)+"/logs?"+q.Encode(), nil)
+	base, err := c.endpoint(ctx)
+	if err != nil {
+		return "", err
+	}
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, base+"/containers/"+url.PathEscape(id)+"/logs?"+q.Encode(), nil)
 	if err != nil {
 		return "", err
 	}
@@ -214,7 +291,11 @@ func demux(data []byte) string {
 // 非 TTY 容器的输出带 8 字节的多路复用头，这里按第一个块的格式判断并去掉。
 func (c *Client) FollowLogs(ctx context.Context, id string, onData func([]byte)) error {
 	q := url.Values{"stdout": {"1"}, "stderr": {"1"}, "follow": {"1"}, "tail": {"0"}, "since": {fmt.Sprint(time.Now().Unix())}}
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.base+"/containers/"+url.PathEscape(id)+"/logs?"+q.Encode(), nil)
+	base, err := c.endpoint(ctx)
+	if err != nil {
+		return err
+	}
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, base+"/containers/"+url.PathEscape(id)+"/logs?"+q.Encode(), nil)
 	if err != nil {
 		return err
 	}
@@ -295,7 +376,11 @@ func (c *Client) ImageID(ctx context.Context, ref string) (string, error) {
 func (c *Client) Pull(ctx context.Context, ref string) error {
 	image, tag := splitRef(ref)
 	q := url.Values{"fromImage": {image}, "tag": {tag}}
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.base+"/images/create?"+q.Encode(), nil)
+	base, err := c.endpoint(ctx)
+	if err != nil {
+		return err
+	}
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, base+"/images/create?"+q.Encode(), nil)
 	if err != nil {
 		return err
 	}

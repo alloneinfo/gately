@@ -25,7 +25,11 @@ type dockerEvent struct {
 // watchEvents 订阅容器的 die / oom 事件，连接中断时返回错误。
 func (c *Client) watchEvents(ctx context.Context, handle func(dockerEvent)) error {
 	filters, _ := json.Marshal(map[string][]string{"type": {"container"}, "event": {"die", "oom"}})
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.base+"/events?filters="+url.QueryEscape(string(filters)), nil)
+	base, err := c.endpoint(ctx)
+	if err != nil {
+		return err
+	}
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, base+"/events?filters="+url.QueryEscape(string(filters)), nil)
 	if err != nil {
 		return err
 	}

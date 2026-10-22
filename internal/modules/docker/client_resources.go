@@ -26,7 +26,11 @@ func escPath(ref string) string {
 
 // rawRequest 发起请求并返回未读取的响应，状态码 >= 300 时转为 *APIError。调用方负责关闭响应体。
 func (c *Client) rawRequest(ctx context.Context, method, path, contentType string, body io.Reader, headers map[string]string) (*http.Response, error) {
-	req, err := http.NewRequestWithContext(ctx, method, c.base+path, body)
+	base, err := c.endpoint(ctx)
+	if err != nil {
+		return nil, err
+	}
+	req, err := http.NewRequestWithContext(ctx, method, base+path, body)
 	if err != nil {
 		return nil, err
 	}
