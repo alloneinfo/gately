@@ -7,6 +7,10 @@ description: Anúncios e notas de cada versão do Gately.
 
 Abaixo estão os anúncios das versões principais. Veja as [GitHub Releases](https://github.com/wangwanjie/gately/releases) para as mudanças completas e os downloads de cada versão.
 
+## [v0.5.6.2](/pt-BR/news/v0.5.6.2)
+
+23 de outubro de 2026 · Corrige o módulo Docker que não conectava no Docker 29, a visão geral que aparecia por um instante antes da página de login e credenciais Cloudflare e registros DDNS renomeados importados do Lucky que não sincronizavam.
+
 ## [v0.5.6.1](/pt-BR/news/v0.5.6.1)
 
 22 de outubro de 2026 · Corrige as regras de firewall gravadas pela imagem Docker que faziam um nft antigo no host travar.

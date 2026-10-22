@@ -7,6 +7,10 @@ description: Gately 各版本的发布公告与更新说明。
 
 重要版本的发布公告如下，每个版本的完整变更与下载文件见 [GitHub Releases](https://github.com/wangwanjie/gately/releases)。
 
+## [v0.5.6.2](/news/v0.5.6.2)
+
+2026 年 10 月 23 日 · 修复 Docker 29 下无法连接 Docker、未登录时先闪现总览页，以及从 Lucky 导入的 Cloudflare 与改名 DDNS 记录不同步的问题。
+
 ## [v0.5.6.1](/news/v0.5.6.1)
 
 2026 年 10 月 22 日 · 修复 Docker 镜像写入的防火墙规则让宿主机上旧版 nft 崩溃的问题。
