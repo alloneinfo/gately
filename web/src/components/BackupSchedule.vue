@@ -188,9 +188,11 @@ async function loadLive() {
   localFiles.value = f
 }
 
-async function put(body: Settings) {
+async function put(form: Settings) {
   saving.value = true
   try {
+    // hasPassword 是 GET 返回的只读字段，后端拒绝未知字段，提交前剔除
+    const { hasPassword: _h, ...body } = form
     Object.assign(settings, await api.put<Settings>('/api/backup/settings', body))
     await loadLive()
     return true
