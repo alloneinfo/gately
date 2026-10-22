@@ -79,8 +79,8 @@
   "home": {
     "pill": "Open source · Auditable · Binaire unique",
     "announce": {
-      "text": "v0.5.5.2 est disponible : corrige les permissions des fichiers sensibles sur fnOS →",
-      "link": "/fr/news/v0.5.5.2"
+      "text": "v0.5.6 : prévention d'intrusion à la fail2ban →",
+      "link": "/fr/news/v0.5.6"
     },
     "titleLine1": "Une boîte à outils de passerelle réseau",
     "titleLine2": "où tout est visible",

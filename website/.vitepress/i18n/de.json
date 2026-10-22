@@ -79,8 +79,8 @@
   "home": {
     "pill": "Open Source · Prüfbar · Einzelne Binärdatei",
     "announce": {
-      "text": "v0.5.5.2 ist da: korrigiert die Berechtigungen sensibler Dateien auf fnOS →",
-      "link": "/de/news/v0.5.5.2"
+      "text": "v0.5.6: Einbruchschutz wie fail2ban →",
+      "link": "/de/news/v0.5.6"
     },
     "titleLine1": "Ein Toolkit für Netzwerk-Gateways,",
     "titleLine2": "das Sie durchschauen können",

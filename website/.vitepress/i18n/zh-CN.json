@@ -79,8 +79,8 @@
   "home": {
     "pill": "开源 · 可审计 · 单文件部署",
     "announce": {
-      "text": "v0.5.5.2 发布：修复飞牛上敏感文件的权限 →",
-      "link": "/news/v0.5.5.2"
+      "text": "v0.5.6 发布：入侵防护，类 fail2ban 自动封禁恶意 IP →",
+      "link": "/news/v0.5.6"
     },
     "titleLine1": "看得见的",
     "titleLine2": "网络网关工具集",

@@ -7,6 +7,10 @@ description: Gately 각 버전의 릴리스 공지와 변경 사항입니다.
 
 주요 버전의 릴리스 공지는 아래와 같습니다. 모든 버전의 전체 변경 사항과 다운로드 파일은 [GitHub Releases](https://github.com/wangwanjie/gately/releases)에서 확인하세요.
 
+## [v0.5.6](/ko/news/v0.5.6)
+
+2026년 10월 22일 · 침입 방지 추가: fail2ban 방식 로그 규칙, 미끼 포트, 포트 스캔 탐지와 nftables 차단 동기화.
+
 ## [v0.5.5.2](/ko/news/v0.5.5.2)
 
 2026년 10월 22일 · fnOS 등의 파일 시스템에서 설정 디렉터리의 민감한 파일을 같은 기기의 다른 사용자가 읽을 수 있던 문제를 수정했습니다.

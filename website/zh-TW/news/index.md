@@ -7,6 +7,10 @@ description: Gately 各版本的發布公告與更新說明。
 
 重要版本的發布公告如下，每個版本的完整變更與下載檔案見 [GitHub Releases](https://github.com/wangwanjie/gately/releases)。
 
+## [v0.5.6](/zh-TW/news/v0.5.6)
+
+2026 年 10 月 22 日 · 新增入侵防護：類似 fail2ban 的日誌規則、誘餌連接埠與連接埠掃描偵測，封鎖同步到 nftables。
+
 ## [v0.5.5.2](/zh-TW/news/v0.5.5.2)
 
 2026 年 10 月 22 日 · 修復飛牛 fnOS 等檔案系統上設定目錄中的敏感檔案可被本機其他使用者讀取的問題。

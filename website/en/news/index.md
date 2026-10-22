@@ -7,6 +7,10 @@ description: Release announcements and notes for each Gately version.
 
 Announcements for major releases are listed below. See [GitHub Releases](https://github.com/wangwanjie/gately/releases) for the full changes and downloads of every version.
 
+## [v0.5.6](/en/news/v0.5.6)
+
+October 22, 2026 · Adds intrusion prevention: fail2ban-style log jails, trap ports and port-scan detection, with bans synced to nftables.
+
 ## [v0.5.5.2](/en/news/v0.5.5.2)
 
 October 22, 2026 · Fixes sensitive files in the config directory being readable by other local users on fnOS and similar filesystems.

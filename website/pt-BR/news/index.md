@@ -7,6 +7,10 @@ description: Anúncios e notas de cada versão do Gately.
 
 Abaixo estão os anúncios das versões principais. Veja as [GitHub Releases](https://github.com/wangwanjie/gately/releases) para as mudanças completas e os downloads de cada versão.
 
+## [v0.5.6](/pt-BR/news/v0.5.6)
+
+22 de outubro de 2026 · Nova prevenção de intrusão: regras de logs no estilo fail2ban, portas armadilha e detecção de varredura, com bloqueios sincronizados no nftables.
+
 ## [v0.5.5.2](/pt-BR/news/v0.5.5.2)
 
 22 de outubro de 2026 · Corrige a leitura de arquivos sensíveis do diretório de configuração por outros usuários locais no fnOS e em sistemas de arquivos semelhantes.

@@ -79,8 +79,8 @@
   "home": {
     "pill": "Código abierto · Auditable · Binario único",
     "announce": {
-      "text": "Ya está aquí v0.5.5.2: corrige los permisos de archivos sensibles en fnOS →",
-      "link": "/es/news/v0.5.5.2"
+      "text": "v0.5.6: prevención de intrusiones al estilo fail2ban →",
+      "link": "/es/news/v0.5.6"
     },
     "titleLine1": "Una pasarela de red",
     "titleLine2": "que puedes ver por dentro",
