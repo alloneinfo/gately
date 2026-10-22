@@ -1,7 +1,7 @@
 {
   "title": "네트워크 및 설정 점검",
   "run": "자가 점검",
-  "intro": "공인 주소, NAT, 시스템 시간, 80/443 포트, DDNS 해석, 인증서 유효 기간, HTTPS 사이트의 인증서 적용 여부, frp 프록시 충돌을 확인합니다. DDNS에서 쓰는 공인 IP 조회 서비스에 접속합니다.",
+  "intro": "공인 주소, NAT, 시스템 시간, 80/443 포트, DDNS 해석, 인증서 유효 기간, HTTPS 사이트의 인증서 적용 여부, frp 프록시 충돌, 침입 방지의 방화벽 동기화를 확인합니다. DDNS에서 쓰는 공인 IP 조회 서비스에 접속합니다.",
   "empty": "보고할 내용이 없습니다",
   "rerun": "다시 점검",
   "issues": "{count}개 항목을 확인해야 합니다",
@@ -35,7 +35,16 @@
     "webCertMissing": "사이트 {site}(포트 {port})에 일치하는 인증서가 없습니다: {domains}",
     "frpOk": "frpc 프록시 {count}개에서 충돌이 없습니다",
     "frpDuplicate": "frpc에 {proxy}라는 이름의 활성 프록시가 여러 개 있어 첫 번째만 적용됩니다",
-    "frpConflict": "{role}에서 프록시 {proxy} 충돌을 보고했습니다: {reason}"
+    "frpConflict": "{role}에서 프록시 {proxy} 충돌을 보고했습니다: {reason}",
+    "guardOk": "침입 방지가 시스템 방화벽에 동기화되어 주소 {bans}개를 차단 중입니다",
+    "guardOS": "이 시스템에는 nftables가 없어 침입 방지는 Gately 자체 서비스에만 적용됩니다",
+    "guardMissing": "침입 방지: nft 명령을 찾을 수 없어 시스템 방화벽에 동기화할 수 없습니다",
+    "guardPermission": "침입 방지: 방화벽을 변경할 권한이 없습니다",
+    "guardError": "침입 방지의 방화벽 규칙 기록 실패: {error}",
+    "guardTrapSkipped": "미끼 포트 {ports}은(는) 사용 중이라 제외했습니다",
+    "guardTrapUserspace": "방화벽 동기화가 적용되지 않아 Gately가 미끼 포트를 직접 수신하며, 핸드셰이크를 완료한 스캔만 감지할 수 있습니다",
+    "guardScanUnavailable": "포트 스캔 탐지가 켜져 있지만 방화벽 동기화가 적용되지 않아 동작하지 않습니다",
+    "guardJailError": "침입 방지 규칙 {jail} 오류: {error}"
   },
   "h": {
     "publicIPv4Fail": "외부 연결과 DNS를 확인하거나 DDNS 설정에서 IP 조회 URL을 변경하세요.",
@@ -51,6 +60,12 @@
     "direct6": "공유기와 로컬 방화벽에서 포트를 허용하면 포트 포워딩 없이 IPv6로 직접 접속할 수 있습니다.",
     "webCertMissing": "이 도메인으로의 접속은 TLS 핸드셰이크에서 실패합니다. 인증서 페이지에서 이를 포함하는 인증서를 추가하거나(와일드카드 인증서는 한 단계 하위 도메인을 포함), 사이트에서 도메인을 제거하세요.",
     "frpDuplicate": "frp는 프록시 이름이 고유해야 합니다. 중복된 이름을 바꾸세요.",
-    "frpConflict": "같은 frps에 같은 이름의 프록시가 이미 있거나 도메인·원격 포트가 사용 중입니다. 여러 기기가 같은 frpc 설정을 복사했을 때 흔히 발생합니다. 기기마다 frpc의 user를 다르게 하거나 프록시 이름, 도메인, 원격 포트를 바꾸세요. 충돌한 프록시의 사이트는 시간 초과됩니다."
+    "frpConflict": "같은 frps에 같은 이름의 프록시가 이미 있거나 도메인·원격 포트가 사용 중입니다. 여러 기기가 같은 frpc 설정을 복사했을 때 흔히 발생합니다. 기기마다 frpc의 user를 다르게 하거나 프록시 이름, 도메인, 원격 포트를 바꾸세요. 충돌한 프록시의 사이트는 시간 초과됩니다.",
+    "guardMissing": "nftables를 설치하세요. Docker는 최신 이미지로 업데이트하세요.",
+    "guardPermission": "nftables에 기록하려면 root 또는 CAP_NET_ADMIN이 필요합니다. Docker는 compose에 cap_add: [NET_ADMIN]을 추가하고 host 네트워크를 사용하세요.",
+    "guardError": "커널에 nftables 모듈이 없거나 nft 버전이 너무 오래되었을 수 있습니다(0.9.0 이상 필요).",
+    "guardTrapSkipped": "이 포트에서는 서비스가 수신 중이므로 미끼로 쓰면 정상 방문자가 차단됩니다. 자동으로 건너뛰었습니다.",
+    "guardScanUnavailable": "침입 방지 페이지에서 방화벽 상태와 해결 방법을 확인하세요.",
+    "guardJailError": "로그 파일 경로, 서비스 유닛 또는 컨테이너 이름이 올바른지 확인하세요. Gately가 컨테이너에서 실행 중이면 로그 디렉터리를 컨테이너에 마운트해야 합니다."
   }
 }

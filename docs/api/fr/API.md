@@ -40,6 +40,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `ssl` | Certificat SSL | `ssl:read`、`ssl:write` |
 | `waf` | Pare-feu WAF | `waf:read`、`waf:write` |
 | `webservice` | Service Web | `webservice:read`、`webservice:write` |
+| `guard` | Prévention d'intrusion | `guard:read`、`guard:write` |
 | `wol` | Wake-on-LAN | `wol:read`、`wol:write` |
 | `webterminal` | Terminal Web | `webterminal:read`、`webterminal:write` |
 | `cron` | Tâche planifiée | `cron:read`、`cron:write` |
@@ -222,6 +223,28 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | POST | `/api/webservice/geoip/upload` | `webservice:write` | Téléverser la base GeoIP (champ multipart file, .mmdb) |
 | POST | `/api/webservice/geoip/download` | `webservice:write` | Télécharger la base GeoIP (.mmdb) depuis une adresse |
 | DELETE | `/api/webservice/geoip` | `webservice:write` | Supprimer la base GeoIP |
+
+## Prévention d'intrusion
+
+| Méthode | Chemin | Permission requise | Description |
+| --- | --- | --- | --- |
+| GET | `/api/guard/logs` | `guard:read` | Consulter les journaux d'exécution d'un module |
+| DELETE | `/api/guard/logs` | `guard:write` | Vider les journaux d'exécution d'un module |
+| GET | `/api/guard/jails` | `guard:read` | Lister Entrée |
+| POST | `/api/guard/jails` | `guard:write` | Ajouter Entrée |
+| PUT | `/api/guard/jails/{key}` | `guard:write` | Modifier Entrée |
+| DELETE | `/api/guard/jails/{key}` | `guard:write` | Supprimer Entrée |
+| PUT | `/api/guard/jails/{key}/enable` | `guard:write` | Activer ou désactiver Entrée |
+| PUT | `/api/guard/jails-order` | `guard:write` | Réordonner Entrée |
+| GET | `/api/guard/presets` | `guard:read` | Modèles de règles pour les services courants |
+| POST | `/api/guard/jails/test` | `guard:write` | Tester les filtres sur des lignes de journal |
+| GET | `/api/guard/status` | `guard:read` | État de la synchronisation du pare-feu et environnement |
+| GET | `/api/guard/settings` | `guard:read` | Paramètres globaux |
+| PUT | `/api/guard/settings` | `guard:write` | Modifier les paramètres globaux |
+| GET | `/api/guard/bans` | `guard:read` | IP actuellement bannies |
+| POST | `/api/guard/bans` | `guard:write` | Bannir manuellement une IP ou un réseau |
+| DELETE | `/api/guard/bans` | `guard:write` | Lever un bannissement (le body est {"key": adresse}) |
+| GET | `/api/guard/firewall/rules` | `guard:read` | Règles écrites par Gately dans nftables (texte) |
 
 ## Wake-on-LAN
 
@@ -598,6 +621,17 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | `password` | string |
 | `schedule` | string |
 
+### banlist.Entry
+
+| Champ | Type |
+| --- | --- |
+| `count` | integer |
+| `created` | Heure (RFC 3339) |
+| `key` | string |
+| `reason` | string |
+| `source` | string |
+| `until` | Heure (RFC 3339) |
+
 ### cloudflared.Tunnel
 
 | Champ | Type |
@@ -759,6 +793,124 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | `loaded` | boolean |
 | `size` | integer |
 | `type` | string |
+
+### guard.BanView
+
+| Champ | Type |
+| --- | --- |
+| `count` | integer |
+| `created` | Heure (RFC 3339) |
+| `jail` | string |
+| `key` | string |
+| `reason` | string |
+| `source` | string |
+| `until` | Heure (RFC 3339) |
+
+### guard.FirewallStatus
+
+| Champ | Type |
+| --- | --- |
+| `active` | boolean |
+| `checkedAt` | Heure (RFC 3339) |
+| `dropped` | Table de correspondance de integer |
+| `enabled` | boolean |
+| `error` | string |
+| `hits` | Table de correspondance de integer |
+| `openPorts` | integer |
+| `reason` | string |
+| `trapPorts` | string |
+| `trapSkipped` | Tableau de integer |
+| `version` | string |
+
+### guard.Jail
+
+| Champ | Type |
+| --- | --- |
+| `banTime` | integer |
+| `enable` | boolean |
+| `filter` | string |
+| `findTime` | integer |
+| `ignore` | string |
+| `key` | string |
+| `maxRetry` | integer |
+| `name` | string |
+| `preset` | string |
+| `remark` | string |
+| `source` | string |
+| `target` | string |
+
+### guard.Platform
+
+| Champ | Type |
+| --- | --- |
+| `docker` | boolean |
+| `inDocker` | boolean |
+| `journal` | boolean |
+| `os` | string |
+
+### guard.ScanSettings
+
+| Champ | Type |
+| --- | --- |
+| `banSeconds` | integer |
+| `enable` | boolean |
+| `excludePorts` | string |
+| `threshold` | integer |
+
+### guard.Settings
+
+| Champ | Type |
+| --- | --- |
+| `banSeconds` | integer |
+| `firewall` | boolean |
+| `ignoreList` | Tableau de string |
+| `ignorePrivate` | boolean |
+| `increment` | boolean |
+| `maxBanSeconds` | integer |
+| `scan` | `guard.ScanSettings` |
+| `trap` | `guard.TrapSettings` |
+
+### guard.Status
+
+| Champ | Type |
+| --- | --- |
+| `bans` | integer |
+| `firewall` | `guard.FirewallStatus` |
+| `platform` | `guard.Platform` |
+| `userTrapPorts` | Tableau de integer |
+
+### guard.TestResult
+
+| Champ | Type |
+| --- | --- |
+| `host` | string |
+| `ignored` | boolean |
+| `line` | string |
+| `matched` | boolean |
+
+### guard.TrapSettings
+
+| Champ | Type |
+| --- | --- |
+| `banSeconds` | integer |
+| `enable` | boolean |
+| `ports` | string |
+
+### guard.banRequest
+
+| Champ | Type |
+| --- | --- |
+| `key` | string |
+| `reason` | string |
+| `seconds` | integer |
+
+### guard.testRequest
+
+| Champ | Type |
+| --- | --- |
+| `filter` | string |
+| `ignore` | string |
+| `lines` | string |
 
 ### ipsource.Source
 
@@ -1026,6 +1178,7 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | `remark` | string |
 | `ruleSets` | Tableau de `waf.RuleSet` |
 | `skipBodyPaths` | string |
+| `webdav` | boolean |
 
 ### waf.RuleSet
 
@@ -1055,7 +1208,9 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | --- | --- |
 | `key` | string |
 | `manual` | boolean |
+| `permanent` | boolean |
 | `reason` | string |
+| `source` | string |
 | `until` | Heure (RFC 3339) |
 
 ### webservice.CacheConfig

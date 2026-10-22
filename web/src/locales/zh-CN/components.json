@@ -41,5 +41,15 @@
     "timeoutTitle": "等待超时",
     "timeoutDesc": "服务长时间未响应。如修改了管理端口或监听地址，请手动访问新地址；也可以查看程序日志确认启动情况。",
     "reload": "刷新页面"
+  },
+  "duration": {
+    "minutes": "分钟",
+    "hours": "小时",
+    "days": "天"
+  },
+  "banTime": {
+    "default": "默认",
+    "custom": "自定义",
+    "permanent": "永久"
   }
 }

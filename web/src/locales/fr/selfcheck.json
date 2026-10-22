@@ -1,7 +1,7 @@
 {
   "title": "Vérification réseau et configuration",
   "run": "Auto-diagnostic",
-  "intro": "Vérifie l'adresse publique, le NAT, l'horloge, les ports 80/443, la résolution DDNS, la validité des certificats, la couverture des sites HTTPS par un certificat et les conflits de proxys frp. Interroge les services d'IP publique configurés pour le DDNS.",
+  "intro": "Vérifie l'adresse publique, le NAT, l'horloge, les ports 80/443, la résolution DDNS, la validité des certificats, la couverture des sites HTTPS par un certificat, les conflits de proxys frp et la synchronisation du pare-feu de la prévention d'intrusion. Interroge les services d'IP publique configurés pour le DDNS.",
   "empty": "Rien à signaler",
   "rerun": "Relancer",
   "issues": "{count} élément(s) à examiner",
@@ -35,7 +35,16 @@
     "webCertMissing": "Le site {site} (port {port}) n'a pas de certificat pour : {domains}",
     "frpOk": "Aucun conflit pour les {count} proxys frpc",
     "frpDuplicate": "Plusieurs proxys frpc actifs s'appellent {proxy} ; seul le premier s'applique",
-    "frpConflict": "{role} signale un conflit pour le proxy {proxy} : {reason}"
+    "frpConflict": "{role} signale un conflit pour le proxy {proxy} : {reason}",
+    "guardOk": "La prévention d'intrusion est synchronisée avec le pare-feu, {bans} adresses bannies",
+    "guardOS": "Ce système n'a pas nftables : la prévention d'intrusion ne protège que les services de Gately",
+    "guardMissing": "Prévention d'intrusion : commande nft introuvable, les bannissements ne sont pas synchronisés avec le pare-feu",
+    "guardPermission": "Prévention d'intrusion : pas l'autorisation de modifier le pare-feu",
+    "guardError": "La prévention d'intrusion n'a pas pu écrire les règles du pare-feu : {error}",
+    "guardTrapSkipped": "Les ports pièges {ports} sont utilisés et ont été exclus",
+    "guardTrapUserspace": "La synchronisation du pare-feu est inactive : Gately écoute lui-même sur les ports pièges et ne détecte que les scans qui terminent la connexion",
+    "guardScanUnavailable": "La détection de scan est activée mais la synchronisation du pare-feu est inactive, elle ne fonctionne donc pas",
+    "guardJailError": "La règle {jail} de la prévention d'intrusion est en erreur : {error}"
   },
   "h": {
     "publicIPv4Fail": "Vérifiez la connectivité sortante et le DNS, ou changez les URL de requête d’IP dans les réglages DDNS.",
@@ -51,6 +60,12 @@
     "direct6": "Les services de cette machine sont joignables en IPv6 sans redirection de ports, si le routeur et le pare-feu local autorisent les ports.",
     "webCertMissing": "Les requêtes vers ces domaines échouent lors de la négociation TLS. Ajoutez un certificat qui les couvre (un joker couvre un niveau de sous-domaine) ou retirez-les du site.",
     "frpDuplicate": "frp exige des noms de proxy uniques ; renommez les doublons.",
-    "frpConflict": "Le serveur frps a déjà un proxy de ce nom, ou le domaine ou le port distant est pris. Cela arrive souvent quand plusieurs appareils copient la même configuration frpc. Donnez un user différent au frpc de chaque appareil ou changez noms, domaines et ports distants ; les sites derrière un proxy en conflit expirent."
+    "frpConflict": "Le serveur frps a déjà un proxy de ce nom, ou le domaine ou le port distant est pris. Cela arrive souvent quand plusieurs appareils copient la même configuration frpc. Donnez un user différent au frpc de chaque appareil ou changez noms, domaines et ports distants ; les sites derrière un proxy en conflit expirent.",
+    "guardMissing": "Installez nftables. Pour Docker, passez à la dernière image.",
+    "guardPermission": "Écrire dans nftables nécessite root ou CAP_NET_ADMIN. Pour Docker, ajoutez cap_add: [NET_ADMIN] au fichier compose et utilisez le réseau host.",
+    "guardError": "Il manque peut-être des modules nftables au noyau, ou nft est trop ancien (0.9.0 ou plus récent requis).",
+    "guardTrapSkipped": "Des services écoutent sur ces ports ; en faire des pièges bannirait des visiteurs légitimes. Ils ont été ignorés.",
+    "guardScanUnavailable": "Consultez la page Prévention d'intrusion pour l'état du pare-feu et la marche à suivre.",
+    "guardJailError": "Vérifiez le chemin du fichier journal, l'unité de service ou le nom du conteneur. Si Gately tourne dans un conteneur, montez-y le répertoire des journaux."
   }
 }

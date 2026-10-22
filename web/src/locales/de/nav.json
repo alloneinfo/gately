@@ -20,6 +20,10 @@
       "title": "Dynamisches DNS",
       "desc": "DNS-Einträge automatisch aktualisieren, wenn sich Ihre öffentliche IP ändert"
     },
+    "guard": {
+      "title": "Einbruchschutz",
+      "desc": "Bösartige IPs in der System-Firewall sperren"
+    },
     "stun": {
       "title": "STUN-Traversal",
       "desc": "Dienste hinter NAT1 ohne öffentliche IP erreichen"

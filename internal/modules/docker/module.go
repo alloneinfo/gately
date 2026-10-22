@@ -1,10 +1,12 @@
 package docker
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"sort"
 	"strings"
 	"sync"
@@ -491,6 +493,40 @@ func (m *Module) ContainerNames(ctx context.Context) ([]string, error) {
 	}
 	sort.Strings(out)
 	return out, nil
+}
+
+// FollowLogs 持续读取容器新产生的日志行，直到 ctx 取消或容器日志流结束，供入侵防护的日志规则使用。
+func (m *Module) FollowLogs(ctx context.Context, name string, onLine func(string)) error {
+	c, err := m.client()
+	if err != nil {
+		return err
+	}
+	var pending []byte
+	err = c.FollowLogs(ctx, name, func(b []byte) {
+		pending = append(pending, b...)
+		for {
+			i := bytes.IndexByte(pending, '\n')
+			if i < 0 {
+				break
+			}
+			line := strings.TrimRight(string(pending[:i]), "\r")
+			pending = pending[i+1:]
+			if line != "" {
+				onLine(line)
+			}
+		}
+		// 没有换行的超长内容直接丢弃，避免占用内存
+		if len(pending) > 64<<10 {
+			pending = pending[:0]
+		}
+	})
+	if ctx.Err() != nil {
+		return nil
+	}
+	if err == nil || errors.Is(err, io.EOF) {
+		return errors.New("日志流已结束，容器可能已停止")
+	}
+	return err
 }
 
 // RestartContainers 依次重启指定容器（名称或 ID），例如证书更新后让服务加载新证书。

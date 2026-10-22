@@ -1,7 +1,7 @@
 {
   "title": "Network & configuration check",
   "run": "Self-check",
-  "intro": "Checks your public address, NAT, clock, ports 80/443, DDNS resolution, certificate validity, certificate coverage of HTTPS sites and frp proxy conflicts. It queries the public IP lookup services configured for DDNS.",
+  "intro": "Checks your public address, NAT, clock, ports 80/443, DDNS resolution, certificate validity, certificate coverage of HTTPS sites, frp proxy conflicts and Intrusion Prevention's firewall sync. It queries the public IP lookup services configured for DDNS.",
   "empty": "Nothing to report",
   "rerun": "Run again",
   "issues": "{count} item(s) need attention",
@@ -35,7 +35,16 @@
     "webCertMissing": "Site {site} (port {port}) has no matching certificate for: {domains}",
     "frpOk": "No conflicts found for {count} frpc proxies",
     "frpDuplicate": "Several enabled frpc proxies are named {proxy}; only the first one takes effect",
-    "frpConflict": "{role} reports a conflict for proxy {proxy}: {reason}"
+    "frpConflict": "{role} reports a conflict for proxy {proxy}: {reason}",
+    "guardOk": "Intrusion Prevention is synced to the system firewall with {bans} addresses banned",
+    "guardOS": "This system has no nftables, so Intrusion Prevention only protects Gately's own services",
+    "guardMissing": "Intrusion Prevention: the nft command was not found, so bans are not synced to the system firewall",
+    "guardPermission": "Intrusion Prevention: no permission to change the firewall",
+    "guardError": "Intrusion Prevention failed to write firewall rules: {error}",
+    "guardTrapSkipped": "Trap ports {ports} are in use and were excluded",
+    "guardTrapUserspace": "Firewall sync is not active, so Gately listens on the trap ports itself and only catches scans that complete the handshake",
+    "guardScanUnavailable": "Port-scan detection is on but firewall sync is not active, so detection is not running",
+    "guardJailError": "Intrusion Prevention jail {jail} has an error: {error}"
   },
   "h": {
     "publicIPv4Fail": "Check outbound connectivity and DNS, or change the IP lookup URLs in the DDNS settings.",
@@ -51,6 +60,12 @@
     "direct6": "Services on this machine are reachable over IPv6 without port forwarding, as long as the router and local firewall allow the ports.",
     "webCertMissing": "Requests to these domains fail during the TLS handshake. Add a certificate that covers them on the Certificates page (a wildcard covers one subdomain level), or remove the domains from the site.",
     "frpDuplicate": "frp requires unique proxy names; rename the duplicates.",
-    "frpConflict": "The frps server already has a proxy with this name, or the domain or remote port is taken. This usually happens when several devices share a copy of the same frpc config. Give each device's frpc a different user, or change the proxy names, domains and remote ports; sites behind a conflicting proxy time out."
+    "frpConflict": "The frps server already has a proxy with this name, or the domain or remote port is taken. This usually happens when several devices share a copy of the same frpc config. Give each device's frpc a different user, or change the proxy names, domains and remote ports; sites behind a conflicting proxy time out.",
+    "guardMissing": "Install nftables. For Docker, update to the latest image.",
+    "guardPermission": "Writing to nftables requires root or CAP_NET_ADMIN. For Docker, add cap_add: [NET_ADMIN] to the compose file and use host networking.",
+    "guardError": "The kernel may be missing nftables modules, or nft is too old (0.9.0 or later is required).",
+    "guardTrapSkipped": "Services listen on these ports, so trapping them would ban legitimate visitors. They were skipped.",
+    "guardScanUnavailable": "See the Intrusion Prevention page for the firewall status and how to fix it.",
+    "guardJailError": "Check the log file path, service unit or container name. When Gately runs in a container, mount the log directory into it."
   }
 }

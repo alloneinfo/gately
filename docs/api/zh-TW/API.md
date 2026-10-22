@@ -40,6 +40,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `ssl` | SSL 憑證 | `ssl:read`、`ssl:write` |
 | `waf` | WAF 防火牆 | `waf:read`、`waf:write` |
 | `webservice` | Web 服務 | `webservice:read`、`webservice:write` |
+| `guard` | 入侵防護 | `guard:read`、`guard:write` |
 | `wol` | 網路喚醒 | `wol:read`、`wol:write` |
 | `webterminal` | Web 終端機 | `webterminal:read`、`webterminal:write` |
 | `cron` | 排程任務 | `cron:read`、`cron:write` |
@@ -222,6 +223,28 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | POST | `/api/webservice/geoip/upload` | `webservice:write` | 上傳 GeoIP 資料庫（multipart 欄位 file，.mmdb） |
 | POST | `/api/webservice/geoip/download` | `webservice:write` | 從位址下載 GeoIP 資料庫（.mmdb） |
 | DELETE | `/api/webservice/geoip` | `webservice:write` | 移除 GeoIP 資料庫 |
+
+## 入侵防護
+
+| 方法 | 路徑 | 所需權限 | 說明 |
+| --- | --- | --- | --- |
+| GET | `/api/guard/logs` | `guard:read` | 檢視模組執行日誌 |
+| DELETE | `/api/guard/logs` | `guard:write` | 清空模組執行日誌 |
+| GET | `/api/guard/jails` | `guard:read` | 取得項目清單 |
+| POST | `/api/guard/jails` | `guard:write` | 新增項目 |
+| PUT | `/api/guard/jails/{key}` | `guard:write` | 修改項目 |
+| DELETE | `/api/guard/jails/{key}` | `guard:write` | 刪除項目 |
+| PUT | `/api/guard/jails/{key}/enable` | `guard:write` | 啟用或停用項目 |
+| PUT | `/api/guard/jails-order` | `guard:write` | 調整項目排序 |
+| GET | `/api/guard/presets` | `guard:read` | 常見服務的規則範本 |
+| POST | `/api/guard/jails/test` | `guard:write` | 用日誌樣例測試過濾規則 |
+| GET | `/api/guard/status` | `guard:read` | 防火牆同步狀態與執行環境 |
+| GET | `/api/guard/settings` | `guard:read` | 全域設定 |
+| PUT | `/api/guard/settings` | `guard:write` | 修改全域設定 |
+| GET | `/api/guard/bans` | `guard:read` | 目前封鎖的 IP |
+| POST | `/api/guard/bans` | `guard:write` | 手動封鎖 IP 或網段 |
+| DELETE | `/api/guard/bans` | `guard:write` | 解除封鎖（body 為 {"key": 位址}） |
+| GET | `/api/guard/firewall/rules` | `guard:read` | Gately 寫入 nftables 的規則（文字） |
 
 ## 網路喚醒
 
@@ -598,6 +621,17 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `password` | string |
 | `schedule` | string |
 
+### banlist.Entry
+
+| 欄位 | 類型 |
+| --- | --- |
+| `count` | integer |
+| `created` | 時間 (RFC 3339) |
+| `key` | string |
+| `reason` | string |
+| `source` | string |
+| `until` | 時間 (RFC 3339) |
+
 ### cloudflared.Tunnel
 
 | 欄位 | 類型 |
@@ -759,6 +793,124 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `loaded` | boolean |
 | `size` | integer |
 | `type` | string |
+
+### guard.BanView
+
+| 欄位 | 類型 |
+| --- | --- |
+| `count` | integer |
+| `created` | 時間 (RFC 3339) |
+| `jail` | string |
+| `key` | string |
+| `reason` | string |
+| `source` | string |
+| `until` | 時間 (RFC 3339) |
+
+### guard.FirewallStatus
+
+| 欄位 | 類型 |
+| --- | --- |
+| `active` | boolean |
+| `checkedAt` | 時間 (RFC 3339) |
+| `dropped` | 對應 of integer |
+| `enabled` | boolean |
+| `error` | string |
+| `hits` | 對應 of integer |
+| `openPorts` | integer |
+| `reason` | string |
+| `trapPorts` | string |
+| `trapSkipped` | 陣列 of integer |
+| `version` | string |
+
+### guard.Jail
+
+| 欄位 | 類型 |
+| --- | --- |
+| `banTime` | integer |
+| `enable` | boolean |
+| `filter` | string |
+| `findTime` | integer |
+| `ignore` | string |
+| `key` | string |
+| `maxRetry` | integer |
+| `name` | string |
+| `preset` | string |
+| `remark` | string |
+| `source` | string |
+| `target` | string |
+
+### guard.Platform
+
+| 欄位 | 類型 |
+| --- | --- |
+| `docker` | boolean |
+| `inDocker` | boolean |
+| `journal` | boolean |
+| `os` | string |
+
+### guard.ScanSettings
+
+| 欄位 | 類型 |
+| --- | --- |
+| `banSeconds` | integer |
+| `enable` | boolean |
+| `excludePorts` | string |
+| `threshold` | integer |
+
+### guard.Settings
+
+| 欄位 | 類型 |
+| --- | --- |
+| `banSeconds` | integer |
+| `firewall` | boolean |
+| `ignoreList` | 陣列 of string |
+| `ignorePrivate` | boolean |
+| `increment` | boolean |
+| `maxBanSeconds` | integer |
+| `scan` | `guard.ScanSettings` |
+| `trap` | `guard.TrapSettings` |
+
+### guard.Status
+
+| 欄位 | 類型 |
+| --- | --- |
+| `bans` | integer |
+| `firewall` | `guard.FirewallStatus` |
+| `platform` | `guard.Platform` |
+| `userTrapPorts` | 陣列 of integer |
+
+### guard.TestResult
+
+| 欄位 | 類型 |
+| --- | --- |
+| `host` | string |
+| `ignored` | boolean |
+| `line` | string |
+| `matched` | boolean |
+
+### guard.TrapSettings
+
+| 欄位 | 類型 |
+| --- | --- |
+| `banSeconds` | integer |
+| `enable` | boolean |
+| `ports` | string |
+
+### guard.banRequest
+
+| 欄位 | 類型 |
+| --- | --- |
+| `key` | string |
+| `reason` | string |
+| `seconds` | integer |
+
+### guard.testRequest
+
+| 欄位 | 類型 |
+| --- | --- |
+| `filter` | string |
+| `ignore` | string |
+| `lines` | string |
 
 ### ipsource.Source
 
@@ -1026,6 +1178,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `remark` | string |
 | `ruleSets` | 陣列 of `waf.RuleSet` |
 | `skipBodyPaths` | string |
+| `webdav` | boolean |
 
 ### waf.RuleSet
 
@@ -1055,7 +1208,9 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | --- | --- |
 | `key` | string |
 | `manual` | boolean |
+| `permanent` | boolean |
 | `reason` | string |
+| `source` | string |
 | `until` | 時間 (RFC 3339) |
 
 ### webservice.CacheConfig

@@ -41,5 +41,15 @@
     "timeoutTitle": "Timed out",
     "timeoutDesc": "The service has not responded for a long time. If you changed the admin port or listen address, open the new address manually. You can also check the program logs to see how startup is going.",
     "reload": "Reload page"
+  },
+  "duration": {
+    "minutes": "minutes",
+    "hours": "hours",
+    "days": "days"
+  },
+  "banTime": {
+    "default": "Default",
+    "custom": "Custom",
+    "permanent": "Permanent"
   }
 }

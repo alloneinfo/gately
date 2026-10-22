@@ -1,7 +1,7 @@
 {
   "title": "Verificação de rede e configuração",
   "run": "Autodiagnóstico",
-  "intro": "Verifica o endereço público, NAT, o relógio, as portas 80/443, a resolução DDNS, a validade dos certificados, a cobertura de certificados dos sites HTTPS e conflitos de proxies frp. Consulta os serviços de IP público configurados para o DDNS.",
+  "intro": "Verifica o endereço público, NAT, o relógio, as portas 80/443, a resolução DDNS, a validade dos certificados, a cobertura de certificados dos sites HTTPS, conflitos de proxies frp e a sincronização do firewall da Prevenção de intrusão. Consulta os serviços de IP público configurados para o DDNS.",
   "empty": "Nada a relatar",
   "rerun": "Executar de novo",
   "issues": "{count} item(ns) precisam de atenção",
@@ -35,7 +35,16 @@
     "webCertMissing": "O site {site} (porta {port}) não tem certificado para: {domains}",
     "frpOk": "Nenhum conflito nos {count} proxies do frpc",
     "frpDuplicate": "Vários proxies ativos do frpc se chamam {proxy}; só o primeiro tem efeito",
-    "frpConflict": "{role} relata um conflito no proxy {proxy}: {reason}"
+    "frpConflict": "{role} relata um conflito no proxy {proxy}: {reason}",
+    "guardOk": "A Prevenção de intrusão está sincronizada com o firewall, com {bans} endereços bloqueados",
+    "guardOS": "Este sistema não tem nftables, então a Prevenção de intrusão só protege os serviços do Gately",
+    "guardMissing": "Prevenção de intrusão: comando nft não encontrado, os bloqueios não são sincronizados com o firewall",
+    "guardPermission": "Prevenção de intrusão: sem permissão para alterar o firewall",
+    "guardError": "A Prevenção de intrusão não conseguiu gravar as regras do firewall: {error}",
+    "guardTrapSkipped": "As portas armadilha {ports} estão em uso e foram excluídas",
+    "guardTrapUserspace": "A sincronização com o firewall não está ativa, então o Gately escuta nas portas armadilha e só detecta varreduras que completam a conexão",
+    "guardScanUnavailable": "A detecção de varredura está ligada, mas a sincronização com o firewall não está ativa, então ela não funciona",
+    "guardJailError": "A regra {jail} da Prevenção de intrusão tem um erro: {error}"
   },
   "h": {
     "publicIPv4Fail": "Verifique a conectividade de saída e o DNS, ou altere as URLs de consulta de IP nas configurações de DDNS.",
@@ -51,6 +60,12 @@
     "direct6": "Os serviços desta máquina ficam acessíveis por IPv6 sem redirecionamento de portas, desde que o roteador e o firewall local liberem as portas.",
     "webCertMissing": "Requisições a esses domínios falham no handshake TLS. Adicione na página de certificados um que os cubra (um curinga cobre um nível de subdomínio) ou remova os domínios do site.",
     "frpDuplicate": "O frp exige nomes de proxy únicos; renomeie os duplicados.",
-    "frpConflict": "O frps já tem um proxy com esse nome, ou o domínio ou a porta remota está em uso. Isso costuma ocorrer quando vários dispositivos copiam a mesma configuração do frpc. Defina um user diferente no frpc de cada dispositivo ou mude nomes, domínios e portas remotas; sites atrás de um proxy em conflito ficam sem resposta."
+    "frpConflict": "O frps já tem um proxy com esse nome, ou o domínio ou a porta remota está em uso. Isso costuma ocorrer quando vários dispositivos copiam a mesma configuração do frpc. Defina um user diferente no frpc de cada dispositivo ou mude nomes, domínios e portas remotas; sites atrás de um proxy em conflito ficam sem resposta.",
+    "guardMissing": "Instale o nftables. No Docker, atualize para a imagem mais recente.",
+    "guardPermission": "Gravar no nftables exige root ou CAP_NET_ADMIN. No Docker, adicione cap_add: [NET_ADMIN] ao arquivo compose e use a rede host.",
+    "guardError": "Talvez faltem módulos do nftables no kernel ou o nft seja antigo demais (é preciso 0.9.0 ou posterior).",
+    "guardTrapSkipped": "Há serviços escutando nessas portas, e usá-las como armadilha bloquearia visitantes legítimos. Elas foram ignoradas.",
+    "guardScanUnavailable": "Veja na página Prevenção de intrusão o status do firewall e como corrigir.",
+    "guardJailError": "Verifique o caminho do arquivo de log, a unidade de serviço ou o nome do contêiner. Se o Gately roda em um contêiner, monte nele o diretório de logs."
   }
 }

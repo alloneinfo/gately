@@ -13,6 +13,7 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/wangwanjie/gately/internal/banlist"
 	"github.com/wangwanjie/gately/internal/reuseport"
 	stunproto "github.com/wangwanjie/gately/internal/stun"
 )
@@ -221,7 +222,8 @@ func (d *udpDispatcher) readLoop(ctx context.Context) {
 			continue
 		}
 		d.mu.Unlock()
-		if d.r.rule.DisableForward {
+		// 不转发被封禁地址的数据包
+		if d.r.rule.DisableForward || banlist.Default.BannedAddr(from) {
 			continue
 		}
 		d.forward(ctx, from, pkt)

@@ -20,6 +20,10 @@
       "title": "Dynamic DNS",
       "desc": "Update DNS records automatically when your public IP changes"
     },
+    "guard": {
+      "title": "Intrusion Prevention",
+      "desc": "Ban malicious IPs at the system firewall"
+    },
     "stun": {
       "title": "STUN Traversal",
       "desc": "Reach services behind NAT1 without a public IP"

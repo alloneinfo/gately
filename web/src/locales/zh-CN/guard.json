@@ -1,0 +1,200 @@
+{
+  "title": "入侵防护",
+  "desc": "类似 fail2ban：按日志规则、诱饵端口与端口扫描检测发现恶意 IP，自动封禁并同步到系统防火墙（nftables）",
+  "savedApplied": "已保存并生效",
+  "banTime": "封禁时长",
+  "banTimeDefaultValue": "默认（{d}）",
+  "tabs": {
+    "bans": "封禁列表（{count}）",
+    "jails": "日志规则",
+    "scan": "诱饵端口与扫描检测",
+    "settings": "设置"
+  },
+  "unit": {
+    "seconds": "{n} 秒",
+    "minutes": "{n} 分钟",
+    "hours": "{n} 小时",
+    "days": "{n} 天"
+  },
+  "fw": {
+    "title": "系统防火墙",
+    "viewRules": "查看规则",
+    "rulesTitle": "Gately 写入 nftables 的规则（表 inet gately）",
+    "active": "已生效",
+    "inactive": "未生效",
+    "disabled": "未开启",
+    "activeBans": "封禁中",
+    "dropped": "已丢弃数据包",
+    "trapHits": "诱饵端口触发",
+    "scanHits": "扫描检测触发",
+    "disabledTitle": "未开启防火墙同步",
+    "disabledHint": "封禁只对 Gately 自身的服务（端口转发、Web 服务、STUN、WebDAV、FTP、管理后台）生效，诱饵端口改由 Gately 监听，端口扫描检测不可用。可在“设置”中开启。",
+    "reasonOS": "当前系统没有 nftables",
+    "hintOS": "防火墙同步只支持 Linux。封禁仍对 Gately 自身的服务生效，诱饵端口改由 Gately 监听，端口扫描检测不可用。",
+    "reasonMissing": "找不到 nft 命令",
+    "hintMissing": "请安装 nftables（Debian / Ubuntu：apt install nftables；OpenWrt 22.03 及以上已自带）。安装后在“设置”中保存一次即可生效。",
+    "hintMissingDocker": "当前镜像不含 nft，请更新到最新版镜像。",
+    "reasonPermission": "没有修改防火墙的权限",
+    "hintPermission": "写入 nftables 需要 root 或 CAP_NET_ADMIN 权限。systemd 服务可在 [Service] 中加入 AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE。",
+    "hintPermissionDocker": "请在 docker-compose.yml 中加入 cap_add: [NET_ADMIN] 并使用 network_mode: host，然后重建容器。",
+    "reasonError": "写入防火墙规则失败",
+    "hintError": "内核可能缺少 nftables 相关模块（nf_tables、nft_set_hash 等），或 nft 版本过旧（需要 0.9.0 以上）。详细错误如下。"
+  },
+  "ban": {
+    "add": "手动封禁",
+    "submit": "封禁",
+    "added": "已封禁",
+    "removed": "已解除 {key} 的封禁",
+    "search": "搜索地址、来源或原因",
+    "empty": "当前没有被封禁的 IP",
+    "address": "IP / 网段",
+    "source": "来源",
+    "reason": "原因",
+    "reasonPlaceholder": "可选，例如：异常访问",
+    "count": "次数",
+    "created": "封禁时间",
+    "until": "剩余",
+    "permanent": "永久",
+    "unban": "解封",
+    "remainDays": "{d} 天 {h} 小时",
+    "remainHours": "{h} 小时 {m} 分",
+    "remainMinutes": "{m} 分钟",
+    "sourceManual": "手动",
+    "sourceWeb": "Web 认证失败",
+    "sourceTrap": "诱饵端口",
+    "sourceScan": "端口扫描",
+    "sourceJailDeleted": "已删除的规则"
+  },
+  "source": {
+    "file": "日志文件",
+    "journal": "systemd 日志",
+    "command": "命令输出",
+    "docker": "Docker 容器",
+    "event": "Gately 事件"
+  },
+  "target": {
+    "file": "文件路径",
+    "journal": "服务单元",
+    "command": "命令",
+    "docker": "容器名",
+    "event": "事件"
+  },
+  "event": {
+    "authFailed": "管理后台登录失败",
+    "wafBlocked": "WAF 拦截请求"
+  },
+  "sourceHelp": {
+    "file": "持续读取文件新增的内容，轮转后自动切换到新文件。每行一个路径。",
+    "fileDocker": "Gately 运行在容器中，只能读取挂载进容器的文件。例如把宿主机的 /var/log 以只读方式挂载到容器内的 /var/log/host，再填写 /var/log/host/auth.log。",
+    "journal": "通过 journalctl 读取指定服务的日志，每行一个服务单元，例如 ssh.service。",
+    "journalMissing": "本机找不到 journalctl（容器中或未使用 systemd 的系统），该来源不可用。",
+    "command": "运行一条持续输出日志的命令并读取其输出，例如 OpenWrt 的 logread -f；命令退出后自动重启。",
+    "docker": "读取指定容器的日志，需要 Docker 管理模块能连接 Docker。",
+    "event": "统计 Gately 自身的事件，事件中带有来源 IP，不需要填写过滤规则。"
+  },
+  "jail": {
+    "intro": "从日志中识别失败记录，同一 IP 在统计窗口内达到次数即被封禁。",
+    "add": "添加规则",
+    "edit": "编辑规则",
+    "fromPreset": "从模板添加",
+    "empty": "还没有规则。可从模板添加 SSH、Nginx、Vaultwarden 等常见服务。",
+    "deleteConfirm": "删除这条规则？已产生的封禁保留到期满。",
+    "source": "日志来源",
+    "filter": "过滤规则",
+    "filterHelp": "Go 正则表达式，每行一条，用 <HOST> 表示来源 IP（支持 IPv4 与 IPv6），任意一条匹配即计一次失败。",
+    "filterEventPlaceholder": "可留空",
+    "ignore": "排除规则",
+    "ignoreHelp": "可选，每行一条正则；匹配的行不计数。",
+    "condition": "触发条件",
+    "conditionValue": "{window} 内 {count} 次",
+    "within": "内失败",
+    "timesThenBan": "次即封禁",
+    "banTime": "封禁时长",
+    "matches": "匹配次数",
+    "bans": "封禁",
+    "bansValue": "累计 {total}，当前 {active}",
+    "statusRunning": "运行中",
+    "statusOff": "已停用",
+    "statusError": "异常",
+    "testTitle": "测试",
+    "testLines": "日志样例",
+    "testPlaceholder": "粘贴几行日志，测试过滤规则能否取出 IP",
+    "testSummary": "{total} 行中匹配 {matched} 行",
+    "testNoMatch": "不匹配",
+    "testIgnored": "{host}（白名单）"
+  },
+  "trap": {
+    "title": "诱饵端口",
+    "help": "在本机没有使用的端口上设下诱饵，任何来源连接这些端口即被封禁。正常用户不会访问这些端口，适合拦截批量扫描。正在监听的端口会自动排除。",
+    "ports": "端口",
+    "portsHelp": "逗号分隔，支持范围，例如 23,3389,5900-5910。内网与白名单地址不会触发。",
+    "effective": "生效端口：{ports}",
+    "userspace": "防火墙未生效，由 Gately 监听：{ports}（只能发现完成握手的扫描）",
+    "skipped": "以下端口正在被监听，已排除：{ports}"
+  },
+  "scan": {
+    "title": "端口扫描检测",
+    "help": "统计每个来源连接本机未开放端口的次数，每分钟超过阈值即封禁。只统计发往本机的新连接，转发给容器或内网设备的流量不计入。",
+    "needFirewall": "诱饵端口由内核处理、端口扫描检测都需要防火墙同步生效，详见上方状态。",
+    "threshold": "阈值",
+    "perMinute": "次 / 分钟",
+    "thresholdHelp": "同一来源每分钟连接未开放端口超过该次数即封禁。正常客户端重试一个关闭的端口每分钟约 5 次，建议不低于 10。",
+    "exclude": "额外开放端口",
+    "excludeHelp": "当前有 {count} 个端口在监听，会自动视为开放；由其他程序通过防火墙规则使用的端口可在此补充。"
+  },
+  "settings": {
+    "firewall": "同步到系统防火墙",
+    "firewallHelp": "开启后在 nftables 中创建 inet gately 表，在内核层丢弃被封禁地址发来的全部流量（包括发往 Docker 容器与内网设备的转发流量）；本机主动访问这些地址（如 DNS、软件源）的回包不受影响。关闭或停止 Gately 时规则会被移除。",
+    "banSeconds": "默认封禁时长",
+    "increment": "递增封禁",
+    "incrementHelp": "同一地址 30 天内再次被封禁时，时长按次数翻倍。",
+    "maxBanSeconds": "最长封禁时长",
+    "whitelist": "白名单",
+    "ignorePrivate": "忽略内网地址",
+    "ignorePrivateHelp": "回环、私有地址、100.64.0.0/10（运营商 NAT 与 Tailscale）、链路本地地址，以及本机网卡所在的 IPv6 /64 网段不会被自动封禁，诱饵端口与扫描检测也不统计它们。",
+    "ignoreList": "白名单地址",
+    "ignoreListHelp": "每行一个 IP 或 CIDR 网段，不会被自动封禁。手动封禁不受白名单限制。"
+  },
+  "presets": {
+    "sshd": {
+      "name": "SSH（日志文件）",
+      "desc": "读取 /var/log/auth.log，RHEL 系为 /var/log/secure"
+    },
+    "sshd-journal": {
+      "name": "SSH（systemd 日志）",
+      "desc": "读取 ssh.service / sshd.service 的日志"
+    },
+    "dropbear": {
+      "name": "Dropbear（OpenWrt）",
+      "desc": "通过 logread -f 读取 OpenWrt 的 SSH 登录失败"
+    },
+    "nginx-http-auth": {
+      "name": "Nginx 基本认证",
+      "desc": "error.log 中的用户名或密码错误"
+    },
+    "nginx-botsearch": {
+      "name": "Nginx 恶意扫描",
+      "desc": "access.log 中探测 wp-login、.env、phpMyAdmin 等路径的请求"
+    },
+    "vaultwarden": {
+      "name": "Vaultwarden",
+      "desc": "读取容器 vaultwarden 的登录失败与两步验证失败"
+    },
+    "homeassistant": {
+      "name": "Home Assistant",
+      "desc": "读取容器 homeassistant 的登录失败（需开启 http 日志）"
+    },
+    "proxmox": {
+      "name": "Proxmox VE",
+      "desc": "读取 pvedaemon 的网页登录失败"
+    },
+    "gately-admin": {
+      "name": "Gately 管理后台登录",
+      "desc": "管理后台登录失败（密码、两步验证、通行密钥）"
+    },
+    "gately-waf": {
+      "name": "WAF 拦截",
+      "desc": "被 WAF 多次拦截的来源。站点经 CDN 回源（按请求头传递真实 IP）时不要使用，否则封禁的会是 CDN 节点"
+    }
+  }
+}

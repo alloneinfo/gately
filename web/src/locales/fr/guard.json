@@ -1,0 +1,200 @@
+{
+  "title": "Prévention d'intrusion",
+  "desc": "Protection à la fail2ban : repère les IP malveillantes grâce aux règles de journaux, aux ports pièges et à la détection de scan, les bannit et synchronise les bannissements avec le pare-feu du système (nftables)",
+  "savedApplied": "Enregistré et appliqué",
+  "banTime": "Durée du bannissement",
+  "banTimeDefaultValue": "Par défaut ({d})",
+  "tabs": {
+    "bans": "Bannissements ({count})",
+    "jails": "Règles de journaux",
+    "scan": "Ports pièges et scans",
+    "settings": "Paramètres"
+  },
+  "unit": {
+    "seconds": "{n} s",
+    "minutes": "{n} min",
+    "hours": "{n} h",
+    "days": "{n} j"
+  },
+  "fw": {
+    "title": "Pare-feu du système",
+    "viewRules": "Voir les règles",
+    "rulesTitle": "Règles écrites par Gately dans nftables (table inet gately)",
+    "active": "Actif",
+    "inactive": "Inactif",
+    "disabled": "Désactivé",
+    "activeBans": "Bannies",
+    "dropped": "Paquets rejetés",
+    "trapHits": "Déclenchements de ports pièges",
+    "scanHits": "Scans détectés",
+    "disabledTitle": "La synchronisation du pare-feu est désactivée",
+    "disabledHint": "Les bannissements ne s'appliquent qu'aux services de Gately (redirection de ports, service web, STUN, WebDAV, FTP et console d'administration). Gately écoute lui-même sur les ports pièges et la détection de scan est indisponible. Activez-la dans Paramètres.",
+    "reasonOS": "Ce système n'a pas nftables",
+    "hintOS": "La synchronisation du pare-feu ne fonctionne que sous Linux. Les bannissements s'appliquent toujours aux services de Gately, Gately écoute lui-même sur les ports pièges et la détection de scan est indisponible.",
+    "reasonMissing": "Commande nft introuvable",
+    "hintMissing": "Installez nftables (Debian / Ubuntu : apt install nftables ; OpenWrt 22.03 et versions ultérieures l'incluent). Enregistrez ensuite les paramètres une fois.",
+    "hintMissingDocker": "Cette image ne contient pas nft. Passez à la dernière image.",
+    "reasonPermission": "Pas l'autorisation de modifier le pare-feu",
+    "hintPermission": "Écrire dans nftables nécessite root ou CAP_NET_ADMIN. Pour un service systemd, ajoutez AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE dans [Service].",
+    "hintPermissionDocker": "Ajoutez cap_add: [NET_ADMIN] dans docker-compose.yml, utilisez network_mode: host puis recréez le conteneur.",
+    "reasonError": "Échec de l'écriture des règles du pare-feu",
+    "hintError": "Il manque peut-être des modules nftables au noyau (nf_tables, nft_set_hash, etc.) ou nft est trop ancien (0.9.0 ou plus récent requis). Détails ci-dessous."
+  },
+  "ban": {
+    "add": "Bannir manuellement",
+    "submit": "Bannir",
+    "added": "Banni",
+    "removed": "{key} a été débanni",
+    "search": "Rechercher une adresse, une source ou un motif",
+    "empty": "Aucune IP n'est bannie",
+    "address": "IP / réseau",
+    "source": "Source",
+    "reason": "Motif",
+    "reasonPlaceholder": "Facultatif, par ex. trafic suspect",
+    "count": "Fois",
+    "created": "Banni le",
+    "until": "Restant",
+    "permanent": "Permanent",
+    "unban": "Débannir",
+    "remainDays": "{d} j {h} h",
+    "remainHours": "{h} h {m} min",
+    "remainMinutes": "{m} min",
+    "sourceManual": "Manuel",
+    "sourceWeb": "Échecs d'authentification web",
+    "sourceTrap": "Port piège",
+    "sourceScan": "Scan de ports",
+    "sourceJailDeleted": "Règle supprimée"
+  },
+  "source": {
+    "file": "Fichier journal",
+    "journal": "Journal systemd",
+    "command": "Sortie de commande",
+    "docker": "Conteneur Docker",
+    "event": "Événement Gately"
+  },
+  "target": {
+    "file": "Chemin du fichier",
+    "journal": "Unité de service",
+    "command": "Commande",
+    "docker": "Conteneur",
+    "event": "Événement"
+  },
+  "event": {
+    "authFailed": "Échec de connexion à la console",
+    "wafBlocked": "Requête bloquée par le WAF"
+  },
+  "sourceHelp": {
+    "file": "Lit les nouvelles lignes du fichier et passe au nouveau fichier après une rotation. Un chemin par ligne.",
+    "fileDocker": "Gately tourne dans un conteneur et ne peut lire que les fichiers montés dedans. Par exemple, montez /var/log de l'hôte en lecture seule sur /var/log/host dans le conteneur et indiquez /var/log/host/auth.log.",
+    "journal": "Lit le journal du service avec journalctl. Une unité par ligne, par ex. ssh.service.",
+    "journalMissing": "journalctl est introuvable (dans un conteneur ou sur un système sans systemd), cette source est donc indisponible.",
+    "command": "Exécute une commande qui affiche des journaux en continu et lit sa sortie, par ex. logread -f sur OpenWrt. La commande est relancée si elle s'arrête.",
+    "docker": "Lit le journal du conteneur. Le module Docker doit pouvoir joindre Docker.",
+    "event": "Compte les événements de Gately qui contiennent l'IP source. Aucun filtre n'est nécessaire."
+  },
+  "jail": {
+    "intro": "Repère les échecs dans les journaux. Une IP qui atteint le nombre d'échecs dans la fenêtre de temps est bannie.",
+    "add": "Ajouter une règle",
+    "edit": "Modifier la règle",
+    "fromPreset": "Depuis un modèle",
+    "empty": "Aucune règle pour l'instant. Ajoutez des services courants comme SSH, Nginx ou Vaultwarden depuis un modèle.",
+    "deleteConfirm": "Supprimer cette règle ? Les bannissements existants restent jusqu'à leur expiration.",
+    "source": "Source de journaux",
+    "filter": "Filtres",
+    "filterHelp": "Expressions régulières Go, une par ligne. <HOST> représente l'IP source (IPv4 et IPv6). Chaque ligne correspondant à un filtre compte pour un échec.",
+    "filterEventPlaceholder": "Facultatif",
+    "ignore": "Exclusions",
+    "ignoreHelp": "Expressions régulières facultatives, une par ligne. Les lignes correspondantes ne sont pas comptées.",
+    "condition": "Déclencheur",
+    "conditionValue": "{count} fois en {window}",
+    "within": "de fenêtre,",
+    "timesThenBan": "échecs puis bannissement",
+    "banTime": "Durée du bannissement",
+    "matches": "Correspondances",
+    "bans": "Bannissements",
+    "bansValue": "{total} au total, {active} actifs",
+    "statusRunning": "En cours",
+    "statusOff": "Désactivée",
+    "statusError": "Erreur",
+    "testTitle": "Test",
+    "testLines": "Lignes d'exemple",
+    "testPlaceholder": "Collez quelques lignes de journal pour vérifier que les filtres extraient l'IP",
+    "testSummary": "{matched} lignes sur {total} correspondent",
+    "testNoMatch": "Aucune correspondance",
+    "testIgnored": "{host} (liste blanche)"
+  },
+  "trap": {
+    "title": "Ports pièges",
+    "help": "Place des pièges sur les ports que cet hôte n'utilise pas. Toute source qui s'y connecte est bannie. Les utilisateurs normaux n'y accèdent jamais, ce qui arrête bien les scans de masse. Les ports en écoute sont exclus automatiquement.",
+    "ports": "Ports",
+    "portsHelp": "Séparés par des virgules, plages acceptées, par ex. 23,3389,5900-5910. Les adresses du LAN et de la liste blanche ne les déclenchent pas.",
+    "effective": "Ports actifs : {ports}",
+    "userspace": "Pare-feu inactif, Gately écoute sur : {ports} (ne détecte que les scans qui terminent la connexion)",
+    "skipped": "Ces ports sont utilisés et ont été exclus : {ports}"
+  },
+  "scan": {
+    "title": "Détection de scan de ports",
+    "help": "Compte combien de fois chaque source se connecte à des ports fermés de cet hôte et la bannit au-delà du seuil par minute. Seules les nouvelles connexions vers cet hôte comptent ; le trafic redirigé vers des conteneurs ou des appareils du LAN n'est pas compté.",
+    "needFirewall": "Les ports pièges côté noyau et la détection de scan nécessitent une synchronisation du pare-feu active. Voir l'état ci-dessus.",
+    "threshold": "Seuil",
+    "perMinute": "par minute",
+    "thresholdHelp": "Une source est bannie si elle se connecte à des ports fermés plus souvent que ce nombre par minute. Un client normal réessaie un port fermé environ 5 fois par minute ; gardez 10 ou plus.",
+    "exclude": "Ports ouverts supplémentaires",
+    "excludeHelp": "{count} ports sont en écoute et comptent automatiquement comme ouverts. Ajoutez ici les ports utilisés par d'autres programmes via des règles de pare-feu."
+  },
+  "settings": {
+    "firewall": "Synchroniser avec le pare-feu",
+    "firewallHelp": "Crée la table inet gately dans nftables et rejette dans le noyau tout le trafic venant des adresses bannies, y compris celui redirigé vers des conteneurs Docker et des appareils du LAN. Les réponses aux connexions que cet hôte ouvre vers ces adresses (DNS, miroirs de paquets, etc.) passent toujours. Les règles sont supprimées quand l'option est désactivée ou que Gately s'arrête.",
+    "banSeconds": "Durée par défaut",
+    "increment": "Bannissements progressifs",
+    "incrementHelp": "Si une adresse est de nouveau bannie dans les 30 jours, la durée double à chaque fois.",
+    "maxBanSeconds": "Durée maximale",
+    "whitelist": "Liste blanche",
+    "ignorePrivate": "Ignorer les adresses du LAN",
+    "ignorePrivateHelp": "Les adresses de bouclage, privées, 100.64.0.0/10 (NAT d'opérateur et Tailscale), lien-local et les réseaux IPv6 /64 des interfaces de cet hôte ne sont jamais bannies automatiquement, et les ports pièges et la détection de scan les ignorent.",
+    "ignoreList": "Adresses autorisées",
+    "ignoreListHelp": "Une IP ou un réseau CIDR par ligne. Jamais bannies automatiquement ; les bannissements manuels ignorent la liste blanche."
+  },
+  "presets": {
+    "sshd": {
+      "name": "SSH (fichier journal)",
+      "desc": "Lit /var/log/auth.log (/var/log/secure sur les systèmes type RHEL)"
+    },
+    "sshd-journal": {
+      "name": "SSH (journal systemd)",
+      "desc": "Lit le journal de ssh.service / sshd.service"
+    },
+    "dropbear": {
+      "name": "Dropbear (OpenWrt)",
+      "desc": "Lit les échecs de connexion SSH d'OpenWrt via logread -f"
+    },
+    "nginx-http-auth": {
+      "name": "Authentification basique Nginx",
+      "desc": "Identifiants ou mots de passe erronés dans error.log"
+    },
+    "nginx-botsearch": {
+      "name": "Scans de robots sur Nginx",
+      "desc": "Requêtes dans access.log qui sondent wp-login, .env, phpMyAdmin et chemins similaires"
+    },
+    "vaultwarden": {
+      "name": "Vaultwarden",
+      "desc": "Échecs de connexion et de double authentification du conteneur vaultwarden"
+    },
+    "homeassistant": {
+      "name": "Home Assistant",
+      "desc": "Échecs de connexion du conteneur homeassistant (journalisation http requise)"
+    },
+    "proxmox": {
+      "name": "Proxmox VE",
+      "desc": "Échecs de connexion web de pvedaemon"
+    },
+    "gately-admin": {
+      "name": "Connexion à Gately",
+      "desc": "Échecs de connexion à la console (mot de passe, code de double authentification, clé d'accès)"
+    },
+    "gately-waf": {
+      "name": "Blocages du WAF",
+      "desc": "Sources bloquées à plusieurs reprises par le WAF. Ne l'utilisez pas pour des sites derrière un CDN qui transmet l'IP réelle dans un en-tête, sinon ce sont les nœuds du CDN qui seront bannis"
+    }
+  }
+}

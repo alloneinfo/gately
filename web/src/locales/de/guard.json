@@ -1,0 +1,200 @@
+{
+  "title": "Einbruchschutz",
+  "desc": "Schutz im Stil von fail2ban: findet bösartige IPs über Protokollregeln, Köderports und Portscan-Erkennung, sperrt sie und überträgt die Sperren in die System-Firewall (nftables)",
+  "savedApplied": "Gespeichert und angewendet",
+  "banTime": "Sperrdauer",
+  "banTimeDefaultValue": "Standard ({d})",
+  "tabs": {
+    "bans": "Sperren ({count})",
+    "jails": "Protokollregeln",
+    "scan": "Köderports & Scans",
+    "settings": "Einstellungen"
+  },
+  "unit": {
+    "seconds": "{n} s",
+    "minutes": "{n} min",
+    "hours": "{n} h",
+    "days": "{n} T"
+  },
+  "fw": {
+    "title": "System-Firewall",
+    "viewRules": "Regeln anzeigen",
+    "rulesTitle": "Von Gately in nftables geschriebene Regeln (Tabelle inet gately)",
+    "active": "Aktiv",
+    "inactive": "Nicht aktiv",
+    "disabled": "Aus",
+    "activeBans": "Gesperrt",
+    "dropped": "Verworfene Pakete",
+    "trapHits": "Köderport-Treffer",
+    "scanHits": "Erkannte Scans",
+    "disabledTitle": "Firewall-Synchronisierung ist aus",
+    "disabledHint": "Sperren gelten nur für Gatelys eigene Dienste (Portweiterleitung, Webdienst, STUN, WebDAV, FTP und Verwaltungsoberfläche). Köderports bedient Gately selbst, die Portscan-Erkennung ist nicht verfügbar. In den Einstellungen einschalten.",
+    "reasonOS": "Dieses System hat kein nftables",
+    "hintOS": "Die Firewall-Synchronisierung gibt es nur unter Linux. Sperren gelten weiterhin für Gatelys eigene Dienste, Köderports bedient Gately selbst, die Portscan-Erkennung ist nicht verfügbar.",
+    "reasonMissing": "Befehl nft nicht gefunden",
+    "hintMissing": "Installieren Sie nftables (Debian / Ubuntu: apt install nftables; OpenWrt ab 22.03 bringt es mit). Danach die Einstellungen einmal speichern.",
+    "hintMissingDocker": "Dieses Image enthält kein nft. Aktualisieren Sie auf das neueste Image.",
+    "reasonPermission": "Keine Berechtigung zum Ändern der Firewall",
+    "hintPermission": "Schreiben in nftables erfordert root oder CAP_NET_ADMIN. Für einen systemd-Dienst unter [Service] AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE ergänzen.",
+    "hintPermissionDocker": "Ergänzen Sie cap_add: [NET_ADMIN] in docker-compose.yml, verwenden Sie network_mode: host und erstellen Sie den Container neu.",
+    "reasonError": "Schreiben der Firewall-Regeln fehlgeschlagen",
+    "hintError": "Dem Kernel fehlen möglicherweise nftables-Module (nf_tables, nft_set_hash usw.) oder nft ist zu alt (0.9.0 oder neuer nötig). Details unten."
+  },
+  "ban": {
+    "add": "Manuell sperren",
+    "submit": "Sperren",
+    "added": "Gesperrt",
+    "removed": "Sperre von {key} aufgehoben",
+    "search": "Adresse, Quelle oder Grund suchen",
+    "empty": "Keine IP ist gesperrt",
+    "address": "IP / Netz",
+    "source": "Quelle",
+    "reason": "Grund",
+    "reasonPlaceholder": "Optional, z. B. verdächtiger Zugriff",
+    "count": "Anzahl",
+    "created": "Gesperrt am",
+    "until": "Verbleibend",
+    "permanent": "Dauerhaft",
+    "unban": "Entsperren",
+    "remainDays": "{d} T {h} h",
+    "remainHours": "{h} h {m} min",
+    "remainMinutes": "{m} min",
+    "sourceManual": "Manuell",
+    "sourceWeb": "Web-Anmeldefehler",
+    "sourceTrap": "Köderport",
+    "sourceScan": "Portscan",
+    "sourceJailDeleted": "Gelöschte Regel"
+  },
+  "source": {
+    "file": "Protokolldatei",
+    "journal": "systemd-Journal",
+    "command": "Befehlsausgabe",
+    "docker": "Docker-Container",
+    "event": "Gately-Ereignis"
+  },
+  "target": {
+    "file": "Dateipfad",
+    "journal": "Diensteinheit",
+    "command": "Befehl",
+    "docker": "Container",
+    "event": "Ereignis"
+  },
+  "event": {
+    "authFailed": "Fehlgeschlagene Anmeldung an der Oberfläche",
+    "wafBlocked": "Von der WAF blockierte Anfrage"
+  },
+  "sourceHelp": {
+    "file": "Liest neu angehängte Zeilen und wechselt nach einer Rotation zur neuen Datei. Ein Pfad pro Zeile.",
+    "fileDocker": "Gately läuft in einem Container und kann nur hineingemountete Dateien lesen. Mounten Sie z. B. /var/log des Hosts schreibgeschützt nach /var/log/host im Container und geben Sie /var/log/host/auth.log an.",
+    "journal": "Liest das Protokoll des Dienstes über journalctl. Eine Einheit pro Zeile, z. B. ssh.service.",
+    "journalMissing": "journalctl wurde nicht gefunden (in einem Container oder auf einem System ohne systemd), daher ist diese Quelle nicht verfügbar.",
+    "command": "Führt einen Befehl aus, der fortlaufend Protokollzeilen ausgibt, und liest seine Ausgabe, z. B. logread -f unter OpenWrt. Der Befehl wird nach dem Beenden neu gestartet.",
+    "docker": "Liest das Protokoll des Containers. Das Docker-Modul muss Docker erreichen können.",
+    "event": "Zählt Gatelys eigene Ereignisse, die die Quell-IP enthalten. Kein Filter nötig."
+  },
+  "jail": {
+    "intro": "Findet Fehlschläge in Protokollen. Eine IP, die die Anzahl im Zeitfenster erreicht, wird gesperrt.",
+    "add": "Regel hinzufügen",
+    "edit": "Regel bearbeiten",
+    "fromPreset": "Aus Vorlage",
+    "empty": "Noch keine Regeln. Fügen Sie gängige Dienste wie SSH, Nginx oder Vaultwarden aus einer Vorlage hinzu.",
+    "deleteConfirm": "Diese Regel löschen? Bestehende Sperren bleiben bis zum Ablauf.",
+    "source": "Protokollquelle",
+    "filter": "Filter",
+    "filterHelp": "Reguläre Ausdrücke (Go), einer pro Zeile. <HOST> steht für die Quell-IP (IPv4 und IPv6). Jede Zeile, die einem Filter entspricht, zählt als ein Fehlschlag.",
+    "filterEventPlaceholder": "Optional",
+    "ignore": "Ausnahmen",
+    "ignoreHelp": "Optionale reguläre Ausdrücke, einer pro Zeile. Passende Zeilen werden nicht gezählt.",
+    "condition": "Auslöser",
+    "conditionValue": "{count}-mal in {window}",
+    "within": "Zeitfenster,",
+    "timesThenBan": "Fehlschläge, dann Sperre",
+    "banTime": "Sperrdauer",
+    "matches": "Treffer",
+    "bans": "Sperren",
+    "bansValue": "{total} insgesamt, {active} aktiv",
+    "statusRunning": "Läuft",
+    "statusOff": "Deaktiviert",
+    "statusError": "Fehler",
+    "testTitle": "Test",
+    "testLines": "Beispielzeilen",
+    "testPlaceholder": "Fügen Sie einige Protokollzeilen ein, um zu prüfen, ob die Filter die IP finden",
+    "testSummary": "{matched} von {total} Zeilen passen",
+    "testNoMatch": "Kein Treffer",
+    "testIgnored": "{host} (Whitelist)"
+  },
+  "trap": {
+    "title": "Köderports",
+    "help": "Legt Köder auf Ports, die dieser Host nicht nutzt. Jede Quelle, die sich dorthin verbindet, wird gesperrt. Normale Nutzer greifen nie auf diese Ports zu, daher fängt das Massenscans gut ab. Ports, auf denen gelauscht wird, werden automatisch ausgenommen.",
+    "ports": "Ports",
+    "portsHelp": "Kommagetrennt, Bereiche erlaubt, z. B. 23,3389,5900-5910. LAN- und Whitelist-Adressen lösen sie nicht aus.",
+    "effective": "Aktive Ports: {ports}",
+    "userspace": "Firewall nicht aktiv, Gately lauscht auf: {ports} (erkennt nur Scans, die den Verbindungsaufbau abschließen)",
+    "skipped": "Diese Ports sind belegt und wurden ausgenommen: {ports}"
+  },
+  "scan": {
+    "title": "Portscan-Erkennung",
+    "help": "Zählt, wie oft jede Quelle sich zu nicht geöffneten Ports dieses Hosts verbindet, und sperrt sie, wenn der Schwellenwert pro Minute überschritten wird. Es zählen nur neue Verbindungen zu diesem Host; an Container oder LAN-Geräte weitergeleiteter Verkehr zählt nicht.",
+    "needFirewall": "Köderports im Kernel und die Portscan-Erkennung erfordern eine aktive Firewall-Synchronisierung. Siehe Status oben.",
+    "threshold": "Schwellenwert",
+    "perMinute": "pro Minute",
+    "thresholdHelp": "Eine Quelle wird gesperrt, wenn sie sich öfter als diese Anzahl pro Minute zu geschlossenen Ports verbindet. Ein normaler Client versucht einen geschlossenen Port etwa 5-mal pro Minute erneut, daher mindestens 10 empfohlen.",
+    "exclude": "Zusätzliche offene Ports",
+    "excludeHelp": "{count} Ports lauschen und gelten automatisch als offen. Ports, die andere Programme über Firewall-Regeln nutzen, hier ergänzen."
+  },
+  "settings": {
+    "firewall": "Mit System-Firewall synchronisieren",
+    "firewallHelp": "Legt in nftables die Tabelle inet gately an und verwirft im Kernel allen Verkehr von gesperrten Adressen, auch den an Docker-Container und LAN-Geräte weitergeleiteten. Antworten auf Verbindungen, die dieser Host zu diesen Adressen aufbaut (DNS, Paketquellen usw.), kommen weiterhin an. Die Regeln werden beim Ausschalten oder Beenden von Gately entfernt.",
+    "banSeconds": "Standard-Sperrdauer",
+    "increment": "Steigende Sperren",
+    "incrementHelp": "Wird eine Adresse innerhalb von 30 Tagen erneut gesperrt, verdoppelt sich die Dauer jedes Mal.",
+    "maxBanSeconds": "Maximale Sperrdauer",
+    "whitelist": "Whitelist",
+    "ignorePrivate": "LAN-Adressen ignorieren",
+    "ignorePrivateHelp": "Loopback-, private, 100.64.0.0/10- (Carrier-Grade-NAT und Tailscale) und Link-Local-Adressen sowie die IPv6-/64-Netze der Schnittstellen dieses Hosts werden nie automatisch gesperrt; Köderports und Scan-Erkennung ignorieren sie.",
+    "ignoreList": "Erlaubte Adressen",
+    "ignoreListHelp": "Eine IP oder ein CIDR-Netz pro Zeile. Werden nie automatisch gesperrt; manuelle Sperren ignorieren die Whitelist."
+  },
+  "presets": {
+    "sshd": {
+      "name": "SSH (Protokolldatei)",
+      "desc": "Liest /var/log/auth.log (/var/log/secure bei RHEL-ähnlichen Systemen)"
+    },
+    "sshd-journal": {
+      "name": "SSH (systemd-Journal)",
+      "desc": "Liest das Protokoll von ssh.service / sshd.service"
+    },
+    "dropbear": {
+      "name": "Dropbear (OpenWrt)",
+      "desc": "Liest fehlgeschlagene SSH-Anmeldungen unter OpenWrt über logread -f"
+    },
+    "nginx-http-auth": {
+      "name": "Nginx-Basic-Auth",
+      "desc": "Falsche Benutzernamen oder Passwörter in error.log"
+    },
+    "nginx-botsearch": {
+      "name": "Nginx-Bot-Scans",
+      "desc": "Anfragen in access.log, die nach wp-login, .env, phpMyAdmin und ähnlichen Pfaden suchen"
+    },
+    "vaultwarden": {
+      "name": "Vaultwarden",
+      "desc": "Fehlgeschlagene Anmeldungen und Zwei-Faktor-Prüfungen im Container vaultwarden"
+    },
+    "homeassistant": {
+      "name": "Home Assistant",
+      "desc": "Fehlgeschlagene Anmeldungen im Container homeassistant (http-Protokollierung nötig)"
+    },
+    "proxmox": {
+      "name": "Proxmox VE",
+      "desc": "Fehlgeschlagene Web-Anmeldungen von pvedaemon"
+    },
+    "gately-admin": {
+      "name": "Gately-Anmeldung",
+      "desc": "Fehlgeschlagene Anmeldungen an der Oberfläche (Passwort, Zwei-Faktor-Code, Passkey)"
+    },
+    "gately-waf": {
+      "name": "WAF-Blockierungen",
+      "desc": "Quellen, die die WAF wiederholt blockiert hat. Nicht für Sites hinter einem CDN verwenden, das die echte IP per Header übergibt, sonst werden die CDN-Knoten gesperrt"
+    }
+  }
+}

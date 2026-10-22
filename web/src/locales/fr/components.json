@@ -41,5 +41,15 @@
     "timeoutTitle": "Délai dépassé",
     "timeoutDesc": "Le service ne répond plus depuis longtemps. Si vous avez modifié le port d'administration ou l'adresse d'écoute, ouvrez manuellement la nouvelle adresse. Vous pouvez aussi consulter les journaux du programme pour suivre le démarrage.",
     "reload": "Recharger la page"
+  },
+  "duration": {
+    "minutes": "minutes",
+    "hours": "heures",
+    "days": "jours"
+  },
+  "banTime": {
+    "default": "Par défaut",
+    "custom": "Personnalisée",
+    "permanent": "Permanent"
   }
 }

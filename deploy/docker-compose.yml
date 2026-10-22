@@ -6,6 +6,9 @@ services:
     restart: unless-stopped
     # 端口转发、STUN 穿透、Web 服务都需要直接监听宿主机端口
     network_mode: host
+    # 入侵防护把封禁写入宿主机的 nftables 防火墙（不需要可删除，封禁仍对 Gately 自身的服务生效）
+    cap_add:
+      - NET_ADMIN
     volumes:
       # 配置目录（明文 JSON，可纳入 git 备份；ssl.json 中含证书私钥）
       - ./data:/etc/gately

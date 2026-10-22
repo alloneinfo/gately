@@ -20,6 +20,10 @@
       "title": "DNS dynamique",
       "desc": "Met à jour automatiquement les enregistrements DNS quand votre IP publique change"
     },
+    "guard": {
+      "title": "Prévention d'intrusion",
+      "desc": "Bannit les IP malveillantes au niveau du pare-feu"
+    },
     "stun": {
       "title": "Traversée STUN",
       "desc": "Accédez à des services derrière un NAT1 sans IP publique"

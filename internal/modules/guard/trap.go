@@ -1,0 +1,108 @@
+package guard
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"net"
+	"net/netip"
+	"sort"
+	"strconv"
+	"sync"
+
+	"github.com/wangwanjie/gately/internal/banlist"
+	"github.com/wangwanjie/gately/internal/logbuf"
+)
+
+// maxUserTrapPorts 是用户态诱饵端口的数量上限，避免填写大范围时占用过多套接字
+const maxUserTrapPorts = 64
+
+// userTrap 在防火墙不可用时由 Gately 自己监听诱饵端口：完成握手的连接即被封禁。
+// 只发 SYN 不完成握手的扫描（如 masscan、nmap -sS）无法在用户态发现，需要防火墙规则。
+type userTrap struct {
+	cancel context.CancelFunc
+	wg     sync.WaitGroup
+	ports  []int
+	errs   map[int]string
+}
+
+// startUserTrap 在指定端口上监听，onHit 在有连接时调用。
+func startUserTrap(ctx context.Context, ports []int, log *logbuf.Logger, onHit func(netip.Addr, int)) *userTrap {
+	ctx, cancel := context.WithCancel(ctx)
+	t := &userTrap{cancel: cancel, errs: map[int]string{}}
+	var lc net.ListenConfig
+	for _, port := range ports {
+		ln, err := lc.Listen(ctx, "tcp", ":"+strconv.Itoa(port))
+		if err != nil {
+			t.errs[port] = err.Error()
+			log.Warnf("诱饵端口 %d 监听失败: %v", port, err)
+			continue
+		}
+		t.ports = append(t.ports, port)
+		t.wg.Add(2)
+		go func() {
+			defer t.wg.Done()
+			<-ctx.Done()
+			ln.Close()
+		}()
+		go func() {
+			defer t.wg.Done()
+			for {
+				c, err := ln.Accept()
+				if err != nil {
+					if ctx.Err() != nil || errors.Is(err, net.ErrClosed) {
+						return
+					}
+					continue
+				}
+				if ap, err := netip.ParseAddrPort(c.RemoteAddr().String()); err == nil {
+					onHit(ap.Addr().Unmap(), port)
+				}
+				c.Close()
+			}
+		}()
+	}
+	sort.Ints(t.ports)
+	if len(t.ports) > 0 {
+		log.Infof("防火墙不可用，改由 Gately 监听 %d 个诱饵端口", len(t.ports))
+	}
+	return t
+}
+
+func (t *userTrap) stop() {
+	t.cancel()
+	t.wg.Wait()
+}
+
+// listening 返回实际监听中的端口（创建后不再变化）。
+func (t *userTrap) listening() []int {
+	return append([]int{}, t.ports...)
+}
+
+// applyTrapLocked 按当前状态启停用户态诱饵端口：防火墙规则生效时由内核处理，不再监听。调用方需持有 m.mu。
+func (m *Module) applyTrapLocked() {
+	if m.trap != nil {
+		m.trap.stop()
+		m.trap = nil
+	}
+	s := m.cfg.Settings
+	if !m.started || !s.Trap.Enable || m.fw.active() {
+		return
+	}
+	ranges, _ := parsePorts(s.Trap.Ports)
+	listening, _ := listeningPorts()
+	rest, _ := subtractPorts(ranges, listening)
+	var ports []int
+	for _, r := range rest {
+		for p := r.lo; p <= r.hi && len(ports) < maxUserTrapPorts; p++ {
+			ports = append(ports, p)
+		}
+	}
+	log := m.logs.Logger("诱饵端口")
+	m.trap = startUserTrap(m.ctx, ports, log, func(a netip.Addr, port int) {
+		if banlist.Default.Ignored(a) {
+			return
+		}
+		m.ban(a, s.Trap.BanSeconds, fmt.Sprintf("连接诱饵端口 %d", port), banlist.SourceTrap, "诱饵端口")
+	})
+}

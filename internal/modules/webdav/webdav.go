@@ -18,6 +18,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	xwebdav "golang.org/x/net/webdav"
 
+	"github.com/wangwanjie/gately/internal/banlist"
 	"github.com/wangwanjie/gately/internal/config"
 	"github.com/wangwanjie/gately/internal/crud"
 	"github.com/wangwanjie/gately/internal/httpx"
@@ -181,6 +182,8 @@ func (m *Module) restartLocked() {
 		m.logs.Add(logbuf.LevelError, "", "监听失败: "+err.Error())
 		return
 	}
+	// 被封禁地址的连接在 Accept 时直接关闭
+	ln = banlist.Default.Listener(ln)
 	// ErrorLog 把 TLS 握手失败等错误写入模块运行日志
 	m.srv = &http.Server{Handler: http.HandlerFunc(m.serve), ReadHeaderTimeout: 30 * time.Second, ErrorLog: m.logs.Logger("").ServerErrorLog()}
 	if m.settings.TLS {

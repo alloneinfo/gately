@@ -14,6 +14,7 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 
+	"github.com/wangwanjie/gately/internal/banlist"
 	"github.com/wangwanjie/gately/internal/i18n"
 	"github.com/wangwanjie/gately/internal/thirdauth"
 )
@@ -37,9 +38,9 @@ type authenticator struct {
 	oauthMu sync.RWMutex
 	oauth   oauthEnv
 
-	// 封禁表与自动封禁时长；shareUses 记录分享链接已兑换次数（受 mu 保护）
+	// bans 为共享封禁表；banMu 保护自动封禁时长；shareUses 记录分享链接已兑换次数（受 mu 保护）
+	bans      *banlist.Store
 	banMu     sync.Mutex
-	bans      map[string]banEntry
 	autoBan   time.Duration
 	shareUses map[string]int
 
@@ -67,7 +68,7 @@ type failCount struct {
 
 func newAuthenticator(secret string) *authenticator {
 	return &authenticator{secret: []byte(secret), fails: map[string]*failCount{}, used: map[string]int64{},
-		bans: map[string]banEntry{}, shareUses: map[string]int{}}
+		bans: banlist.Default, shareUses: map[string]int{}}
 }
 
 // verifyUser 校验用户名密码，密码支持明文（兼容 Lucky）与 bcrypt 哈希。

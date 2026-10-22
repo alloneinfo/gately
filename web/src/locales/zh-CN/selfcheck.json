@@ -1,7 +1,7 @@
 {
   "title": "网络与配置自检",
   "run": "网络自检",
-  "intro": "检查公网地址、NAT、系统时间、80/443 端口、DDNS 解析、证书有效期、HTTPS 站点的证书覆盖与 frp 代理冲突。会访问 DDNS 使用的公网 IP 查询服务。",
+  "intro": "检查公网地址、NAT、系统时间、80/443 端口、DDNS 解析、证书有效期、HTTPS 站点的证书覆盖、frp 代理冲突与入侵防护的防火墙同步。会访问 DDNS 使用的公网 IP 查询服务。",
   "empty": "没有可报告的内容",
   "rerun": "重新检查",
   "issues": "{count} 项需要关注",
@@ -35,7 +35,16 @@
     "webCertMissing": "站点 {site}（端口 {port}）没有匹配的证书：{domains}",
     "frpOk": "frpc 的 {count} 个代理没有发现冲突",
     "frpDuplicate": "frpc 中有多个启用的代理都叫 {proxy}，只有第一个生效",
-    "frpConflict": "{role} 报告代理 {proxy} 冲突：{reason}"
+    "frpConflict": "{role} 报告代理 {proxy} 冲突：{reason}",
+    "guardOk": "入侵防护已同步到系统防火墙，当前封禁 {bans} 个地址",
+    "guardOS": "当前系统没有 nftables，入侵防护只对 Gately 自身的服务生效",
+    "guardMissing": "入侵防护：找不到 nft 命令，无法同步到系统防火墙",
+    "guardPermission": "入侵防护：没有修改防火墙的权限",
+    "guardError": "入侵防护写入防火墙规则失败：{error}",
+    "guardTrapSkipped": "诱饵端口 {ports} 正在被监听，已排除",
+    "guardTrapUserspace": "防火墙同步未生效，诱饵端口改由 Gately 监听，只能发现完成握手的扫描",
+    "guardScanUnavailable": "端口扫描检测已开启，但防火墙同步未生效，检测不会运行",
+    "guardJailError": "入侵防护规则 {jail} 异常：{error}"
   },
   "h": {
     "publicIPv4Fail": "检查出网连通性与 DNS，或在 DDNS 设置中更换 IP 查询地址。",
@@ -51,6 +60,12 @@
     "direct6": "外部可以通过 IPv6 直接访问本机的服务（需在路由器和本机防火墙放行对应端口），无需端口映射。",
     "webCertMissing": "访问这些域名会在 TLS 握手时失败。请在证书页添加覆盖它们的证书（通配符证书可覆盖一级子域名），或把域名从站点中移除。",
     "frpDuplicate": "frp 要求代理名称唯一，请修改重名代理的名称。",
-    "frpConflict": "同一个 frps 上已有同名代理，或域名、远程端口已被占用，常见于多台设备复制了同一份 frpc 配置。为每台设备的 frpc 设置不同的用户（user），或修改代理名称、域名与远程端口；冲突的代理对应的网站会超时。"
+    "frpConflict": "同一个 frps 上已有同名代理，或域名、远程端口已被占用，常见于多台设备复制了同一份 frpc 配置。为每台设备的 frpc 设置不同的用户（user），或修改代理名称、域名与远程端口；冲突的代理对应的网站会超时。",
+    "guardMissing": "请安装 nftables；Docker 部署请更新到最新镜像。",
+    "guardPermission": "写入 nftables 需要 root 或 CAP_NET_ADMIN。Docker 部署请在 compose 中加入 cap_add: [NET_ADMIN] 并使用 host 网络。",
+    "guardError": "内核可能缺少 nftables 模块，或 nft 版本过旧（需要 0.9.0 以上）。",
+    "guardTrapSkipped": "这些端口上有服务在监听，设成诱饵会误封正常访问者，已自动跳过。",
+    "guardScanUnavailable": "在入侵防护页面查看防火墙状态与处理办法。",
+    "guardJailError": "检查日志文件路径、服务单元或容器名是否正确；Gately 在容器中运行时需要把日志目录挂载进容器。"
   }
 }

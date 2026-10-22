@@ -41,5 +41,15 @@
     "timeoutTitle": "Tempo esgotado",
     "timeoutDesc": "O serviço não responde há muito tempo. Se você alterou a porta de administração ou o endereço de escuta, abra o novo endereço manualmente. Você também pode consultar os logs do programa para ver como está a inicialização.",
     "reload": "Recarregar página"
+  },
+  "duration": {
+    "minutes": "minutos",
+    "hours": "horas",
+    "days": "dias"
+  },
+  "banTime": {
+    "default": "Padrão",
+    "custom": "Personalizada",
+    "permanent": "Permanente"
   }
 }

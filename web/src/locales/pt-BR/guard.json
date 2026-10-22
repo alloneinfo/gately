@@ -1,0 +1,200 @@
+{
+  "title": "Prevenção de intrusão",
+  "desc": "Proteção no estilo fail2ban: encontra IPs maliciosos por regras de logs, portas armadilha e detecção de varredura, bloqueia-os e sincroniza os bloqueios com o firewall do sistema (nftables)",
+  "savedApplied": "Salvo e aplicado",
+  "banTime": "Duração do bloqueio",
+  "banTimeDefaultValue": "Padrão ({d})",
+  "tabs": {
+    "bans": "Bloqueios ({count})",
+    "jails": "Regras de logs",
+    "scan": "Armadilhas e varreduras",
+    "settings": "Configurações"
+  },
+  "unit": {
+    "seconds": "{n} s",
+    "minutes": "{n} min",
+    "hours": "{n} h",
+    "days": "{n} d"
+  },
+  "fw": {
+    "title": "Firewall do sistema",
+    "viewRules": "Ver regras",
+    "rulesTitle": "Regras que o Gately gravou no nftables (tabela inet gately)",
+    "active": "Ativo",
+    "inactive": "Inativo",
+    "disabled": "Desligado",
+    "activeBans": "Bloqueados",
+    "dropped": "Pacotes descartados",
+    "trapHits": "Acionamentos de armadilha",
+    "scanHits": "Varreduras detectadas",
+    "disabledTitle": "A sincronização com o firewall está desligada",
+    "disabledHint": "Os bloqueios valem só para os serviços do Gately (encaminhamento de portas, serviço web, STUN, WebDAV, FTP e painel). O próprio Gately escuta nas portas armadilha e a detecção de varredura fica indisponível. Ative em Configurações.",
+    "reasonOS": "Este sistema não tem nftables",
+    "hintOS": "A sincronização com o firewall só funciona no Linux. Os bloqueios continuam valendo para os serviços do Gately, o próprio Gately escuta nas portas armadilha e a detecção de varredura fica indisponível.",
+    "reasonMissing": "Comando nft não encontrado",
+    "hintMissing": "Instale o nftables (Debian / Ubuntu: apt install nftables; OpenWrt 22.03 ou posterior já inclui). Depois salve as configurações uma vez.",
+    "hintMissingDocker": "Esta imagem não inclui o nft. Atualize para a imagem mais recente.",
+    "reasonPermission": "Sem permissão para alterar o firewall",
+    "hintPermission": "Gravar no nftables exige root ou CAP_NET_ADMIN. Para um serviço systemd, adicione AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE em [Service].",
+    "hintPermissionDocker": "Adicione cap_add: [NET_ADMIN] ao docker-compose.yml, use network_mode: host e recrie o contêiner.",
+    "reasonError": "Falha ao gravar as regras do firewall",
+    "hintError": "Talvez faltem módulos do nftables no kernel (nf_tables, nft_set_hash etc.) ou o nft seja antigo demais (é preciso 0.9.0 ou posterior). Detalhes abaixo."
+  },
+  "ban": {
+    "add": "Bloquear manualmente",
+    "submit": "Bloquear",
+    "added": "Bloqueado",
+    "removed": "{key} desbloqueado",
+    "search": "Pesquisar endereço, origem ou motivo",
+    "empty": "Nenhum IP bloqueado",
+    "address": "IP / rede",
+    "source": "Origem",
+    "reason": "Motivo",
+    "reasonPlaceholder": "Opcional, ex.: tráfego suspeito",
+    "count": "Vezes",
+    "created": "Bloqueado em",
+    "until": "Restante",
+    "permanent": "Permanente",
+    "unban": "Desbloquear",
+    "remainDays": "{d} d {h} h",
+    "remainHours": "{h} h {m} min",
+    "remainMinutes": "{m} min",
+    "sourceManual": "Manual",
+    "sourceWeb": "Falhas de autenticação web",
+    "sourceTrap": "Porta armadilha",
+    "sourceScan": "Varredura de portas",
+    "sourceJailDeleted": "Regra excluída"
+  },
+  "source": {
+    "file": "Arquivo de log",
+    "journal": "Journal do systemd",
+    "command": "Saída de comando",
+    "docker": "Contêiner Docker",
+    "event": "Evento do Gately"
+  },
+  "target": {
+    "file": "Caminho do arquivo",
+    "journal": "Unidade de serviço",
+    "command": "Comando",
+    "docker": "Contêiner",
+    "event": "Evento"
+  },
+  "event": {
+    "authFailed": "Falha de login no painel",
+    "wafBlocked": "Requisição bloqueada pelo WAF"
+  },
+  "sourceHelp": {
+    "file": "Lê as linhas novas do arquivo e passa para o arquivo novo após a rotação. Um caminho por linha.",
+    "fileDocker": "O Gately roda em um contêiner e só lê arquivos montados nele. Por exemplo, monte o /var/log do host como somente leitura em /var/log/host no contêiner e informe /var/log/host/auth.log.",
+    "journal": "Lê o log do serviço com o journalctl. Uma unidade por linha, ex.: ssh.service.",
+    "journalMissing": "journalctl não encontrado (em um contêiner ou sistema sem systemd), então esta origem está indisponível.",
+    "command": "Executa um comando que imprime logs continuamente e lê a saída, ex.: logread -f no OpenWrt. O comando é reiniciado quando termina.",
+    "docker": "Lê o log do contêiner. O módulo Docker precisa conseguir acessar o Docker.",
+    "event": "Conta eventos do próprio Gately que trazem o IP de origem. Não precisa de filtro."
+  },
+  "jail": {
+    "intro": "Encontra falhas nos logs. Um IP que atinge o número de falhas dentro da janela de tempo é bloqueado.",
+    "add": "Adicionar regra",
+    "edit": "Editar regra",
+    "fromPreset": "A partir de modelo",
+    "empty": "Nenhuma regra ainda. Adicione serviços comuns como SSH, Nginx ou Vaultwarden a partir de um modelo.",
+    "deleteConfirm": "Excluir esta regra? Os bloqueios existentes continuam até expirar.",
+    "source": "Origem dos logs",
+    "filter": "Filtros",
+    "filterHelp": "Expressões regulares Go, uma por linha. <HOST> representa o IP de origem (IPv4 e IPv6). Cada linha que corresponde a algum filtro conta como uma falha.",
+    "filterEventPlaceholder": "Opcional",
+    "ignore": "Ignorar",
+    "ignoreHelp": "Expressões regulares opcionais, uma por linha. Linhas correspondentes não são contadas.",
+    "condition": "Gatilho",
+    "conditionValue": "{count} vezes em {window}",
+    "within": "de janela,",
+    "timesThenBan": "falhas e bloqueia",
+    "banTime": "Duração do bloqueio",
+    "matches": "Correspondências",
+    "bans": "Bloqueios",
+    "bansValue": "{total} no total, {active} ativos",
+    "statusRunning": "Em execução",
+    "statusOff": "Desativada",
+    "statusError": "Erro",
+    "testTitle": "Teste",
+    "testLines": "Linhas de exemplo",
+    "testPlaceholder": "Cole algumas linhas de log para verificar se os filtros extraem o IP",
+    "testSummary": "{matched} de {total} linhas corresponderam",
+    "testNoMatch": "Sem correspondência",
+    "testIgnored": "{host} (lista de permissões)"
+  },
+  "trap": {
+    "title": "Portas armadilha",
+    "help": "Coloca armadilhas em portas que este host não usa. Qualquer origem que se conecte a elas é bloqueada. Usuários normais nunca acessam essas portas, então isso barra bem varreduras em massa. Portas em escuta são excluídas automaticamente.",
+    "ports": "Portas",
+    "portsHelp": "Separadas por vírgula, aceita intervalos, ex.: 23,3389,5900-5910. Endereços da LAN e da lista de permissões não as acionam.",
+    "effective": "Portas ativas: {ports}",
+    "userspace": "Firewall inativo, o Gately escuta em: {ports} (só detecta varreduras que completam a conexão)",
+    "skipped": "Estas portas estão em uso e foram excluídas: {ports}"
+  },
+  "scan": {
+    "title": "Detecção de varredura de portas",
+    "help": "Conta quantas vezes cada origem se conecta a portas fechadas deste host e a bloqueia quando passa do limite por minuto. Só contam conexões novas a este host; tráfego encaminhado a contêineres ou dispositivos da LAN não conta.",
+    "needFirewall": "As portas armadilha no kernel e a detecção de varredura exigem a sincronização com o firewall ativa. Veja o status acima.",
+    "threshold": "Limite",
+    "perMinute": "por minuto",
+    "thresholdHelp": "Uma origem é bloqueada se conectar a portas fechadas mais vezes por minuto do que este valor. Um cliente normal tenta de novo uma porta fechada cerca de 5 vezes por minuto, então use 10 ou mais.",
+    "exclude": "Portas abertas adicionais",
+    "excludeHelp": "Há {count} portas em escuta, consideradas abertas automaticamente. Adicione aqui as portas que outros programas usam por meio de regras de firewall."
+  },
+  "settings": {
+    "firewall": "Sincronizar com o firewall",
+    "firewallHelp": "Cria a tabela inet gately no nftables e descarta no kernel todo o tráfego vindo dos endereços bloqueados, inclusive o encaminhado a contêineres Docker e dispositivos da LAN. As respostas às conexões que este host abre para esses endereços (DNS, espelhos de pacotes etc.) continuam passando. As regras são removidas ao desligar a opção ou parar o Gately.",
+    "banSeconds": "Duração padrão",
+    "increment": "Bloqueios progressivos",
+    "incrementHelp": "Se um endereço for bloqueado de novo em 30 dias, a duração dobra a cada vez.",
+    "maxBanSeconds": "Duração máxima",
+    "whitelist": "Lista de permissões",
+    "ignorePrivate": "Ignorar endereços da LAN",
+    "ignorePrivateHelp": "Loopback, endereços privados, 100.64.0.0/10 (NAT de operadora e Tailscale), link-local e as redes IPv6 /64 das interfaces deste host nunca são bloqueados automaticamente, e as portas armadilha e a detecção de varredura os ignoram.",
+    "ignoreList": "Endereços permitidos",
+    "ignoreListHelp": "Um IP ou rede CIDR por linha. Nunca são bloqueados automaticamente; bloqueios manuais ignoram a lista de permissões."
+  },
+  "presets": {
+    "sshd": {
+      "name": "SSH (arquivo de log)",
+      "desc": "Lê /var/log/auth.log (/var/log/secure em sistemas tipo RHEL)"
+    },
+    "sshd-journal": {
+      "name": "SSH (journal do systemd)",
+      "desc": "Lê o log de ssh.service / sshd.service"
+    },
+    "dropbear": {
+      "name": "Dropbear (OpenWrt)",
+      "desc": "Lê falhas de login SSH do OpenWrt via logread -f"
+    },
+    "nginx-http-auth": {
+      "name": "Autenticação básica do Nginx",
+      "desc": "Usuários ou senhas incorretos no error.log"
+    },
+    "nginx-botsearch": {
+      "name": "Varredura de bots no Nginx",
+      "desc": "Requisições no access.log que procuram wp-login, .env, phpMyAdmin e caminhos parecidos"
+    },
+    "vaultwarden": {
+      "name": "Vaultwarden",
+      "desc": "Falhas de login e de verificação em duas etapas no contêiner vaultwarden"
+    },
+    "homeassistant": {
+      "name": "Home Assistant",
+      "desc": "Falhas de login no contêiner homeassistant (requer log http)"
+    },
+    "proxmox": {
+      "name": "Proxmox VE",
+      "desc": "Falhas de login web do pvedaemon"
+    },
+    "gately-admin": {
+      "name": "Login no Gately",
+      "desc": "Falhas de login no painel (senha, código de duas etapas, chave de acesso)"
+    },
+    "gately-waf": {
+      "name": "Bloqueios do WAF",
+      "desc": "Origens bloqueadas repetidamente pelo WAF. Não use em sites atrás de uma CDN que passa o IP real em um cabeçalho, ou os nós da CDN serão bloqueados"
+    }
+  }
+}

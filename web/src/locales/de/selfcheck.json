@@ -1,7 +1,7 @@
 {
   "title": "Netzwerk- und Konfigurationsprüfung",
   "run": "Selbsttest",
-  "intro": "Prüft öffentliche Adresse, NAT, Uhrzeit, Ports 80/443, DDNS-Auflösung, Zertifikatsgültigkeit, Zertifikatsabdeckung der HTTPS-Sites und frp-Proxy-Konflikte. Fragt die für DDNS konfigurierten Dienste zur Ermittlung der öffentlichen IP ab.",
+  "intro": "Prüft öffentliche Adresse, NAT, Uhrzeit, Ports 80/443, DDNS-Auflösung, Zertifikatsgültigkeit, Zertifikatsabdeckung der HTTPS-Sites, frp-Proxy-Konflikte und die Firewall-Synchronisierung des Einbruchschutzes. Fragt die für DDNS konfigurierten Dienste zur Ermittlung der öffentlichen IP ab.",
   "empty": "Nichts zu melden",
   "rerun": "Erneut prüfen",
   "issues": "{count} Punkt(e) erfordern Aufmerksamkeit",
@@ -35,7 +35,16 @@
     "webCertMissing": "Site {site} (Port {port}) hat kein passendes Zertifikat für: {domains}",
     "frpOk": "Keine Konflikte bei {count} frpc-Proxys",
     "frpDuplicate": "Mehrere aktive frpc-Proxys heißen {proxy}; nur der erste wird verwendet",
-    "frpConflict": "{role} meldet einen Konflikt für Proxy {proxy}: {reason}"
+    "frpConflict": "{role} meldet einen Konflikt für Proxy {proxy}: {reason}",
+    "guardOk": "Der Einbruchschutz ist mit der System-Firewall synchronisiert, {bans} Adressen gesperrt",
+    "guardOS": "Dieses System hat kein nftables, daher schützt der Einbruchschutz nur Gatelys eigene Dienste",
+    "guardMissing": "Einbruchschutz: Befehl nft nicht gefunden, Sperren werden nicht in die System-Firewall übertragen",
+    "guardPermission": "Einbruchschutz: keine Berechtigung zum Ändern der Firewall",
+    "guardError": "Der Einbruchschutz konnte die Firewall-Regeln nicht schreiben: {error}",
+    "guardTrapSkipped": "Die Köderports {ports} sind belegt und wurden ausgenommen",
+    "guardTrapUserspace": "Die Firewall-Synchronisierung ist nicht aktiv, daher lauscht Gately selbst auf den Köderports und erkennt nur Scans, die den Verbindungsaufbau abschließen",
+    "guardScanUnavailable": "Die Portscan-Erkennung ist eingeschaltet, aber die Firewall-Synchronisierung ist nicht aktiv, daher läuft sie nicht",
+    "guardJailError": "Die Einbruchschutz-Regel {jail} hat einen Fehler: {error}"
   },
   "h": {
     "publicIPv4Fail": "Ausgehende Verbindung und DNS prüfen oder die IP-Abfrage-URLs in den DDNS-Einstellungen ändern.",
@@ -51,6 +60,12 @@
     "direct6": "Dienste auf diesem Rechner sind ohne Portweiterleitung per IPv6 erreichbar, sofern Router und lokale Firewall die Ports freigeben.",
     "webCertMissing": "Anfragen an diese Domains scheitern beim TLS-Handshake. Fügen Sie auf der Zertifikatsseite ein passendes Zertifikat hinzu (ein Wildcard deckt eine Subdomain-Ebene ab) oder entfernen Sie die Domains aus der Site.",
     "frpDuplicate": "frp verlangt eindeutige Proxy-Namen; benennen Sie die Duplikate um.",
-    "frpConflict": "Auf dem frps gibt es bereits einen Proxy mit diesem Namen, oder Domain bzw. Remote-Port sind belegt. Das passiert oft, wenn mehrere Geräte dieselbe frpc-Konfiguration nutzen. Geben Sie dem frpc jedes Geräts einen eigenen user oder ändern Sie Proxy-Namen, Domains und Remote-Ports; Sites hinter einem kollidierenden Proxy laufen in Timeouts."
+    "frpConflict": "Auf dem frps gibt es bereits einen Proxy mit diesem Namen, oder Domain bzw. Remote-Port sind belegt. Das passiert oft, wenn mehrere Geräte dieselbe frpc-Konfiguration nutzen. Geben Sie dem frpc jedes Geräts einen eigenen user oder ändern Sie Proxy-Namen, Domains und Remote-Ports; Sites hinter einem kollidierenden Proxy laufen in Timeouts.",
+    "guardMissing": "Installieren Sie nftables. Bei Docker auf das neueste Image aktualisieren.",
+    "guardPermission": "Schreiben in nftables erfordert root oder CAP_NET_ADMIN. Bei Docker cap_add: [NET_ADMIN] in der Compose-Datei ergänzen und das Host-Netzwerk verwenden.",
+    "guardError": "Dem Kernel fehlen möglicherweise nftables-Module oder nft ist zu alt (0.9.0 oder neuer nötig).",
+    "guardTrapSkipped": "Auf diesen Ports lauschen Dienste; als Köder würden sie legitime Besucher sperren. Sie wurden übersprungen.",
+    "guardScanUnavailable": "Status der Firewall und Abhilfe finden Sie auf der Seite Einbruchschutz.",
+    "guardJailError": "Prüfen Sie Pfad der Protokolldatei, Diensteinheit oder Containernamen. Läuft Gately in einem Container, muss das Protokollverzeichnis hineingemountet werden."
   }
 }

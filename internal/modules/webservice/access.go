@@ -14,6 +14,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/wangwanjie/gately/internal/banlist"
 	"github.com/wangwanjie/gately/internal/events"
 	"github.com/wangwanjie/gately/internal/geoip"
 )
@@ -350,21 +351,20 @@ func (a *authenticator) takeShareUse(key string, max int) bool {
 }
 
 // ---- IP 封禁 ----
-
-// banEntry 是一条封禁记录。
-type banEntry struct {
-	Until  time.Time
-	Reason string
-	Manual bool
-}
+// 封禁记录保存在进程共享的封禁表（internal/banlist）中：同一张表也对端口转发、STUN 等服务生效，
+// 入侵防护模块开启时负责持久化并同步到系统防火墙。
 
 // BanInfo 是封禁列表中的一项。
 type BanInfo struct {
-	// Key 为被封禁的地址（IPv6 按 /64 聚合）
-	Key    string    `json:"key"`
-	Until  time.Time `json:"until"`
-	Reason string    `json:"reason"`
-	Manual bool      `json:"manual"`
+	// Key 为被封禁的地址（IPv6 按 /64 聚合）或网段
+	Key   string    `json:"key"`
+	Until time.Time `json:"until,omitzero"`
+	// Permanent 为 true 表示永久封禁（Until 为空）
+	Permanent bool   `json:"permanent,omitempty"`
+	Reason    string `json:"reason"`
+	Manual    bool   `json:"manual"`
+	// Source 为封禁来源，例如 webservice、manual、trap、scan 或 jail:<规则>
+	Source string `json:"source"`
 }
 
 // setBanSeconds 设置认证失败达到上限后的自动封禁时长，0 表示不自动封禁。
@@ -376,53 +376,41 @@ func (a *authenticator) setBanSeconds(sec int) {
 
 // banned 判断地址当前是否被封禁。
 func (a *authenticator) banned(addr netip.Addr) bool {
-	a.banMu.Lock()
-	defer a.banMu.Unlock()
-	if len(a.bans) == 0 {
-		return false
-	}
-	key := limitKey(addr.String())
-	e, ok := a.bans[key]
-	if !ok {
-		return false
-	}
-	if time.Now().After(e.Until) {
-		delete(a.bans, key)
-		return false
-	}
-	return true
+	return a.bans.Banned(addr)
 }
 
-// ban 封禁地址 d 时长，返回规范化后的键。
+// ban 封禁地址 d 时长，返回规范化后的键；manual 为 true 时不受入侵防护白名单限制。
+// 地址在白名单中而未被封禁时返回空字符串。
 func (a *authenticator) ban(ip string, d time.Duration, reason string, manual bool) string {
 	key := limitKey(ip)
-	a.banMu.Lock()
-	a.bans[key] = banEntry{Until: time.Now().Add(d), Reason: reason, Manual: manual}
-	a.banMu.Unlock()
+	source := banlist.SourceWeb
+	if manual {
+		source = banlist.SourceManual
+	}
+	if _, _, err := a.bans.Ban(key, banlist.Options{Duration: d, Reason: reason, Source: source, Force: manual}); err != nil {
+		return ""
+	}
 	return key
 }
 
 // unban 解除封禁。
 func (a *authenticator) unban(key string) {
-	a.banMu.Lock()
-	delete(a.bans, key)
-	a.banMu.Unlock()
+	a.bans.Unban(key)
 }
 
-// listBans 返回尚未过期的封禁，按到期时间排序。
+// listBans 返回尚未过期的封禁，按到期时间排序（永久封禁在最后）。
 func (a *authenticator) listBans() []BanInfo {
-	a.banMu.Lock()
-	defer a.banMu.Unlock()
-	now := time.Now()
 	out := []BanInfo{}
-	for k, e := range a.bans {
-		if now.After(e.Until) {
-			delete(a.bans, k)
-			continue
-		}
-		out = append(out, BanInfo{Key: k, Until: e.Until, Reason: e.Reason, Manual: e.Manual})
+	for _, e := range a.bans.List() {
+		out = append(out, BanInfo{Key: e.Key, Until: e.Until, Permanent: e.Permanent(), Reason: e.Reason,
+			Manual: e.Source == banlist.SourceManual, Source: e.Source})
 	}
-	sort.Slice(out, func(i, j int) bool { return out[i].Until.Before(out[j].Until) })
+	sort.SliceStable(out, func(i, j int) bool {
+		if out[i].Permanent != out[j].Permanent {
+			return !out[i].Permanent
+		}
+		return out[i].Until.Before(out[j].Until)
+	})
 	return out
 }
 
@@ -434,7 +422,9 @@ func (a *authenticator) autoBanFor(key string) {
 	if d <= 0 {
 		return
 	}
-	a.ban(key, d, "认证连续失败", false)
+	if a.ban(key, d, "认证连续失败", false) == "" {
+		return
+	}
 	events.Publish(events.Event{
 		Type:    events.AuthBanned,
 		Source:  "Web 服务",

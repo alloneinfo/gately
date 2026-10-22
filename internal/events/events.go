@@ -31,6 +31,7 @@ const (
 	BackupFailed    = "backup.failed"
 	AuthFailed      = "auth.failed"
 	AuthBanned      = "auth.banned"
+	GuardBanned     = "guard.banned"
 	NotifyTest      = "notify.test"
 	STUNChanged     = "stun.changed"
 	LoginSuccessful = "login.success"
@@ -74,6 +75,7 @@ var Catalog = []TypeInfo{
 	{BackupFailed, "备份：失败", LevelError},
 	{AuthFailed, "认证：连续失败", LevelWarn},
 	{AuthBanned, "认证：IP 已被封禁", LevelWarn},
+	{GuardBanned, "入侵防护：IP 已被封禁", LevelWarn},
 	{LoginSuccessful, "管理后台：登录成功", LevelInfo},
 	{AuditChange, "管理后台：配置变更", LevelInfo},
 	{AuditAccess, "管理后台：访问敏感内容", LevelWarn},

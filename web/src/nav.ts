@@ -23,6 +23,7 @@ import {
   ScrollText,
   Server,
   Settings,
+  ShieldBan,
   ShieldCheck,
   ShieldHalf,
   SquareTerminal,
@@ -56,6 +57,7 @@ export const navGroups: NavGroup[] = [
     items: [
       { path: '/portforward', titleKey: 'nav.items.portforward.title', icon: ArrowLeftRight, moduleId: 'portforward', descKey: 'nav.items.portforward.desc' },
       { path: '/ddns', titleKey: 'nav.items.ddns.title', icon: Globe, moduleId: 'ddns', descKey: 'nav.items.ddns.desc' },
+      { path: '/guard', titleKey: 'nav.items.guard.title', icon: ShieldBan, moduleId: 'guard', descKey: 'nav.items.guard.desc' },
     ],
   },
   {

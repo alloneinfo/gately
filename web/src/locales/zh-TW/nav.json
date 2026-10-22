@@ -20,6 +20,10 @@
       "title": "動態網域",
       "desc": "公網 IP 變動時自動更新解析"
     },
+    "guard": {
+      "title": "入侵防護",
+      "desc": "封鎖惡意 IP，聯動系統防火牆"
+    },
     "stun": {
       "title": "STUN 穿透",
       "desc": "NAT1 網路下無公網 IP 穿透"

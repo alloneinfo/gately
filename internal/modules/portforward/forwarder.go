@@ -15,6 +15,7 @@ import (
 
 	proxyproto "github.com/pires/go-proxyproto"
 
+	"github.com/wangwanjie/gately/internal/banlist"
 	"github.com/wangwanjie/gately/internal/logbuf"
 	"github.com/wangwanjie/gately/internal/netpipe"
 )
@@ -251,6 +252,8 @@ func (r *runner) startTCP(ctx context.Context, network, addr string, pair PortPa
 	if err != nil {
 		return err
 	}
+	// 被封禁地址的连接在 Accept 时直接关闭
+	ln = banlist.Default.Listener(ln)
 	r.track(ln)
 	sem := make(chan struct{}, maxConns)
 	r.wg.Add(1)
@@ -430,6 +433,10 @@ func (r *runner) startUDP(ctx context.Context, network, addr string, targetPort 
 					return
 				}
 				r.current().log.Warnf("UDP 读取失败: %v", err)
+				continue
+			}
+			// 丢弃被封禁地址的数据包（已有会话随空闲超时自然结束）
+			if banlist.Default.BannedAddr(clientAddr) {
 				continue
 			}
 			key := clientAddr.String()

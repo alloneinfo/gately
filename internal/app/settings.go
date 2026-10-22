@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/wangwanjie/gately/internal/auth"
+	"github.com/wangwanjie/gately/internal/banlist"
 	"github.com/wangwanjie/gately/internal/httpx"
 	"github.com/wangwanjie/gately/internal/i18n"
 	"github.com/wangwanjie/gately/internal/logbuf"
@@ -335,6 +336,12 @@ func (a *App) accessControl(next http.Handler) http.Handler {
 			return
 		}
 		s := a.settingsSnapshot()
+		// 被封禁的地址（入侵防护、Web 服务认证失败等）不能访问管理后台；内网与回环地址除外，
+		// 避免在 Web 站点上输错几次密码就把管理员自己锁在外面
+		if ip, err := netip.ParseAddr(httpx.ClientIP(r)); err == nil && !isPrivate(ip.String()) && banlist.Default.Banned(ip) {
+			http.Error(w, "403 Forbidden", http.StatusForbidden)
+			return
+		}
 		if s.LANOnly && !isPrivate(httpx.ClientIP(r)) {
 			http.Error(w, "403 Forbidden", http.StatusForbidden)
 			return

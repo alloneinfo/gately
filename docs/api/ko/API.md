@@ -40,6 +40,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `ssl` | SSL 인증서 | `ssl:read`、`ssl:write` |
 | `waf` | WAF 방화벽 | `waf:read`、`waf:write` |
 | `webservice` | Web 서비스 | `webservice:read`、`webservice:write` |
+| `guard` | 침입 방지 | `guard:read`、`guard:write` |
 | `wol` | Wake-on-LAN | `wol:read`、`wol:write` |
 | `webterminal` | Web 터미널 | `webterminal:read`、`webterminal:write` |
 | `cron` | 예약 작업 | `cron:read`、`cron:write` |
@@ -222,6 +223,28 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | POST | `/api/webservice/geoip/upload` | `webservice:write` | GeoIP 데이터베이스 업로드 (multipart 필드 file, .mmdb) |
 | POST | `/api/webservice/geoip/download` | `webservice:write` | 주소에서 GeoIP 데이터베이스(.mmdb) 다운로드 |
 | DELETE | `/api/webservice/geoip` | `webservice:write` | GeoIP 데이터베이스 제거 |
+
+## 침입 방지
+
+| 메서드 | 경로 | 필요 권한 | 설명 |
+| --- | --- | --- | --- |
+| GET | `/api/guard/logs` | `guard:read` | 모듈 실행 로그 보기 |
+| DELETE | `/api/guard/logs` | `guard:write` | 모듈 실행 로그 비우기 |
+| GET | `/api/guard/jails` | `guard:read` | 항목 목록 조회 |
+| POST | `/api/guard/jails` | `guard:write` | 항목 추가 |
+| PUT | `/api/guard/jails/{key}` | `guard:write` | 항목 수정 |
+| DELETE | `/api/guard/jails/{key}` | `guard:write` | 항목 삭제 |
+| PUT | `/api/guard/jails/{key}/enable` | `guard:write` | 항목 사용 설정/해제 |
+| PUT | `/api/guard/jails-order` | `guard:write` | 항목 순서 변경 |
+| GET | `/api/guard/presets` | `guard:read` | 일반 서비스용 규칙 템플릿 |
+| POST | `/api/guard/jails/test` | `guard:write` | 로그 샘플로 필터 테스트 |
+| GET | `/api/guard/status` | `guard:read` | 방화벽 동기화 상태와 실행 환경 |
+| GET | `/api/guard/settings` | `guard:read` | 전역 설정 |
+| PUT | `/api/guard/settings` | `guard:write` | 전역 설정 변경 |
+| GET | `/api/guard/bans` | `guard:read` | 현재 차단된 IP |
+| POST | `/api/guard/bans` | `guard:write` | IP 또는 네트워크 수동 차단 |
+| DELETE | `/api/guard/bans` | `guard:write` | 차단 해제 (body는 {"key": 주소}) |
+| GET | `/api/guard/firewall/rules` | `guard:read` | Gately가 nftables에 기록한 규칙(텍스트) |
 
 ## Wake-on-LAN
 
@@ -598,6 +621,17 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `password` | string |
 | `schedule` | string |
 
+### banlist.Entry
+
+| 필드 | 타입 |
+| --- | --- |
+| `count` | integer |
+| `created` | 시간 (RFC 3339) |
+| `key` | string |
+| `reason` | string |
+| `source` | string |
+| `until` | 시간 (RFC 3339) |
+
 ### cloudflared.Tunnel
 
 | 필드 | 타입 |
@@ -759,6 +793,124 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `loaded` | boolean |
 | `size` | integer |
 | `type` | string |
+
+### guard.BanView
+
+| 필드 | 타입 |
+| --- | --- |
+| `count` | integer |
+| `created` | 시간 (RFC 3339) |
+| `jail` | string |
+| `key` | string |
+| `reason` | string |
+| `source` | string |
+| `until` | 시간 (RFC 3339) |
+
+### guard.FirewallStatus
+
+| 필드 | 타입 |
+| --- | --- |
+| `active` | boolean |
+| `checkedAt` | 시간 (RFC 3339) |
+| `dropped` | Map of integer |
+| `enabled` | boolean |
+| `error` | string |
+| `hits` | Map of integer |
+| `openPorts` | integer |
+| `reason` | string |
+| `trapPorts` | string |
+| `trapSkipped` | Array of integer |
+| `version` | string |
+
+### guard.Jail
+
+| 필드 | 타입 |
+| --- | --- |
+| `banTime` | integer |
+| `enable` | boolean |
+| `filter` | string |
+| `findTime` | integer |
+| `ignore` | string |
+| `key` | string |
+| `maxRetry` | integer |
+| `name` | string |
+| `preset` | string |
+| `remark` | string |
+| `source` | string |
+| `target` | string |
+
+### guard.Platform
+
+| 필드 | 타입 |
+| --- | --- |
+| `docker` | boolean |
+| `inDocker` | boolean |
+| `journal` | boolean |
+| `os` | string |
+
+### guard.ScanSettings
+
+| 필드 | 타입 |
+| --- | --- |
+| `banSeconds` | integer |
+| `enable` | boolean |
+| `excludePorts` | string |
+| `threshold` | integer |
+
+### guard.Settings
+
+| 필드 | 타입 |
+| --- | --- |
+| `banSeconds` | integer |
+| `firewall` | boolean |
+| `ignoreList` | Array of string |
+| `ignorePrivate` | boolean |
+| `increment` | boolean |
+| `maxBanSeconds` | integer |
+| `scan` | `guard.ScanSettings` |
+| `trap` | `guard.TrapSettings` |
+
+### guard.Status
+
+| 필드 | 타입 |
+| --- | --- |
+| `bans` | integer |
+| `firewall` | `guard.FirewallStatus` |
+| `platform` | `guard.Platform` |
+| `userTrapPorts` | Array of integer |
+
+### guard.TestResult
+
+| 필드 | 타입 |
+| --- | --- |
+| `host` | string |
+| `ignored` | boolean |
+| `line` | string |
+| `matched` | boolean |
+
+### guard.TrapSettings
+
+| 필드 | 타입 |
+| --- | --- |
+| `banSeconds` | integer |
+| `enable` | boolean |
+| `ports` | string |
+
+### guard.banRequest
+
+| 필드 | 타입 |
+| --- | --- |
+| `key` | string |
+| `reason` | string |
+| `seconds` | integer |
+
+### guard.testRequest
+
+| 필드 | 타입 |
+| --- | --- |
+| `filter` | string |
+| `ignore` | string |
+| `lines` | string |
 
 ### ipsource.Source
 
@@ -1026,6 +1178,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `remark` | string |
 | `ruleSets` | Array of `waf.RuleSet` |
 | `skipBodyPaths` | string |
+| `webdav` | boolean |
 
 ### waf.RuleSet
 
@@ -1055,7 +1208,9 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | --- | --- |
 | `key` | string |
 | `manual` | boolean |
+| `permanent` | boolean |
 | `reason` | string |
+| `source` | string |
 | `until` | 시간 (RFC 3339) |
 
 ### webservice.CacheConfig

@@ -1,0 +1,200 @@
+{
+  "title": "Intrusion Prevention",
+  "desc": "fail2ban-style protection: finds malicious IPs through log jails, trap ports and port-scan detection, bans them and syncs the bans to the system firewall (nftables)",
+  "savedApplied": "Saved and applied",
+  "banTime": "Ban duration",
+  "banTimeDefaultValue": "Default ({d})",
+  "tabs": {
+    "bans": "Bans ({count})",
+    "jails": "Log jails",
+    "scan": "Trap ports & scan detection",
+    "settings": "Settings"
+  },
+  "unit": {
+    "seconds": "{n} s",
+    "minutes": "{n} min",
+    "hours": "{n} h",
+    "days": "{n} d"
+  },
+  "fw": {
+    "title": "System firewall",
+    "viewRules": "View rules",
+    "rulesTitle": "Rules Gately wrote to nftables (table inet gately)",
+    "active": "Active",
+    "inactive": "Not active",
+    "disabled": "Off",
+    "activeBans": "Banned",
+    "dropped": "Packets dropped",
+    "trapHits": "Trap port hits",
+    "scanHits": "Scan detections",
+    "disabledTitle": "Firewall sync is off",
+    "disabledHint": "Bans only apply to Gately's own services (port forwarding, web service, STUN, WebDAV, FTP and the admin console). Trap ports are served by Gately itself and port-scan detection is unavailable. Turn it on under Settings.",
+    "reasonOS": "This system has no nftables",
+    "hintOS": "Firewall sync is Linux only. Bans still apply to Gately's own services, trap ports are served by Gately itself and port-scan detection is unavailable.",
+    "reasonMissing": "The nft command was not found",
+    "hintMissing": "Install nftables (Debian / Ubuntu: apt install nftables; OpenWrt 22.03 and later ship it). Save the settings once after installing.",
+    "hintMissingDocker": "This image does not include nft. Update to the latest image.",
+    "reasonPermission": "No permission to change the firewall",
+    "hintPermission": "Writing to nftables requires root or CAP_NET_ADMIN. For a systemd service add AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE under [Service].",
+    "hintPermissionDocker": "Add cap_add: [NET_ADMIN] to docker-compose.yml, use network_mode: host and recreate the container.",
+    "reasonError": "Failed to write firewall rules",
+    "hintError": "The kernel may be missing nftables modules (nf_tables, nft_set_hash and so on), or nft is too old (0.9.0 or later is required). Details below."
+  },
+  "ban": {
+    "add": "Ban manually",
+    "submit": "Ban",
+    "added": "Banned",
+    "removed": "Unbanned {key}",
+    "search": "Search address, source or reason",
+    "empty": "No IP is banned",
+    "address": "IP / network",
+    "source": "Source",
+    "reason": "Reason",
+    "reasonPlaceholder": "Optional, e.g. suspicious traffic",
+    "count": "Count",
+    "created": "Banned at",
+    "until": "Remaining",
+    "permanent": "Permanent",
+    "unban": "Unban",
+    "remainDays": "{d} d {h} h",
+    "remainHours": "{h} h {m} min",
+    "remainMinutes": "{m} min",
+    "sourceManual": "Manual",
+    "sourceWeb": "Web auth failures",
+    "sourceTrap": "Trap port",
+    "sourceScan": "Port scan",
+    "sourceJailDeleted": "Deleted jail"
+  },
+  "source": {
+    "file": "Log file",
+    "journal": "systemd journal",
+    "command": "Command output",
+    "docker": "Docker container",
+    "event": "Gately event"
+  },
+  "target": {
+    "file": "File path",
+    "journal": "Service unit",
+    "command": "Command",
+    "docker": "Container",
+    "event": "Event"
+  },
+  "event": {
+    "authFailed": "Admin console login failed",
+    "wafBlocked": "Request blocked by the WAF"
+  },
+  "sourceHelp": {
+    "file": "Follows new lines appended to the file and switches to the new file after rotation. One path per line.",
+    "fileDocker": "Gately runs in a container and can only read files mounted into it. For example, mount the host's /var/log read-only at /var/log/host inside the container and enter /var/log/host/auth.log.",
+    "journal": "Reads the service's log through journalctl. One unit per line, e.g. ssh.service.",
+    "journalMissing": "journalctl was not found (in a container or on a system without systemd), so this source is unavailable.",
+    "command": "Runs a command that keeps printing log lines and reads its output, e.g. logread -f on OpenWrt. The command is restarted when it exits.",
+    "docker": "Reads the container's log. The Docker module must be able to reach Docker.",
+    "event": "Counts Gately's own events, which carry the source IP. No filter is needed."
+  },
+  "jail": {
+    "intro": "Finds failures in logs. An IP that reaches the count within the time window is banned.",
+    "add": "Add jail",
+    "edit": "Edit jail",
+    "fromPreset": "From template",
+    "empty": "No jails yet. Add common services such as SSH, Nginx or Vaultwarden from a template.",
+    "deleteConfirm": "Delete this jail? Existing bans stay until they expire.",
+    "source": "Log source",
+    "filter": "Filters",
+    "filterHelp": "Go regular expressions, one per line. <HOST> stands for the source IP (IPv4 and IPv6). Each line matching any filter counts as one failure.",
+    "filterEventPlaceholder": "Optional",
+    "ignore": "Ignore",
+    "ignoreHelp": "Optional regular expressions, one per line. Matching lines are not counted.",
+    "condition": "Trigger",
+    "conditionValue": "{count} times within {window}",
+    "within": "window,",
+    "timesThenBan": "failures, then ban",
+    "banTime": "Ban duration",
+    "matches": "Matches",
+    "bans": "Bans",
+    "bansValue": "{total} total, {active} active",
+    "statusRunning": "Running",
+    "statusOff": "Disabled",
+    "statusError": "Error",
+    "testTitle": "Test",
+    "testLines": "Sample lines",
+    "testPlaceholder": "Paste a few log lines to check that the filters extract the IP",
+    "testSummary": "{matched} of {total} lines matched",
+    "testNoMatch": "No match",
+    "testIgnored": "{host} (whitelisted)"
+  },
+  "trap": {
+    "title": "Trap ports",
+    "help": "Sets traps on ports this host does not use. Any source that connects to them is banned. Normal users never touch these ports, so this catches mass scanning well. Ports that are listening are excluded automatically.",
+    "ports": "Ports",
+    "portsHelp": "Comma separated, ranges allowed, e.g. 23,3389,5900-5910. LAN and whitelisted addresses never trigger them.",
+    "effective": "Active ports: {ports}",
+    "userspace": "Firewall not active, Gately listens on: {ports} (only catches scans that complete the handshake)",
+    "skipped": "These ports are in use and were excluded: {ports}"
+  },
+  "scan": {
+    "title": "Port-scan detection",
+    "help": "Counts how often each source connects to ports that are not open on this host and bans it when it exceeds the threshold per minute. Only new connections to this host count; traffic forwarded to containers or LAN devices is ignored.",
+    "needFirewall": "Kernel-side trap ports and port-scan detection both require firewall sync to be active. See the status above.",
+    "threshold": "Threshold",
+    "perMinute": "per minute",
+    "thresholdHelp": "A source is banned when it connects to closed ports more often than this per minute. A normal client retrying a closed port does so about 5 times a minute, so keep this at 10 or above.",
+    "exclude": "Extra open ports",
+    "excludeHelp": "{count} ports are listening and count as open automatically. Add ports used by other programs through firewall rules here."
+  },
+  "settings": {
+    "firewall": "Sync to system firewall",
+    "firewallHelp": "Creates the inet gately table in nftables and drops all traffic from banned addresses in the kernel, including traffic forwarded to Docker containers and LAN devices. Replies to connections this host opens to those addresses (DNS, package mirrors and so on) still get through. The rules are removed when this is turned off or Gately stops.",
+    "banSeconds": "Default ban duration",
+    "increment": "Escalating bans",
+    "incrementHelp": "When an address is banned again within 30 days, the duration doubles each time.",
+    "maxBanSeconds": "Maximum ban duration",
+    "whitelist": "Whitelist",
+    "ignorePrivate": "Ignore LAN addresses",
+    "ignorePrivateHelp": "Loopback, private addresses, 100.64.0.0/10 (carrier-grade NAT and Tailscale), link-local addresses and the IPv6 /64 networks of this host's interfaces are never banned automatically, and trap ports and scan detection ignore them.",
+    "ignoreList": "Whitelisted addresses",
+    "ignoreListHelp": "One IP or CIDR network per line. These are never banned automatically; manual bans ignore the whitelist."
+  },
+  "presets": {
+    "sshd": {
+      "name": "SSH (log file)",
+      "desc": "Reads /var/log/auth.log (/var/log/secure on RHEL-like systems)"
+    },
+    "sshd-journal": {
+      "name": "SSH (systemd journal)",
+      "desc": "Reads the log of ssh.service / sshd.service"
+    },
+    "dropbear": {
+      "name": "Dropbear (OpenWrt)",
+      "desc": "Reads OpenWrt SSH login failures through logread -f"
+    },
+    "nginx-http-auth": {
+      "name": "Nginx basic auth",
+      "desc": "Wrong user names or passwords in error.log"
+    },
+    "nginx-botsearch": {
+      "name": "Nginx bot search",
+      "desc": "Requests in access.log probing wp-login, .env, phpMyAdmin and similar paths"
+    },
+    "vaultwarden": {
+      "name": "Vaultwarden",
+      "desc": "Login and two-step failures in the vaultwarden container"
+    },
+    "homeassistant": {
+      "name": "Home Assistant",
+      "desc": "Login failures in the homeassistant container (http logging must be on)"
+    },
+    "proxmox": {
+      "name": "Proxmox VE",
+      "desc": "Web login failures from pvedaemon"
+    },
+    "gately-admin": {
+      "name": "Gately admin login",
+      "desc": "Failed admin console logins (password, two-step code, passkey)"
+    },
+    "gately-waf": {
+      "name": "WAF blocks",
+      "desc": "Sources blocked by the WAF repeatedly. Do not use it for sites behind a CDN that passes the real IP in a header, or the CDN's nodes get banned"
+    }
+  }
+}

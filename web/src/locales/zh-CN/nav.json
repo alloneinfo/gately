@@ -20,6 +20,10 @@
       "title": "动态域名",
       "desc": "公网 IP 变化时自动更新解析"
     },
+    "guard": {
+      "title": "入侵防护",
+      "desc": "封禁恶意 IP，联动系统防火墙"
+    },
     "stun": {
       "title": "STUN 穿透",
       "desc": "NAT1 网络下无公网 IP 穿透"

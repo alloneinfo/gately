@@ -46,6 +46,10 @@ func (m *Module) handleAddBan(w http.ResponseWriter, r *http.Request) {
 		httpx.Error(w, http.StatusBadRequest, "封禁时长不能超过 30 天")
 		return
 	}
+	if p := httpx.ClientIP(r); p != "" && limitKey(p) == limitKey(addr.Unmap().String()) {
+		httpx.Error(w, http.StatusBadRequest, "不能封禁你当前使用的地址")
+		return
+	}
 	key := m.auth.ban(addr.Unmap().String(), d, "手动封禁", true)
 	httpx.OK(w, map[string]string{"key": key})
 }
@@ -56,7 +60,12 @@ func (m *Module) handleRemoveBan(w http.ResponseWriter, r *http.Request) {
 		httpx.Error(w, http.StatusBadRequest, "%v", err)
 		return
 	}
-	m.auth.unban(strings.TrimSpace(req.Key))
+	key := strings.TrimSpace(req.Key)
+	// 也接受未规范化的 IPv6 单个地址
+	if a, err := netip.ParseAddr(key); err == nil {
+		key = limitKey(a.String())
+	}
+	m.auth.unban(key)
 	httpx.OK(w, map[string]bool{"ok": true})
 }
 

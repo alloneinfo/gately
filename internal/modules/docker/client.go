@@ -210,6 +210,67 @@ func demux(data []byte) string {
 	return out.String()
 }
 
+// FollowLogs 持续读取容器从现在开始产生的日志，把标准输出与标准错误按块交给 onData，直到 ctx 取消或日志流结束。
+// 非 TTY 容器的输出带 8 字节的多路复用头，这里按第一个块的格式判断并去掉。
+func (c *Client) FollowLogs(ctx context.Context, id string, onData func([]byte)) error {
+	q := url.Values{"stdout": {"1"}, "stderr": {"1"}, "follow": {"1"}, "tail": {"0"}, "since": {fmt.Sprint(time.Now().Unix())}}
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.base+"/containers/"+url.PathEscape(id)+"/logs?"+q.Encode(), nil)
+	if err != nil {
+		return err
+	}
+	resp, err := c.hc.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode >= 300 {
+		var e struct {
+			Message string `json:"message"`
+		}
+		b, _ := io.ReadAll(io.LimitReader(resp.Body, 4096))
+		if json.Unmarshal(b, &e) != nil || e.Message == "" {
+			e.Message = strings.TrimSpace(string(b))
+		}
+		return &APIError{Status: resp.StatusCode, Message: e.Message}
+	}
+	rd := bufio.NewReaderSize(resp.Body, 64<<10)
+	head, err := rd.Peek(8)
+	if err != nil {
+		if errors.Is(err, io.EOF) && len(head) > 0 {
+			onData(head)
+		}
+		return err
+	}
+	multiplexed := (head[0] == 0 || head[0] == 1 || head[0] == 2) && head[1] == 0 && head[2] == 0 && head[3] == 0
+	if !multiplexed {
+		buf := make([]byte, 32<<10)
+		for {
+			n, err := rd.Read(buf)
+			if n > 0 {
+				onData(buf[:n])
+			}
+			if err != nil {
+				return err
+			}
+		}
+	}
+	hdr := make([]byte, 8)
+	for {
+		if _, err := io.ReadFull(rd, hdr); err != nil {
+			return err
+		}
+		n := int(binary.BigEndian.Uint32(hdr[4:8]))
+		if n > 1<<20 {
+			return fmt.Errorf("日志块过大（%d 字节）", n)
+		}
+		chunk := make([]byte, n)
+		if _, err := io.ReadFull(rd, chunk); err != nil {
+			return err
+		}
+		onData(chunk)
+	}
+}
+
 // Inspect 返回容器详情的原始 JSON，重建容器时需要完整保留未知字段。
 func (c *Client) Inspect(ctx context.Context, id string) (map[string]json.RawMessage, error) {
 	var out map[string]json.RawMessage

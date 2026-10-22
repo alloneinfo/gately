@@ -305,7 +305,7 @@ const ruleTemplates = computed(() => [
   { id: 'cert', name: t('notify.tpl.cert.name'), desc: t('notify.tpl.cert.desc'), events: ['ssl.expiring', 'ssl.renew_failed', 'ssl.deploy_failed'], minLevel: 'warn', silence: 86400 },
   { id: 'address', name: t('notify.tpl.address.name'), desc: t('notify.tpl.address.desc'), events: ['ddns.changed', 'stun.changed'], minLevel: 'info', silence: 0 },
   { id: 'health', name: t('notify.tpl.health.name'), desc: t('notify.tpl.health.desc'), events: ['upstream.down', 'upstream.up', 'docker.exited', 'process.exited'], minLevel: 'info', silence: 300 },
-  { id: 'security', name: t('notify.tpl.security.name'), desc: t('notify.tpl.security.desc'), events: ['auth.failed', 'auth.banned', 'login.success', 'audit.access'], minLevel: 'info', silence: 0 },
+  { id: 'security', name: t('notify.tpl.security.name'), desc: t('notify.tpl.security.desc'), events: ['auth.failed', 'auth.banned', 'guard.banned', 'login.success', 'audit.access'], minLevel: 'info', silence: 0 },
   { id: 'changes', name: t('notify.tpl.changes.name'), desc: t('notify.tpl.changes.desc'), events: ['audit.change'], minLevel: 'info', silence: 0 },
 ])
 

@@ -1,7 +1,7 @@
 {
   "title": "Comprobación de red y configuración",
   "run": "Autodiagnóstico",
-  "intro": "Comprueba la dirección pública, NAT, la hora, los puertos 80/443, la resolución DDNS, la validez de los certificados, la cobertura de certificados de los sitios HTTPS y los conflictos de proxies frp. Consulta los servicios de IP pública configurados para DDNS.",
+  "intro": "Comprueba la dirección pública, NAT, la hora, los puertos 80/443, la resolución DDNS, la validez de los certificados, la cobertura de certificados de los sitios HTTPS, los conflictos de proxies frp y la sincronización del cortafuegos de Prevención de intrusiones. Consulta los servicios de IP pública configurados para DDNS.",
   "empty": "Nada que informar",
   "rerun": "Repetir",
   "issues": "{count} elemento(s) requieren atención",
@@ -35,7 +35,16 @@
     "webCertMissing": "El sitio {site} (puerto {port}) no tiene certificado para: {domains}",
     "frpOk": "Sin conflictos en los {count} proxies de frpc",
     "frpDuplicate": "Varios proxies activos de frpc se llaman {proxy}; solo el primero tiene efecto",
-    "frpConflict": "{role} informa un conflicto en el proxy {proxy}: {reason}"
+    "frpConflict": "{role} informa un conflicto en el proxy {proxy}: {reason}",
+    "guardOk": "Prevención de intrusiones está sincronizada con el cortafuegos con {bans} direcciones bloqueadas",
+    "guardOS": "Este sistema no tiene nftables, así que Prevención de intrusiones solo protege los servicios de Gately",
+    "guardMissing": "Prevención de intrusiones: no se encuentra el comando nft, así que los bloqueos no se sincronizan con el cortafuegos",
+    "guardPermission": "Prevención de intrusiones: sin permiso para modificar el cortafuegos",
+    "guardError": "Prevención de intrusiones no pudo escribir las reglas del cortafuegos: {error}",
+    "guardTrapSkipped": "Los puertos trampa {ports} están en uso y se excluyeron",
+    "guardTrapUserspace": "La sincronización con el cortafuegos no está activa, así que Gately escucha él mismo en los puertos trampa y solo detecta escaneos que completan la conexión",
+    "guardScanUnavailable": "La detección de escaneos está activada, pero la sincronización con el cortafuegos no está activa y no funciona",
+    "guardJailError": "La regla {jail} de Prevención de intrusiones tiene un error: {error}"
   },
   "h": {
     "publicIPv4Fail": "Comprueba la conectividad de salida y el DNS, o cambia las URL de consulta de IP en la configuración de DDNS.",
@@ -51,6 +60,12 @@
     "direct6": "Los servicios de este equipo son accesibles por IPv6 sin redirección de puertos, siempre que el router y el cortafuegos local permitan los puertos.",
     "webCertMissing": "Las solicitudes a estos dominios fallan en el handshake TLS. Añade en la página de certificados uno que los cubra (un comodín cubre un nivel de subdominio) o quita los dominios del sitio.",
     "frpDuplicate": "frp exige nombres de proxy únicos; renombra los duplicados.",
-    "frpConflict": "El servidor frps ya tiene un proxy con ese nombre, o el dominio o puerto remoto está ocupado. Suele pasar cuando varios equipos copian la misma configuración de frpc. Asigna un user distinto al frpc de cada equipo o cambia nombres, dominios y puertos remotos; los sitios tras un proxy en conflicto agotan el tiempo de espera."
+    "frpConflict": "El servidor frps ya tiene un proxy con ese nombre, o el dominio o puerto remoto está ocupado. Suele pasar cuando varios equipos copian la misma configuración de frpc. Asigna un user distinto al frpc de cada equipo o cambia nombres, dominios y puertos remotos; los sitios tras un proxy en conflicto agotan el tiempo de espera.",
+    "guardMissing": "Instala nftables. En Docker, actualiza a la imagen más reciente.",
+    "guardPermission": "Escribir en nftables requiere root o CAP_NET_ADMIN. En Docker, añade cap_add: [NET_ADMIN] al archivo compose y usa la red host.",
+    "guardError": "Puede que al kernel le falten módulos de nftables o que nft sea demasiado antiguo (se necesita 0.9.0 o posterior).",
+    "guardTrapSkipped": "Hay servicios escuchando en estos puertos y usarlos como trampa bloquearía visitantes legítimos. Se omitieron.",
+    "guardScanUnavailable": "Consulta la página de Prevención de intrusiones para ver el estado del cortafuegos y cómo solucionarlo.",
+    "guardJailError": "Comprueba la ruta del archivo de registro, la unidad de servicio o el nombre del contenedor. Si Gately se ejecuta en un contenedor, monta en él el directorio de registros."
   }
 }

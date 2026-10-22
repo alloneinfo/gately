@@ -18,6 +18,7 @@ import (
 	"github.com/spf13/afero"
 	"golang.org/x/crypto/bcrypt"
 
+	"github.com/wangwanjie/gately/internal/banlist"
 	"github.com/wangwanjie/gately/internal/config"
 	"github.com/wangwanjie/gately/internal/crud"
 	"github.com/wangwanjie/gately/internal/httpx"
@@ -164,7 +165,11 @@ func (d *driver) GetSettings() (*ftpserver.Settings, error) {
 	return st, nil
 }
 
+// ClientConnected 拒绝被封禁地址的连接。
 func (d *driver) ClientConnected(cc ftpserver.ClientContext) (string, error) {
+	if banlist.Default.BannedAddr(cc.RemoteAddr()) {
+		return "", errors.New("Access denied")
+	}
 	return "Gately FTP", nil
 }
 

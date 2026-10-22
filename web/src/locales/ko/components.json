@@ -41,5 +41,15 @@
     "timeoutTitle": "대기 시간 초과",
     "timeoutDesc": "서비스가 오랫동안 응답하지 않습니다. 관리 포트나 수신 주소를 변경했다면 새 주소로 직접 접속하세요. 프로그램 로그에서 시작 상태를 확인할 수도 있습니다.",
     "reload": "페이지 새로고침"
+  },
+  "duration": {
+    "minutes": "분",
+    "hours": "시간",
+    "days": "일"
+  },
+  "banTime": {
+    "default": "기본값",
+    "custom": "사용자 지정",
+    "permanent": "영구"
   }
 }

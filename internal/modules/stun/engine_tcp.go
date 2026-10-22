@@ -13,6 +13,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/wangwanjie/gately/internal/banlist"
 	"github.com/wangwanjie/gately/internal/netpipe"
 	"github.com/wangwanjie/gately/internal/reuseport"
 	stunproto "github.com/wangwanjie/gately/internal/stun"
@@ -261,6 +262,11 @@ func (r *runner) acceptLoop(ctx context.Context, ln net.Listener) {
 				return
 			}
 			time.Sleep(100 * time.Millisecond)
+			continue
+		}
+		// 被封禁地址的连接直接关闭
+		if banlist.Default.BannedAddr(c.RemoteAddr()) {
+			c.Close()
 			continue
 		}
 		select {

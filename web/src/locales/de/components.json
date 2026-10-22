@@ -41,5 +41,15 @@
     "timeoutTitle": "Zeitüberschreitung",
     "timeoutDesc": "Der Dienst antwortet seit längerer Zeit nicht. Falls Sie den Admin-Port oder die Listen-Adresse geändert haben, öffnen Sie die neue Adresse manuell. Außerdem können Sie in den Programmprotokollen prüfen, wie der Start verläuft.",
     "reload": "Seite neu laden"
+  },
+  "duration": {
+    "minutes": "Minuten",
+    "hours": "Stunden",
+    "days": "Tage"
+  },
+  "banTime": {
+    "default": "Standard",
+    "custom": "Benutzerdefiniert",
+    "permanent": "Dauerhaft"
   }
 }

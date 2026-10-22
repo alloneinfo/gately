@@ -1,0 +1,662 @@
+package guard
+
+import (
+	"context"
+	"net"
+	"net/netip"
+	"os"
+	"path/filepath"
+	"slices"
+	"strconv"
+	"strings"
+	"sync"
+	"testing"
+	"time"
+
+	"github.com/wangwanjie/gately/internal/banlist"
+	"github.com/wangwanjie/gately/internal/config"
+	"github.com/wangwanjie/gately/internal/events"
+	"github.com/wangwanjie/gately/internal/logbuf"
+	"github.com/wangwanjie/gately/internal/module"
+)
+
+// cleanDefault 清空共享封禁表，避免测试之间互相影响。
+func cleanDefault(t *testing.T) {
+	t.Helper()
+	clear := func() {
+		for _, e := range banlist.Default.List() {
+			banlist.Default.Unban(e.Key)
+		}
+		banlist.Default.SetIgnore(nil)
+	}
+	clear()
+	t.Cleanup(clear)
+}
+
+func TestParsePorts(t *testing.T) {
+	got, err := parsePorts("3389, 23，5900-5902\n5901-5905 24")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if formatPorts(got) != "23-24,3389,5900-5905" || countPorts(got) != 9 {
+		t.Fatalf("解析结果不符: %s", formatPorts(got))
+	}
+	for _, bad := range []string{"0", "70000", "10-5", "a", "1-"} {
+		if _, err := parsePorts(bad); err == nil {
+			t.Errorf("parsePorts(%q) 应报错", bad)
+		}
+	}
+	rest, removed := subtractPorts(got, map[int]bool{23: true, 5902: true, 6000: true})
+	if formatPorts(rest) != "24,3389,5900-5901,5903-5905" || !slices.Equal(removed, []int{23, 5902}) {
+		t.Fatalf("排除结果不符: %s %v", formatPorts(rest), removed)
+	}
+}
+
+func TestParseProcNet(t *testing.T) {
+	data := `  sl  local_address rem_address   st tx_queue rx_queue tr tm->when retrnsmt   uid  timeout inode
+   0: 00000000:0016 00000000:0000 0A 00000000:00000000 00:00000000 00000000     0        0 1 1 0000000000000000 100 0 0 10 0
+   1: 0100007F:0CEA 00000000:0000 0A 00000000:00000000 00:00000000 00000000     0        0 2 1 0000000000000000 100 0 0 10 0
+   2: 0512A8C0:1F90 00000000:0000 0A 00000000:00000000 00:00000000 00000000     0        0 3 1 0000000000000000 100 0 0 10 0
+   3: 0512A8C0:0016 0A12A8C0:D431 01 00000000:00000000 00:00000000 00000000     0        0 4 1 0000000000000000 100 0 0 10 0
+`
+	data6 := `  sl  local_address                         remote_address                        st tx_queue rx_queue tr tm->when retrnsmt   uid  timeout inode
+   0: 00000000000000000000000000000000:01BB 00000000000000000000000000000000:0000 0A 00000000:00000000 00:00000000 00000000     0        0 5 1 0000000000000000 100 0 0 10 0
+   1: 00000000000000000000000001000000:1538 00000000000000000000000000000000:0000 0A 00000000:00000000 00:00000000 00000000     0        0 6 1 0000000000000000 100 0 0 10 0
+`
+	ports := map[int]bool{}
+	parseProcNet(strings.NewReader(data), ports)
+	parseProcNet(strings.NewReader(data6), ports)
+	// 22（全部地址）、8080（192.168.18.5）、443（IPv6 全部地址）在监听；3306 与 5432 只绑定回环；已建立的连接不算
+	want := map[int]bool{22: true, 8080: true, 443: true}
+	if len(ports) != len(want) {
+		t.Fatalf("监听端口不符: %v", ports)
+	}
+	for p := range want {
+		if !ports[p] {
+			t.Fatalf("缺少端口 %d: %v", p, ports)
+		}
+	}
+}
+
+func TestPresetsMatch(t *testing.T) {
+	samples := map[string]struct {
+		line string
+		host string
+	}{
+		"sshd":            {"Oct 22 10:01:02 nas sshd[1234]: Failed password for invalid user admin from 203.0.113.5 port 52811 ssh2", "203.0.113.5"},
+		"sshd-journal":    {"Connection closed by authenticating user root 2001:db8::7 port 40122 [preauth]", "2001:db8::7"},
+		"dropbear":        {"Thu Oct 22 10:01:02 2026 authpriv.warn dropbear[2345]: Bad password attempt for 'root' from 198.51.100.9:61234", "198.51.100.9"},
+		"nginx-http-auth": {`2026/10/22 10:01:02 [error] 31#31: *5 user "bob": password mismatch, client: 203.0.113.10, server: nas.example.com, request: "GET / HTTP/1.1", host: "nas.example.com"`, "203.0.113.10"},
+		"nginx-botsearch": {`203.0.113.11 - - [22/Oct/2026:10:01:02 +0800] "GET /wp-login.php HTTP/1.1" 404 153 "-" "Mozilla/5.0"`, "203.0.113.11"},
+		"vaultwarden":     {"[2026-10-22 10:01:02.123][vaultwarden::api::identity][ERROR] Username or password is incorrect. Try again. IP: 203.0.113.12. Username: a@b.c.", "203.0.113.12"},
+		"homeassistant":   {"2026-10-22 10:01:02.123 WARNING (MainThread) [homeassistant.components.http.ban] Login attempt or request with invalid authentication from 203.0.113.13 (203.0.113.13). Requested URL: '/auth/login_flow'.", "203.0.113.13"},
+		"proxmox":         {"pvedaemon[1234]: authentication failure; rhost=::ffff:203.0.113.14 user=root@pam msg=Authentication failure", "203.0.113.14"},
+	}
+	for _, p := range Presets {
+		j := p
+		if err := j.Validate(); err != nil {
+			t.Fatalf("预设 %s 无效: %v", p.Preset, err)
+		}
+		if p.Source == SourceEvent {
+			continue
+		}
+		s, ok := samples[p.Preset]
+		if !ok {
+			t.Fatalf("预设 %s 缺少测试样例", p.Preset)
+		}
+		mt, err := newMatcher(j)
+		if err != nil {
+			t.Fatal(err)
+		}
+		a, ok := mt.match(s.line)
+		if !ok || a.String() != s.host {
+			t.Errorf("预设 %s 匹配结果 %v %v，期望 %s", p.Preset, a, ok, s.host)
+		}
+		if _, ok := mt.match("Accepted publickey for root from 203.0.113.99 port 1 ssh2"); ok {
+			t.Errorf("预设 %s 不应匹配成功登录", p.Preset)
+		}
+	}
+}
+
+// 用户名等字段可被攻击者任意填写，预设规则必须取到真实的来源地址，不能借日志注入封禁任意地址
+func TestPresetsResistInjection(t *testing.T) {
+	cases := map[string]struct {
+		line string
+		host string
+	}{
+		"sshd":            {"sshd[1]: Invalid user x from 8.8.8.8 port 1 from 203.0.113.5 port 22", "203.0.113.5"},
+		"sshd-journal":    {"Failed password for invalid user a from 8.8.8.8 port 22 ssh2 from 203.0.113.6 port 4000 ssh2", "203.0.113.6"},
+		"dropbear":        {"Bad password attempt for 'x' from 8.8.8.8:1' from 203.0.113.7:5555", "203.0.113.7"},
+		"nginx-http-auth": {`user "a": password mismatch, client: 8.8.8.8, server: x, request: "GET / HTTP/1.1", host: "h"": password mismatch, client: 203.0.113.8, server: s, request: "GET / HTTP/1.1", host: "h"`, "203.0.113.8"},
+		"homeassistant":   {"Login attempt or request with invalid authentication from 8.8.8.8 (203.0.113.9). Requested URL: '/auth/token'.", "203.0.113.9"},
+	}
+	for _, p := range Presets {
+		c, ok := cases[p.Preset]
+		if !ok {
+			continue
+		}
+		mt, err := newMatcher(p)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if a, ok := mt.match(c.line); !ok || a.String() != c.host {
+			t.Errorf("预设 %s 被注入：取到 %v %v，期望 %s", p.Preset, a, ok, c.host)
+		}
+	}
+}
+
+func TestJailValidate(t *testing.T) {
+	bad := []Jail{
+		{Name: "", Source: SourceFile, Target: "/var/log/x", Filter: "from <HOST>"},
+		{Name: "a", Source: SourceFile, Target: "", Filter: "from <HOST>"},
+		{Name: "a", Source: SourceFile, Target: "/x", Filter: "no host here"},
+		{Name: "a", Source: SourceFile, Target: "/x", Filter: "from <HOST>("},
+		{Name: "a", Source: SourceJournal, Target: "--all", Filter: "from <HOST>"},
+		{Name: "a", Source: SourceDocker, Target: "a b", Filter: "from <HOST>"},
+		{Name: "a", Source: SourceEvent, Target: "ddns.changed"},
+		{Name: "a", Source: "x", Target: "y", Filter: "from <HOST>"},
+		{Name: "a", Source: SourceFile, Target: "/x", Filter: "from <HOST>", BanTime: 5},
+	}
+	for i, j := range bad {
+		if err := j.Validate(); err == nil {
+			t.Errorf("第 %d 条应校验失败: %+v", i, j)
+		}
+	}
+	j := Jail{Name: " ok ", Source: SourceFile, Target: " /a \n\n /b ", Filter: "from <HOST>\n\n", Ignore: "127\\.0\\.0\\.1"}
+	if err := j.Validate(); err != nil {
+		t.Fatal(err)
+	}
+	if j.Name != "ok" || j.Target != "/a\n/b" || j.MaxRetry != defaultMaxRetry || j.FindTime != defaultFindTime {
+		t.Fatalf("规范化结果不符: %+v", j)
+	}
+	mt, _ := newMatcher(Jail{Filter: "from <HOST>", Ignore: "trusted"})
+	if _, ok := mt.match("fail from 1.2.3.4 trusted"); ok {
+		t.Fatal("排除规则应生效")
+	}
+	if a, ok := mt.match("fail from [2001:db8::1]:22"); !ok || a.String() != "2001:db8::1" {
+		t.Fatalf("应识别方括号中的 IPv6: %v %v", a, ok)
+	}
+}
+
+func TestSettingsValidate(t *testing.T) {
+	s := defaultSettings()
+	if err := s.Validate(); err != nil {
+		t.Fatal(err)
+	}
+	s.IgnoreList = []string{" 203.0.113.0/24 ", "", "2001:db8::1"}
+	s.Trap.Ports = "3389 23"
+	if err := s.Validate(); err != nil {
+		t.Fatal(err)
+	}
+	if len(s.IgnoreList) != 2 || s.Trap.Ports != "23,3389" {
+		t.Fatalf("规范化结果不符: %+v", s)
+	}
+	ig := s.ignoreSet([]netip.Prefix{netip.MustParsePrefix("2001:db8:aa:bb::/64")})
+	// 白名单中的单个 IPv6 地址保护它所在的 /64；本机所在的 IPv6 网段在忽略内网地址时视为内网
+	for addr, want := range map[string]bool{"192.168.1.1": true, "100.100.1.1": true, "203.0.113.9": true, "2001:db8::1": true, "2001:db8::77": true,
+		"2001:db8:0:1::1": false, "2001:db8:aa:bb::9": true, "8.8.8.8": false, "127.0.0.1": true} {
+		if ig.contains(netip.MustParseAddr(addr)) != want {
+			t.Errorf("白名单判断 %s 不符", addr)
+		}
+	}
+	bad := defaultSettings()
+	bad.IgnoreList = []string{"x"}
+	if bad.Validate() == nil {
+		t.Fatal("无效白名单应报错")
+	}
+	bad = defaultSettings()
+	bad.MaxBanSeconds = 100
+	if bad.Validate() == nil {
+		t.Fatal("最长时长小于默认时长应报错")
+	}
+	bad = defaultSettings()
+	bad.Trap = TrapSettings{Enable: true, Ports: ""}
+	if bad.Validate() == nil {
+		t.Fatal("启用诱饵端口但未填写端口应报错")
+	}
+}
+
+func TestTailFileRotation(t *testing.T) {
+	old := tailPoll
+	tailPoll = 20 * time.Millisecond
+	t.Cleanup(func() { tailPoll = old })
+	dir := t.TempDir()
+	p := filepath.Join(dir, "auth.log")
+	if err := os.WriteFile(p, []byte("old line before start\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	var mu sync.Mutex
+	var lines []string
+	ctx, cancel := context.WithCancel(context.Background())
+	done := make(chan struct{})
+	go func() {
+		defer close(done)
+		tailFile(ctx, p, func(l string) {
+			mu.Lock()
+			lines = append(lines, l)
+			mu.Unlock()
+		}, func(string) {})
+	}()
+	waitFor := func(n int) {
+		t.Helper()
+		deadline := time.Now().Add(3 * time.Second)
+		for time.Now().Before(deadline) {
+			mu.Lock()
+			got := len(lines)
+			mu.Unlock()
+			if got >= n {
+				return
+			}
+			time.Sleep(10 * time.Millisecond)
+		}
+		mu.Lock()
+		defer mu.Unlock()
+		t.Fatalf("等待 %d 行超时: %q", n, lines)
+	}
+	time.Sleep(50 * time.Millisecond)
+	appendFile(t, p, "first\nsecond partial")
+	waitFor(1)
+	appendFile(t, p, " done\n")
+	waitFor(2)
+	// 模拟 logrotate：轮转前最后写入的一行仍要读到；改名旧文件后创建新文件，新文件从头读取
+	appendFile(t, p, "last before rotate\n")
+	if err := os.Rename(p, p+".1"); err != nil {
+		t.Fatal(err)
+	}
+	appendFile(t, p, "after rotate\n")
+	waitFor(4)
+	// 截断后从头读取
+	if err := os.WriteFile(p, []byte("x\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	waitFor(5)
+	cancel()
+	<-done
+	mu.Lock()
+	defer mu.Unlock()
+	want := []string{"first", "second partial done", "last before rotate", "after rotate", "x"}
+	if !slices.Equal(lines, want) {
+		t.Fatalf("读取结果 %q，期望 %q", lines, want)
+	}
+}
+
+// 启动时不存在的文件：之后新建的从头读取；之前就有、稍后才可见的（例如晚挂载的存储卷）从末尾读取，不把历史当成新失败
+func TestTailFileLateAppear(t *testing.T) {
+	oldPoll, oldBackoff := tailPoll, retryBackoff
+	tailPoll, retryBackoff = 20*time.Millisecond, 20*time.Millisecond
+	t.Cleanup(func() { tailPoll, retryBackoff = oldPoll, oldBackoff })
+	dir := t.TempDir()
+	run := func(p string) (func() []string, func()) {
+		var mu sync.Mutex
+		var lines []string
+		ctx, cancel := context.WithCancel(context.Background())
+		done := make(chan struct{})
+		go func() {
+			defer close(done)
+			tailFile(ctx, p, func(l string) {
+				mu.Lock()
+				lines = append(lines, l)
+				mu.Unlock()
+			}, func(string) {})
+		}()
+		get := func() []string {
+			mu.Lock()
+			defer mu.Unlock()
+			return append([]string{}, lines...)
+		}
+		return get, func() { cancel(); <-done }
+	}
+	// 新建的文件从头读取
+	fresh := filepath.Join(dir, "fresh.log")
+	get, stop := run(fresh)
+	time.Sleep(60 * time.Millisecond)
+	appendFile(t, fresh, "a\nb\n")
+	time.Sleep(150 * time.Millisecond)
+	stop()
+	if got := get(); !slices.Equal(got, []string{"a", "b"}) {
+		t.Fatalf("新建文件应从头读取: %q", got)
+	}
+	// 早已存在、稍后才出现的文件从末尾读取
+	staging := filepath.Join(dir, "staging")
+	if err := os.MkdirAll(staging, 0o700); err != nil {
+		t.Fatal(err)
+	}
+	src := filepath.Join(staging, "old.log")
+	appendFile(t, src, "history 1\nhistory 2\n")
+	past := time.Now().Add(-time.Hour)
+	if err := os.Chtimes(src, past, past); err != nil {
+		t.Fatal(err)
+	}
+	late := filepath.Join(dir, "late.log")
+	get, stop = run(late)
+	time.Sleep(60 * time.Millisecond)
+	if err := os.Rename(src, late); err != nil {
+		t.Fatal(err)
+	}
+	time.Sleep(100 * time.Millisecond)
+	appendFile(t, late, "new\n")
+	time.Sleep(150 * time.Millisecond)
+	stop()
+	if got := get(); !slices.Equal(got, []string{"new"}) {
+		t.Fatalf("早已存在的文件应从末尾读取: %q", got)
+	}
+}
+
+func appendFile(t *testing.T, p, s string) {
+	t.Helper()
+	f, err := os.OpenFile(p, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o600)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f.Close()
+	if _, err := f.WriteString(s); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestBuildScript(t *testing.T) {
+	now := time.Now()
+	s := defaultSettings()
+	s.IgnoreList = []string{"203.0.113.0/24"}
+	s.Trap = TrapSettings{Enable: true, Ports: "23,5900-5901", BanSeconds: 7200}
+	s.Scan = ScanSettings{Enable: true, Threshold: 20}
+	entries := []banlist.Entry{
+		{Key: "1.2.3.4", Until: now.Add(time.Hour)},
+		{Key: "2001:db8:1:2::/64", Until: now.Add(30 * time.Minute)},
+		{Key: "5.6.7.8"},
+		{Key: "10.20.0.0/16", Until: now.Add(time.Hour)},
+		{Key: "10.20.30.0/24", Until: now.Add(time.Hour)},
+	}
+	script, members, deny := buildScript(s, nil, entries, []portRange{{22, 22}, {443, 443}}, []portRange{{23, 23}, {5900, 5901}}, now)
+	for _, want := range []string{
+		"table inet gately {}\ndelete table inet gately\n",
+		"add element inet gately ban4 { 1.2.3.4 timeout 3601s }",
+		"add element inet gately ban6 { 2001:db8:1:2:: timeout 1801s }",
+		"add element inet gately deny4 { 5.6.7.8, 10.20.0.0/16 }",
+		"elements = { 22, 443 }",
+		"elements = { 23, 5900-5901 }",
+		"203.0.113.0/24",
+		"add @trap4 { ip saddr timeout 7200s }",
+		"limit rate over 20/minute burst 20 packets } add @scan4 { ip saddr timeout 3600s }",
+		"ip6 saddr & ffff:ffff:ffff:ffff:: @ban6 counter drop",
+		"prerouting priority -190; policy accept;\n\t\tiif \"lo\" accept\n\t\tct direction reply accept",
+	} {
+		if !strings.Contains(script, want) {
+			t.Errorf("脚本缺少 %q:\n%s", want, script)
+		}
+	}
+	if len(members) != 2 || !strings.Contains(deny, "flush set inet gately deny4") {
+		t.Fatalf("members=%v deny=%q", members, deny)
+	}
+	// 关闭诱饵端口与扫描检测时不生成 input 链
+	s.Trap.Enable, s.Scan.Enable = false, false
+	script, _, _ = buildScript(s, nil, nil, nil, nil, now)
+	if strings.Contains(script, "hook input") {
+		t.Fatal("未启用检测时不应生成 input 链")
+	}
+}
+
+// fakeNFT 记录执行的 nft 命令，并可返回预设的输出与错误。
+type fakeNFT struct {
+	mu     sync.Mutex
+	calls  []string
+	output string
+	fail   func(stdin string, args []string) error
+}
+
+func (f *fakeNFT) run(_ context.Context, stdin string, args ...string) (string, error) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	f.calls = append(f.calls, strings.Join(args, " ")+"\n"+stdin)
+	if f.fail != nil {
+		if err := f.fail(stdin, args); err != nil {
+			return "", err
+		}
+	}
+	if len(args) > 0 && args[0] == "-j" {
+		return f.output, nil
+	}
+	return "", nil
+}
+
+func (f *fakeNFT) last() string {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	if len(f.calls) == 0 {
+		return ""
+	}
+	return f.calls[len(f.calls)-1]
+}
+
+func activeFirewall(t *testing.T, fake *fakeNFT) *firewall {
+	t.Helper()
+	fw := newFirewall(logbuf.New(100, nil).Logger("fw"))
+	fw.run = fake.run
+	fw.nft = "nft"
+	fw.status = FirewallStatus{Enabled: true, Active: true}
+	fw.cfg = defaultSettings()
+	return fw
+}
+
+func TestFirewallFlush(t *testing.T) {
+	cleanDefault(t)
+	fake := &fakeNFT{}
+	fw := activeFirewall(t, fake)
+	unsub := banlist.Default.Subscribe(fw.change)
+	defer unsub()
+	ctx := context.Background()
+
+	banlist.Default.Ban("1.2.3.4", banlist.Options{Duration: time.Hour})
+	banlist.Default.Ban("2001:db8::/64", banlist.Options{Duration: time.Hour})
+	fw.flush(ctx)
+	got := fake.last()
+	if !strings.Contains(got, "add element inet gately ban4 { 1.2.3.4 timeout") || !strings.Contains(got, "add element inet gately ban6 { 2001:db8:: timeout") {
+		t.Fatalf("新增封禁语句不符:\n%s", got)
+	}
+	// 延长时长：先删除再添加
+	banlist.Default.Ban("1.2.3.4", banlist.Options{Duration: 3 * time.Hour})
+	fw.flush(ctx)
+	got = fake.last()
+	if !strings.Contains(got, "delete element inet gately ban4 { 1.2.3.4 }\nadd element inet gately ban4 { 1.2.3.4 timeout") {
+		t.Fatalf("延长封禁语句不符:\n%s", got)
+	}
+	// 网段与永久封禁写入 deny 集合
+	banlist.Default.Ban("198.51.100.0/24", banlist.Options{Duration: time.Hour})
+	banlist.Default.Ban("1.2.3.4", banlist.Options{Permanent: true})
+	fw.flush(ctx)
+	got = fake.last()
+	if !strings.Contains(got, "delete element inet gately ban4 { 1.2.3.4 }") || !strings.Contains(got, "add element inet gately deny4 { 1.2.3.4, 198.51.100.0/24 }") {
+		t.Fatalf("网段封禁语句不符:\n%s", got)
+	}
+	// 提前解封：从 ban 集合删除；删除失败时逐条重试并忽略“不存在”
+	fake.fail = func(stdin string, _ []string) error {
+		if strings.Count(stdin, "\n") > 1 {
+			return errorString("No such file or directory")
+		}
+		return nil
+	}
+	banlist.Default.Unban("2001:db8::/64")
+	banlist.Default.Unban("198.51.100.0/24")
+	fw.flush(ctx)
+	got = fake.last()
+	if !strings.Contains(got, "deny4 { 1.2.3.4 }") {
+		t.Fatalf("逐条重试的最后一条应为重写 deny 集合:\n%s", got)
+	}
+	if _, ok := fw.members["2001:db8::/64"]; ok {
+		t.Fatal("解封后应从 members 中移除")
+	}
+}
+
+type errorString string
+
+func (e errorString) Error() string { return string(e) }
+
+func TestFirewallPollImports(t *testing.T) {
+	cleanDefault(t)
+	fake := &fakeNFT{output: `{"nftables": [{"metainfo": {"version": "1.0.6"}},
+		{"set": {"family": "inet", "name": "trap4", "table": "gately", "type": "ipv4_addr", "elem": [{"elem": {"val": "203.0.113.50", "timeout": 3600, "expires": 3590}}]}},
+		{"set": {"family": "inet", "name": "scan6", "table": "gately", "type": "ipv6_addr", "elem": ["2001:db8:5:6::"]}},
+		{"rule": {"family": "inet", "table": "gately", "chain": "pre", "comment": "ban", "expr": [{"match": {}}, {"counter": {"packets": 7, "bytes": 420}}, {"drop": null}]}},
+		{"rule": {"family": "inet", "table": "gately", "chain": "pre", "comment": "ban", "expr": [{"counter": {"packets": 3, "bytes": 180}}, {"drop": null}]}},
+		{"rule": {"family": "inet", "table": "gately", "chain": "in", "comment": "trap-hit", "expr": [{"counter": {"packets": 1, "bytes": 60}}]}}
+	]}`}
+	fw := activeFirewall(t, fake)
+	unsub := banlist.Default.Subscribe(fw.change)
+	defer unsub()
+	got := map[string][]netip.Addr{}
+	fw.importFn = func(source string, addrs []netip.Addr) {
+		got[source] = append(got[source], addrs...)
+		for _, a := range addrs {
+			banlist.Default.Ban(banlist.KeyFor(a), banlist.Options{Duration: time.Hour, Source: source})
+		}
+	}
+	fw.poll(context.Background())
+	if len(got[banlist.SourceTrap]) != 1 || got[banlist.SourceTrap][0].String() != "203.0.113.50" || len(got[banlist.SourceScan]) != 1 {
+		t.Fatalf("导入结果不符: %v", got)
+	}
+	st := fw.snapshot()
+	if st.Dropped["ban"] != 10 || st.Hits["trap"] != 1 {
+		t.Fatalf("计数不符: %+v", st)
+	}
+	all := strings.Join(fake.calls, "\n")
+	if !strings.Contains(all, "add element inet gately ban4 { 203.0.113.50 timeout") ||
+		!strings.Contains(all, "delete element inet gately trap4 { 203.0.113.50 }") ||
+		!strings.Contains(all, "delete element inet gately scan6 { 2001:db8:5:6:: }") {
+		t.Fatalf("应把内核封禁移入 ban 集合并清理临时集合:\n%s", all)
+	}
+	if !banlist.Default.Banned(netip.MustParseAddr("2001:db8:5:6::99")) {
+		t.Fatal("IPv6 扫描来源应按 /64 封禁")
+	}
+}
+
+func newTestModule(t *testing.T) *Module {
+	t.Helper()
+	cleanDefault(t)
+	dir := t.TempDir()
+	store, err := config.Open(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// 测试中不写系统防火墙
+	if err := store.Save(ID, fileConfig{Settings: Settings{Firewall: false, IgnorePrivate: true}}); err != nil {
+		t.Fatal(err)
+	}
+	old := localPrefixes
+	localPrefixes = func() []netip.Prefix { return nil }
+	t.Cleanup(func() { localPrefixes = old })
+	m := New(Deps{})
+	if err := m.Init(module.Env{Store: store, Logs: logbuf.New(200, nil)}); err != nil {
+		t.Fatal(err)
+	}
+	if err := m.Start(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = m.Stop() })
+	return m
+}
+
+func TestEventJailBans(t *testing.T) {
+	m := newTestModule(t)
+	j := Jail{Key: "j1", Name: "admin", Enable: true, Source: SourceEvent, Target: events.AuthFailed, MaxRetry: 3, FindTime: 60}
+	if err := j.Validate(); err != nil {
+		t.Fatal(err)
+	}
+	m.mu.Lock()
+	m.cfg.Jails = append(m.cfg.Jails, j)
+	m.startJailLocked(j)
+	m.mu.Unlock()
+	ev := func(ip string) {
+		m.onEvent(events.Event{Type: events.AuthFailed, Fields: map[string]string{"ip": ip}})
+	}
+	// 内网地址在白名单中，不会被封禁
+	for i := 0; i < 5; i++ {
+		ev("192.168.1.9")
+	}
+	ev("203.0.113.7:5555")
+	ev("203.0.113.7")
+	if banlist.Default.Banned(netip.MustParseAddr("203.0.113.7")) {
+		t.Fatal("未达到次数不应封禁")
+	}
+	ev("203.0.113.7")
+	e, ok := banlist.Default.Get("203.0.113.7")
+	if !ok || e.Source != banlist.SourceJailPrefix+"j1" || e.Permanent() {
+		t.Fatalf("应由规则封禁: %+v %v", e, ok)
+	}
+	if banlist.Default.Banned(netip.MustParseAddr("192.168.1.9")) {
+		t.Fatal("白名单地址不应被封禁")
+	}
+	// WAF 事件不计入登录失败规则
+	for i := 0; i < 5; i++ {
+		m.onEvent(events.Event{Type: events.WAFBlocked, Fields: map[string]string{"ip": "198.51.100.1:443"}})
+	}
+	if banlist.Default.Banned(netip.MustParseAddr("198.51.100.1")) {
+		t.Fatal("事件类型不同不应计数")
+	}
+	v := m.jailViewLocked(&j).(JailView)
+	if v.Matches != 8 || v.Bans != 1 || v.Active != 1 || !v.Running {
+		t.Fatalf("规则统计不符: %+v", v)
+	}
+}
+
+func TestBansPersisted(t *testing.T) {
+	m := newTestModule(t)
+	if _, err := ManualBan("198.51.100.0/24", -1, "", "203.0.113.1", m.cur()); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := ManualBan("203.0.113.1", 3600, "", "203.0.113.1", m.cur()); err == nil {
+		t.Fatal("不能封禁自己的地址")
+	}
+	if _, err := ManualBan("10.0.0.1", 3600, "", "203.0.113.1", m.cur()); err != nil {
+		t.Fatalf("手动封禁不受白名单限制: %v", err)
+	}
+	if err := m.Stop(); err != nil {
+		t.Fatal(err)
+	}
+	data, err := os.ReadFile(m.bansPath())
+	if err != nil || !strings.Contains(string(data), "198.51.100.0/24") {
+		t.Fatalf("封禁记录应写入文件: %v %s", err, data)
+	}
+	// 重新启动后恢复
+	for _, e := range banlist.Default.List() {
+		banlist.Default.Unban(e.Key)
+	}
+	if err := m.Start(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	if !banlist.Default.Banned(netip.MustParseAddr("198.51.100.77")) || !banlist.Default.Banned(netip.MustParseAddr("10.0.0.1")) {
+		t.Fatalf("重启后应恢复封禁: %+v", banlist.Default.List())
+	}
+}
+
+func TestUserTrap(t *testing.T) {
+	m := newTestModule(t)
+	ln, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	port := ln.Addr().(*net.TCPAddr).Port
+	ln.Close()
+	hits := make(chan netip.Addr, 1)
+	tr := startUserTrap(context.Background(), []int{port}, m.logs.Logger("t"), func(a netip.Addr, p int) {
+		if p == port {
+			hits <- a
+		}
+	})
+	defer tr.stop()
+	if !slices.Equal(tr.listening(), []int{port}) {
+		t.Fatalf("应监听端口 %d: %v", port, tr.listening())
+	}
+	c, err := net.Dial("tcp", net.JoinHostPort("127.0.0.1", strconv.Itoa(port)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	c.Close()
+	select {
+	case a := <-hits:
+		if a.String() != "127.0.0.1" {
+			t.Fatalf("来源地址不符: %s", a)
+		}
+	case <-time.After(2 * time.Second):
+		t.Fatal("连接诱饵端口应触发回调")
+	}
+}

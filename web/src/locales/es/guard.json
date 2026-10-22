@@ -1,0 +1,200 @@
+{
+  "title": "Prevención de intrusiones",
+  "desc": "Protección al estilo de fail2ban: detecta IP maliciosas mediante reglas de registros, puertos trampa y detección de escaneos, las bloquea y sincroniza los bloqueos con el cortafuegos del sistema (nftables)",
+  "savedApplied": "Guardado y aplicado",
+  "banTime": "Duración del bloqueo",
+  "banTimeDefaultValue": "Predeterminada ({d})",
+  "tabs": {
+    "bans": "Bloqueos ({count})",
+    "jails": "Reglas de registros",
+    "scan": "Puertos trampa y escaneos",
+    "settings": "Configuración"
+  },
+  "unit": {
+    "seconds": "{n} s",
+    "minutes": "{n} min",
+    "hours": "{n} h",
+    "days": "{n} d"
+  },
+  "fw": {
+    "title": "Cortafuegos del sistema",
+    "viewRules": "Ver reglas",
+    "rulesTitle": "Reglas que Gately escribió en nftables (tabla inet gately)",
+    "active": "Activo",
+    "inactive": "Inactivo",
+    "disabled": "Desactivado",
+    "activeBans": "Bloqueadas",
+    "dropped": "Paquetes descartados",
+    "trapHits": "Activaciones de puertos trampa",
+    "scanHits": "Escaneos detectados",
+    "disabledTitle": "La sincronización con el cortafuegos está desactivada",
+    "disabledHint": "Los bloqueos solo afectan a los servicios de Gately (reenvío de puertos, servicio web, STUN, WebDAV, FTP y el panel de administración). Gately escucha él mismo en los puertos trampa y la detección de escaneos no está disponible. Actívala en Configuración.",
+    "reasonOS": "Este sistema no tiene nftables",
+    "hintOS": "La sincronización con el cortafuegos solo funciona en Linux. Los bloqueos siguen afectando a los servicios de Gately, Gately escucha él mismo en los puertos trampa y la detección de escaneos no está disponible.",
+    "reasonMissing": "No se encuentra el comando nft",
+    "hintMissing": "Instala nftables (Debian / Ubuntu: apt install nftables; OpenWrt 22.03 y posteriores ya lo incluyen). Después guarda la configuración una vez.",
+    "hintMissingDocker": "Esta imagen no incluye nft. Actualiza a la imagen más reciente.",
+    "reasonPermission": "Sin permiso para modificar el cortafuegos",
+    "hintPermission": "Escribir en nftables requiere root o CAP_NET_ADMIN. Para un servicio systemd añade AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE en [Service].",
+    "hintPermissionDocker": "Añade cap_add: [NET_ADMIN] a docker-compose.yml, usa network_mode: host y vuelve a crear el contenedor.",
+    "reasonError": "No se pudieron escribir las reglas del cortafuegos",
+    "hintError": "Puede que al kernel le falten módulos de nftables (nf_tables, nft_set_hash, etc.) o que nft sea demasiado antiguo (se necesita 0.9.0 o posterior). Detalles a continuación."
+  },
+  "ban": {
+    "add": "Bloquear manualmente",
+    "submit": "Bloquear",
+    "added": "Bloqueada",
+    "removed": "Se desbloqueó {key}",
+    "search": "Buscar dirección, origen o motivo",
+    "empty": "No hay ninguna IP bloqueada",
+    "address": "IP / red",
+    "source": "Origen",
+    "reason": "Motivo",
+    "reasonPlaceholder": "Opcional, p. ej. tráfico sospechoso",
+    "count": "Veces",
+    "created": "Bloqueada el",
+    "until": "Restante",
+    "permanent": "Permanente",
+    "unban": "Desbloquear",
+    "remainDays": "{d} d {h} h",
+    "remainHours": "{h} h {m} min",
+    "remainMinutes": "{m} min",
+    "sourceManual": "Manual",
+    "sourceWeb": "Fallos de autenticación web",
+    "sourceTrap": "Puerto trampa",
+    "sourceScan": "Escaneo de puertos",
+    "sourceJailDeleted": "Regla eliminada"
+  },
+  "source": {
+    "file": "Archivo de registro",
+    "journal": "Diario de systemd",
+    "command": "Salida de un comando",
+    "docker": "Contenedor Docker",
+    "event": "Evento de Gately"
+  },
+  "target": {
+    "file": "Ruta del archivo",
+    "journal": "Unidad de servicio",
+    "command": "Comando",
+    "docker": "Contenedor",
+    "event": "Evento"
+  },
+  "event": {
+    "authFailed": "Inicio de sesión fallido en el panel",
+    "wafBlocked": "Solicitud bloqueada por el WAF"
+  },
+  "sourceHelp": {
+    "file": "Lee las líneas nuevas del archivo y cambia al archivo nuevo tras la rotación. Una ruta por línea.",
+    "fileDocker": "Gately se ejecuta en un contenedor y solo puede leer archivos montados en él. Por ejemplo, monta /var/log del anfitrión en modo de solo lectura en /var/log/host dentro del contenedor e indica /var/log/host/auth.log.",
+    "journal": "Lee el registro del servicio con journalctl. Una unidad por línea, p. ej. ssh.service.",
+    "journalMissing": "No se encuentra journalctl (dentro de un contenedor o en un sistema sin systemd), así que este origen no está disponible.",
+    "command": "Ejecuta un comando que imprime registros de forma continua y lee su salida, p. ej. logread -f en OpenWrt. El comando se reinicia si termina.",
+    "docker": "Lee el registro del contenedor. El módulo Docker debe poder conectarse a Docker.",
+    "event": "Cuenta eventos propios de Gately que incluyen la IP de origen. No hace falta filtro."
+  },
+  "jail": {
+    "intro": "Busca fallos en los registros. Una IP que alcanza el número de fallos dentro de la ventana de tiempo queda bloqueada.",
+    "add": "Añadir regla",
+    "edit": "Editar regla",
+    "fromPreset": "Desde plantilla",
+    "empty": "Aún no hay reglas. Añade servicios habituales como SSH, Nginx o Vaultwarden desde una plantilla.",
+    "deleteConfirm": "¿Eliminar esta regla? Los bloqueos existentes se mantienen hasta que expiren.",
+    "source": "Origen de registros",
+    "filter": "Filtros",
+    "filterHelp": "Expresiones regulares de Go, una por línea. <HOST> representa la IP de origen (IPv4 e IPv6). Cada línea que coincide con algún filtro cuenta como un fallo.",
+    "filterEventPlaceholder": "Opcional",
+    "ignore": "Excluir",
+    "ignoreHelp": "Expresiones regulares opcionales, una por línea. Las líneas que coinciden no se cuentan.",
+    "condition": "Condición",
+    "conditionValue": "{count} veces en {window}",
+    "within": "de ventana,",
+    "timesThenBan": "fallos y se bloquea",
+    "banTime": "Duración del bloqueo",
+    "matches": "Coincidencias",
+    "bans": "Bloqueos",
+    "bansValue": "{total} en total, {active} activos",
+    "statusRunning": "En ejecución",
+    "statusOff": "Desactivada",
+    "statusError": "Error",
+    "testTitle": "Prueba",
+    "testLines": "Líneas de ejemplo",
+    "testPlaceholder": "Pega algunas líneas de registro para comprobar que los filtros extraen la IP",
+    "testSummary": "{matched} de {total} líneas coinciden",
+    "testNoMatch": "Sin coincidencia",
+    "testIgnored": "{host} (lista blanca)"
+  },
+  "trap": {
+    "title": "Puertos trampa",
+    "help": "Coloca trampas en puertos que este equipo no usa. Cualquier origen que se conecte a ellos queda bloqueado. Los usuarios normales nunca usan estos puertos, así que detiene bien los escaneos masivos. Los puertos en escucha se excluyen automáticamente.",
+    "ports": "Puertos",
+    "portsHelp": "Separados por comas, admite rangos, p. ej. 23,3389,5900-5910. Las direcciones de la LAN y de la lista blanca no los activan.",
+    "effective": "Puertos activos: {ports}",
+    "userspace": "Cortafuegos inactivo, Gately escucha en: {ports} (solo detecta escaneos que completan la conexión)",
+    "skipped": "Estos puertos están en uso y se excluyeron: {ports}"
+  },
+  "scan": {
+    "title": "Detección de escaneos de puertos",
+    "help": "Cuenta cuántas veces cada origen se conecta a puertos cerrados de este equipo y lo bloquea si supera el umbral por minuto. Solo cuentan las conexiones nuevas a este equipo; el tráfico reenviado a contenedores o dispositivos de la LAN no cuenta.",
+    "needFirewall": "Los puertos trampa en el kernel y la detección de escaneos requieren que la sincronización con el cortafuegos esté activa. Consulta el estado arriba.",
+    "threshold": "Umbral",
+    "perMinute": "por minuto",
+    "thresholdHelp": "Un origen se bloquea si se conecta a puertos cerrados más veces por minuto que este valor. Un cliente normal reintenta un puerto cerrado unas 5 veces por minuto, así que conviene no bajar de 10.",
+    "exclude": "Puertos abiertos adicionales",
+    "excludeHelp": "Hay {count} puertos en escucha que se consideran abiertos automáticamente. Añade aquí los puertos que otros programas usan mediante reglas del cortafuegos."
+  },
+  "settings": {
+    "firewall": "Sincronizar con el cortafuegos",
+    "firewallHelp": "Crea la tabla inet gately en nftables y descarta en el kernel todo el tráfico que llega de las direcciones bloqueadas, incluido el reenviado a contenedores Docker y dispositivos de la LAN. Las respuestas a las conexiones que este equipo abre hacia esas direcciones (DNS, repositorios, etc.) siguen pasando. Las reglas se eliminan al desactivarla o al detener Gately.",
+    "banSeconds": "Duración predeterminada",
+    "increment": "Bloqueos progresivos",
+    "incrementHelp": "Si una dirección vuelve a bloquearse en 30 días, la duración se duplica cada vez.",
+    "maxBanSeconds": "Duración máxima",
+    "whitelist": "Lista blanca",
+    "ignorePrivate": "Ignorar direcciones de la LAN",
+    "ignorePrivateHelp": "Las direcciones de loopback, privadas, 100.64.0.0/10 (NAT de operador y Tailscale), de enlace local y las redes IPv6 /64 de las interfaces de este equipo nunca se bloquean automáticamente, y los puertos trampa y la detección de escaneos las ignoran.",
+    "ignoreList": "Direcciones permitidas",
+    "ignoreListHelp": "Una IP o red CIDR por línea. Nunca se bloquean automáticamente; los bloqueos manuales no tienen en cuenta la lista blanca."
+  },
+  "presets": {
+    "sshd": {
+      "name": "SSH (archivo de registro)",
+      "desc": "Lee /var/log/auth.log (/var/log/secure en sistemas tipo RHEL)"
+    },
+    "sshd-journal": {
+      "name": "SSH (diario de systemd)",
+      "desc": "Lee el registro de ssh.service / sshd.service"
+    },
+    "dropbear": {
+      "name": "Dropbear (OpenWrt)",
+      "desc": "Lee los fallos de inicio de sesión SSH de OpenWrt con logread -f"
+    },
+    "nginx-http-auth": {
+      "name": "Autenticación básica de Nginx",
+      "desc": "Usuarios o contraseñas incorrectos en error.log"
+    },
+    "nginx-botsearch": {
+      "name": "Escaneo de bots en Nginx",
+      "desc": "Solicitudes en access.log que buscan wp-login, .env, phpMyAdmin y rutas similares"
+    },
+    "vaultwarden": {
+      "name": "Vaultwarden",
+      "desc": "Fallos de inicio de sesión y de verificación en dos pasos del contenedor vaultwarden"
+    },
+    "homeassistant": {
+      "name": "Home Assistant",
+      "desc": "Fallos de inicio de sesión del contenedor homeassistant (requiere registros http)"
+    },
+    "proxmox": {
+      "name": "Proxmox VE",
+      "desc": "Fallos de inicio de sesión web de pvedaemon"
+    },
+    "gately-admin": {
+      "name": "Inicio de sesión en Gately",
+      "desc": "Inicios de sesión fallidos en el panel (contraseña, código de dos pasos, llave de acceso)"
+    },
+    "gately-waf": {
+      "name": "Bloqueos del WAF",
+      "desc": "Orígenes bloqueados repetidamente por el WAF. No lo uses en sitios detrás de una CDN que pasa la IP real en una cabecera, o se bloquearán los nodos de la CDN"
+    }
+  }
+}

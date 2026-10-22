@@ -20,6 +20,10 @@
       "title": "DNS dinâmico",
       "desc": "Atualiza os registros DNS automaticamente quando seu IP público muda"
     },
+    "guard": {
+      "title": "Prevenção de intrusão",
+      "desc": "Bloqueia IPs maliciosos no firewall do sistema"
+    },
     "stun": {
       "title": "Travessia STUN",
       "desc": "Acesse serviços atrás de NAT1 sem IP público"

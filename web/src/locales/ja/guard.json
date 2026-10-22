@@ -1,0 +1,200 @@
+{
+  "title": "侵入防御",
+  "desc": "fail2ban のような保護機能：ログルール、おとりポート、ポートスキャン検出で悪意のある IP を見つけて自動でブロックし、システムファイアウォール（nftables）に同期します",
+  "savedApplied": "保存して適用しました",
+  "banTime": "ブロック期間",
+  "banTimeDefaultValue": "既定（{d}）",
+  "tabs": {
+    "bans": "ブロック一覧（{count}）",
+    "jails": "ログルール",
+    "scan": "おとりポートとスキャン検出",
+    "settings": "設定"
+  },
+  "unit": {
+    "seconds": "{n} 秒",
+    "minutes": "{n} 分",
+    "hours": "{n} 時間",
+    "days": "{n} 日"
+  },
+  "fw": {
+    "title": "システムファイアウォール",
+    "viewRules": "ルールを表示",
+    "rulesTitle": "Gately が nftables に書き込んだルール（テーブル inet gately）",
+    "active": "有効",
+    "inactive": "無効",
+    "disabled": "オフ",
+    "activeBans": "ブロック中",
+    "dropped": "破棄したパケット",
+    "trapHits": "おとりポートの検出",
+    "scanHits": "スキャンの検出",
+    "disabledTitle": "ファイアウォール同期がオフです",
+    "disabledHint": "ブロックは Gately 自身のサービス（ポート転送、Web サービス、STUN、WebDAV、FTP、管理画面）にだけ適用され、おとりポートは Gately が待ち受け、ポートスキャン検出は利用できません。「設定」でオンにできます。",
+    "reasonOS": "このシステムには nftables がありません",
+    "hintOS": "ファイアウォール同期は Linux のみ対応です。ブロックは Gately 自身のサービスには適用され、おとりポートは Gately が待ち受け、ポートスキャン検出は利用できません。",
+    "reasonMissing": "nft コマンドが見つかりません",
+    "hintMissing": "nftables をインストールしてください（Debian / Ubuntu：apt install nftables、OpenWrt 22.03 以降は標準搭載）。インストール後に「設定」で一度保存すると有効になります。",
+    "hintMissingDocker": "このイメージには nft が含まれていません。最新のイメージに更新してください。",
+    "reasonPermission": "ファイアウォールを変更する権限がありません",
+    "hintPermission": "nftables への書き込みには root または CAP_NET_ADMIN が必要です。systemd サービスでは [Service] に AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE を追加してください。",
+    "hintPermissionDocker": "docker-compose.yml に cap_add: [NET_ADMIN] を追加し、network_mode: host を使ってコンテナを再作成してください。",
+    "reasonError": "ファイアウォールルールの書き込みに失敗しました",
+    "hintError": "カーネルに nftables 関連モジュール（nf_tables、nft_set_hash など）がないか、nft が古すぎる可能性があります（0.9.0 以上が必要）。詳細は以下のとおりです。"
+  },
+  "ban": {
+    "add": "手動でブロック",
+    "submit": "ブロック",
+    "added": "ブロックしました",
+    "removed": "{key} のブロックを解除しました",
+    "search": "アドレス、ソース、理由で検索",
+    "empty": "ブロック中の IP はありません",
+    "address": "IP / ネットワーク",
+    "source": "ソース",
+    "reason": "理由",
+    "reasonPlaceholder": "任意。例：不審なアクセス",
+    "count": "回数",
+    "created": "ブロック日時",
+    "until": "残り",
+    "permanent": "永久",
+    "unban": "解除",
+    "remainDays": "{d} 日 {h} 時間",
+    "remainHours": "{h} 時間 {m} 分",
+    "remainMinutes": "{m} 分",
+    "sourceManual": "手動",
+    "sourceWeb": "Web 認証失敗",
+    "sourceTrap": "おとりポート",
+    "sourceScan": "ポートスキャン",
+    "sourceJailDeleted": "削除済みのルール"
+  },
+  "source": {
+    "file": "ログファイル",
+    "journal": "systemd ジャーナル",
+    "command": "コマンド出力",
+    "docker": "Docker コンテナ",
+    "event": "Gately イベント"
+  },
+  "target": {
+    "file": "ファイルパス",
+    "journal": "サービスユニット",
+    "command": "コマンド",
+    "docker": "コンテナ名",
+    "event": "イベント"
+  },
+  "event": {
+    "authFailed": "管理画面のログイン失敗",
+    "wafBlocked": "WAF によるリクエストのブロック"
+  },
+  "sourceHelp": {
+    "file": "ファイルに追加された内容を読み続け、ローテーション後は新しいファイルに自動で切り替えます。1 行に 1 パス。",
+    "fileDocker": "Gately はコンテナ内で動作しているため、コンテナにマウントされたファイルしか読めません。例えばホストの /var/log をコンテナ内の /var/log/host に読み取り専用でマウントし、/var/log/host/auth.log と入力します。",
+    "journal": "journalctl で指定したサービスのログを読み取ります。1 行に 1 ユニット（例：ssh.service）。",
+    "journalMissing": "journalctl が見つかりません（コンテナ内または systemd を使わないシステム）。このソースは利用できません。",
+    "command": "ログを出力し続けるコマンドを実行してその出力を読み取ります（例：OpenWrt の logread -f）。コマンドが終了すると自動で再起動します。",
+    "docker": "指定したコンテナのログを読み取ります。Docker 管理モジュールが Docker に接続できる必要があります。",
+    "event": "送信元 IP を含む Gately 自身のイベントを集計します。フィルターは不要です。"
+  },
+  "jail": {
+    "intro": "ログから失敗記録を見つけ、集計期間内に回数に達した IP をブロックします。",
+    "add": "ルールを追加",
+    "edit": "ルールを編集",
+    "fromPreset": "テンプレートから追加",
+    "empty": "ルールはまだありません。SSH、Nginx、Vaultwarden などのよく使われるサービスをテンプレートから追加できます。",
+    "deleteConfirm": "このルールを削除しますか？既存のブロックは期限まで残ります。",
+    "source": "ログソース",
+    "filter": "フィルター",
+    "filterHelp": "Go の正規表現を 1 行に 1 つ。<HOST> は送信元 IP（IPv4 と IPv6）を表します。いずれかに一致すると失敗 1 回として数えます。",
+    "filterEventPlaceholder": "空欄でも可",
+    "ignore": "除外",
+    "ignoreHelp": "任意。正規表現を 1 行に 1 つ。一致した行は数えません。",
+    "condition": "発動条件",
+    "conditionValue": "{window} 以内に {count} 回",
+    "within": "以内に",
+    "timesThenBan": "回失敗でブロック",
+    "banTime": "ブロック期間",
+    "matches": "一致回数",
+    "bans": "ブロック",
+    "bansValue": "累計 {total}、現在 {active}",
+    "statusRunning": "実行中",
+    "statusOff": "無効",
+    "statusError": "異常",
+    "testTitle": "テスト",
+    "testLines": "ログのサンプル",
+    "testPlaceholder": "ログを数行貼り付けて、フィルターで IP を取り出せるか確認します",
+    "testSummary": "{total} 行中 {matched} 行が一致",
+    "testNoMatch": "一致なし",
+    "testIgnored": "{host}（ホワイトリスト）"
+  },
+  "trap": {
+    "title": "おとりポート",
+    "help": "このホストで使っていないポートにおとりを置き、接続してきた送信元をブロックします。通常のユーザーはこれらのポートにアクセスしないため、大量スキャンの遮断に向いています。待ち受け中のポートは自動で除外されます。",
+    "ports": "ポート",
+    "portsHelp": "カンマ区切り、範囲指定可（例：23,3389,5900-5910）。LAN とホワイトリストのアドレスでは発動しません。",
+    "effective": "有効なポート：{ports}",
+    "userspace": "ファイアウォールが無効のため Gately が待ち受け：{ports}（ハンドシェイクを完了するスキャンのみ検出）",
+    "skipped": "次のポートは使用中のため除外しました：{ports}"
+  },
+  "scan": {
+    "title": "ポートスキャン検出",
+    "help": "各送信元がこのホストの開いていないポートに接続した回数を数え、毎分のしきい値を超えるとブロックします。このホスト宛ての新しい接続だけを数え、コンテナや LAN 機器へ転送される通信は含みません。",
+    "needFirewall": "カーネル側のおとりポートとポートスキャン検出には、ファイアウォール同期が有効である必要があります。上の状態を確認してください。",
+    "threshold": "しきい値",
+    "perMinute": "回 / 分",
+    "thresholdHelp": "同じ送信元が 1 分間に開いていないポートへこの回数を超えて接続するとブロックします。通常のクライアントが閉じたポートを再試行するのは毎分約 5 回なので、10 以上をおすすめします。",
+    "exclude": "追加の開放ポート",
+    "excludeHelp": "現在 {count} 個のポートが待ち受け中で、自動的に開放扱いになります。他のプログラムがファイアウォールルール経由で使うポートはここに追加してください。"
+  },
+  "settings": {
+    "firewall": "システムファイアウォールに同期",
+    "firewallHelp": "nftables に inet gately テーブルを作成し、ブロックしたアドレスから届く通信（Docker コンテナや LAN 機器への転送を含む）をすべてカーネルで破棄します。このホストからそれらのアドレスへ接続した通信（DNS、パッケージミラーなど）の応答は影響を受けません。オフにするか Gately を停止するとルールは削除されます。",
+    "banSeconds": "既定のブロック期間",
+    "increment": "段階的ブロック",
+    "incrementHelp": "30 日以内に同じアドレスが再びブロックされると、回数に応じて期間が倍になります。",
+    "maxBanSeconds": "最長ブロック期間",
+    "whitelist": "ホワイトリスト",
+    "ignorePrivate": "LAN アドレスを無視",
+    "ignorePrivateHelp": "ループバック、プライベートアドレス、100.64.0.0/10（キャリアグレード NAT と Tailscale）、リンクローカルアドレス、このホストのインターフェースがある IPv6 /64 は自動でブロックされず、おとりポートとスキャン検出の対象にもなりません。",
+    "ignoreList": "ホワイトリストのアドレス",
+    "ignoreListHelp": "1 行に 1 つの IP または CIDR ネットワーク。自動ではブロックされません。手動ブロックはホワイトリストの影響を受けません。"
+  },
+  "presets": {
+    "sshd": {
+      "name": "SSH（ログファイル）",
+      "desc": "/var/log/auth.log を読み取り（RHEL 系は /var/log/secure）"
+    },
+    "sshd-journal": {
+      "name": "SSH（systemd ジャーナル）",
+      "desc": "ssh.service / sshd.service のログを読み取り"
+    },
+    "dropbear": {
+      "name": "Dropbear（OpenWrt）",
+      "desc": "logread -f で OpenWrt の SSH ログイン失敗を読み取り"
+    },
+    "nginx-http-auth": {
+      "name": "Nginx Basic 認証",
+      "desc": "error.log のユーザー名またはパスワードの誤り"
+    },
+    "nginx-botsearch": {
+      "name": "Nginx 不正スキャン",
+      "desc": "access.log 内の wp-login、.env、phpMyAdmin などを探るリクエスト"
+    },
+    "vaultwarden": {
+      "name": "Vaultwarden",
+      "desc": "vaultwarden コンテナのログイン失敗と 2 段階認証の失敗"
+    },
+    "homeassistant": {
+      "name": "Home Assistant",
+      "desc": "homeassistant コンテナのログイン失敗（http のログ出力が必要）"
+    },
+    "proxmox": {
+      "name": "Proxmox VE",
+      "desc": "pvedaemon の Web ログイン失敗"
+    },
+    "gately-admin": {
+      "name": "Gately 管理画面のログイン",
+      "desc": "管理画面のログイン失敗（パスワード、2 段階認証、パスキー）"
+    },
+    "gately-waf": {
+      "name": "WAF ブロック",
+      "desc": "WAF に繰り返しブロックされた送信元。CDN 経由（実 IP をヘッダーで渡す方式）のサイトでは使わないでください。CDN のノードがブロックされます"
+    }
+  }
+}

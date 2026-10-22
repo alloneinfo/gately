@@ -73,6 +73,15 @@ const MESSAGES: Record<string, string> = {
   'frp.ok.ok': 'selfcheck.r.frpOk',
   'frp.duplicate.warn': 'selfcheck.r.frpDuplicate',
   'frp.conflict.warn': 'selfcheck.r.frpConflict',
+  'guard.firewall.ok': 'selfcheck.r.guardOk',
+  'guard.os.info': 'selfcheck.r.guardOS',
+  'guard.missing.warn': 'selfcheck.r.guardMissing',
+  'guard.permission.warn': 'selfcheck.r.guardPermission',
+  'guard.error.warn': 'selfcheck.r.guardError',
+  'guard.trapSkipped.info': 'selfcheck.r.guardTrapSkipped',
+  'guard.trapUserspace.info': 'selfcheck.r.guardTrapUserspace',
+  'guard.scanUnavailable.warn': 'selfcheck.r.guardScanUnavailable',
+  'guard.jailError.warn': 'selfcheck.r.guardJailError',
   'module.summary.warn': 'selfcheck.r.moduleIssue',
   'module.summary.fail': 'selfcheck.r.moduleIssue',
 }
@@ -94,6 +103,12 @@ const HINTS: Record<string, string> = {
   'web.certMissing.warn': 'selfcheck.h.webCertMissing',
   'frp.duplicate.warn': 'selfcheck.h.frpDuplicate',
   'frp.conflict.warn': 'selfcheck.h.frpConflict',
+  'guard.missing.warn': 'selfcheck.h.guardMissing',
+  'guard.permission.warn': 'selfcheck.h.guardPermission',
+  'guard.error.warn': 'selfcheck.h.guardError',
+  'guard.trapSkipped.info': 'selfcheck.h.guardTrapSkipped',
+  'guard.scanUnavailable.warn': 'selfcheck.h.guardScanUnavailable',
+  'guard.jailError.warn': 'selfcheck.h.guardJailError',
 }
 
 function message(r: CheckResult): string {

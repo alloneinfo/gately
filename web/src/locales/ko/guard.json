@@ -1,0 +1,200 @@
+{
+  "title": "침입 방지",
+  "desc": "fail2ban 방식의 보호: 로그 규칙, 미끼 포트, 포트 스캔 탐지로 악성 IP를 찾아 자동으로 차단하고 시스템 방화벽(nftables)에 동기화합니다",
+  "savedApplied": "저장 및 적용됨",
+  "banTime": "차단 시간",
+  "banTimeDefaultValue": "기본값({d})",
+  "tabs": {
+    "bans": "차단 목록({count})",
+    "jails": "로그 규칙",
+    "scan": "미끼 포트와 스캔 탐지",
+    "settings": "설정"
+  },
+  "unit": {
+    "seconds": "{n}초",
+    "minutes": "{n}분",
+    "hours": "{n}시간",
+    "days": "{n}일"
+  },
+  "fw": {
+    "title": "시스템 방화벽",
+    "viewRules": "규칙 보기",
+    "rulesTitle": "Gately가 nftables에 기록한 규칙(테이블 inet gately)",
+    "active": "적용됨",
+    "inactive": "적용 안 됨",
+    "disabled": "꺼짐",
+    "activeBans": "차단 중",
+    "dropped": "삭제된 패킷",
+    "trapHits": "미끼 포트 감지",
+    "scanHits": "스캔 탐지",
+    "disabledTitle": "방화벽 동기화가 꺼져 있습니다",
+    "disabledHint": "차단은 Gately 자체 서비스(포트 포워딩, 웹 서비스, STUN, WebDAV, FTP, 관리 콘솔)에만 적용되고, 미끼 포트는 Gately가 직접 수신하며 포트 스캔 탐지는 사용할 수 없습니다. '설정'에서 켤 수 있습니다.",
+    "reasonOS": "이 시스템에는 nftables가 없습니다",
+    "hintOS": "방화벽 동기화는 Linux만 지원합니다. 차단은 Gately 자체 서비스에 계속 적용되고, 미끼 포트는 Gately가 직접 수신하며 포트 스캔 탐지는 사용할 수 없습니다.",
+    "reasonMissing": "nft 명령을 찾을 수 없습니다",
+    "hintMissing": "nftables를 설치하세요(Debian / Ubuntu: apt install nftables, OpenWrt 22.03 이상은 기본 포함). 설치 후 '설정'에서 한 번 저장하면 적용됩니다.",
+    "hintMissingDocker": "현재 이미지에 nft가 없습니다. 최신 이미지로 업데이트하세요.",
+    "reasonPermission": "방화벽을 변경할 권한이 없습니다",
+    "hintPermission": "nftables에 기록하려면 root 또는 CAP_NET_ADMIN 권한이 필요합니다. systemd 서비스는 [Service]에 AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE를 추가하세요.",
+    "hintPermissionDocker": "docker-compose.yml에 cap_add: [NET_ADMIN]을 추가하고 network_mode: host를 사용한 뒤 컨테이너를 다시 만드세요.",
+    "reasonError": "방화벽 규칙 기록 실패",
+    "hintError": "커널에 nftables 관련 모듈(nf_tables, nft_set_hash 등)이 없거나 nft 버전이 너무 오래되었을 수 있습니다(0.9.0 이상 필요). 자세한 오류는 아래와 같습니다."
+  },
+  "ban": {
+    "add": "수동 차단",
+    "submit": "차단",
+    "added": "차단했습니다",
+    "removed": "{key} 차단을 해제했습니다",
+    "search": "주소, 출처 또는 사유 검색",
+    "empty": "차단된 IP가 없습니다",
+    "address": "IP / 네트워크",
+    "source": "출처",
+    "reason": "사유",
+    "reasonPlaceholder": "선택 사항, 예: 비정상 접근",
+    "count": "횟수",
+    "created": "차단 시각",
+    "until": "남은 시간",
+    "permanent": "영구",
+    "unban": "해제",
+    "remainDays": "{d}일 {h}시간",
+    "remainHours": "{h}시간 {m}분",
+    "remainMinutes": "{m}분",
+    "sourceManual": "수동",
+    "sourceWeb": "웹 인증 실패",
+    "sourceTrap": "미끼 포트",
+    "sourceScan": "포트 스캔",
+    "sourceJailDeleted": "삭제된 규칙"
+  },
+  "source": {
+    "file": "로그 파일",
+    "journal": "systemd 저널",
+    "command": "명령 출력",
+    "docker": "Docker 컨테이너",
+    "event": "Gately 이벤트"
+  },
+  "target": {
+    "file": "파일 경로",
+    "journal": "서비스 유닛",
+    "command": "명령",
+    "docker": "컨테이너 이름",
+    "event": "이벤트"
+  },
+  "event": {
+    "authFailed": "관리 콘솔 로그인 실패",
+    "wafBlocked": "WAF 요청 차단"
+  },
+  "sourceHelp": {
+    "file": "파일에 추가되는 내용을 계속 읽고, 로테이션 후에는 새 파일로 자동 전환합니다. 한 줄에 경로 하나.",
+    "fileDocker": "Gately가 컨테이너에서 실행 중이므로 컨테이너에 마운트된 파일만 읽을 수 있습니다. 예를 들어 호스트의 /var/log를 컨테이너의 /var/log/host에 읽기 전용으로 마운트한 뒤 /var/log/host/auth.log를 입력하세요.",
+    "journal": "journalctl로 지정한 서비스의 로그를 읽습니다. 한 줄에 유닛 하나(예: ssh.service).",
+    "journalMissing": "journalctl을 찾을 수 없어(컨테이너 안이거나 systemd를 쓰지 않는 시스템) 이 출처를 사용할 수 없습니다.",
+    "command": "로그를 계속 출력하는 명령을 실행해 출력을 읽습니다(예: OpenWrt의 logread -f). 명령이 종료되면 자동으로 다시 시작합니다.",
+    "docker": "지정한 컨테이너의 로그를 읽습니다. Docker 관리 모듈이 Docker에 연결할 수 있어야 합니다.",
+    "event": "출처 IP가 포함된 Gately 자체 이벤트를 집계합니다. 필터가 필요 없습니다."
+  },
+  "jail": {
+    "intro": "로그에서 실패 기록을 찾아, 집계 기간 내에 횟수에 도달한 IP를 차단합니다.",
+    "add": "규칙 추가",
+    "edit": "규칙 편집",
+    "fromPreset": "템플릿에서 추가",
+    "empty": "아직 규칙이 없습니다. 템플릿에서 SSH, Nginx, Vaultwarden 등 일반 서비스를 추가할 수 있습니다.",
+    "deleteConfirm": "이 규칙을 삭제할까요? 이미 생긴 차단은 만료될 때까지 유지됩니다.",
+    "source": "로그 출처",
+    "filter": "필터",
+    "filterHelp": "Go 정규식, 한 줄에 하나. <HOST>는 출처 IP(IPv4 및 IPv6)를 나타내며, 하나라도 일치하면 실패 1회로 셉니다.",
+    "filterEventPlaceholder": "비워 둘 수 있음",
+    "ignore": "제외",
+    "ignoreHelp": "선택 사항, 한 줄에 정규식 하나. 일치하는 줄은 세지 않습니다.",
+    "condition": "발동 조건",
+    "conditionValue": "{window} 내 {count}회",
+    "within": "내",
+    "timesThenBan": "회 실패 시 차단",
+    "banTime": "차단 시간",
+    "matches": "일치 횟수",
+    "bans": "차단",
+    "bansValue": "누적 {total}, 현재 {active}",
+    "statusRunning": "실행 중",
+    "statusOff": "사용 안 함",
+    "statusError": "오류",
+    "testTitle": "테스트",
+    "testLines": "로그 샘플",
+    "testPlaceholder": "로그 몇 줄을 붙여 넣어 필터가 IP를 추출하는지 확인하세요",
+    "testSummary": "{total}줄 중 {matched}줄 일치",
+    "testNoMatch": "일치 없음",
+    "testIgnored": "{host}(화이트리스트)"
+  },
+  "trap": {
+    "title": "미끼 포트",
+    "help": "이 호스트에서 쓰지 않는 포트에 미끼를 두고, 이 포트에 접속하는 출처를 차단합니다. 일반 사용자는 이 포트에 접근하지 않으므로 대량 스캔 차단에 적합합니다. 수신 중인 포트는 자동으로 제외됩니다.",
+    "ports": "포트",
+    "portsHelp": "쉼표로 구분, 범위 지원(예: 23,3389,5900-5910). LAN 및 화이트리스트 주소는 발동하지 않습니다.",
+    "effective": "적용된 포트: {ports}",
+    "userspace": "방화벽이 적용되지 않아 Gately가 수신: {ports}(핸드셰이크를 완료한 스캔만 감지)",
+    "skipped": "다음 포트는 사용 중이라 제외했습니다: {ports}"
+  },
+  "scan": {
+    "title": "포트 스캔 탐지",
+    "help": "각 출처가 이 호스트의 열려 있지 않은 포트에 접속한 횟수를 세어 분당 임계값을 넘으면 차단합니다. 이 호스트로 오는 새 연결만 세며, 컨테이너나 LAN 기기로 전달되는 트래픽은 포함하지 않습니다.",
+    "needFirewall": "커널에서 처리하는 미끼 포트와 포트 스캔 탐지는 모두 방화벽 동기화가 적용되어야 합니다. 위 상태를 확인하세요.",
+    "threshold": "임계값",
+    "perMinute": "회 / 분",
+    "thresholdHelp": "같은 출처가 분당 이 횟수를 넘게 열려 있지 않은 포트에 접속하면 차단합니다. 일반 클라이언트가 닫힌 포트를 재시도하는 횟수는 분당 약 5회이므로 10 이상을 권장합니다.",
+    "exclude": "추가 개방 포트",
+    "excludeHelp": "현재 {count}개 포트가 수신 중이며 자동으로 개방된 것으로 봅니다. 다른 프로그램이 방화벽 규칙으로 사용하는 포트는 여기에 추가하세요."
+  },
+  "settings": {
+    "firewall": "시스템 방화벽에 동기화",
+    "firewallHelp": "nftables에 inet gately 테이블을 만들고, 차단된 주소에서 오는 모든 트래픽(Docker 컨테이너와 LAN 기기로 전달되는 트래픽 포함)을 커널에서 삭제합니다. 이 호스트가 그 주소로 먼저 연결한 통신(DNS, 패키지 미러 등)의 응답은 영향을 받지 않습니다. 끄거나 Gately를 중지하면 규칙이 제거됩니다.",
+    "banSeconds": "기본 차단 시간",
+    "increment": "점진적 차단",
+    "incrementHelp": "같은 주소가 30일 안에 다시 차단되면 횟수에 따라 시간이 두 배가 됩니다.",
+    "maxBanSeconds": "최대 차단 시간",
+    "whitelist": "화이트리스트",
+    "ignorePrivate": "LAN 주소 무시",
+    "ignorePrivateHelp": "루프백, 사설 주소, 100.64.0.0/10(통신사 NAT와 Tailscale), 링크 로컬 주소, 이 호스트 인터페이스가 속한 IPv6 /64는 자동 차단되지 않으며, 미끼 포트와 스캔 탐지도 이를 세지 않습니다.",
+    "ignoreList": "화이트리스트 주소",
+    "ignoreListHelp": "한 줄에 IP 또는 CIDR 네트워크 하나. 자동으로 차단되지 않습니다. 수동 차단은 화이트리스트의 영향을 받지 않습니다."
+  },
+  "presets": {
+    "sshd": {
+      "name": "SSH(로그 파일)",
+      "desc": "/var/log/auth.log 읽기(RHEL 계열은 /var/log/secure)"
+    },
+    "sshd-journal": {
+      "name": "SSH(systemd 저널)",
+      "desc": "ssh.service / sshd.service 로그 읽기"
+    },
+    "dropbear": {
+      "name": "Dropbear(OpenWrt)",
+      "desc": "logread -f로 OpenWrt의 SSH 로그인 실패 읽기"
+    },
+    "nginx-http-auth": {
+      "name": "Nginx 기본 인증",
+      "desc": "error.log의 사용자 이름 또는 비밀번호 오류"
+    },
+    "nginx-botsearch": {
+      "name": "Nginx 악성 스캔",
+      "desc": "access.log에서 wp-login, .env, phpMyAdmin 등의 경로를 탐색하는 요청"
+    },
+    "vaultwarden": {
+      "name": "Vaultwarden",
+      "desc": "vaultwarden 컨테이너의 로그인 실패와 2단계 인증 실패"
+    },
+    "homeassistant": {
+      "name": "Home Assistant",
+      "desc": "homeassistant 컨테이너의 로그인 실패(http 로그 필요)"
+    },
+    "proxmox": {
+      "name": "Proxmox VE",
+      "desc": "pvedaemon의 웹 로그인 실패"
+    },
+    "gately-admin": {
+      "name": "Gately 관리 콘솔 로그인",
+      "desc": "관리 콘솔 로그인 실패(비밀번호, 2단계 인증, 패스키)"
+    },
+    "gately-waf": {
+      "name": "WAF 차단",
+      "desc": "WAF에 반복적으로 차단된 출처. 실제 IP를 헤더로 전달하는 CDN 뒤의 사이트에는 쓰지 마세요. CDN 노드가 차단됩니다"
+    }
+  }
+}

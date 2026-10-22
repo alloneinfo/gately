@@ -12,6 +12,7 @@ import (
 	"github.com/wangwanjie/gately/internal/modules/docker"
 	"github.com/wangwanjie/gately/internal/modules/frp"
 	"github.com/wangwanjie/gately/internal/modules/ftp"
+	"github.com/wangwanjie/gately/internal/modules/guard"
 	"github.com/wangwanjie/gately/internal/modules/nettools"
 	"github.com/wangwanjie/gately/internal/modules/notify"
 	"github.com/wangwanjie/gately/internal/modules/portforward"
@@ -63,6 +64,8 @@ func New() (mods []module.Module, certs *ssl.Module) {
 		certs,
 		firewall,
 		webservice.New(certs, firewall),
+		// 入侵防护读取容器日志时复用 Docker 模块的客户端
+		guard.New(guard.Deps{FollowDocker: dock.FollowLogs}),
 		wol.New(),
 		term,
 		cron.New(),

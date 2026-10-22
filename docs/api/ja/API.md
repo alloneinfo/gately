@@ -40,6 +40,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `ssl` | SSL 証明書 | `ssl:read`、`ssl:write` |
 | `waf` | WAF ファイアウォール | `waf:read`、`waf:write` |
 | `webservice` | Web サービス | `webservice:read`、`webservice:write` |
+| `guard` | 侵入防御 | `guard:read`、`guard:write` |
 | `wol` | Wake-on-LAN | `wol:read`、`wol:write` |
 | `webterminal` | Web ターミナル | `webterminal:read`、`webterminal:write` |
 | `cron` | スケジュールタスク | `cron:read`、`cron:write` |
@@ -222,6 +223,28 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | POST | `/api/webservice/geoip/upload` | `webservice:write` | GeoIP データベースをアップロード（multipart フィールド file、.mmdb） |
 | POST | `/api/webservice/geoip/download` | `webservice:write` | URL から GeoIP データベース（.mmdb）をダウンロード |
 | DELETE | `/api/webservice/geoip` | `webservice:write` | GeoIP データベースを削除 |
+
+## 侵入防御
+
+| メソッド | パス | 必要な権限 | 説明 |
+| --- | --- | --- | --- |
+| GET | `/api/guard/logs` | `guard:read` | モジュールの実行ログを表示 |
+| DELETE | `/api/guard/logs` | `guard:write` | モジュールの実行ログを消去 |
+| GET | `/api/guard/jails` | `guard:read` | エントリ の一覧を取得 |
+| POST | `/api/guard/jails` | `guard:write` | エントリ を追加 |
+| PUT | `/api/guard/jails/{key}` | `guard:write` | エントリ を更新 |
+| DELETE | `/api/guard/jails/{key}` | `guard:write` | エントリ を削除 |
+| PUT | `/api/guard/jails/{key}/enable` | `guard:write` | エントリ の有効/無効を切り替え |
+| PUT | `/api/guard/jails-order` | `guard:write` | エントリ の並び順を変更 |
+| GET | `/api/guard/presets` | `guard:read` | よく使われるサービスのルールテンプレート |
+| POST | `/api/guard/jails/test` | `guard:write` | ログのサンプルでフィルターをテスト |
+| GET | `/api/guard/status` | `guard:read` | ファイアウォール同期の状態と実行環境 |
+| GET | `/api/guard/settings` | `guard:read` | グローバル設定 |
+| PUT | `/api/guard/settings` | `guard:write` | 全体設定を変更 |
+| GET | `/api/guard/bans` | `guard:read` | 現在ブロック中の IP |
+| POST | `/api/guard/bans` | `guard:write` | IP またはネットワークを手動でブロック |
+| DELETE | `/api/guard/bans` | `guard:write` | ブロックを解除（body は {"key": アドレス}） |
+| GET | `/api/guard/firewall/rules` | `guard:read` | Gately が nftables に書き込んだルール（テキスト） |
 
 ## Wake-on-LAN
 
@@ -598,6 +621,17 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `password` | string |
 | `schedule` | string |
 
+### banlist.Entry
+
+| フィールド | 型 |
+| --- | --- |
+| `count` | integer |
+| `created` | 時刻 (RFC 3339) |
+| `key` | string |
+| `reason` | string |
+| `source` | string |
+| `until` | 時刻 (RFC 3339) |
+
 ### cloudflared.Tunnel
 
 | フィールド | 型 |
@@ -759,6 +793,124 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `loaded` | boolean |
 | `size` | integer |
 | `type` | string |
+
+### guard.BanView
+
+| フィールド | 型 |
+| --- | --- |
+| `count` | integer |
+| `created` | 時刻 (RFC 3339) |
+| `jail` | string |
+| `key` | string |
+| `reason` | string |
+| `source` | string |
+| `until` | 時刻 (RFC 3339) |
+
+### guard.FirewallStatus
+
+| フィールド | 型 |
+| --- | --- |
+| `active` | boolean |
+| `checkedAt` | 時刻 (RFC 3339) |
+| `dropped` | マップ of integer |
+| `enabled` | boolean |
+| `error` | string |
+| `hits` | マップ of integer |
+| `openPorts` | integer |
+| `reason` | string |
+| `trapPorts` | string |
+| `trapSkipped` | 配列 of integer |
+| `version` | string |
+
+### guard.Jail
+
+| フィールド | 型 |
+| --- | --- |
+| `banTime` | integer |
+| `enable` | boolean |
+| `filter` | string |
+| `findTime` | integer |
+| `ignore` | string |
+| `key` | string |
+| `maxRetry` | integer |
+| `name` | string |
+| `preset` | string |
+| `remark` | string |
+| `source` | string |
+| `target` | string |
+
+### guard.Platform
+
+| フィールド | 型 |
+| --- | --- |
+| `docker` | boolean |
+| `inDocker` | boolean |
+| `journal` | boolean |
+| `os` | string |
+
+### guard.ScanSettings
+
+| フィールド | 型 |
+| --- | --- |
+| `banSeconds` | integer |
+| `enable` | boolean |
+| `excludePorts` | string |
+| `threshold` | integer |
+
+### guard.Settings
+
+| フィールド | 型 |
+| --- | --- |
+| `banSeconds` | integer |
+| `firewall` | boolean |
+| `ignoreList` | 配列 of string |
+| `ignorePrivate` | boolean |
+| `increment` | boolean |
+| `maxBanSeconds` | integer |
+| `scan` | `guard.ScanSettings` |
+| `trap` | `guard.TrapSettings` |
+
+### guard.Status
+
+| フィールド | 型 |
+| --- | --- |
+| `bans` | integer |
+| `firewall` | `guard.FirewallStatus` |
+| `platform` | `guard.Platform` |
+| `userTrapPorts` | 配列 of integer |
+
+### guard.TestResult
+
+| フィールド | 型 |
+| --- | --- |
+| `host` | string |
+| `ignored` | boolean |
+| `line` | string |
+| `matched` | boolean |
+
+### guard.TrapSettings
+
+| フィールド | 型 |
+| --- | --- |
+| `banSeconds` | integer |
+| `enable` | boolean |
+| `ports` | string |
+
+### guard.banRequest
+
+| フィールド | 型 |
+| --- | --- |
+| `key` | string |
+| `reason` | string |
+| `seconds` | integer |
+
+### guard.testRequest
+
+| フィールド | 型 |
+| --- | --- |
+| `filter` | string |
+| `ignore` | string |
+| `lines` | string |
 
 ### ipsource.Source
 
@@ -1026,6 +1178,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `remark` | string |
 | `ruleSets` | 配列 of `waf.RuleSet` |
 | `skipBodyPaths` | string |
+| `webdav` | boolean |
 
 ### waf.RuleSet
 
@@ -1055,7 +1208,9 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | --- | --- |
 | `key` | string |
 | `manual` | boolean |
+| `permanent` | boolean |
 | `reason` | string |
+| `source` | string |
 | `until` | 時刻 (RFC 3339) |
 
 ### webservice.CacheConfig

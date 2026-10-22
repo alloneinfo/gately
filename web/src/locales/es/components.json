@@ -41,5 +41,15 @@
     "timeoutTitle": "Tiempo agotado",
     "timeoutDesc": "El servicio lleva mucho tiempo sin responder. Si cambiaste el puerto de administración o la dirección de escucha, abre la nueva dirección manualmente. También puedes revisar los registros del programa para ver cómo va el arranque.",
     "reload": "Recargar página"
+  },
+  "duration": {
+    "minutes": "minutos",
+    "hours": "horas",
+    "days": "días"
+  },
+  "banTime": {
+    "default": "Predeterminada",
+    "custom": "Personalizada",
+    "permanent": "Permanente"
   }
 }

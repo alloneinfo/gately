@@ -40,6 +40,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `ssl` | SSL-сертификат | `ssl:read`、`ssl:write` |
 | `waf` | Брандмауэр WAF | `waf:read`、`waf:write` |
 | `webservice` | Веб-служба | `webservice:read`、`webservice:write` |
+| `guard` | Защита от вторжений | `guard:read`、`guard:write` |
 | `wol` | Wake-on-LAN | `wol:read`、`wol:write` |
 | `webterminal` | Веб-терминал | `webterminal:read`、`webterminal:write` |
 | `cron` | Запланированная задача | `cron:read`、`cron:write` |
@@ -222,6 +223,28 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | POST | `/api/webservice/geoip/upload` | `webservice:write` | Загрузить базу данных GeoIP (поле multipart file, .mmdb) |
 | POST | `/api/webservice/geoip/download` | `webservice:write` | Скачать базу данных GeoIP (.mmdb) по адресу |
 | DELETE | `/api/webservice/geoip` | `webservice:write` | Удалить базу данных GeoIP |
+
+## Защита от вторжений
+
+| Метод | Путь | Необходимое право | Описание |
+| --- | --- | --- | --- |
+| GET | `/api/guard/logs` | `guard:read` | Просмотр журнала работы модуля |
+| DELETE | `/api/guard/logs` | `guard:write` | Очистить журнал работы модуля |
+| GET | `/api/guard/jails` | `guard:read` | Список: Элемент |
+| POST | `/api/guard/jails` | `guard:write` | Добавить: Элемент |
+| PUT | `/api/guard/jails/{key}` | `guard:write` | Изменить: Элемент |
+| DELETE | `/api/guard/jails/{key}` | `guard:write` | Удалить: Элемент |
+| PUT | `/api/guard/jails/{key}/enable` | `guard:write` | Включить или отключить: Элемент |
+| PUT | `/api/guard/jails-order` | `guard:write` | Изменить порядок: Элемент |
+| GET | `/api/guard/presets` | `guard:read` | Шаблоны правил для распространённых сервисов |
+| POST | `/api/guard/jails/test` | `guard:write` | Проверить фильтры на примерах строк журнала |
+| GET | `/api/guard/status` | `guard:read` | Состояние синхронизации с брандмауэром и окружение |
+| GET | `/api/guard/settings` | `guard:read` | Глобальные настройки |
+| PUT | `/api/guard/settings` | `guard:write` | Изменить общие настройки |
+| GET | `/api/guard/bans` | `guard:read` | Заблокированные сейчас IP |
+| POST | `/api/guard/bans` | `guard:write` | Заблокировать IP или сеть вручную |
+| DELETE | `/api/guard/bans` | `guard:write` | Снять блокировку (body: {"key": адрес}) |
+| GET | `/api/guard/firewall/rules` | `guard:read` | Правила, записанные Gately в nftables (текст) |
 
 ## Wake-on-LAN
 
@@ -598,6 +621,17 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `password` | string |
 | `schedule` | string |
 
+### banlist.Entry
+
+| Поле | Тип |
+| --- | --- |
+| `count` | integer |
+| `created` | Время (RFC 3339) |
+| `key` | string |
+| `reason` | string |
+| `source` | string |
+| `until` | Время (RFC 3339) |
+
 ### cloudflared.Tunnel
 
 | Поле | Тип |
@@ -759,6 +793,124 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `loaded` | boolean |
 | `size` | integer |
 | `type` | string |
+
+### guard.BanView
+
+| Поле | Тип |
+| --- | --- |
+| `count` | integer |
+| `created` | Время (RFC 3339) |
+| `jail` | string |
+| `key` | string |
+| `reason` | string |
+| `source` | string |
+| `until` | Время (RFC 3339) |
+
+### guard.FirewallStatus
+
+| Поле | Тип |
+| --- | --- |
+| `active` | boolean |
+| `checkedAt` | Время (RFC 3339) |
+| `dropped` | Словарь из integer |
+| `enabled` | boolean |
+| `error` | string |
+| `hits` | Словарь из integer |
+| `openPorts` | integer |
+| `reason` | string |
+| `trapPorts` | string |
+| `trapSkipped` | Массив из integer |
+| `version` | string |
+
+### guard.Jail
+
+| Поле | Тип |
+| --- | --- |
+| `banTime` | integer |
+| `enable` | boolean |
+| `filter` | string |
+| `findTime` | integer |
+| `ignore` | string |
+| `key` | string |
+| `maxRetry` | integer |
+| `name` | string |
+| `preset` | string |
+| `remark` | string |
+| `source` | string |
+| `target` | string |
+
+### guard.Platform
+
+| Поле | Тип |
+| --- | --- |
+| `docker` | boolean |
+| `inDocker` | boolean |
+| `journal` | boolean |
+| `os` | string |
+
+### guard.ScanSettings
+
+| Поле | Тип |
+| --- | --- |
+| `banSeconds` | integer |
+| `enable` | boolean |
+| `excludePorts` | string |
+| `threshold` | integer |
+
+### guard.Settings
+
+| Поле | Тип |
+| --- | --- |
+| `banSeconds` | integer |
+| `firewall` | boolean |
+| `ignoreList` | Массив из string |
+| `ignorePrivate` | boolean |
+| `increment` | boolean |
+| `maxBanSeconds` | integer |
+| `scan` | `guard.ScanSettings` |
+| `trap` | `guard.TrapSettings` |
+
+### guard.Status
+
+| Поле | Тип |
+| --- | --- |
+| `bans` | integer |
+| `firewall` | `guard.FirewallStatus` |
+| `platform` | `guard.Platform` |
+| `userTrapPorts` | Массив из integer |
+
+### guard.TestResult
+
+| Поле | Тип |
+| --- | --- |
+| `host` | string |
+| `ignored` | boolean |
+| `line` | string |
+| `matched` | boolean |
+
+### guard.TrapSettings
+
+| Поле | Тип |
+| --- | --- |
+| `banSeconds` | integer |
+| `enable` | boolean |
+| `ports` | string |
+
+### guard.banRequest
+
+| Поле | Тип |
+| --- | --- |
+| `key` | string |
+| `reason` | string |
+| `seconds` | integer |
+
+### guard.testRequest
+
+| Поле | Тип |
+| --- | --- |
+| `filter` | string |
+| `ignore` | string |
+| `lines` | string |
 
 ### ipsource.Source
 
@@ -1026,6 +1178,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `remark` | string |
 | `ruleSets` | Массив из `waf.RuleSet` |
 | `skipBodyPaths` | string |
+| `webdav` | boolean |
 
 ### waf.RuleSet
 
@@ -1055,7 +1208,9 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | --- | --- |
 | `key` | string |
 | `manual` | boolean |
+| `permanent` | boolean |
 | `reason` | string |
+| `source` | string |
 | `until` | Время (RFC 3339) |
 
 ### webservice.CacheConfig

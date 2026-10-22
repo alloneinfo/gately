@@ -41,5 +41,15 @@
     "timeoutTitle": "等待逾時",
     "timeoutDesc": "服務長時間未回應。如修改了管理連接埠或監聽位址，請手動存取新位址；也可以查看程式日誌確認啟動情況。",
     "reload": "重新整理頁面"
+  },
+  "duration": {
+    "minutes": "分鐘",
+    "hours": "小時",
+    "days": "天"
+  },
+  "banTime": {
+    "default": "預設",
+    "custom": "自訂",
+    "permanent": "永久"
   }
 }

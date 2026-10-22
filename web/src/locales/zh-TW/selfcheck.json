@@ -1,7 +1,7 @@
 {
   "title": "網路與設定自檢",
   "run": "網路自檢",
-  "intro": "檢查公網位址、NAT、系統時間、80/443 連接埠、DDNS 解析、憑證有效期、HTTPS 站點的憑證涵蓋與 frp 代理衝突。會存取 DDNS 使用的公網 IP 查詢服務。",
+  "intro": "檢查公網位址、NAT、系統時間、80/443 連接埠、DDNS 解析、憑證有效期、HTTPS 站點的憑證涵蓋、frp 代理衝突與入侵防護的防火牆同步。會存取 DDNS 使用的公網 IP 查詢服務。",
   "empty": "沒有可回報的內容",
   "rerun": "重新檢查",
   "issues": "{count} 項需要留意",
@@ -35,7 +35,16 @@
     "webCertMissing": "站點 {site}（連接埠 {port}）沒有相符的憑證：{domains}",
     "frpOk": "frpc 的 {count} 個代理未發現衝突",
     "frpDuplicate": "frpc 中有多個啟用的代理都叫 {proxy}，只有第一個生效",
-    "frpConflict": "{role} 回報代理 {proxy} 衝突：{reason}"
+    "frpConflict": "{role} 回報代理 {proxy} 衝突：{reason}",
+    "guardOk": "入侵防護已同步到系統防火牆，目前封鎖 {bans} 個位址",
+    "guardOS": "目前系統沒有 nftables，入侵防護只對 Gately 自身的服務生效",
+    "guardMissing": "入侵防護：找不到 nft 命令，無法同步到系統防火牆",
+    "guardPermission": "入侵防護：沒有修改防火牆的權限",
+    "guardError": "入侵防護寫入防火牆規則失敗：{error}",
+    "guardTrapSkipped": "誘餌連接埠 {ports} 正在被監聽，已排除",
+    "guardTrapUserspace": "防火牆同步未生效，誘餌連接埠改由 Gately 監聽，只能發現完成交握的掃描",
+    "guardScanUnavailable": "連接埠掃描偵測已開啟，但防火牆同步未生效，偵測不會執行",
+    "guardJailError": "入侵防護規則 {jail} 異常：{error}"
   },
   "h": {
     "publicIPv4Fail": "檢查對外連線與 DNS，或在 DDNS 設定中更換 IP 查詢位址。",
@@ -51,6 +60,12 @@
     "direct6": "外部可透過 IPv6 直接存取本機的服務（需在路由器與本機防火牆放行對應連接埠），不需要連接埠轉發。",
     "webCertMissing": "存取這些網域會在 TLS 交握時失敗。請在憑證頁新增涵蓋它們的憑證（萬用字元憑證可涵蓋一級子網域），或將網域從站點中移除。",
     "frpDuplicate": "frp 要求代理名稱唯一，請修改重名代理的名稱。",
-    "frpConflict": "同一個 frps 上已有同名代理，或網域、遠端連接埠已被佔用，常見於多台裝置複製了同一份 frpc 設定。為每台裝置的 frpc 設定不同的使用者（user），或修改代理名稱、網域與遠端連接埠；衝突的代理對應的網站會逾時。"
+    "frpConflict": "同一個 frps 上已有同名代理，或網域、遠端連接埠已被佔用，常見於多台裝置複製了同一份 frpc 設定。為每台裝置的 frpc 設定不同的使用者（user），或修改代理名稱、網域與遠端連接埠；衝突的代理對應的網站會逾時。",
+    "guardMissing": "請安裝 nftables；Docker 部署請更新到最新映像檔。",
+    "guardPermission": "寫入 nftables 需要 root 或 CAP_NET_ADMIN。Docker 部署請在 compose 中加入 cap_add: [NET_ADMIN] 並使用 host 網路。",
+    "guardError": "核心可能缺少 nftables 模組，或 nft 版本過舊（需要 0.9.0 以上）。",
+    "guardTrapSkipped": "這些連接埠上有服務在監聽，設成誘餌會誤封正常訪客，已自動略過。",
+    "guardScanUnavailable": "在入侵防護頁面查看防火牆狀態與處理方式。",
+    "guardJailError": "檢查日誌檔案路徑、服務單元或容器名稱是否正確；Gately 在容器中執行時需要把日誌目錄掛載進容器。"
   }
 }

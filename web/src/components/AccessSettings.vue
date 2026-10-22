@@ -6,12 +6,17 @@
       <span class="inline-help">{{ t('accessSettings.authFailBanHelp') }}</span>
     </el-form-item>
     <el-form-item :label="t('accessSettings.banList')">
-      <div class="rows">
+      <!-- 入侵防护开启时，封禁统一在该模块中管理（与端口转发等服务共用同一张封禁表） -->
+      <div v-if="guardOn" class="rows">
+        <div class="meta">{{ t('accessSettings.guardManaged', { count: bans.length }) }}</div>
+        <div><router-link to="/guard" class="link">{{ t('accessSettings.openGuard') }}</router-link></div>
+      </div>
+      <div v-else class="rows">
         <el-empty v-if="!bans.length" :image-size="36" :description="t('accessSettings.noBans')" />
         <div v-for="b in bans" :key="b.key" class="row">
           <span class="mono key">{{ b.key }}</span>
           <el-tag size="small" :type="b.manual ? 'info' : 'warning'">{{ b.reason }}</el-tag>
-          <span class="meta">{{ t('accessSettings.until', { time: new Date(b.until).toLocaleString() }) }}</span>
+          <span class="meta">{{ b.permanent ? t('accessSettings.permanent') : t('accessSettings.until', { time: new Date(b.until).toLocaleString() }) }}</span>
           <el-button text size="small" @click="unban(b.key)">{{ t('accessSettings.unban') }}</el-button>
         </div>
         <div class="row">
@@ -51,10 +56,12 @@ import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { Upload } from 'lucide-vue-next'
 import { api } from '../api'
+import { moduleEnabled } from '../nav'
 
 interface Ban {
   key: string
   until: string
+  permanent?: boolean
   reason: string
   manual: boolean
 }
@@ -69,6 +76,7 @@ const { t } = useI18n()
 const seconds = defineModel<number>('autoBanSeconds', { required: true })
 const minutes = computed({ get: () => Math.round((seconds.value ?? 0) / 60), set: (v: number) => (seconds.value = (v ?? 0) * 60) })
 const bans = ref<Ban[]>([])
+const guardOn = computed(() => moduleEnabled('guard'))
 const geo = ref<GeoInfo>({ loaded: false, size: 0 })
 const newIp = ref('')
 const newHours = ref(24)
@@ -161,6 +169,10 @@ onMounted(() => {
 }
 .flex {
   flex: 1;
+}
+.link {
+  color: var(--el-color-primary);
+  font-size: 13px;
 }
 .meta,
 .inline-help {
