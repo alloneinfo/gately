@@ -22,6 +22,7 @@ import (
 	"github.com/wangwanjie/gately/internal/logbuf"
 	"github.com/wangwanjie/gately/internal/resolver"
 	"github.com/wangwanjie/gately/internal/thirdauth"
+	"github.com/wangwanjie/gately/internal/webpage"
 )
 
 // Settings 是全局设置（settings.json）。字段对齐 Lucky 的基础设置中对 Gately 有意义的部分。
@@ -367,7 +368,14 @@ func (a *App) accessControl(next http.Handler) http.Handler {
 			if !passed && !a.tokenPeek(r) {
 				// 已登录的会话（例如修改安全入口之前登录）仍可访问
 				if _, ok := a.auth.Verify(auth.TokenFromRequest(r)); !ok {
-					http.NotFound(w, r)
+					// 浏览器访问时给出提示页（仍返回 404），接口等其他请求保持纯文本 404
+					webpage.Error(w, r, webpage.Problem{
+						Code:   http.StatusNotFound,
+						Lock:   true,
+						Title:  "请通过安全入口访问",
+						Detail: "当前地址未通过安全入口验证，无法打开管理后台。",
+						Hint:   "请使用完整的安全入口地址（例如 http://域名:端口/入口路径）访问；忘记入口时，可在配置目录的 gately.json 中清空 safePath 后重启 Gately。",
+					})
 					return
 				}
 			}

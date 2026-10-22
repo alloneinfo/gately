@@ -17,6 +17,7 @@ import (
 	"github.com/wangwanjie/gately/internal/banlist"
 	"github.com/wangwanjie/gately/internal/i18n"
 	"github.com/wangwanjie/gately/internal/thirdauth"
+	"github.com/wangwanjie/gately/internal/webpage"
 )
 
 // 网页认证使用的保留路径与会话时长
@@ -297,30 +298,104 @@ func (a *authenticator) check(w http.ResponseWriter, r *http.Request, s Site) bo
 	return false
 }
 
-const loginSrc = `<!doctype html>
-<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>登录 - {{.Host}}</title>
-<style>
-body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#f2f5f4;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif}
-form{background:#fff;padding:28px 32px;border-radius:10px;box-shadow:0 2px 16px rgba(0,0,0,.08);width:300px}
-h1{font-size:18px;margin:0 0 4px}p{margin:0 0 18px;color:#888;font-size:13px}
-input{width:100%;box-sizing:border-box;padding:10px;margin-bottom:12px;border:1px solid #ccd;border-radius:6px;font-size:14px}
-button{width:100%;padding:10px;border:0;border-radius:6px;background:#0e7c66;color:#fff;font-size:15px;cursor:pointer}
-.err{color:#d33;font-size:13px;margin-bottom:10px}
-.oauth{display:block;text-align:center;margin-top:10px;padding:9px;border:1px solid #ccd;border-radius:6px;color:#333;text-decoration:none;font-size:14px}
-</style></head><body>
-<form method="post" action="{{.Action}}">
-<h1>访问 {{.Host}}</h1><p>此站点需要登录</p>
-{{if .Error}}<div class="err">{{.Error}}</div>{{end}}
-{{if .HasPassword}}
-<input name="username" placeholder="用户名" autocomplete="username" required autofocus>
-<input name="password" type="password" placeholder="密码" autocomplete="current-password" required>
-{{if .HasTOTP}}<input name="code" placeholder="动态验证码（未启用可留空）" inputmode="numeric" autocomplete="one-time-code" maxlength="6">{{end}}
+// loginSrc 是网页认证登录页的主体（外壳与样式见 webpage 包）。设置了 Pending 时在登录卡片上弹出动态验证码对话框。
+// 模板内不写中文（包括脚本注释），否则整段会被 i18nsync 当作翻译键；脚本依次处理：显示/隐藏密码、
+// 提交后禁用按钮防止重复提交、验证码只保留数字且输满 6 位自动提交。页面不依赖脚本也能正常登录。
+const loginSrc = `{{define "body"}}<section class="card login"{{if .Pending}} aria-hidden="true"{{end}}>
+<div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="16" r="1"/><rect x="3" y="10" width="18" height="12" rx="2"/><path d="M7 10V7a5 5 0 0 1 10 0v3"/></svg></div>
+<h1>{{.T.title}}</h1>
+<p class="sub">{{.T.subtitle}}</p>
+<div class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg><span>{{.Host}}</span></div>
+{{if and .Error (not .Pending)}}<div class="alert" role="alert"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg><span>{{.Error}}</span></div>{{end}}
+{{if .HasPassword}}<form method="post" action="{{.Action}}" data-once>
+<div class="fields">
+<label class="f"><span>{{.T.username}}</span><div class="ctl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></svg><input name="username" value="{{.Username}}" placeholder="{{.T.usernamePh}}" autocomplete="username" autocapitalize="none" spellcheck="false" required{{if not .Username}} autofocus{{end}}></div></label>
+<label class="f"><span>{{.T.password}}</span><div class="ctl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><input id="pw" name="password" type="password" placeholder="{{.T.passwordPh}}" autocomplete="current-password" required{{if .Username}} autofocus{{end}}><button type="button" class="eye" id="eye" title="{{.T.showPassword}}" aria-label="{{.T.showPassword}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.06 12.35a1 1 0 0 1 0-.7 10.75 10.75 0 0 1 19.88 0 1 1 0 0 1 0 .7 10.75 10.75 0 0 1-19.88 0"/><circle cx="12" cy="12" r="3"/></svg></button></div></label>
+</div>
 <input type="hidden" name="next" value="{{.Next}}">
-<button type="submit">登录</button>
-{{end}}
-{{range .Providers}}<a class="oauth" href="{{$.StartURL}}?p={{.Key}}&next={{$.Next}}">使用 {{.Name}} 登录</a>{{end}}
-</form></body></html>`
+<button class="btn primary" type="submit">{{.T.submit}}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></button>
+</form>{{end}}
+{{if .Providers}}{{if .HasPassword}}<div class="or">{{.T.or}}</div>{{else}}<div class="gap"></div>{{end}}
+<div class="oauth">{{range .Providers}}<a class="btn ghost" href="{{$.StartURL}}?p={{.Key}}&next={{$.Next}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z"/><circle cx="16.5" cy="7.5" r=".5" fill="currentColor"/></svg>{{printf $.T.loginWith .Name}}</a>{{end}}</div>{{end}}
+</section>
+{{if .Pending}}<div class="modal" role="dialog" aria-modal="true" aria-labelledby="totp-title">
+<form class="card sheet" method="post" action="{{.Action}}" data-once>
+<div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg></div>
+<h1 id="totp-title">{{.T.totpTitle}}</h1>
+<p class="sub">{{.T.totpPrompt}}</p>
+<div class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></svg><span>{{.Username}}</span></div>
+{{if .Error}}<div class="alert" role="alert"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg><span>{{.Error}}</span></div>{{end}}
+<input class="otp{{if .Error}} shake{{end}}" id="otp" name="code" inputmode="numeric" pattern="[0-9]{6}" autocomplete="one-time-code" maxlength="6" placeholder="000000" required autofocus aria-label="{{.T.code}}">
+<input type="hidden" name="pending" value="{{.Pending}}">
+<input type="hidden" name="next" value="{{.Next}}">
+<button class="btn primary" type="submit">{{.T.verify}}</button>
+<p class="tip">{{.T.totpAuto}}</p>
+<a class="back" href="{{.Action}}?next={{.Next}}&amp;u={{.Username}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>{{.T.back}}</a>
+</form></div>{{end}}
+<style>
+.login .gap{height:24px}
+.modal{position:fixed;inset:0;z-index:10;display:grid;place-items:center;padding:16px;background:rgba(8,18,16,.42);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);animation:fade .2s ease-out both}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.sheet{max-width:380px;text-align:center;animation:pop .25s cubic-bezier(.2,.9,.3,1.2) both}
+@keyframes pop{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:none}}
+.sheet .icon{margin:0 auto}
+.sheet .sub{text-wrap:balance}
+.sheet .alert{text-align:left}
+.otp{display:block;width:100%;height:60px;margin-top:22px;padding:0 0 0 .55em;border:1px solid var(--line);border-radius:14px;background:var(--input);color:var(--text);text-align:center;font:650 30px/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.55em;outline:none;transition:border-color .15s,box-shadow .15s}
+.otp::placeholder{color:var(--line)}
+.otp:focus{border-color:var(--brand);background:var(--card);box-shadow:0 0 0 4px var(--brand-soft)}
+.otp.shake{border-color:var(--danger);animation:shake .4s}
+@keyframes shake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.sheet .btn.primary{margin-top:16px}
+.tip{margin:12px 0 0;color:var(--faint);font-size:12.5px}
+.back{display:inline-flex;align-items:center;gap:6px;margin-top:14px;padding:4px 8px;border-radius:8px;color:var(--muted);text-decoration:none;font-size:13px}
+.back:hover{color:var(--text);background:var(--brand-soft)}
+.back svg{width:15px;height:15px}
+</style>
+<script>
+(function(){
+  var eye=document.getElementById('eye'),pw=document.getElementById('pw');
+  if(eye&&pw){eye.addEventListener('click',function(){pw.type=pw.type==='password'?'text':'password';pw.focus();});}
+  document.querySelectorAll('form[data-once]').forEach(function(f){
+    f.addEventListener('submit',function(){var b=f.querySelector('button[type=submit]');if(b){setTimeout(function(){b.disabled=true;},0);}});
+  });
+  var otp=document.getElementById('otp');
+  if(otp){
+    otp.focus();
+    otp.addEventListener('input',function(){
+      otp.classList.remove('shake');
+      var v=otp.value.replace(/\D/g,'').slice(0,6);
+      if(v!==otp.value){otp.value=v;}
+      if(v.length===6){otp.form.requestSubmit?otp.form.requestSubmit():otp.form.submit();}
+    });
+  }
+})();
+</script>{{end}}`
+
+// loginTexts 为登录页文案，中文为翻译键。
+var loginTexts = map[string]string{
+	"pageTitle":    "登录",
+	"title":        "登录以继续访问",
+	"subtitle":     "此站点已开启访问保护，请先验证身份",
+	"username":     "用户名",
+	"usernamePh":   "请输入用户名",
+	"password":     "密码",
+	"passwordPh":   "请输入密码",
+	"showPassword": "显示或隐藏密码",
+	"submit":       "登录",
+	"or":           "或使用以下方式",
+	"loginWith":    "使用 %s 登录",
+	"totpTitle":    "两步验证",
+	"totpPrompt":   "打开验证器应用，输入当前显示的 6 位动态验证码",
+	"code":         "动态验证码",
+	"verify":       "验证",
+	"totpAuto":     "输满 6 位后自动提交",
+	"back":         "返回重新登录",
+}
+
+func init() {
+	webpage.MustRegister("ws-login", loginSrc)
+}
 
 // safeNext 只允许站内相对路径，防止开放重定向。
 func safeNext(next string) string {
@@ -358,12 +433,25 @@ func (a *authenticator) siteProviders(s Site) []loginProvider {
 	return out
 }
 
+// totpStep 是密码校验通过、等待输入动态验证码时签发的凭据：验证码步骤无需再次提交密码。
+// 绑定用户凭据指纹、域名与站点，修改密码或 TOTP 后立即失效。
+type totpStep struct {
+	User  string `json:"u"`
+	Cred  string `json:"c"`
+	Host  string `json:"h"`
+	Scope string `json:"s"`
+}
+
+// totpStepTTL 为输入动态验证码的时限。
+const totpStepTTL = 5 * time.Minute
+
 func (a *authenticator) handleLogin(w http.ResponseWriter, r *http.Request, s Site, ip string) {
 	host := hostOnly(r.Host)
 	data := map[string]any{
 		"Host": host, "Action": authPath + "/login", "Next": safeNext(r.URL.Query().Get("next")),
 		"HasPassword": len(s.Users) > 0 || s.SharedUsers, "Providers": a.siteProviders(s), "StartURL": oauthStart,
-		"HasTOTP": s.SharedUsers && a.shared.get().hasTOTP(),
+		// 从验证码对话框返回时带回用户名，免得重新输入
+		"Username": r.URL.Query().Get("u"),
 	}
 	if r.URL.Path == authPath+"/logout" {
 		http.SetCookie(w, &http.Cookie{Name: cookieName(s), Value: "", Path: "/", MaxAge: -1})
@@ -374,6 +462,7 @@ func (a *authenticator) handleLogin(w http.ResponseWriter, r *http.Request, s Si
 		http.Redirect(w, r, authPath+"/login", http.StatusFound)
 		return
 	}
+	status := http.StatusOK
 	if r.Method == http.MethodPost {
 		_ = r.ParseForm()
 		data["Next"] = safeNext(r.PostForm.Get("next"))
@@ -381,22 +470,39 @@ func (a *authenticator) handleLogin(w http.ResponseWriter, r *http.Request, s Si
 		key := limitKey(ip)
 		if !a.reserve(key) {
 			data["Error"] = "失败次数过多，请稍后再试"
+		} else if token := r.PostForm.Get("pending"); token != "" && s.SharedUsers {
+			// 第二步：校验动态验证码
+			u, msg, expired := a.finishTOTPStep(token, host, s, r.PostForm.Get("code"))
+			a.release(key, msg == "")
+			if msg == "" {
+				a.issueSharedSession(w, r, s, u)
+				http.Redirect(w, r, next, http.StatusFound)
+				return
+			}
+			data["Error"] = msg
+			if !expired {
+				// 验证码错误时保持在验证码对话框，凭据仍在有效期内可继续输入
+				data["Pending"], data["Username"] = token, u.Name
+			}
 		} else {
 			user := r.PostForm.Get("username")
 			pass := r.PostForm.Get("password")
 			valid := len(s.Users) > 0 && verifyUser(s.Users, user, pass)
 			msg := "用户名或密码错误"
 			var shared AuthUser
+			needCode := false
 			if !valid && s.SharedUsers {
 				var errMsg string
-				shared, errMsg = a.loginShared(user, pass, r.PostForm.Get("code"))
+				shared, errMsg, needCode = a.loginShared(user, pass, r.PostForm.Get("code"))
 				valid = errMsg == ""
 				if !valid {
 					msg = errMsg
 				}
 			}
-			a.release(key, valid)
-			if valid {
+			// 密码正确但需要验证码：本次校验不计入失败次数，转入验证码对话框
+			a.release(key, valid || needCode)
+			switch {
+			case valid:
 				if shared.Name != "" {
 					a.issueSharedSession(w, r, s, shared)
 				} else {
@@ -404,20 +510,40 @@ func (a *authenticator) handleLogin(w http.ResponseWriter, r *http.Request, s Si
 				}
 				http.Redirect(w, r, next, http.StatusFound)
 				return
+			case needCode:
+				data["Pending"] = a.signBlob("totp-step", totpStep{User: shared.Name, Cred: a.sharedCred(shared), Host: host, Scope: s.scope}, totpStepTTL)
+				data["Username"] = shared.Name
+			default:
+				data["Error"] = msg
+				data["Username"] = user
 			}
-			data["Error"] = msg
 		}
 	}
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	w.Header().Set("Cache-Control", "no-store")
 	if _, failed := data["Error"]; failed {
-		w.WriteHeader(http.StatusUnauthorized)
+		status = http.StatusUnauthorized
 	}
-	lang := visitorLang(r)
+	lang := i18n.RequestLang(r)
 	if msg, ok := data["Error"].(string); ok {
 		data["Error"] = i18n.Tr(lang, msg)
 	}
-	_ = executeLocalized(w, "login", loginSrc, lang, data)
+	data["PageTitle"] = i18n.Tr(lang, loginTexts["pageTitle"]) + " · " + host
+	webpage.Render(w, status, "ws-login", lang, loginTexts, data)
+}
+
+// finishTOTPStep 校验验证码步骤的凭据与动态验证码；expired 为 true 表示凭据无效或已过期，需要重新输入密码。
+func (a *authenticator) finishTOTPStep(token, host string, s Site, code string) (u AuthUser, msg string, expired bool) {
+	var st totpStep
+	if err := a.verifyBlob("totp-step", token, &st); err != nil || st.Host != host || st.Scope != s.scope {
+		return AuthUser{}, "验证已超时，请重新登录", true
+	}
+	u, ok := a.shared.get().users[st.User]
+	if !ok || u.TOTPSecret == "" || !hmac.Equal([]byte(st.Cred), []byte(a.sharedCred(u))) {
+		return AuthUser{}, "验证已超时，请重新登录", true
+	}
+	if msg := a.checkTOTP(u, code); msg != "" {
+		return u, msg, false
+	}
+	return u, "", false
 }
 
 // hostOnly 去掉 Host 中的端口。

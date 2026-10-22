@@ -60,16 +60,6 @@ func (s *sharedStore) get() sharedEnv {
 	return s.env
 }
 
-// hasTOTP 判断是否有共享用户启用了 TOTP，决定登录页是否显示验证码输入框。
-func (e sharedEnv) hasTOTP() bool {
-	for _, u := range e.users {
-		if u.TOTPSecret != "" {
-			return true
-		}
-	}
-	return false
-}
-
 // ssoFor 返回 host 可使用的单点登录 Cookie 域；host 不在该域下时返回空。
 func (e sharedEnv) ssoFor(host string) string {
 	if e.domain == "" {
@@ -105,27 +95,39 @@ func (a *authenticator) sharedCred(u AuthUser) string {
 }
 
 // loginShared 用共享用户登录：校验密码与 TOTP，返回给访客的错误提示（空表示成功）。
-func (a *authenticator) loginShared(name, pass, code string) (AuthUser, string) {
+// needCode 为 true 表示密码正确，但该用户启用了 TOTP 且尚未提交验证码，应进入验证码步骤。
+func (a *authenticator) loginShared(name, pass, code string) (u AuthUser, msg string, needCode bool) {
 	env := a.shared.get()
 	u, ok := env.checkPassword(name, pass)
 	if !ok {
-		return AuthUser{}, "用户名或密码错误"
+		return AuthUser{}, "用户名或密码错误", false
 	}
 	if u.TOTPSecret == "" {
-		return u, ""
+		return u, "", false
 	}
+	if strings.TrimSpace(code) == "" {
+		return u, "请输入动态验证码", true
+	}
+	if msg := a.checkTOTP(u, code); msg != "" {
+		return AuthUser{}, msg, false
+	}
+	return u, "", false
+}
+
+// checkTOTP 校验共享用户的动态验证码，返回给访客的错误提示（空表示通过）。
+func (a *authenticator) checkTOTP(u AuthUser, code string) string {
 	code = strings.TrimSpace(code)
 	if code == "" {
-		return AuthUser{}, "请输入动态验证码"
+		return "请输入动态验证码"
 	}
 	if !auth.ValidateTOTP(u.TOTPSecret, code, time.Now()) {
-		return AuthUser{}, "动态验证码错误"
+		return "动态验证码错误"
 	}
 	// 同一验证码在有效期内只能使用一次，防止被截获后重放
 	if !a.consumeOnce("totp|"+u.Name+"|"+code, 2*time.Minute) {
-		return AuthUser{}, "动态验证码已使用，请等待下一个"
+		return "动态验证码已使用，请等待下一个"
 	}
-	return u, ""
+	return ""
 }
 
 // issueSharedSession 写出共享用户会话。配置了单点登录域且站点在该域下时写到父域，其余站点免登录。

@@ -122,7 +122,7 @@ func (l *listenerRunner) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	s := l.route(r.Host)
 	if s == nil {
-		http.NotFound(w, r)
+		writeNotFound(w, r, "站点不存在", "这个域名没有配置对应的站点，请检查访问地址是否正确。")
 		return
 	}
 	s.ServeHTTP(w, r)

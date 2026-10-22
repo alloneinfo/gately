@@ -17,9 +17,9 @@ import (
 	proxyproto "github.com/pires/go-proxyproto"
 
 	"github.com/wangwanjie/gately/internal/geoip"
-	"github.com/wangwanjie/gately/internal/i18n"
 	"github.com/wangwanjie/gately/internal/iplist"
 	"github.com/wangwanjie/gately/internal/logbuf"
+	"github.com/wangwanjie/gately/internal/webpage"
 )
 
 // SiteStats 是站点的请求统计。
@@ -551,26 +551,16 @@ func (h *siteHandler) String() string {
 	return fmt.Sprintf("%s %v", h.site.Type, h.site.Domains)
 }
 
-const errorPageSrc = `<!doctype html>
-<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>{{.Code}} {{.Title}}</title>
-<style>
-body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#f2f5f4;color:#333;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif}
-.box{background:#fff;padding:32px 36px;border-radius:12px;box-shadow:0 2px 16px rgba(0,0,0,.06);max-width:420px;margin:16px}
-.code{font-size:44px;font-weight:600;color:#0e7c66;margin:0}h1{font-size:18px;margin:8px 0}p{color:#777;font-size:14px;line-height:1.6;margin:0}
-.host{margin-top:16px;font-size:12px;color:#aaa;word-break:break-all}
-@media (prefers-color-scheme:dark){body{background:#141817;color:#ddd}.box{background:#1d2221;box-shadow:none}p{color:#999}}
-</style></head><body><div class="box"><p class="code">{{.Code}}</p><h1>{{.Title}}</h1><p>{{.Detail}}</p><div class="host">{{.Host}} · Gately</div></div></body></html>`
-
-// writeErrorPage 浏览器访问时输出简洁的错误页，其他客户端输出纯文本。
+// writeErrorPage 浏览器访问时输出样式化的错误页，其他客户端输出纯文本。
 func writeErrorPage(w http.ResponseWriter, r *http.Request, code int, title, detail string) {
-	if !strings.Contains(r.Header.Get("Accept"), "text/html") {
-		http.Error(w, fmt.Sprintf("%d %s", code, http.StatusText(code)), code)
+	webpage.Error(w, r, webpage.Problem{Code: code, Title: title, Detail: detail})
+}
+
+// writeNotFound 输出 404：浏览器看到错误页，其他客户端与 http.NotFound 一致。
+func writeNotFound(w http.ResponseWriter, r *http.Request, title, detail string) {
+	if !webpage.WantsHTML(r) {
+		http.NotFound(w, r)
 		return
 	}
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	w.Header().Set("Cache-Control", "no-store")
-	w.WriteHeader(code)
-	lang := visitorLang(r)
-	_ = executeLocalized(w, "err", errorPageSrc, lang, map[string]any{"Code": code, "Title": i18n.Tr(lang, title), "Detail": i18n.Tr(lang, detail), "Host": r.Host})
+	webpage.Error(w, r, webpage.Problem{Code: http.StatusNotFound, Title: title, Detail: detail, Home: r.URL.Path != "/"})
 }
