@@ -4,6 +4,7 @@
   "repo": "GitHub 儲存庫",
   "releases": "版本發佈",
   "feedback": "回報問題",
+  "sponsor": "贊助",
   "checkUpdate": "檢查更新",
   "newVersion": "發現新版本 {latest}（目前 {current}）",
   "upToDate": "目前已是最新版本",

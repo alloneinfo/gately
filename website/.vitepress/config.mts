@@ -43,7 +43,8 @@ function buildThemeConfig(loc: SiteLocale, pack: any): DefaultTheme.Config & Rec
       { text: pack.nav.docs, link: `${p}/docs/guide/introduction`, activeMatch: `${p}/docs/` },
       { text: pack.nav.modules, link: `${p}/docs/modules/`, activeMatch: `${p}/docs/modules/` },
       { text: pack.nav.download, link: `${p}/download` },
-      { text: pack.nav.changelog, link: `${p}/news/`, activeMatch: `${p}/news/` }
+      { text: pack.nav.changelog, link: `${p}/news/`, activeMatch: `${p}/news/` },
+      { text: pack.nav.sponsor, link: `${p}/sponsor` }
     ],
     sidebar: { [`${p}/docs/`]: buildSidebar(loc, pack) },
     editLink: { pattern: `${REPO}/edit/main/website/:path`, text: ui.editLink },
@@ -63,7 +64,8 @@ function buildThemeConfig(loc: SiteLocale, pack: any): DefaultTheme.Config & Rec
     // 首页与下载页组件使用的文案
     aiNotice: ui.aiNotice,
     home: pack.home,
-    download: pack.download
+    download: pack.download,
+    sponsor: pack.sponsor
   }
 }
 

@@ -196,6 +196,10 @@ make lint     # gofmt、go vet、前端型別檢查
 
 Bug 請提交到 [GitHub Issues](https://github.com/wangwanjie/gately/issues)，並附上[診斷包](docs/zh-TW/DIAGNOSTICS.md)（設定 → 診斷）；診斷包在本機產生，不含密碼、權杖、網域名稱和真實 IP。
 
+## 贊助
+
+Gately 的全部功能免費開放。如果它幫到了你，歡迎透過 USDT、[愛發電](https://ifdian.net/a/gately)或微信贊助，收款碼與地址見[官網贊助頁](https://gately.cn/zh-TW/sponsor)。
+
 ## Star 趨勢
 
 [![Star History Chart](https://api.star-history.com/svg?repos=wangwanjie/gately&type=Date)](https://star-history.com/#wangwanjie/gately&Date)

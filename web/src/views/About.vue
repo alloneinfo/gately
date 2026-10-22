@@ -20,6 +20,7 @@
         <el-button type="primary" tag="a" :href="REPO" target="_blank" rel="noopener" :icon="Github">{{ t('about.repo') }}</el-button>
         <el-button tag="a" :href="`${REPO}/releases`" target="_blank" rel="noopener" :icon="Package">{{ t('about.releases') }}</el-button>
         <el-button tag="a" :href="`${REPO}/issues`" target="_blank" rel="noopener" :icon="MessageSquare">{{ t('about.feedback') }}</el-button>
+        <el-button tag="a" :href="sponsorUrl" target="_blank" rel="noopener" :icon="Heart">{{ t('about.sponsor') }}</el-button>
         <el-button :icon="RefreshCw" :loading="checking" @click="checkUpdate">{{ t('about.checkUpdate') }}</el-button>
       </div>
       <div v-if="update?.hasUpdate" class="update-hint">
@@ -155,6 +156,7 @@ import {
   FolderSync,
   Github,
   Globe,
+  Heart,
   Import,
   LayoutGrid,
   LockKeyhole,
@@ -176,9 +178,11 @@ import { api, type SystemSettings, type SystemInfo, type UpdateInfo, type Upgrad
 import AppLogo from '../components/AppLogo.vue'
 import UpdateDialog from '../components/UpdateDialog.vue'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 const REPO = 'https://github.com/wangwanjie/gately'
+// 官网赞助页：简体中文在站点根，其余语言在同名子目录（与管理界面语言代码一致）
+const sponsorUrl = computed(() => (locale.value === 'zh-CN' ? 'https://gately.cn/sponsor' : `https://gately.cn/${locale.value}/sponsor`))
 const DOCKER_CMD = `docker run -d --name gately --network host \\
   -v ./gately-data:/etc/gately \\
   -v /var/run/docker.sock:/var/run/docker.sock \\

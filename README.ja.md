@@ -196,6 +196,10 @@ make lint     # gofmt、go vet、フロントエンドの型チェック
 
 不具合は [GitHub Issues](https://github.com/wangwanjie/gately/issues) に報告し、[診断パッケージ](docs/ja/DIAGNOSTICS.md)（設定 → 診断）を添付してください。診断パッケージはローカルで生成され、パスワード、トークン、ドメイン、実際の IP は含まれません。
 
+## スポンサー
+
+Gately のすべての機能は無料です。役に立ったと感じたら、USDT、[愛発電](https://ifdian.net/a/gately)、WeChat Pay で開発を支援できます。アドレスと QR コードは[スポンサーページ](https://gately.cn/ja/sponsor)にあります。
+
 ## Star 履歴
 
 [![Star History Chart](https://api.star-history.com/svg?repos=wangwanjie/gately&type=Date)](https://star-history.com/#wangwanjie/gately&Date)

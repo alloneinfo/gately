@@ -9,7 +9,8 @@
     "docs": "文档",
     "modules": "功能模块",
     "download": "下载",
-    "changelog": "更新日志"
+    "changelog": "更新日志",
+    "sponsor": "赞助"
   },
   "sidebar": {
     "groups": {
@@ -299,5 +300,19 @@
     "publishedAt": "发布于 {date}",
     "releaseNotes": "更新说明",
     "checksums": "校验和"
+  },
+  "sponsor": {
+    "cnTitle": "爱发电 / 微信",
+    "cnDesc": "使用人民币付款，适合国内用户。爱发电支持一次性自选金额，也支持按月赞助；也可以直接扫码。",
+    "afdianButton": "在爱发电赞助",
+    "afdianDesc": "手机浏览器可直接打开付款",
+    "wechat": "微信扫码",
+    "afdianQr": "爱发电扫码",
+    "cryptoTitle": "USDT（加密货币）",
+    "cryptoDesc": "适合海外用户。三条网络任选其一，地址仅接收 USDT。",
+    "cryptoWarn": "转账前请确认网络与地址匹配：ERC20 与 Arbitrum One 使用同一地址，TRC20 地址以 T 开头。转错网络或币种的资产无法找回。",
+    "copy": "复制",
+    "copied": "已复制",
+    "note": "Gately 的全部功能对每个人免费开放，赞助完全自愿。赞助会用于测试设备、服务器和域名开销，也让作者能投入更多时间维护和开发。感谢每一位支持者！"
   }
 }

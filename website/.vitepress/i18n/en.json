@@ -9,7 +9,8 @@
     "docs": "Docs",
     "modules": "Modules",
     "download": "Download",
-    "changelog": "Changelog"
+    "changelog": "Changelog",
+    "sponsor": "Sponsor"
   },
   "sidebar": {
     "groups": {
@@ -299,5 +300,19 @@
     "publishedAt": "Published {date}",
     "releaseNotes": "Release notes",
     "checksums": "Checksums"
+  },
+  "sponsor": {
+    "cnTitle": "Afdian / WeChat Pay",
+    "cnDesc": "Payments in CNY, convenient for users in mainland China. Afdian supports one-time donations of any amount as well as monthly support; you can also scan a QR code directly.",
+    "afdianButton": "Sponsor on Afdian",
+    "afdianDesc": "Opens directly in a mobile browser",
+    "wechat": "Scan with WeChat",
+    "afdianQr": "Scan for Afdian",
+    "cryptoTitle": "USDT (crypto)",
+    "cryptoDesc": "Works from anywhere in the world. Pick any of the three networks; these addresses accept USDT only.",
+    "cryptoWarn": "Before sending, make sure the network matches the address: ERC20 and Arbitrum One share one address, and the TRC20 address starts with T. Funds sent on the wrong network or as another token cannot be recovered.",
+    "copy": "Copy",
+    "copied": "Copied",
+    "note": "Every Gately feature is free for everyone, and sponsoring is entirely voluntary. Donations cover test hardware, servers and domains, and give the author more time for maintenance and new features. Thank you to every supporter!"
   }
 }

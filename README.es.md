@@ -196,6 +196,10 @@ Las preguntas, comentarios y consejos de uso son bienvenidos en el grupo de Tele
 
 Los errores se reportan en [GitHub Issues](https://github.com/wangwanjie/gately/issues); adjunta un [paquete de diagnóstico](docs/es/DIAGNOSTICS.md) (Ajustes → Diagnóstico). Se genera localmente y no contiene contraseñas, tokens, dominios ni IP reales.
 
+## Patrocinar
+
+Todas las funciones de Gately son gratuitas. Si te resulta útil, puedes apoyar el desarrollo con USDT, [Afdian](https://ifdian.net/a/gately) o WeChat Pay; las direcciones y los códigos QR están en la [página de patrocinio](https://gately.cn/es/sponsor).
+
 ## Evolución de estrellas
 
 [![Star History Chart](https://api.star-history.com/svg?repos=wangwanjie/gately&type=Date)](https://star-history.com/#wangwanjie/gately&Date)

@@ -9,7 +9,8 @@
     "docs": "文件",
     "modules": "功能模組",
     "download": "下載",
-    "changelog": "更新日誌"
+    "changelog": "更新日誌",
+    "sponsor": "贊助"
   },
   "sidebar": {
     "groups": {
@@ -299,5 +300,19 @@
     "publishedAt": "發布於 {date}",
     "releaseNotes": "更新說明",
     "checksums": "校驗碼"
+  },
+  "sponsor": {
+    "cnTitle": "愛發電 / 微信",
+    "cnDesc": "以人民幣付款，適合中國大陸使用者。愛發電支援一次性自選金額，也支援按月贊助；也可以直接掃碼。",
+    "afdianButton": "在愛發電贊助",
+    "afdianDesc": "手機瀏覽器可直接開啟付款",
+    "wechat": "微信掃碼",
+    "afdianQr": "愛發電掃碼",
+    "cryptoTitle": "USDT（加密貨幣）",
+    "cryptoDesc": "適合海外與港澳台使用者。三條網路任選其一，地址僅接收 USDT。",
+    "cryptoWarn": "轉帳前請確認網路與地址相符：ERC20 與 Arbitrum One 使用同一地址，TRC20 地址以 T 開頭。轉錯網路或幣種的資產無法找回。",
+    "copy": "複製",
+    "copied": "已複製",
+    "note": "Gately 的全部功能對每個人免費開放，贊助完全自願。贊助將用於測試設備、伺服器與網域開銷，也讓作者能投入更多時間維護與開發。感謝每一位支持者！"
   }
 }

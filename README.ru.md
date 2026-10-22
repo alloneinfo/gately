@@ -196,6 +196,10 @@ make lint     # gofmt, go vet, проверка типов фронтенда
 
 Об ошибках сообщайте в [GitHub Issues](https://github.com/wangwanjie/gately/issues) и прикладывайте [диагностический пакет](docs/ru/DIAGNOSTICS.md) (Настройки → Диагностика). Он создаётся локально и не содержит паролей, токенов, доменов и реальных IP-адресов.
 
+## Поддержать
+
+Все функции Gately бесплатны. Если проект вам полезен, поддержать разработку можно через USDT, [Afdian](https://ifdian.net/a/gately) или WeChat Pay; адреса и QR-коды — на [странице поддержки](https://gately.cn/ru/sponsor).
+
 ## История звёзд
 
 [![Star History Chart](https://api.star-history.com/svg?repos=wangwanjie/gately&type=Date)](https://star-history.com/#wangwanjie/gately&Date)

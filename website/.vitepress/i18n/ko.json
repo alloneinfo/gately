@@ -9,7 +9,8 @@
     "docs": "문서",
     "modules": "기능 모듈",
     "download": "다운로드",
-    "changelog": "변경 내역"
+    "changelog": "변경 내역",
+    "sponsor": "후원"
   },
   "sidebar": {
     "groups": {
@@ -299,5 +300,19 @@
     "publishedAt": "{date} 게시",
     "releaseNotes": "릴리스 노트",
     "checksums": "체크섬"
+  },
+  "sponsor": {
+    "cnTitle": "아이파뎬(爱发电) / WeChat Pay",
+    "cnDesc": "위안화 결제를 지원하며 중국 본토 사용자에게 편리합니다. 아이파뎬에서는 원하는 금액으로 일회성 후원이나 월간 후원을 할 수 있고, QR 코드로 바로 결제할 수도 있습니다.",
+    "afdianButton": "아이파뎬에서 후원하기",
+    "afdianDesc": "모바일 브라우저에서 바로 열립니다",
+    "wechat": "WeChat으로 스캔",
+    "afdianQr": "아이파뎬 스캔",
+    "cryptoTitle": "USDT (암호화폐)",
+    "cryptoDesc": "전 세계 어디서나 보낼 수 있습니다. 세 네트워크 중 하나를 선택하세요. 이 주소는 USDT 전용입니다.",
+    "cryptoWarn": "보내기 전에 네트워크와 주소가 맞는지 확인하세요. ERC20과 Arbitrum One은 같은 주소를 쓰고, TRC20 주소는 T로 시작합니다. 잘못된 네트워크나 다른 토큰으로 보낸 자산은 되찾을 수 없습니다.",
+    "copy": "복사",
+    "copied": "복사됨",
+    "note": "Gately의 모든 기능은 누구에게나 무료이며, 후원은 전적으로 자발적입니다. 후원금은 테스트 장비, 서버, 도메인 비용에 쓰이고, 작성자가 유지보수와 새 기능 개발에 더 많은 시간을 쓸 수 있게 해 줍니다. 후원해 주시는 모든 분께 감사드립니다!"
   }
 }

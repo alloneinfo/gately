@@ -4,6 +4,7 @@
   "repo": "Repositório no GitHub",
   "releases": "Versões",
   "feedback": "Reportar um problema",
+  "sponsor": "Apoiar",
   "checkUpdate": "Verificar atualizações",
   "newVersion": "Nova versão {latest} disponível (atual {current})",
   "upToDate": "Você está na versão mais recente",

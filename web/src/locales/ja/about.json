@@ -4,6 +4,7 @@
   "repo": "GitHub リポジトリ",
   "releases": "リリース",
   "feedback": "問題を報告",
+  "sponsor": "スポンサー",
   "checkUpdate": "アップデートを確認",
   "newVersion": "新しいバージョン {latest} があります（現在 {current}）",
   "upToDate": "最新バージョンです",

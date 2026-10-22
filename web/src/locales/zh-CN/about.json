@@ -4,6 +4,7 @@
   "repo": "GitHub 仓库",
   "releases": "版本发布",
   "feedback": "反馈问题",
+  "sponsor": "赞助",
   "checkUpdate": "检查更新",
   "newVersion": "发现新版本 {latest}（当前 {current}）",
   "upToDate": "当前已是最新版本",

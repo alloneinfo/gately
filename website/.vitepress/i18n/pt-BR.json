@@ -9,7 +9,8 @@
     "docs": "Documentação",
     "modules": "Módulos",
     "download": "Download",
-    "changelog": "Changelog"
+    "changelog": "Changelog",
+    "sponsor": "Apoiar"
   },
   "sidebar": {
     "groups": {
@@ -299,5 +300,19 @@
     "publishedAt": "Publicado em {date}",
     "releaseNotes": "Notas da versão",
     "checksums": "Checksums"
+  },
+  "sponsor": {
+    "cnTitle": "Afdian / WeChat Pay",
+    "cnDesc": "Pagamento em yuan (CNY), prático para usuários da China continental. O Afdian aceita doações únicas de qualquer valor e apoio mensal; você também pode escanear um QR code diretamente.",
+    "afdianButton": "Apoiar no Afdian",
+    "afdianDesc": "Abre direto no navegador do celular",
+    "wechat": "Escanear com WeChat",
+    "afdianQr": "Escanear para o Afdian",
+    "cryptoTitle": "USDT (criptomoeda)",
+    "cryptoDesc": "Funciona de qualquer lugar do mundo. Escolha uma das três redes; estes endereços aceitam somente USDT.",
+    "cryptoWarn": "Antes de enviar, confira se a rede corresponde ao endereço: ERC20 e Arbitrum One usam o mesmo endereço, e o endereço TRC20 começa com T. Fundos enviados pela rede errada ou em outro token não podem ser recuperados.",
+    "copy": "Copiar",
+    "copied": "Copiado",
+    "note": "Todos os recursos do Gately são gratuitos para todos, e apoiar é totalmente voluntário. As doações cobrem equipamentos de teste, servidores e domínios, e dão ao autor mais tempo para manutenção e novos recursos. Obrigado a todas as pessoas que apoiam o projeto!"
   }
 }

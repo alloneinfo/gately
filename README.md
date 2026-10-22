@@ -196,6 +196,10 @@ Questions, feedback and usage tips are welcome in the Telegram group: [t.me/gate
 
 Please report bugs in [GitHub Issues](https://github.com/wangwanjie/gately/issues) and attach a [diagnostics bundle](docs/en/DIAGNOSTICS.md) (Settings → Diagnostics); it is generated locally and contains no passwords, tokens, domains or real IPs.
 
+## Sponsor
+
+Every Gately feature is free. If it helps you, you can sponsor development with USDT, [Afdian](https://ifdian.net/a/gately) or WeChat Pay; addresses and QR codes are on the [sponsor page](https://gately.cn/en/sponsor).
+
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=wangwanjie/gately&type=Date)](https://star-history.com/#wangwanjie/gately&Date)

@@ -4,6 +4,7 @@
   "repo": "GitHub 저장소",
   "releases": "릴리스",
   "feedback": "문제 신고",
+  "sponsor": "후원",
   "checkUpdate": "업데이트 확인",
   "newVersion": "새 버전 {latest}을(를) 찾았습니다 (현재 {current})",
   "upToDate": "현재 최신 버전입니다",

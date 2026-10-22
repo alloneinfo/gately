@@ -196,6 +196,10 @@ Questions, retours et astuces d’utilisation sont les bienvenus dans le groupe 
 
 Les bugs se signalent dans [GitHub Issues](https://github.com/wangwanjie/gately/issues), avec un [paquet de diagnostic](docs/fr/DIAGNOSTICS.md) en pièce jointe (Paramètres → Diagnostic). Il est généré localement et ne contient ni mots de passe, ni jetons, ni domaines, ni IP réelles.
 
+## Soutenir
+
+Toutes les fonctionnalités de Gately sont gratuites. S'il vous est utile, vous pouvez soutenir son développement avec USDT, [Afdian](https://ifdian.net/a/gately) ou WeChat Pay ; les adresses et QR codes se trouvent sur la [page de soutien](https://gately.cn/fr/sponsor).
+
 ## Historique des étoiles
 
 [![Star History Chart](https://api.star-history.com/svg?repos=wangwanjie/gately&type=Date)](https://star-history.com/#wangwanjie/gately&Date)

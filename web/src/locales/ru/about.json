@@ -4,6 +4,7 @@
   "repo": "Репозиторий GitHub",
   "releases": "Релизы",
   "feedback": "Сообщить о проблеме",
+  "sponsor": "Поддержать",
   "checkUpdate": "Проверить обновления",
   "newVersion": "Доступна новая версия {latest} (текущая {current})",
   "upToDate": "У вас последняя версия",

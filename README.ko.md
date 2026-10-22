@@ -196,6 +196,10 @@ make lint     # gofmt, go vet, 프런트엔드 타입 검사
 
 버그는 [GitHub Issues](https://github.com/wangwanjie/gately/issues)에 등록하고 [진단 패키지](docs/ko/DIAGNOSTICS.md)(설정 → 진단)를 첨부해 주세요. 진단 패키지는 로컬에서 생성되며 비밀번호, 토큰, 도메인, 실제 IP를 포함하지 않습니다.
 
+## 후원
+
+Gately의 모든 기능은 무료입니다. 도움이 되었다면 USDT, [아이파뎬](https://ifdian.net/a/gately), WeChat Pay로 개발을 후원할 수 있으며, 주소와 QR 코드는 [후원 페이지](https://gately.cn/ko/sponsor)에 있습니다.
+
 ## Star 추이
 
 [![Star History Chart](https://api.star-history.com/svg?repos=wangwanjie/gately&type=Date)](https://star-history.com/#wangwanjie/gately&Date)
