@@ -9,7 +9,7 @@ Abaixo estão os anúncios das versões principais. Veja as [GitHub Releases](ht
 
 ## [v0.5.6.2](/pt-BR/news/v0.5.6.2)
 
-23 de outubro de 2026 · Corrige o módulo Docker que não conectava no Docker 29, a visão geral que aparecia por um instante antes da página de login e credenciais Cloudflare e registros DDNS renomeados importados do Lucky que não sincronizavam.
+23 de outubro de 2026 · Novo visual das páginas de login e de erro do serviço web, com a verificação em duas etapas em uma janela. Corrige o módulo Docker que não conectava no Docker 29, a visão geral que aparecia por um instante antes da página de login e credenciais Cloudflare e registros DDNS renomeados importados do Lucky que não sincronizavam.
 
 ## [v0.5.6.1](/pt-BR/news/v0.5.6.1)
 

@@ -9,7 +9,7 @@ Unten stehen die Ankündigungen zu wichtigen Releases. Alle Änderungen und Down
 
 ## [v0.5.6.2](/de/news/v0.5.6.2)
 
-23. Oktober 2026 · Behebt, dass das Docker-Modul unter Docker 29 keine Verbindung bekam, die Übersicht vor der Anmeldeseite aufblitzte und aus Lucky importierte Cloudflare-Zugangsdaten sowie umbenannte DDNS-Einträge nicht synchronisiert wurden.
+23. Oktober 2026 · Neu gestaltete Anmelde- und Fehlerseiten des Webdienstes, Zwei-Faktor-Bestätigung im Pop-up. Behebt, dass das Docker-Modul unter Docker 29 keine Verbindung bekam, die Übersicht vor der Anmeldeseite aufblitzte und aus Lucky importierte Cloudflare-Zugangsdaten sowie umbenannte DDNS-Einträge nicht synchronisiert wurden.
 
 ## [v0.5.6.1](/de/news/v0.5.6.1)
 

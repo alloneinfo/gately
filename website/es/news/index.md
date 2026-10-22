@@ -9,7 +9,7 @@ A continuación se listan los anuncios de las versiones principales. Consulta [G
 
 ## [v0.5.6.2](/es/news/v0.5.6.2)
 
-23 de octubre de 2026 · Corrige que el módulo Docker no pudiera conectarse con Docker 29, que el resumen apareciera un instante antes de la página de inicio de sesión y que las credenciales de Cloudflare y los registros DDNS renombrados importados de Lucky no se sincronizaran.
+23 de octubre de 2026 · Nuevo diseño de las páginas de inicio de sesión y de error del servicio web, con la verificación en dos pasos en una ventana emergente. Corrige que el módulo Docker no pudiera conectarse con Docker 29, que el resumen apareciera un instante antes de la página de inicio de sesión y que las credenciales de Cloudflare y los registros DDNS renombrados importados de Lucky no se sincronizaran.
 
 ## [v0.5.6.1](/es/news/v0.5.6.1)
 

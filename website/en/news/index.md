@@ -9,7 +9,7 @@ Announcements for major releases are listed below. See [GitHub Releases](https:/
 
 ## [v0.5.6.2](/en/news/v0.5.6.2)
 
-October 23, 2026 · Fixes the Docker module failing to connect on Docker 29, the overview flashing before the login page, and Cloudflare credentials and renamed DDNS records imported from Lucky not syncing.
+October 23, 2026 · Redesigned Web service login and error pages with two-step verification in a popup. Fixes the Docker module failing to connect on Docker 29, the overview flashing before the login page, and Cloudflare credentials and renamed DDNS records imported from Lucky not syncing.
 
 ## [v0.5.6.1](/en/news/v0.5.6.1)
 

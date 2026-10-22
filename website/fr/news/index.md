@@ -9,7 +9,7 @@ Les annonces des versions majeures sont listées ci-dessous. Consultez [GitHub R
 
 ## [v0.5.6.2](/fr/news/v0.5.6.2)
 
-23 octobre 2026 · Corrige l'échec de connexion du module Docker sous Docker 29, l'affichage furtif de la vue d'ensemble avant la page de connexion, ainsi que la synchronisation des identifiants Cloudflare et des enregistrements DDNS renommés importés de Lucky.
+23 octobre 2026 · Nouvelles pages de connexion et d'erreur du service web, avec la vérification en deux étapes dans une fenêtre. Corrige l'échec de connexion du module Docker sous Docker 29, l'affichage furtif de la vue d'ensemble avant la page de connexion, ainsi que la synchronisation des identifiants Cloudflare et des enregistrements DDNS renommés importés de Lucky.
 
 ## [v0.5.6.1](/fr/news/v0.5.6.1)
 

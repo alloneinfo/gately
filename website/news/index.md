@@ -9,7 +9,7 @@ description: Gately 各版本的发布公告与更新说明。
 
 ## [v0.5.6.2](/news/v0.5.6.2)
 
-2026 年 10 月 23 日 · 修复 Docker 29 下无法连接 Docker、未登录时先闪现总览页，以及从 Lucky 导入的 Cloudflare 与改名 DDNS 记录不同步的问题。
+2026 年 10 月 23 日 · Web 服务登录页与错误页全新设计，两步验证改为弹窗。修复 Docker 29 下无法连接 Docker、未登录时先闪现总览页，以及从 Lucky 导入的 Cloudflare 与改名 DDNS 记录不同步的问题。
 
 ## [v0.5.6.1](/news/v0.5.6.1)
 
