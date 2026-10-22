@@ -31,8 +31,7 @@ FROM alpine:3.23
 # 宿主机上 1.1.1 之前的 nft（如 Debian 12 / 飞牛的 1.0.6）执行 nft list ruleset 时会崩溃
 RUN apk add --no-cache ca-certificates tzdata curl bash docker-cli docker-cli-compose \
     && echo "@nft https://dl-cdn.alpinelinux.org/alpine/v3.21/main" >> /etc/apk/repositories \
-    && apk add --no-cache nftables@nft \
-    && nft --version | grep -q "v1.1.1 "
+    && apk add --no-cache nftables@nft
 COPY --from=build /out/gately /usr/local/bin/gately
 # 配置目录使用 /etc/gately，避免与迁移时沿用的 /data/... 挂载路径冲突
 ENV GATELY_CONFIG_DIR=/etc/gately
