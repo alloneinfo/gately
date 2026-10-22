@@ -56,7 +56,8 @@ web/                   前端專案，建置產物由 web/embed.go 嵌入
 | ✅ M8 可信與維運 | 操作稽核日誌、設定歷史與回溯、宣告式設定目錄；Passkey 登入與唯讀帳號；ACME HTTP-01；HTTP/3；全域 Prometheus 指標與 Grafana 面板；網路自我檢測與首次啟動引導；DDNS 新增 Route 53、OVH、Gandi、NS1、Bunny、Namecheap、DynDNS2；通知新增 ntfy、Gotify、Pushover、Discord、Slack、Server酱、PushPlus 與規則範本；發布產物 cosign 簽章、建置來源證明與 SBOM；systemd 與 OpenWrt 服務範本 | WebAuthn 以軟體驗證器端對端測試；Route 53 簽章經 AWS 官方 SigV4 測試向量校驗；HTTP/3 以 quic-go 用戶端實測 |
 | ✅ M8.5 安裝與升級 | 飛牛 fnOS 原生應用（.fpk，接入統一閘道與飛牛登入狀態）；Linux 二進位檔線上升級；OpenWrt 安裝套件（24.10 及以前的 .ipk、25.12 起的 .apk） | fpk 在飛牛虛擬機實測；OpenWrt 安裝套件在 24.10 / 25.12 官方 rootfs 容器與 iStoreOS 實測，CI 冒煙測試涵蓋安裝與移除 |
 | ✅ M8.6 遷移與維運 | 匯入 nginx 設定（`nginx -T`，含 include 展開、upstream、Authelia 的 `auth_request`）；憑證自動部署（經 SSH 推送並執行指令、重新啟動 Docker 容器）；WAF 請求內容檢查上限、超過上限只檢查前段與依路徑略過；訂閱 IP 清單（定時重新整理、站台與路徑規則引用）；自檢新增 HTTPS 站台憑證涵蓋與 frp 代理衝突；線上升級支援四段版本號 | nginx 匯入以真實正式環境設定（77 個站台、Authelia、upstream）驗證；SSH 推送以 SFTP 測試伺服器端對端測試；WAF 以 2 MB 請求內容驗證拒絕、只檢查前段與略過路徑 |
-| M9 待定 | 全域 IP 過濾、多管理員與細粒度角色 | 視社群需求排程 |
+| ✅ M8.7 入侵防護 | 類 fail2ban 的日誌規則（日誌檔案、systemd 日誌、命令輸出、Docker 容器日誌、管理後台登入失敗、WAF 攔截）與常見服務範本；誘餌連接埠與連接埠掃描偵測；統一封鎖清單（合併 Web 服務的驗證失敗封鎖，持久保存、遞增時長、手動網段與永久封鎖、白名單）；連接埠轉發、Web 服務、STUN、WebDAV、FTP 與管理後台都拒絕被封鎖的位址；封鎖同步到 nftables（獨立的 `inet gately` 表）在核心層丟棄 | 在 fnOS（nftables 1.0.6）與 iStoreOS 24.10（nftables 1.1.1）的獨立網路命名空間中驗證誘餌連接埠、掃描偵測（IPv4/IPv6）、四種日誌來源、持久保存與規則自我修復；Docker 容器驗證權限偵測與使用者態誘餌連接埠回退 |
+| M9 待定 | 多管理員與細粒度角色 | 視社群需求排程 |
 
 ## 設計取捨
 

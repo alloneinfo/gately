@@ -12,6 +12,7 @@ Gately 的每项能力是一个独立模块，可单独启停、单独配置，�
 | SSL 证书 | ACME DNS-01 自动签发与续期、上传、映射到目录并执行脚本 | [查看](/docs/modules/ssl) |
 | Web 服务 | 反向代理、重定向、静态文件、HTTPS、认证、访问控制、负载均衡与健康检查、缓存与限流、访问统计 | [查看](/docs/modules/web) |
 | WAF 防火墙 | Coraza + OWASP CRS v4 | [查看](/docs/modules/waf) |
+| 入侵防护 | 日志规则（类 fail2ban）、诱饵端口、端口扫描检测，封禁同步到 nftables | [查看](/docs/modules/guard) |
 | Tailscale / frp / cloudflared | 托管官方二进制的组网与内网穿透 | [查看](/docs/modules/tunnels) |
 | Docker 管理 | 容器创建与编辑、日志与终端、Compose、镜像更新与升级、网络与卷 | [查看](/docs/modules/docker) |
 | Web 终端 | SSH、Telnet、本机 Shell、SFTP 文件管理、持久会话 | [查看](/docs/modules/terminal) |

@@ -5,7 +5,7 @@
 Image: `ghcr.io/wangwanjie/gately`, verfügbar für amd64, arm64 und arm/v7.
 
 ```bash
-docker run -d --name gately --network host \
+docker run -d --name gately --network host --cap-add NET_ADMIN \
   -v ./gately-data:/etc/gately \
   -v /var/run/docker.sock:/var/run/docker.sock \
   ghcr.io/wangwanjie/gately:latest
@@ -21,6 +21,9 @@ services:
     restart: unless-stopped
     # Portweiterleitung, STUN-Traversal und Web-Dienste lauschen direkt auf Ports des Hosts
     network_mode: host
+    # Der Einbruchschutz schreibt Sperren in die Firewall des Hosts (bei Bedarf entfernen)
+    cap_add:
+      - NET_ADMIN
     volumes:
       # Konfigurationsverzeichnis (einfaches JSON, kann in Git gesichert werden; ssl.json enthält private Zertifikatsschlüssel)
       - ./data:/etc/gately
@@ -29,6 +32,8 @@ services:
     environment:
       - TZ=Asia/Shanghai
 ```
+
+`--cap-add NET_ADMIN` und `cap_add` erlauben dem [Einbruchschutz](/de/docs/modules/guard), Sperren in die nftables-Firewall des Hosts zu schreiben. Sie können sie weglassen; Sperren gelten dann weiterhin für Gatelys eigene Dienste.
 
 Das Image enthält `sh`, `bash` und `curl`, sodass gängige Benachrichtigungsskripte direkt laufen.
 

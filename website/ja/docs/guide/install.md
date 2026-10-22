@@ -5,7 +5,7 @@
 イメージのアドレスは `ghcr.io/wangwanjie/gately` で、amd64、arm64、arm/v7 に対応しています。
 
 ```bash
-docker run -d --name gately --network host \
+docker run -d --name gately --network host --cap-add NET_ADMIN \
   -v ./gately-data:/etc/gately \
   -v /var/run/docker.sock:/var/run/docker.sock \
   ghcr.io/wangwanjie/gately:latest
@@ -21,6 +21,9 @@ services:
     restart: unless-stopped
     # ポート転送、STUN 穿孔、Web サービスはいずれもホストのポートを直接待ち受ける必要があります
     network_mode: host
+    # 侵入防御がブロックをホストのファイアウォールに書き込みます（不要なら削除）
+    cap_add:
+      - NET_ADMIN
     volumes:
       # 設定ディレクトリ（平文の JSON。git でのバックアップも可能。ssl.json には証明書の秘密鍵が含まれます）
       - ./data:/etc/gately
@@ -29,6 +32,8 @@ services:
     environment:
       - TZ=Asia/Shanghai
 ```
+
+`--cap-add NET_ADMIN` と `cap_add` は、[侵入防御](/ja/docs/modules/guard)がブロックをホストの nftables ファイアウォールに書き込むためのものです。不要なら外してもかまいません。その場合もブロックは Gately 自身のサービスに適用されます。
 
 イメージには `sh`、`bash`、`curl` が含まれているため、一般的な通知スクリプトはそのまま実行できます。
 

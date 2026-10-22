@@ -53,6 +53,7 @@ export const sidebarGroups: SidebarGroup[] = [
       'modules/ssl',
       'modules/web',
       'modules/waf',
+      'modules/guard',
       'modules/tunnels',
       'modules/docker',
       'modules/terminal',

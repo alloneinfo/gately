@@ -42,6 +42,7 @@ Gately は完全なオープンソースで、ユーザーとコミュニティ�
 | Cloudflare トンネル | cloudflared のトークントンネルと trycloudflare の一時トンネル、複数トンネル、自動再起動、パブリックアドレス表示 |
 | Web サービス | ドメインごとのリバースプロキシ／リダイレクト／静的ファイル／固定テキスト、HTTPS と HTTP/3（QUIC）、WebSocket、PROXY プロトコルの送受信、Basic 認証、Web 認証、GitHub/Google/QQ/OIDC ログイン、TOTP による 2 段階認証とサブドメイン間のシングルサインオンに対応した共有ユーザー、Authelia などの外部サービスへのフォワード認証、IP 許可・拒否リストと定期更新される購読 IP リスト（中国の省・市の IP 範囲など）、パスルール、一時共有リンク、認証失敗時の自動ブロック、GeoIP による国別フィルタ、パスごとのバックエンド、アクセスされたドメインを SNI として送る HTTPS バックエンド、バックエンドの重み／スタンバイ／負荷分散ポリシー、アクティブ／パッシブヘルスチェック、圧縮、レート制限、レスポンスキャッシュ、パス書き換え、拡張子なし URL とカスタム 404 ページに対応した静的サイト、サイトの変更時に既存の接続を切断しない、1 分単位のアクセス統計と Prometheus メトリクス |
 | WAF ファイアウォール | Coraza + OWASP CRS v4、ファイル単位のルール有効化、カスタム SecLang、ブロック／検知のみ、リクエストボディの検査上限を調整でき、上限超過時は先頭部分のみ検査またはパス単位で省略できるため、クラウドドライブや WebDAV などのアップロード用サイトにも WAF を適用可能 |
+| 侵入防御 | fail2ban 風のログルール（ログファイル、systemd ジャーナル、コマンド出力、Docker コンテナのログ、管理画面のログイン失敗、WAF ブロック）、SSH・Nginx・Vaultwarden などのテンプレート、おとりポートとポートスキャン検出、手動のネットワーク・永久ブロック、段階的な期間、ホワイトリストを備えた統一ブロック一覧。ブロックはシステムファイアウォール（nftables）に同期してカーネルで破棄し、nftables のない環境では Gately 自身のサービスに適用 |
 | Docker 管理 | コンテナの作成と編集、ログとターミナル、Compose、イメージ更新チェックとワンクリックアップグレード（失敗時は自動ロールバック）、ネットワークとボリューム |
 | Web ターミナル | SSH（ホストキーは初回接続時に信頼）、Telnet、ローカルシェル（既定は無効）。プロキシ、永続セッション、SFTP ファイル管理、2FA とプロトコル確認、クイックコマンド、画面分割 |
 | ネットワーク診断 | Ping、トレースルート、ポート探査、DNS 照会、速度測定、LAN スキャン |
@@ -88,7 +89,7 @@ Gately は完全なオープンソースで、ユーザーとコミュニティ�
 イメージは amd64、arm64、arm/v7 に対応しています。
 
 ```bash
-docker run -d --name gately --network host \
+docker run -d --name gately --network host --cap-add NET_ADMIN \
   -v ./gately-data:/etc/gately \
   -v /var/run/docker.sock:/var/run/docker.sock \
   ghcr.io/wangwanjie/gately:latest
@@ -98,7 +99,7 @@ docker run -d --name gately --network host \
 
 パスワードを忘れたときや 2 段階認証アプリを紛失したときは、サーバー上で `gately reset-password` または `gately reset-totp` を実行します（Docker では `docker exec -it gately gately reset-password`）。確認するとすぐに反映されます。詳しくは[パスワードと 2 段階認証のリセット](https://gately.cn/ja/docs/guide/install#reset)を参照してください。
 
-ポート転送、STUN、Web サービスはホストのポートで待ち受けるため、`--network host` を推奨します。Docker 管理が不要な場合は `docker.sock` のマウントを外せます。
+ポート転送、STUN、Web サービスはホストのポートで待ち受けるため、`--network host` を推奨します。Docker 管理が不要な場合は `docker.sock` のマウントを外せます。`--cap-add NET_ADMIN` は侵入防御がブロックをホストの nftables ファイアウォールに書き込むためのもので、付けない場合もブロックは Gately 自身のサービスに適用されます。
 
 ### バイナリ
 

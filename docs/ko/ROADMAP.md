@@ -56,7 +56,8 @@ web/                   프런트엔드 프로젝트, 빌드 결과물은 web/emb
 | ✅ M8 신뢰성과 운영 | 작업 감사 로그, 설정 기록과 롤백, 선언적 설정 디렉터리. 패스키 로그인과 읽기 전용 계정. ACME HTTP-01. HTTP/3. 전역 Prometheus 메트릭과 Grafana 대시보드. 네트워크 자가 점검과 최초 실행 안내. DDNS에 Route 53, OVH, Gandi, NS1, Bunny, Namecheap, DynDNS2 추가. 알림에 ntfy, Gotify, Pushover, Discord, Slack, ServerChan, PushPlus와 규칙 템플릿 추가. 릴리스 결과물의 cosign 서명, 빌드 출처 증명, SBOM. systemd와 OpenWrt 서비스 템플릿 | WebAuthn은 소프트웨어 인증기로 종단 간 테스트. Route 53 서명은 AWS 공식 SigV4 테스트 벡터로 검증. HTTP/3는 quic-go 클라이언트로 실측 |
 | ✅ M8.5 설치와 업그레이드 | fnOS 네이티브 앱(.fpk, 통합 게이트웨이와 fnOS 로그인 상태 연동). Linux 바이너리 온라인 업그레이드. OpenWrt 설치 패키지(24.10 이하용 .ipk, 25.12 이상용 .apk) | fpk는 fnOS 가상 머신에서 실측. OpenWrt 설치 패키지는 24.10 / 25.12 공식 rootfs 컨테이너와 iStoreOS에서 실측, CI 스모크 테스트가 설치와 제거를 검증 |
 | ✅ M8.6 마이그레이션과 운영 | nginx 설정 가져오기(`nginx -T`, include 펼치기, upstream, Authelia의 `auth_request` 포함). 인증서 자동 배포(SSH로 업로드 후 명령 실행, Docker 컨테이너 재시작). WAF 요청 본문 검사 한도, 한도 초과 시 앞부분만 검사, 경로별 건너뛰기. 구독 IP 목록(주기적 갱신, 사이트와 경로 규칙에서 참조). 자가 점검에 HTTPS 사이트 인증서 적용 여부와 frp 프록시 충돌 추가. 온라인 업그레이드에서 네 자리 버전 번호 지원 | nginx 가져오기는 실제 운영 설정(사이트 77개, Authelia, upstream)으로 검증. SSH 업로드는 SFTP 테스트 서버로 종단 간 테스트. WAF는 2 MB 요청 본문으로 거부, 앞부분만 검사, 경로 건너뛰기를 검증 |
-| M9 미정 | 전역 IP 필터링, 다중 관리자와 세분화된 역할 | 커뮤니티 요구에 따라 일정 결정 |
+| ✅ M8.7 침입 방지 | fail2ban 방식 로그 규칙(로그 파일, systemd 저널, 명령 출력, Docker 컨테이너 로그, 관리 콘솔 로그인 실패, WAF 차단)과 일반 서비스 템플릿, 미끼 포트와 포트 스캔 탐지, 통합 차단 목록(웹 서비스 인증 실패 차단 통합, 저장, 점진적 시간, 수동 네트워크·영구 차단, 화이트리스트), 포트 포워딩·웹 서비스·STUN·WebDAV·FTP·관리 콘솔에서 차단된 주소 거부, 차단을 nftables(별도 `inet gately` 테이블)에 동기화해 커널에서 삭제 | fnOS(nftables 1.0.6)와 iStoreOS 24.10(nftables 1.1.1)의 독립 네트워크 네임스페이스에서 미끼 포트, 스캔 탐지(IPv4/IPv6), 네 가지 로그 출처, 저장과 규칙 자동 복구를 검증. Docker 컨테이너에서 권한 판정과 사용자 공간 미끼 포트 전환을 검증 |
+| M9 미정 | 다중 관리자와 세분화된 역할 | 커뮤니티 요구에 따라 일정 결정 |
 
 ## 설계상 선택
 

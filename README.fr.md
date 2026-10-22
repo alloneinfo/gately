@@ -42,6 +42,7 @@ Gately est entièrement open source afin que les utilisateurs et la communauté 
 | Tunnel Cloudflare | Tunnel à jeton cloudflared et tunnel temporaire trycloudflare, plusieurs tunnels, redémarrage automatique, affichage de l'adresse publique |
 | Service web | Reverse proxy/redirection/fichiers statiques/texte fixe par domaine ; HTTPS et HTTP/3 (QUIC) ; WebSocket ; envoi et réception du protocole PROXY ; authentification de base, authentification web, connexion GitHub/Google/QQ/OIDC, utilisateurs partagés avec vérification en deux étapes TOTP et authentification unique entre sous-domaines, authentification déléguée à un service externe comme Authelia ; listes blanche et noire d'IP et listes d'IP abonnées actualisées périodiquement (par exemple les plages d'IP par province ou ville), règles par chemin, liens de partage temporaires, bannissement automatique après échecs d'authentification, filtrage par pays GeoIP ; backends par chemin, backends HTTPS recevant le domaine visité comme SNI, poids des backends/secours/politiques d'équilibrage de charge, contrôles de santé actifs et passifs, compression, limitation de débit, cache des réponses, réécriture de chemins ; sites statiques avec URL sans extension et page 404 personnalisée ; les modifications de site s'appliquent sans couper les connexions ouvertes ; statistiques d'accès à la minute et métriques Prometheus |
 | Pare-feu WAF | Coraza + OWASP CRS v4, activation des règles par fichier, SecLang personnalisé, blocage/détection seule ; limite d'inspection du corps de requête réglable, avec inspection du seul début ou exemption par chemin au-delà de la limite, pour protéger aussi les sites de cloud personnel ou WebDAV qui reçoivent des envois |
+| Prévention d'intrusion | Règles de journaux à la fail2ban (fichiers journaux, journal systemd, sortie de commande, journaux de conteneurs Docker, échecs de connexion à la console, blocages du WAF) avec des modèles pour SSH, Nginx, Vaultwarden et d'autres ; ports pièges et détection de scan ; une liste de bannissement avec bannissements manuels de réseaux CIDR et permanents, durées progressives et liste blanche ; les bannissements sont synchronisés avec le pare-feu du système (nftables) et rejetés dans le noyau, ou s'appliquent aux services de Gately là où nftables est absent |
 | Gestion Docker | Création et édition de conteneurs, journaux et terminal, Compose, vérification des mises à jour d'images et mise à niveau en un clic (retour arrière automatique en cas d'échec), réseaux et volumes |
 | Terminal web | SSH (confiance dans la clé d'hôte à la première connexion), Telnet, shell local (désactivé par défaut) ; proxy, sessions persistantes, gestion de fichiers SFTP, 2FA et confirmation du protocole, commandes rapides, écran partagé |
 | Diagnostic réseau | Ping, traceroute, sondage de ports, requêtes DNS, test de débit, scan du réseau local |
@@ -88,7 +89,7 @@ Méthode de mesure :
 L'image prend en charge amd64, arm64 et arm/v7 :
 
 ```bash
-docker run -d --name gately --network host \
+docker run -d --name gately --network host --cap-add NET_ADMIN \
   -v ./gately-data:/etc/gately \
   -v /var/run/docker.sock:/var/run/docker.sock \
   ghcr.io/wangwanjie/gately:latest
@@ -98,7 +99,7 @@ Ouvrez `http://<IP de l'appareil>:16680`, connectez-vous avec le compte par déf
 
 En cas d'oubli du mot de passe ou de perte de l'application d'authentification, exécutez `gately reset-password` ou `gately reset-totp` sur le serveur (avec Docker : `docker exec -it gately gately reset-password`) ; la réinitialisation s'applique dès la confirmation. Consultez [Réinitialiser le mot de passe et l'authentification à deux facteurs](https://gately.cn/fr/docs/guide/install#reset).
 
-La redirection de ports, STUN et le service web doivent écouter sur les ports de l'hôte ; `--network host` est recommandé. Si vous n'avez pas besoin de la gestion Docker, vous pouvez supprimer le montage de `docker.sock`.
+La redirection de ports, STUN et le service web doivent écouter sur les ports de l'hôte ; `--network host` est recommandé. Si vous n'avez pas besoin de la gestion Docker, vous pouvez supprimer le montage de `docker.sock`. `--cap-add NET_ADMIN` permet à la prévention d'intrusion d'écrire les bannissements dans le pare-feu nftables de l'hôte ; sans lui, les bannissements s'appliquent toujours aux services de Gately.
 
 ### Binaire
 

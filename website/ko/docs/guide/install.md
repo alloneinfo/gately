@@ -5,7 +5,7 @@
 이미지 주소는 `ghcr.io/wangwanjie/gately`이며 amd64, arm64, arm/v7을 지원합니다.
 
 ```bash
-docker run -d --name gately --network host \
+docker run -d --name gately --network host --cap-add NET_ADMIN \
   -v ./gately-data:/etc/gately \
   -v /var/run/docker.sock:/var/run/docker.sock \
   ghcr.io/wangwanjie/gately:latest
@@ -21,6 +21,9 @@ services:
     restart: unless-stopped
     # 포트 포워딩, STUN 통과, 웹 서비스는 모두 호스트 포트를 직접 수신해야 합니다
     network_mode: host
+    # 침입 방지가 차단을 호스트 방화벽에 기록합니다(필요 없으면 삭제)
+    cap_add:
+      - NET_ADMIN
     volumes:
       # 설정 디렉터리 (일반 JSON, git 백업 가능. ssl.json에는 인증서 개인 키가 들어 있습니다)
       - ./data:/etc/gately
@@ -29,6 +32,8 @@ services:
     environment:
       - TZ=Asia/Shanghai
 ```
+
+`--cap-add NET_ADMIN`과 `cap_add`는 [침입 방지](/ko/docs/modules/guard)가 차단을 호스트의 nftables 방화벽에 기록하는 데 쓰입니다. 필요 없으면 빼도 되며, 이 경우에도 차단은 Gately 자체 서비스에 적용됩니다.
 
 이미지에는 `sh`, `bash`, `curl`이 내장되어 있어 일반적인 알림 스크립트를 바로 실행할 수 있습니다.
 

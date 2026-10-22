@@ -34,6 +34,7 @@
       "modules/ssl": "SSL-сертификаты",
       "modules/web": "Веб-службы",
       "modules/waf": "Брандмауэр WAF",
+      "modules/guard": "Защита от вторжений",
       "modules/tunnels": "Tailscale / frp / cloudflared",
       "modules/docker": "Управление Docker",
       "modules/terminal": "Веб-терминал",

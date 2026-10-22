@@ -42,6 +42,7 @@ Gately 完全开源，用户和社区可以直接审阅源码与配置。对于�
 | Cloudflare 隧道 | cloudflared 令牌隧道与 trycloudflare 临时隧道，多隧道、自动重启、公网地址展示 |
 | Web 服务 | 按域名反向代理/重定向/静态文件/固定文本；HTTPS 与 HTTP/3（QUIC）；WebSocket；PROXY 协议收发；基本认证、网页认证、GitHub/Google/QQ/OIDC 登录、带 TOTP 二次验证并可跨子域名单点登录的共享用户、转发认证到 Authelia 等外部服务；IP 黑白名单与定时刷新的订阅 IP 列表（如省市 IP 段）、路径规则、临时分享链接、认证失败自动封禁、GeoIP 国家过滤；按路径分流后端、HTTPS 后端按访问域名发送 SNI、后端权重/备用/负载均衡策略、主动与被动健康检查、压缩、限流、响应缓存、路径重写；静态站点支持无扩展名地址与自定义 404 页；修改站点不会断开已有连接；分钟级访问统计与 Prometheus 指标 |
 | WAF 防火墙 | Coraza + OWASP CRS v4，可按文件启用规则、自定义 SecLang、拦截/仅检测；请求体检查上限可调，超限时只检查前段或按路径跳过，网盘、WebDAV 等上传站点也能挂 WAF |
+| 入侵防护 | 类 fail2ban 的日志规则（日志文件、systemd 日志、命令输出、Docker 容器日志、管理后台登录失败、WAF 拦截），内置 SSH、Nginx、Vaultwarden 等模板；诱饵端口与端口扫描检测；统一封禁表，支持手动网段与永久封禁、递增时长与白名单；封禁同步到系统防火墙（nftables）在内核层丢弃，没有 nftables 的平台对 Gately 自身的服务生效 |
 | Docker 管理 | 容器创建与编辑、日志与终端、Compose、镜像更新检查与一键升级（失败自动回滚）、网络与卷 |
 | Web 终端 | SSH（主机密钥首次信任）、Telnet、本机 Shell（默认关闭）；代理、持久会话、SFTP 文件管理、2FA 与协议确认、快捷命令、分屏 |
 | 网络诊断 | Ping、路由追踪、端口探测、DNS 查询、测速、局域网扫描 |
@@ -88,7 +89,7 @@ Gately 完全开源，用户和社区可以直接审阅源码与配置。对于�
 镜像支持 amd64、arm64、arm/v7：
 
 ```bash
-docker run -d --name gately --network host \
+docker run -d --name gately --network host --cap-add NET_ADMIN \
   -v ./gately-data:/etc/gately \
   -v /var/run/docker.sock:/var/run/docker.sock \
   ghcr.io/wangwanjie/gately:latest
@@ -98,7 +99,7 @@ docker run -d --name gately --network host \
 
 忘记密码或丢失两步验证器时，在服务器上运行 `gately reset-password` 或 `gately reset-totp`（Docker 为 `docker exec -it gately gately reset-password`），确认后立即生效，详见[重置密码与两步验证](https://gately.cn/docs/guide/install#reset)。
 
-端口转发、STUN、Web 服务需要监听宿主机端口，推荐 `--network host`。不需要 Docker 管理时可去掉 `docker.sock` 挂载。
+端口转发、STUN、Web 服务需要监听宿主机端口，推荐 `--network host`。不需要 Docker 管理时可去掉 `docker.sock` 挂载。`--cap-add NET_ADMIN` 供入侵防护把封禁写入宿主机的 nftables 防火墙；不加时封禁仍对 Gately 自身的服务生效。
 
 ### 二进制
 

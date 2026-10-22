@@ -34,6 +34,7 @@
       "modules/ssl": "SSL-Zertifikate",
       "modules/web": "Web-Dienste",
       "modules/waf": "WAF-Firewall",
+      "modules/guard": "Einbruchschutz",
       "modules/tunnels": "Tailscale / frp / cloudflared",
       "modules/docker": "Docker-Verwaltung",
       "modules/terminal": "Web-Terminal",

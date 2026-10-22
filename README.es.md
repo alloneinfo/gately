@@ -42,6 +42,7 @@ Gately es totalmente abierto para que usuarios y comunidad puedan revisar direct
 | Túnel Cloudflare | Túnel con token de cloudflared y túnel temporal de trycloudflare, varios túneles, reinicio automático, visualización de la dirección pública |
 | Servicio web | Proxy inverso/redirección/archivos estáticos/texto fijo por dominio; HTTPS y HTTP/3 (QUIC); WebSocket; envío y recepción del protocolo PROXY; autenticación básica, autenticación web, inicio de sesión con GitHub/Google/QQ/OIDC, usuarios compartidos con verificación en dos pasos TOTP e inicio de sesión único entre subdominios, autenticación delegada (forward auth) a un servicio externo como Authelia; listas blancas y negras de IP y listas de IP suscritas con actualización periódica (como rangos de IP por provincia o ciudad), reglas por ruta, enlaces temporales para compartir, bloqueo automático tras fallos de autenticación, filtrado de países con GeoIP; backends por ruta, backends HTTPS que reciben como SNI el dominio visitado, pesos de backend/respaldo/balanceo de carga, comprobaciones de salud activas y pasivas, compresión, limitación de tasa, caché de respuestas, reescritura de rutas; sitios estáticos con URL limpias y una página 404 personalizada; los cambios en los sitios se aplican sin cortar las conexiones abiertas; estadísticas de acceso por minuto y métricas de Prometheus |
 | Cortafuegos WAF | Coraza + OWASP CRS v4, activación de reglas por archivo, SecLang personalizado, bloqueo/solo detección; límite de inspección del cuerpo de la solicitud ajustable, con inspección solo de la primera parte u omisión por ruta al superarlo, para poder proteger con WAF también nubes personales, WebDAV y otros sitios de subida |
+| Prevención de intrusiones | Reglas de registros al estilo fail2ban (archivos de registro, diario de systemd, salida de comandos, registros de contenedores Docker, inicios de sesión fallidos en el panel, bloqueos del WAF) con plantillas para SSH, Nginx, Vaultwarden y más; puertos trampa y detección de escaneos; una lista de bloqueos con bloqueos manuales de redes CIDR y permanentes, duraciones progresivas y lista blanca; los bloqueos se sincronizan con el cortafuegos del sistema (nftables) y se descartan en el kernel, o se aplican a los servicios de Gately donde no hay nftables |
 | Gestión de Docker | Creación y edición de contenedores, registros y terminal, Compose, comprobación de actualizaciones de imágenes y actualización con un clic (reversión automática si falla), redes y volúmenes |
 | Terminal web | SSH (confianza en la clave del host en el primer uso), Telnet, shell local (desactivado por defecto); proxy, sesiones persistentes, gestión de archivos SFTP, 2FA y confirmación de protocolo, comandos rápidos, paneles divididos |
 | Diagnóstico de red | Ping, traceroute, sondeo de puertos, consultas DNS, prueba de velocidad, escaneo de la red local |
@@ -88,7 +89,7 @@ Cómo se midió:
 La imagen es compatible con amd64, arm64 y arm/v7:
 
 ```bash
-docker run -d --name gately --network host \
+docker run -d --name gately --network host --cap-add NET_ADMIN \
   -v ./gately-data:/etc/gately \
   -v /var/run/docker.sock:/var/run/docker.sock \
   ghcr.io/wangwanjie/gately:latest
@@ -98,7 +99,7 @@ Abre `http://<IP del dispositivo>:16680`, inicia sesión con el usuario predeter
 
 Si olvidas la contraseña o pierdes el autenticador, ejecuta `gately reset-password` o `gately reset-totp` en el servidor (con Docker, `docker exec -it gately gately reset-password`); el cambio se aplica en cuanto lo confirmas. Consulta [Restablecer la contraseña y la verificación en dos pasos](https://gately.cn/es/docs/guide/install#reset).
 
-El reenvío de puertos, STUN y el servicio web necesitan escuchar puertos del host, por lo que se recomienda `--network host`. Si no necesitas la gestión de Docker, puedes quitar el montaje de `docker.sock`.
+El reenvío de puertos, STUN y el servicio web necesitan escuchar puertos del host, por lo que se recomienda `--network host`. Si no necesitas la gestión de Docker, puedes quitar el montaje de `docker.sock`. `--cap-add NET_ADMIN` permite que Prevención de intrusiones escriba los bloqueos en el cortafuegos nftables del host; sin él, los bloqueos siguen aplicándose a los servicios de Gately.
 
 ### Binario
 

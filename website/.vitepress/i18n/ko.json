@@ -34,6 +34,7 @@
       "modules/ssl": "SSL 인증서",
       "modules/web": "웹 서비스",
       "modules/waf": "WAF 방화벽",
+      "modules/guard": "침입 방지",
       "modules/tunnels": "Tailscale / frp / cloudflared",
       "modules/docker": "Docker 관리",
       "modules/terminal": "웹 터미널",

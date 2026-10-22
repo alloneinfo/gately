@@ -148,6 +148,8 @@ Un visitante abre `https://dominio/cualquier-ruta?_gs=token` para canjear una se
 
 La lista de bloqueos de «Ajustes globales» muestra las IP bloqueadas actualmente, el motivo (fallos de autenticación repetidos o bloqueo manual) y la hora de expiración, y cada entrada se puede levantar con «Desbloquear». También puedes bloquear manualmente: introduce una IP y un número de horas (de 1 a 720, es decir, 30 días como máximo); la API usa 24 horas por defecto.
 
+La lista de bloqueos se comparte con [Prevención de intrusiones](/es/docs/modules/guard): con el módulo activado, aquí solo se muestra el número de bloqueos y un enlace a su página para gestionarlos. Los bloqueos también afectan al reenvío de puertos, STUN y otros servicios, y se descartan en el cortafuegos del sistema si la sincronización está activada; con «Ignorar direcciones de la LAN» activado, esas direcciones nunca se bloquean automáticamente.
+
 ### Filtro de países con GeoIP
 
 El «Filtro de países» de un sitio tiene tres modos: desactivado, permitir solo y denegar. Introduce códigos de país ISO de dos letras separados por comas, como `CN, HK, US`. Cuando está activado se requiere al menos un país.

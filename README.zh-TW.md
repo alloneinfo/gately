@@ -42,6 +42,7 @@ Gately 完全開源，使用者和社群可以直接檢視原始碼與設定。�
 | Cloudflare 通道 | cloudflared 權杖通道與 trycloudflare 臨時通道，多通道、自動重啟、公開位址顯示 |
 | Web 服務 | 依網域反向代理／重新導向／靜態檔案／固定文字；HTTPS 與 HTTP/3（QUIC）；WebSocket；PROXY 協定收發；基本驗證、網頁驗證、GitHub/Google/QQ/OIDC 登入、支援 TOTP 二次驗證並可跨子網域單一登入的共用使用者、轉發認證到 Authelia 等外部服務；IP 黑白名單與定時重新整理的訂閱 IP 清單（如省市 IP 段）、路徑規則、臨時分享連結、驗證失敗自動封鎖、GeoIP 國家過濾；依路徑分流後端、HTTPS 後端依造訪網域傳送 SNI、後端權重／備援／負載平衡策略、主動與被動健康檢查、壓縮、限流、回應快取、路徑改寫；靜態站台支援無副檔名網址與自訂 404 頁面；修改站台不會中斷既有連線；分鐘級存取統計與 Prometheus 指標 |
 | WAF 防火牆 | Coraza + OWASP CRS v4，可依檔案啟用規則、自訂 SecLang、攔截／僅偵測；請求內容檢查上限可調，超過上限時只檢查前段或依路徑略過，網盤、WebDAV 等上傳站台也能掛上 WAF |
+| 入侵防護 | 類 fail2ban 的日誌規則（日誌檔案、systemd 日誌、命令輸出、Docker 容器日誌、管理後台登入失敗、WAF 攔截），內建 SSH、Nginx、Vaultwarden 等範本；誘餌連接埠與連接埠掃描偵測；統一封鎖清單，支援手動網段與永久封鎖、遞增時長與白名單；封鎖同步到系統防火牆（nftables）在核心層丟棄，沒有 nftables 的平台對 Gately 自身的服務生效 |
 | Docker 管理 | 容器建立與編輯、日誌與終端機、Compose、映像檔更新檢查與一鍵升級（失敗自動還原）、網路與磁碟區 |
 | Web 終端機 | SSH（主機金鑰首次信任）、Telnet、本機 Shell（預設關閉）；代理、持久工作階段、SFTP 檔案管理、2FA 與協定確認、快捷指令、分割畫面 |
 | 網路診斷 | Ping、路由追蹤、連接埠探測、DNS 查詢、測速、區域網路掃描 |
@@ -88,7 +89,7 @@ Gately 完全開源，使用者和社群可以直接檢視原始碼與設定。�
 映像檔支援 amd64、arm64、arm/v7：
 
 ```bash
-docker run -d --name gately --network host \
+docker run -d --name gately --network host --cap-add NET_ADMIN \
   -v ./gately-data:/etc/gately \
   -v /var/run/docker.sock:/var/run/docker.sock \
   ghcr.io/wangwanjie/gately:latest
@@ -98,7 +99,7 @@ docker run -d --name gately --network host \
 
 忘記密碼或遺失兩步驟驗證器時，在伺服器上執行 `gately reset-password` 或 `gately reset-totp`（Docker 為 `docker exec -it gately gately reset-password`），確認後立即生效，詳見[重設密碼與兩步驟驗證](https://gately.cn/zh-TW/docs/guide/install#reset)。
 
-連接埠轉發、STUN、Web 服務需要監聽主機連接埠，建議使用 `--network host`。不需要 Docker 管理時可拿掉 `docker.sock` 掛載。
+連接埠轉發、STUN、Web 服務需要監聽主機連接埠，建議使用 `--network host`。不需要 Docker 管理時可拿掉 `docker.sock` 掛載。`--cap-add NET_ADMIN` 供入侵防護把封鎖寫入主機的 nftables 防火牆；不加時封鎖仍對 Gately 自身的服務生效。
 
 ### 二進位檔
 

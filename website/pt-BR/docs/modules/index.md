@@ -12,6 +12,7 @@ Você pode desativar um módulo inteiro em "Configurações → Módulos". Um m�
 | Certificados SSL | Emissão e renovação automáticas via ACME DNS-01, upload, mapeamento para um diretório com execução de scripts | [Ver](/pt-BR/docs/modules/ssl) |
 | Serviços Web | Proxy reverso, redirecionamentos, arquivos estáticos, HTTPS, autenticação, controle de acesso, balanceamento de carga e health checks, cache e limitação de taxa, estatísticas de acesso | [Ver](/pt-BR/docs/modules/web) |
 | Firewall WAF | Coraza + OWASP CRS v4 | [Ver](/pt-BR/docs/modules/waf) |
+| Prevenção de intrusão | Regras de logs (estilo fail2ban), portas armadilha e detecção de varredura, com bloqueios sincronizados no nftables | [Ver](/pt-BR/docs/modules/guard) |
 | Tailscale / frp / cloudflared | Redes e travessia de NAT com binários oficiais gerenciados | [Ver](/pt-BR/docs/modules/tunnels) |
 | Docker | Criação e edição de contêineres, logs e terminal, Compose, atualização de imagens e upgrades, redes e volumes | [Ver](/pt-BR/docs/modules/docker) |
 | Terminal Web | SSH, Telnet, shell local, gerenciador de arquivos SFTP, sessões persistentes | [Ver](/pt-BR/docs/modules/terminal) |

@@ -34,6 +34,7 @@
       "modules/ssl": "SSL 憑證",
       "modules/web": "Web 服務",
       "modules/waf": "WAF 防火牆",
+      "modules/guard": "入侵防護",
       "modules/tunnels": "Tailscale / frp / cloudflared",
       "modules/docker": "Docker 管理",
       "modules/terminal": "Web 終端機",

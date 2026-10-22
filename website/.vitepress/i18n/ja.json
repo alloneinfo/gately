@@ -34,6 +34,7 @@
       "modules/ssl": "SSL 証明書",
       "modules/web": "Web サービス",
       "modules/waf": "WAF ファイアウォール",
+      "modules/guard": "侵入防御",
       "modules/tunnels": "Tailscale / frp / cloudflared",
       "modules/docker": "Docker 管理",
       "modules/terminal": "Web ターミナル",

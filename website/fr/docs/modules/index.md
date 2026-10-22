@@ -12,6 +12,7 @@ Vous pouvez désactiver un module entier dans « Paramètres → Modules ». Un 
 | Certificats SSL | Émission et renouvellement automatiques ACME DNS-01, import, mappage vers un répertoire avec scripts | [Consulter](/fr/docs/modules/ssl) |
 | Services Web | Proxy inverse, redirections, fichiers statiques, HTTPS, authentification, contrôle d'accès, répartition de charge et vérifications d'état, cache et limitation de débit, statistiques d'accès | [Consulter](/fr/docs/modules/web) |
 | Pare-feu WAF | Coraza + OWASP CRS v4 | [Consulter](/fr/docs/modules/waf) |
+| Prévention d'intrusion | Règles de journaux (à la fail2ban), ports pièges et détection de scan, bannissements synchronisés dans nftables | [Consulter](/fr/docs/modules/guard) |
 | Tailscale / frp / cloudflared | Réseau et traversée NAT avec des binaires officiels gérés | [Consulter](/fr/docs/modules/tunnels) |
 | Docker | Création et édition de conteneurs, journaux et terminal, Compose, mises à jour et montées de version d'images, réseaux et volumes | [Consulter](/fr/docs/modules/docker) |
 | Terminal Web | SSH, Telnet, shell local, gestionnaire de fichiers SFTP, sessions persistantes | [Consulter](/fr/docs/modules/terminal) |

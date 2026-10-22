@@ -5,7 +5,7 @@
 Образ `ghcr.io/wangwanjie/gately`, поддерживаются amd64, arm64, arm/v7.
 
 ```bash
-docker run -d --name gately --network host \
+docker run -d --name gately --network host --cap-add NET_ADMIN \
   -v ./gately-data:/etc/gately \
   -v /var/run/docker.sock:/var/run/docker.sock \
   ghcr.io/wangwanjie/gately:latest
@@ -21,6 +21,9 @@ services:
     restart: unless-stopped
     # Проброс портов, STUN и веб-службы должны напрямую слушать порты хоста
     network_mode: host
+    # Защита от вторжений записывает блокировки в брандмауэр хоста (удалите, если не нужно)
+    cap_add:
+      - NET_ADMIN
     volumes:
       # Каталог конфигурации (открытый JSON, можно хранить в git; ssl.json содержит закрытые ключи сертификатов)
       - ./data:/etc/gately
@@ -29,6 +32,8 @@ services:
     environment:
       - TZ=Asia/Shanghai
 ```
+
+`--cap-add NET_ADMIN` и `cap_add` нужны [защите от вторжений](/ru/docs/modules/guard), чтобы записывать блокировки в брандмауэр nftables хоста. Их можно убрать — тогда блокировки действуют только на службы Gately.
 
 В образ встроены `sh`, `bash` и `curl`, поэтому типовые скрипты уведомлений работают без доработок.
 

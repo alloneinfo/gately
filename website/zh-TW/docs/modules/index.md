@@ -12,6 +12,7 @@ Gately 的每項能力都是獨立模組，可單獨啟停、單獨設定，設�
 | SSL 憑證 | ACME DNS-01 自動簽發與續期、上傳、對應到目錄並執行指令碼 | [查看](/zh-TW/docs/modules/ssl) |
 | Web 服務 | 反向代理、重新導向、靜態檔案、HTTPS、驗證、存取控制、負載平衡與健康檢查、快取與限流、存取統計 | [查看](/zh-TW/docs/modules/web) |
 | WAF 防火牆 | Coraza + OWASP CRS v4 | [查看](/zh-TW/docs/modules/waf) |
+| 入侵防護 | 日誌規則（類 fail2ban）、誘餌連接埠、連接埠掃描偵測，封鎖同步到 nftables | [查看](/zh-TW/docs/modules/guard) |
 | Tailscale / frp / cloudflared | 託管官方執行檔的組網與內網穿透 | [查看](/zh-TW/docs/modules/tunnels) |
 | Docker 管理 | 容器建立與編輯、日誌與終端機、Compose、映像檔更新與升級、網路與磁碟區 | [查看](/zh-TW/docs/modules/docker) |
 | Web 終端機 | SSH、Telnet、本機 Shell、SFTP 檔案管理、持久工作階段 | [查看](/zh-TW/docs/modules/terminal) |

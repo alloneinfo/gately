@@ -42,6 +42,7 @@ O Gately é totalmente aberto, para que usuários e comunidade possam examinar d
 | Cloudflare Tunnel | Túneis cloudflared com token e túneis temporários trycloudflare, vários túneis, reinício automático, exibição do endereço público |
 | Serviços Web | Proxy reverso/redirecionamento/arquivos estáticos/texto fixo por domínio; HTTPS e HTTP/3 (QUIC); WebSocket; envio e recebimento do protocolo PROXY; autenticação básica, autenticação web, login via GitHub/Google/QQ/OIDC, usuários compartilhados com verificação em dois fatores TOTP e login único entre subdomínios, autenticação delegada (forward auth) a um serviço externo como o Authelia; lista negra e lista branca de IPs e listas de IP assinadas com atualização periódica (como faixas de IP por província ou cidade), regras por caminho, links de compartilhamento temporários, bloqueio automático após falhas de autenticação, filtro de países por GeoIP; backends por caminho, backends HTTPS que recebem o domínio visitado como SNI, peso dos backends/backup/estratégias de balanceamento de carga, verificações de integridade ativas e passivas, compressão, limitação de taxa, cache de respostas, reescrita de caminhos; sites estáticos com URLs limpas e uma página 404 personalizada; alterações nos sites são aplicadas sem derrubar as conexões abertas; estatísticas de acesso por minuto e métricas do Prometheus |
 | Firewall WAF | Coraza + OWASP CRS v4, regras ativáveis por arquivo, SecLang personalizado, bloquear/apenas detectar; limite de inspeção do corpo ajustável, com inspeção só da parte inicial acima do limite ou exceção por caminho, para usar o WAF também em sites de upload como nuvens pessoais e WebDAV |
+| Prevenção de intrusão | Regras de logs no estilo fail2ban (arquivos de log, journal do systemd, saída de comandos, logs de contêineres Docker, falhas de login no painel, bloqueios do WAF) com modelos para SSH, Nginx, Vaultwarden e outros; portas armadilha e detecção de varredura; uma lista de bloqueio com bloqueios manuais de redes CIDR e permanentes, durações progressivas e lista de permissões; os bloqueios são sincronizados com o firewall do sistema (nftables) e descartados no kernel, ou valem para os serviços do Gately onde não há nftables |
 | Gerenciamento do Docker | Criação e edição de contêineres, logs e terminal, Compose, verificação de atualização de imagens e atualização em um clique (rollback automático em caso de falha), redes e volumes |
 | Terminal Web | SSH (confiança na chave do host no primeiro acesso), Telnet, shell local (desativado por padrão); proxy, sessões persistentes, gerenciamento de arquivos por SFTP, 2FA e confirmação de protocolo, comandos rápidos, divisão de tela |
 | Diagnóstico de rede | Ping, traceroute, teste de porta, consulta DNS, teste de velocidade, varredura da rede local |
@@ -88,7 +89,7 @@ Como foi medido:
 A imagem suporta amd64, arm64 e arm/v7:
 
 ```bash
-docker run -d --name gately --network host \
+docker run -d --name gately --network host --cap-add NET_ADMIN \
   -v ./gately-data:/etc/gately \
   -v /var/run/docker.sock:/var/run/docker.sock \
   ghcr.io/wangwanjie/gately:latest
@@ -98,7 +99,7 @@ Abra `http://<IP do dispositivo>:16680`, entre com a conta padrão `admin` e a s
 
 Se esquecer a senha ou perder o autenticador de dois fatores, execute `gately reset-password` ou `gately reset-totp` no servidor (no Docker, `docker exec -it gately gately reset-password`); depois da confirmação, a mudança vale na hora. Veja [Redefinir a senha e a autenticação em dois fatores](https://gately.cn/pt-BR/docs/guide/install#reset).
 
-Redirecionamento de portas, STUN e serviços Web precisam escutar portas do host, por isso recomenda-se `--network host`. Se você não precisa do gerenciamento do Docker, pode remover a montagem de `docker.sock`.
+Redirecionamento de portas, STUN e serviços Web precisam escutar portas do host, por isso recomenda-se `--network host`. Se você não precisa do gerenciamento do Docker, pode remover a montagem de `docker.sock`. `--cap-add NET_ADMIN` permite que a Prevenção de intrusão grave os bloqueios no firewall nftables do host; sem ele, os bloqueios continuam valendo para os serviços do Gately.
 
 ### Binário
 

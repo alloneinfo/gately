@@ -42,6 +42,7 @@ Gately ist vollständig quelloffen, sodass Nutzer und Community Quellcode und Ko
 | Cloudflare Tunnel | cloudflared-Token-Tunnel und temporäre trycloudflare-Tunnel, mehrere Tunnel, automatischer Neustart, Anzeige der öffentlichen Adresse |
 | Web-Dienste | Reverse-Proxy/Weiterleitung/statische Dateien/Festtext je Domain; HTTPS und HTTP/3 (QUIC); WebSocket; PROXY-Protokoll senden und empfangen; Basic-Authentifizierung, Web-Authentifizierung, Anmeldung über GitHub/Google/QQ/OIDC, gemeinsame Benutzer mit TOTP-Zwei-Faktor-Prüfung und Single Sign-on über Subdomains hinweg, Forward-Auth an einen externen Dienst wie Authelia; IP-Black-/Whitelist und regelmäßig aktualisierte abonnierte IP-Listen (etwa IP-Bereiche von Provinzen und Städten), Pfadregeln, temporäre Freigabelinks, automatische Sperre nach fehlgeschlagenen Anmeldungen, GeoIP-Länderfilter; Backends pro Pfad, HTTPS-Backends, die die aufgerufene Domain als SNI erhalten, Backend-Gewichtung/Backup/Lastverteilungsstrategien, aktive und passive Health-Checks, Kompression, Ratenbegrenzung, Antwort-Cache, Pfad-Rewrite; statische Sites mit URLs ohne Endung und eigener 404-Seite; Site-Änderungen greifen, ohne bestehende Verbindungen zu trennen; minutengenaue Zugriffsstatistik und Prometheus-Metriken |
 | WAF-Firewall | Coraza + OWASP CRS v4, Regeln dateiweise aktivierbar, eigenes SecLang, Blockieren/nur Erkennen; einstellbares Prüflimit für Request-Bodys, bei Überschreitung nur den Anfang prüfen oder Pfade ausnehmen, damit auch Upload-Sites wie Cloud-Speicher und WebDAV hinter der WAF laufen |
+| Einbruchschutz | Protokollregeln wie bei fail2ban (Protokolldateien, systemd-Journal, Befehlsausgabe, Docker-Container-Protokolle, fehlgeschlagene Anmeldungen an der Oberfläche, WAF-Blockierungen) mit Vorlagen für SSH, Nginx, Vaultwarden und mehr; Köderports und Portscan-Erkennung; eine Sperrliste mit manuellen CIDR- und Dauersperren, steigender Dauer und Whitelist; Sperren werden in die System-Firewall (nftables) übertragen und im Kernel verworfen bzw. gelten ohne nftables für Gatelys eigene Dienste |
 | Docker-Verwaltung | Container erstellen und bearbeiten, Logs und Terminal, Compose, Prüfung auf Image-Updates und Upgrade per Klick (bei Fehlern automatischer Rollback), Netzwerke und Volumes |
 | Web-Terminal | SSH (Hostschlüssel beim ersten Mal bestätigen), Telnet, lokale Shell (standardmäßig deaktiviert); Proxy, persistente Sitzungen, SFTP-Dateiverwaltung, 2FA und Protokollbestätigung, Schnellbefehle, geteilte Ansicht |
 | Netzwerkdiagnose | Ping, Traceroute, Portprüfung, DNS-Abfrage, Geschwindigkeitstest, LAN-Scan |
@@ -88,7 +89,7 @@ So wurde gemessen:
 Das Image unterstützt amd64, arm64 und arm/v7:
 
 ```bash
-docker run -d --name gately --network host \
+docker run -d --name gately --network host --cap-add NET_ADMIN \
   -v ./gately-data:/etc/gately \
   -v /var/run/docker.sock:/var/run/docker.sock \
   ghcr.io/wangwanjie/gately:latest
@@ -98,7 +99,7 @@ docker run -d --name gately --network host \
 
 Haben Sie das Passwort vergessen oder den Zwei-Faktor-Authenticator verloren, führen Sie auf dem Server `gately reset-password` bzw. `gately reset-totp` aus (bei Docker `docker exec -it gately gately reset-password`); nach der Bestätigung gilt die Änderung sofort. Siehe [Passwort und Zwei-Faktor-Authentifizierung zurücksetzen](https://gately.cn/de/docs/guide/install#reset).
 
-Portweiterleitung, STUN und Web-Dienste müssen Ports des Hosts belegen; empfohlen wird `--network host`. Wird die Docker-Verwaltung nicht benötigt, kann der `docker.sock`-Mount entfallen.
+Portweiterleitung, STUN und Web-Dienste müssen Ports des Hosts belegen; empfohlen wird `--network host`. Wird die Docker-Verwaltung nicht benötigt, kann der `docker.sock`-Mount entfallen. Mit `--cap-add NET_ADMIN` schreibt der Einbruchschutz Sperren in die nftables-Firewall des Hosts; ohne gelten Sperren weiterhin für Gatelys eigene Dienste.
 
 ### Binärdatei
 

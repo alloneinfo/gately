@@ -12,6 +12,7 @@ You can turn off a whole module under "Settings → Modules". A disabled module 
 | SSL Certificates | Automatic ACME DNS-01 issuance and renewal, upload, mapping to a directory with scripts | [View](/en/docs/modules/ssl) |
 | Web Services | Reverse proxy, redirects, static files, HTTPS, authentication, access control, load balancing and health checks, caching and rate limiting, access statistics | [View](/en/docs/modules/web) |
 | WAF Firewall | Coraza + OWASP CRS v4 | [View](/en/docs/modules/waf) |
+| Intrusion Prevention | Log jails (fail2ban-style), trap ports and port-scan detection, with bans synced to nftables | [View](/en/docs/modules/guard) |
 | Tailscale / frp / cloudflared | Networking and NAT traversal with managed official binaries | [View](/en/docs/modules/tunnels) |
 | Docker | Container creation and editing, logs and terminal, Compose, image updates and upgrades, networks and volumes | [View](/en/docs/modules/docker) |
 | Web Terminal | SSH, Telnet, local shell, SFTP file manager, persistent sessions | [View](/en/docs/modules/terminal) |

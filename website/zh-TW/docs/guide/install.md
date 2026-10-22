@@ -5,7 +5,7 @@
 映像檔位址 `ghcr.io/wangwanjie/gately`，支援 amd64、arm64、arm/v7。
 
 ```bash
-docker run -d --name gately --network host \
+docker run -d --name gately --network host --cap-add NET_ADMIN \
   -v ./gately-data:/etc/gately \
   -v /var/run/docker.sock:/var/run/docker.sock \
   ghcr.io/wangwanjie/gately:latest
@@ -21,6 +21,9 @@ services:
     restart: unless-stopped
     # 連接埠轉發、STUN 穿透、Web 服務都需要直接監聽主機的連接埠
     network_mode: host
+    # 入侵防護把封鎖寫入主機防火牆（不需要可刪除）
+    cap_add:
+      - NET_ADMIN
     volumes:
       # 設定目錄（純文字 JSON，可納入 git 備份；ssl.json 中含憑證私鑰）
       - ./data:/etc/gately
@@ -29,6 +32,8 @@ services:
     environment:
       - TZ=Asia/Taipei
 ```
+
+`--cap-add NET_ADMIN` 與 `cap_add` 供[入侵防護](/zh-TW/docs/modules/guard)把封鎖寫入主機的 nftables 防火牆，不需要可以拿掉，封鎖仍對 Gately 自身的服務生效。
 
 映像檔內建 `sh`、`bash` 與 `curl`，常見的通知指令碼可以直接執行。
 

@@ -148,6 +148,8 @@ A visitor opens `https://domain/any-path?_gs=token` to redeem a session. After a
 
 The ban list in "Global settings" shows the currently banned IPs, the reason (repeated authentication failures or manual ban) and the expiry time, and each entry can be lifted with "Unban". You can also ban manually: enter an IP and a number of hours (1 to 720, which is at most 30 days); the API defaults to 24 hours.
 
+The ban list is shared with [Intrusion Prevention](/en/docs/modules/guard): when the Intrusion Prevention module is on, this section only shows the number of bans and links to the Intrusion Prevention page for managing them. Bans also apply to port forwarding, STUN and other services, and are dropped in the system firewall when firewall sync is on; with "Ignore LAN addresses" on, LAN addresses are never banned automatically.
+
 ### GeoIP country filter
 
 A site's "Country filter" has three modes: off, allow only, and deny. Enter two-letter ISO country codes separated by commas, such as `CN, HK, US`. At least one country is required when enabled.

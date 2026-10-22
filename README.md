@@ -42,6 +42,7 @@ Gately is fully open source, so users and the community can read the source and 
 | Cloudflare Tunnel | cloudflared token tunnels and trycloudflare quick tunnels, multiple tunnels, automatic restart, public address display |
 | Web services | Per-domain reverse proxy / redirect / static files / fixed text; HTTPS and HTTP/3 (QUIC); WebSocket; PROXY protocol in and out; basic auth, web auth, GitHub/Google/QQ/OIDC sign-in, shared users with TOTP two-step verification and single sign-on across subdomains, forward auth to an external service such as Authelia; IP allow/deny lists and subscribed IP lists refreshed on a schedule (such as province or city IP ranges), path rules, temporary share links, automatic ban on failed auth, GeoIP country filtering; per-path backends, HTTPS backends that receive the visited domain as SNI, backend weights / standby / load-balancing policies, active and passive health checks, compression, rate limiting, response caching, path rewriting; static sites with clean URLs and a custom 404 page; site changes apply without dropping open connections; per-minute access statistics and Prometheus metrics |
 | WAF | Coraza + OWASP CRS v4, per-file rule toggles, custom SecLang, block or detection-only mode; adjustable request body inspection limit that can inspect only the first part or skip by path, so cloud drives, WebDAV and other upload sites can sit behind the WAF |
+| Intrusion Prevention | fail2ban-style log jails (log files, systemd journal, command output, Docker container logs, failed admin logins, WAF blocks) with templates for SSH, Nginx, Vaultwarden and more; trap ports and port-scan detection; one ban list with manual CIDR and permanent bans, escalating durations and a whitelist; bans are synced to the system firewall (nftables) and dropped in the kernel, or apply to Gately's own services where nftables is unavailable |
 | Docker management | Create and edit containers, logs and terminal, Compose, image update checks with one-click upgrade (automatic rollback on failure), networks and volumes |
 | Web terminal | SSH (trust host key on first use), Telnet, local shell (off by default); proxies, persistent sessions, SFTP file manager, 2FA and protocol confirmation, quick commands, split panes |
 | Network diagnostics | Ping, traceroute, port probe, DNS lookup, speed test, LAN scan |
@@ -88,7 +89,7 @@ How it was measured:
 Images are available for amd64, arm64, and arm/v7:
 
 ```bash
-docker run -d --name gately --network host \
+docker run -d --name gately --network host --cap-add NET_ADMIN \
   -v ./gately-data:/etc/gately \
   -v /var/run/docker.sock:/var/run/docker.sock \
   ghcr.io/wangwanjie/gately:latest
@@ -98,7 +99,7 @@ Open `http://<device-ip>:16680` and sign in with the default account `admin` and
 
 If you forget the password or lose your authenticator, run `gately reset-password` or `gately reset-totp` on the server (`docker exec -it gately gately reset-password` for Docker); the change takes effect once you confirm. See [Reset password and two-factor authentication](https://gately.cn/en/docs/guide/install#reset).
 
-Port forwarding, STUN, and web services listen on host ports, so `--network host` is recommended. If you do not need Docker management, drop the `docker.sock` mount.
+Port forwarding, STUN, and web services listen on host ports, so `--network host` is recommended. If you do not need Docker management, drop the `docker.sock` mount. `--cap-add NET_ADMIN` lets Intrusion Prevention write bans to the host's nftables firewall; without it, bans still apply to Gately's own services.
 
 ### Binary
 

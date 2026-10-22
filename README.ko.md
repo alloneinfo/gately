@@ -42,6 +42,7 @@ Gately는 완전한 오픈소스로, 사용자와 커뮤니티가 소스 코드�
 | Cloudflare 터널 | cloudflared 토큰 터널과 trycloudflare 임시 터널, 다중 터널, 자동 재시작, 공개 주소 표시 |
 | 웹 서비스 | 도메인별 리버스 프록시/리디렉션/정적 파일/고정 텍스트. HTTPS 및 HTTP/3(QUIC). WebSocket. PROXY 프로토콜 송수신. 기본 인증, 웹 인증, GitHub/Google/QQ/OIDC 로그인, TOTP 2단계 인증과 하위 도메인 간 통합 로그인(SSO)을 지원하는 공유 사용자, Authelia 같은 외부 서비스로의 포워드 인증. IP 허용/차단 목록과 주기적으로 갱신되는 구독 IP 목록(예: 지역별 IP 대역), 경로 규칙, 임시 공유 링크, 인증 실패 시 자동 차단, GeoIP 국가 필터링. 경로별 백엔드, 방문한 도메인을 SNI로 보내는 HTTPS 백엔드, 백엔드 가중치/백업/로드 밸런싱 정책, 능동·수동 헬스 체크, 압축, 속도 제한, 응답 캐시, 경로 재작성. 확장자 없는 URL과 사용자 지정 404 페이지를 지원하는 정적 사이트. 사이트를 수정해도 기존 연결이 끊기지 않음. 분 단위 접속 통계와 Prometheus 메트릭 |
 | WAF 방화벽 | Coraza + OWASP CRS v4, 파일 단위 규칙 활성화, 사용자 지정 SecLang, 차단/탐지 전용. 요청 본문 검사 한도를 조정할 수 있고 한도 초과 시 앞부분만 검사하거나 경로별로 건너뛸 수 있어 클라우드 드라이브, WebDAV 같은 업로드 사이트에도 WAF 적용 가능 |
+| 침입 방지 | fail2ban 방식 로그 규칙(로그 파일, systemd 저널, 명령 출력, Docker 컨테이너 로그, 관리 콘솔 로그인 실패, WAF 차단)과 SSH·Nginx·Vaultwarden 등 템플릿, 미끼 포트와 포트 스캔 탐지, 수동 네트워크·영구 차단·점진적 시간·화이트리스트를 갖춘 통합 차단 목록. 차단은 시스템 방화벽(nftables)에 동기화되어 커널에서 삭제되며, nftables가 없는 환경에서는 Gately 자체 서비스에 적용 |
 | Docker 관리 | 컨테이너 생성 및 편집, 로그와 터미널, Compose, 이미지 업데이트 확인 및 원클릭 업그레이드(실패 시 자동 롤백), 네트워크와 볼륨 |
 | 웹 터미널 | SSH(호스트 키 최초 신뢰), Telnet, 로컬 셸(기본 비활성). 프록시, 지속 세션, SFTP 파일 관리, 2FA 및 프로토콜 확인, 빠른 명령, 화면 분할 |
 | 네트워크 진단 | Ping, 경로 추적, 포트 탐색, DNS 조회, 속도 측정, LAN 스캔 |
@@ -88,7 +89,7 @@ Gately는 완전한 오픈소스로, 사용자와 커뮤니티가 소스 코드�
 이미지는 amd64, arm64, arm/v7을 지원합니다.
 
 ```bash
-docker run -d --name gately --network host \
+docker run -d --name gately --network host --cap-add NET_ADMIN \
   -v ./gately-data:/etc/gately \
   -v /var/run/docker.sock:/var/run/docker.sock \
   ghcr.io/wangwanjie/gately:latest
@@ -98,7 +99,7 @@ docker run -d --name gately --network host \
 
 비밀번호를 잊었거나 2단계 인증기를 잃어버렸다면 서버에서 `gately reset-password` 또는 `gately reset-totp`를 실행하세요(Docker는 `docker exec -it gately gately reset-password`). 확인하면 바로 적용됩니다. 자세한 내용은 [비밀번호와 2단계 인증 재설정](https://gately.cn/ko/docs/guide/install#reset)을 참고하세요.
 
-포트 포워딩, STUN, 웹 서비스는 호스트 포트를 수신해야 하므로 `--network host`를 권장합니다. Docker 관리가 필요 없다면 `docker.sock` 마운트를 제거해도 됩니다.
+포트 포워딩, STUN, 웹 서비스는 호스트 포트를 수신해야 하므로 `--network host`를 권장합니다. Docker 관리가 필요 없다면 `docker.sock` 마운트를 제거해도 됩니다. `--cap-add NET_ADMIN`은 침입 방지가 차단을 호스트의 nftables 방화벽에 기록하는 데 쓰이며, 빼더라도 차단은 Gately 자체 서비스에 적용됩니다.
 
 ### 바이너리
 

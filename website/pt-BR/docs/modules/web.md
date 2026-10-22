@@ -148,6 +148,8 @@ O visitante abre `https://domain/any-path?_gs=token` para resgatar uma sessão. 
 
 A lista de banimentos em "Configurações globais" mostra os IPs atualmente banidos, o motivo (falhas de autenticação repetidas ou banimento manual) e a hora de expiração, e cada entrada pode ser removida com "Desbanir". Você também pode banir manualmente: informe um IP e um número de horas (1 a 720, ou seja, no máximo 30 dias); a API usa 24 horas por padrão.
 
+A lista de bloqueio é compartilhada com a [Prevenção de intrusão](/pt-BR/docs/modules/guard): com esse módulo ligado, esta seção mostra só o número de bloqueios e leva à página dele para gerenciá-los. Os bloqueios também valem para encaminhamento de portas, STUN e outros serviços, e são descartados no firewall do sistema quando a sincronização está ligada; com "Ignorar endereços da LAN" ligado, esses endereços nunca são bloqueados automaticamente.
+
 ### Filtro de países por GeoIP
 
 O "Filtro de países" de um site tem três modos: desativado, permitir apenas e negar. Informe códigos de país ISO de duas letras separados por vírgula, como `CN, HK, US`. Pelo menos um país é obrigatório quando ativado.

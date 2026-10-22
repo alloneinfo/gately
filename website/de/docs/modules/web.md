@@ -148,6 +148,8 @@ Ein Besucher ruft `https://domain/beliebiger-pfad?_gs=token` auf, um eine Sitzun
 
 Die Sperrliste in den „Globalen Einstellungen“ zeigt die aktuell gesperrten IPs, den Grund (wiederholte Authentifizierungsfehler oder manuelle Sperre) und den Ablaufzeitpunkt, und jeder Eintrag lässt sich mit „Entsperren“ aufheben. Sie können auch manuell sperren: Geben Sie eine IP und eine Anzahl Stunden ein (1 bis 720, also höchstens 30 Tage); die API verwendet standardmäßig 24 Stunden.
 
+Die Sperrliste wird mit dem [Einbruchschutz](/de/docs/modules/guard) geteilt: Ist dieses Modul eingeschaltet, zeigt dieser Abschnitt nur die Anzahl der Sperren und verweist zur Verwaltung auf dessen Seite. Sperren gelten auch für Portweiterleitung, STUN und andere Dienste und werden bei aktiver Firewall-Synchronisierung in der System-Firewall verworfen; mit „LAN-Adressen ignorieren“ werden LAN-Adressen nie automatisch gesperrt.
+
 ### GeoIP-Länderfilter
 
 Der „Länderfilter“ einer Site hat drei Modi: aus, nur erlauben und verweigern. Geben Sie zweistellige ISO-Ländercodes kommagetrennt ein, etwa `CN, HK, US`. Bei Aktivierung ist mindestens ein Land erforderlich.

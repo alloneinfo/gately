@@ -5,7 +5,7 @@
 Imagen: `ghcr.io/wangwanjie/gately`, disponible para amd64, arm64 y arm/v7.
 
 ```bash
-docker run -d --name gately --network host \
+docker run -d --name gately --network host --cap-add NET_ADMIN \
   -v ./gately-data:/etc/gately \
   -v /var/run/docker.sock:/var/run/docker.sock \
   ghcr.io/wangwanjie/gately:latest
@@ -21,6 +21,9 @@ services:
     restart: unless-stopped
     # El reenvío de puertos, el traversal STUN y los servicios web escuchan directamente en puertos del host
     network_mode: host
+    # Prevención de intrusiones escribe los bloqueos en el cortafuegos del anfitrión (elimínalo si no lo necesitas)
+    cap_add:
+      - NET_ADMIN
     volumes:
       # Directorio de configuración (JSON plano, se puede guardar en git; ssl.json contiene claves privadas de certificados)
       - ./data:/etc/gately
@@ -29,6 +32,8 @@ services:
     environment:
       - TZ=Asia/Shanghai
 ```
+
+`--cap-add NET_ADMIN` y `cap_add` permiten que [Prevención de intrusiones](/es/docs/modules/guard) escriba los bloqueos en el cortafuegos nftables del anfitrión. Puedes quitarlos; los bloqueos seguirán aplicándose a los servicios de Gately.
 
 La imagen incluye `sh`, `bash` y `curl`, así que los scripts de notificación habituales funcionan sin cambios.
 

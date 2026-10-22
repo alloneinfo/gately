@@ -5,7 +5,7 @@
 镜像地址 `ghcr.io/wangwanjie/gately`，支持 amd64、arm64、arm/v7。
 
 ```bash
-docker run -d --name gately --network host \
+docker run -d --name gately --network host --cap-add NET_ADMIN \
   -v ./gately-data:/etc/gately \
   -v /var/run/docker.sock:/var/run/docker.sock \
   ghcr.io/wangwanjie/gately:latest
@@ -21,6 +21,9 @@ services:
     restart: unless-stopped
     # 端口转发、STUN 穿透、Web 服务都需要直接监听宿主机端口
     network_mode: host
+    # 入侵防护把封禁写入宿主机防火墙（不需要可删除）
+    cap_add:
+      - NET_ADMIN
     volumes:
       # 配置目录（明文 JSON，可纳入 git 备份；ssl.json 中含证书私钥）
       - ./data:/etc/gately
@@ -29,6 +32,8 @@ services:
     environment:
       - TZ=Asia/Shanghai
 ```
+
+`--cap-add NET_ADMIN` 与 `cap_add` 供[入侵防护](/docs/modules/guard)把封禁写入宿主机的 nftables 防火墙，不需要可以去掉，封禁仍对 Gately 自身的服务生效。
 
 镜像内置 `sh`、`bash` 与 `curl`，常见的通知脚本可以直接运行。
 

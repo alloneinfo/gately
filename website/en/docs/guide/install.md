@@ -5,7 +5,7 @@
 Image: `ghcr.io/wangwanjie/gately`, available for amd64, arm64 and arm/v7.
 
 ```bash
-docker run -d --name gately --network host \
+docker run -d --name gately --network host --cap-add NET_ADMIN \
   -v ./gately-data:/etc/gately \
   -v /var/run/docker.sock:/var/run/docker.sock \
   ghcr.io/wangwanjie/gately:latest
@@ -21,6 +21,9 @@ services:
     restart: unless-stopped
     # Port forwarding, STUN traversal and web services all listen on host ports directly
     network_mode: host
+    # Intrusion Prevention writes bans to the host firewall (remove if not needed)
+    cap_add:
+      - NET_ADMIN
     volumes:
       # Config directory (plain JSON, safe to keep in git; ssl.json contains certificate private keys)
       - ./data:/etc/gately
@@ -29,6 +32,8 @@ services:
     environment:
       - TZ=Asia/Shanghai
 ```
+
+`--cap-add NET_ADMIN` and `cap_add` let [Intrusion Prevention](/en/docs/modules/guard) write bans to the host's nftables firewall. You can drop them; bans then still apply to Gately's own services.
 
 The image ships with `sh`, `bash` and `curl`, so typical notification scripts run out of the box.
 

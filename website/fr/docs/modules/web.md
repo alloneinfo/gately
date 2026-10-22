@@ -148,6 +148,8 @@ Un visiteur ouvre `https://domain/any-path?_gs=token` pour obtenir une session. 
 
 La liste de bannissement dans « Paramètres globaux » affiche les IP actuellement bannies, la raison (échecs d'authentification répétés ou bannissement manuel) et l'heure d'expiration, et chaque entrée peut être levée avec « Débannir ». Vous pouvez aussi bannir manuellement : saisissez une IP et un nombre d'heures (1 à 720, soit 30 jours au maximum) ; l'API utilise 24 heures par défaut.
 
+La liste de bannissement est partagée avec la [prévention d'intrusion](/fr/docs/modules/guard) : quand ce module est activé, cette section n'affiche que le nombre de bannissements et renvoie à sa page pour les gérer. Les bannissements s'appliquent aussi à la redirection de ports, à STUN et aux autres services, et sont rejetés dans le pare-feu du système quand la synchronisation est activée ; avec « Ignorer les adresses du LAN », ces adresses ne sont jamais bannies automatiquement.
+
 ### Filtre de pays GeoIP
 
 Le « Filtre de pays » d'un site propose trois modes : désactivé, autoriser uniquement et refuser. Saisissez des codes pays ISO à deux lettres séparés par des virgules, comme `CN, HK, US`. Au moins un pays est requis lorsque le filtre est activé.

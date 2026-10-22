@@ -5,7 +5,7 @@
 Image : `ghcr.io/wangwanjie/gately`, disponible pour amd64, arm64 et arm/v7.
 
 ```bash
-docker run -d --name gately --network host \
+docker run -d --name gately --network host --cap-add NET_ADMIN \
   -v ./gately-data:/etc/gately \
   -v /var/run/docker.sock:/var/run/docker.sock \
   ghcr.io/wangwanjie/gately:latest
@@ -21,6 +21,9 @@ services:
     restart: unless-stopped
     # La redirection de ports, la traversée STUN et les services Web écoutent directement sur les ports de l'hôte
     network_mode: host
+    # La prévention d'intrusion écrit les bannissements dans le pare-feu de l'hôte (à supprimer si inutile)
+    cap_add:
+      - NET_ADMIN
     volumes:
       # Dossier de configuration (JSON en clair, peut être versionné avec git ; ssl.json contient les clés privées des certificats)
       - ./data:/etc/gately
@@ -29,6 +32,8 @@ services:
     environment:
       - TZ=Europe/Paris
 ```
+
+`--cap-add NET_ADMIN` et `cap_add` permettent à la [prévention d'intrusion](/fr/docs/modules/guard) d'écrire les bannissements dans le pare-feu nftables de l'hôte. Vous pouvez les retirer ; les bannissements s'appliquent alors toujours aux services de Gately.
 
 L'image embarque `sh`, `bash` et `curl` : les scripts de notification courants fonctionnent donc sans configuration supplémentaire.
 

@@ -12,6 +12,7 @@ Unter „Einstellungen → Module“ können Sie ein ganzes Modul ausschalten. E
 | SSL-Zertifikate | Automatische ACME-DNS-01-Ausstellung und -Erneuerung, Upload, Zuordnung zu einem Verzeichnis mit Skripten | [Ansehen](/de/docs/modules/ssl) |
 | Web-Dienste | Reverse Proxy, Weiterleitungen, statische Dateien, HTTPS, Authentifizierung, Zugriffskontrolle, Lastverteilung und Health-Checks, Caching und Ratenbegrenzung, Zugriffsstatistiken | [Ansehen](/de/docs/modules/web) |
 | WAF-Firewall | Coraza + OWASP CRS v4 | [Ansehen](/de/docs/modules/waf) |
+| Einbruchschutz | Protokollregeln (wie fail2ban), Köderports und Portscan-Erkennung, Sperren werden in nftables übertragen | [Ansehen](/de/docs/modules/guard) |
 | Tailscale / frp / cloudflared | Vernetzung und NAT-Traversal mit verwalteten offiziellen Binärdateien | [Ansehen](/de/docs/modules/tunnels) |
 | Docker | Container erstellen und bearbeiten, Logs und Terminal, Compose, Image-Updates und Upgrades, Netzwerke und Volumes | [Ansehen](/de/docs/modules/docker) |
 | Web-Terminal | SSH, Telnet, lokale Shell, SFTP-Dateimanager, persistente Sitzungen | [Ansehen](/de/docs/modules/terminal) |
