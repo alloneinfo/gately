@@ -318,9 +318,11 @@ func TestUDPTraversalEndToEnd(t *testing.T) {
 			t.Fatalf("UDP 转发失败: %q %v", buf[:n], err)
 		}
 	}
-	if s := r.snapshot().Stats; s.TotalConns != 1 || s.BytesIn != 15 {
-		t.Fatalf("UDP 统计错误: %+v", s)
-	}
+	// 入站字节在写给目标后才累加，回显可能先于累加到达客户端，因此等待统计到位
+	waitFor(t, "UDP 统计", func() bool {
+		s := r.snapshot().Stats
+		return s.TotalConns == 1 && s.BytesIn == 15
+	})
 	// 心跳期间地址变化
 	e.stun.SetMapAddr(func(a netip.AddrPort) netip.AddrPort { return netip.MustParseAddrPort("198.51.100.1:5000") })
 	waitFor(t, "UDP 地址变化", func() bool { return r.snapshot().PublicAddr == "198.51.100.1:5000" })
