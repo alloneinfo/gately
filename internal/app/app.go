@@ -25,6 +25,7 @@ import (
 	"github.com/wangwanjie/gately/internal/auth"
 	"github.com/wangwanjie/gately/internal/config"
 	"github.com/wangwanjie/gately/internal/events"
+	"github.com/wangwanjie/gately/internal/httpcompress"
 	"github.com/wangwanjie/gately/internal/httpx"
 	"github.com/wangwanjie/gately/internal/i18n"
 	"github.com/wangwanjie/gately/internal/logbuf"
@@ -282,7 +283,8 @@ func (a *App) Handler() http.Handler {
 	a.routeDocs = rec.docs
 	mux.Handle("/api/", a.requireAuth(a.roleGuard(a.audit.Middleware(protected))))
 	mux.Handle("/", a.staticHandler())
-	return securityHeaders(i18n.Middleware(a.accessControl(httpx.SameOrigin(mux))))
+	// 压缩放在翻译之外，压缩的是翻译后的最终内容；已预压缩的静态资源自带 Content-Encoding，不会重复压缩
+	return securityHeaders(httpcompress.Handler(i18n.Middleware(a.accessControl(httpx.SameOrigin(mux)))))
 }
 
 // Run 启动所有模块和管理服务，阻塞直到 ctx 取消。收到重启请求时停止全部服务后重新执行自身。
@@ -777,6 +779,9 @@ func (a *App) staticHandler() http.Handler {
 				// 带哈希的构建产物可长期缓存
 				if strings.HasPrefix(name, "assets/") {
 					w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
+				}
+				if a.servePrecompressed(w, r, name) {
+					return
 				}
 				files.ServeHTTP(w, r)
 				return

@@ -9,6 +9,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/wangwanjie/gately/internal/httpcompress"
 )
 
 // maxCacheEntry 是单个缓存条目的上限，同时不超过总容量的 1/4。
@@ -89,7 +91,7 @@ func requestCacheable(r *http.Request) bool {
 }
 
 func cacheKey(r *http.Request) string {
-	return r.Host + "|" + r.URL.RequestURI() + "|" + negotiateEncoding(r.Header.Get("Accept-Encoding")) + "|" + r.Header.Get("Accept-Encoding")
+	return r.Host + "|" + r.URL.RequestURI() + "|" + httpcompress.Negotiate(r.Header.Get("Accept-Encoding")) + "|" + r.Header.Get("Accept-Encoding")
 }
 
 // freshness 根据响应头计算可缓存时长。ok 为 false 表示不可缓存。

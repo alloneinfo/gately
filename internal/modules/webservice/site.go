@@ -17,6 +17,7 @@ import (
 	proxyproto "github.com/pires/go-proxyproto"
 
 	"github.com/wangwanjie/gately/internal/geoip"
+	"github.com/wangwanjie/gately/internal/httpcompress"
 	"github.com/wangwanjie/gately/internal/iplist"
 	"github.com/wangwanjie/gately/internal/logbuf"
 	"github.com/wangwanjie/gately/internal/webpage"
@@ -128,7 +129,7 @@ func newSiteHandler(s Site, log *logbuf.Logger, auth *authenticator, waf WAFProv
 		})
 	}
 	if s.Compress && s.Type != TypeRedirect {
-		h.handler = compressHandler(h.handler)
+		h.handler = httpcompress.Handler(h.handler)
 	}
 	h.pipeline = http.HandlerFunc(h.serveInner)
 	// WAF 放在认证之前，登录页同样受保护
