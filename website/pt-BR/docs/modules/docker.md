@@ -25,7 +25,7 @@ Montar o `docker.sock` equivale a conceder acesso de nível root ao host. Se voc
 - Abas da página de detalhes:
   - Visão geral: status, código de saída, número de reinícios, estado de saúde, detalhes de rede, montagens e o projeto e serviço Compose a que pertence;
   - Logs: veja os logs recentes, com timestamps opcionais;
-  - Terminal: abra um terminal interativo dentro de um contêiner em execução (`/bin/sh` por padrão; comando e usuário podem ser informados);
+  - Terminal: abra um terminal interativo dentro de um contêiner em execução (`/bin/sh` por padrão; comando e usuário podem ser informados; as cores seguem a preferência do terminal web);
   - Arquivos: navegue pelos arquivos do contêiner, edite texto online (até 1 MiB), envie, baixe (diretórios são empacotados em tar.gz), renomeie, crie diretórios e exclua. A exclusão executa `rm -rf` dentro do contêiner, então ele precisa estar em execução;
   - Monitoramento: amostras de CPU, memória, rede, E/S de disco e número de processos, além da lista de processos dentro do contêiner.
 

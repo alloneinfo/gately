@@ -22,7 +22,7 @@ Yes. Every release ships offline fnOS packages (`.fpk`) that you install manuall
 
 ## Does it support OpenWrt / iStoreOS?
 
-Yes. Every release ships OpenWrt packages: the `.ipk` for OpenWrt 24.10 and earlier (including iStoreOS), installed with `opkg install`, and the `.apk` for OpenWrt 25.12 and later, installed with `apk add --allow-untrusted`. The service starts right after install and keeps its config in `/etc/gately`; to upgrade, install the newer package. The binary is about 35 MB, so a soft router with ample storage is a good fit. See [OpenWrt](/en/docs/guide/install#openwrt).
+Yes. Every release ships OpenWrt packages: the `.ipk` for OpenWrt 24.10 and earlier (including iStoreOS), installed with `opkg install`, and the `.apk` for OpenWrt 25.12 and later, installed with `apk add --allow-untrusted`. The service starts right after install and keeps its config in `/etc/gately`; to upgrade, install the newer package. The binary is about 32 MB, so a soft router with ample storage is a good fit. See [OpenWrt](/en/docs/guide/install#openwrt).
 
 ## Why is `--network host` recommended?
 

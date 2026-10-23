@@ -130,6 +130,10 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 
 # Получить только записи журнала модуля с номером больше 10 (нужно ddns:read)
 curl -H "Authorization: Bearer gtl_xxxx" "http://localhost:16680/api/ddns/logs?since=10"
+
+# Получить только 200 последних записей; передайте наименьший номер в before, чтобы листать назад
+curl -H "Authorization: Bearer gtl_xxxx" "http://localhost:16680/api/ddns/logs?limit=200"
+curl -H "Authorization: Bearer gtl_xxxx" "http://localhost:16680/api/ddns/logs?before=1200&limit=200"
 ```
 
 ## Полный список интерфейсов

@@ -86,7 +86,7 @@ apk add --allow-untrusted ./gately_<version>_openwrt_amd64.apk
 - アップグレード：新しいパッケージをダウンロードし、もう一度 `opkg install` または `apk add --allow-untrusted` を実行します。設定は保持されます。自動起動を無効にしていた場合は、アップグレード後も無効のままです。
 - アンインストール：`opkg remove gately` または `apk del gately` を実行します。設定ディレクトリは残るため、完全に削除するには `rm -rf /etc/gately` も実行してください。
 - インストール前にデバイスのアーキテクチャを確認します。アーキテクチャが合わない場合、opkg はインストールを中止します。OpenWrt 25.12 の apk はパッケージ自体はインストールしますがサービスを起動しないため、`apk del gately` を実行してから正しいパッケージを入れ直してください。
-- バイナリは約 35 MB で、同程度の空き容量が必要です（`df -h /overlay` で確認できます）。x86 のソフトルーターや ARM64 ボックスなどストレージに余裕のあるデバイス向けで、フラッシュが 16 MB / 32 MB のルーターには収まりません。
+- バイナリは約 32 MB で、同程度の空き容量が必要です（`df -h /overlay` で確認できます）。x86 のソフトルーターや ARM64 ボックスなどストレージに余裕のあるデバイス向けで、フラッシュが 16 MB / 32 MB のルーターには収まりません。
 - arm パッケージにはハードウェア浮動小数点に対応した ARMv7 が必要です。ARMv5 / ARMv6 のデバイスや、`arm_cortex-a9` のような FPU を持たないコアには現在対応していません。
 
 手動でデプロイすることもできます。Linux 用のアーカイブをダウンロードし、procd 用の起動スクリプト [deploy/openwrt/gately.init](https://github.com/wangwanjie/gately/blob/main/deploy/openwrt/gately.init) を使います。

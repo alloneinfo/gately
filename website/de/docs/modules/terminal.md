@@ -28,7 +28,7 @@ Beim ersten Aufbau einer SSH-Verbindung wird der Host-Fingerabdruck des Servers 
 - Mehrere Clients können sich gleichzeitig an dieselbe Sitzung anbinden, mit gemeinsamer Eingabe und per Broadcast verteilter Ausgabe;
 - Sitzungen können eine Bemerkung haben. Die Sitzungsliste zeigt Erstellungszeit, Zeit der letzten Aktivität, Fenstergröße sowie gesendete und empfangene Bytes;
 - Nach dem Neuladen der Seite werden noch aktive Sitzungen als Tabs samt geteiltem Layout wiederhergestellt;
-- Das Terminal hat eine eingebaute Suche (Stichwort eingeben, mit Enter zum nächsten Treffer, mit Shift+Enter zum vorherigen), Kopieren, Einfügen, Bildschirm löschen, Schriftgröße anpassen, Vollbild und mehrere Farbschemata.
+- Das Terminal hat eine eingebaute Suche (Stichwort eingeben, mit Enter zum nächsten Treffer, mit Shift+Enter zum vorherigen), Kopieren, Einfügen, Bildschirm löschen, Schriftgröße anpassen, Vollbild und mehrere Farbschemata (standardmäßig passend zum Oberflächendesign, oder fest eingestellt).
 
 ### Einstellungen
 

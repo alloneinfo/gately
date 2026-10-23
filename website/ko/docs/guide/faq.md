@@ -22,7 +22,7 @@
 
 ## OpenWrt / iStoreOS를 지원하나요?
 
-지원합니다. 모든 릴리스에 OpenWrt 패키지가 포함됩니다. OpenWrt 24.10 이하(iStoreOS 포함)는 `.ipk`를 `opkg install`로, OpenWrt 25.12 이상은 `.apk`를 `apk add --allow-untrusted`로 설치합니다. 설치 후 바로 시작되며 설정은 `/etc/gately`에 저장되고, 업그레이드는 새 패키지를 설치하면 됩니다. 바이너리가 약 35 MB이므로 저장 공간이 넉넉한 소프트 라우터에 적합합니다. 자세한 내용은 [OpenWrt](/ko/docs/guide/install#openwrt)를 참고하세요.
+지원합니다. 모든 릴리스에 OpenWrt 패키지가 포함됩니다. OpenWrt 24.10 이하(iStoreOS 포함)는 `.ipk`를 `opkg install`로, OpenWrt 25.12 이상은 `.apk`를 `apk add --allow-untrusted`로 설치합니다. 설치 후 바로 시작되며 설정은 `/etc/gately`에 저장되고, 업그레이드는 새 패키지를 설치하면 됩니다. 바이너리가 약 32 MB이므로 저장 공간이 넉넉한 소프트 라우터에 적합합니다. 자세한 내용은 [OpenWrt](/ko/docs/guide/install#openwrt)를 참고하세요.
 
 ## 왜 `--network host`를 권장하나요?
 

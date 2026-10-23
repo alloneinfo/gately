@@ -91,4 +91,4 @@ Ejecuta comandos o envía peticiones HTTP según una programación cron.
 
 ## Temas
 
-La interfaz ofrece varios temas: Esmeralda, Océano, Fresco, Sakura, Atardecer, Oscuro, Medianoche, Punk y seguir el sistema (Oscuro cuando el sistema es oscuro y, si no, Esmeralda). La elección del tema se guarda localmente en el navegador.
+La interfaz ofrece 15 paletas en dos grupos, originales de Gately (Esmeralda, Océano, Fresco, Sakura, Atardecer, Medianoche, Punk) y clásicas (GitHub, Nord, Dracula, Catppuccin, Tokyo Night, Gruvbox, Rosé Pine, Solarized), y cada paleta tiene variante clara y oscura. El modo puede ser claro, oscuro o seguir el sistema, que usa la variante clara u oscura de la paleta actual. Cualquier paleta admite uno de 10 colores de acento predefinidos o uno elegido con el selector del sistema, y el logotipo y el degradado de la página de inicio de sesión lo siguen; volver a elegir una paleta quita el acento personalizado. Las esquinas pueden ser rectas, las de la paleta o redondeadas. La configuración del tema se guarda localmente en el navegador.

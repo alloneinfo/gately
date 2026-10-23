@@ -130,6 +130,10 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 
 # Obtener solo los registros del módulo con un número de secuencia mayor que 10 (requiere ddns:read)
 curl -H "Authorization: Bearer gtl_xxxx" "http://localhost:16680/api/ddns/logs?since=10"
+
+# Obtener solo las 200 entradas más recientes; pasar el número más bajo como before para ver las anteriores
+curl -H "Authorization: Bearer gtl_xxxx" "http://localhost:16680/api/ddns/logs?limit=200"
+curl -H "Authorization: Bearer gtl_xxxx" "http://localhost:16680/api/ddns/logs?before=1200&limit=200"
 ```
 
 ## Referencia completa de la API

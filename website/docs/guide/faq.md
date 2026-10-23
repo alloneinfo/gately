@@ -22,7 +22,7 @@
 
 ## 支持 OpenWrt / iStoreOS 吗？
 
-支持。每个版本附带 OpenWrt 安装包：OpenWrt 24.10 及以前（含 iStoreOS）用 `.ipk`，执行 `opkg install` 安装；OpenWrt 25.12 起用 `.apk`，执行 `apk add --allow-untrusted` 安装。安装后自动启动，配置保存在 `/etc/gately`，升级时安装新版安装包即可。程序约 35 MB，适合存储较大的软路由。详见 [OpenWrt](/docs/guide/install#openwrt)。
+支持。每个版本附带 OpenWrt 安装包：OpenWrt 24.10 及以前（含 iStoreOS）用 `.ipk`，执行 `opkg install` 安装；OpenWrt 25.12 起用 `.apk`，执行 `apk add --allow-untrusted` 安装。安装后自动启动，配置保存在 `/etc/gately`，升级时安装新版安装包即可。程序约 32 MB，适合存储较大的软路由。详见 [OpenWrt](/docs/guide/install#openwrt)。
 
 ## 为什么推荐 `--network host`？
 

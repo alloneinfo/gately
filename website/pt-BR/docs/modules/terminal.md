@@ -28,7 +28,7 @@ Na primeira conexão SSH, a impressão digital do host do servidor é registrada
 - Vários clientes podem se conectar à mesma sessão ao mesmo tempo, com entrada compartilhada e saída transmitida a todos;
 - As sessões podem ter uma observação. A lista de sessões mostra a data de criação, a hora da última atividade, o tamanho da janela e os bytes enviados e recebidos;
 - Após atualizar a página, as sessões ainda ativas são restauradas como abas, junto com o layout dividido;
-- O terminal tem pesquisa embutida (digite uma palavra-chave, pressione Enter para a próxima ocorrência e Shift+Enter para a anterior), copiar, colar, limpar a tela, ajuste do tamanho da fonte, tela cheia e vários esquemas de cores.
+- O terminal tem pesquisa embutida (digite uma palavra-chave, pressione Enter para a próxima ocorrência e Shift+Enter para a anterior), copiar, colar, limpar a tela, ajuste do tamanho da fonte, tela cheia e vários esquemas de cores (por padrão seguem o tema da interface, ou um esquema fixo).
 
 ### Configurações
 

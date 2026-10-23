@@ -86,7 +86,7 @@ apk add --allow-untrusted ./gately_<版本>_openwrt_amd64.apk
 - 升級：下載新版安裝包，同樣執行 `opkg install` 或 `apk add --allow-untrusted`，設定保留。若停用了開機自動啟動，升級後維持停用；
 - 解除安裝：`opkg remove gately` 或 `apk del gately`。設定目錄會保留，要徹底刪除請再執行 `rm -rf /etc/gately`；
 - 安裝前會核對裝置架構。裝錯架構時 opkg 會中止安裝；OpenWrt 25.12 的 apk 仍會裝上但不啟動服務，請執行 `apk del gately` 後改用正確的安裝包；
-- 程式約 35 MB，安裝需要同等大小的可用空間（以 `df -h /overlay` 查看），適合 x86 軟路由、ARM64 盒子等儲存空間較大的裝置，16 MB / 32 MB 快閃記憶體的路由器裝不下；
+- 程式約 32 MB，安裝需要同等大小的可用空間（以 `df -h /overlay` 查看），適合 x86 軟路由、ARM64 盒子等儲存空間較大的裝置，16 MB / 32 MB 快閃記憶體的路由器裝不下；
 - arm 安裝包需要 ARMv7 且具備硬體浮點運算，ARMv5 / ARMv6 以及 `arm_cortex-a9` 這類沒有浮點運算單元的裝置暫不支援。
 
 也可以手動部署：下載 Linux 壓縮檔，搭配 procd 啟動指令碼 [deploy/openwrt/gately.init](https://github.com/wangwanjie/gately/blob/main/deploy/openwrt/gately.init)：

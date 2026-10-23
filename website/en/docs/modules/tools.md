@@ -91,4 +91,4 @@ Run commands or send HTTP requests on a cron schedule.
 
 ## Themes
 
-The UI offers several themes: Emerald, Ocean, Fresh, Sakura, Sunset, Dark, Midnight, Punk, and follow system (Dark when the system is dark, otherwise Emerald). The theme choice is stored locally in the browser.
+The UI offers 15 palettes in two groups, Gately originals (Emerald, Ocean, Fresh, Sakura, Sunset, Midnight, Punk) and classics (GitHub, Nord, Dracula, Catppuccin, Tokyo Night, Gruvbox, Rosé Pine, Solarized), and every palette has a light and a dark variant. The mode can be light, dark or follow system, which picks the light or dark variant of the current palette. Any palette can take one of 10 preset accent colors or a color from the system picker, and the logo and login page gradient follow it; choosing a palette again clears the custom accent. Corners can be sharp, the palette's own or round. Theme settings are stored locally in the browser.

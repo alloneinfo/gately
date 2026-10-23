@@ -130,6 +130,10 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 
 # Récupérer uniquement les journaux du module dont le numéro est supérieur à 10 (nécessite ddns:read)
 curl -H "Authorization: Bearer gtl_xxxx" "http://localhost:16680/api/ddns/logs?since=10"
+
+# Récupérer seulement les 200 entrées les plus récentes, puis passer le plus petit numéro en before pour remonter
+curl -H "Authorization: Bearer gtl_xxxx" "http://localhost:16680/api/ddns/logs?limit=200"
+curl -H "Authorization: Bearer gtl_xxxx" "http://localhost:16680/api/ddns/logs?before=1200&limit=200"
 ```
 
 ## Liste complète des API

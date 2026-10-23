@@ -134,7 +134,7 @@ Cada Release inclui pacotes para OpenWrt: `gately_<versão>_openwrt_<arquitetura
 
 - O serviço é ativado e iniciado na instalação; a interface de administração fica em `http://<endereço do roteador>:16680`, com a conta padrão `admin` e a senha padrão `gately.cn`.
 - A configuração fica em `/etc/gately` e é mantida em atualizações, desinstalações e atualizações de firmware (sysupgrade). Para atualizar, instale o pacote mais novo; a atualização online na página Sobre indica o gerenciador de pacotes.
-- O binário tem cerca de 35 MB, então os pacotes atendem soft routers x86, boxes ARM64 e outros dispositivos com bastante armazenamento; o pacote arm requer ARMv7 com ponto flutuante por hardware.
+- O binário tem cerca de 32 MB, então os pacotes atendem soft routers x86, boxes ARM64 e outros dispositivos com bastante armazenamento; o pacote arm requer ARMv7 com ponto flutuante por hardware.
 
 ### Monitoramento
 

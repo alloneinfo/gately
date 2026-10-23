@@ -130,6 +130,10 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 
 # 只拉取序號大於 10 的模組日誌（需要 ddns:read）
 curl -H "Authorization: Bearer gtl_xxxx" "http://localhost:16680/api/ddns/logs?since=10"
+
+# 只取最新 200 筆；再用其中最小的序號作為 before 往前翻頁
+curl -H "Authorization: Bearer gtl_xxxx" "http://localhost:16680/api/ddns/logs?limit=200"
+curl -H "Authorization: Bearer gtl_xxxx" "http://localhost:16680/api/ddns/logs?before=1200&limit=200"
 ```
 
 ## 完整介面清單

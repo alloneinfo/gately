@@ -91,4 +91,4 @@ Execute comandos ou envie requisições HTTP em um agendamento cron.
 
 ## Temas
 
-A interface oferece vários temas: Esmeralda, Oceano, Fresco, Sakura, Pôr do sol, Escuro, Meia-noite, Punk e seguir o sistema (Escuro quando o sistema é escuro, caso contrário Esmeralda). A escolha do tema é armazenada localmente no navegador.
+A interface oferece 15 paletas em dois grupos, originais do Gately (Esmeralda, Oceano, Fresco, Sakura, Pôr do sol, Meia-noite, Punk) e clássicas (GitHub, Nord, Dracula, Catppuccin, Tokyo Night, Gruvbox, Rosé Pine, Solarized), e cada paleta tem variante clara e escura. O modo pode ser claro, escuro ou seguir o sistema, que usa a variante clara ou escura da paleta atual. Qualquer paleta aceita uma de 10 cores de destaque predefinidas ou uma cor escolhida no seletor do sistema, e o logotipo e o degradê da página de login acompanham; escolher uma paleta de novo remove o destaque personalizado. Os cantos podem ser retos, os da paleta ou arredondados. As configurações de tema ficam armazenadas localmente no navegador.

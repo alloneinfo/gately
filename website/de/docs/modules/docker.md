@@ -25,7 +25,7 @@ Die Einbindung von `docker.sock` entspricht Root-Rechten auf dem Host. Brauchen 
 - Tabs der Detailseite:
   - Übersicht: Status, Exit-Code, Anzahl der Neustarts, Health-Status, Netzwerkdetails, Einbindungen sowie das zugehörige Compose-Projekt und der Dienst;
   - Logs: aktuelle Logs ansehen, wahlweise mit Zeitstempeln;
-  - Terminal: ein interaktives Terminal in einem laufenden Container öffnen (standardmäßig `/bin/sh`; Befehl und Benutzer sind angebbar);
+  - Terminal: ein interaktives Terminal in einem laufenden Container öffnen (standardmäßig `/bin/sh`; Befehl und Benutzer sind angebbar; Farben wie im Web-Terminal eingestellt);
   - Dateien: Dateien im Container durchsuchen, Text online bearbeiten (bis 1 MiB), hochladen, herunterladen (Verzeichnisse werden als tar.gz gepackt), umbenennen, Verzeichnisse anlegen, löschen. Beim Löschen läuft `rm -rf` im Container, der Container muss also laufen;
   - Überwachung: Messwerte für CPU, Arbeitsspeicher, Netzwerk und Disk-I/O sowie Prozessanzahl, dazu die Liste der Prozesse im Container.
 

@@ -86,7 +86,7 @@ apk add --allow-untrusted ./gately_<version>_openwrt_amd64.apk
 - 업그레이드: 새 버전 패키지를 내려받아 `opkg install` 또는 `apk add --allow-untrusted`를 다시 실행합니다. 설정은 유지됩니다. 부팅 시 자동 시작을 꺼 두었다면 업그레이드 후에도 꺼진 상태로 유지됩니다.
 - 제거: `opkg remove gately` 또는 `apk del gately`. 설정 디렉터리는 남으므로 완전히 지우려면 `rm -rf /etc/gately`를 실행합니다.
 - 설치 전에 장치 아키텍처를 확인합니다. 아키텍처가 맞지 않으면 opkg는 설치를 중단합니다. OpenWrt 25.12의 apk는 패키지를 설치하지만 서비스를 시작하지 않으므로 `apk del gately`로 제거한 뒤 올바른 패키지를 설치하세요.
-- 바이너리는 약 35 MB이며 설치하려면 같은 크기의 여유 공간이 필요합니다(`df -h /overlay`로 확인). x86 소프트 라우터, ARM64 박스 등 저장 공간이 넉넉한 장치에 적합하며, 플래시가 16 MB / 32 MB인 라우터에는 설치할 수 없습니다.
+- 바이너리는 약 32 MB이며 설치하려면 같은 크기의 여유 공간이 필요합니다(`df -h /overlay`로 확인). x86 소프트 라우터, ARM64 박스 등 저장 공간이 넉넉한 장치에 적합하며, 플래시가 16 MB / 32 MB인 라우터에는 설치할 수 없습니다.
 - arm 패키지는 하드웨어 부동소수점을 지원하는 ARMv7이 필요합니다. ARMv5 / ARMv6 장치와 `arm_cortex-a9`처럼 FPU가 없는 코어는 아직 지원하지 않습니다.
 
 수동으로 배포할 수도 있습니다. Linux 압축 파일을 내려받아 procd 시작 스크립트 [deploy/openwrt/gately.init](https://github.com/wangwanjie/gately/blob/main/deploy/openwrt/gately.init)와 함께 사용합니다.

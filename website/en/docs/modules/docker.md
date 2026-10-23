@@ -25,7 +25,7 @@ Mounting `docker.sock` is equivalent to granting root-level access to the host. 
 - Detail page tabs:
   - Overview: status, exit code, restart count, health status, network details, mounts, and the Compose project and service it belongs to;
   - Logs: view recent logs, with optional timestamps;
-  - Terminal: open an interactive terminal inside a running container (`/bin/sh` by default; command and user can be specified);
+  - Terminal: open an interactive terminal inside a running container (`/bin/sh` by default; command and user can be specified; colors follow the Web terminal preference);
   - Files: browse files in the container, edit text online (up to 1 MiB), upload, download (directories are packed as tar.gz), rename, create directories, delete. Deletion runs `rm -rf` inside the container, so the container must be running;
   - Monitoring: samples of CPU, memory, network and disk I/O, and process count, plus the list of processes inside the container.
 

@@ -22,7 +22,7 @@ Ja. Jedes Release enthält Offline-Pakete für fnOS (`.fpk`), die Sie manuell ü
 
 ## Unterstützt Gately OpenWrt / iStoreOS?
 
-Ja. Jede Version enthält OpenWrt-Pakete: das `.ipk` für OpenWrt 24.10 und älter (einschließlich iStoreOS), installiert mit `opkg install`, und das `.apk` für OpenWrt 25.12 und neuer, installiert mit `apk add --allow-untrusted`. Der Dienst startet direkt nach der Installation und speichert seine Konfiguration in `/etc/gately`; zum Aktualisieren installieren Sie einfach das neue Paket. Das Programm ist etwa 35 MB groß und eignet sich daher für Soft-Router mit ausreichend Speicher. Siehe [OpenWrt](/de/docs/guide/install#openwrt).
+Ja. Jede Version enthält OpenWrt-Pakete: das `.ipk` für OpenWrt 24.10 und älter (einschließlich iStoreOS), installiert mit `opkg install`, und das `.apk` für OpenWrt 25.12 und neuer, installiert mit `apk add --allow-untrusted`. Der Dienst startet direkt nach der Installation und speichert seine Konfiguration in `/etc/gately`; zum Aktualisieren installieren Sie einfach das neue Paket. Das Programm ist etwa 32 MB groß und eignet sich daher für Soft-Router mit ausreichend Speicher. Siehe [OpenWrt](/de/docs/guide/install#openwrt).
 
 ## Warum wird `--network host` empfohlen?
 

@@ -86,7 +86,7 @@ apk add --allow-untrusted ./gately_<version>_openwrt_amd64.apk
 - Actualizar: descarga el paquete más reciente y vuelve a ejecutar `opkg install` o `apk add --allow-untrusted`; tu configuración se conserva. Si desactivaste el inicio del servicio en el arranque, seguirá desactivado tras la actualización;
 - Desinstalar: `opkg remove gately` o `apk del gately`. El directorio de configuración se conserva; ejecuta `rm -rf /etc/gately` para eliminarlo también;
 - Antes de instalar se comprueba la arquitectura del dispositivo. opkg cancela la instalación si la arquitectura no coincide; el apk de OpenWrt 25.12 instala el paquete igualmente pero deja el servicio detenido, así que ejecuta `apk del gately` e instala el paquete correcto;
-- El binario ocupa unos 35 MB y necesita la misma cantidad de espacio libre (compruébalo con `df -h /overlay`), por lo que es adecuado para routers software x86, equipos ARM64 y otros dispositivos con almacenamiento amplio; los routers con 16 MB / 32 MB de flash se quedan cortos;
+- El binario ocupa unos 32 MB y necesita la misma cantidad de espacio libre (compruébalo con `df -h /overlay`), por lo que es adecuado para routers software x86, equipos ARM64 y otros dispositivos con almacenamiento amplio; los routers con 16 MB / 32 MB de flash se quedan cortos;
 - El paquete arm requiere ARMv7 con coma flotante por hardware. Los dispositivos ARMv5 / ARMv6 y los núcleos sin FPU como `arm_cortex-a9` todavía no son compatibles.
 
 También puedes desplegarlo manualmente: descarga el archivo para Linux y usa el script de arranque de procd [deploy/openwrt/gately.init](https://github.com/wangwanjie/gately/blob/main/deploy/openwrt/gately.init):

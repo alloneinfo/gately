@@ -134,7 +134,7 @@ docker run -d --name gately --network host --cap-add NET_ADMIN \
 
 - 安装后自动启用开机自启并启动，管理界面为 `http://<路由器地址>:16680`，默认账号 `admin`，默认密码 `gately.cn`。
 - 配置在 `/etc/gately`，升级、卸载与刷写固件（sysupgrade）时都会保留。升级时安装新版安装包即可，「关于」页的在线升级会提示改用包管理器。
-- 程序约 35 MB，适合 x86 软路由、ARM64 盒子等存储较大的设备；arm 安装包需要 ARMv7 且带硬件浮点。
+- 程序约 32 MB，适合 x86 软路由、ARM64 盒子等存储较大的设备；arm 安装包需要 ARMv7 且带硬件浮点。
 
 ### 监控
 

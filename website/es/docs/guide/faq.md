@@ -22,7 +22,7 @@ Sí. Cada versión incluye paquetes sin conexión para fnOS (`.fpk`) que se inst
 
 ## ¿Es compatible con OpenWrt / iStoreOS?
 
-Sí. Cada versión incluye paquetes para OpenWrt: el `.ipk` para OpenWrt 24.10 y anteriores (incluido iStoreOS), que se instala con `opkg install`, y el `.apk` para OpenWrt 25.12 y posteriores, que se instala con `apk add --allow-untrusted`. El servicio arranca justo después de la instalación y guarda su configuración en `/etc/gately`; para actualizar, instala el paquete nuevo. El binario ocupa unos 35 MB, así que conviene un router software con almacenamiento de sobra. Consulta [OpenWrt](/es/docs/guide/install#openwrt).
+Sí. Cada versión incluye paquetes para OpenWrt: el `.ipk` para OpenWrt 24.10 y anteriores (incluido iStoreOS), que se instala con `opkg install`, y el `.apk` para OpenWrt 25.12 y posteriores, que se instala con `apk add --allow-untrusted`. El servicio arranca justo después de la instalación y guarda su configuración en `/etc/gately`; para actualizar, instala el paquete nuevo. El binario ocupa unos 32 MB, así que conviene un router software con almacenamiento de sobra. Consulta [OpenWrt](/es/docs/guide/install#openwrt).
 
 ## ¿Por qué se recomienda `--network host`?
 

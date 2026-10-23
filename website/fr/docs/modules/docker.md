@@ -25,7 +25,7 @@ Monter `docker.sock` revient à accorder un accès de niveau root à l'hôte. Si
 - Onglets de la page de détail :
   - Aperçu : état, code de sortie, nombre de redémarrages, état de santé, détails réseau, montages, ainsi que le projet Compose et le service auxquels il appartient ;
   - Journaux : consultation des journaux récents, avec horodatage facultatif ;
-  - Terminal : ouvre un terminal interactif dans un conteneur en cours d'exécution (`/bin/sh` par défaut ; la commande et l'utilisateur peuvent être précisés) ;
+  - Terminal : ouvre un terminal interactif dans un conteneur en cours d'exécution (`/bin/sh` par défaut ; la commande et l'utilisateur peuvent être précisés ; les couleurs suivent la préférence du terminal Web) ;
   - Fichiers : parcourir les fichiers du conteneur, modifier un texte en ligne (jusqu'à 1 Mio), téléverser, télécharger (les dossiers sont empaquetés en tar.gz), renommer, créer des dossiers, supprimer. La suppression exécute `rm -rf` dans le conteneur, qui doit donc être en cours d'exécution ;
   - Surveillance : échantillons de CPU, mémoire, réseau et E/S disque, nombre de processus, ainsi que la liste des processus du conteneur.
 

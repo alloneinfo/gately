@@ -25,7 +25,7 @@ Montar `docker.sock` equivale a conceder acceso de nivel root al host. Si no nec
 - Pestañas de la página de detalle:
   - Resumen: estado, código de salida, número de reinicios, estado de salud, detalles de red, montajes, y el proyecto y servicio de Compose al que pertenece;
   - Registros: consulta de los registros recientes, con marcas de tiempo opcionales;
-  - Terminal: abre un terminal interactivo dentro de un contenedor en ejecución (`/bin/sh` por defecto; se pueden indicar el comando y el usuario);
+  - Terminal: abre un terminal interactivo dentro de un contenedor en ejecución (`/bin/sh` por defecto; se pueden indicar el comando y el usuario; los colores siguen la preferencia del terminal web);
   - Archivos: explora los archivos del contenedor, edita texto en línea (hasta 1 MiB), sube, descarga (los directorios se empaquetan como tar.gz), renombra, crea directorios y elimina. Al eliminar se ejecuta `rm -rf` dentro del contenedor, por lo que el contenedor debe estar en ejecución;
   - Monitorización: muestras de CPU, memoria, red y E/S de disco, y número de procesos, además de la lista de procesos dentro del contenedor.
 

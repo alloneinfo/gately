@@ -91,4 +91,4 @@ Führen Sie Befehle aus oder senden Sie HTTP-Anfragen nach einem Cron-Zeitplan.
 
 ## Designs
 
-Die Oberfläche bietet mehrere Designs: Emerald, Ocean, Fresh, Sakura, Sunset, Dark, Midnight, Punk sowie „System folgen“ (Dark, wenn das System dunkel ist, sonst Emerald). Die Wahl des Designs wird lokal im Browser gespeichert.
+Die Oberfläche bietet 15 Farbpaletten in zwei Gruppen, Gately-Originale (Smaragd, Ozean, Frisch, Sakura, Sonnenuntergang, Mitternacht, Punk) und Klassiker (GitHub, Nord, Dracula, Catppuccin, Tokyo Night, Gruvbox, Rosé Pine, Solarized); jede Palette hat eine helle und eine dunkle Variante. Als Modus stehen Hell, Dunkel und „System folgen“ zur Wahl, das die helle oder dunkle Variante der aktuellen Palette verwendet. Jede Palette kann eine von 10 vordefinierten Akzentfarben oder eine Farbe aus der Farbauswahl des Systems erhalten; Logo und Verlauf der Anmeldeseite folgen ihr, und eine erneute Wahl der Palette entfernt die eigene Akzentfarbe. Ecken können eckig, wie in der Palette oder abgerundet sein. Die Designeinstellungen werden lokal im Browser gespeichert.

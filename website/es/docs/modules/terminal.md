@@ -28,7 +28,7 @@ Cuando se establece por primera vez una conexión SSH, se registra y se confía 
 - Varios clientes pueden conectarse a la misma sesión a la vez, con entrada compartida y salida difundida;
 - Las sesiones pueden tener una nota. La lista de sesiones muestra la hora de creación, la hora de la última actividad, el tamaño de la ventana y los bytes enviados y recibidos;
 - Tras actualizar la página, las sesiones que siguen activas se restauran como pestañas, junto con la disposición dividida;
-- El terminal incluye búsqueda (escribe una palabra clave, pulsa Intro para la siguiente coincidencia y Mayús+Intro para la anterior), copiar, pegar, borrar pantalla, ajuste del tamaño de fuente, pantalla completa y varios esquemas de color de terminal.
+- El terminal incluye búsqueda (escribe una palabra clave, pulsa Intro para la siguiente coincidencia y Mayús+Intro para la anterior), copiar, pegar, borrar pantalla, ajuste del tamaño de fuente, pantalla completa y varios esquemas de color de terminal (por defecto sigue el tema de la interfaz, o se fija uno).
 
 ### Ajustes
 

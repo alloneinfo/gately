@@ -28,7 +28,7 @@ When an SSH connection is first established, the server's host fingerprint is re
 - Multiple clients can attach to the same session at once, with shared input and broadcast output;
 - Sessions can have a remark. The session list shows creation time, last activity time, window size and bytes sent and received;
 - After a page refresh, sessions that are still alive are restored as tabs, along with the split layout;
-- The terminal has built-in search (type a keyword, press Enter for the next match and Shift+Enter for the previous one), copy, paste, clear screen, font size adjustment, full screen and several terminal color schemes.
+- The terminal has built-in search (type a keyword, press Enter for the next match and Shift+Enter for the previous one), copy, paste, clear screen, font size adjustment, full screen and several terminal color schemes (following the interface theme by default, or fixed to one scheme).
 
 ### Settings
 

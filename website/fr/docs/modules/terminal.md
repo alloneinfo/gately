@@ -28,7 +28,7 @@ Lors de la première connexion SSH, l'empreinte de l'hôte du serveur est enregi
 - Plusieurs clients peuvent se rattacher simultanément à la même session, avec une saisie partagée et une sortie diffusée à tous ;
 - Les sessions peuvent avoir une remarque. La liste des sessions affiche l'heure de création, l'heure de la dernière activité, la taille de la fenêtre et les octets envoyés et reçus ;
 - Après un rafraîchissement de la page, les sessions toujours actives sont restaurées sous forme d'onglets, ainsi que la disposition de la vue scindée ;
-- Le terminal intègre la recherche (saisissez un mot-clé, Entrée pour l'occurrence suivante et Maj+Entrée pour la précédente), la copie, le collage, l'effacement de l'écran, le réglage de la taille de police, le plein écran et plusieurs thèmes de couleurs.
+- Le terminal intègre la recherche (saisissez un mot-clé, Entrée pour l'occurrence suivante et Maj+Entrée pour la précédente), la copie, le collage, l'effacement de l'écran, le réglage de la taille de police, le plein écran et plusieurs thèmes de couleurs (qui suivent par défaut le thème de l'interface, ou un thème fixe).
 
 ### Paramètres
 
