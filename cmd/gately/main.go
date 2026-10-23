@@ -12,11 +12,14 @@ import (
 	"path/filepath"
 	"runtime"
 	"syscall"
+	// 内嵌 IANA 时区数据（约 450 KB）：OpenWrt 等精简系统没有 /usr/share/zoneinfo，否则设置里的时区一律无法加载
+	_ "time/tzdata"
 
 	"github.com/wangwanjie/gately/internal/app"
 	"github.com/wangwanjie/gately/internal/ctl"
 	"github.com/wangwanjie/gately/internal/i18n"
 	"github.com/wangwanjie/gately/internal/modules/registry"
+	"github.com/wangwanjie/gately/internal/systz"
 	"github.com/wangwanjie/gately/internal/version"
 	"github.com/wangwanjie/gately/web"
 )
@@ -67,6 +70,9 @@ func main() {
 		printVersion()
 		return
 	}
+
+	// OpenWrt 没有 /etc/localtime，procd 也不传 TZ，按系统配置的时区计时；设置中指定的时区随后会覆盖它
+	systz.Init()
 
 	// Web 服务使用证书模块按 SNI 提供 HTTPS 证书，并按站点引用 WAF 实例
 	mods, certs := registry.New()
