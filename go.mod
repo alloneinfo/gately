@@ -11,6 +11,7 @@ require (
 	github.com/corazawaf/coraza/v3 v3.8.1
 	github.com/creack/pty v1.1.24
 	github.com/fclairamb/ftpserverlib v0.32.4
+	github.com/hirochachacha/go-smb2 v1.1.0
 	github.com/klauspost/compress v1.18.0
 	github.com/maxmind/mmdbwriter v1.2.0
 	github.com/oschwald/maxminddb-golang/v2 v2.8.0
@@ -24,6 +25,7 @@ require (
 
 require (
 	github.com/corazawaf/libinjection-go v0.3.3 // indirect
+	github.com/geoffgarside/ber v1.1.0 // indirect
 	github.com/goccy/go-json v0.10.5 // indirect
 	github.com/goccy/go-yaml v1.19.2 // indirect
 	github.com/gotnospirit/makeplural v0.0.0-20180622080156-a5f48d94d976 // indirect

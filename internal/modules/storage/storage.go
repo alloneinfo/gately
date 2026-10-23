@@ -1,4 +1,4 @@
-// Package storage 实现存储管理与文件管理：登记本地目录或远程 WebDAV 作为挂载点，
+// Package storage 实现存储管理与文件管理：登记本地目录、远程 WebDAV 或 SMB 共享作为挂载点，
 // 并提供浏览器内的文件浏览、上传、下载、新建目录、重命名与删除。
 package storage
 
@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"mime"
+	"net"
 	"net/http"
 	"net/url"
 	"os"
@@ -29,6 +30,7 @@ const ID = "storage"
 const (
 	TypeLocal  = "local"
 	TypeWebDAV = "webdav"
+	TypeSMB    = "smb"
 )
 
 // Mount 是一个存储挂载点。
@@ -44,11 +46,14 @@ type Mount struct {
 	// Path 是本地目录（绝对路径），Type 为 local 时使用
 	Path string `json:"path"`
 
-	// 以下字段在 Type 为 webdav 时使用
-	URL        string `json:"url"`
-	Username   string `json:"username"`
-	Password   string `json:"password"`
-	SkipVerify bool   `json:"skipVerify"`
+	// 以下字段在 Type 为 webdav 或 smb 时使用；smb 的 URL 形如 smb://主机[:端口]/共享名[/子目录]
+	URL      string `json:"url"`
+	Username string `json:"username"`
+	Password string `json:"password"`
+	// SkipVerify 仅 webdav 使用
+	SkipVerify bool `json:"skipVerify"`
+	// Domain 是 SMB 认证所用的域或工作组，仅 smb 使用，通常留空
+	Domain string `json:"domain,omitempty"`
 }
 
 type fileConfig struct {
@@ -71,14 +76,33 @@ func (mt *Mount) Validate() error {
 		if !st.IsDir() {
 			return errors.New("本地路径不是目录")
 		}
-		mt.URL, mt.Username, mt.Password, mt.SkipVerify = "", "", "", false
+		mt.URL, mt.Username, mt.Password, mt.SkipVerify, mt.Domain = "", "", "", false, ""
 	case TypeWebDAV:
 		u, err := url.Parse(strings.TrimSpace(mt.URL))
 		if err != nil || (u.Scheme != "http" && u.Scheme != "https") || u.Host == "" {
 			return errors.New("WebDAV 地址需以 http:// 或 https:// 开头")
 		}
 		mt.URL = u.String()
-		mt.Path = ""
+		mt.Path, mt.Domain = "", ""
+	case TypeSMB:
+		addr, share, sub, err := parseSMB(mt.URL)
+		if err != nil {
+			return err
+		}
+		// 规范化地址：默认端口 445 不写出，子目录去掉多余的斜杠
+		host, port, _ := net.SplitHostPort(addr)
+		if port == "445" {
+			addr = host
+			if strings.Contains(host, ":") {
+				addr = "[" + host + "]"
+			}
+		}
+		mt.URL = "smb://" + addr + "/" + share
+		if sub != "" {
+			mt.URL += "/" + sub
+		}
+		mt.Domain = strings.TrimSpace(mt.Domain)
+		mt.Path, mt.SkipVerify = "", false
 	default:
 		return errors.New("存储类型无效")
 	}
@@ -189,9 +213,12 @@ func (m *Module) open(key string, write bool) (backend, error) {
 	}
 	var b backend
 	var err error
-	if mt.Type == TypeLocal {
+	switch mt.Type {
+	case TypeLocal:
 		b, err = newLocal(mt.Path)
-	} else {
+	case TypeSMB:
+		b, err = newSMB(mt.URL, mt.Username, mt.Password, mt.Domain)
+	default:
 		b, err = newDAV(mt.URL, mt.Username, mt.Password, mt.SkipVerify)
 	}
 	if err != nil {

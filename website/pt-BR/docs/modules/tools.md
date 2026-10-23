@@ -45,10 +45,11 @@ Adicione montagens em "Armazenamento", no grupo "Armazenamento em rede", e geren
 | Campo | Descrição |
 | --- | --- |
 | `name`, `remark`, `enable` | Nome, observação e chave de ativação |
-| `type` | `local` (diretório local) ou `webdav` (WebDAV remoto) |
+| `type` | `local` (diretório local), `webdav` (WebDAV remoto) ou `smb` (compartilhamento SMB) |
 | `path` | Diretório local, deve ser um caminho absoluto existente (usado por `local`) |
-| `url`, `username`, `password` | Endereço do WebDAV remoto (começando com `http://` ou `https://`) e conta; a senha é mascarada na interface (usados por `webdav`) |
+| `url`, `username`, `password` | Endereço remoto e conta; a senha é mascarada na interface (usados por `webdav` e `smb`). O endereço WebDAV começa com `http://` ou `https://`; o endereço SMB tem a forma `smb://host[:porta]/compartilhamento[/subdiretório]`, há suporte a SMB2/3 e com o usuário vazio a conexão é feita como convidado |
 | `skipVerify` | Ignora a validação do certificado HTTPS (usado por `webdav`) |
+| `domain` | Domínio ou grupo de trabalho para a autenticação SMB, normalmente vazio (usado por `smb`) |
 | `readOnly` | Monta como somente leitura; o gerenciador de arquivos rejeita qualquer operação de escrita |
 
 Diretórios locais e armazenamentos WebDAV podem ser importados do gerenciamento de armazenamento do Lucky. Aliyun Drive e montagens do sistema não são migrados.

@@ -8,7 +8,7 @@
       <el-empty v-if="!mounts.length" :description="t('storage.empty')" class="empty" />
       <EntityCard v-for="m in mounts" :key="m.key" :class="{ active: m.key === current?.key }">
         <template #lead>
-          <div class="mt-icon"><component :is="m.type === 'local' ? Folder : Cloud" :size="18" /></div>
+          <div class="mt-icon"><component :is="m.type === 'local' ? Folder : m.type === 'smb' ? Server : Cloud" :size="18" /></div>
         </template>
         <template #title>{{ m.name }}</template>
         <template v-if="m.remark" #sub>{{ m.remark }}</template>
@@ -17,7 +17,7 @@
           <StatusBadge v-else-if="m.readOnly" type="info" :text="t('storage.readOnly')" />
           <StatusBadge v-else type="running" :text="t('storage.readWrite')" />
         </template>
-        <Field :label="m.type === 'local' ? t('storage.localDir') : 'WebDAV'" mono>{{ m.type === 'local' ? m.path : m.url }}</Field>
+        <Field :label="m.type === 'local' ? t('storage.localDir') : m.type === 'smb' ? 'SMB' : 'WebDAV'" mono>{{ m.type === 'local' ? m.path : m.url }}</Field>
         <template #actions>
           <el-switch :model-value="m.enable" size="small" @change="(v: boolean) => toggle(m, v)" />
           <el-button text size="small" :icon="Pencil" @click="openEditor(m)">{{ t('common.edit') }}</el-button>
@@ -88,16 +88,24 @@
           <el-radio-group v-model="editing.type">
             <el-radio-button value="local">{{ t('storage.localDir') }}</el-radio-button>
             <el-radio-button value="webdav">{{ t('storage.remoteWebdav') }}</el-radio-button>
+            <el-radio-button value="smb">{{ t('storage.remoteSmb') }}</el-radio-button>
           </el-radio-group>
         </el-form-item>
         <el-form-item v-if="editing.type === 'local'" :label="t('storage.dir')">
           <el-input v-model="editing.path" class="mono" placeholder="/data/share" />
         </el-form-item>
         <template v-else>
-          <el-form-item :label="t('storage.url')"><el-input v-model="editing.url" class="mono" placeholder="https://nas.example.com:5006/dav" /></el-form-item>
+          <el-form-item :label="t('storage.url')">
+            <el-input v-model="editing.url" class="mono" :placeholder="editing.type === 'smb' ? 'smb://192.168.1.10/share' : 'https://nas.example.com:5006/dav'" />
+            <div v-if="editing.type === 'smb'" class="form-help">{{ t('storage.smbUrlHelp') }}</div>
+          </el-form-item>
           <el-form-item :label="t('storage.username')"><el-input v-model="editing.username" /></el-form-item>
           <el-form-item :label="t('storage.password')"><el-input v-model="editing.password" type="password" show-password /></el-form-item>
-          <el-form-item :label="t('storage.skipVerify')">
+          <el-form-item v-if="editing.type === 'smb'" :label="t('storage.domain')">
+            <el-input v-model="editing.domain" placeholder="WORKGROUP" />
+            <div class="form-help">{{ t('storage.domainHelp') }}</div>
+          </el-form-item>
+          <el-form-item v-else :label="t('storage.skipVerify')">
             <el-switch v-model="editing.skipVerify" />
             <span class="help">{{ t('storage.skipVerifyHelp') }}</span>
           </el-form-item>
@@ -118,7 +126,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useI18n } from 'vue-i18n'
-import { Cloud, Download, File, Folder, FolderOpen, FolderPlus, HardDrive, Pencil, Plus, RefreshCw, Trash2, Upload } from 'lucide-vue-next'
+import { Cloud, Download, File, Folder, FolderOpen, FolderPlus, HardDrive, Pencil, Plus, RefreshCw, Server, Trash2, Upload } from 'lucide-vue-next'
 import { api } from '../api'
 import PageHeader from '../components/PageHeader.vue'
 import EntityCard from '../components/EntityCard.vue'
@@ -129,7 +137,7 @@ import { useFormLayout } from '../composables/useIsMobile'
 interface Mount {
   key?: string
   name: string
-  type: 'local' | 'webdav'
+  type: 'local' | 'webdav' | 'smb'
   remark: string
   enable: boolean
   readOnly: boolean
@@ -138,6 +146,8 @@ interface Mount {
   username: string
   password: string
   skipVerify: boolean
+  // SMB 认证所用的域或工作组，仅 smb 类型使用
+  domain?: string
 }
 interface Entry {
   name: string
@@ -161,7 +171,7 @@ const uploading = ref(false)
 const fileInput = ref<HTMLInputElement>()
 
 function empty(): Mount {
-  return { name: '', type: 'local', remark: '', enable: true, readOnly: false, path: '', url: '', username: '', password: '', skipVerify: false }
+  return { name: '', type: 'local', remark: '', enable: true, readOnly: false, path: '', url: '', username: '', password: '', skipVerify: false, domain: '' }
 }
 
 const crumbs = computed(() => {

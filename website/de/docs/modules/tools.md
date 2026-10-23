@@ -45,10 +45,11 @@ Fügen Sie Einbindungen unter „Speicher“ in der Gruppe „Netzwerkspeicher�
 | Feld | Beschreibung |
 | --- | --- |
 | `name`, `remark`, `enable` | Name, Bemerkung und Aktivierungsschalter |
-| `type` | `local` (lokales Verzeichnis) oder `webdav` (entferntes WebDAV) |
+| `type` | `local` (lokales Verzeichnis), `webdav` (entferntes WebDAV) oder `smb` (SMB-Freigabe) |
 | `path` | Lokales Verzeichnis, muss ein vorhandener absoluter Pfad sein (für `local`) |
-| `url`, `username`, `password` | Adresse des entfernten WebDAV (beginnend mit `http://` oder `https://`) und Konto; das Passwort wird in der Oberfläche maskiert (für `webdav`) |
+| `url`, `username`, `password` | Entfernte Adresse und Konto; das Passwort wird in der Oberfläche maskiert (für `webdav` und `smb`). Eine WebDAV-Adresse beginnt mit `http://` oder `https://`; eine SMB-Adresse hat die Form `smb://host[:port]/freigabe[/unterverzeichnis]`, unterstützt wird SMB2/3, ohne Benutzername wird als Gast verbunden |
 | `skipVerify` | Prüfung des HTTPS-Zertifikats überspringen (für `webdav`) |
+| `domain` | Domäne oder Arbeitsgruppe für die SMB-Anmeldung, meist leer (für `smb`) |
 | `readOnly` | Schreibgeschützt einbinden; der Dateimanager lehnt jeden Schreibvorgang ab |
 
 Lokale Verzeichnisse und WebDAV-Speicher lassen sich aus der Speicherverwaltung von Lucky importieren. Alibaba Cloud Drive und Systemeinbindungen werden nicht migriert.

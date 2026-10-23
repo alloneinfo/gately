@@ -45,10 +45,11 @@ Añade montajes en «Almacenamiento», dentro del grupo «Almacenamiento en red�
 | Campo | Descripción |
 | --- | --- |
 | `name`, `remark`, `enable` | Nombre, nota e interruptor de activación |
-| `type` | `local` (directorio local) o `webdav` (WebDAV remoto) |
+| `type` | `local` (directorio local), `webdav` (WebDAV remoto) o `smb` (recurso compartido SMB) |
 | `path` | Directorio local, debe ser una ruta absoluta existente (lo usa `local`) |
-| `url`, `username`, `password` | Dirección del WebDAV remoto (que empieza por `http://` o `https://`) y cuenta; la contraseña se enmascara en la interfaz (lo usa `webdav`) |
+| `url`, `username`, `password` | Dirección remota y cuenta; la contraseña se enmascara en la interfaz (lo usan `webdav` y `smb`). La dirección WebDAV empieza por `http://` o `https://`; la dirección SMB tiene la forma `smb://host[:puerto]/recurso[/subdirectorio]`, admite SMB2/3 y con el usuario vacío se conecta como invitado |
 | `skipVerify` | Omite la verificación del certificado HTTPS (lo usa `webdav`) |
+| `domain` | Dominio o grupo de trabajo para la autenticación SMB, normalmente vacío (lo usa `smb`) |
 | `readOnly` | Montaje de solo lectura; el gestor de archivos rechaza cualquier operación de escritura |
 
 Los directorios locales y los almacenamientos WebDAV se pueden importar desde la gestión de almacenamiento de Lucky. Alibaba Cloud Drive y los montajes del sistema no se migran.

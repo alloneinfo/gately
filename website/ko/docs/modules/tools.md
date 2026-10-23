@@ -45,10 +45,11 @@ Lucky의 FTP 설정에서 서비스 매개변수와 사용자를 가져올 수 �
 | 필드 | 설명 |
 | --- | --- |
 | `name`, `remark`, `enable` | 이름, 메모, 사용 스위치 |
-| `type` | `local`(로컬 디렉터리) 또는 `webdav`(원격 WebDAV) |
+| `type` | `local`(로컬 디렉터리), `webdav`(원격 WebDAV) 또는 `smb`(SMB 공유) |
 | `path` | 로컬 디렉터리이며 이미 존재하는 절대 경로여야 합니다(`local`에서 사용) |
-| `url`, `username`, `password` | 원격 WebDAV 주소(`http://` 또는 `https://`로 시작)와 계정. 비밀번호는 UI에서 마스킹됩니다(`webdav`에서 사용) |
+| `url`, `username`, `password` | 원격 주소와 계정. 비밀번호는 UI에서 마스킹됩니다(`webdav`, `smb`에서 사용). WebDAV 주소는 `http://` 또는 `https://`로 시작하고, SMB 주소는 `smb://호스트[:포트]/공유이름[/하위디렉터리]` 형식이며 SMB2/3를 지원합니다. 사용자 이름을 비우면 게스트로 접속합니다 |
 | `skipVerify` | HTTPS 인증서 검증을 건너뜁니다(`webdav`에서 사용) |
+| `domain` | SMB 인증에 사용할 도메인 또는 작업 그룹. 보통 비워 둡니다(`smb`에서 사용) |
 | `readOnly` | 읽기 전용 마운트이며 파일 관리가 모든 쓰기 작업을 거부합니다 |
 
 Lucky의 스토리지 관리에서 로컬 디렉터리와 WebDAV 스토리지를 가져올 수 있으며 Aliyun Drive와 시스템 마운트는 가져오지 않습니다.

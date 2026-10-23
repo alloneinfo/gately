@@ -45,10 +45,11 @@ Add mounts under "Storage" in the "Network Storage" group, and manage files onli
 | Field | Description |
 | --- | --- |
 | `name`, `remark`, `enable` | Name, remark and enable switch |
-| `type` | `local` (local directory) or `webdav` (remote WebDAV) |
+| `type` | `local` (local directory), `webdav` (remote WebDAV) or `smb` (SMB share) |
 | `path` | Local directory, must be an existing absolute path (used by `local`) |
-| `url`, `username`, `password` | Remote WebDAV address (starting with `http://` or `https://`) and account; the password is masked in the UI (used by `webdav`) |
+| `url`, `username`, `password` | Remote address and account; the password is masked in the UI (used by `webdav` and `smb`). A WebDAV address starts with `http://` or `https://`; an SMB address looks like `smb://host[:port]/share[/subdir]`, SMB2/3 is supported and an empty username connects as guest |
 | `skipVerify` | Skip HTTPS certificate verification (used by `webdav`) |
+| `domain` | Domain or workgroup for SMB authentication, usually empty (used by `smb`) |
 | `readOnly` | Mount read-only; the file manager rejects every write operation |
 
 Local directories and WebDAV storages can be imported from Lucky's storage management. Alibaba Cloud Drive and system mounts are not migrated.

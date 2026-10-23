@@ -45,10 +45,11 @@
 | 字段 | 说明 |
 | --- | --- |
 | `name`、`remark`、`enable` | 名称、备注与启用开关 |
-| `type` | `local`（本地目录）或 `webdav`（远程 WebDAV） |
+| `type` | `local`（本地目录）、`webdav`（远程 WebDAV）或 `smb`（SMB 共享） |
 | `path` | 本地目录，需为已存在的绝对路径（`local` 使用） |
-| `url`、`username`、`password` | 远程 WebDAV 地址（以 `http://` 或 `https://` 开头）与账号，密码在界面中脱敏（`webdav` 使用） |
+| `url`、`username`、`password` | 远程地址与账号，密码在界面中脱敏（`webdav`、`smb` 使用）。WebDAV 地址以 `http://` 或 `https://` 开头；SMB 地址形如 `smb://主机[:端口]/共享名[/子目录]`，支持 SMB2/3，用户名留空时以来宾身份访问 |
 | `skipVerify` | 跳过 HTTPS 证书校验（`webdav` 使用） |
+| `domain` | SMB 认证所用的域或工作组，通常留空（`smb` 使用） |
 | `readOnly` | 只读挂载，文件管理拒绝一切写操作 |
 
 可从 Lucky 的存储管理导入本地目录与 WebDAV 存储，阿里云盘与系统挂载不迁移。

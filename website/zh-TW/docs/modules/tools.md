@@ -45,10 +45,11 @@
 | 欄位 | 說明 |
 | --- | --- |
 | `name`、`remark`、`enable` | 名稱、備註與啟用開關 |
-| `type` | `local`（本機目錄）或 `webdav`（遠端 WebDAV） |
+| `type` | `local`（本機目錄）、`webdav`（遠端 WebDAV）或 `smb`（SMB 共用） |
 | `path` | 本機目錄，需為已存在的絕對路徑（`local` 使用） |
-| `url`、`username`、`password` | 遠端 WebDAV 位址（以 `http://` 或 `https://` 開頭）與帳號，密碼在介面中遮蔽（`webdav` 使用） |
+| `url`、`username`、`password` | 遠端位址與帳號，密碼在介面中遮蔽（`webdav`、`smb` 使用）。WebDAV 位址以 `http://` 或 `https://` 開頭；SMB 位址形如 `smb://主機[:連接埠]/共用名稱[/子目錄]`，支援 SMB2/3，使用者名稱留空時以來賓身分存取 |
 | `skipVerify` | 略過 HTTPS 憑證驗證（`webdav` 使用） |
+| `domain` | SMB 認證所用的網域或工作群組，通常留空（`smb` 使用） |
 | `readOnly` | 唯讀掛載，檔案管理拒絕一切寫入操作 |
 
 可從 Lucky 的儲存管理匯入本機目錄與 WebDAV 儲存，阿里雲盤與系統掛載不遷移。

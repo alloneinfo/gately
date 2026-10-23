@@ -45,10 +45,11 @@ Ajoutez des montages dans « Stockage » du groupe « Stockage réseau », et g�
 | Champ | Description |
 | --- | --- |
 | `name`, `remark`, `enable` | Nom, remarque et interrupteur d'activation |
-| `type` | `local` (répertoire local) ou `webdav` (WebDAV distant) |
+| `type` | `local` (répertoire local), `webdav` (WebDAV distant) ou `smb` (partage SMB) |
 | `path` | Répertoire local, doit être un chemin absolu existant (utilisé par `local`) |
-| `url`, `username`, `password` | Adresse WebDAV distante (commençant par `http://` ou `https://`) et compte ; le mot de passe est masqué dans l'interface (utilisés par `webdav`) |
+| `url`, `username`, `password` | Adresse distante et compte ; le mot de passe est masqué dans l'interface (utilisés par `webdav` et `smb`). Une adresse WebDAV commence par `http://` ou `https://` ; une adresse SMB a la forme `smb://hôte[:port]/partage[/sous-dossier]`, SMB2/3 est pris en charge et un utilisateur vide se connecte en invité |
 | `skipVerify` | Ignore la vérification du certificat HTTPS (utilisé par `webdav`) |
+| `domain` | Domaine ou groupe de travail pour l'authentification SMB, généralement vide (utilisé par `smb`) |
 | `readOnly` | Monte en lecture seule ; le gestionnaire de fichiers rejette toute opération d'écriture |
 
 Les répertoires locaux et les stockages WebDAV peuvent être importés depuis la gestion du stockage de Lucky. Alibaba Cloud Drive et les montages système ne sont pas migrés.
