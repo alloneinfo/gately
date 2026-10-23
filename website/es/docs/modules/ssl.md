@@ -9,7 +9,7 @@ Emite y renueva certificados automáticamente para que los usen los [Servicios w
 - Certificados comodín y EAB (por ejemplo, ZeroSSL);
 - Subida de un certificado existente o lectura desde archivos;
 - Exportación a un directorio: cuando cambia un certificado, los archivos se escriben en el directorio indicado y se ejecuta un script, para que otros servicios puedan recargarlo;
-- Despliegue automático: cuando cambia un certificado, se envía por SSH a otros hosts y se ejecuta un comando, o se reinician los contenedores Docker que lo usan.
+- Despliegue automático: cuando cambia un certificado, se copia a varios directorios locales, se envía por SSH a otros hosts y se ejecuta un comando, o se reinician los contenedores Docker que lo usan.
 
 ## Validación HTTP-01
 
@@ -29,8 +29,11 @@ Cuando un certificado está activado, Gately escribe `.crt`, `.key`, `.pem` y `_
 
 En el «Despliegue automático» del certificado puedes añadir varios destinos de despliegue, que se ejecutan automáticamente cada vez que el certificado se emite, se renueva o se actualiza:
 
+- **Copiar a directorio local**: escribe el certificado en un directorio de esta máquina y ejecuta allí el comando "Ejecutar tras copiar". Puedes añadir varios directorios, cada uno con un comando distinto. Si los archivos de un directorio se borran o cambian, la siguiente comprobación los vuelve a copiar. Si Gately se ejecuta en Docker, el directorio y el comando están dentro del contenedor;
 - **Subir a host SSH**: elige una conexión SSH ya existente en el [Terminal web](/es/docs/modules/terminal) y se reutilizan su dirección, su método de autenticación y su proxy. Los archivos del certificado (`<nota>.crt`, `.key`, `.pem` y `_issuerCertificate.crt`, igual que en el mapeo de certificados, por lo que la nota es obligatoria) se escriben en el «Directorio remoto» y después se ejecuta en el host remoto el comando de «Ejecutar tras subir», por ejemplo `systemctl reload nginx`; el comando puede usar `$certName`, `$certDir`, `$certFile` y `$keyFile`. Cada archivo se escribe primero en un archivo temporal con los permisos ya ajustados y luego se renombra para sustituir al anterior; la clave privada queda con permisos 0600;
 - **Reiniciar contenedores locales**: cuando cambia el certificado, los contenedores Docker elegidos se reinician uno tras otro; útil para servicios en contenedores que montan el directorio de mapeo y necesitan reiniciarse para cargar el certificado nuevo.
+
+"Copiar a directorio local" y "Subir a host SSH" admiten nombres de archivo para el certificado (cadena completa) y la clave privada, como `fullchain.pem` y `privkey.pem`. Con ambos indicados solo se escriben esos dos archivos y la nota puede quedar vacía; si se dejan vacíos se usan los nombres del mapeo de certificados. `$certFile` y `$keyFile` apuntan a los archivos realmente escritos.
 
 El despliegue automático nunca confía en un host desconocido: la conexión SSH elegida debe haberse abierto una vez desde el Terminal web para registrar la clave del host antes de que se envíe nada. Si un despliegue falla, se reintenta cada hora y se emite el evento «Certificado: despliegue fallido», al que puedes suscribirte en el [Centro de notificaciones](/es/docs/modules/notify). El botón «Desplegar ahora» de la tarjeta del certificado ignora el intervalo de reintento, despliega de inmediato en todos los destinos activados y muestra el resultado de cada uno.
 

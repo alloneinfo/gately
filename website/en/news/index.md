@@ -7,6 +7,10 @@ description: Release announcements and notes for each Gately version.
 
 Announcements for major releases are listed below. See [GitHub Releases](https://github.com/wangwanjie/gately/releases) for the full changes and downloads of every version.
 
+## [v0.5.6.4](/en/news/v0.5.6.4)
+
+October 23, 2026 · Certificate auto deploy can copy to several local directories, each with its own command, and write the certificate and key under custom file names.
+
 ## [v0.5.6.3](/en/news/v0.5.6.3)
 
 October 23, 2026 · Fixes the overview hiding the br-lan interface on OpenWrt, and the time zone that could not be set and stayed on UTC.

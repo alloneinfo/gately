@@ -7,6 +7,10 @@ description: Release-Ankündigungen und Versionshinweise zu jeder Gately-Version
 
 Unten stehen die Ankündigungen zu wichtigen Releases. Alle Änderungen und Downloads jeder Version finden Sie unter [GitHub Releases](https://github.com/wangwanjie/gately/releases).
 
+## [v0.5.6.4](/de/news/v0.5.6.4)
+
+23. Oktober 2026 · Die automatische Zertifikatsbereitstellung kopiert in mehrere lokale Verzeichnisse mit jeweils eigenem Befehl und unterstützt eigene Dateinamen für Zertifikat und Schlüssel.
+
 ## [v0.5.6.3](/de/news/v0.5.6.3)
 
 23. Oktober 2026 · Behebt, dass die Übersicht unter OpenWrt die Schnittstelle br-lan ausblendete und sich die Zeitzone nicht einstellen ließ, sodass die Zeit in UTC lief.

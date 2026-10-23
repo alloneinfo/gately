@@ -7,6 +7,10 @@ description: Anuncios y notas de cada versión de Gately.
 
 A continuación se listan los anuncios de las versiones principales. Consulta [GitHub Releases](https://github.com/wangwanjie/gately/releases) para ver todos los cambios y las descargas de cada versión.
 
+## [v0.5.6.4](/es/news/v0.5.6.4)
+
+23 de octubre de 2026 · El despliegue automático de certificados copia a varios directorios locales, cada uno con su comando, y admite nombres de archivo personalizados para el certificado y la clave.
+
 ## [v0.5.6.3](/es/news/v0.5.6.3)
 
 23 de octubre de 2026 · Corrige que el resumen ocultara la interfaz br-lan en OpenWrt y que la zona horaria no pudiera configurarse, con la hora siempre en UTC.

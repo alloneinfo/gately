@@ -7,6 +7,10 @@ description: Gately 各版本的發布公告與更新說明。
 
 重要版本的發布公告如下，每個版本的完整變更與下載檔案見 [GitHub Releases](https://github.com/wangwanjie/gately/releases)。
 
+## [v0.5.6.4](/zh-TW/news/v0.5.6.4)
+
+2026 年 10 月 23 日 · 憑證自動部署支援複製到多個本機目錄、每個目錄單獨設定指令，並可自訂憑證與私鑰檔名。
+
 ## [v0.5.6.3](/zh-TW/news/v0.5.6.3)
 
 2026 年 10 月 23 日 · 修復 OpenWrt 上總覽看不到 br-lan 網卡、時區無法設定且時間以 UTC 計算的問題。

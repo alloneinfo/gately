@@ -9,7 +9,7 @@ Issue and renew certificates automatically for use by [Web Services](/en/docs/mo
 - Wildcard certificates and EAB (for example ZeroSSL);
 - Upload an existing certificate, or read it from files;
 - Map to a directory: after a certificate changes, the files are written to the specified directory and a script runs, so other services can reload;
-- Auto deploy: after a certificate changes, push it to other hosts over SSH and run a command, or restart the Docker containers that use it.
+- Auto deploy: after a certificate changes, copy it to several local directories, push it to other hosts over SSH and run a command, or restart the Docker containers that use it.
 
 ## HTTP-01 validation
 
@@ -29,8 +29,11 @@ Once a certificate is enabled, Gately writes `.crt`, `.key`, `.pem` and `_issuer
 
 Under the certificate's "Auto deploy" you can add several deployment targets, which run automatically after the certificate is issued, renewed or updated:
 
+- **Copy to local directory**: write the certificate to a directory on this machine, then run the "Run after copying" command locally. You can add several directories, each with a different command. If the certificate files in a directory are deleted or changed, the next check copies them again. When Gately runs in Docker, the directory and command are inside the container;
 - **Upload to SSH host**: pick an existing SSH connection from [Web Terminal](/en/docs/modules/terminal) to reuse its address, authentication and proxy. The certificate files (`<remark>.crt`, `.key`, `.pem` and `_issuerCertificate.crt`, the same as certificate mapping, so the remark is required) are written to the remote directory, then the "Run after upload" command runs on the remote host, for example `systemctl reload nginx`. The command can use `$certName`, `$certDir`, `$certFile` and `$keyFile`. Files are first written to temporary files with their permissions set and then renamed into place; the private key gets permission 0600;
 - **Restart local containers**: after the certificate changes, the selected Docker containers are restarted in turn. Use this for containers that mount the mapping directory and need a restart to load the new certificate.
+
+"Copy to local directory" and "Upload to SSH host" accept file names for the certificate (full chain) and the private key, such as `fullchain.pem` and `privkey.pem`. With both set, only those two files are written and the remark may be empty; left empty, the certificate mapping file names are used. `$certFile` and `$keyFile` in the command point to the files actually written.
 
 Auto deploy never trusts an unknown host: connect to the selected SSH connection once in Web Terminal to record its host key before anything is pushed. Failed deployments are retried every hour and raise a "Certificate: deployment failed" event, which you can subscribe to in the [Notification Center](/en/docs/modules/notify). "Deploy now" on the certificate card ignores the retry interval, deploys to all enabled targets right away and shows the result for each target.
 
