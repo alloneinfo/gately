@@ -191,6 +191,7 @@
     "localShellAddr": "{shell} local"
   },
   "themes": {
+    "follow": "Seguir o tema da interface",
     "default": "Escuro padrão",
     "githubLight": "Claro (GitHub)"
   }

@@ -191,6 +191,7 @@
     "localShellAddr": "本機 {shell}"
   },
   "themes": {
+    "follow": "跟隨介面主題",
     "default": "預設深色",
     "githubLight": "淺色（GitHub）"
   }

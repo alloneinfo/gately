@@ -1,18 +1,39 @@
 // 换肤：色系与亮暗模式分别保存在 localStorage；模式为“跟随系统”时按 prefers-color-scheme 取色系的亮色或暗色调色板。
 import { computed, ref, watch } from 'vue'
-import { DEFAULT_FAMILY, buildThemeVars, findFamily, legacyTheme, logoSvg, resolveTheme, themeFamilies, type ThemeDef, type ThemeMode } from '../themes'
+import {
+  DEFAULT_FAMILY,
+  buildThemeVars,
+  customizeTheme,
+  findFamily,
+  isHexColor,
+  legacyTheme,
+  logoSvg,
+  resolveTheme,
+  themeFamilies,
+  type RadiusPref,
+  type ThemeDef,
+  type ThemeMode,
+} from '../themes'
 
 const familyKey = 'gately-theme-family'
 const modeKey = 'gately-theme-mode'
 const legacyKey = 'gately-theme' // 旧版只保存单一主题 ID
+const accentKey = 'gately-theme-accent'
+const radiusKey = 'gately-theme-radius'
 
 // family/mode 是用户的选择；preview 是选择面板里悬停预览的色系，为 null 时不预览
 const family = ref<string>(DEFAULT_FAMILY)
 const mode = ref<ThemeMode>('auto')
 const preview = ref<string | null>(null)
+// accent 为自定义主色（null 表示用色系自带主色），radius 为圆角偏好
+const accent = ref<string | null>(null)
+const radius = ref<RadiusPref>('')
 const systemDark = ref(false)
 const wantDark = computed(() => (mode.value === 'auto' ? systemDark.value : mode.value === 'dark'))
-const current = computed<ThemeDef>(() => resolveTheme(findFamily(preview.value ?? family.value), wantDark.value))
+// 悬停预览展示色系原本的主色，便于比较；圆角偏好始终生效
+const current = computed<ThemeDef>(() =>
+  customizeTheme(resolveTheme(findFamily(preview.value ?? family.value), wantDark.value), preview.value ? null : accent.value, radius.value),
+)
 const isDark = computed(() => current.value.dark)
 let installed = false
 // 记录上次写入的变量名，切换时清理，避免残留
@@ -47,6 +68,14 @@ function apply() {
 
 // load 读取保存的选择；新键不存在时从旧版的单一主题 ID 迁移。
 function load() {
+  const savedAccent = localStorage.getItem(accentKey)
+  if (isHexColor(savedAccent)) {
+    accent.value = savedAccent
+  }
+  const savedRadius = localStorage.getItem(radiusKey)
+  if (savedRadius === 'sharp' || savedRadius === 'round') {
+    radius.value = savedRadius
+  }
   const savedFamily = localStorage.getItem(familyKey)
   const savedMode = localStorage.getItem(modeKey)
   if (savedFamily || savedMode) {
@@ -108,16 +137,18 @@ function withReveal(update: () => void, x?: number, y?: number) {
 
 export function useTheme() {
   install()
-  // setFamily 选定色系；传入点击坐标时带圆形过渡
+  // setFamily 选定色系，同时清除自定义主色（选色系即选用它的整套配色）；传入点击坐标时带圆形过渡
   function setFamily(id: string, x?: number, y?: number) {
     // 悬停预览已经展示了该色系，此时无需再过渡
-    const shown = preview.value === id
+    const shown = preview.value === id && !accent.value
     const update = () => {
       preview.value = null
       family.value = id
+      accent.value = null
     }
     localStorage.setItem(familyKey, id)
-    if (shown || id === family.value) {
+    localStorage.removeItem(accentKey)
+    if (shown || (id === family.value && !accent.value)) {
       update()
       return
     }
@@ -132,11 +163,28 @@ export function useTheme() {
       mode.value = m
     }, x, y)
   }
+  // setAccent 设置自定义主色，传 null 恢复色系自带主色
+  function setAccent(c: string | null) {
+    accent.value = isHexColor(c) ? c.toLowerCase() : null
+    if (accent.value) {
+      localStorage.setItem(accentKey, accent.value)
+    } else {
+      localStorage.removeItem(accentKey)
+    }
+  }
+  function setRadius(r: RadiusPref) {
+    radius.value = r
+    if (r) {
+      localStorage.setItem(radiusKey, r)
+    } else {
+      localStorage.removeItem(radiusKey)
+    }
+  }
   // setPreview 临时展示某个色系，传 null 恢复用户的选择
   function setPreview(id: string | null) {
     preview.value = id
   }
-  return { family, mode, wantDark, current, isDark, setFamily, setMode, setPreview }
+  return { family, mode, accent, radius, wantDark, current, isDark, setFamily, setMode, setAccent, setRadius, setPreview }
 }
 
 // initTheme 在应用挂载前调用，避免首屏闪烁。

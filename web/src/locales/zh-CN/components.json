@@ -12,7 +12,15 @@
     "groupOriginal": "Gately 原创",
     "groupClassic": "经典配色",
     "darkOnly": "仅暗色",
-    "lightOnly": "仅亮色"
+    "lightOnly": "仅亮色",
+    "custom": "自定义",
+    "accent": "主色",
+    "accentCustom": "自选颜色",
+    "accentReset": "恢复色系自带主色",
+    "radius": "圆角",
+    "radiusSharp": "直角",
+    "radiusDefault": "跟随色系",
+    "radiusRound": "圆润"
   },
   "moduleBanner": {
     "defaultDesc": "模块停用期间，下列条目全部不会运行；启用模块后，各条目按自身开关生效。",

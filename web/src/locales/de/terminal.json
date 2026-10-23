@@ -191,6 +191,7 @@
     "localShellAddr": "Lokal {shell}"
   },
   "themes": {
+    "follow": "UI-Design folgen",
     "default": "Standard dunkel",
     "githubLight": "Hell (GitHub)"
   }

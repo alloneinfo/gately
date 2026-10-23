@@ -489,11 +489,12 @@ watch(
     }
   },
 )
+// 选中“跟随界面主题”时，界面换肤也会让配色重新计算
 watch(
-  () => props.themeName,
-  (v) => {
+  () => findTheme(props.themeName).theme,
+  (th) => {
     if (term) {
-      term.options.theme = findTheme(v).theme
+      term.options.theme = th
     }
   },
 )

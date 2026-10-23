@@ -53,13 +53,13 @@ export const themeFamilies: ThemeFamily[] = [
       sidebar: '#ffffff',
       border: '#e6eaee',
       text: '#1f2937',
-      textSub: '#6b7280',
+      textSub: '#69707e',
       logo: ['#18a888', '#0b5f4f', '#9ff3dc'],
       hero: ['#0f8a71', '#0b5f4f', '#083f35'],
     },
     // 沿用旧版“暗黑”主题
     dark: {
-      primary: '#2bb596',
+      primary: '#27a589',
       chart2: '#818cf8',
       page: '#0f1113',
       card: '#16181b',
@@ -116,12 +116,12 @@ export const themeFamilies: ThemeFamily[] = [
       sidebar: '#fbfef8',
       border: '#e0eed5',
       text: '#233421',
-      textSub: '#6a7f65',
+      textSub: '#61765d',
       logo: ['#6fd36b', '#2a9a48', '#f7ffb0'],
       hero: ['#45bb5a', '#2a9a48', '#176b33'],
     },
     dark: {
-      primary: '#3fb55e',
+      primary: '#3aa756',
       chart2: '#fbbf24',
       page: '#0d130d',
       card: '#141c14',
@@ -147,7 +147,7 @@ export const themeFamilies: ThemeFamily[] = [
       sidebar: '#fffafb',
       border: '#f4dce4',
       text: '#3a1f2b',
-      textSub: '#8f6b79',
+      textSub: '#8a6674',
       logo: ['#f27aa5', '#c23a6e', '#ffe0ec'],
       hero: ['#e0568a', '#be3a6c', '#7e2147'],
     },
@@ -178,12 +178,12 @@ export const themeFamilies: ThemeFamily[] = [
       sidebar: '#fffaf4',
       border: '#efe1d2',
       text: '#3a2616',
-      textSub: '#8a6f58',
+      textSub: '#866b55',
       logo: ['#ff9a3c', '#c24a0a', '#ffe3b8'],
       hero: ['#e8791f', '#c24a0a', '#7a2b05'],
     },
     dark: {
-      primary: '#e57a28',
+      primary: '#de7627',
       chart2: '#22b8c4',
       page: '#15100b',
       card: '#1e1711',
@@ -214,7 +214,7 @@ export const themeFamilies: ThemeFamily[] = [
       hero: ['#5b68e8', '#3b47c0', '#1c2470'],
     },
     dark: {
-      primary: '#7c8cff',
+      primary: '#7a89fa',
       chart2: '#38bdf8',
       page: '#0b1020',
       card: '#121830',
@@ -233,7 +233,19 @@ export const themeFamilies: ThemeFamily[] = [
     descKey: 'themes.punk.desc',
     radius: 2,
     logoRadius: 4,
-    // 朋克只有暗色：霓虹色在浅底上失去效果
+    // 亮色：浅紫底配深洋红与青色，保留锐角与霓虹光晕
+    light: {
+      primary: '#d1106e',
+      chart2: '#0891b2',
+      page: '#f5eefc',
+      card: '#fffbff',
+      sidebar: '#fbf6ff',
+      border: '#dcc6f2',
+      text: '#1f0a3a',
+      textSub: '#634a82',
+      logo: ['#ff2e97', '#7a1fd1', '#00e5ff'],
+      hero: ['#e0137a', '#7a1fd1', '#2a0b55'],
+    },
     dark: {
       primary: '#ff2e97',
       chart2: '#00e5ff',
@@ -299,7 +311,7 @@ export const themeFamilies: ThemeFamily[] = [
       hero: ['#5e81ac', '#4c6a92', '#2e3440'],
     },
     dark: {
-      primary: '#81a1c1',
+      primary: '#7896b3',
       chart2: '#a3be8c',
       page: '#2e3440',
       card: '#3b4252',
@@ -331,7 +343,7 @@ export const themeFamilies: ThemeFamily[] = [
       hero: ['#7a5fe0', '#644ac9', '#2c1f66'],
     },
     dark: {
-      primary: '#bd93f9',
+      primary: '#a681db',
       chart2: '#ff79c6',
       page: '#21222c',
       card: '#282a36',
@@ -358,7 +370,7 @@ export const themeFamilies: ThemeFamily[] = [
       sidebar: '#eff1f5',
       border: '#d5d9e2',
       text: '#4c4f69',
-      textSub: '#6c6f85',
+      textSub: '#666980',
       logo: ['#ea76cb', '#8839ef', '#dce0e8'],
       hero: ['#8839ef', '#5c2bb0', '#2a1458'],
     },
@@ -389,7 +401,7 @@ export const themeFamilies: ThemeFamily[] = [
       sidebar: '#e9e9ed',
       border: '#c4c8da',
       text: '#343b58',
-      textSub: '#6172b0',
+      textSub: '#546296',
       logo: ['#7dcfff', '#2e7de9', '#e1e2e7'],
       hero: ['#2e7de9', '#3760bf', '#1f2d5c'],
     },
@@ -421,7 +433,7 @@ export const themeFamilies: ThemeFamily[] = [
       sidebar: '#f9f5d7',
       border: '#e2d3aa',
       text: '#3c3836',
-      textSub: '#7c6f64',
+      textSub: '#6f645b',
       logo: ['#d79921', '#af3a03', '#fbf1c7'],
       hero: ['#d65d0e', '#af3a03', '#5a1f00'],
     },
@@ -453,12 +465,12 @@ export const themeFamilies: ThemeFamily[] = [
       sidebar: '#fdf7f0',
       border: '#ebe1d8',
       text: '#575279',
-      textSub: '#797593',
+      textSub: '#706c8c',
       logo: ['#d7827e', '#b4637a', '#f6c177'],
       hero: ['#d7827e', '#b4637a', '#575279'],
     },
     dark: {
-      primary: '#eb6f92',
+      primary: '#e46c8e',
       chart2: '#9ccfd8',
       page: '#191724',
       card: '#1f1d2e',
@@ -485,7 +497,7 @@ export const themeFamilies: ThemeFamily[] = [
       sidebar: '#fdf6e3',
       border: '#ddd6c1',
       text: '#073642',
-      textSub: '#657b83',
+      textSub: '#506c75',
       logo: ['#2aa198', '#268bd2', '#b58900'],
       hero: ['#268bd2', '#1a6496', '#073642'],
     },
@@ -544,13 +556,42 @@ export function legacyTheme(id: string): { family: string; mode: ThemeMode } | n
   return null
 }
 
+// 自定义：用户可在任意色系上覆盖主色与圆角
+export type RadiusPref = '' | 'sharp' | 'round' // 空串表示沿用色系自身的圆角
+
+// 主色预设：覆盖常用色相，深浅适中，亮暗两种底色上都能用
+export const ACCENT_PRESETS = ['#0e7c66', '#0d9488', '#0b73c9', '#4f5bd5', '#8839ef', '#d6457c', '#e5484d', '#d9640f', '#ca8a04', '#2fa84f']
+
+export function isHexColor(s: string | null | undefined): s is string {
+  return !!s && /^#[0-9a-fA-F]{6}$/.test(s)
+}
+
+// customizeTheme 在解析好的主题上叠加自定义主色与圆角；主色变化时标志与登录页渐变一并由主色推导。
+export function customizeTheme(t: ThemeDef, accent: string | null, radius: RadiusPref): ThemeDef {
+  const out = { ...t }
+  if (isHexColor(accent)) {
+    const a = accent.toLowerCase()
+    out.primary = a
+    out.logo = [mix(a, '#ffffff', 0.25), mix(a, '#000000', 0.3), mix(a, '#ffffff', 0.7)]
+    out.hero = [a, mix(a, '#000000', 0.3), mix(a, '#000000', 0.6)]
+  }
+  if (radius === 'sharp') {
+    out.radius = 3
+    out.logoRadius = 4
+  } else if (radius === 'round') {
+    out.radius = 16
+    out.logoRadius = 11
+  }
+  return out
+}
+
 function parseHex(hex: string): [number, number, number] {
   const h = hex.replace('#', '')
   return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)]
 }
 
 // mix 把颜色 a 与 b 按比例混合，t 为 b 的占比（0~1）。
-function mix(a: string, b: string, t: number): string {
+export function mix(a: string, b: string, t: number): string {
   const ca = parseHex(a)
   const cb = parseHex(b)
   const out = ca.map((v, i) => Math.round(v * (1 - t) + cb[i] * t))

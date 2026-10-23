@@ -12,7 +12,15 @@
     "groupOriginal": "Gately 오리지널",
     "groupClassic": "클래식 팔레트",
     "darkOnly": "다크 전용",
-    "lightOnly": "라이트 전용"
+    "lightOnly": "라이트 전용",
+    "custom": "사용자 지정",
+    "accent": "강조색",
+    "accentCustom": "색상 선택",
+    "accentReset": "팔레트 기본 강조색으로 되돌리기",
+    "radius": "모서리",
+    "radiusSharp": "각진",
+    "radiusDefault": "팔레트",
+    "radiusRound": "둥근"
   },
   "moduleBanner": {
     "defaultDesc": "모듈을 사용하지 않는 동안 아래 항목은 모두 실행되지 않습니다. 모듈을 사용하면 각 항목은 자체 스위치에 따라 동작합니다.",

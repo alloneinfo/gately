@@ -68,6 +68,50 @@
         </section>
       </div>
 
+      <!-- 自定义：在当前色系上覆盖主色与圆角 -->
+      <section class="custom">
+        <div class="group-title">{{ t('components.themePicker.custom') }}</div>
+        <div class="row">
+          <span class="row-label">{{ t('components.themePicker.accent') }}</span>
+          <div class="dots">
+            <button
+              v-for="c in ACCENT_PRESETS"
+              :key="c"
+              class="dot"
+              :class="{ active: accent === c }"
+              :style="{ background: c }"
+              :aria-label="c"
+              :aria-pressed="accent === c"
+              @click="setAccent(c)"
+            />
+            <!-- 自选颜色：原生取色器，拖动时实时生效 -->
+            <label class="dot dot-pick" :class="{ active: !!accent && !ACCENT_PRESETS.includes(accent) }" :title="t('components.themePicker.accentCustom')">
+              <input type="color" :value="current.primary" :aria-label="t('components.themePicker.accentCustom')" @input="setAccent(($event.target as HTMLInputElement).value)" />
+            </label>
+          </div>
+          <button v-if="accent" class="reset" :title="t('components.themePicker.accentReset')" :aria-label="t('components.themePicker.accentReset')" @click="setAccent(null)">
+            <RotateCcw :size="13" />
+          </button>
+        </div>
+        <div class="row">
+          <span class="row-label">{{ t('components.themePicker.radius') }}</span>
+          <div class="modes radius" role="radiogroup" :aria-label="t('components.themePicker.radius')">
+            <button
+              v-for="r in radii"
+              :key="r.id"
+              class="mode"
+              role="radio"
+              :aria-checked="radius === r.id"
+              :class="{ active: radius === r.id }"
+              @click="setRadius(r.id)"
+            >
+              <span class="r-icon" :style="{ borderRadius: r.icon }" />
+              <span>{{ t(r.key) }}</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
       <!-- 底部说明：显示悬停或当前色系的描述 -->
       <div class="foot">
         <span class="foot-name">{{ familyName(info) }}</span>
@@ -81,13 +125,13 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Check, MonitorSmartphone, Moon, Palette, Sun } from 'lucide-vue-next'
-import { findFamily, resolveTheme, singleMode, themeFamilies, type ThemeFamily, type ThemeMode } from '../themes'
+import { Check, MonitorSmartphone, Moon, Palette, RotateCcw, Sun } from 'lucide-vue-next'
+import { ACCENT_PRESETS, findFamily, resolveTheme, singleMode, themeFamilies, type RadiusPref, type ThemeFamily, type ThemeMode } from '../themes'
 import { useTheme } from '../composables/useTheme'
 import { useScrollLock } from '../composables/useScrollLock'
 
 const { t } = useI18n()
-const { family, mode, wantDark, setFamily, setMode, setPreview } = useTheme()
+const { family, mode, accent, radius, current, wantDark, setFamily, setMode, setAccent, setRadius, setPreview } = useTheme()
 // 面板打开期间锁定页面滚动，滚轮和触摸滑动不穿透到下方页面
 const lockScroll = useScrollLock('.theme-popper')
 
@@ -95,6 +139,13 @@ const modes: { id: ThemeMode; key: string; icon: typeof Sun }[] = [
   { id: 'light', key: 'components.themePicker.modeLight', icon: Sun },
   { id: 'dark', key: 'components.themePicker.modeDark', icon: Moon },
   { id: 'auto', key: 'components.themePicker.modeAuto', icon: MonitorSmartphone },
+]
+
+// 圆角选项；icon 为按钮里示意图标的圆角
+const radii: { id: RadiusPref; key: string; icon: string }[] = [
+  { id: 'sharp', key: 'components.themePicker.radiusSharp', icon: '1px' },
+  { id: '', key: 'components.themePicker.radiusDefault', icon: '3px' },
+  { id: 'round', key: 'components.themePicker.radiusRound', icon: '6px' },
 ]
 
 const groups = [
@@ -342,6 +393,100 @@ function swatchVars(f: ThemeFamily) {
   font-weight: 600;
   color: var(--el-color-primary);
 }
+.custom {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.custom .group-title {
+  margin-bottom: 0;
+}
+.row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 30px;
+}
+.row-label {
+  width: 34px;
+  flex-shrink: 0;
+  font-size: 12px;
+  color: var(--el-text-color-regular);
+}
+.dots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+.dot {
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);
+  transition: transform 0.12s;
+}
+.dot:hover {
+  transform: scale(1.12);
+}
+/* 选中：外圈留出底色间隙再描一圈主色 */
+.dot.active {
+  box-shadow:
+    0 0 0 2px var(--el-bg-color-overlay),
+    0 0 0 3.5px var(--el-color-primary);
+}
+/* 自选颜色按钮：彩虹色环，原生取色器铺满且透明 */
+.dot-pick {
+  background: conic-gradient(#f43f5e, #f59e0b, #84cc16, #10b981, #06b6d4, #6366f1, #d946ef, #f43f5e);
+  overflow: hidden;
+}
+.dot-pick input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  border: none;
+  padding: 0;
+}
+.reset {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--el-text-color-secondary);
+  cursor: pointer;
+}
+.reset:hover {
+  color: var(--el-color-primary);
+  background: var(--el-fill-color);
+}
+.modes.radius {
+  flex: 1;
+}
+.modes.radius .mode {
+  flex: 1;
+  justify-content: center;
+}
+.r-icon {
+  width: 10px;
+  height: 10px;
+  border: 1.5px solid currentColor;
+  border-right: none;
+  border-bottom: none;
+}
 .foot {
   margin-top: 10px;
   padding-top: 8px;
@@ -366,9 +511,9 @@ function swatchVars(f: ThemeFamily) {
   border-radius: 4px;
   background: var(--el-fill-color);
 }
-/* 窄屏：分段控件只显示图标 */
+/* 窄屏：亮暗模式分段控件只显示图标 */
 @media (max-width: 400px) {
-  .mode span {
+  .head .mode span {
     display: none;
   }
 }

@@ -12,7 +12,15 @@
     "groupOriginal": "Originales de Gately",
     "groupClassic": "Paletas clásicas",
     "darkOnly": "Solo oscuro",
-    "lightOnly": "Solo claro"
+    "lightOnly": "Solo claro",
+    "custom": "Personalizar",
+    "accent": "Acento",
+    "accentCustom": "Elegir un color",
+    "accentReset": "Usar el acento de la paleta",
+    "radius": "Esquinas",
+    "radiusSharp": "Rectas",
+    "radiusDefault": "Paleta",
+    "radiusRound": "Redondeadas"
   },
   "moduleBanner": {
     "defaultDesc": "Mientras el módulo esté desactivado, ninguno de los elementos siguientes se ejecutará. Al activarlo, cada elemento sigue su propio interruptor.",

@@ -191,6 +191,7 @@
     "localShellAddr": "ローカル {shell}"
   },
   "themes": {
+    "follow": "UI テーマに合わせる",
     "default": "デフォルト（ダーク）",
     "githubLight": "ライト（GitHub）"
   }

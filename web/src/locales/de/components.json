@@ -12,7 +12,15 @@
     "groupOriginal": "Gately-Originale",
     "groupClassic": "Klassische Paletten",
     "darkOnly": "Nur dunkel",
-    "lightOnly": "Nur hell"
+    "lightOnly": "Nur hell",
+    "custom": "Anpassen",
+    "accent": "Akzent",
+    "accentCustom": "Farbe wählen",
+    "accentReset": "Akzent der Palette verwenden",
+    "radius": "Ecken",
+    "radiusSharp": "Eckig",
+    "radiusDefault": "Palette",
+    "radiusRound": "Rund"
   },
   "moduleBanner": {
     "defaultDesc": "Solange das Modul deaktiviert ist, wird keiner der folgenden Einträge ausgeführt. Nach der Aktivierung richtet sich jeder Eintrag nach seinem eigenen Schalter.",

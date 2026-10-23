@@ -11,7 +11,7 @@
       <el-button v-if="!connected" type="primary" :icon="Plug" @click="connect">{{ t('docker.container.term.connect') }}</el-button>
       <el-button v-else :icon="Unplug" @click="disconnect">{{ t('docker.container.term.disconnect') }}</el-button>
     </div>
-    <div class="term-box">
+    <div class="term-box" :style="{ background: bg }">
       <div ref="el" class="term-pane"></div>
     </div>
     <div v-if="isMobile" class="keys">
@@ -21,18 +21,24 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Plug, Unplug } from 'lucide-vue-next'
 import { Terminal } from '@xterm/xterm'
 import { FitAddon } from '@xterm/addon-fit'
 import '@xterm/xterm/css/xterm.css'
 import { useIsMobile } from '../../composables/useIsMobile'
+import { useTermPrefs } from '../../components/terminal/prefs'
+import { findTheme } from '../../components/terminal/themes'
 
 const { t } = useI18n()
 
 const props = defineProps<{ containerId: string }>()
 const isMobile = useIsMobile()
+// 配色沿用终端页的偏好（默认跟随界面主题）
+const { themeName } = useTermPrefs()
+const termTheme = computed(() => findTheme(themeName.value).theme)
+const bg = computed(() => termTheme.value.background ?? '#1d1f21')
 
 const el = ref<HTMLElement>()
 const shell = ref('/bin/sh')
@@ -164,7 +170,7 @@ onMounted(() => {
     cursorBlink: true,
     fontSize: isMobile.value ? 12 : 13,
     fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace',
-    theme: { background: '#1d1f21' },
+    theme: termTheme.value,
   })
   term.loadAddon(fit)
   term.open(el.value!)
@@ -175,6 +181,12 @@ onMounted(() => {
   observer.observe(el.value!)
   window.addEventListener('orientationchange', doFit)
   connect()
+})
+
+watch(termTheme, (th) => {
+  if (term) {
+    term.options.theme = th
+  }
 })
 
 onBeforeUnmount(() => {
@@ -214,7 +226,6 @@ onBeforeUnmount(() => {
   min-height: 260px;
   border-radius: var(--g-radius-sm);
   overflow: hidden;
-  background: #1d1f21;
 }
 .term-pane {
   height: 100%;

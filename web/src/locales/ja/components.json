@@ -12,7 +12,15 @@
     "groupOriginal": "Gately オリジナル",
     "groupClassic": "定番パレット",
     "darkOnly": "ダークのみ",
-    "lightOnly": "ライトのみ"
+    "lightOnly": "ライトのみ",
+    "custom": "カスタマイズ",
+    "accent": "アクセント",
+    "accentCustom": "色を選ぶ",
+    "accentReset": "パレットのアクセントに戻す",
+    "radius": "角丸",
+    "radiusSharp": "シャープ",
+    "radiusDefault": "パレット",
+    "radiusRound": "丸め"
   },
   "moduleBanner": {
     "defaultDesc": "モジュールが無効の間は、以下の項目はすべて動作しません。モジュールを有効にすると、各項目は個別のスイッチに従います。",

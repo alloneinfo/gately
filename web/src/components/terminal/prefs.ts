@@ -19,7 +19,8 @@ function initialFont(): number {
 }
 
 const fontSize = ref(initialFont())
-const themeName = ref(localStorage.getItem(THEME_KEY) || 'default')
+// 未设置过时默认跟随界面主题
+const themeName = ref(localStorage.getItem(THEME_KEY) || 'follow')
 
 watch(fontSize, (v) => {
   localStorage.setItem(FONT_KEY, String(v))

@@ -12,7 +12,15 @@
     "groupOriginal": "Gately 原創",
     "groupClassic": "經典配色",
     "darkOnly": "僅暗色",
-    "lightOnly": "僅亮色"
+    "lightOnly": "僅亮色",
+    "custom": "自訂",
+    "accent": "主色",
+    "accentCustom": "自選顏色",
+    "accentReset": "恢復色系內建主色",
+    "radius": "圓角",
+    "radiusSharp": "直角",
+    "radiusDefault": "跟隨色系",
+    "radiusRound": "圓潤"
   },
   "moduleBanner": {
     "defaultDesc": "模組停用期間，下列項目全部不會執行；啟用模組後，各項目依自身開關生效。",

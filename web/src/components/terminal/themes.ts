@@ -1,6 +1,10 @@
 // 终端配色主题。
 import type { ITheme } from '@xterm/xterm'
 import { t } from '../../i18n'
+import { mix, type ThemeDef } from '../../themes'
+import { useTheme } from '../../composables/useTheme'
+
+const { current: uiTheme } = useTheme()
 
 export interface TermTheme {
   name: string
@@ -11,6 +15,14 @@ export interface TermTheme {
 }
 
 export const termThemes: TermTheme[] = [
+  // 跟随界面主题：底色、文字、光标取自当前界面配色，ANSI 色按亮暗沿用默认深色或 GitHub 浅色；用 getter 让界面换肤后取到最新值
+  {
+    name: 'follow',
+    labelKey: 'terminal.themes.follow',
+    get theme() {
+      return followTheme(uiTheme.value)
+    },
+  },
   {
     name: 'default',
     labelKey: 'terminal.themes.default',
@@ -84,6 +96,19 @@ export const termThemes: TermTheme[] = [
     },
   },
 ]
+
+// followTheme 由界面主题生成终端配色。
+function followTheme(ui: ThemeDef): ITheme {
+  const base = findTheme(ui.dark ? 'default' : 'github-light').theme
+  return {
+    ...base,
+    background: ui.card,
+    foreground: ui.text,
+    cursor: ui.primary,
+    cursorAccent: ui.card,
+    selectionBackground: mix(ui.primary, ui.card, ui.dark ? 0.6 : 0.75),
+  }
+}
 
 export function findTheme(name: string): TermTheme {
   return termThemes.find((x) => x.name === name) ?? termThemes[0]

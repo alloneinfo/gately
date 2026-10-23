@@ -12,7 +12,15 @@
     "groupOriginal": "Gately originals",
     "groupClassic": "Classic palettes",
     "darkOnly": "Dark only",
-    "lightOnly": "Light only"
+    "lightOnly": "Light only",
+    "custom": "Customize",
+    "accent": "Accent",
+    "accentCustom": "Pick a colour",
+    "accentReset": "Use the palette accent",
+    "radius": "Corners",
+    "radiusSharp": "Sharp",
+    "radiusDefault": "Palette",
+    "radiusRound": "Round"
   },
   "moduleBanner": {
     "defaultDesc": "While the module is disabled, none of the items below will run. After enabling it, each item follows its own switch.",
