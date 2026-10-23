@@ -14,6 +14,8 @@
 
 ![SNI 라우팅을 적용한 포트 포워딩: 여러 서비스가 443 포트를 함께 사용](docs/images/portforward-sni.webp)
 
+![침입 방지: fail2ban 방식의 자동 차단을 nftables 방화벽에 동기화](docs/images/guard.webp)
+
 ![설정 기록: 차이 비교와 원클릭 롤백](docs/images/config-history.webp)
 
 ![감사 로그](docs/images/audit-log.webp)

@@ -14,6 +14,8 @@
 
 ![SNI 振り分けによるポート転送：複数のサービスで 443 番ポートを共用](docs/images/portforward-sni.webp)
 
+![侵入防御：fail2ban 風の自動ブロックを nftables ファイアウォールに同期](docs/images/guard.webp)
+
 ![設定履歴：差分表示とワンクリックロールバック](docs/images/config-history.webp)
 
 ![監査ログ](docs/images/audit-log.webp)

@@ -14,6 +14,8 @@ Um conjunto de ferramentas de gateway de rede, de código aberto e auditável, p
 
 ![Redirecionamento de portas com roteamento SNI: uma única porta 443 compartilhada por vários serviços](docs/images/portforward-sni.webp)
 
+![Proteção contra intrusões: bloqueios no estilo fail2ban sincronizados com o nftables](docs/images/guard.webp)
+
 ![Histórico de configuração com diff e rollback em um clique](docs/images/config-history.webp)
 
 ![Log de auditoria](docs/images/audit-log.webp)

@@ -14,6 +14,8 @@ An open-source, auditable network gateway toolkit for home networks, NAS boxes, 
 
 ![Port forwarding with SNI routing: one port 443 shared by several services](docs/images/portforward-sni.webp)
 
+![Intrusion protection: fail2ban-style bans synced to nftables](docs/images/guard.webp)
+
 ![Configuration history with diff and one-click rollback](docs/images/config-history.webp)
 
 ![Audit log](docs/images/audit-log.webp)

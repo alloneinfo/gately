@@ -14,6 +14,8 @@
 
 ![連接埠轉發的 SNI 分流：多個服務共用 443 連接埠](docs/images/portforward-sni.webp)
 
+![入侵防護：類 fail2ban 的自動封鎖，同步到 nftables 防火牆](docs/images/guard.webp)
+
 ![設定歷史：差異比對與一鍵回滾](docs/images/config-history.webp)
 
 ![操作稽核](docs/images/audit-log.webp)

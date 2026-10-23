@@ -14,6 +14,8 @@ Conjunto de herramientas de puerta de enlace de red, de código abierto y audita
 
 ![Reenvío de puertos con enrutamiento SNI: un único puerto 443 compartido por varios servicios](docs/images/portforward-sni.webp)
 
+![Protección contra intrusiones: bloqueos al estilo de fail2ban sincronizados con nftables](docs/images/guard.webp)
+
 ![Historial de configuración con comparación de diferencias y reversión con un clic](docs/images/config-history.webp)
 
 ![Registro de auditoría](docs/images/audit-log.webp)

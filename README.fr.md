@@ -14,6 +14,8 @@ Boîte à outils de passerelle réseau open source et auditable, pour les résea
 
 ![Redirection de ports avec routage SNI : un seul port 443 partagé par plusieurs services](docs/images/portforward-sni.webp)
 
+![Protection contre les intrusions : bannissements façon fail2ban synchronisés avec nftables](docs/images/guard.webp)
+
 ![Historique de configuration avec diff et restauration en un clic](docs/images/config-history.webp)
 
 ![Journal d'audit](docs/images/audit-log.webp)

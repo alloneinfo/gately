@@ -14,6 +14,8 @@ Ein quelloffenes, prüfbares Toolkit für Netzwerk-Gateways – für Heimnetz, N
 
 ![Portweiterleitung mit SNI-Routing: ein Port 443, geteilt von mehreren Diensten](docs/images/portforward-sni.webp)
 
+![Einbruchschutz: Sperren im Stil von fail2ban, synchronisiert mit nftables](docs/images/guard.webp)
+
 ![Konfigurationsverlauf mit Diff und Rollback per Klick](docs/images/config-history.webp)
 
 ![Audit-Log](docs/images/audit-log.webp)

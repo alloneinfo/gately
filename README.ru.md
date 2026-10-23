@@ -14,6 +14,8 @@
 
 ![Проброс портов с маршрутизацией по SNI: один порт 443 для нескольких служб](docs/images/portforward-sni.webp)
 
+![Защита от вторжений: блокировки в стиле fail2ban с синхронизацией в nftables](docs/images/guard.webp)
+
 ![История конфигурации: сравнение различий и откат в один клик](docs/images/config-history.webp)
 
 ![Журнал аудита](docs/images/audit-log.webp)
