@@ -7,6 +7,10 @@ description: Gately 各版本的發布公告與更新說明。
 
 重要版本的發布公告如下，每個版本的完整變更與下載檔案見 [GitHub Releases](https://github.com/wangwanjie/gately/releases)。
 
+## [v0.5.6.3](/zh-TW/news/v0.5.6.3)
+
+2026 年 10 月 23 日 · 修復 OpenWrt 上總覽看不到 br-lan 網卡、時區無法設定且時間以 UTC 計算的問題。
+
 ## [v0.5.6.2](/zh-TW/news/v0.5.6.2)
 
 2026 年 10 月 23 日 · Web 服務登入頁與錯誤頁全新設計，兩步驟驗證改為彈窗。修復 Docker 29 下無法連線 Docker、未登入時先閃現總覽頁，以及從 Lucky 匯入的 Cloudflare 與改名 DDNS 紀錄不同步的問題。

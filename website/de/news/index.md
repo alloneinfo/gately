@@ -7,6 +7,10 @@ description: Release-Ankündigungen und Versionshinweise zu jeder Gately-Version
 
 Unten stehen die Ankündigungen zu wichtigen Releases. Alle Änderungen und Downloads jeder Version finden Sie unter [GitHub Releases](https://github.com/wangwanjie/gately/releases).
 
+## [v0.5.6.3](/de/news/v0.5.6.3)
+
+23. Oktober 2026 · Behebt, dass die Übersicht unter OpenWrt die Schnittstelle br-lan ausblendete und sich die Zeitzone nicht einstellen ließ, sodass die Zeit in UTC lief.
+
 ## [v0.5.6.2](/de/news/v0.5.6.2)
 
 23. Oktober 2026 · Neu gestaltete Anmelde- und Fehlerseiten des Webdienstes, Zwei-Faktor-Bestätigung im Pop-up. Behebt, dass das Docker-Modul unter Docker 29 keine Verbindung bekam, die Übersicht vor der Anmeldeseite aufblitzte und aus Lucky importierte Cloudflare-Zugangsdaten sowie umbenannte DDNS-Einträge nicht synchronisiert wurden.

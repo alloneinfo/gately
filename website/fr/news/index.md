@@ -7,6 +7,10 @@ description: Annonces et notes de version de chaque version de Gately.
 
 Les annonces des versions majeures sont listées ci-dessous. Consultez [GitHub Releases](https://github.com/wangwanjie/gately/releases) pour la liste complète des changements et les téléchargements de chaque version.
 
+## [v0.5.6.3](/fr/news/v0.5.6.3)
+
+23 octobre 2026 · Corrige la vue d'ensemble qui masquait l'interface br-lan sous OpenWrt, ainsi que le fuseau horaire impossible à régler, l'heure restant en UTC.
+
 ## [v0.5.6.2](/fr/news/v0.5.6.2)
 
 23 octobre 2026 · Nouvelles pages de connexion et d'erreur du service web, avec la vérification en deux étapes dans une fenêtre. Corrige l'échec de connexion du module Docker sous Docker 29, l'affichage furtif de la vue d'ensemble avant la page de connexion, ainsi que la synchronisation des identifiants Cloudflare et des enregistrements DDNS renommés importés de Lucky.

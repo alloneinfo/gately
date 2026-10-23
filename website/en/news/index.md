@@ -7,6 +7,10 @@ description: Release announcements and notes for each Gately version.
 
 Announcements for major releases are listed below. See [GitHub Releases](https://github.com/wangwanjie/gately/releases) for the full changes and downloads of every version.
 
+## [v0.5.6.3](/en/news/v0.5.6.3)
+
+October 23, 2026 · Fixes the overview hiding the br-lan interface on OpenWrt, and the time zone that could not be set and stayed on UTC.
+
 ## [v0.5.6.2](/en/news/v0.5.6.2)
 
 October 23, 2026 · Redesigned Web service login and error pages with two-step verification in a popup. Fixes the Docker module failing to connect on Docker 29, the overview flashing before the login page, and Cloudflare credentials and renamed DDNS records imported from Lucky not syncing.
