@@ -545,13 +545,14 @@ func (a *App) runUpgrade(exe string) {
 			} else {
 				st.State, st.Error = upgradeStateFailed, err.Error()
 			}
+			// 与失败状态在同一临界区内释放升级锁：前端看到“失败”后立即重试时不会再收到 409
+			a.upgrading.Store(false)
 		})
 		if canceled {
 			a.sysLogs.Add(logbuf.LevelInfo, "system", "已取消在线升级")
 		} else {
 			a.sysLogs.Add(logbuf.LevelWarn, "system", fmt.Sprintf("在线升级失败: %v", err))
 		}
-		a.upgrading.Store(false)
 		return
 	}
 	a.setUpgradeStatus(func(*upgradeStatus) { a.upgradeCancel = nil })
