@@ -7,6 +7,10 @@ description: Annonces et notes de version de chaque version de Gately.
 
 Les annonces des versions majeures sont listées ci-dessous. Consultez [GitHub Releases](https://github.com/wangwanjie/gately/releases) pour la liste complète des changements et les téléchargements de chaque version.
 
+## [v0.5.7](/fr/news/v0.5.7)
+
+24 octobre 2026 · Les Montages de stockage se connectent aux partages SMB ; les thèmes deviennent 15 palettes en clair et en sombre, avec accent et coins personnalisables ; l'interface d'administration est compressée et le binaire est environ 15 % plus léger.
+
 ## [v0.5.6.4](/fr/news/v0.5.6.4)
 
 23 octobre 2026 · Le déploiement automatique des certificats copie vers plusieurs répertoires locaux, chacun avec sa commande, et accepte des noms de fichiers personnalisés pour le certificat et la clé.

@@ -79,8 +79,8 @@
   "home": {
     "pill": "Open source · Auditable · Single binary",
     "announce": {
-      "text": "v0.5.6 is out: Intrusion Prevention, fail2ban-style bans →",
-      "link": "/en/news/v0.5.6"
+      "text": "v0.5.7 is out: SMB share mounts and new themes →",
+      "link": "/en/news/v0.5.7"
     },
     "titleLine1": "A network gateway toolkit",
     "titleLine2": "you can see through",

@@ -79,8 +79,8 @@
   "home": {
     "pill": "Código aberto · Auditável · Binário único",
     "announce": {
-      "text": "v0.5.6: prevenção de intrusão no estilo fail2ban →",
-      "link": "/pt-BR/news/v0.5.6"
+      "text": "v0.5.7: montagens SMB e novos temas →",
+      "link": "/pt-BR/news/v0.5.7"
     },
     "titleLine1": "Um kit de gateway de rede",
     "titleLine2": "que você enxerga por dentro",

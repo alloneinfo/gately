@@ -79,8 +79,8 @@
   "home": {
     "pill": "Open Source · Prüfbar · Einzelne Binärdatei",
     "announce": {
-      "text": "v0.5.6: Einbruchschutz wie fail2ban →",
-      "link": "/de/news/v0.5.6"
+      "text": "v0.5.7: SMB-Freigaben einbinden und neue Designs →",
+      "link": "/de/news/v0.5.7"
     },
     "titleLine1": "Ein Toolkit für Netzwerk-Gateways,",
     "titleLine2": "das Sie durchschauen können",

@@ -7,6 +7,10 @@ description: Release-Ankündigungen und Versionshinweise zu jeder Gately-Version
 
 Unten stehen die Ankündigungen zu wichtigen Releases. Alle Änderungen und Downloads jeder Version finden Sie unter [GitHub Releases](https://github.com/wangwanjie/gately/releases).
 
+## [v0.5.7](/de/news/v0.5.7)
+
+24. Oktober 2026 · Speicher-Einbindungen verbinden sich mit SMB-Freigaben; Designs werden zu 15 Paletten mit hell und dunkel, eigenem Akzent und Ecken; die Verwaltungsoberfläche wird komprimiert übertragen und die Binärdatei ist etwa 15 % kleiner.
+
 ## [v0.5.6.4](/de/news/v0.5.6.4)
 
 23. Oktober 2026 · Die automatische Zertifikatsbereitstellung kopiert in mehrere lokale Verzeichnisse mit jeweils eigenem Befehl und unterstützt eigene Dateinamen für Zertifikat und Schlüssel.

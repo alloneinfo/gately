@@ -79,8 +79,8 @@
   "home": {
     "pill": "Código abierto · Auditable · Binario único",
     "announce": {
-      "text": "v0.5.6: prevención de intrusiones al estilo fail2ban →",
-      "link": "/es/news/v0.5.6"
+      "text": "v0.5.7: montajes SMB y nuevos temas →",
+      "link": "/es/news/v0.5.7"
     },
     "titleLine1": "Una pasarela de red",
     "titleLine2": "que puedes ver por dentro",

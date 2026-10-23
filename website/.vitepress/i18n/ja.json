@@ -79,8 +79,8 @@
   "home": {
     "pill": "オープンソース · 監査可能 · 単一バイナリ",
     "announce": {
-      "text": "v0.5.6 リリース：fail2ban 風の侵入防御 →",
-      "link": "/ja/news/v0.5.6"
+      "text": "v0.5.7 リリース：SMB 共有のマウントと新しいテーマ →",
+      "link": "/ja/news/v0.5.7"
     },
     "titleLine1": "中身が見える",
     "titleLine2": "ネットワークゲートウェイツールキット",

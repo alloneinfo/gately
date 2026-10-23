@@ -7,6 +7,10 @@ description: Release announcements and notes for each Gately version.
 
 Announcements for major releases are listed below. See [GitHub Releases](https://github.com/wangwanjie/gately/releases) for the full changes and downloads of every version.
 
+## [v0.5.7](/en/news/v0.5.7)
+
+October 24, 2026 · Storage Mounts can connect to SMB shares; themes become 15 palettes with light and dark, custom accent and corners; the management interface is compressed and the binary is about 15% smaller.
+
 ## [v0.5.6.4](/en/news/v0.5.6.4)
 
 October 23, 2026 · Certificate auto deploy can copy to several local directories, each with its own command, and write the certificate and key under custom file names.
