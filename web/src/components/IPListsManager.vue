@@ -56,12 +56,13 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { Pencil, Plus, RotateCw, Trash2 } from 'lucide-vue-next'
 import { api } from '../api'
 import { useFormLayout } from '../composables/useIsMobile'
+import { usePolling } from '../composables/usePolling'
 
 // IPList 对应 /api/webservice/iplists 的条目：按地址订阅、定时刷新的 IP 列表
 export interface IPList {
@@ -91,7 +92,8 @@ const editorVisible = ref(false)
 const saving = ref(false)
 const refreshing = ref('')
 const editing = ref<IPList>(empty())
-let timer: number | undefined
+// 定时刷新，标签页在后台时暂停
+const polling = usePolling(load, 5000)
 
 function empty(): IPList {
   return { name: '', enable: true, url: '', refreshHours: 24, remark: '' }
@@ -179,9 +181,8 @@ async function remove(l: IPListView) {
 onMounted(() => {
   load().catch((e) => ElMessage.error((e as Error).message))
   // 新增列表后在后台下载，定时刷新以显示进度
-  timer = window.setInterval(() => load().catch(() => {}), 5000)
+  polling.start()
 })
-onBeforeUnmount(() => window.clearInterval(timer))
 </script>
 
 <style scoped>

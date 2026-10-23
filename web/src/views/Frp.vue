@@ -189,7 +189,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useI18n } from 'vue-i18n'
 import { ArrowRightLeft, FileUp, Pencil, Plug, Plus, Save, Server, Trash2, Waypoints } from 'lucide-vue-next'
@@ -201,6 +201,7 @@ import StatusBadge, { type StatusType } from '../components/StatusBadge.vue'
 import LogCard from '../components/LogCard.vue'
 import { useFormLayout } from '../composables/useIsMobile'
 import { useListText, splitCommasOrSpaces } from '../composables/useListText'
+import { usePolling } from '../composables/usePolling'
 
 interface ClientSettings {
   enable: boolean
@@ -256,7 +257,8 @@ const savingClient = ref(false)
 const savingServer = ref(false)
 const editorVisible = ref(false)
 const editing = ref<Proxy>(empty())
-let timer: number | undefined
+// 定时刷新，标签页在后台时暂停
+const polling = usePolling(refresh, 5000)
 
 interface ImportResult {
   applied: boolean
@@ -425,9 +427,8 @@ async function remove(p: Proxy) {
 
 onMounted(() => {
   load()
-  timer = window.setInterval(refresh, 5000)
+  polling.start()
 })
-onBeforeUnmount(() => window.clearInterval(timer))
 </script>
 
 <style scoped>

@@ -91,7 +91,7 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { Cloud, Pencil, Plus, RefreshCw, Save, Terminal, Trash2 } from 'lucide-vue-next'
@@ -102,6 +102,7 @@ import Field from '../components/Field.vue'
 import StatusBadge, { type StatusType } from '../components/StatusBadge.vue'
 import LogCard from '../components/LogCard.vue'
 import { useFormLayout } from '../composables/useIsMobile'
+import { usePolling } from '../composables/usePolling'
 
 interface Tunnel {
   key?: string
@@ -131,7 +132,8 @@ const version = ref('')
 const binError = ref('')
 const editorVisible = ref(false)
 const editing = ref<Tunnel>(empty())
-let timer: number | undefined
+// 定时刷新，标签页在后台时暂停
+const polling = usePolling(loadTunnels, 4000)
 
 function empty(): Tunnel {
   return { name: '', enable: true, mode: 'token', token: '', service: 'http://localhost:8080', protocol: 'auto', edgeIpVersion: 'auto', remark: '' }
@@ -229,9 +231,8 @@ async function remove(tn: Tunnel) {
 onMounted(() => {
   loadSettings()
   loadTunnels()
-  timer = window.setInterval(loadTunnels, 4000)
+  polling.start()
 })
-onBeforeUnmount(() => window.clearInterval(timer))
 </script>
 
 <style scoped>

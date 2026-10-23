@@ -180,7 +180,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { ArrowDown, ArrowLeftRight, ArrowUp, Pencil, Plus, SlidersHorizontal, Trash2, TriangleAlert } from 'lucide-vue-next'
@@ -194,6 +194,7 @@ import Field from '../components/Field.vue'
 import StatusBadge, { type StatusType } from '../components/StatusBadge.vue'
 import LogCard from '../components/LogCard.vue'
 import { useFormLayout } from '../composables/useIsMobile'
+import { usePolling } from '../composables/usePolling'
 
 interface Rule {
   key?: string
@@ -281,7 +282,8 @@ const settings = ref<Settings>()
 const settingsForm = ref<Settings>()
 const settingsVisible = ref(false)
 const enabling = ref(false)
-let timer: number | undefined
+// 定时刷新，标签页在后台时暂停
+const polling = usePolling(load, 3000)
 
 const moduleOff = computed(() => settings.value?.enable === false)
 // SNI 分流只处理 TCP
@@ -488,9 +490,8 @@ onMounted(() => {
   load()
   loadSettings()
   // 定时刷新连接数与流量
-  timer = window.setInterval(load, 3000)
+  polling.start()
 })
-onBeforeUnmount(() => window.clearInterval(timer))
 </script>
 
 <style scoped>

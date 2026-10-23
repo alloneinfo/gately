@@ -128,7 +128,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useI18n } from 'vue-i18n'
 import { Activity, Cpu, Network, RefreshCw, Save, SlidersHorizontal, Waypoints } from 'lucide-vue-next'
@@ -139,6 +139,7 @@ import StatusBadge, { type StatusType } from '../components/StatusBadge.vue'
 import LogCard from '../components/LogCard.vue'
 import { useFormLayout } from '../composables/useIsMobile'
 import { useListText, splitCommasOrSpaces } from '../composables/useListText'
+import { usePolling } from '../composables/usePolling'
 
 interface Settings {
   enable: boolean
@@ -212,7 +213,8 @@ const defaultStateDir = ref('')
 const status = ref<Status>()
 const saving = ref(false)
 const restarting = ref(false)
-let timer: number | undefined
+// 定时刷新，标签页在后台时暂停
+const polling = usePolling(loadStatus, 5000)
 
 // 输入框保留原始文本，逗号、空格可正常输入（见 useListText）
 const routesText = useListText(() => settings.advertiseRoutes, (v) => (settings.advertiseRoutes = v), {
@@ -286,9 +288,8 @@ async function restart() {
 onMounted(() => {
   loadSettings()
   loadStatus()
-  timer = window.setInterval(loadStatus, 5000)
+  polling.start()
 })
-onBeforeUnmount(() => window.clearInterval(timer))
 </script>
 
 <style scoped>

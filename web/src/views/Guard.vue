@@ -324,7 +324,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { Ban, Crosshair, FileCode, Flame, FlaskConical, LayoutTemplate, Pencil, Plus, Radar, RefreshCw, Save, Search, ShieldBan, SlidersHorizontal, Trash2 } from 'lucide-vue-next'
@@ -338,6 +338,7 @@ import ListInput from '../components/ListInput.vue'
 import DurationInput from '../components/DurationInput.vue'
 import BanTimeInput from '../components/BanTimeInput.vue'
 import { useFormLayout } from '../composables/useIsMobile'
+import { usePolling } from '../composables/usePolling'
 
 interface FirewallStatus {
   enabled: boolean
@@ -435,7 +436,8 @@ const testResults = ref<TestResult[]>()
 const testing = ref(false)
 const rulesVisible = ref(false)
 const rulesText = ref('')
-let timer: number | undefined
+// 定时刷新，标签页在后台时暂停
+const polling = usePolling(refresh, 10000)
 
 function emptyJail(): Jail {
   return { name: '', enable: true, source: 'file', target: '', filter: '', ignore: '', maxRetry: 5, findTime: 600, banTime: 0, remark: '' }
@@ -762,9 +764,8 @@ onMounted(async () => {
   } catch {
     presets.value = []
   }
-  timer = window.setInterval(refresh, 10000)
+  polling.start()
 })
-onBeforeUnmount(() => window.clearInterval(timer))
 </script>
 
 <style scoped>

@@ -199,7 +199,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { Pencil, Plus, Radar, RotateCw, SlidersHorizontal, Trash2 } from 'lucide-vue-next'
@@ -216,6 +216,7 @@ import { useFormLayout } from '../composables/useIsMobile'
 import { useListText, splitLinesOrCommas } from '../composables/useListText'
 import WebhookEditor, { type WebhookConfig } from '../components/WebhookEditor.vue'
 import type { NetInterface } from '../components/IPSourceEditor.vue'
+import { usePolling } from '../composables/usePolling'
 
 interface Rule {
   key?: string
@@ -290,7 +291,8 @@ const tab = ref('basic')
 const editing = ref<Rule>(emptyRule())
 const settingsVisible = ref(false)
 const settings = ref<Settings>()
-let timer: number | undefined
+// 定时刷新，标签页在后台时暂停
+const polling = usePolling(load, 3000)
 
 // 输入框保留原始文本，回车、逗号可正常输入（见 useListText）
 const lines = { split: splitLinesOrCommas }
@@ -486,9 +488,8 @@ onMounted(async () => {
   loadModule()
   interfaces.value = await api.get<NetInterface[]>('/api/stun/netinterfaces')
   await load()
-  timer = window.setInterval(load, 3000)
+  polling.start()
 })
-onBeforeUnmount(() => window.clearInterval(timer))
 </script>
 
 <style scoped>

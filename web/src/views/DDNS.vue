@@ -170,7 +170,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { ChevronsDownUp, ChevronsUpDown, Globe, Pencil, Plus, RefreshCw, Trash2, Zap } from 'lucide-vue-next'
@@ -187,6 +187,7 @@ import LogCard from '../components/LogCard.vue'
 import WebhookEditor, { type WebhookConfig } from '../components/WebhookEditor.vue'
 import IPSourceEditor, { type IPSource, type NetInterface } from '../components/IPSourceEditor.vue'
 import { useFormLayout } from '../composables/useIsMobile'
+import { usePolling } from '../composables/usePolling'
 
 interface ProviderMeta {
   name: string
@@ -267,7 +268,8 @@ const enabling = ref(false)
 const tab = ref('basic')
 const editing = ref<Task>(emptyTask())
 const extra = ref<Record<string, string>>({})
-let timer: number | undefined
+// 定时刷新，标签页在后台时暂停
+const polling = usePolling(load, 5000)
 
 const currentProvider = computed(() => providers.value.find((p) => p.name === editing.value.provider))
 const moduleOff = computed(() => settingsLoaded.value && !settings.enable)
@@ -495,21 +497,26 @@ async function enableModule() {
 }
 
 onMounted(async () => {
-  const [p, i, d, s] = await Promise.all([
-    api.get<ProviderMeta[]>('/api/ddns/providers'),
-    api.get<NetInterface[]>('/api/ddns/netinterfaces'),
-    api.get<{ ipv4URLs: string[]; ipv6URLs: string[] }>('/api/ddns/defaults'),
-    api.get<{ enable: boolean }>('/api/ddns/settings'),
-  ])
-  providers.value = p
-  interfaces.value = i
-  Object.assign(defaults, d)
-  settings.enable = s.enable
-  settingsLoaded.value = true
-  await load()
-  timer = window.setInterval(load, 5000)
+  // 任务列表与元数据一起并行请求，首屏只需一次往返；数据一并赋值，避免服务商名称先显示内部名再跳成标题
+  try {
+    const [p, i, d, s, tk] = await Promise.all([
+      api.get<ProviderMeta[]>('/api/ddns/providers'),
+      api.get<NetInterface[]>('/api/ddns/netinterfaces'),
+      api.get<{ ipv4URLs: string[]; ipv6URLs: string[] }>('/api/ddns/defaults'),
+      api.get<{ enable: boolean }>('/api/ddns/settings'),
+      api.get<TaskView[]>('/api/ddns/tasks'),
+    ])
+    providers.value = p
+    interfaces.value = i
+    Object.assign(defaults, d)
+    settings.enable = s.enable
+    settingsLoaded.value = true
+    tasks.value = tk
+  } finally {
+    loading.value = false
+  }
+  polling.start()
 })
-onBeforeUnmount(() => window.clearInterval(timer))
 </script>
 
 <style scoped>

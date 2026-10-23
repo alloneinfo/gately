@@ -90,7 +90,7 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { CalendarClock, History, Pencil, Play, Plus, Trash2 } from 'lucide-vue-next'
@@ -104,6 +104,7 @@ import StatusBadge, { type StatusType } from '../components/StatusBadge.vue'
 import LogCard from '../components/LogCard.vue'
 import WebhookEditor, { type WebhookConfig } from '../components/WebhookEditor.vue'
 import { useFormLayout } from '../composables/useIsMobile'
+import { usePolling } from '../composables/usePolling'
 
 interface Run {
   start: string
@@ -141,7 +142,8 @@ const nextRuns = ref<string[]>([])
 const specError = ref('')
 const historyVisible = ref(false)
 const history = ref<Run[]>([])
-let timer: number | undefined
+// 定时刷新，标签页在后台时暂停
+const polling = usePolling(load, 5000)
 
 function empty(): Task {
   return {
@@ -251,9 +253,8 @@ async function remove(tk: TaskView) {
 
 onMounted(() => {
   load()
-  timer = window.setInterval(load, 5000)
+  polling.start()
 })
-onBeforeUnmount(() => window.clearInterval(timer))
 </script>
 
 <style scoped>

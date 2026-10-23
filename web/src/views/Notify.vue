@@ -212,7 +212,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useI18n } from 'vue-i18n'
 import { Bell, Pencil, Plus, Send, Trash2 } from 'lucide-vue-next'
@@ -224,6 +224,7 @@ import StatusBadge from '../components/StatusBadge.vue'
 import LogCard from '../components/LogCard.vue'
 import { useFormLayout } from '../composables/useIsMobile'
 import { useListText, splitLines } from '../composables/useListText'
+import { usePolling } from '../composables/usePolling'
 
 interface WebhookCfg {
   enable: boolean
@@ -326,7 +327,8 @@ const channelVisible = ref(false)
 const ruleVisible = ref(false)
 const editingChannel = ref<Channel>(emptyChannel())
 const editingRule = ref<Rule>(emptyRule())
-let timer: number | undefined
+// 定时刷新，标签页在后台时暂停
+const polling = usePolling(load, 15000)
 
 const secretHint = computed(() => (editingChannel.value.hasSecret ? t('notify.secretSet') : ''))
 // 输入框保留原始文本，回车可正常换行（见 useListText）
@@ -498,9 +500,8 @@ async function test(c: Channel) {
 onMounted(async () => {
   eventTypes.value = await api.get('/api/notify/event-types')
   await load()
-  timer = window.setInterval(load, 15000)
+  polling.start()
 })
-onBeforeUnmount(() => window.clearInterval(timer))
 </script>
 
 <style scoped>

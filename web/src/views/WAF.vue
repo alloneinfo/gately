@@ -122,7 +122,7 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { Pencil, Plus, ShieldHalf, Trash2 } from 'lucide-vue-next'
@@ -135,6 +135,7 @@ import Field from '../components/Field.vue'
 import StatusBadge, { type StatusType } from '../components/StatusBadge.vue'
 import LogCard from '../components/LogCard.vue'
 import { useFormLayout } from '../composables/useIsMobile'
+import { usePolling } from '../composables/usePolling'
 
 interface RuleSet {
   enable: boolean
@@ -174,7 +175,8 @@ const crsFiles = ref<string[]>([])
 const editorVisible = ref(false)
 const saving = ref(false)
 const editing = ref<Instance>(empty())
-let timer: number | undefined
+// 定时刷新，标签页在后台时暂停
+const polling = usePolling(load, 5000)
 
 function empty(): Instance {
   return { name: '', enable: true, mode: 'block', paranoia: 1, inboundThreshold: 5, outboundThreshold: 4, ruleSets: [{ enable: true, remark: t('waf.defaultRuleSetRemark'), type: 'crs', param: '' }], bodyLimitMB: 0, bodyLimitAction: 'reject', skipBodyPaths: '', webdav: false, remark: '' }
@@ -261,9 +263,8 @@ async function remove(row: InstanceView) {
 onMounted(async () => {
   crsFiles.value = await api.get('/api/waf/crs')
   await load()
-  timer = window.setInterval(load, 5000)
+  polling.start()
 })
-onBeforeUnmount(() => window.clearInterval(timer))
 </script>
 
 <style scoped>

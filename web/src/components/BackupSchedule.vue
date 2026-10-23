@@ -92,13 +92,14 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, reactive, ref } from 'vue'
+import { onMounted, reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useI18n } from 'vue-i18n'
 import { CalendarClock, Download, Pencil, Play, Plus, Trash2 } from 'lucide-vue-next'
 import { api } from '../api'
 import StatusBadge from './StatusBadge.vue'
 import { useFormLayout } from '../composables/useIsMobile'
+import { usePolling } from '../composables/usePolling'
 
 interface Settings {
   enable: boolean
@@ -153,7 +154,8 @@ const saving = ref(false)
 const running = ref(false)
 const targetVisible = ref(false)
 const editingTarget = ref<Target>(emptyTarget())
-let timer: number | undefined
+// 定时刷新，标签页在后台时暂停
+const polling = usePolling(loadLive, 15000)
 
 function emptyTarget(): Target {
   return { name: '', enable: true, mount: '', dir: 'gately-backups' }
@@ -278,9 +280,8 @@ onMounted(async () => {
   } catch (e) {
     ElMessage.error((e as Error).message)
   }
-  timer = window.setInterval(() => loadLive().catch(() => {}), 15000)
+  polling.start()
 })
-onBeforeUnmount(() => window.clearInterval(timer))
 </script>
 
 <style scoped>

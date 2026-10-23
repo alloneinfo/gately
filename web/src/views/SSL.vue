@@ -246,7 +246,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { Download, Pencil, Plus, RotateCw, Send, ShieldCheck, SlidersHorizontal, Trash2, Upload } from 'lucide-vue-next'
@@ -261,6 +261,7 @@ import StatusBadge, { type StatusType } from '../components/StatusBadge.vue'
 import LogCard from '../components/LogCard.vue'
 import { useFormLayout } from '../composables/useIsMobile'
 import { useListText, splitLinesOrCommas } from '../composables/useListText'
+import { usePolling } from '../composables/usePolling'
 
 interface ProviderMeta {
   name: string
@@ -361,7 +362,8 @@ const targets = ref<DeployTargets>({ ssh: [], containers: [] })
 const deploying = ref('')
 const { t } = useI18n()
 const { isMobile, labelPosition } = useFormLayout()
-let timer: number | undefined
+// 定时刷新，标签页在后台时暂停
+const polling = usePolling(load, 5000)
 
 const currentProvider = computed(() => providers.value.find((p) => p.name === editing.value.acme.provider))
 // 输入框保留原始文本，回车、逗号可正常输入（见 useListText）
@@ -634,9 +636,8 @@ onMounted(async () => {
   loadTargets()
   providers.value = await api.get<ProviderMeta[]>('/api/ssl/providers')
   await load()
-  timer = window.setInterval(load, 5000)
+  polling.start()
 })
-onBeforeUnmount(() => window.clearInterval(timer))
 </script>
 
 <style scoped>

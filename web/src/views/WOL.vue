@@ -56,7 +56,7 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, reactive, ref } from 'vue'
+import { onMounted, reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useI18n } from 'vue-i18n'
 import { Monitor, Pencil, Plus, Power, Trash2, Zap } from 'lucide-vue-next'
@@ -68,6 +68,7 @@ import StatusBadge, { type StatusType } from '../components/StatusBadge.vue'
 import LogCard from '../components/LogCard.vue'
 import { useFormLayout } from '../composables/useIsMobile'
 import { useListText, splitLinesOrCommas } from '../composables/useListText'
+import { usePolling } from '../composables/usePolling'
 
 interface Device {
   key?: string
@@ -88,7 +89,8 @@ const status = ref<Record<string, string>>({})
 const waking = reactive<Record<string, boolean>>({})
 const editorVisible = ref(false)
 const editing = ref<Device>(empty())
-let timer: number | undefined
+// 定时刷新，标签页在后台时暂停
+const polling = usePolling(load, 10000)
 
 // 输入框保留原始文本，回车、逗号可正常输入（见 useListText）
 const macsText = useListText(() => editing.value.macs, (v) => (editing.value.macs = v), { split: splitLinesOrCommas })
@@ -165,9 +167,8 @@ async function remove(d: Device) {
 
 onMounted(() => {
   load()
-  timer = window.setInterval(load, 10000)
+  polling.start()
 })
-onBeforeUnmount(() => window.clearInterval(timer))
 </script>
 
 <style scoped>

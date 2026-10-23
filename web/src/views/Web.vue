@@ -341,7 +341,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { BarChart3, ChevronsDownUp, ChevronsUpDown, FileInput, Pencil, Plus, Server, SlidersHorizontal, Trash2 } from 'lucide-vue-next'
@@ -366,6 +366,7 @@ import LogCard from '../components/LogCard.vue'
 import { useFormLayout } from '../composables/useIsMobile'
 import { useListText, splitLines } from '../composables/useListText'
 import ListInput from '../components/ListInput.vue'
+import { usePolling } from '../composables/usePolling'
 
 interface Site {
   key?: string
@@ -498,7 +499,8 @@ interface WebSettings {
   ssoDomain: string
 }
 const settings = ref<WebSettings>()
-let timer: number | undefined
+// 定时刷新，标签页在后台时暂停
+const polling = usePolling(load, 5000)
 
 // 按逗号（含中文逗号）或空白拆分
 const splitCsv = (v: string) =>
@@ -867,9 +869,8 @@ onMounted(async () => {
   loadIPLists()
   wafInstances.value = await api.get('/api/waf/instances')
   await load()
-  timer = window.setInterval(load, 5000)
+  polling.start()
 })
-onBeforeUnmount(() => window.clearInterval(timer))
 </script>
 
 <style scoped>
