@@ -2,6 +2,7 @@ package guard
 
 import (
 	"context"
+	"fmt"
 	"net"
 	"net/netip"
 	"os"
@@ -658,5 +659,46 @@ func TestUserTrap(t *testing.T) {
 		}
 	case <-time.After(2 * time.Second):
 		t.Fatal("连接诱饵端口应触发回调")
+	}
+}
+
+// 保存设置会删除并重建 nftables 表，内核计数器归零，界面上的计数应在此前的基础上继续累加
+func TestFirewallCountsSurviveApply(t *testing.T) {
+	cleanDefault(t)
+	counts := func(ban, trap uint64) string {
+		return fmt.Sprintf(`{"nftables": [
+			{"rule": {"comment": "ban", "expr": [{"counter": {"packets": %d}}, {"drop": null}]}},
+			{"rule": {"comment": "trap-hit", "expr": [{"counter": {"packets": %d}}]}}
+		]}`, ban, trap)
+	}
+	fake := &fakeNFT{output: counts(10, 2)}
+	fw := activeFirewall(t, fake)
+	ctx := context.Background()
+	fw.poll(ctx)
+	// 轮询之后内核计数又增加了，保存设置时应读取最新计数再重建
+	fake.output = counts(15, 3)
+	fw.apply(ctx, defaultSettings())
+	if st := fw.snapshot(); !st.Active || st.Dropped["ban"] != 15 || st.Hits["trap"] != 3 {
+		t.Fatalf("保存设置后计数不应清零: %+v", st)
+	}
+	// 重建后的新表从零开始计数
+	fake.output = counts(4, 1)
+	fw.poll(ctx)
+	if st := fw.snapshot(); st.Dropped["ban"] != 19 || st.Hits["trap"] != 4 {
+		t.Fatalf("重建后计数应继续累加: %+v", st)
+	}
+	// 表被外部清除时退回最近一次轮询的结果
+	fake.fail = func(_ string, args []string) error {
+		if len(args) > 0 && args[0] == "-j" {
+			return errorString("No such file or directory")
+		}
+		return nil
+	}
+	fw.poll(ctx)
+	fake.fail = nil
+	fake.output = counts(1, 0)
+	fw.poll(ctx)
+	if st := fw.snapshot(); st.Dropped["ban"] != 20 || st.Hits["trap"] != 4 {
+		t.Fatalf("外部清除重建后计数应继续累加: %+v", st)
 	}
 }

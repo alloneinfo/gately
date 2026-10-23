@@ -89,6 +89,9 @@ type firewall struct {
 	local []netip.Prefix
 	// lastErr 为最近一次记录到日志的写入错误，重试时相同的错误不重复记录
 	lastErr string
+	// baseDropped / baseHits 为之前的表（保存设置、外部清除或停止时被删除重建）累计的计数。
+	// 内核计数器随表一起归零，界面显示的是基数与当前表计数之和
+	baseDropped, baseHits map[string]uint64
 
 	kick   chan struct{}
 	cancel context.CancelFunc
@@ -96,7 +99,7 @@ type firewall struct {
 }
 
 func newFirewall(log *logbuf.Logger) *firewall {
-	f := &firewall{log: log, members: map[string]time.Time{}, kick: make(chan struct{}, 1)}
+	f := &firewall{log: log, members: map[string]time.Time{}, baseDropped: map[string]uint64{}, baseHits: map[string]uint64{}, kick: make(chan struct{}, 1)}
 	f.run = f.execNFT
 	return f
 }
@@ -177,6 +180,8 @@ func (f *firewall) stop() {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	if f.status.Active {
+		// 删除表前保留计数，模块重新启动后继续累加
+		f.keepCountsLocked(context.Background())
 		if _, err := f.run(context.Background(), "", "delete", "table", "inet", tableName); err != nil {
 			f.log.Warnf("删除防火墙规则失败: %v", err)
 		} else {
@@ -241,7 +246,9 @@ func (f *firewall) applyLocked(ctx context.Context, s Settings) {
 	f.cfg = s
 	wasActive := f.status.Active
 	version := f.status.Version
-	f.status = FirewallStatus{Enabled: s.Firewall, Version: version, Dropped: map[string]uint64{}, Hits: map[string]uint64{}, TrapSkipped: []int{}}
+	// 重建会删除旧表，先把旧表的计数并入基数，保存设置后计数不清零
+	f.keepCountsLocked(ctx)
+	f.status = FirewallStatus{Enabled: s.Firewall, Version: version, Dropped: cloneCounts(f.baseDropped), Hits: cloneCounts(f.baseHits), TrapSkipped: []int{}}
 	f.dirty = false
 	f.members = map[string]time.Time{}
 	if !s.Firewall {
@@ -654,6 +661,37 @@ func deleteStmt(key string) string {
 	return fmt.Sprintf("delete element inet %s %s { %s }", tableName, set, p.Addr())
 }
 
+// keepCountsLocked 把当前显示的计数（基数加当前表计数）记为新的基数，在表被删除或重建前调用。
+// 规则生效时直接读取内核的最新计数；读取失败或表已被外部删除时退回最近一次轮询的结果。
+func (f *firewall) keepCountsLocked(ctx context.Context) {
+	dropped, hits := f.status.Dropped, f.status.Hits
+	if f.status.Active {
+		if out, err := f.run(ctx, "", "-j", "list", "table", "inet", tableName); err == nil {
+			var doc nftDoc
+			if json.Unmarshal([]byte(out), &doc) == nil {
+				d, h := doc.counters()
+				dropped, hits = addCounts(f.baseDropped, d), addCounts(f.baseHits, h)
+			}
+		}
+	}
+	// 未生效时 status 中的计数就是基数本身，这里重复调用不会重复累加
+	if dropped != nil {
+		f.baseDropped = cloneCounts(dropped)
+	}
+	if hits != nil {
+		f.baseHits = cloneCounts(hits)
+	}
+}
+
+// addCounts 返回两组计数逐项相加的结果。
+func addCounts(a, b map[string]uint64) map[string]uint64 {
+	out := cloneCounts(a)
+	for k, v := range b {
+		out[k] += v
+	}
+	return out
+}
+
 // nftDoc 是 nft -j list table 的输出结构（只取用到的字段）。
 type nftDoc struct {
 	Nftables []struct {
@@ -666,6 +704,24 @@ type nftDoc struct {
 			Expr    []json.RawMessage `json:"expr"`
 		} `json:"rule"`
 	} `json:"nftables"`
+}
+
+// counters 汇总带注释规则的计数：注释以 -hit 结尾的是触发次数，其余是丢弃的数据包数。
+func (d nftDoc) counters() (dropped, hits map[string]uint64) {
+	dropped, hits = map[string]uint64{}, map[string]uint64{}
+	for _, item := range d.Nftables {
+		if item.Rule == nil || item.Rule.Comment == "" {
+			continue
+		}
+		if n, ok := ruleCounter(item.Rule.Expr); ok {
+			if name, isHit := strings.CutSuffix(item.Rule.Comment, "-hit"); isHit {
+				hits[name] += n
+			} else {
+				dropped[item.Rule.Comment] += n
+			}
+		}
+	}
+	return dropped, hits
 }
 
 // elemAddr 解析集合元素：可能是字符串，也可能是带超时信息的对象。
@@ -733,7 +789,6 @@ func (f *firewall) poll(ctx context.Context) {
 		return
 	}
 	f.status.Error = ""
-	dropped, hits := map[string]uint64{}, map[string]uint64{}
 	inbox := map[string][]netip.Addr{}
 	for _, item := range doc.Nftables {
 		if item.Set != nil {
@@ -746,17 +801,9 @@ func (f *firewall) poll(ctx context.Context) {
 				}
 			}
 		}
-		if item.Rule != nil && item.Rule.Comment != "" {
-			if n, ok := ruleCounter(item.Rule.Expr); ok {
-				if name, isHit := strings.CutSuffix(item.Rule.Comment, "-hit"); isHit {
-					hits[name] += n
-				} else {
-					dropped[item.Rule.Comment] += n
-				}
-			}
-		}
 	}
-	f.status.Dropped, f.status.Hits = dropped, hits
+	dropped, hits := doc.counters()
+	f.status.Dropped, f.status.Hits = addCounts(f.baseDropped, dropped), addCounts(f.baseHits, hits)
 	f.status.CheckedAt = time.Now()
 	f.refreshPortsLocked(ctx)
 	importFn := f.importFn
