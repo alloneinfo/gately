@@ -1,5 +1,5 @@
 {
-  "title": "存储管理",
+  "title": "存储挂载",
   "desc": "登记本地目录、远程 WebDAV 或 SMB 共享为挂载点，在浏览器中管理文件",
   "addMount": "添加挂载点",
   "editMount": "编辑挂载点",

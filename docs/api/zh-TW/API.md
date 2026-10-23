@@ -45,9 +45,9 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `webterminal` | Web 終端機 | `webterminal:read`、`webterminal:write` |
 | `cron` | 排程任務 | `cron:read`、`cron:write` |
 | `docker` | Docker 管理 | `docker:read`、`docker:write` |
-| `webdav` | WebDAV | `webdav:read`、`webdav:write` |
+| `webdav` | WebDAV 服務 | `webdav:read`、`webdav:write` |
 | `ftp` | FTP 服務 | `ftp:read`、`ftp:write` |
-| `storage` | 儲存管理 | `storage:read`、`storage:write` |
+| `storage` | 儲存掛載 | `storage:read`、`storage:write` |
 | `notify` | 通知中心 | `notify:read`、`notify:write` |
 | `nettools` | 網路診斷 | `nettools:read`、`nettools:write` |
 | `backup` | 設定備份 | `backup:read`、`backup:write` |
@@ -403,7 +403,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/docker/containers/{id}/files` | `docker:write` | 刪除容器內檔案 |
 | GET | `/api/docker/containers/{id}/exec` | `docker:write` | 在容器內開啟終端機（WebSocket） |
 
-## WebDAV
+## WebDAV 服務
 
 | 方法 | 路徑 | 所需權限 | 說明 |
 | --- | --- | --- | --- |
@@ -421,7 +421,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | GET | `/api/ftp/settings` | `ftp:read` | 讀取 FTP 設定 |
 | PUT | `/api/ftp/settings` | `ftp:write` | 儲存 FTP 設定 |
 
-## 儲存管理
+## 儲存掛載
 
 | 方法 | 路徑 | 所需權限 | 說明 |
 | --- | --- | --- | --- |
@@ -1096,6 +1096,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 
 | 欄位 | 類型 |
 | --- | --- |
+| `domain` | string |
 | `enable` | boolean |
 | `key` | string |
 | `name` | string |

@@ -1242,6 +1242,9 @@
       },
       "storage.Mount": {
         "properties": {
+          "domain": {
+            "type": "string"
+          },
           "enable": {
             "type": "boolean"
           },
@@ -15936,7 +15939,7 @@
         ],
         "summary": "스토리지 파일 삭제",
         "tags": [
-          "스토리지 관리"
+          "스토리지 마운트"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -15997,7 +16000,7 @@
         ],
         "summary": "스토리지 파일 다운로드",
         "tags": [
-          "스토리지 관리"
+          "스토리지 마운트"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16058,7 +16061,7 @@
         ],
         "summary": "스토리지 디렉터리 목록 조회",
         "tags": [
-          "스토리지 관리"
+          "스토리지 마운트"
         ],
         "x-required-scope": "storage:read",
         "x-token-allowed": true
@@ -16128,7 +16131,7 @@
         ],
         "summary": "스토리지 디렉터리 생성",
         "tags": [
-          "스토리지 관리"
+          "스토리지 마운트"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16198,7 +16201,7 @@
         ],
         "summary": "스토리지 파일 이름 변경 또는 이동",
         "tags": [
-          "스토리지 관리"
+          "스토리지 마운트"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16259,7 +16262,7 @@
         ],
         "summary": "스토리지에 파일 업로드",
         "tags": [
-          "스토리지 관리"
+          "스토리지 마운트"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16310,7 +16313,7 @@
         ],
         "summary": "모듈 실행 로그 비우기",
         "tags": [
-          "스토리지 관리"
+          "스토리지 마운트"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16385,7 +16388,7 @@
         ],
         "summary": "모듈 실행 로그 보기",
         "tags": [
-          "스토리지 관리"
+          "스토리지 마운트"
         ],
         "x-required-scope": "storage:read",
         "x-token-allowed": true
@@ -16446,7 +16449,7 @@
         ],
         "summary": "항목 목록 조회",
         "tags": [
-          "스토리지 관리"
+          "스토리지 마운트"
         ],
         "x-required-scope": "storage:read",
         "x-token-allowed": true
@@ -16511,7 +16514,7 @@
         ],
         "summary": "항목 추가",
         "tags": [
-          "스토리지 관리"
+          "스토리지 마운트"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16571,7 +16574,7 @@
         ],
         "summary": "항목 순서 변경",
         "tags": [
-          "스토리지 관리"
+          "스토리지 마운트"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16632,7 +16635,7 @@
         ],
         "summary": "항목 삭제",
         "tags": [
-          "스토리지 관리"
+          "스토리지 마운트"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16707,7 +16710,7 @@
         ],
         "summary": "항목 수정",
         "tags": [
-          "스토리지 관리"
+          "스토리지 마운트"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16777,7 +16780,7 @@
         ],
         "summary": "항목 사용 설정/해제",
         "tags": [
-          "스토리지 관리"
+          "스토리지 마운트"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -19612,7 +19615,7 @@
         ],
         "summary": "모듈 실행 로그 비우기",
         "tags": [
-          "WebDAV"
+          "WebDAV 서비스"
         ],
         "x-required-scope": "webdav:write",
         "x-token-allowed": true
@@ -19687,7 +19690,7 @@
         ],
         "summary": "모듈 실행 로그 보기",
         "tags": [
-          "WebDAV"
+          "WebDAV 서비스"
         ],
         "x-required-scope": "webdav:read",
         "x-token-allowed": true
@@ -19738,7 +19741,7 @@
         ],
         "summary": "WebDAV 설정 읽기",
         "tags": [
-          "WebDAV"
+          "WebDAV 서비스"
         ],
         "x-required-scope": "webdav:read",
         "x-token-allowed": true
@@ -19796,7 +19799,7 @@
         ],
         "summary": "WebDAV 설정 저장",
         "tags": [
-          "WebDAV"
+          "WebDAV 서비스"
         ],
         "x-required-scope": "webdav:write",
         "x-token-allowed": true
@@ -25437,13 +25440,13 @@
       "name": "Docker 관리"
     },
     {
-      "name": "WebDAV"
+      "name": "WebDAV 서비스"
     },
     {
       "name": "FTP 서비스"
     },
     {
-      "name": "스토리지 관리"
+      "name": "스토리지 마운트"
     },
     {
       "name": "알림 센터"

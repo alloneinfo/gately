@@ -1,4 +1,5 @@
 {
+  "title": "Serveur WebDAV",
   "service": "Service",
   "listenIp": "Adresse d'écoute",
   "listenIpPlaceholder": "Laisser vide pour écouter sur toutes les adresses",

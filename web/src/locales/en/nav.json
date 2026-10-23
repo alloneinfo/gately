@@ -4,7 +4,7 @@
     "network": "Network",
     "tunnel": "Networking & Tunnels",
     "web": "Web",
-    "storage": "Network Storage",
+    "storage": "File Services",
     "tools": "Tools",
     "system": "System"
   },
@@ -53,11 +53,11 @@
       "desc": "Automatic ACME issuance and renewal"
     },
     "storage": {
-      "title": "Storage",
-      "desc": "Mount local directories or remote WebDAV and manage files online"
+      "title": "Storage Mounts",
+      "desc": "Mount local directories, remote WebDAV or SMB shares and manage files online"
     },
     "webdav": {
-      "title": "WebDAV",
+      "title": "WebDAV Service",
       "desc": "WebDAV file sharing service"
     },
     "ftp": {

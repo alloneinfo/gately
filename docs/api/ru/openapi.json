@@ -1242,6 +1242,9 @@
       },
       "storage.Mount": {
         "properties": {
+          "domain": {
+            "type": "string"
+          },
           "enable": {
             "type": "boolean"
           },
@@ -15936,7 +15939,7 @@
         ],
         "summary": "Удалить файл хранилища",
         "tags": [
-          "Управление хранилищем"
+          "Монтирование хранилищ"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -15997,7 +16000,7 @@
         ],
         "summary": "Скачать файл из хранилища",
         "tags": [
-          "Управление хранилищем"
+          "Монтирование хранилищ"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16058,7 +16061,7 @@
         ],
         "summary": "Список каталогов хранилища",
         "tags": [
-          "Управление хранилищем"
+          "Монтирование хранилищ"
         ],
         "x-required-scope": "storage:read",
         "x-token-allowed": true
@@ -16128,7 +16131,7 @@
         ],
         "summary": "Создать каталог хранилища",
         "tags": [
-          "Управление хранилищем"
+          "Монтирование хранилищ"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16198,7 +16201,7 @@
         ],
         "summary": "Переименовать или переместить файл хранилища",
         "tags": [
-          "Управление хранилищем"
+          "Монтирование хранилищ"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16259,7 +16262,7 @@
         ],
         "summary": "Загрузить файл в хранилище",
         "tags": [
-          "Управление хранилищем"
+          "Монтирование хранилищ"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16310,7 +16313,7 @@
         ],
         "summary": "Очистить журнал работы модуля",
         "tags": [
-          "Управление хранилищем"
+          "Монтирование хранилищ"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16385,7 +16388,7 @@
         ],
         "summary": "Просмотр журнала работы модуля",
         "tags": [
-          "Управление хранилищем"
+          "Монтирование хранилищ"
         ],
         "x-required-scope": "storage:read",
         "x-token-allowed": true
@@ -16446,7 +16449,7 @@
         ],
         "summary": "Список: Элемент",
         "tags": [
-          "Управление хранилищем"
+          "Монтирование хранилищ"
         ],
         "x-required-scope": "storage:read",
         "x-token-allowed": true
@@ -16511,7 +16514,7 @@
         ],
         "summary": "Добавить: Элемент",
         "tags": [
-          "Управление хранилищем"
+          "Монтирование хранилищ"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16571,7 +16574,7 @@
         ],
         "summary": "Изменить порядок: Элемент",
         "tags": [
-          "Управление хранилищем"
+          "Монтирование хранилищ"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16632,7 +16635,7 @@
         ],
         "summary": "Удалить: Элемент",
         "tags": [
-          "Управление хранилищем"
+          "Монтирование хранилищ"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16707,7 +16710,7 @@
         ],
         "summary": "Изменить: Элемент",
         "tags": [
-          "Управление хранилищем"
+          "Монтирование хранилищ"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16777,7 +16780,7 @@
         ],
         "summary": "Включить или отключить: Элемент",
         "tags": [
-          "Управление хранилищем"
+          "Монтирование хранилищ"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -19612,7 +19615,7 @@
         ],
         "summary": "Очистить журнал работы модуля",
         "tags": [
-          "WebDAV"
+          "WebDAV-сервер"
         ],
         "x-required-scope": "webdav:write",
         "x-token-allowed": true
@@ -19687,7 +19690,7 @@
         ],
         "summary": "Просмотр журнала работы модуля",
         "tags": [
-          "WebDAV"
+          "WebDAV-сервер"
         ],
         "x-required-scope": "webdav:read",
         "x-token-allowed": true
@@ -19738,7 +19741,7 @@
         ],
         "summary": "Чтение настроек WebDAV",
         "tags": [
-          "WebDAV"
+          "WebDAV-сервер"
         ],
         "x-required-scope": "webdav:read",
         "x-token-allowed": true
@@ -19796,7 +19799,7 @@
         ],
         "summary": "Сохранить настройки WebDAV",
         "tags": [
-          "WebDAV"
+          "WebDAV-сервер"
         ],
         "x-required-scope": "webdav:write",
         "x-token-allowed": true
@@ -25437,13 +25440,13 @@
       "name": "Управление Docker"
     },
     {
-      "name": "WebDAV"
+      "name": "WebDAV-сервер"
     },
     {
       "name": "Служба FTP"
     },
     {
-      "name": "Управление хранилищем"
+      "name": "Монтирование хранилищ"
     },
     {
       "name": "Центр уведомлений"

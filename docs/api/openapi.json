@@ -1242,6 +1242,9 @@
       },
       "storage.Mount": {
         "properties": {
+          "domain": {
+            "type": "string"
+          },
           "enable": {
             "type": "boolean"
           },
@@ -15936,7 +15939,7 @@
         ],
         "summary": "删除存储文件",
         "tags": [
-          "存储管理"
+          "存储挂载"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -15997,7 +16000,7 @@
         ],
         "summary": "下载存储文件",
         "tags": [
-          "存储管理"
+          "存储挂载"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16058,7 +16061,7 @@
         ],
         "summary": "列出存储目录",
         "tags": [
-          "存储管理"
+          "存储挂载"
         ],
         "x-required-scope": "storage:read",
         "x-token-allowed": true
@@ -16128,7 +16131,7 @@
         ],
         "summary": "创建存储目录",
         "tags": [
-          "存储管理"
+          "存储挂载"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16198,7 +16201,7 @@
         ],
         "summary": "重命名或移动存储文件",
         "tags": [
-          "存储管理"
+          "存储挂载"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16259,7 +16262,7 @@
         ],
         "summary": "上传文件到存储",
         "tags": [
-          "存储管理"
+          "存储挂载"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16310,7 +16313,7 @@
         ],
         "summary": "清空模块运行日志",
         "tags": [
-          "存储管理"
+          "存储挂载"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16385,7 +16388,7 @@
         ],
         "summary": "查看模块运行日志",
         "tags": [
-          "存储管理"
+          "存储挂载"
         ],
         "x-required-scope": "storage:read",
         "x-token-allowed": true
@@ -16446,7 +16449,7 @@
         ],
         "summary": "获取条目列表",
         "tags": [
-          "存储管理"
+          "存储挂载"
         ],
         "x-required-scope": "storage:read",
         "x-token-allowed": true
@@ -16511,7 +16514,7 @@
         ],
         "summary": "新增条目",
         "tags": [
-          "存储管理"
+          "存储挂载"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16571,7 +16574,7 @@
         ],
         "summary": "调整条目排序",
         "tags": [
-          "存储管理"
+          "存储挂载"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16632,7 +16635,7 @@
         ],
         "summary": "删除条目",
         "tags": [
-          "存储管理"
+          "存储挂载"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16707,7 +16710,7 @@
         ],
         "summary": "修改条目",
         "tags": [
-          "存储管理"
+          "存储挂载"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16777,7 +16780,7 @@
         ],
         "summary": "启用或停用条目",
         "tags": [
-          "存储管理"
+          "存储挂载"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -19612,7 +19615,7 @@
         ],
         "summary": "清空模块运行日志",
         "tags": [
-          "WebDAV"
+          "WebDAV 服务"
         ],
         "x-required-scope": "webdav:write",
         "x-token-allowed": true
@@ -19687,7 +19690,7 @@
         ],
         "summary": "查看模块运行日志",
         "tags": [
-          "WebDAV"
+          "WebDAV 服务"
         ],
         "x-required-scope": "webdav:read",
         "x-token-allowed": true
@@ -19738,7 +19741,7 @@
         ],
         "summary": "读取 WebDAV 设置",
         "tags": [
-          "WebDAV"
+          "WebDAV 服务"
         ],
         "x-required-scope": "webdav:read",
         "x-token-allowed": true
@@ -19796,7 +19799,7 @@
         ],
         "summary": "保存 WebDAV 设置",
         "tags": [
-          "WebDAV"
+          "WebDAV 服务"
         ],
         "x-required-scope": "webdav:write",
         "x-token-allowed": true
@@ -25437,13 +25440,13 @@
       "name": "Docker 管理"
     },
     {
-      "name": "WebDAV"
+      "name": "WebDAV 服务"
     },
     {
       "name": "FTP 服务"
     },
     {
-      "name": "存储管理"
+      "name": "存储挂载"
     },
     {
       "name": "通知中心"

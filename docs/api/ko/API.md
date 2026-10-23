@@ -45,9 +45,9 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `webterminal` | Web 터미널 | `webterminal:read`、`webterminal:write` |
 | `cron` | 예약 작업 | `cron:read`、`cron:write` |
 | `docker` | Docker 관리 | `docker:read`、`docker:write` |
-| `webdav` | WebDAV | `webdav:read`、`webdav:write` |
+| `webdav` | WebDAV 서비스 | `webdav:read`、`webdav:write` |
 | `ftp` | FTP 서비스 | `ftp:read`、`ftp:write` |
-| `storage` | 스토리지 관리 | `storage:read`、`storage:write` |
+| `storage` | 스토리지 마운트 | `storage:read`、`storage:write` |
 | `notify` | 알림 센터 | `notify:read`、`notify:write` |
 | `nettools` | 네트워크 진단 | `nettools:read`、`nettools:write` |
 | `backup` | 설정 백업 | `backup:read`、`backup:write` |
@@ -403,7 +403,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/docker/containers/{id}/files` | `docker:write` | 컨테이너 내부 파일 삭제 |
 | GET | `/api/docker/containers/{id}/exec` | `docker:write` | 컨테이너 내부 터미널 열기 (WebSocket) |
 
-## WebDAV
+## WebDAV 서비스
 
 | 메서드 | 경로 | 필요 권한 | 설명 |
 | --- | --- | --- | --- |
@@ -421,7 +421,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | GET | `/api/ftp/settings` | `ftp:read` | FTP 설정 읽기 |
 | PUT | `/api/ftp/settings` | `ftp:write` | FTP 설정 저장 |
 
-## 스토리지 관리
+## 스토리지 마운트
 
 | 메서드 | 경로 | 필요 권한 | 설명 |
 | --- | --- | --- | --- |
@@ -1096,6 +1096,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 
 | 필드 | 타입 |
 | --- | --- |
+| `domain` | string |
 | `enable` | boolean |
 | `key` | string |
 | `name` | string |

@@ -36,7 +36,7 @@ Arquivos compatíveis:
 | lucky_webterminal.lkcf | Terminal Web | Conexões SSH; a impressão digital do host é registrada na primeira conexão |
 | lucky_webdav.lkcf | WebDAV | A lista de montagens do usuário vira vários diretórios, e usuários com o mesmo nome e senha são mesclados; montagens que referenciam o gerenciamento de armazenamento são resolvidas para o diretório local correspondente |
 | lucky_ftpserver.lkcf | FTP | Porta de escuta, intervalo de portas passivas, TLS e parâmetros de timeout, além dos usuários (tratados como no WebDAV) |
-| lucky_storagemanagement.lkcf | Gerenciamento de armazenamento | Diretórios locais e armazenamento WebDAV; Aliyun Drive, montagens do sistema e proxy de acesso não são migrados |
+| lucky_storagemanagement.lkcf | Montagens de armazenamento | Diretórios locais e armazenamento WebDAV; Aliyun Drive, montagens do sistema e proxy de acesso não são migrados |
 | lucky_frp.lkcf | frp | A primeira instância de cliente (endereço do servidor, token, protocolo de transporte e proxies) e a primeira instância de servidor; visitantes, proxies de plugin e console não são migrados |
 | lucky_cloudflared.lkcf | Cloudflare Tunnel | Túneis que usam token de túnel; clientes Access e túneis com apenas token de API não são migrados |
 | lucky_base.lkcf | Configurações globais, Serviços Web | Apenas acesso pela rede local, limite de falhas de login, duração da sessão, fuso horário, DNS personalizado (incluindo a sintaxe doh@), parâmetros de GC e origens confiáveis do protocolo PROXY. Porta de administração, caminho de entrada seguro, conta de administrador e autenticação em dois fatores não são migrados |

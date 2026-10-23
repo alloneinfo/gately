@@ -4,7 +4,7 @@
     "network": "Red",
     "tunnel": "Redes y túneles",
     "web": "Web",
-    "storage": "Almacenamiento en red",
+    "storage": "Servicios de archivos",
     "tools": "Herramientas",
     "system": "Sistema"
   },
@@ -53,11 +53,11 @@
       "desc": "Emisión y renovación automática con ACME"
     },
     "storage": {
-      "title": "Almacenamiento",
-      "desc": "Monta directorios locales o WebDAV remoto y gestiona archivos en línea"
+      "title": "Montajes de almacenamiento",
+      "desc": "Monta directorios locales, WebDAV remoto o recursos compartidos SMB y gestiona archivos en línea"
     },
     "webdav": {
-      "title": "WebDAV",
+      "title": "Servicio WebDAV",
       "desc": "Servicio para compartir archivos por WebDAV"
     },
     "ftp": {

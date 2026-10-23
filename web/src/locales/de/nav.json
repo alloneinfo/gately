@@ -4,7 +4,7 @@
     "network": "Netzwerk",
     "tunnel": "Vernetzung & Tunnel",
     "web": "Web",
-    "storage": "Netzwerkspeicher",
+    "storage": "Dateidienste",
     "tools": "Werkzeuge",
     "system": "System"
   },
@@ -53,11 +53,11 @@
       "desc": "Automatische ACME-Ausstellung und -Erneuerung"
     },
     "storage": {
-      "title": "Speicher",
-      "desc": "Lokale Verzeichnisse oder entferntes WebDAV einbinden und Dateien online verwalten"
+      "title": "Speicher-Einbindungen",
+      "desc": "Lokale Verzeichnisse, entferntes WebDAV oder SMB-Freigaben einbinden und Dateien online verwalten"
     },
     "webdav": {
-      "title": "WebDAV",
+      "title": "WebDAV-Dienst",
       "desc": "WebDAV-Dateifreigabedienst"
     },
     "ftp": {

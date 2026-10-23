@@ -36,7 +36,7 @@ Fichiers pris en charge :
 | lucky_webterminal.lkcf | Terminal Web | Connexions SSH ; l'empreinte de l'hôte est enregistrée à la première connexion |
 | lucky_webdav.lkcf | WebDAV | La liste de montages d'un utilisateur devient plusieurs dossiers, les utilisateurs de même nom et même mot de passe sont fusionnés ; les montages référençant la gestion du stockage sont résolus vers le dossier local correspondant |
 | lucky_ftpserver.lkcf | FTP | Port d'écoute, plage de ports passifs, TLS et délais, ainsi que les utilisateurs (traités comme pour WebDAV) |
-| lucky_storagemanagement.lkcf | Stockage | Dossiers locaux et stockages WebDAV ; Aliyun Drive, montages système et proxy d'accès ne sont pas migrés |
+| lucky_storagemanagement.lkcf | Montages de stockage | Dossiers locaux et stockages WebDAV ; Aliyun Drive, montages système et proxy d'accès ne sont pas migrés |
 | lucky_frp.lkcf | frp | Première instance cliente (adresse du serveur, jeton, protocole de transport et proxys) et première instance serveur ; visiteurs, proxys de plugin et tableau de bord non migrés |
 | lucky_cloudflared.lkcf | Tunnel Cloudflare | Tunnels utilisant un jeton de tunnel ; les clients Access et les tunnels renseignés uniquement avec un jeton d'API ne sont pas migrés |
 | lucky_base.lkcf | Paramètres globaux, Services Web | Accès limité au réseau local, nombre maximal d'échecs de connexion, durée de session, fuseau horaire, DNS personnalisé (y compris la notation doh@), paramètres GC, sources de confiance du protocole PROXY. Port d'administration, chemin d'accès secret, compte administrateur et authentification à deux facteurs ne sont pas migrés |

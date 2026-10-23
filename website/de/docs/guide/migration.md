@@ -36,7 +36,7 @@ Unterstützte Dateien:
 | lucky_webterminal.lkcf | Web-Terminal | SSH-Verbindungen; beim ersten Verbinden wird der Host-Fingerabdruck gespeichert |
 | lucky_webdav.lkcf | WebDAV | Die Einbindungsliste eines Benutzers wird zu mehreren Verzeichnissen, Benutzer mit gleichem Namen und Passwort werden zusammengeführt; Verweise auf Einbindungen der Speicherverwaltung werden zu den jeweiligen lokalen Verzeichnissen aufgelöst |
 | lucky_ftpserver.lkcf | FTP | Listen-Port, Bereich der passiven Ports, TLS- und Timeout-Parameter sowie Benutzer (Behandlung wie bei WebDAV) |
-| lucky_storagemanagement.lkcf | Speicherverwaltung | Lokale Verzeichnisse und WebDAV-Speicher; Alibaba Cloud Drive, Systemeinbindungen und Zugriffs-Proxys werden nicht migriert |
+| lucky_storagemanagement.lkcf | Speicher-Einbindungen | Lokale Verzeichnisse und WebDAV-Speicher; Alibaba Cloud Drive, Systemeinbindungen und Zugriffs-Proxys werden nicht migriert |
 | lucky_frp.lkcf | frp | Die erste Client-Instanz (Serveradresse, Token, Transportprotokoll und Proxys) und die erste Server-Instanz; Visitors, Plugin-Proxys und das Dashboard werden nicht migriert |
 | lucky_cloudflared.lkcf | Cloudflare Tunnel | Tunnel mit Tunnel-Token; Access-Clients und Tunnel, bei denen nur ein API-Token eingetragen ist, werden nicht migriert |
 | lucky_base.lkcf | Globale Einstellungen, Web-Dienste | Nur LAN-Zugriff, maximale Anmeldefehlversuche, Sitzungsdauer, Zeitzone, eigenes DNS (auch die Schreibweise doh@), GC-Parameter, vertrauenswürdige Quellen für das PROXY-Protokoll. Verwaltungsport, sicherer Einstiegspfad, Administratorkonto und Zwei-Faktor-Authentifizierung werden nicht migriert |

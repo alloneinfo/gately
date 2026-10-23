@@ -1242,6 +1242,9 @@
       },
       "storage.Mount": {
         "properties": {
+          "domain": {
+            "type": "string"
+          },
           "enable": {
             "type": "boolean"
           },
@@ -15936,7 +15939,7 @@
         ],
         "summary": "Delete a storage file",
         "tags": [
-          "Storage management"
+          "Storage Mounts"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -15997,7 +16000,7 @@
         ],
         "summary": "Download a storage file",
         "tags": [
-          "Storage management"
+          "Storage Mounts"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16058,7 +16061,7 @@
         ],
         "summary": "List a storage directory",
         "tags": [
-          "Storage management"
+          "Storage Mounts"
         ],
         "x-required-scope": "storage:read",
         "x-token-allowed": true
@@ -16128,7 +16131,7 @@
         ],
         "summary": "Create a storage directory",
         "tags": [
-          "Storage management"
+          "Storage Mounts"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16198,7 +16201,7 @@
         ],
         "summary": "Rename or move a storage file",
         "tags": [
-          "Storage management"
+          "Storage Mounts"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16259,7 +16262,7 @@
         ],
         "summary": "Upload a file to storage",
         "tags": [
-          "Storage management"
+          "Storage Mounts"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16310,7 +16313,7 @@
         ],
         "summary": "Clear module runtime logs",
         "tags": [
-          "Storage management"
+          "Storage Mounts"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16385,7 +16388,7 @@
         ],
         "summary": "View module runtime logs",
         "tags": [
-          "Storage management"
+          "Storage Mounts"
         ],
         "x-required-scope": "storage:read",
         "x-token-allowed": true
@@ -16446,7 +16449,7 @@
         ],
         "summary": "List Entry",
         "tags": [
-          "Storage management"
+          "Storage Mounts"
         ],
         "x-required-scope": "storage:read",
         "x-token-allowed": true
@@ -16511,7 +16514,7 @@
         ],
         "summary": "Create Entry",
         "tags": [
-          "Storage management"
+          "Storage Mounts"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16571,7 +16574,7 @@
         ],
         "summary": "Reorder Entry",
         "tags": [
-          "Storage management"
+          "Storage Mounts"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16632,7 +16635,7 @@
         ],
         "summary": "Delete Entry",
         "tags": [
-          "Storage management"
+          "Storage Mounts"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16707,7 +16710,7 @@
         ],
         "summary": "Update Entry",
         "tags": [
-          "Storage management"
+          "Storage Mounts"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16777,7 +16780,7 @@
         ],
         "summary": "Enable or disable Entry",
         "tags": [
-          "Storage management"
+          "Storage Mounts"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -19612,7 +19615,7 @@
         ],
         "summary": "Clear module runtime logs",
         "tags": [
-          "WebDAV"
+          "WebDAV Service"
         ],
         "x-required-scope": "webdav:write",
         "x-token-allowed": true
@@ -19687,7 +19690,7 @@
         ],
         "summary": "View module runtime logs",
         "tags": [
-          "WebDAV"
+          "WebDAV Service"
         ],
         "x-required-scope": "webdav:read",
         "x-token-allowed": true
@@ -19738,7 +19741,7 @@
         ],
         "summary": "Read WebDAV settings",
         "tags": [
-          "WebDAV"
+          "WebDAV Service"
         ],
         "x-required-scope": "webdav:read",
         "x-token-allowed": true
@@ -19796,7 +19799,7 @@
         ],
         "summary": "Save WebDAV settings",
         "tags": [
-          "WebDAV"
+          "WebDAV Service"
         ],
         "x-required-scope": "webdav:write",
         "x-token-allowed": true
@@ -25437,13 +25440,13 @@
       "name": "Docker management"
     },
     {
-      "name": "WebDAV"
+      "name": "WebDAV Service"
     },
     {
       "name": "FTP service"
     },
     {
-      "name": "Storage management"
+      "name": "Storage Mounts"
     },
     {
       "name": "Notification center"

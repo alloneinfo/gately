@@ -179,7 +179,7 @@
       },
       {
         "title": "Servicios de archivos",
-        "text": "Servicios WebDAV y FTP con gestión de almacenamiento, montajes WebDAV locales y remotos y administración de archivos en línea."
+        "text": "Servicios WebDAV y FTP con montajes de almacenamiento de directorios locales, WebDAV remoto y recursos compartidos SMB, y administración de archivos en línea."
       },
       {
         "title": "Tareas programadas y Wake-on-LAN",

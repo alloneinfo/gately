@@ -1,5 +1,5 @@
 {
-  "title": "Almacenamiento",
+  "title": "Montajes de almacenamiento",
   "desc": "Registra directorios locales, WebDAV remoto o recursos compartidos SMB como montajes y gestiona archivos desde el navegador",
   "addMount": "Añadir montaje",
   "editMount": "Editar montaje",

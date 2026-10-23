@@ -36,7 +36,7 @@ Gately の「設定 → バックアップと移行」を開き、すべての `
 | lucky_webterminal.lkcf | Web ターミナル | SSH 接続。初回接続時にホストフィンガープリントを記録します |
 | lucky_webdav.lkcf | WebDAV | ユーザーのマウント一覧は複数のディレクトリに変換され、同名・同パスワードのユーザーは統合されます。ストレージ管理を参照するマウントは対応するローカルディレクトリに解決されます |
 | lucky_ftpserver.lkcf | FTP | 待ち受けポート、パッシブポート範囲、TLS とタイムアウトのパラメーター、およびユーザー（扱いは WebDAV と同じ） |
-| lucky_storagemanagement.lkcf | ストレージ管理 | ローカルディレクトリと WebDAV ストレージ。Alibaba Cloud Drive、システムマウント、アクセスプロキシは移行されません |
+| lucky_storagemanagement.lkcf | ストレージマウント | ローカルディレクトリと WebDAV ストレージ。Alibaba Cloud Drive、システムマウント、アクセスプロキシは移行されません |
 | lucky_frp.lkcf | frp | 最初のクライアントインスタンス（サーバーアドレス、トークン、トランスポートプロトコル、プロキシ）と最初のサーバーインスタンス。ビジター、プラグインプロキシ、ダッシュボードは移行されません |
 | lucky_cloudflared.lkcf | Cloudflare トンネル | トンネルトークンを使うトンネル。Access のアクセス側と、API トークンのみを入力したトンネルは移行されません |
 | lucky_base.lkcf | 全体設定、Web サービス | LAN 内からのみ許可、ログイン失敗の上限、セッション期間、タイムゾーン、カスタム DNS（doh@ 形式を含む）、GC パラメーター、PROXY プロトコルの信頼元。管理ポート、セキュアエントリー、管理者アカウント、2 段階認証は移行されません |

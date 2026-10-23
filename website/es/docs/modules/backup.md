@@ -42,16 +42,16 @@ Pulsa «Guardar ajustes» para aplicar el horario y «Copiar ahora» para ejecut
 
 ### Destinos de la copia
 
-Además del directorio local, puedes añadir varios destinos remotos. Cada uno escribe en un punto de montaje de «Almacenamiento» (un directorio local o un WebDAV remoto):
+Además del directorio local, puedes añadir varios destinos remotos. Cada uno escribe en un punto de montaje de «Montajes de almacenamiento» (un directorio local, un WebDAV remoto o un recurso compartido SMB):
 
 | Campo | Descripción |
 | --- | --- |
 | Nombre | Obligatorio |
-| Punto de montaje de almacenamiento | Elige un montaje existente de Almacenamiento. No se pueden seleccionar los montajes de solo lectura o desactivados |
+| Punto de montaje de almacenamiento | Elige un montaje existente de «Montajes de almacenamiento». No se pueden seleccionar los montajes de solo lectura o desactivados |
 | Directorio | Subdirectorio dentro del montaje; déjalo vacío para la raíz |
 | Activado | Interruptor |
 
-Si todavía no tienes ningún montaje, añade antes uno en «Almacenamiento». Eliminar un destino no elimina las copias ya escritas.
+Si todavía no tienes ningún montaje, añade antes uno en «Montajes de almacenamiento». Eliminar un destino no elimina las copias ya escritas.
 
 ### Flujo de ejecución
 

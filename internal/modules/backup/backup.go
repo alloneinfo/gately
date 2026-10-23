@@ -1,4 +1,4 @@
-// Package backup 实现定时配置备份：按 cron 表达式打包全部配置，写入本地目录或存储管理中的挂载点
+// Package backup 实现定时配置备份：按 cron 表达式打包全部配置，写入本地目录或存储挂载中的挂载点
 // （本地目录、WebDAV），支持口令加密与按数量保留，并在成功或失败时发布通知事件。
 package backup
 
@@ -40,7 +40,7 @@ const (
 
 var parser = robfig.NewParser(robfig.Minute | robfig.Hour | robfig.Dom | robfig.Month | robfig.Dow | robfig.Descriptor)
 
-// Storage 由存储管理模块实现，备份通过它写入挂载点。
+// Storage 由存储挂载模块实现，备份通过它写入挂载点。
 type Storage interface {
 	MountList() []storage.MountInfo
 	PutFile(mount, dir, name string, data []byte) error
@@ -61,12 +61,12 @@ type Settings struct {
 	LocalEnable bool `json:"localEnable"`
 }
 
-// Target 是一个远程备份目的地，写入存储管理中的某个挂载点。
+// Target 是一个远程备份目的地，写入存储挂载中的某个挂载点。
 type Target struct {
 	Key    string `json:"key"`
 	Name   string `json:"name"`
 	Enable bool   `json:"enable"`
-	// Mount 为存储管理中的挂载点 key
+	// Mount 为存储挂载中的挂载点 key
 	Mount string `json:"mount"`
 	// Dir 为挂载点内的目录，留空为根目录
 	Dir string `json:"dir"`
@@ -150,7 +150,7 @@ type Module struct {
 	now     func() time.Time
 }
 
-// New 创建模块。st 为存储管理模块，可为 nil（此时只支持本地目录）。
+// New 创建模块。st 为存储挂载模块，可为 nil（此时只支持本地目录）。
 func New(st Storage) *Module {
 	return &Module{storage: st, now: time.Now}
 }
@@ -325,7 +325,7 @@ func (m *Module) writeLocal(name string, data []byte, keep int) Result {
 func (m *Module) writeTarget(t Target, name string, data []byte, keep int) Result {
 	res := Result{Target: t.Name, File: name}
 	if m.storage == nil {
-		res.Error = "存储管理不可用"
+		res.Error = "存储挂载不可用"
 		return res
 	}
 	if err := m.storage.PutFile(t.Mount, t.Dir, name, data); err != nil {

@@ -42,16 +42,16 @@ Cliquez sur « Enregistrer les paramètres » pour appliquer la planification, e
 
 ### Destinations de sauvegarde
 
-Outre le répertoire local, vous pouvez ajouter plusieurs destinations distantes. Chacune écrit vers un montage de « Stockage » (un répertoire local ou un WebDAV distant) :
+Outre le répertoire local, vous pouvez ajouter plusieurs destinations distantes. Chacune écrit vers un montage de « Montages de stockage » (un répertoire local, un WebDAV distant ou un partage SMB) :
 
 | Champ | Description |
 | --- | --- |
 | Nom | Obligatoire |
-| Montage de stockage | Choisissez un montage existant dans Stockage. Les montages en lecture seule ou désactivés ne peuvent pas être sélectionnés |
+| Montage de stockage | Choisissez un montage existant dans « Montages de stockage ». Les montages en lecture seule ou désactivés ne peuvent pas être sélectionnés |
 | Répertoire | Sous-répertoire dans le montage ; laissez vide pour la racine |
 | Activé | Interrupteur |
 
-Si vous n'avez pas encore de montage, ajoutez-en d'abord un dans « Stockage ». Supprimer une destination ne supprime pas les sauvegardes déjà écrites.
+Si vous n'avez pas encore de montage, ajoutez-en d'abord un dans « Montages de stockage ». Supprimer une destination ne supprime pas les sauvegardes déjà écrites.
 
 ### Déroulement de l'exécution
 

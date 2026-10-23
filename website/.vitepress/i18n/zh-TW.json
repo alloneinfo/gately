@@ -179,7 +179,7 @@
       },
       {
         "title": "檔案服務",
-        "text": "WebDAV、FTP 服務與儲存管理，支援本機與遠端 WebDAV 掛載及線上檔案管理。"
+        "text": "WebDAV、FTP 服務與儲存掛載，支援本機目錄、遠端 WebDAV 與 SMB 共用掛載及線上檔案管理。"
       },
       {
         "title": "排程工作與喚醒",

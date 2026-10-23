@@ -42,16 +42,16 @@ Click "Save settings" to apply the schedule, and "Back up now" to run one immedi
 
 ### Backup destinations
 
-Besides the local directory, you can add several remote destinations. Each one writes to a mount in "Storage" (a local directory or a remote WebDAV):
+Besides the local directory, you can add several remote destinations. Each one writes to a mount in "Storage Mounts" (a local directory, a remote WebDAV or an SMB share):
 
 | Field | Description |
 | --- | --- |
 | Name | Required |
-| Storage mount | Choose an existing mount from Storage. Read-only or disabled mounts cannot be selected |
+| Storage mount | Choose an existing mount from "Storage Mounts". Read-only or disabled mounts cannot be selected |
 | Directory | Subdirectory inside the mount; leave empty for the root |
 | Enabled | Switch |
 
-If you have no mounts yet, add one in "Storage" first. Deleting a destination does not delete backups already written.
+If you have no mounts yet, add one in "Storage Mounts" first. Deleting a destination does not delete backups already written.
 
 ### Execution flow
 

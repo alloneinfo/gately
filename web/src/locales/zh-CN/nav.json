@@ -4,7 +4,7 @@
     "network": "网络",
     "tunnel": "组网与穿透",
     "web": "Web",
-    "storage": "网络存储",
+    "storage": "文件服务",
     "tools": "工具",
     "system": "系统"
   },
@@ -53,11 +53,11 @@
       "desc": "ACME 自动申请与续签"
     },
     "storage": {
-      "title": "存储管理",
-      "desc": "挂载本地目录或远程 WebDAV，在线管理文件"
+      "title": "存储挂载",
+      "desc": "挂载本地目录、远程 WebDAV 或 SMB 共享，在线管理文件"
     },
     "webdav": {
-      "title": "WebDAV",
+      "title": "WebDAV 服务",
       "desc": "WebDAV 文件共享服务"
     },
     "ftp": {

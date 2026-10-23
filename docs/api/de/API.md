@@ -45,9 +45,9 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `webterminal` | Web-Terminal | `webterminal:read`、`webterminal:write` |
 | `cron` | Geplante Aufgaben | `cron:read`、`cron:write` |
 | `docker` | Docker-Verwaltung | `docker:read`、`docker:write` |
-| `webdav` | WebDAV | `webdav:read`、`webdav:write` |
+| `webdav` | WebDAV-Dienst | `webdav:read`、`webdav:write` |
 | `ftp` | FTP-Dienst | `ftp:read`、`ftp:write` |
-| `storage` | Speicherverwaltung | `storage:read`、`storage:write` |
+| `storage` | Speicher-Einbindungen | `storage:read`、`storage:write` |
 | `notify` | Benachrichtigungszentrale | `notify:read`、`notify:write` |
 | `nettools` | Netzwerkdiagnose | `nettools:read`、`nettools:write` |
 | `backup` | Konfigurations-Backup | `backup:read`、`backup:write` |
@@ -403,7 +403,7 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | DELETE | `/api/docker/containers/{id}/files` | `docker:write` | Datei im Container löschen |
 | GET | `/api/docker/containers/{id}/exec` | `docker:write` | Terminal im Container öffnen (WebSocket) |
 
-## WebDAV
+## WebDAV-Dienst
 
 | Methode | Pfad | Erforderliche Berechtigung | Beschreibung |
 | --- | --- | --- | --- |
@@ -421,7 +421,7 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | GET | `/api/ftp/settings` | `ftp:read` | FTP-Einstellungen lesen |
 | PUT | `/api/ftp/settings` | `ftp:write` | FTP-Einstellungen speichern |
 
-## Speicherverwaltung
+## Speicher-Einbindungen
 
 | Methode | Pfad | Erforderliche Berechtigung | Beschreibung |
 | --- | --- | --- | --- |
@@ -1096,6 +1096,7 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 
 | Feld | Typ |
 | --- | --- |
+| `domain` | string |
 | `enable` | boolean |
 | `key` | string |
 | `name` | string |

@@ -45,9 +45,9 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `webterminal` | Web terminal | `webterminal:read`、`webterminal:write` |
 | `cron` | Scheduled task | `cron:read`、`cron:write` |
 | `docker` | Docker management | `docker:read`、`docker:write` |
-| `webdav` | WebDAV | `webdav:read`、`webdav:write` |
+| `webdav` | WebDAV Service | `webdav:read`、`webdav:write` |
 | `ftp` | FTP service | `ftp:read`、`ftp:write` |
-| `storage` | Storage management | `storage:read`、`storage:write` |
+| `storage` | Storage Mounts | `storage:read`、`storage:write` |
 | `notify` | Notification center | `notify:read`、`notify:write` |
 | `nettools` | Network diagnostics | `nettools:read`、`nettools:write` |
 | `backup` | Configuration backup | `backup:read`、`backup:write` |
@@ -403,7 +403,7 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | DELETE | `/api/docker/containers/{id}/files` | `docker:write` | Delete a file inside a container |
 | GET | `/api/docker/containers/{id}/exec` | `docker:write` | Open a terminal inside a container (WebSocket) |
 
-## WebDAV
+## WebDAV Service
 
 | Method | Path | Required permission | Description |
 | --- | --- | --- | --- |
@@ -421,7 +421,7 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | GET | `/api/ftp/settings` | `ftp:read` | Read FTP settings |
 | PUT | `/api/ftp/settings` | `ftp:write` | Save FTP settings |
 
-## Storage management
+## Storage Mounts
 
 | Method | Path | Required permission | Description |
 | --- | --- | --- | --- |
@@ -1096,6 +1096,7 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 
 | Field | Type |
 | --- | --- |
+| `domain` | string |
 | `enable` | boolean |
 | `key` | string |
 | `name` | string |

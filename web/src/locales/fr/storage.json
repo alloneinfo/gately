@@ -1,5 +1,5 @@
 {
-  "title": "Stockage",
+  "title": "Montages de stockage",
   "desc": "Enregistrez des dossiers locaux, du WebDAV distant ou des partages SMB comme points de montage et gérez les fichiers dans le navigateur",
   "addMount": "Ajouter un montage",
   "editMount": "Modifier le montage",

@@ -45,9 +45,9 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `webterminal` | Web ターミナル | `webterminal:read`、`webterminal:write` |
 | `cron` | スケジュールタスク | `cron:read`、`cron:write` |
 | `docker` | Docker 管理 | `docker:read`、`docker:write` |
-| `webdav` | WebDAV | `webdav:read`、`webdav:write` |
+| `webdav` | WebDAV サービス | `webdav:read`、`webdav:write` |
 | `ftp` | FTP サービス | `ftp:read`、`ftp:write` |
-| `storage` | ストレージ管理 | `storage:read`、`storage:write` |
+| `storage` | ストレージマウント | `storage:read`、`storage:write` |
 | `notify` | 通知センター | `notify:read`、`notify:write` |
 | `nettools` | ネットワーク診断 | `nettools:read`、`nettools:write` |
 | `backup` | 設定バックアップ | `backup:read`、`backup:write` |
@@ -403,7 +403,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/docker/containers/{id}/files` | `docker:write` | コンテナ内のファイルを削除 |
 | GET | `/api/docker/containers/{id}/exec` | `docker:write` | コンテナ内でターミナルを開く（WebSocket） |
 
-## WebDAV
+## WebDAV サービス
 
 | メソッド | パス | 必要な権限 | 説明 |
 | --- | --- | --- | --- |
@@ -421,7 +421,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | GET | `/api/ftp/settings` | `ftp:read` | FTP 設定を読み取り |
 | PUT | `/api/ftp/settings` | `ftp:write` | FTP 設定を保存 |
 
-## ストレージ管理
+## ストレージマウント
 
 | メソッド | パス | 必要な権限 | 説明 |
 | --- | --- | --- | --- |
@@ -1096,6 +1096,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 
 | フィールド | 型 |
 | --- | --- |
+| `domain` | string |
 | `enable` | boolean |
 | `key` | string |
 | `name` | string |

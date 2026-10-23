@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader title="WebDAV" :desc="t('webdav.desc')" :icon="FolderSync">
+    <PageHeader :title="t('webdav.title')" :desc="t('webdav.desc')" :icon="FolderSync">
       <el-button type="primary" :icon="Save" :loading="saving" @click="save">{{ t('common.save') }}</el-button>
     </PageHeader>
 

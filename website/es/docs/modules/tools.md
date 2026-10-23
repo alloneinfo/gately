@@ -2,7 +2,7 @@
 
 ## WebDAV
 
-Se configura en «WebDAV», dentro del grupo «Almacenamiento en red» de la barra lateral.
+Se configura en «Servicio WebDAV», dentro del grupo «Servicios de archivos» de la barra lateral.
 
 | Campo | Por defecto | Descripción |
 | --- | --- | --- |
@@ -21,7 +21,7 @@ Al migrar desde Lucky, la lista de montajes de un usuario se convierte en varios
 
 ## FTP
 
-Se configura en «Servicio FTP», dentro del grupo «Almacenamiento en red». Se admiten FTP y FTPS.
+Se configura en «Servicio FTP», dentro del grupo «Servicios de archivos». Se admiten FTP y FTPS.
 
 | Campo | Por defecto | Descripción |
 | --- | --- | --- |
@@ -38,9 +38,9 @@ Se configura en «Servicio FTP», dentro del grupo «Almacenamiento en red». Se
 
 Los parámetros del servicio y los usuarios se pueden importar desde la configuración FTP de Lucky (consulta [Migrar desde Lucky](/es/docs/guide/migration)).
 
-## Almacenamiento
+## Montajes de almacenamiento
 
-Añade montajes en «Almacenamiento», dentro del grupo «Almacenamiento en red», y administra los archivos en línea desde la página.
+Añade montajes en «Montajes de almacenamiento», dentro del grupo «Servicios de archivos», y administra los archivos en línea desde la página.
 
 | Campo | Descripción |
 | --- | --- |

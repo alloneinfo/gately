@@ -1242,6 +1242,9 @@
       },
       "storage.Mount": {
         "properties": {
+          "domain": {
+            "type": "string"
+          },
           "enable": {
             "type": "boolean"
           },
@@ -15936,7 +15939,7 @@
         ],
         "summary": "Eliminar un archivo de almacenamiento",
         "tags": [
-          "Administración de almacenamiento"
+          "Montajes de almacenamiento"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -15997,7 +16000,7 @@
         ],
         "summary": "Descargar un archivo del almacenamiento",
         "tags": [
-          "Administración de almacenamiento"
+          "Montajes de almacenamiento"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16058,7 +16061,7 @@
         ],
         "summary": "Listar el directorio de almacenamiento",
         "tags": [
-          "Administración de almacenamiento"
+          "Montajes de almacenamiento"
         ],
         "x-required-scope": "storage:read",
         "x-token-allowed": true
@@ -16128,7 +16131,7 @@
         ],
         "summary": "Crear un directorio de almacenamiento",
         "tags": [
-          "Administración de almacenamiento"
+          "Montajes de almacenamiento"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16198,7 +16201,7 @@
         ],
         "summary": "Renombrar o mover un archivo de almacenamiento",
         "tags": [
-          "Administración de almacenamiento"
+          "Montajes de almacenamiento"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16259,7 +16262,7 @@
         ],
         "summary": "Subir un archivo al almacenamiento",
         "tags": [
-          "Administración de almacenamiento"
+          "Montajes de almacenamiento"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16310,7 +16313,7 @@
         ],
         "summary": "Vaciar los registros de ejecución del módulo",
         "tags": [
-          "Administración de almacenamiento"
+          "Montajes de almacenamiento"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16385,7 +16388,7 @@
         ],
         "summary": "Ver los registros de ejecución del módulo",
         "tags": [
-          "Administración de almacenamiento"
+          "Montajes de almacenamiento"
         ],
         "x-required-scope": "storage:read",
         "x-token-allowed": true
@@ -16446,7 +16449,7 @@
         ],
         "summary": "Listar Entrada",
         "tags": [
-          "Administración de almacenamiento"
+          "Montajes de almacenamiento"
         ],
         "x-required-scope": "storage:read",
         "x-token-allowed": true
@@ -16511,7 +16514,7 @@
         ],
         "summary": "Añadir Entrada",
         "tags": [
-          "Administración de almacenamiento"
+          "Montajes de almacenamiento"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16571,7 +16574,7 @@
         ],
         "summary": "Reordenar Entrada",
         "tags": [
-          "Administración de almacenamiento"
+          "Montajes de almacenamiento"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16632,7 +16635,7 @@
         ],
         "summary": "Eliminar Entrada",
         "tags": [
-          "Administración de almacenamiento"
+          "Montajes de almacenamiento"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16707,7 +16710,7 @@
         ],
         "summary": "Modificar Entrada",
         "tags": [
-          "Administración de almacenamiento"
+          "Montajes de almacenamiento"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16777,7 +16780,7 @@
         ],
         "summary": "Activar o desactivar Entrada",
         "tags": [
-          "Administración de almacenamiento"
+          "Montajes de almacenamiento"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -19612,7 +19615,7 @@
         ],
         "summary": "Vaciar los registros de ejecución del módulo",
         "tags": [
-          "WebDAV"
+          "Servicio WebDAV"
         ],
         "x-required-scope": "webdav:write",
         "x-token-allowed": true
@@ -19687,7 +19690,7 @@
         ],
         "summary": "Ver los registros de ejecución del módulo",
         "tags": [
-          "WebDAV"
+          "Servicio WebDAV"
         ],
         "x-required-scope": "webdav:read",
         "x-token-allowed": true
@@ -19738,7 +19741,7 @@
         ],
         "summary": "Leer los ajustes de WebDAV",
         "tags": [
-          "WebDAV"
+          "Servicio WebDAV"
         ],
         "x-required-scope": "webdav:read",
         "x-token-allowed": true
@@ -19796,7 +19799,7 @@
         ],
         "summary": "Guardar los ajustes de WebDAV",
         "tags": [
-          "WebDAV"
+          "Servicio WebDAV"
         ],
         "x-required-scope": "webdav:write",
         "x-token-allowed": true
@@ -25437,13 +25440,13 @@
       "name": "Administración de Docker"
     },
     {
-      "name": "WebDAV"
+      "name": "Servicio WebDAV"
     },
     {
       "name": "Servicio FTP"
     },
     {
-      "name": "Administración de almacenamiento"
+      "name": "Montajes de almacenamiento"
     },
     {
       "name": "Centro de notificaciones"

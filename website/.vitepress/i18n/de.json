@@ -179,7 +179,7 @@
       },
       {
         "title": "Dateidienste",
-        "text": "WebDAV- und FTP-Dienste mit Speicherverwaltung, lokalen und entfernten WebDAV-Einbindungen sowie Dateiverwaltung im Browser."
+        "text": "WebDAV- und FTP-Dienste mit Speicher-Einbindungen für lokale Verzeichnisse, entferntes WebDAV und SMB-Freigaben sowie Dateiverwaltung im Browser."
       },
       {
         "title": "Geplante Aufgaben & Wake-on-LAN",

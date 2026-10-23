@@ -45,9 +45,9 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `webterminal` | Terminal web | `webterminal:read`、`webterminal:write` |
 | `cron` | Tarefa agendada | `cron:read`、`cron:write` |
 | `docker` | Gerenciamento do Docker | `docker:read`、`docker:write` |
-| `webdav` | WebDAV | `webdav:read`、`webdav:write` |
+| `webdav` | Serviço WebDAV | `webdav:read`、`webdav:write` |
 | `ftp` | Serviço FTP | `ftp:read`、`ftp:write` |
-| `storage` | Gerenciamento de armazenamento | `storage:read`、`storage:write` |
+| `storage` | Montagens de armazenamento | `storage:read`、`storage:write` |
 | `notify` | Central de notificações | `notify:read`、`notify:write` |
 | `nettools` | Diagnóstico de rede | `nettools:read`、`nettools:write` |
 | `backup` | Backup de configuração | `backup:read`、`backup:write` |
@@ -403,7 +403,7 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | DELETE | `/api/docker/containers/{id}/files` | `docker:write` | Excluir arquivo dentro do contêiner |
 | GET | `/api/docker/containers/{id}/exec` | `docker:write` | Abrir terminal dentro do contêiner (WebSocket) |
 
-## WebDAV
+## Serviço WebDAV
 
 | Método | Caminho | Permissão necessária | Descrição |
 | --- | --- | --- | --- |
@@ -421,7 +421,7 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | GET | `/api/ftp/settings` | `ftp:read` | Ler configurações do FTP |
 | PUT | `/api/ftp/settings` | `ftp:write` | Salvar configurações do FTP |
 
-## Gerenciamento de armazenamento
+## Montagens de armazenamento
 
 | Método | Caminho | Permissão necessária | Descrição |
 | --- | --- | --- | --- |
@@ -1096,6 +1096,7 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 
 | Campo | Tipo |
 | --- | --- |
+| `domain` | string |
 | `enable` | boolean |
 | `key` | string |
 | `name` | string |

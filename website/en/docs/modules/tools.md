@@ -2,7 +2,7 @@
 
 ## WebDAV
 
-Configure it under "WebDAV" in the sidebar "Network Storage" group.
+Configure it under "WebDAV Service" in the sidebar "File Services" group.
 
 | Field | Default | Description |
 | --- | --- | --- |
@@ -21,7 +21,7 @@ When migrating from Lucky, a user's mount list is converted into multiple direct
 
 ## FTP
 
-Configure it under "FTP Service" in the "Network Storage" group. FTP and FTPS are supported.
+Configure it under "FTP Service" in the "File Services" group. FTP and FTPS are supported.
 
 | Field | Default | Description |
 | --- | --- | --- |
@@ -38,9 +38,9 @@ Configure it under "FTP Service" in the "Network Storage" group. FTP and FTPS ar
 
 Service parameters and users can be imported from Lucky's FTP configuration (see [Migrating from Lucky](/en/docs/guide/migration)).
 
-## Storage
+## Storage Mounts
 
-Add mounts under "Storage" in the "Network Storage" group, and manage files online on the page.
+Add mounts under "Storage Mounts" in the "File Services" group, and manage files online on the page.
 
 | Field | Description |
 | --- | --- |

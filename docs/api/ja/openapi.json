@@ -1242,6 +1242,9 @@
       },
       "storage.Mount": {
         "properties": {
+          "domain": {
+            "type": "string"
+          },
           "enable": {
             "type": "boolean"
           },
@@ -15936,7 +15939,7 @@
         ],
         "summary": "ストレージのファイルを削除",
         "tags": [
-          "ストレージ管理"
+          "ストレージマウント"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -15997,7 +16000,7 @@
         ],
         "summary": "ストレージのファイルをダウンロード",
         "tags": [
-          "ストレージ管理"
+          "ストレージマウント"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16058,7 +16061,7 @@
         ],
         "summary": "ストレージのディレクトリを一覧表示",
         "tags": [
-          "ストレージ管理"
+          "ストレージマウント"
         ],
         "x-required-scope": "storage:read",
         "x-token-allowed": true
@@ -16128,7 +16131,7 @@
         ],
         "summary": "ストレージディレクトリを作成",
         "tags": [
-          "ストレージ管理"
+          "ストレージマウント"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16198,7 +16201,7 @@
         ],
         "summary": "ストレージのファイルの名前変更または移動",
         "tags": [
-          "ストレージ管理"
+          "ストレージマウント"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16259,7 +16262,7 @@
         ],
         "summary": "ストレージにファイルをアップロード",
         "tags": [
-          "ストレージ管理"
+          "ストレージマウント"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16310,7 +16313,7 @@
         ],
         "summary": "モジュールの実行ログを消去",
         "tags": [
-          "ストレージ管理"
+          "ストレージマウント"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16385,7 +16388,7 @@
         ],
         "summary": "モジュールの実行ログを表示",
         "tags": [
-          "ストレージ管理"
+          "ストレージマウント"
         ],
         "x-required-scope": "storage:read",
         "x-token-allowed": true
@@ -16446,7 +16449,7 @@
         ],
         "summary": "エントリ の一覧を取得",
         "tags": [
-          "ストレージ管理"
+          "ストレージマウント"
         ],
         "x-required-scope": "storage:read",
         "x-token-allowed": true
@@ -16511,7 +16514,7 @@
         ],
         "summary": "エントリ を追加",
         "tags": [
-          "ストレージ管理"
+          "ストレージマウント"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16571,7 +16574,7 @@
         ],
         "summary": "エントリ の並び順を変更",
         "tags": [
-          "ストレージ管理"
+          "ストレージマウント"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16632,7 +16635,7 @@
         ],
         "summary": "エントリ を削除",
         "tags": [
-          "ストレージ管理"
+          "ストレージマウント"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16707,7 +16710,7 @@
         ],
         "summary": "エントリ を更新",
         "tags": [
-          "ストレージ管理"
+          "ストレージマウント"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16777,7 +16780,7 @@
         ],
         "summary": "エントリ の有効/無効を切り替え",
         "tags": [
-          "ストレージ管理"
+          "ストレージマウント"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -19612,7 +19615,7 @@
         ],
         "summary": "モジュールの実行ログを消去",
         "tags": [
-          "WebDAV"
+          "WebDAV サービス"
         ],
         "x-required-scope": "webdav:write",
         "x-token-allowed": true
@@ -19687,7 +19690,7 @@
         ],
         "summary": "モジュールの実行ログを表示",
         "tags": [
-          "WebDAV"
+          "WebDAV サービス"
         ],
         "x-required-scope": "webdav:read",
         "x-token-allowed": true
@@ -19738,7 +19741,7 @@
         ],
         "summary": "WebDAV 設定を読み取り",
         "tags": [
-          "WebDAV"
+          "WebDAV サービス"
         ],
         "x-required-scope": "webdav:read",
         "x-token-allowed": true
@@ -19796,7 +19799,7 @@
         ],
         "summary": "WebDAV 設定を保存",
         "tags": [
-          "WebDAV"
+          "WebDAV サービス"
         ],
         "x-required-scope": "webdav:write",
         "x-token-allowed": true
@@ -25437,13 +25440,13 @@
       "name": "Docker 管理"
     },
     {
-      "name": "WebDAV"
+      "name": "WebDAV サービス"
     },
     {
       "name": "FTP サービス"
     },
     {
-      "name": "ストレージ管理"
+      "name": "ストレージマウント"
     },
     {
       "name": "通知センター"

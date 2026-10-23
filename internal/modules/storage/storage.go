@@ -1,4 +1,4 @@
-// Package storage 实现存储管理与文件管理：登记本地目录、远程 WebDAV 或 SMB 共享作为挂载点，
+// Package storage 实现存储挂载与文件管理：登记本地目录、远程 WebDAV 或 SMB 共享作为挂载点，
 // 并提供浏览器内的文件浏览、上传、下载、新建目录、重命名与删除。
 package storage
 
@@ -137,7 +137,7 @@ func New() *Module { return &Module{backends: map[string]backend{}} }
 func (m *Module) ID() string { return ID }
 
 // Title 实现 module.Module。
-func (m *Module) Title() string { return "存储管理" }
+func (m *Module) Title() string { return "存储挂载" }
 
 // Init 实现 module.Module。
 func (m *Module) Init(env module.Env) error {

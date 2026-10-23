@@ -179,7 +179,7 @@
       },
       {
         "title": "Services de fichiers",
-        "text": "Services WebDAV et FTP et gestion du stockage, avec montages WebDAV locaux et distants et gestion de fichiers en ligne."
+        "text": "Services WebDAV et FTP et montages de stockage pour dossiers locaux, WebDAV distant et partages SMB, avec gestion de fichiers en ligne."
       },
       {
         "title": "Tâches planifiées et Wake-on-LAN",

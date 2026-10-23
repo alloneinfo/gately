@@ -1,5 +1,5 @@
 {
-  "title": "儲存管理",
+  "title": "儲存掛載",
   "desc": "登記本機目錄、遠端 WebDAV 或 SMB 共用為掛載點，在瀏覽器中管理檔案",
   "addMount": "新增掛載點",
   "editMount": "編輯掛載點",

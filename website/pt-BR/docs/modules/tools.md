@@ -2,7 +2,7 @@
 
 ## WebDAV
 
-Configure em "WebDAV", no grupo "Armazenamento em rede" da barra lateral.
+Configure em "Serviço WebDAV", no grupo "Serviços de arquivos" da barra lateral.
 
 | Campo | Padrão | Descrição |
 | --- | --- | --- |
@@ -21,7 +21,7 @@ Na migração do Lucky, a lista de montagens de um usuário é convertida em vá
 
 ## FTP
 
-Configure em "Serviço FTP", no grupo "Armazenamento em rede". FTP e FTPS são compatíveis.
+Configure em "Serviço FTP", no grupo "Serviços de arquivos". FTP e FTPS são compatíveis.
 
 | Campo | Padrão | Descrição |
 | --- | --- | --- |
@@ -38,9 +38,9 @@ Configure em "Serviço FTP", no grupo "Armazenamento em rede". FTP e FTPS são c
 
 Os parâmetros do serviço e os usuários podem ser importados da configuração de FTP do Lucky (veja [Migrar do Lucky](/pt-BR/docs/guide/migration)).
 
-## Armazenamento
+## Montagens de armazenamento
 
-Adicione montagens em "Armazenamento", no grupo "Armazenamento em rede", e gerencie os arquivos online na própria página.
+Adicione montagens em "Montagens de armazenamento", no grupo "Serviços de arquivos", e gerencie os arquivos online na própria página.
 
 | Campo | Descrição |
 | --- | --- |

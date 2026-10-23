@@ -45,9 +45,9 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `webterminal` | Web 终端 | `webterminal:read`、`webterminal:write` |
 | `cron` | 计划任务 | `cron:read`、`cron:write` |
 | `docker` | Docker 管理 | `docker:read`、`docker:write` |
-| `webdav` | WebDAV | `webdav:read`、`webdav:write` |
+| `webdav` | WebDAV 服务 | `webdav:read`、`webdav:write` |
 | `ftp` | FTP 服务 | `ftp:read`、`ftp:write` |
-| `storage` | 存储管理 | `storage:read`、`storage:write` |
+| `storage` | 存储挂载 | `storage:read`、`storage:write` |
 | `notify` | 通知中心 | `notify:read`、`notify:write` |
 | `nettools` | 网络诊断 | `nettools:read`、`nettools:write` |
 | `backup` | 配置备份 | `backup:read`、`backup:write` |
@@ -403,7 +403,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/docker/containers/{id}/files` | `docker:write` | 删除容器内文件 |
 | GET | `/api/docker/containers/{id}/exec` | `docker:write` | 在容器内打开终端（WebSocket） |
 
-## WebDAV
+## WebDAV 服务
 
 | 方法 | 路径 | 所需权限 | 说明 |
 | --- | --- | --- | --- |
@@ -421,7 +421,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | GET | `/api/ftp/settings` | `ftp:read` | 读取 FTP 设置 |
 | PUT | `/api/ftp/settings` | `ftp:write` | 保存 FTP 设置 |
 
-## 存储管理
+## 存储挂载
 
 | 方法 | 路径 | 所需权限 | 说明 |
 | --- | --- | --- | --- |
@@ -1096,6 +1096,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 
 | 字段 | 类型 |
 | --- | --- |
+| `domain` | string |
 | `enable` | boolean |
 | `key` | string |
 | `name` | string |

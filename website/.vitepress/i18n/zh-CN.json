@@ -179,7 +179,7 @@
       },
       {
         "title": "文件服务",
-        "text": "WebDAV、FTP 服务与存储管理，支持本地与远程 WebDAV 挂载及在线文件管理。"
+        "text": "WebDAV、FTP 服务与存储挂载，支持本地目录、远程 WebDAV 与 SMB 共享挂载及在线文件管理。"
       },
       {
         "title": "计划任务与唤醒",

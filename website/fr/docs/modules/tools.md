@@ -2,7 +2,7 @@
 
 ## WebDAV
 
-Configurez-le dans « WebDAV » du groupe « Stockage réseau » de la barre latérale.
+Configurez-le dans « Service WebDAV » du groupe « Services de fichiers » de la barre latérale.
 
 | Champ | Par défaut | Description |
 | --- | --- | --- |
@@ -21,7 +21,7 @@ Lors d'une migration depuis Lucky, la liste de montages d'un utilisateur est con
 
 ## FTP
 
-Configurez-le dans « Service FTP » du groupe « Stockage réseau ». FTP et FTPS sont pris en charge.
+Configurez-le dans « Service FTP » du groupe « Services de fichiers ». FTP et FTPS sont pris en charge.
 
 | Champ | Par défaut | Description |
 | --- | --- | --- |
@@ -38,9 +38,9 @@ Configurez-le dans « Service FTP » du groupe « Stockage réseau ». FTP et FT
 
 Les paramètres du service et les utilisateurs peuvent être importés depuis la configuration FTP de Lucky (voir [Migrer depuis Lucky](/fr/docs/guide/migration)).
 
-## Stockage
+## Montages de stockage
 
-Ajoutez des montages dans « Stockage » du groupe « Stockage réseau », et gérez les fichiers en ligne depuis la page.
+Ajoutez des montages dans « Montages de stockage » du groupe « Services de fichiers », et gérez les fichiers en ligne depuis la page.
 
 | Champ | Description |
 | --- | --- |

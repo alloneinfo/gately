@@ -42,16 +42,16 @@ Mit „Einstellungen speichern“ übernehmen Sie den Zeitplan, mit „Jetzt sic
 
 ### Sicherungsziele
 
-Neben dem lokalen Verzeichnis können Sie mehrere entfernte Ziele hinzufügen. Jedes schreibt in eine Einbindung unter „Speicher“ (ein lokales Verzeichnis oder ein entferntes WebDAV):
+Neben dem lokalen Verzeichnis können Sie mehrere entfernte Ziele hinzufügen. Jedes schreibt in eine Einbindung unter „Speicher-Einbindungen“ (ein lokales Verzeichnis, ein entferntes WebDAV oder eine SMB-Freigabe):
 
 | Feld | Beschreibung |
 | --- | --- |
 | Name | Pflicht |
-| Speicher-Einbindung | Wählen Sie eine vorhandene Einbindung aus dem Speicher. Schreibgeschützte oder deaktivierte Einbindungen lassen sich nicht wählen |
+| Speicher-Einbindung | Wählen Sie eine vorhandene Einbindung aus „Speicher-Einbindungen“. Schreibgeschützte oder deaktivierte Einbindungen lassen sich nicht wählen |
 | Verzeichnis | Unterverzeichnis innerhalb der Einbindung; leer lassen für das Stammverzeichnis |
 | Aktiviert | Schalter |
 
-Haben Sie noch keine Einbindung, legen Sie zuerst unter „Speicher“ eine an. Das Löschen eines Ziels löscht bereits geschriebene Sicherungen nicht.
+Haben Sie noch keine Einbindung, legen Sie zuerst unter „Speicher-Einbindungen“ eine an. Das Löschen eines Ziels löscht bereits geschriebene Sicherungen nicht.
 
 ### Ablauf
 

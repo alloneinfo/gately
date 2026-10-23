@@ -42,16 +42,16 @@ Clique em "Salvar configurações" para aplicar o agendamento e em "Fazer backup
 
 ### Destinos de backup
 
-Além do diretório local, você pode adicionar vários destinos remotos. Cada um grava em uma montagem de "Armazenamento" (um diretório local ou um WebDAV remoto):
+Além do diretório local, você pode adicionar vários destinos remotos. Cada um grava em uma montagem de "Montagens de armazenamento" (um diretório local, um WebDAV remoto ou um compartilhamento SMB):
 
 | Campo | Descrição |
 | --- | --- |
 | Nome | Obrigatório |
-| Montagem de armazenamento | Escolha uma montagem existente em Armazenamento. Montagens somente leitura ou desativadas não podem ser selecionadas |
+| Montagem de armazenamento | Escolha uma montagem existente em "Montagens de armazenamento". Montagens somente leitura ou desativadas não podem ser selecionadas |
 | Diretório | Subdiretório dentro da montagem; deixe em branco para a raiz |
 | Ativado | Chave |
 
-Se você ainda não tem montagens, adicione uma primeiro em "Armazenamento". Excluir um destino não exclui os backups já gravados.
+Se você ainda não tem montagens, adicione uma primeiro em "Montagens de armazenamento". Excluir um destino não exclui os backups já gravados.
 
 ### Fluxo de execução
 

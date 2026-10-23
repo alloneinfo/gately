@@ -4,7 +4,7 @@
     "network": "網路",
     "tunnel": "組網與穿透",
     "web": "Web",
-    "storage": "網路儲存",
+    "storage": "檔案服務",
     "tools": "工具",
     "system": "系統"
   },
@@ -53,11 +53,11 @@
       "desc": "ACME 自動申請與續簽"
     },
     "storage": {
-      "title": "儲存管理",
-      "desc": "掛載本機目錄或遠端 WebDAV，線上管理檔案"
+      "title": "儲存掛載",
+      "desc": "掛載本機目錄、遠端 WebDAV 或 SMB 共用，線上管理檔案"
     },
     "webdav": {
-      "title": "WebDAV",
+      "title": "WebDAV 服務",
       "desc": "WebDAV 檔案分享服務"
     },
     "ftp": {

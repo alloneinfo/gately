@@ -121,7 +121,7 @@ func New(certs CertSource) *Module { return &Module{certs: certs} }
 func (m *Module) ID() string { return ID }
 
 // Title 实现 module.Module。
-func (m *Module) Title() string { return "WebDAV" }
+func (m *Module) Title() string { return "WebDAV 服务" }
 
 // Init 实现 module.Module。
 func (m *Module) Init(env module.Env) error {

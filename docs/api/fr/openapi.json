@@ -1242,6 +1242,9 @@
       },
       "storage.Mount": {
         "properties": {
+          "domain": {
+            "type": "string"
+          },
           "enable": {
             "type": "boolean"
           },
@@ -15936,7 +15939,7 @@
         ],
         "summary": "Supprimer un fichier du stockage",
         "tags": [
-          "Gestion du stockage"
+          "Montages de stockage"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -15997,7 +16000,7 @@
         ],
         "summary": "Télécharger un fichier du stockage",
         "tags": [
-          "Gestion du stockage"
+          "Montages de stockage"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16058,7 +16061,7 @@
         ],
         "summary": "Lister le répertoire de stockage",
         "tags": [
-          "Gestion du stockage"
+          "Montages de stockage"
         ],
         "x-required-scope": "storage:read",
         "x-token-allowed": true
@@ -16128,7 +16131,7 @@
         ],
         "summary": "Créer un répertoire de stockage",
         "tags": [
-          "Gestion du stockage"
+          "Montages de stockage"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16198,7 +16201,7 @@
         ],
         "summary": "Renommer ou déplacer un fichier de stockage",
         "tags": [
-          "Gestion du stockage"
+          "Montages de stockage"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16259,7 +16262,7 @@
         ],
         "summary": "Téléverser un fichier vers le stockage",
         "tags": [
-          "Gestion du stockage"
+          "Montages de stockage"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16310,7 +16313,7 @@
         ],
         "summary": "Vider les journaux d'exécution d'un module",
         "tags": [
-          "Gestion du stockage"
+          "Montages de stockage"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16385,7 +16388,7 @@
         ],
         "summary": "Consulter les journaux d'exécution d'un module",
         "tags": [
-          "Gestion du stockage"
+          "Montages de stockage"
         ],
         "x-required-scope": "storage:read",
         "x-token-allowed": true
@@ -16446,7 +16449,7 @@
         ],
         "summary": "Lister Entrée",
         "tags": [
-          "Gestion du stockage"
+          "Montages de stockage"
         ],
         "x-required-scope": "storage:read",
         "x-token-allowed": true
@@ -16511,7 +16514,7 @@
         ],
         "summary": "Ajouter Entrée",
         "tags": [
-          "Gestion du stockage"
+          "Montages de stockage"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16571,7 +16574,7 @@
         ],
         "summary": "Réordonner Entrée",
         "tags": [
-          "Gestion du stockage"
+          "Montages de stockage"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16632,7 +16635,7 @@
         ],
         "summary": "Supprimer Entrée",
         "tags": [
-          "Gestion du stockage"
+          "Montages de stockage"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16707,7 +16710,7 @@
         ],
         "summary": "Modifier Entrée",
         "tags": [
-          "Gestion du stockage"
+          "Montages de stockage"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16777,7 +16780,7 @@
         ],
         "summary": "Activer ou désactiver Entrée",
         "tags": [
-          "Gestion du stockage"
+          "Montages de stockage"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -19612,7 +19615,7 @@
         ],
         "summary": "Vider les journaux d'exécution d'un module",
         "tags": [
-          "WebDAV"
+          "Service WebDAV"
         ],
         "x-required-scope": "webdav:write",
         "x-token-allowed": true
@@ -19687,7 +19690,7 @@
         ],
         "summary": "Consulter les journaux d'exécution d'un module",
         "tags": [
-          "WebDAV"
+          "Service WebDAV"
         ],
         "x-required-scope": "webdav:read",
         "x-token-allowed": true
@@ -19738,7 +19741,7 @@
         ],
         "summary": "Lire les paramètres WebDAV",
         "tags": [
-          "WebDAV"
+          "Service WebDAV"
         ],
         "x-required-scope": "webdav:read",
         "x-token-allowed": true
@@ -19796,7 +19799,7 @@
         ],
         "summary": "Enregistrer les paramètres WebDAV",
         "tags": [
-          "WebDAV"
+          "Service WebDAV"
         ],
         "x-required-scope": "webdav:write",
         "x-token-allowed": true
@@ -25437,13 +25440,13 @@
       "name": "Gestion Docker"
     },
     {
-      "name": "WebDAV"
+      "name": "Service WebDAV"
     },
     {
       "name": "Service FTP"
     },
     {
-      "name": "Gestion du stockage"
+      "name": "Montages de stockage"
     },
     {
       "name": "Centre de notifications"

@@ -179,7 +179,7 @@
       },
       {
         "title": "File Services",
-        "text": "WebDAV and FTP services plus storage management, with local and remote WebDAV mounts and online file management."
+        "text": "WebDAV and FTP services plus storage mounts for local directories, remote WebDAV and SMB shares, with online file management."
       },
       {
         "title": "Scheduled Tasks & Wake-on-LAN",

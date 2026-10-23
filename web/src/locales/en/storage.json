@@ -1,5 +1,5 @@
 {
-  "title": "Storage",
+  "title": "Storage Mounts",
   "desc": "Register local directories, remote WebDAV or SMB shares as mounts and manage files in the browser",
   "addMount": "Add mount",
   "editMount": "Edit mount",

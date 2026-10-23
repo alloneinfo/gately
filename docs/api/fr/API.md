@@ -45,9 +45,9 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `webterminal` | Terminal Web | `webterminal:read`、`webterminal:write` |
 | `cron` | Tâche planifiée | `cron:read`、`cron:write` |
 | `docker` | Gestion Docker | `docker:read`、`docker:write` |
-| `webdav` | WebDAV | `webdav:read`、`webdav:write` |
+| `webdav` | Service WebDAV | `webdav:read`、`webdav:write` |
 | `ftp` | Service FTP | `ftp:read`、`ftp:write` |
-| `storage` | Gestion du stockage | `storage:read`、`storage:write` |
+| `storage` | Montages de stockage | `storage:read`、`storage:write` |
 | `notify` | Centre de notifications | `notify:read`、`notify:write` |
 | `nettools` | Diagnostic réseau | `nettools:read`、`nettools:write` |
 | `backup` | Sauvegarde de configuration | `backup:read`、`backup:write` |
@@ -403,7 +403,7 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | DELETE | `/api/docker/containers/{id}/files` | `docker:write` | Supprimer un fichier dans le conteneur |
 | GET | `/api/docker/containers/{id}/exec` | `docker:write` | Ouvrir un terminal dans le conteneur (WebSocket) |
 
-## WebDAV
+## Service WebDAV
 
 | Méthode | Chemin | Permission requise | Description |
 | --- | --- | --- | --- |
@@ -421,7 +421,7 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | GET | `/api/ftp/settings` | `ftp:read` | Lire les paramètres FTP |
 | PUT | `/api/ftp/settings` | `ftp:write` | Enregistrer les paramètres FTP |
 
-## Gestion du stockage
+## Montages de stockage
 
 | Méthode | Chemin | Permission requise | Description |
 | --- | --- | --- | --- |
@@ -1096,6 +1096,7 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 
 | Champ | Type |
 | --- | --- |
+| `domain` | string |
 | `enable` | boolean |
 | `key` | string |
 | `name` | string |

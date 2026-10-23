@@ -54,7 +54,7 @@ O Gately é totalmente aberto, para que usuários e comunidade possam examinar d
 | Wake-on-LAN | Broadcast do magic packet, detecção de status online |
 | WebDAV | Vários usuários, diretórios independentes, somente leitura |
 | FTP | Vários usuários, diretórios independentes, somente leitura, com suporte a FTPS e intervalo de portas passivas |
-| Gerenciamento de armazenamento | Diretórios locais, montagens WebDAV remotas e compartilhamentos SMB, gerenciamento de arquivos online |
+| Montagens de armazenamento | Diretórios locais, montagens WebDAV remotas e compartilhamentos SMB, gerenciamento de arquivos online |
 | Tarefas agendadas | Expressões cron, comandos ou requisições HTTP, histórico de execuções |
 | Segurança e configurações | Login com passkey (WebAuthn), autenticação em dois fatores (TOTP), contas somente leitura, limitação de falhas de login, entrada de segurança, acesso somente pela rede interna, HTTPS na interface de administração, vários tokens de API (autorização de leitura e escrita por módulo), DNS personalizado (com suporte a DoH), fuso horário, backup e restauração da configuração, endereço real do cliente vindo de proxies reversos locais confiáveis, ativação e desativação dos módulos de recursos (módulos desativados não iniciam serviços nem oferecem API) |
 | Aplicativo nativo para fnOS | Pacotes `.fpk` offline (x86 / ARM); integrado ao gateway unificado do fnOS, abre pelo ícone na área de trabalho do fnOS e funciona pelo seu domínio remoto do fnOS; os administradores do fnOS podem entrar com a sessão do fnOS (desativado por padrão); roda como root para escutar nas portas 80/443 e gerenciar o Docker |

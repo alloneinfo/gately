@@ -45,9 +45,9 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `webterminal` | Веб-терминал | `webterminal:read`、`webterminal:write` |
 | `cron` | Запланированная задача | `cron:read`、`cron:write` |
 | `docker` | Управление Docker | `docker:read`、`docker:write` |
-| `webdav` | WebDAV | `webdav:read`、`webdav:write` |
+| `webdav` | WebDAV-сервер | `webdav:read`、`webdav:write` |
 | `ftp` | Служба FTP | `ftp:read`、`ftp:write` |
-| `storage` | Управление хранилищем | `storage:read`、`storage:write` |
+| `storage` | Монтирование хранилищ | `storage:read`、`storage:write` |
 | `notify` | Центр уведомлений | `notify:read`、`notify:write` |
 | `nettools` | Диагностика сети | `nettools:read`、`nettools:write` |
 | `backup` | Резервная копия конфигурации | `backup:read`、`backup:write` |
@@ -403,7 +403,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/docker/containers/{id}/files` | `docker:write` | Удалить файл внутри контейнера |
 | GET | `/api/docker/containers/{id}/exec` | `docker:write` | Открыть терминал внутри контейнера (WebSocket) |
 
-## WebDAV
+## WebDAV-сервер
 
 | Метод | Путь | Необходимое право | Описание |
 | --- | --- | --- | --- |
@@ -421,7 +421,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | GET | `/api/ftp/settings` | `ftp:read` | Чтение настроек FTP |
 | PUT | `/api/ftp/settings` | `ftp:write` | Сохранить настройки FTP |
 
-## Управление хранилищем
+## Монтирование хранилищ
 
 | Метод | Путь | Необходимое право | Описание |
 | --- | --- | --- | --- |
@@ -1096,6 +1096,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 
 | Поле | Тип |
 | --- | --- |
+| `domain` | string |
 | `enable` | boolean |
 | `key` | string |
 | `name` | string |

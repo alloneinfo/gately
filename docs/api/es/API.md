@@ -45,9 +45,9 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `webterminal` | Terminal web | `webterminal:read`、`webterminal:write` |
 | `cron` | Tarea programada | `cron:read`、`cron:write` |
 | `docker` | Administración de Docker | `docker:read`、`docker:write` |
-| `webdav` | WebDAV | `webdav:read`、`webdav:write` |
+| `webdav` | Servicio WebDAV | `webdav:read`、`webdav:write` |
 | `ftp` | Servicio FTP | `ftp:read`、`ftp:write` |
-| `storage` | Administración de almacenamiento | `storage:read`、`storage:write` |
+| `storage` | Montajes de almacenamiento | `storage:read`、`storage:write` |
 | `notify` | Centro de notificaciones | `notify:read`、`notify:write` |
 | `nettools` | Diagnóstico de red | `nettools:read`、`nettools:write` |
 | `backup` | Copia de seguridad de la configuración | `backup:read`、`backup:write` |
@@ -403,7 +403,7 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | DELETE | `/api/docker/containers/{id}/files` | `docker:write` | Eliminar un archivo dentro del contenedor |
 | GET | `/api/docker/containers/{id}/exec` | `docker:write` | Abrir un terminal dentro del contenedor (WebSocket) |
 
-## WebDAV
+## Servicio WebDAV
 
 | Método | Ruta | Permiso requerido | Descripción |
 | --- | --- | --- | --- |
@@ -421,7 +421,7 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | GET | `/api/ftp/settings` | `ftp:read` | Leer los ajustes de FTP |
 | PUT | `/api/ftp/settings` | `ftp:write` | Guardar los ajustes de FTP |
 
-## Administración de almacenamiento
+## Montajes de almacenamiento
 
 | Método | Ruta | Permiso requerido | Descripción |
 | --- | --- | --- | --- |
@@ -1096,6 +1096,7 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 
 | Campo | Tipo |
 | --- | --- |
+| `domain` | string |
 | `enable` | boolean |
 | `key` | string |
 | `name` | string |

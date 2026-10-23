@@ -2,7 +2,7 @@
 
 ## WebDAV
 
-Konfiguration unter „WebDAV“ in der Seitenleistengruppe „Netzwerkspeicher“.
+Konfiguration unter „WebDAV-Dienst“ in der Seitenleistengruppe „Dateidienste“.
 
 | Feld | Standard | Beschreibung |
 | --- | --- | --- |
@@ -21,7 +21,7 @@ Bei der Migration von Lucky wird die Einbindungsliste eines Benutzers in mehrere
 
 ## FTP
 
-Konfiguration unter „FTP-Dienst“ in der Gruppe „Netzwerkspeicher“. FTP und FTPS werden unterstützt.
+Konfiguration unter „FTP-Dienst“ in der Gruppe „Dateidienste“. FTP und FTPS werden unterstützt.
 
 | Feld | Standard | Beschreibung |
 | --- | --- | --- |
@@ -38,9 +38,9 @@ Konfiguration unter „FTP-Dienst“ in der Gruppe „Netzwerkspeicher“. FTP u
 
 Dienstparameter und Benutzer lassen sich aus der FTP-Konfiguration von Lucky importieren (siehe [Migration von Lucky](/de/docs/guide/migration)).
 
-## Speicher
+## Speicher-Einbindungen
 
-Fügen Sie Einbindungen unter „Speicher“ in der Gruppe „Netzwerkspeicher“ hinzu und verwalten Sie Dateien online auf der Seite.
+Fügen Sie Einbindungen unter „Speicher-Einbindungen“ in der Gruppe „Dateidienste“ hinzu und verwalten Sie Dateien online auf der Seite.
 
 | Feld | Beschreibung |
 | --- | --- |

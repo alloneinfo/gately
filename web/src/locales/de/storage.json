@@ -1,5 +1,5 @@
 {
-  "title": "Speicher",
+  "title": "Speicher-Einbindungen",
   "desc": "Lokale Verzeichnisse, entferntes WebDAV oder SMB-Freigaben als Einbindungen registrieren und Dateien im Browser verwalten",
   "addMount": "Einbindung hinzufügen",
   "editMount": "Einbindung bearbeiten",

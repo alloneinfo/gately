@@ -1242,6 +1242,9 @@
       },
       "storage.Mount": {
         "properties": {
+          "domain": {
+            "type": "string"
+          },
           "enable": {
             "type": "boolean"
           },
@@ -15936,7 +15939,7 @@
         ],
         "summary": "Speicherdatei löschen",
         "tags": [
-          "Speicherverwaltung"
+          "Speicher-Einbindungen"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -15997,7 +16000,7 @@
         ],
         "summary": "Speicherdatei herunterladen",
         "tags": [
-          "Speicherverwaltung"
+          "Speicher-Einbindungen"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16058,7 +16061,7 @@
         ],
         "summary": "Speicherverzeichnis auflisten",
         "tags": [
-          "Speicherverwaltung"
+          "Speicher-Einbindungen"
         ],
         "x-required-scope": "storage:read",
         "x-token-allowed": true
@@ -16128,7 +16131,7 @@
         ],
         "summary": "Speicherverzeichnis erstellen",
         "tags": [
-          "Speicherverwaltung"
+          "Speicher-Einbindungen"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16198,7 +16201,7 @@
         ],
         "summary": "Speicherdatei umbenennen oder verschieben",
         "tags": [
-          "Speicherverwaltung"
+          "Speicher-Einbindungen"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16259,7 +16262,7 @@
         ],
         "summary": "Datei in den Speicher hochladen",
         "tags": [
-          "Speicherverwaltung"
+          "Speicher-Einbindungen"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16310,7 +16313,7 @@
         ],
         "summary": "Modulprotokolle leeren",
         "tags": [
-          "Speicherverwaltung"
+          "Speicher-Einbindungen"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16385,7 +16388,7 @@
         ],
         "summary": "Laufzeitprotokolle eines Moduls anzeigen",
         "tags": [
-          "Speicherverwaltung"
+          "Speicher-Einbindungen"
         ],
         "x-required-scope": "storage:read",
         "x-token-allowed": true
@@ -16446,7 +16449,7 @@
         ],
         "summary": "Einträge auflisten",
         "tags": [
-          "Speicherverwaltung"
+          "Speicher-Einbindungen"
         ],
         "x-required-scope": "storage:read",
         "x-token-allowed": true
@@ -16511,7 +16514,7 @@
         ],
         "summary": "Einträge hinzufügen",
         "tags": [
-          "Speicherverwaltung"
+          "Speicher-Einbindungen"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16571,7 +16574,7 @@
         ],
         "summary": "Einträge neu anordnen",
         "tags": [
-          "Speicherverwaltung"
+          "Speicher-Einbindungen"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16632,7 +16635,7 @@
         ],
         "summary": "Einträge löschen",
         "tags": [
-          "Speicherverwaltung"
+          "Speicher-Einbindungen"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16707,7 +16710,7 @@
         ],
         "summary": "Einträge ändern",
         "tags": [
-          "Speicherverwaltung"
+          "Speicher-Einbindungen"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -16777,7 +16780,7 @@
         ],
         "summary": "Einträge aktivieren oder deaktivieren",
         "tags": [
-          "Speicherverwaltung"
+          "Speicher-Einbindungen"
         ],
         "x-required-scope": "storage:write",
         "x-token-allowed": true
@@ -19612,7 +19615,7 @@
         ],
         "summary": "Modulprotokolle leeren",
         "tags": [
-          "WebDAV"
+          "WebDAV-Dienst"
         ],
         "x-required-scope": "webdav:write",
         "x-token-allowed": true
@@ -19687,7 +19690,7 @@
         ],
         "summary": "Laufzeitprotokolle eines Moduls anzeigen",
         "tags": [
-          "WebDAV"
+          "WebDAV-Dienst"
         ],
         "x-required-scope": "webdav:read",
         "x-token-allowed": true
@@ -19738,7 +19741,7 @@
         ],
         "summary": "WebDAV-Einstellungen lesen",
         "tags": [
-          "WebDAV"
+          "WebDAV-Dienst"
         ],
         "x-required-scope": "webdav:read",
         "x-token-allowed": true
@@ -19796,7 +19799,7 @@
         ],
         "summary": "WebDAV-Einstellungen speichern",
         "tags": [
-          "WebDAV"
+          "WebDAV-Dienst"
         ],
         "x-required-scope": "webdav:write",
         "x-token-allowed": true
@@ -25437,13 +25440,13 @@
       "name": "Docker-Verwaltung"
     },
     {
-      "name": "WebDAV"
+      "name": "WebDAV-Dienst"
     },
     {
       "name": "FTP-Dienst"
     },
     {
-      "name": "Speicherverwaltung"
+      "name": "Speicher-Einbindungen"
     },
     {
       "name": "Benachrichtigungszentrale"
