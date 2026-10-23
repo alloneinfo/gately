@@ -181,14 +181,15 @@
           <div class="deploy-head">
             <el-switch v-model="d.enable" size="small" />
             <el-radio-group v-model="d.type" size="small">
+              <el-radio-button value="local">{{ t('ssl.deployLocal') }}</el-radio-button>
               <el-radio-button value="ssh">{{ t('ssl.deploySSH') }}</el-radio-button>
               <el-radio-button value="docker">{{ t('ssl.deployDocker') }}</el-radio-button>
             </el-radio-group>
             <el-input v-model="d.remark" size="small" :placeholder="t('common.remark')" class="deploy-remark" />
             <el-button text type="danger" size="small" :icon="Trash2" :aria-label="t('ssl.deleteDeploy')" @click="editing.deploys.splice(i, 1)" />
           </div>
-          <template v-if="d.type === 'ssh'">
-            <el-form-item :label="t('ssl.deployConnection')">
+          <template v-if="d.type === 'ssh' || d.type === 'local'">
+            <el-form-item v-if="d.type === 'ssh'" :label="t('ssl.deployConnection')">
               <el-select v-model="d.connection" filterable :placeholder="t('ssl.deployConnectionPlaceholder')" :no-data-text="t('ssl.deployNoConnections')" class="full">
                 <el-option v-for="o in targets.ssh" :key="o.key" :label="o.name" :value="o.key">
                   <span>{{ o.name }}</span>
@@ -198,10 +199,19 @@
               </el-select>
               <div v-if="d.connection && targets.ssh.find((o) => o.key === d.connection && !o.trusted)" class="form-help warn">{{ t('ssl.deployUntrustedHelp') }}</div>
             </el-form-item>
-            <el-form-item :label="t('ssl.deployDir')"><el-input v-model="d.dir" class="mono" placeholder="/etc/nginx/certs" /></el-form-item>
-            <el-form-item :label="t('ssl.deployCommand')">
-              <el-input v-model="d.command" type="textarea" :rows="2" class="mono" placeholder="systemctl reload nginx" />
-              <div class="form-help">{{ t('ssl.deployCommandHelp') }}</div>
+            <el-form-item :label="d.type === 'ssh' ? t('ssl.deployDir') : t('ssl.deployLocalDir')">
+              <el-input v-model="d.dir" class="mono" placeholder="/etc/nginx/certs" />
+            </el-form-item>
+            <el-form-item :label="t('ssl.deployFileNames')">
+              <div class="deploy-names">
+                <el-input v-model="d.certName" class="mono" :placeholder="defaultFileName('.crt')" />
+                <el-input v-model="d.keyName" class="mono" :placeholder="defaultFileName('.key')" />
+              </div>
+              <div class="form-help">{{ t('ssl.deployFileNamesHelp') }}</div>
+            </el-form-item>
+            <el-form-item :label="d.type === 'ssh' ? t('ssl.deployCommand') : t('ssl.deployLocalCommand')">
+              <el-input v-model="d.command" type="textarea" :rows="2" class="mono" :placeholder="d.type === 'ssh' ? 'systemctl reload nginx' : 'docker exec nginx nginx -s reload'" />
+              <div class="form-help">{{ d.type === 'ssh' ? t('ssl.deployCommandHelp') : t('ssl.deployLocalCommandHelp') }}</div>
             </el-form-item>
           </template>
           <el-form-item v-else :label="t('ssl.deployContainers')">
@@ -293,13 +303,16 @@ interface Cert {
   updatedAt?: string
 }
 
-// Deploy 是证书变化后自动执行的部署目标：经 SSH 上传到远程主机，或重启本机容器
+// Deploy 是证书变化后自动执行的部署目标：复制到本机目录、经 SSH 上传到远程主机，或重启本机容器
 interface Deploy {
   enable: boolean
-  type: 'ssh' | 'docker'
+  type: 'local' | 'ssh' | 'docker'
   remark: string
   connection: string
   dir: string
+  // certName / keyName 为自定义的证书与私钥文件名，需同时填写；留空沿用证书映射的文件名
+  certName: string
+  keyName: string
   command: string
   containers: string[]
   deployedHash?: string
@@ -392,7 +405,13 @@ function emptyCert(): Cert {
 }
 
 function addDeploy() {
-  editing.value.deploys.push({ enable: true, type: 'ssh', remark: '', connection: '', dir: '', command: '', containers: [] })
+  editing.value.deploys.push({ enable: true, type: 'local', remark: '', connection: '', dir: '', certName: '', keyName: '', command: '', containers: [] })
+}
+
+// defaultFileName 返回未自定义文件名时使用的默认文件名（备注中的 * 替换为 _，与后端一致）
+function defaultFileName(ext: string) {
+  const base = editing.value.remark.trim().replaceAll('*', '_') || t('common.remark')
+  return base + ext
 }
 
 // enabledDeploys 返回启用的部署目标及其下标（运行状态按下标对应）
@@ -407,6 +426,9 @@ function deployTitle(d: Deploy) {
   }
   if (d.type === 'docker') {
     return t('ssl.deployDockerTitle', { names: (d.containers ?? []).join(', ') })
+  }
+  if (d.type === 'local') {
+    return t('ssl.deployLocalTitle', { dir: d.dir })
   }
   const name = targets.value.ssh.find((o) => o.key === d.connection)?.name ?? d.connection
   return `${name}:${d.dir}`
@@ -502,7 +524,7 @@ function openEditor(row?: CertView) {
     editing.value = JSON.parse(JSON.stringify(cert))
     // 旧配置没有验证方式字段，视为 DNS 验证
     editing.value.acme.challenge ||= 'dns'
-    editing.value.deploys = (editing.value.deploys ?? []).map((d) => ({ ...d, containers: d.containers ?? [] }))
+    editing.value.deploys = (editing.value.deploys ?? []).map((d) => ({ ...d, certName: d.certName ?? '', keyName: d.keyName ?? '', containers: d.containers ?? [] }))
   } else {
     editing.value = emptyCert()
   }
@@ -659,6 +681,11 @@ onBeforeUnmount(() => window.clearInterval(timer))
   gap: 8px 10px;
   align-items: center;
   margin-bottom: 12px;
+}
+.deploy-names {
+  display: flex;
+  gap: 8px;
+  width: 100%;
 }
 .deploy-remark {
   width: 200px;

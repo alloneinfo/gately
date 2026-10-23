@@ -95,7 +95,7 @@ type Cert struct {
 	IssuerPEM string `json:"issuerPem"`
 
 	Mapping Mapping `json:"mapping"`
-	// Deploys 为证书内容变化后自动执行的部署目标（SSH 主机、Docker 容器）
+	// Deploys 为证书内容变化后自动执行的部署目标（SSH 主机、本机目录、Docker 容器）
 	Deploys []Deploy `json:"deploys"`
 	// UpdatedAt 为证书内容最近一次变化时间
 	UpdatedAt time.Time `json:"updatedAt,omitzero"`

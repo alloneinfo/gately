@@ -1,6 +1,7 @@
 package ssl
 
 import (
+	"bytes"
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
@@ -9,6 +10,8 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -25,7 +28,12 @@ const (
 	DeploySSH = "ssh"
 	// DeployDocker 重启本机 Docker 容器，让挂载了映射目录的服务加载新证书
 	DeployDocker = "docker"
+	// DeployLocal 把证书复制到本机目录，再在本机执行命令
+	DeployLocal = "local"
 )
+
+// reFileName 限制自定义文件名只含常见字符，不能带路径分隔符
+var reFileName = regexp.MustCompile(`^[\p{L}\p{N}._@+-]+$`)
 
 // 部署参数，可在测试中调整
 var (
@@ -40,9 +48,13 @@ type Deploy struct {
 	Remark string `json:"remark"`
 	// Connection 为 Web 终端中 SSH 连接的 key，复用其地址、认证、代理与已记录的主机密钥
 	Connection string `json:"connection"`
-	// Dir 为远程主机上的证书目录（绝对路径），文件名与证书映射相同：<备注>.crt/.key/.pem/_issuerCertificate.crt
+	// Dir 为证书目录（绝对路径）：SSH 部署为远程主机上的目录，本机部署为本机目录。
+	// 默认文件名与证书映射相同：<备注>.crt/.key/.pem/_issuerCertificate.crt
 	Dir string `json:"dir"`
-	// Command 为上传后在远程主机执行的命令，可使用 $certName、$certDir、$certFile、$keyFile
+	// CertName / KeyName 为自定义的证书（完整链）与私钥文件名，需同时填写；填写后只写这两个文件
+	CertName string `json:"certName,omitempty"`
+	KeyName  string `json:"keyName,omitempty"`
+	// Command 为写入证书后执行的命令（SSH 部署在远程主机执行，本机部署在本机执行），可使用 $certName、$certDir、$certFile、$keyFile
 	Command string `json:"command"`
 	// Containers 为要重启的本机容器名称或 ID
 	Containers []string `json:"containers"`
@@ -97,8 +109,8 @@ func (d *Deploy) validate(remark string) error {
 	d.Remark = strings.TrimSpace(d.Remark)
 	switch d.Type {
 	case DeploySSH:
-		if remark == "" {
-			return errors.New("部署到 SSH 主机时备注不能为空（用作文件名）")
+		if err := d.validateFileNames(remark); err != nil {
+			return err
 		}
 		if strings.TrimSpace(d.Connection) == "" {
 			return errors.New("请选择部署使用的 SSH 连接")
@@ -109,6 +121,16 @@ func (d *Deploy) validate(remark string) error {
 		}
 		d.Dir = path.Clean(d.Dir)
 		d.Containers = nil
+	case DeployLocal:
+		if err := d.validateFileNames(remark); err != nil {
+			return err
+		}
+		d.Dir = strings.TrimSpace(d.Dir)
+		if !filepath.IsAbs(d.Dir) {
+			return errors.New("本机证书目录需为绝对路径")
+		}
+		d.Dir = filepath.Clean(d.Dir)
+		d.Connection, d.Containers = "", nil
 	case DeployDocker:
 		var names []string
 		for _, n := range d.Containers {
@@ -120,17 +142,74 @@ func (d *Deploy) validate(remark string) error {
 			return errors.New("请选择要重启的容器")
 		}
 		d.Containers = names
-		d.Connection, d.Dir, d.Command = "", "", ""
+		d.Connection, d.Dir, d.Command, d.CertName, d.KeyName = "", "", "", "", ""
 	default:
 		return fmt.Errorf("未知的部署方式 %q", d.Type)
 	}
 	return nil
 }
 
+// validateFileNames 校验自定义文件名；未自定义时沿用证书映射的文件名，此时备注不能为空。
+func (d *Deploy) validateFileNames(remark string) error {
+	d.CertName, d.KeyName = strings.TrimSpace(d.CertName), strings.TrimSpace(d.KeyName)
+	if d.CertName == "" && d.KeyName == "" {
+		if remark == "" {
+			return errors.New("未自定义文件名时备注不能为空（用作文件名）")
+		}
+		return nil
+	}
+	if d.CertName == "" || d.KeyName == "" {
+		return errors.New("证书文件名与私钥文件名需同时填写")
+	}
+	for _, n := range []string{d.CertName, d.KeyName} {
+		if n == "." || n == ".." || !reFileName.MatchString(n) {
+			return fmt.Errorf("文件名 %q 无效，只能包含字母、数字以及 . _ - + @", n)
+		}
+	}
+	if d.CertName == d.KeyName {
+		return errors.New("证书文件名与私钥文件名不能相同")
+	}
+	return nil
+}
+
+// customNames 表示是否使用自定义文件名。
+func (d *Deploy) customNames() bool {
+	return d.CertName != "" && d.KeyName != ""
+}
+
+// targetKey 返回部署目标设置的标识，用于编辑时比对设置是否变化。
+func (d *Deploy) targetKey() string {
+	return strings.Join([]string{d.Type, d.Connection, d.Dir, d.CertName, d.KeyName, d.Command, strings.Join(d.Containers, "\n")}, "\x00")
+}
+
+// deployFiles 返回部署时写入的文件及证书、私钥的文件名。
+func deployFiles(c *Cert, d *Deploy) (files []RemoteFile, certName, keyName string) {
+	if d.customNames() {
+		files = []RemoteFile{
+			{Name: d.CertName, Data: pemBytes(c.CertPEM), Mode: 0o644},
+			{Name: d.KeyName, Data: pemBytes(c.KeyPEM), Mode: 0o600},
+		}
+		return files, d.CertName, d.KeyName
+	}
+	for name, data := range mappingFiles(c) {
+		mode := os.FileMode(0o644)
+		if strings.HasSuffix(name, ".key") {
+			mode = 0o600
+		}
+		files = append(files, RemoteFile{Name: name, Data: data, Mode: mode})
+	}
+	return files, c.fileBase() + ".crt", c.fileBase() + ".key"
+}
+
 // deployHash 计算证书内容与部署目标设置的摘要，任何一方变化都会触发重新部署。
 func deployHash(c *Cert, d *Deploy) string {
 	h := sha256.New()
-	for _, s := range []string{c.CertPEM, c.KeyPEM, c.IssuerPEM, c.fileBase(), d.Type, d.Connection, d.Dir, d.Command, strings.Join(d.Containers, "\n")} {
+	// 字段顺序与旧版本保持一致，升级后已部署的目标不会因摘要变化而重新部署
+	parts := []string{c.CertPEM, c.KeyPEM, c.IssuerPEM, c.fileBase(), d.Type, d.Connection, d.Dir, d.Command, strings.Join(d.Containers, "\n")}
+	if d.customNames() {
+		parts = append(parts, d.CertName, d.KeyName)
+	}
+	for _, s := range parts {
 		h.Write([]byte(s))
 		h.Write([]byte{0})
 	}
@@ -160,22 +239,51 @@ func (m *Module) deployStateLocked(key string, i int) *DeployState {
 func newDeployJobLocked(c *Cert, i int) deployJob {
 	d := c.Deploys[i]
 	job := deployJob{certKey: c.Key, index: i, hash: deployHash(c, &d), target: d, label: label(c)}
-	if d.Type == DeploySSH {
-		for name, data := range mappingFiles(c) {
-			mode := os.FileMode(0o644)
-			if strings.HasSuffix(name, ".key") {
-				mode = 0o600
-			}
-			job.files = append(job.files, RemoteFile{Name: name, Data: data, Mode: mode})
+	if d.Type == DeploySSH || d.Type == DeployLocal {
+		files, certName, keyName := deployFiles(c, &d)
+		job.files = files
+		// 远程主机按 POSIX 路径拼接，本机按当前系统路径拼接
+		join := path.Join
+		if d.Type == DeployLocal {
+			join = filepath.Join
 		}
 		job.vars = map[string]string{
 			"certName": c.fileBase(),
 			"certDir":  d.Dir,
-			"certFile": path.Join(d.Dir, c.fileBase()+".crt"),
-			"keyFile":  path.Join(d.Dir, c.fileBase()+".key"),
+			"certFile": join(d.Dir, certName),
+			"keyFile":  join(d.Dir, keyName),
 		}
 	}
 	return job
+}
+
+// localStale 判断本机目录中的证书文件是否缺失或被改动，此时即使已部署过也需要重新复制。
+func localStale(c *Cert, d *Deploy) bool {
+	files, _, _ := deployFiles(c, d)
+	for _, f := range files {
+		old, err := os.ReadFile(filepath.Join(d.Dir, f.Name))
+		if err != nil || !bytes.Equal(old, f.Data) {
+			return true
+		}
+	}
+	return false
+}
+
+// writeLocalFiles 把证书文件写入本机目录，内容相同的文件跳过。
+func writeLocalFiles(dir string, files []RemoteFile) error {
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		return fmt.Errorf("创建目录失败: %w", err)
+	}
+	for _, f := range files {
+		p := filepath.Join(dir, f.Name)
+		if old, err := os.ReadFile(p); err == nil && bytes.Equal(old, f.Data) {
+			continue
+		}
+		if err := writeFileAtomic(p, f.Data, f.Mode); err != nil {
+			return fmt.Errorf("写入 %s 失败: %w", p, err)
+		}
+	}
+	return nil
 }
 
 // scheduleDeploysLocked 在后台执行证书内容或目标设置已变化的部署；失败的目标在退避时间内不重试。
@@ -186,7 +294,11 @@ func (m *Module) scheduleDeploysLocked(c *Cert) {
 	now := time.Now()
 	for i := range c.Deploys {
 		d := &c.Deploys[i]
-		if !d.Enable || d.DeployedHash == deployHash(c, d) {
+		if !d.Enable {
+			continue
+		}
+		// 本机目录的文件被删除或改动时也重新复制，与证书映射的行为一致
+		if d.DeployedHash == deployHash(c, d) && (d.Type != DeployLocal || !localStale(c, d)) {
 			continue
 		}
 		ds := m.deployStateLocked(c.Key, i)
@@ -233,6 +345,23 @@ func (m *Module) runDeploy(parent context.Context, job deployJob) error {
 			return err
 		}
 		log.Infof("证书已更新，已重启容器 %s", strings.Join(job.target.Containers, ", "))
+	case DeployLocal:
+		if err := writeLocalFiles(job.target.Dir, job.files); err != nil {
+			return err
+		}
+		if strings.TrimSpace(job.target.Command) == "" {
+			log.Infof("证书已复制到 %s", job.target.Dir)
+			return nil
+		}
+		// 本机命令沿用证书映射脚本的执行方式，变量以环境变量注入
+		out, err := script.Run(job.target.Command, job.vars)
+		if err != nil {
+			if s := strings.TrimSpace(string(out)); s != "" {
+				return fmt.Errorf("命令执行失败: %w：%s", err, script.Summarize(out, 500))
+			}
+			return fmt.Errorf("命令执行失败: %w", err)
+		}
+		log.Infof("证书已复制到 %s，命令执行完成 %s", job.target.Dir, script.Summarize(out, 1000))
 	}
 	return nil
 }
@@ -296,8 +425,11 @@ func deployName(d *Deploy) string {
 	if d.Remark != "" {
 		return d.Remark
 	}
-	if d.Type == DeployDocker {
+	switch d.Type {
+	case DeployDocker:
 		return "Docker " + strings.Join(d.Containers, ", ")
+	case DeployLocal:
+		return "Local " + d.Dir
 	}
 	return "SSH " + d.Dir
 }
@@ -393,8 +525,7 @@ func keepDeployRecords(old, updated *Cert) {
 		u.DeployedHash, u.DeployedAt = "", time.Time{}
 		for j := range old.Deploys {
 			o := &old.Deploys[j]
-			if o.Type == u.Type && o.Connection == u.Connection && o.Dir == u.Dir && o.Command == u.Command &&
-				strings.Join(o.Containers, "\n") == strings.Join(u.Containers, "\n") {
+			if o.targetKey() == u.targetKey() {
 				u.DeployedHash, u.DeployedAt = o.DeployedHash, o.DeployedAt
 				break
 			}
