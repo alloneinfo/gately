@@ -116,19 +116,24 @@ func (c *compressWriter) Write(p []byte) (int, error) {
 	if !c.active {
 		return c.ResponseWriter.Write(p)
 	}
-	if c.w == nil {
-		// 压缩器的内部缓冲较大（brotli 约数百 KB），从池中复用，避免每个响应重新分配
-		if c.enc == "br" {
-			bw := brotliPool.Get().(*brotli.Writer)
-			bw.Reset(c.ResponseWriter)
-			c.w = bw
-		} else {
-			gz := gzipPool.Get().(*gzip.Writer)
-			gz.Reset(c.ResponseWriter)
-			c.w = gz
-		}
-	}
+	c.ensureWriter()
 	return c.w.Write(p)
+}
+
+// ensureWriter 按需创建压缩器。压缩器的内部缓冲较大（brotli 约数百 KB），从池中复用，避免每个响应重新分配。
+func (c *compressWriter) ensureWriter() {
+	if c.w != nil {
+		return
+	}
+	if c.enc == "br" {
+		bw := brotliPool.Get().(*brotli.Writer)
+		bw.Reset(c.ResponseWriter)
+		c.w = bw
+	} else {
+		gz := gzipPool.Get().(*gzip.Writer)
+		gz.Reset(c.ResponseWriter)
+		c.w = gz
+	}
 }
 
 var (
@@ -140,6 +145,12 @@ var (
 )
 
 func (c *compressWriter) Flush() {
+	// 还没写过响应头就 Flush 时，先在这里决定是否压缩；否则底层会先发出不带 Content-Encoding 的头，
+	// 随后的 Write 却写入压缩数据
+	if !c.decided {
+		c.decide(http.StatusOK, nil)
+		c.ResponseWriter.WriteHeader(http.StatusOK)
+	}
 	if f, ok := c.w.(interface{ Flush() error }); ok {
 		_ = f.Flush()
 	}
@@ -153,9 +164,11 @@ func (c *compressWriter) Hijack() (net.Conn, *bufio.ReadWriter, error) {
 func (c *compressWriter) Unwrap() http.ResponseWriter { return c.ResponseWriter }
 
 func (c *compressWriter) finish() {
-	if c.w == nil {
+	if !c.active {
 		return
 	}
+	// 已声明 Content-Encoding 但处理函数没有写正文时，也要写出一个合法的空压缩流，严格的客户端才能正常解码
+	c.ensureWriter()
 	_ = c.w.Close()
 	// Close 之后放回池中，下次使用前会 Reset 到新的输出
 	switch w := c.w.(type) {
@@ -165,6 +178,7 @@ func (c *compressWriter) finish() {
 		gzipPool.Put(w)
 	}
 	c.w = nil
+	c.active = false
 }
 
 // Handler 对可压缩的响应启用 br / gzip。WebSocket 升级请求直接放行。

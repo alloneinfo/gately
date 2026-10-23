@@ -681,6 +681,9 @@ func (f *firewall) keepCountsLocked(ctx context.Context) {
 	if hits != nil {
 		f.baseHits = cloneCounts(hits)
 	}
+	// 状态同步为刚读到的最新计数：模块停止后再启动时，未生效分支以 status 为基数，
+	// 不同步的话会退回停止前最后一次轮询的值，丢掉其间的命中
+	f.status.Dropped, f.status.Hits = cloneCounts(f.baseDropped), cloneCounts(f.baseHits)
 }
 
 // addCounts 返回两组计数逐项相加的结果。

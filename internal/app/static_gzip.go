@@ -10,6 +10,7 @@ import (
 	"mime"
 	"net/http"
 	"path"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -20,20 +21,23 @@ func (a *App) servePrecompressed(w http.ResponseWriter, r *http.Request, name st
 	if r.Method != http.MethodGet && r.Method != http.MethodHead {
 		return false
 	}
-	// 范围请求按原文件处理，避免压缩内容与 Range 偏移不一致
-	if r.Header.Get("Range") != "" || !acceptsGzip(r.Header.Get("Accept-Encoding")) {
-		return false
-	}
 	f, err := a.opts.Web.Open(name + ".gz")
 	if err != nil {
 		return false
 	}
 	defer f.Close()
+	h := w.Header()
+	// 有预压缩版本时，回退到解压内容的响应同样随 Accept-Encoding 变化；
+	// 不标 Vary 的话，共享缓存可能把未压缩版本（assets 带一年 immutable）发给所有人
+	h.Add("Vary", "Accept-Encoding")
+	// 范围请求按原文件处理，避免压缩内容与 Range 偏移不一致
+	if r.Header.Get("Range") != "" || !acceptsGzip(r.Header.Get("Accept-Encoding")) {
+		return false
+	}
 	rs, ok := f.(io.ReadSeeker)
 	if !ok {
 		return false
 	}
-	h := w.Header()
 	// Content-Type 按原文件扩展名设置，否则 ServeContent 会按 .gz 识别
 	ct := mime.TypeByExtension(path.Ext(name))
 	if ct == "" {
@@ -41,14 +45,19 @@ func (a *App) servePrecompressed(w http.ResponseWriter, r *http.Request, name st
 	}
 	h.Set("Content-Type", ct)
 	h.Set("Content-Encoding", "gzip")
-	h.Add("Vary", "Accept-Encoding")
+	// 带 Content-Encoding 时 ServeContent 不输出 Content-Length，超过写缓冲（约 2 KB）的文件会变成 chunked 传输，
+	// 这里按 .gz 文件大小显式设置；Range 已在上面排除，304 时 net/http 会自行删除该头
+	if st, err := f.Stat(); err == nil {
+		h.Set("Content-Length", strconv.FormatInt(st.Size(), 10))
+	}
 	// 内嵌文件没有修改时间，传零值即不输出 Last-Modified
 	http.ServeContent(w, r, name, time.Time{}, rs)
 	return true
 }
 
-// acceptsGzip 判断 Accept-Encoding 是否接受 gzip（含 *），q=0 视为拒绝。
+// acceptsGzip 判断 Accept-Encoding 是否接受 gzip（含 *），q=0 视为拒绝；显式写出的 gzip 优先于 *。
 func acceptsGzip(accept string) bool {
+	star := false
 	for _, part := range strings.Split(accept, ",") {
 		enc, params, _ := strings.Cut(strings.TrimSpace(part), ";")
 		enc = strings.ToLower(strings.TrimSpace(enc))
@@ -56,12 +65,13 @@ func acceptsGzip(accept string) bool {
 			continue
 		}
 		q := strings.ReplaceAll(strings.TrimSpace(params), " ", "")
-		if q == "q=0" || q == "q=0.0" || q == "q=0.00" || q == "q=0.000" {
-			return false
+		ok := !(q == "q=0" || q == "q=0.0" || q == "q=0.00" || q == "q=0.000")
+		if enc == "gzip" {
+			return ok
 		}
-		return true
+		star = ok
 	}
-	return false
+	return star
 }
 
 // gzipOnlyFS 让只嵌入了 .gz 的构建产物看起来仍有原文件：x.js 不存在而 x.js.gz 存在时，

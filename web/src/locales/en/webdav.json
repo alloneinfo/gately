@@ -1,5 +1,5 @@
 {
-  "title": "WebDAV Server",
+  "title": "WebDAV Service",
   "service": "Service",
   "listenIp": "Listen address",
   "listenIpPlaceholder": "Leave empty to listen on all addresses",

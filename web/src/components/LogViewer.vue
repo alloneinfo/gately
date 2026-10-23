@@ -53,6 +53,10 @@ const hasMore = ref(false)
 const loadingMore = ref(false)
 let lastSeq = 0
 let loaded = false
+// 轮询裁剪上限：用户每加载一页历史就放宽相应条数，避免刚加载的旧日志被下一次轮询裁掉
+let keep = MAX
+// 清空时递增，丢弃清空前发出、清空后才返回的请求结果
+let generation = 0
 
 const order = { debug: 0, info: 1, warn: 2, error: 3 }
 const visible = computed(() =>
@@ -72,9 +76,13 @@ async function scrollToEnd() {
 
 // 首次拉取最近一页，之后按序号增量拉取，只追加新日志
 async function poll() {
+  const gen = generation
   try {
     if (!loaded) {
       const list = await api.get<LogEntry[]>(`${props.url}?since=0&limit=${PAGE}`)
+      if (gen !== generation) {
+        return
+      }
       loaded = true
       hasMore.value = list.length >= PAGE
       entries.value = toRows(list)
@@ -85,14 +93,17 @@ async function poll() {
       return
     }
     const list = await api.get<LogEntry[]>(`${props.url}?since=${lastSeq}`)
+    if (gen !== generation) {
+      return
+    }
     if (list.length) {
       lastSeq = list[list.length - 1].seq
       const next = entries.value.concat(toRows(list))
-      if (next.length > MAX) {
+      if (next.length > keep) {
         // 超出上限时丢掉最旧的部分，仍可通过“加载更早的日志”找回
         hasMore.value = true
       }
-      entries.value = next.slice(-MAX)
+      entries.value = next.slice(-keep)
       await scrollToEnd()
     }
   } catch {
@@ -107,14 +118,21 @@ async function loadEarlier() {
     return
   }
   loadingMore.value = true
+  const gen = generation
   try {
     const list = await api.get<LogEntry[]>(`${props.url}?before=${first.seq}&limit=${PAGE}`)
+    if (gen !== generation) {
+      return
+    }
     hasMore.value = list.length >= PAGE
     if (!list.length) {
       return
     }
     const el = box.value
     const oldHeight = el?.scrollHeight ?? 0
+    // 用户在翻看历史：停止自动滚到底部，并放宽裁剪上限保住刚加载的这一页
+    follow.value = false
+    keep = Math.max(keep, entries.value.length + list.length)
     entries.value = toRows(list).concat(entries.value)
     await nextTick()
     if (el) {
@@ -129,8 +147,10 @@ async function loadEarlier() {
 
 async function clear() {
   await api.del(props.url)
+  generation++
   entries.value = []
   hasMore.value = false
+  keep = MAX
 }
 
 // 每 2 秒增量拉取，标签页在后台时暂停

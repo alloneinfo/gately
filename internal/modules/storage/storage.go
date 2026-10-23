@@ -97,10 +97,13 @@ func (mt *Mount) Validate() error {
 				addr = "[" + host + "]"
 			}
 		}
-		mt.URL = "smb://" + addr + "/" + share
+		// parseSMB 返回的共享名与子目录已解码，交给 url.URL 重新转义，
+		// 否则含 %、#、? 的目录或 IPv6 zone 存盘后再次解析会指向别处或解析失败
+		p := "/" + share
 		if sub != "" {
-			mt.URL += "/" + sub
+			p += "/" + sub
 		}
+		mt.URL = (&url.URL{Scheme: "smb", Host: addr, Path: p}).String()
 		mt.Domain = strings.TrimSpace(mt.Domain)
 		mt.Path, mt.SkipVerify = "", false
 	default:

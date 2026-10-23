@@ -59,6 +59,35 @@ func TestMountValidateSMB(t *testing.T) {
 	}
 }
 
+// TestMountValidateSMBEscaped 确认含特殊字符的子目录与 IPv6 zone 规范化后仍能解析回原值，
+// 且再次校验结果不变（编辑保存不会把地址越改越坏）。
+func TestMountValidateSMBEscaped(t *testing.T) {
+	cases := []struct {
+		in, addr, share, sub string
+	}{
+		{"smb://nas/share/a%23b", "nas:445", "share", "a#b"},
+		{"smb://nas/share/what%3F/x", "nas:445", "share", "what?/x"},
+		{"smb://nas/share/100%25", "nas:445", "share", "100%"},
+		{"smb://nas/my%20share/dir%20a", "nas:445", "my share", "dir a"},
+		{"smb://[fe80::1%25en0]/s", "[fe80::1%en0]:445", "s", ""},
+		{"smb://[fe80::1%25en0]:4450/s/d", "[fe80::1%en0]:4450", "s", "d"},
+	}
+	for _, c := range cases {
+		m := Mount{Name: "x", Type: TypeSMB, URL: c.in}
+		if err := m.Validate(); err != nil {
+			t.Fatalf("%s: %v", c.in, err)
+		}
+		addr, share, sub, err := parseSMB(m.URL)
+		if err != nil || addr != c.addr || share != c.share || sub != c.sub {
+			t.Errorf("%s → %s: 得到 %q %q %q %v", c.in, m.URL, addr, share, sub, err)
+		}
+		first := m.URL
+		if err := m.Validate(); err != nil || m.URL != first {
+			t.Errorf("%s: 再次校验结果变化 %q → %q %v", c.in, first, m.URL, err)
+		}
+	}
+}
+
 // TestSMBBackend 连接真实的 SMB 服务做完整读写，需设置 GATELY_TEST_SMB_URL（指向一个可写的空目录），
 // 可选 GATELY_TEST_SMB_USER / GATELY_TEST_SMB_PASS；未设置时跳过。
 func TestSMBBackend(t *testing.T) {

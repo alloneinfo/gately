@@ -4,8 +4,10 @@ import (
 	"bytes"
 	"compress/gzip"
 	"errors"
+	"fmt"
 	"io"
 	"io/fs"
+	"math/rand"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -112,6 +114,8 @@ func TestAcceptsGzip(t *testing.T) {
 		"*":                  true,
 		"deflate, GZIP":      true,
 		"identity, gzip;q=0": false,
+		"*;q=0, gzip":        true,
+		"gzip;q=0, *":        false,
 	} {
 		if got := acceptsGzip(accept); got != want {
 			t.Errorf("acceptsGzip(%q) = %v，期望 %v", accept, got, want)
@@ -121,7 +125,13 @@ func TestAcceptsGzip(t *testing.T) {
 
 // 构建产物只嵌入 .gz 时：接受 gzip 的请求原样返回 .gz，其余请求（含 Range）由服务端解压后返回。
 func TestStaticGzipOnly(t *testing.T) {
-	css := []byte(strings.Repeat(".gately{color:red}\n", 300))
+	// 混入伪随机内容，让 .gz 超过 net/http 的写缓冲（约 2 KB），才能覆盖 Content-Length 的情形
+	var sb strings.Builder
+	rnd := rand.New(rand.NewSource(1))
+	for i := 0; i < 600; i++ {
+		fmt.Fprintf(&sb, ".g%x{color:#%06x}\n", rnd.Int63(), rnd.Intn(1<<24))
+	}
+	css := []byte(sb.String())
 	web := fstest.MapFS{
 		"index.html":      {Data: []byte(`<!doctype html><html><head></head><body></body></html>`)},
 		"assets/b.css.gz": {Data: gz(t, css)},
@@ -155,7 +165,19 @@ func TestStaticGzipOnly(t *testing.T) {
 		t.Fatalf("接受 gzip 时应返回 .gz: %d %v", resp.StatusCode, resp.Header)
 	}
 
+	// 预压缩响应超过写缓冲时也要带 Content-Length，不能退化为 chunked
+	if resp.ContentLength != int64(len(web["assets/b.css.gz"].Data)) || len(resp.TransferEncoding) != 0 {
+		t.Fatalf("预压缩响应应带 Content-Length: %d %v", resp.ContentLength, resp.TransferEncoding)
+	}
+	if !strings.Contains(resp.Header.Get("Vary"), "Accept-Encoding") {
+		t.Fatalf("预压缩响应应带 Vary: %v", resp.Header)
+	}
+
 	resp, body = get("", "")
+	// 回退到解压内容的响应同样要带 Vary，避免共享缓存把未压缩版本发给所有人
+	if !strings.Contains(resp.Header.Get("Vary"), "Accept-Encoding") {
+		t.Fatalf("解压回退的响应应带 Vary: %v", resp.Header)
+	}
 	if resp.StatusCode != http.StatusOK || resp.Header.Get("Content-Encoding") != "" || !bytes.Equal(body, css) {
 		t.Fatalf("不接受 gzip 时应返回解压内容: %d %v", resp.StatusCode, resp.Header)
 	}

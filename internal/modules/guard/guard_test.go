@@ -702,3 +702,30 @@ func TestFirewallCountsSurviveApply(t *testing.T) {
 		t.Fatalf("外部清除重建后计数应继续累加: %+v", st)
 	}
 }
+
+// 模块停止时读取的最新内核计数应保留到下次启动，不能退回停止前最后一次轮询的值
+func TestFirewallCountsSurviveStop(t *testing.T) {
+	cleanDefault(t)
+	counts := func(ban, trap uint64) string {
+		return fmt.Sprintf(`{"nftables": [
+			{"rule": {"comment": "ban", "expr": [{"counter": {"packets": %d}}, {"drop": null}]}},
+			{"rule": {"comment": "trap-hit", "expr": [{"counter": {"packets": %d}}]}}
+		]}`, ban, trap)
+	}
+	fake := &fakeNFT{output: counts(10, 2)}
+	fw := activeFirewall(t, fake)
+	ctx := context.Background()
+	fw.poll(ctx)
+	// 最后一次轮询之后又有新的命中，随后模块停止
+	fake.output = counts(15, 3)
+	fw.stop()
+	if st := fw.snapshot(); st.Dropped["ban"] != 15 || st.Hits["trap"] != 3 {
+		t.Fatalf("停止后应显示停止时的最新计数: %+v", st)
+	}
+	// 重新启动：新表从零开始
+	fake.output = counts(0, 0)
+	fw.apply(ctx, defaultSettings())
+	if st := fw.snapshot(); st.Dropped["ban"] != 15 || st.Hits["trap"] != 3 {
+		t.Fatalf("重新启动后计数应保留: %+v", st)
+	}
+}

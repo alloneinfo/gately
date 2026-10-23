@@ -76,7 +76,7 @@
         <el-form-item :label="t('common.name')"><el-input v-model="editingTarget.name" /></el-form-item>
         <el-form-item :label="t('backupSchedule.mount')">
           <el-select v-model="editingTarget.mount" style="width: 100%" :placeholder="t('backupSchedule.mountPlaceholder')">
-            <el-option v-for="m in mounts" :key="m.key" :label="t('backupSchedule.mountLabel', { name: m.name, type: m.type === 'webdav' ? 'WebDAV' : t('backupSchedule.localType') })" :value="m.key" :disabled="m.readOnly || !m.enable" />
+            <el-option v-for="m in mounts" :key="m.key" :label="t('backupSchedule.mountLabel', { name: m.name, type: m.type === 'webdav' ? 'WebDAV' : m.type === 'smb' ? 'SMB' : t('backupSchedule.localType') })" :value="m.key" :disabled="m.readOnly || !m.enable" />
           </el-select>
           <div v-if="!mounts.length" class="form-help">{{ t('backupSchedule.noMounts') }}</div>
         </el-form-item>
