@@ -1,5 +1,6 @@
 // i18nsync 把源码里的中文字面量同步到 internal/i18n/locales/<语言>.json：
 // 新增的键写入空值等待翻译，已有译文保持不变，源码里已不存在的键默认保留（加 -prune 删除）。
+// 同时生成二进制内嵌用的 <语言>.json.gz。
 package main
 
 import (
@@ -53,6 +54,11 @@ func main() {
 		raw, _ := json.MarshalIndent(next, "", "  ")
 		raw = append(raw, '\n')
 		if err := os.WriteFile(path, raw, 0o644); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+		// 二进制只嵌入压缩版本，JSON 改动后必须同步重新生成
+		if err := os.WriteFile(path+".gz", i18n.CompressLocale(raw), 0o644); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}

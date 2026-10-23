@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
-import { readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
+import { readdirSync, readFileSync, statSync, unlinkSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { constants, gzipSync } from 'node:zlib'
 
@@ -12,8 +12,9 @@ const keepGitkeep = {
   },
 }
 
-// 构建后为 assets 下的文本资源生成 .gz，管理端直接返回压缩版本，免去每次请求实时压缩。
+// 构建后为 assets 下的文本资源生成 .gz 并删除原文件，管理端直接返回压缩版本，免去每次请求实时压缩。
 // 只生成 gzip：浏览器经 HTTP 访问（如局域网 IP）时不支持 br，gzip 两种场景都能用。
+// 二进制只嵌入 .gz（文本资源约少 3/4 体积）；少数不接受 gzip 的请求由服务端现场解压返回。
 const precompress = {
   name: 'precompress-gzip',
   closeBundle() {
@@ -25,6 +26,7 @@ const precompress = {
         continue
       }
       writeFileSync(file + '.gz', gzipSync(readFileSync(file), { level: constants.Z_BEST_COMPRESSION }))
+      unlinkSync(file)
     }
   },
 }

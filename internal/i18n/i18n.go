@@ -1,12 +1,16 @@
 // Package i18n 为后端运行时文案提供多语言：源码中的中文字面量即键，译文放在 locales/<语言>.json。
+// 二进制只嵌入由 i18nsync 生成的 locales/<语言>.json.gz（体积约为 JSON 的三成），首次用到某种语言时才解压并建表。
 //
 // 翻译发生在输出边界（HTTP 错误与数据、日志、通知、API 文档），业务代码仍然产生中文原文，
 // 因此不需要改动调用点；带 %s / %d 的格式串按模板匹配，译文可用 %[n]s 调整参数顺序。
 package i18n
 
 import (
+	"bytes"
+	"compress/gzip"
 	"embed"
 	"encoding/json"
+	"io"
 	"os"
 	"regexp"
 	"sort"
@@ -24,12 +28,13 @@ const FallbackLang = "en"
 // Langs 是支持的语言，顺序同官网与管理界面。
 var Langs = []string{"zh-CN", "en", "zh-TW", "ja", "ko", "es", "fr", "de", "ru", "pt-BR"}
 
-//go:embed locales/*.json
+//go:embed locales/*.json.gz
 var localeFS embed.FS
 
 var (
-	loadOnce sync.Once
-	catalogs map[string]*catalog
+	catalogMu sync.Mutex
+	// catalogs 按语言缓存已加载的译文表；值为 nil 表示该语言加载失败，不再重试
+	catalogs = map[string]*catalog{}
 )
 
 // Normalize 把任意语言标识（如 zh_CN.UTF-8、en-US、pt）规整为受支持的语言代码，无法识别时返回空串。
@@ -139,24 +144,49 @@ func realVerbs(k string) [][]int {
 	return out
 }
 
-func load() {
-	loadOnce.Do(func() {
-		catalogs = map[string]*catalog{}
-		for _, l := range Langs {
-			if l == SourceLang {
-				continue
-			}
-			raw, err := localeFS.ReadFile("locales/" + l + ".json")
-			if err != nil {
-				continue
-			}
-			var m map[string]string
-			if json.Unmarshal(raw, &m) != nil {
-				continue
-			}
-			catalogs[l] = buildCatalog(m)
-		}
-	})
+// catalogFor 返回目标语言的译文表，首次调用时才解压并解析该语言，未用到的语言不占内存。
+func catalogFor(lang string) *catalog {
+	catalogMu.Lock()
+	defer catalogMu.Unlock()
+	if c, ok := catalogs[lang]; ok {
+		return c
+	}
+	var c *catalog
+	if m, err := readLocale(lang); err == nil {
+		c = buildCatalog(m)
+	}
+	catalogs[lang] = c
+	return c
+}
+
+// readLocale 读取并解压内嵌的 locales/<语言>.json.gz。
+func readLocale(lang string) (map[string]string, error) {
+	raw, err := localeFS.ReadFile("locales/" + lang + ".json.gz")
+	if err != nil {
+		return nil, err
+	}
+	zr, err := gzip.NewReader(bytes.NewReader(raw))
+	if err != nil {
+		return nil, err
+	}
+	data, err := io.ReadAll(zr)
+	if err != nil {
+		return nil, err
+	}
+	var m map[string]string
+	if err := json.Unmarshal(data, &m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+// CompressLocale 把译文 JSON 压缩为内嵌用的 .json.gz；输出只取决于输入，便于提交与校验。
+func CompressLocale(data []byte) []byte {
+	var buf bytes.Buffer
+	zw, _ := gzip.NewWriterLevel(&buf, gzip.BestCompression)
+	_, _ = zw.Write(data)
+	_ = zw.Close()
+	return buf.Bytes()
 }
 
 func buildCatalog(m map[string]string) *catalog {
@@ -254,8 +284,7 @@ func Tr(lang, s string) string {
 	if lang == "" || lang == SourceLang || s == "" || !hasHan(s) {
 		return s
 	}
-	load()
-	c := catalogs[lang]
+	c := catalogFor(lang)
 	if c == nil {
 		return s
 	}

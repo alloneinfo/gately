@@ -1,7 +1,12 @@
 package app
 
 import (
+	"bytes"
+	"compress/gzip"
+	"encoding/binary"
+	"errors"
 	"io"
+	"io/fs"
 	"mime"
 	"net/http"
 	"path"
@@ -58,3 +63,85 @@ func acceptsGzip(accept string) bool {
 	}
 	return false
 }
+
+// gzipOnlyFS 让只嵌入了 .gz 的构建产物看起来仍有原文件：x.js 不存在而 x.js.gz 存在时，
+// Stat 返回原文件信息（长度取自 gzip 尾部，不解压），Open 时解压返回，供不接受 gzip 的请求使用。
+type gzipOnlyFS struct {
+	fsys fs.FS
+}
+
+func (g gzipOnlyFS) Open(name string) (fs.File, error) {
+	f, err := g.fsys.Open(name)
+	if !g.fallback(name, err) {
+		return f, err
+	}
+	raw, gzErr := fs.ReadFile(g.fsys, name+".gz")
+	if gzErr != nil {
+		return nil, err
+	}
+	zr, gzErr := gzip.NewReader(bytes.NewReader(raw))
+	if gzErr != nil {
+		return nil, &fs.PathError{Op: "open", Path: name, Err: gzErr}
+	}
+	data, gzErr := io.ReadAll(zr)
+	if gzErr != nil {
+		return nil, &fs.PathError{Op: "open", Path: name, Err: gzErr}
+	}
+	return &memFile{Reader: bytes.NewReader(data), info: memInfo{name: path.Base(name), size: int64(len(data))}}, nil
+}
+
+func (g gzipOnlyFS) Stat(name string) (fs.FileInfo, error) {
+	info, err := fs.Stat(g.fsys, name)
+	if !g.fallback(name, err) {
+		return info, err
+	}
+	f, gzErr := g.fsys.Open(name + ".gz")
+	if gzErr != nil {
+		return nil, err
+	}
+	defer f.Close()
+	// gzip 尾部 4 字节（ISIZE）是原始长度对 2^32 取模，前端资源远小于 4 GB
+	rs, ok := f.(io.ReadSeeker)
+	if !ok {
+		return nil, err
+	}
+	var tail [4]byte
+	if _, gzErr := rs.Seek(-4, io.SeekEnd); gzErr != nil {
+		return nil, err
+	}
+	if _, gzErr := io.ReadFull(rs, tail[:]); gzErr != nil {
+		return nil, err
+	}
+	return memInfo{name: path.Base(name), size: int64(binary.LittleEndian.Uint32(tail[:]))}, nil
+}
+
+// fallback 判断是否需要改用 .gz：原文件不存在，且请求的本身不是 .gz。
+func (g gzipOnlyFS) fallback(name string, err error) bool {
+	return err != nil && errors.Is(err, fs.ErrNotExist) && !strings.HasSuffix(name, ".gz")
+}
+
+// memFile 是解压到内存的只读文件，支持 Seek 以便 http.ServeContent 处理 Range。
+type memFile struct {
+	*bytes.Reader
+	info memInfo
+}
+
+func (f *memFile) Stat() (fs.FileInfo, error) {
+	return f.info, nil
+}
+
+func (f *memFile) Close() error {
+	return nil
+}
+
+type memInfo struct {
+	name string
+	size int64
+}
+
+func (i memInfo) Name() string       { return i.name }
+func (i memInfo) Size() int64        { return i.size }
+func (i memInfo) Mode() fs.FileMode  { return 0o444 }
+func (i memInfo) ModTime() time.Time { return time.Time{} }
+func (i memInfo) IsDir() bool        { return false }
+func (i memInfo) Sys() any           { return nil }

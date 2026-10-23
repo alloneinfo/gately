@@ -16,8 +16,9 @@ import (
 )
 
 func testCatalog(m map[string]string) {
-	load()
+	catalogMu.Lock()
 	catalogs["xx"] = buildCatalog(m)
+	catalogMu.Unlock()
 }
 
 func TestTrExactTemplateAndWrap(t *testing.T) {
@@ -149,3 +150,46 @@ func normVerbs(v []string) []string {
 var regexpIndex = regexp.MustCompile(`\[\d+\]`)
 
 func sortStrings(v []string) { sort.Strings(v) }
+
+// TestEmbeddedLocalesUpToDate 保证内嵌的 .json.gz 与 locales/<语言>.json 内容一致，避免改了 JSON 忘记重新生成。
+func TestEmbeddedLocalesUpToDate(t *testing.T) {
+	for _, lang := range Langs {
+		if lang == SourceLang {
+			continue
+		}
+		raw, err := os.ReadFile(filepath.Join("locales", lang+".json"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		var want map[string]string
+		if err := json.Unmarshal(raw, &want); err != nil {
+			t.Fatal(err)
+		}
+		got, err := readLocale(lang)
+		if err != nil {
+			t.Fatalf("%s 内嵌译文读取失败: %v", lang, err)
+		}
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("%s 的内嵌译文已过期，请运行 go run ./internal/i18n/cmd/i18nsync -root . 重新生成", lang)
+		}
+	}
+}
+
+// TestCatalogLazyLoad 确认译文表按语言首次使用时才加载。
+func TestCatalogLazyLoad(t *testing.T) {
+	catalogMu.Lock()
+	delete(catalogs, "de")
+	catalogMu.Unlock()
+	if Tr("de", "测试一下不存在的文案") == "" {
+		t.Fatal("翻译结果不应为空")
+	}
+	catalogMu.Lock()
+	c, ok := catalogs["de"]
+	catalogMu.Unlock()
+	if !ok || c == nil || len(c.exact) == 0 {
+		t.Fatal("de 译文表应在首次使用时加载")
+	}
+	if catalogFor("xx-unknown") != nil {
+		t.Fatal("不存在的语言应返回 nil")
+	}
+}

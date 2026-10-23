@@ -68,6 +68,9 @@ type compressWriter struct {
 	enc     string
 	w       io.WriteCloser
 	decided bool
+	// active 表示由本层压缩；上游已自带 Content-Encoding（如预压缩文件、反代上游的 gzip）时为 false，
+	// 不能用响应头是否等于 enc 判断，否则上游 gzip 遇到只接受 gzip 的客户端会被再压一次
+	active bool
 }
 
 func (c *compressWriter) decide(status int, sniff []byte) {
@@ -90,6 +93,7 @@ func (c *compressWriter) decide(status int, sniff []byte) {
 	if n, err := strconv.Atoi(h.Get("Content-Length")); err == nil && n < MinSize {
 		return
 	}
+	c.active = true
 	h.Del("Content-Length")
 	h.Set("Content-Encoding", c.enc)
 	h.Add("Vary", "Accept-Encoding")
@@ -109,7 +113,7 @@ func (c *compressWriter) Write(p []byte) (int, error) {
 		c.decide(http.StatusOK, p)
 		c.ResponseWriter.WriteHeader(http.StatusOK)
 	}
-	if c.Header().Get("Content-Encoding") != c.enc {
+	if !c.active {
 		return c.ResponseWriter.Write(p)
 	}
 	if c.w == nil {

@@ -791,11 +791,13 @@ func (a *App) staticHandler() http.Handler {
 			http.Error(w, "前端未构建：请在 web 目录执行 pnpm install && pnpm build 后重新编译", http.StatusNotFound)
 		})
 	}
-	files := http.FileServer(http.FS(a.opts.Web))
+	// 构建产物的文本资源只嵌入 .gz，包装后原文件名仍可 Stat/Open
+	web := gzipOnlyFS{fsys: a.opts.Web}
+	files := http.FileServer(http.FS(web))
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		name := strings.TrimPrefix(r.URL.Path, "/")
 		if name != "" {
-			if _, err := fs.Stat(a.opts.Web, name); err == nil {
+			if _, err := fs.Stat(web, name); err == nil {
 				// 带哈希的构建产物可长期缓存
 				if strings.HasPrefix(name, "assets/") {
 					w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
