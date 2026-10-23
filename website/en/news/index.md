@@ -9,7 +9,7 @@ Announcements for major releases are listed below. See [GitHub Releases](https:/
 
 ## [v0.5.7](/en/news/v0.5.7)
 
-October 24, 2026 · Storage Mounts can connect to SMB shares; themes become 15 palettes with light and dark, custom accent and corners; the management interface is compressed and the binary is about 15% smaller.
+October 24, 2026 · Storage Mounts can connect to SMB shares; themes become 15 palettes with light and dark, custom accent and corners; the management interface is compressed and the binary is about 11% smaller.
 
 ## [v0.5.6.4](/en/news/v0.5.6.4)
 

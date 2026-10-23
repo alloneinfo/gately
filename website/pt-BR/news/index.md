@@ -9,7 +9,7 @@ Abaixo estão os anúncios das versões principais. Veja as [GitHub Releases](ht
 
 ## [v0.5.7](/pt-BR/news/v0.5.7)
 
-24 de outubro de 2026 · Montagens de armazenamento se conectam a compartilhamentos SMB; os temas viram 15 paletas com claro e escuro, destaque e cantos personalizáveis; a interface de administração é transferida compactada e o binário ficou cerca de 15% menor.
+24 de outubro de 2026 · Montagens de armazenamento se conectam a compartilhamentos SMB; os temas viram 15 paletas com claro e escuro, destaque e cantos personalizáveis; a interface de administração é transferida compactada e o binário ficou cerca de 11% menor.
 
 ## [v0.5.6.4](/pt-BR/news/v0.5.6.4)
 

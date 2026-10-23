@@ -9,7 +9,7 @@ Les annonces des versions majeures sont listées ci-dessous. Consultez [GitHub R
 
 ## [v0.5.7](/fr/news/v0.5.7)
 
-24 octobre 2026 · Les Montages de stockage se connectent aux partages SMB ; les thèmes deviennent 15 palettes en clair et en sombre, avec accent et coins personnalisables ; l'interface d'administration est compressée et le binaire est environ 15 % plus léger.
+24 octobre 2026 · Les Montages de stockage se connectent aux partages SMB ; les thèmes deviennent 15 palettes en clair et en sombre, avec accent et coins personnalisables ; l'interface d'administration est compressée et le binaire est environ 11 % plus léger.
 
 ## [v0.5.6.4](/fr/news/v0.5.6.4)
 

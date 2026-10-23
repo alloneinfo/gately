@@ -9,7 +9,7 @@ A continuación se listan los anuncios de las versiones principales. Consulta [G
 
 ## [v0.5.7](/es/news/v0.5.7)
 
-24 de octubre de 2026 · Montajes de almacenamiento se conecta a recursos compartidos SMB; los temas pasan a ser 15 paletas con claro y oscuro, acento y esquinas personalizables; la interfaz de administración se transfiere comprimida y el binario es un 15 % más pequeño.
+24 de octubre de 2026 · Montajes de almacenamiento se conecta a recursos compartidos SMB; los temas pasan a ser 15 paletas con claro y oscuro, acento y esquinas personalizables; la interfaz de administración se transfiere comprimida y el binario es un 11 % más pequeño.
 
 ## [v0.5.6.4](/es/news/v0.5.6.4)
 

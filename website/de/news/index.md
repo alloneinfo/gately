@@ -9,7 +9,7 @@ Unten stehen die Ankündigungen zu wichtigen Releases. Alle Änderungen und Down
 
 ## [v0.5.7](/de/news/v0.5.7)
 
-24. Oktober 2026 · Speicher-Einbindungen verbinden sich mit SMB-Freigaben; Designs werden zu 15 Paletten mit hell und dunkel, eigenem Akzent und Ecken; die Verwaltungsoberfläche wird komprimiert übertragen und die Binärdatei ist etwa 15 % kleiner.
+24. Oktober 2026 · Speicher-Einbindungen verbinden sich mit SMB-Freigaben; Designs werden zu 15 Paletten mit hell und dunkel, eigenem Akzent und Ecken; die Verwaltungsoberfläche wird komprimiert übertragen und die Binärdatei ist etwa 11 % kleiner.
 
 ## [v0.5.6.4](/de/news/v0.5.6.4)
 
