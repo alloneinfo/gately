@@ -1,5 +1,5 @@
 <template>
-  <el-popover trigger="click" :width="316" placement="bottom-end" popper-class="theme-popper">
+  <el-popover trigger="click" :width="316" placement="bottom-end" popper-class="theme-popper" @before-enter="lockScroll(true)" @before-leave="lockScroll(false)">
     <template #reference>
       <button class="picker-btn" :aria-label="t('components.themePicker.switchTheme')" :title="t('components.themePicker.switchTheme')">
         <Palette :size="18" />
@@ -44,9 +44,12 @@ import { useI18n } from 'vue-i18n'
 import { Check, MonitorSmartphone, Palette } from 'lucide-vue-next'
 import { AUTO_ID, themes } from '../themes'
 import { useTheme } from '../composables/useTheme'
+import { useScrollLock } from '../composables/useScrollLock'
 
 const { t } = useI18n()
 const { choice, setTheme } = useTheme()
+// 面板打开期间锁定页面滚动，滚轮和触摸滑动不穿透到下方页面
+const lockScroll = useScrollLock('.theme-popper')
 </script>
 
 <style scoped>

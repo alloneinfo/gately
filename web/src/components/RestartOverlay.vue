@@ -24,6 +24,7 @@
 import { onBeforeUnmount, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Loader2, RefreshCw, TriangleAlert } from 'lucide-vue-next'
+import { useScrollLock } from '../composables/useScrollLock'
 
 const { t } = useI18n()
 
@@ -33,6 +34,8 @@ const elapsed = ref(0)
 const timedOut = ref(false)
 let timer: number | undefined
 let ticker: number | undefined
+// 等待层盖住整个页面，期间页面不随滚轮滚动；等待层只会随页面刷新消失，因此无需解锁
+const lockScroll = useScrollLock()
 
 function reload() {
   location.reload()
@@ -48,6 +51,7 @@ function start(text: string) {
   stop()
   title.value = text
   visible.value = true
+  lockScroll(true)
   timedOut.value = false
   elapsed.value = 0
   const begin = Date.now()

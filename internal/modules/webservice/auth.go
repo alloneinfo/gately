@@ -301,6 +301,7 @@ func (a *authenticator) check(w http.ResponseWriter, r *http.Request, s Site) bo
 // loginSrc 是网页认证登录页的主体（外壳与样式见 webpage 包）。设置了 Pending 时在登录卡片上弹出动态验证码对话框。
 // 模板内不写中文（包括脚本注释），否则整段会被 i18nsync 当作翻译键；脚本依次处理：显示/隐藏密码、
 // 提交后禁用按钮防止重复提交、验证码只保留数字且输满 6 位自动提交。页面不依赖脚本也能正常登录。
+// 验证码对话框打开时锁定页面滚动（body:has(.modal)），滚轮和触摸滑动不穿透到下方的登录卡片；屏幕过矮时对话框自身可滚动。
 const loginSrc = `{{define "body"}}<section class="card login"{{if .Pending}} aria-hidden="true"{{end}}>
 <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="16" r="1"/><rect x="3" y="10" width="18" height="12" rx="2"/><path d="M7 10V7a5 5 0 0 1 10 0v3"/></svg></div>
 <h1>{{.T.title}}</h1>
@@ -334,7 +335,8 @@ const loginSrc = `{{define "body"}}<section class="card login"{{if .Pending}} ar
 </form></div>{{end}}
 <style>
 .login .gap{height:24px}
-.modal{position:fixed;inset:0;z-index:10;display:grid;place-items:center;padding:16px;background:rgba(8,18,16,.42);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);animation:fade .2s ease-out both}
+body:has(.modal){overflow:hidden}
+.modal{position:fixed;inset:0;z-index:10;display:grid;place-items:center;padding:16px;overflow:auto;overscroll-behavior:contain;background:rgba(8,18,16,.42);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);animation:fade .2s ease-out both}
 @keyframes fade{from{opacity:0}to{opacity:1}}
 .sheet{max-width:380px;text-align:center;animation:pop .25s cubic-bezier(.2,.9,.3,1.2) both}
 @keyframes pop{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:none}}

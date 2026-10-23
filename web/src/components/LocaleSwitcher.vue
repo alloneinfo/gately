@@ -1,5 +1,5 @@
 <template>
-  <el-dropdown trigger="click" @command="onCommand">
+  <el-dropdown trigger="click" popper-class="locale-popper" @command="onCommand" @visible-change="lockScroll">
     <button class="picker-btn" :aria-label="t('common.language')" :title="t('common.language')">
       <Languages :size="18" />
     </button>
@@ -24,8 +24,12 @@ import { Check, Languages } from 'lucide-vue-next'
 import { useI18n } from 'vue-i18n'
 import { setLocale } from '../i18n'
 import { locales } from '../i18n/locales'
+import { useScrollLock } from '../composables/useScrollLock'
 
 const { t, locale } = useI18n()
+
+// 菜单打开期间锁定页面滚动，滚轮和触摸滑动不穿透到下方页面
+const lockScroll = useScrollLock('.locale-popper')
 
 const ISSUES_URL = 'https://github.com/wangwanjie/gately/issues'
 

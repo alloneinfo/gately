@@ -30,7 +30,7 @@
         <div class="header-right">
           <LocaleSwitcher />
           <ThemePicker />
-          <el-dropdown trigger="click" @command="onCommand">
+          <el-dropdown trigger="click" popper-class="user-popper" @command="onCommand" @visible-change="lockScroll">
             <button class="user-btn">
               <span class="avatar">{{ (username || 'A').slice(0, 1).toUpperCase() }}</span>
               <span v-if="!isMobile" class="user-name">{{ username }}</span>
@@ -75,6 +75,7 @@ import ThemePicker from '../components/ThemePicker.vue'
 import LocaleSwitcher from '../components/LocaleSwitcher.vue'
 import { disabledModules, groupByPath, pathEnabled } from '../nav'
 import { useIsMobile } from '../composables/useIsMobile'
+import { useScrollLock } from '../composables/useScrollLock'
 
 const route = useRoute()
 const { t } = useI18n()
@@ -88,6 +89,8 @@ const defaultPassword = ref(false)
 const drawer = ref(false)
 const collapsed = ref(localStorage.getItem('gately-collapsed') === '1')
 const group = computed(() => groupByPath(route.path))
+// 用户菜单与语言、皮肤弹出层一致：打开期间页面不随滚轮滚动
+const lockScroll = useScrollLock('.user-popper')
 
 function toggleCollapse() {
   collapsed.value = !collapsed.value
