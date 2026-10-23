@@ -23,3 +23,19 @@ func TestSnapshot(t *testing.T) {
 	b, _ := json.MarshalIndent(s, "", "  ")
 	t.Log(string(b))
 }
+
+func TestIsVirtual(t *testing.T) {
+	cases := map[string]bool{
+		// OpenWrt 的局域网、广域网网桥要展示
+		"br-lan": false, "br-wan": false, "br-guest": false, "eth0": false, "tailscale0": false,
+		// Docker 自定义网络网桥与常见虚拟网卡隐藏
+		"br-1a2b3c4d5e6f": true, "docker0": true, "veth12ab": true, "virbr0": true,
+		// 长度或字符不符合 Docker 规则的 br- 网卡按真实网卡处理
+		"br-1a2b3c4d5e6": false, "br-1A2B3C4D5E6F": false,
+	}
+	for name, want := range cases {
+		if got := isVirtual(name); got != want {
+			t.Errorf("isVirtual(%q) = %v，期望 %v", name, got, want)
+		}
+	}
+}

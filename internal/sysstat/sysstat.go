@@ -172,15 +172,33 @@ func clampPercent(v float64) float64 {
 }
 
 // virtualPrefixes 是容器与虚拟化产生的网卡前缀，数量多且对用户意义不大，概览中隐藏。
-var virtualPrefixes = []string{"veth", "docker", "br-", "virbr", "cni", "flannel", "vnet", "tap", "dummy", "kube", "cali", "lxc"}
+// Docker 自定义网络的网桥另由 isDockerBridge 识别：OpenWrt 的 br-lan、br-wan 同样以 br- 开头，是真实的局域网口。
+var virtualPrefixes = []string{"veth", "docker", "virbr", "cni", "flannel", "vnet", "tap", "dummy", "kube", "cali", "lxc"}
 
 func isVirtual(name string) bool {
+	if isDockerBridge(name) {
+		return true
+	}
 	for _, p := range virtualPrefixes {
 		if strings.HasPrefix(name, p) {
 			return true
 		}
 	}
 	return false
+}
+
+// isDockerBridge 判断网卡是否为 Docker 自定义网络的网桥，其名称固定为 br- 加网络 ID 的前 12 位十六进制。
+func isDockerBridge(name string) bool {
+	id, ok := strings.CutPrefix(name, "br-")
+	if !ok || len(id) != 12 {
+		return false
+	}
+	for _, c := range id {
+		if !(c >= '0' && c <= '9' || c >= 'a' && c <= 'f') {
+			return false
+		}
+	}
+	return true
 }
 
 // interfaces 列出处于启用状态、配置了地址的网卡，并附带流量计数与速率。
