@@ -5,7 +5,14 @@
   "themePicker": {
     "switchTheme": "Design wechseln",
     "title": "Designfarben",
-    "followSystem": "System folgen (Smaragd / Dunkel)"
+    "mode": "Darstellung",
+    "modeLight": "Hell",
+    "modeDark": "Dunkel",
+    "modeAuto": "System",
+    "groupOriginal": "Gately-Originale",
+    "groupClassic": "Klassische Paletten",
+    "darkOnly": "Nur dunkel",
+    "lightOnly": "Nur hell"
   },
   "moduleBanner": {
     "defaultDesc": "Solange das Modul deaktiviert ist, wird keiner der folgenden Einträge ausgeführt. Nach der Aktivierung richtet sich jeder Eintrag nach seinem eigenen Schalter.",

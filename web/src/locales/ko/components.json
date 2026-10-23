@@ -5,7 +5,14 @@
   "themePicker": {
     "switchTheme": "테마 전환",
     "title": "테마 색상",
-    "followSystem": "시스템 설정 따르기 (에메랄드 / 다크)"
+    "mode": "화면 모드",
+    "modeLight": "라이트",
+    "modeDark": "다크",
+    "modeAuto": "시스템",
+    "groupOriginal": "Gately 오리지널",
+    "groupClassic": "클래식 팔레트",
+    "darkOnly": "다크 전용",
+    "lightOnly": "라이트 전용"
   },
   "moduleBanner": {
     "defaultDesc": "모듈을 사용하지 않는 동안 아래 항목은 모두 실행되지 않습니다. 모듈을 사용하면 각 항목은 자체 스위치에 따라 동작합니다.",

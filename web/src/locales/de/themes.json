@@ -19,10 +19,6 @@
     "name": "Sonnenuntergang",
     "desc": "Bernstein und Orange · warm und satt"
   },
-  "dark": {
-    "name": "Dunkel",
-    "desc": "Klassisches Dunkelgrau · augenschonend bei Nacht"
-  },
   "midnight": {
     "name": "Mitternacht",
     "desc": "Indigoblauer Nachthimmel · konzentriert und immersiv"
@@ -30,5 +26,29 @@
   "punk": {
     "name": "Punk",
     "desc": "Neonpink und Cyan · scharfer Cyberpunk"
+  },
+  "github": {
+    "desc": "GitHub-Farben · vertraut und klar"
+  },
+  "nord": {
+    "desc": "Arktisches Eisblau · gedämpft und kühl"
+  },
+  "dracula": {
+    "desc": "Vampir-Lila und Pink · ein Entwickler-Klassiker"
+  },
+  "catppuccin": {
+    "desc": "Sanfte Pastelltöne · Latte / Mocha"
+  },
+  "tokyoNight": {
+    "desc": "Tokio bei Nacht · Neonblau und Violett"
+  },
+  "gruvbox": {
+    "desc": "Retro-Warmgelb · augenschonend"
+  },
+  "rosePine": {
+    "desc": "Rose und Kiefer · ruhig und elegant"
+  },
+  "solarized": {
+    "desc": "Präziser Klassiker · warm und kühl im Gleichgewicht"
   }
 }

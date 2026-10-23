@@ -5,7 +5,14 @@
   "themePicker": {
     "switchTheme": "切换主题",
     "title": "主题配色",
-    "followSystem": "跟随系统（翠绿 / 暗黑）"
+    "mode": "亮暗模式",
+    "modeLight": "亮色",
+    "modeDark": "暗色",
+    "modeAuto": "跟随系统",
+    "groupOriginal": "Gately 原创",
+    "groupClassic": "经典配色",
+    "darkOnly": "仅暗色",
+    "lightOnly": "仅亮色"
   },
   "moduleBanner": {
     "defaultDesc": "模块停用期间，下列条目全部不会运行；启用模块后，各条目按自身开关生效。",

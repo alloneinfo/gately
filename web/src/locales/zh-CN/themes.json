@@ -19,10 +19,6 @@
     "name": "暮光",
     "desc": "琥珀橙红 · 温暖厚重"
   },
-  "dark": {
-    "name": "暗黑",
-    "desc": "经典深灰 · 夜间护眼"
-  },
   "midnight": {
     "name": "午夜",
     "desc": "靛蓝星空 · 沉浸专注"
@@ -30,5 +26,29 @@
   "punk": {
     "name": "朋克",
     "desc": "霓虹粉青 · 锐角赛博"
+  },
+  "github": {
+    "desc": "GitHub 官方配色 · 熟悉简洁"
+  },
+  "nord": {
+    "desc": "北极冰蓝 · 低饱和冷调"
+  },
+  "dracula": {
+    "desc": "吸血鬼紫粉 · 经典开发者配色"
+  },
+  "catppuccin": {
+    "desc": "马卡龙柔彩 · Latte / Mocha"
+  },
+  "tokyoNight": {
+    "desc": "东京夜景 · 霓虹蓝紫"
+  },
+  "gruvbox": {
+    "desc": "复古暖黄 · 柔和护眼"
+  },
+  "rosePine": {
+    "desc": "玫瑰松林 · 低调雅致"
+  },
+  "solarized": {
+    "desc": "经典精确配色 · 冷暖平衡"
   }
 }

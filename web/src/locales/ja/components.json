@@ -5,7 +5,14 @@
   "themePicker": {
     "switchTheme": "テーマを切り替え",
     "title": "テーマカラー",
-    "followSystem": "システムに合わせる（エメラルド / ダーク）"
+    "mode": "表示モード",
+    "modeLight": "ライト",
+    "modeDark": "ダーク",
+    "modeAuto": "システム",
+    "groupOriginal": "Gately オリジナル",
+    "groupClassic": "定番パレット",
+    "darkOnly": "ダークのみ",
+    "lightOnly": "ライトのみ"
   },
   "moduleBanner": {
     "defaultDesc": "モジュールが無効の間は、以下の項目はすべて動作しません。モジュールを有効にすると、各項目は個別のスイッチに従います。",

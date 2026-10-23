@@ -324,3 +324,15 @@ html[data-theme='punk'] ::selection {
   background: var(--el-color-primary);
   color: #fff;
 }
+
+/* 换肤过渡：新主题从点击处以圆形展开（动画由 useTheme 驱动），过渡期间关闭其它过渡避免新画面渐变 */
+html.theme-vt::view-transition-old(root),
+html.theme-vt::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+html.theme-vt *,
+html.theme-vt *::before,
+html.theme-vt *::after {
+  transition: none !important;
+}

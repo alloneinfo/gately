@@ -19,10 +19,6 @@
     "name": "Atardecer",
     "desc": "Ámbar y naranja · cálido e intenso"
   },
-  "dark": {
-    "name": "Oscuro",
-    "desc": "Gris oscuro clásico · cómodo para la vista de noche"
-  },
   "midnight": {
     "name": "Medianoche",
     "desc": "Cielo nocturno índigo · concentración inmersiva"
@@ -30,5 +26,29 @@
   "punk": {
     "name": "Punk",
     "desc": "Rosa y cian neón · cyberpunk afilado"
+  },
+  "github": {
+    "desc": "Colores de GitHub · familiares y limpios"
+  },
+  "nord": {
+    "desc": "Azul hielo ártico · suave y frío"
+  },
+  "dracula": {
+    "desc": "Morado y rosa vampiro · un clásico para desarrolladores"
+  },
+  "catppuccin": {
+    "desc": "Pasteles suaves · Latte / Mocha"
+  },
+  "tokyoNight": {
+    "desc": "Tokio de noche · azul y violeta neón"
+  },
+  "gruvbox": {
+    "desc": "Amarillo retro cálido · suave para la vista"
+  },
+  "rosePine": {
+    "desc": "Rosa y pino · sobrio y elegante"
+  },
+  "solarized": {
+    "desc": "Clásico preciso · equilibrio cálido y frío"
   }
 }

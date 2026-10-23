@@ -5,7 +5,14 @@
   "themePicker": {
     "switchTheme": "Switch theme",
     "title": "Theme colors",
-    "followSystem": "Follow system (Emerald / Dark)"
+    "mode": "Appearance",
+    "modeLight": "Light",
+    "modeDark": "Dark",
+    "modeAuto": "System",
+    "groupOriginal": "Gately originals",
+    "groupClassic": "Classic palettes",
+    "darkOnly": "Dark only",
+    "lightOnly": "Light only"
   },
   "moduleBanner": {
     "defaultDesc": "While the module is disabled, none of the items below will run. After enabling it, each item follows its own switch.",

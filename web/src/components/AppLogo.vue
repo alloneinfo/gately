@@ -24,8 +24,8 @@ const gid = `gl-${Math.random().toString(36).slice(2, 8)}`
   flex-shrink: 0;
   display: block;
 }
-/* 朋克主题使用锐角 */
-:global(html[data-theme='punk']) .logo-bg {
-  rx: 4px;
+/* 圆角随主题变化（如朋克使用锐角） */
+.logo-bg {
+  rx: var(--g-logo-radius, 9px);
 }
 </style>

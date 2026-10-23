@@ -5,7 +5,14 @@
   "themePicker": {
     "switchTheme": "Changer de thème",
     "title": "Couleurs du thème",
-    "followSystem": "Suivre le système (Émeraude / Sombre)"
+    "mode": "Apparence",
+    "modeLight": "Clair",
+    "modeDark": "Sombre",
+    "modeAuto": "Système",
+    "groupOriginal": "Créations Gately",
+    "groupClassic": "Palettes classiques",
+    "darkOnly": "Sombre uniquement",
+    "lightOnly": "Clair uniquement"
   },
   "moduleBanner": {
     "defaultDesc": "Tant que le module est désactivé, aucun des éléments ci-dessous ne s'exécute. Une fois activé, chaque élément suit son propre interrupteur.",

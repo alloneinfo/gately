@@ -19,10 +19,6 @@
     "name": "Sunset",
     "desc": "Amber and orange · warm and rich"
   },
-  "dark": {
-    "name": "Dark",
-    "desc": "Classic dark gray · easy on the eyes at night"
-  },
   "midnight": {
     "name": "Midnight",
     "desc": "Indigo night sky · immersive focus"
@@ -30,5 +26,29 @@
   "punk": {
     "name": "Punk",
     "desc": "Neon pink and cyan · sharp cyberpunk"
+  },
+  "github": {
+    "desc": "GitHub colors · familiar and clean"
+  },
+  "nord": {
+    "desc": "Arctic ice blue · muted and cool"
+  },
+  "dracula": {
+    "desc": "Vampire purple and pink · a developer classic"
+  },
+  "catppuccin": {
+    "desc": "Soft pastels · Latte / Mocha"
+  },
+  "tokyoNight": {
+    "desc": "Tokyo at night · neon blue and violet"
+  },
+  "gruvbox": {
+    "desc": "Retro warm yellow · soft on the eyes"
+  },
+  "rosePine": {
+    "desc": "Rose and pine · quiet and elegant"
+  },
+  "solarized": {
+    "desc": "Precision classic · balanced warm and cool"
   }
 }

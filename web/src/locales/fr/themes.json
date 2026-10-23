@@ -19,10 +19,6 @@
     "name": "Coucher de soleil",
     "desc": "Ambre et orange · chaud et riche"
   },
-  "dark": {
-    "name": "Sombre",
-    "desc": "Gris foncé classique · reposant la nuit"
-  },
   "midnight": {
     "name": "Minuit",
     "desc": "Ciel nocturne indigo · concentration immersive"
@@ -30,5 +26,29 @@
   "punk": {
     "name": "Punk",
     "desc": "Rose néon et cyan · cyberpunk tranchant"
+  },
+  "github": {
+    "desc": "Couleurs GitHub · familières et nettes"
+  },
+  "nord": {
+    "desc": "Bleu glacier arctique · doux et froid"
+  },
+  "dracula": {
+    "desc": "Violet et rose vampire · un classique des développeurs"
+  },
+  "catppuccin": {
+    "desc": "Pastels doux · Latte / Mocha"
+  },
+  "tokyoNight": {
+    "desc": "Tokyo la nuit · bleu et violet néon"
+  },
+  "gruvbox": {
+    "desc": "Jaune rétro chaleureux · doux pour les yeux"
+  },
+  "rosePine": {
+    "desc": "Rose et pin · discret et élégant"
+  },
+  "solarized": {
+    "desc": "Classique précis · équilibre chaud et froid"
   }
 }

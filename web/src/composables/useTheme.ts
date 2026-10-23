@@ -1,17 +1,18 @@
-// 换肤：主题 ID 保存在 localStorage；选择“跟随系统”时按 prefers-color-scheme 在翠绿/暗黑间切换。
-import { computed, ref } from 'vue'
-import { AUTO_ID, buildThemeVars, findTheme, logoSvg, themes, type ThemeDef } from '../themes'
+// 换肤：色系与亮暗模式分别保存在 localStorage；模式为“跟随系统”时按 prefers-color-scheme 取色系的亮色或暗色调色板。
+import { computed, ref, watch } from 'vue'
+import { DEFAULT_FAMILY, buildThemeVars, findFamily, legacyTheme, logoSvg, resolveTheme, themeFamilies, type ThemeDef, type ThemeMode } from '../themes'
 
-const storageKey = 'gately-theme'
-// choice 是用户的选择（含 auto），current 是实际生效的主题
-const choice = ref<string>(AUTO_ID)
+const familyKey = 'gately-theme-family'
+const modeKey = 'gately-theme-mode'
+const legacyKey = 'gately-theme' // 旧版只保存单一主题 ID
+
+// family/mode 是用户的选择；preview 是选择面板里悬停预览的色系，为 null 时不预览
+const family = ref<string>(DEFAULT_FAMILY)
+const mode = ref<ThemeMode>('auto')
+const preview = ref<string | null>(null)
 const systemDark = ref(false)
-const current = computed<ThemeDef>(() => {
-  if (choice.value === AUTO_ID) {
-    return findTheme(systemDark.value ? 'dark' : 'emerald')
-  }
-  return findTheme(choice.value)
-})
+const wantDark = computed(() => (mode.value === 'auto' ? systemDark.value : mode.value === 'dark'))
+const current = computed<ThemeDef>(() => resolveTheme(findFamily(preview.value ?? family.value), wantDark.value))
 const isDark = computed(() => current.value.dark)
 let installed = false
 // 记录上次写入的变量名，切换时清理，避免残留
@@ -44,6 +45,29 @@ function apply() {
   setLink('icon', { href, type: 'image/svg+xml' }, 'link[rel="icon"][type="image/svg+xml"]')
 }
 
+// load 读取保存的选择；新键不存在时从旧版的单一主题 ID 迁移。
+function load() {
+  const savedFamily = localStorage.getItem(familyKey)
+  const savedMode = localStorage.getItem(modeKey)
+  if (savedFamily || savedMode) {
+    if (savedFamily && themeFamilies.some((f) => f.id === savedFamily)) {
+      family.value = savedFamily
+    }
+    if (savedMode === 'light' || savedMode === 'dark' || savedMode === 'auto') {
+      mode.value = savedMode
+    }
+    return
+  }
+  const legacy = legacyTheme(localStorage.getItem(legacyKey) ?? '')
+  if (legacy) {
+    family.value = legacy.family
+    mode.value = legacy.mode
+    localStorage.setItem(familyKey, legacy.family)
+    localStorage.setItem(modeKey, legacy.mode)
+    localStorage.removeItem(legacyKey)
+  }
+}
+
 function install() {
   if (installed || typeof window === 'undefined') {
     return
@@ -53,28 +77,66 @@ function install() {
   systemDark.value = mql.matches
   mql.addEventListener('change', (e) => {
     systemDark.value = e.matches
-    if (choice.value === AUTO_ID) {
-      apply()
-    }
   })
-  const saved = localStorage.getItem(storageKey)
-  if (saved === 'light') {
-    // 兼容旧版本只有亮/暗两种的存储值
-    choice.value = 'emerald'
-  } else if (saved && (saved === AUTO_ID || themes.some((t) => t.id === saved))) {
-    choice.value = saved
-  }
+  load()
   apply()
+  // 生效主题的任何来源（选择、预览、系统亮暗）变化都同步刷新；flush: 'sync' 让视图过渡回调里的修改立即落到 DOM
+  watch(current, apply, { flush: 'sync' })
+}
+
+// withReveal 用视图过渡从 (x, y) 处以圆形扩散展开新主题；浏览器不支持或用户偏好减少动效时直接切换。
+function withReveal(update: () => void, x?: number, y?: number) {
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  if (!document.startViewTransition || reduce || x === undefined || y === undefined) {
+    update()
+    return
+  }
+  const root = document.documentElement
+  root.classList.add('theme-vt')
+  const vt = document.startViewTransition(update)
+  const r = Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y))
+  vt.ready
+    .then(() => {
+      root.animate(
+        { clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${r}px at ${x}px ${y}px)`] },
+        { duration: 450, easing: 'ease-in-out', pseudoElement: '::view-transition-new(root)' },
+      )
+    })
+    .catch(() => {})
+  vt.finished.finally(() => root.classList.remove('theme-vt'))
 }
 
 export function useTheme() {
   install()
-  function setTheme(id: string) {
-    choice.value = id
-    localStorage.setItem(storageKey, id)
-    apply()
+  // setFamily 选定色系；传入点击坐标时带圆形过渡
+  function setFamily(id: string, x?: number, y?: number) {
+    // 悬停预览已经展示了该色系，此时无需再过渡
+    const shown = preview.value === id
+    const update = () => {
+      preview.value = null
+      family.value = id
+    }
+    localStorage.setItem(familyKey, id)
+    if (shown || id === family.value) {
+      update()
+      return
+    }
+    withReveal(update, x, y)
   }
-  return { choice, current, isDark, setTheme }
+  function setMode(m: ThemeMode, x?: number, y?: number) {
+    if (m === mode.value) {
+      return
+    }
+    localStorage.setItem(modeKey, m)
+    withReveal(() => {
+      mode.value = m
+    }, x, y)
+  }
+  // setPreview 临时展示某个色系，传 null 恢复用户的选择
+  function setPreview(id: string | null) {
+    preview.value = id
+  }
+  return { family, mode, wantDark, current, isDark, setFamily, setMode, setPreview }
 }
 
 // initTheme 在应用挂载前调用，避免首屏闪烁。
