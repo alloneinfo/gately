@@ -1186,6 +1186,9 @@
       },
       "ssl.Deploy": {
         "properties": {
+          "certName": {
+            "type": "string"
+          },
           "command": {
             "type": "string"
           },
@@ -1210,6 +1213,9 @@
           },
           "enable": {
             "type": "boolean"
+          },
+          "keyName": {
+            "type": "string"
           },
           "remark": {
             "type": "string"
@@ -3230,12 +3236,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "`since` 매개변수로 증분 조회를 지원하며, 일련번호가 이 값보다 큰 로그를 반환합니다.\n\n필요한 권한: `backup:read`.",
+        "description": "`since` 매개변수로 증분 조회를 지원하며 순번이 이 값보다 큰 로그를 반환합니다. `before`는 순번이 이 값보다 작은 로그를 반환하여 이전 기록을 불러올 때 사용하고, `limit`는 그중 최신 항목만 반환합니다.\n\n필요한 권한: `backup:read`.",
         "parameters": [
           {
             "description": "증분 조회: 일련번호가 이 값보다 큰 로그만 반환",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "이전 로그 불러오기: 순번이 이 값보다 작은 로그만 반환",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "반환할 최대 개수로, 조건에 맞는 최신 항목부터 가져옵니다. 0 또는 생략 시 제한 없음",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -4032,12 +4054,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "`since` 매개변수로 증분 조회를 지원하며, 일련번호가 이 값보다 큰 로그를 반환합니다.\n\n필요한 권한: `cloudflared:read`.",
+        "description": "`since` 매개변수로 증분 조회를 지원하며 순번이 이 값보다 큰 로그를 반환합니다. `before`는 순번이 이 값보다 작은 로그를 반환하여 이전 기록을 불러올 때 사용하고, `limit`는 그중 최신 항목만 반환합니다.\n\n필요한 권한: `cloudflared:read`.",
         "parameters": [
           {
             "description": "증분 조회: 일련번호가 이 값보다 큰 로그만 반환",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "이전 로그 불러오기: 순번이 이 값보다 작은 로그만 반환",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "반환할 최대 개수로, 조건에 맞는 최신 항목부터 가져옵니다. 0 또는 생략 시 제한 없음",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -4704,12 +4742,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "`since` 매개변수로 증분 조회를 지원하며, 일련번호가 이 값보다 큰 로그를 반환합니다.\n\n필요한 권한: `cron:read`.",
+        "description": "`since` 매개변수로 증분 조회를 지원하며 순번이 이 값보다 큰 로그를 반환합니다. `before`는 순번이 이 값보다 작은 로그를 반환하여 이전 기록을 불러올 때 사용하고, `limit`는 그중 최신 항목만 반환합니다.\n\n필요한 권한: `cron:read`.",
         "parameters": [
           {
             "description": "증분 조회: 일련번호가 이 값보다 큰 로그만 반환",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "이전 로그 불러오기: 순번이 이 값보다 작은 로그만 반환",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "반환할 최대 개수로, 조건에 맞는 최신 항목부터 가져옵니다. 0 또는 생략 시 제한 없음",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -5438,12 +5492,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "`since` 매개변수로 증분 조회를 지원하며, 일련번호가 이 값보다 큰 로그를 반환합니다.\n\n필요한 권한: `ddns:read`.",
+        "description": "`since` 매개변수로 증분 조회를 지원하며 순번이 이 값보다 큰 로그를 반환합니다. `before`는 순번이 이 값보다 작은 로그를 반환하여 이전 기록을 불러올 때 사용하고, `limit`는 그중 최신 항목만 반환합니다.\n\n필요한 권한: `ddns:read`.",
         "parameters": [
           {
             "description": "증분 조회: 일련번호가 이 값보다 큰 로그만 반환",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "이전 로그 불러오기: 순번이 이 값보다 작은 로그만 반환",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "반환할 최대 개수로, 조건에 맞는 최신 항목부터 가져옵니다. 0 또는 생략 시 제한 없음",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -9018,12 +9088,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "`since` 매개변수로 증분 조회를 지원하며, 일련번호가 이 값보다 큰 로그를 반환합니다.\n\n필요한 권한: `docker:read`.",
+        "description": "`since` 매개변수로 증분 조회를 지원하며 순번이 이 값보다 큰 로그를 반환합니다. `before`는 순번이 이 값보다 작은 로그를 반환하여 이전 기록을 불러올 때 사용하고, `limit`는 그중 최신 항목만 반환합니다.\n\n필요한 권한: `docker:read`.",
         "parameters": [
           {
             "description": "증분 조회: 일련번호가 이 값보다 큰 로그만 반환",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "이전 로그 불러오기: 순번이 이 값보다 작은 로그만 반환",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "반환할 최대 개수로, 조건에 맞는 최신 항목부터 가져옵니다. 0 또는 생략 시 제한 없음",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -10236,12 +10322,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "`since` 매개변수로 증분 조회를 지원하며, 일련번호가 이 값보다 큰 로그를 반환합니다.\n\n필요한 권한: `frp:read`.",
+        "description": "`since` 매개변수로 증분 조회를 지원하며 순번이 이 값보다 큰 로그를 반환합니다. `before`는 순번이 이 값보다 작은 로그를 반환하여 이전 기록을 불러올 때 사용하고, `limit`는 그중 최신 항목만 반환합니다.\n\n필요한 권한: `frp:read`.",
         "parameters": [
           {
             "description": "증분 조회: 일련번호가 이 값보다 큰 로그만 반환",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "이전 로그 불러오기: 순번이 이 값보다 작은 로그만 반환",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "반환할 최대 개수로, 조건에 맞는 최신 항목부터 가져옵니다. 0 또는 생략 시 제한 없음",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -10847,12 +10949,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "`since` 매개변수로 증분 조회를 지원하며, 일련번호가 이 값보다 큰 로그를 반환합니다.\n\n필요한 권한: `ftp:read`.",
+        "description": "`since` 매개변수로 증분 조회를 지원하며 순번이 이 값보다 큰 로그를 반환합니다. `before`는 순번이 이 값보다 작은 로그를 반환하여 이전 기록을 불러올 때 사용하고, `limit`는 그중 최신 항목만 반환합니다.\n\n필요한 권한: `ftp:read`.",
         "parameters": [
           {
             "description": "증분 조회: 일련번호가 이 값보다 큰 로그만 반환",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "이전 로그 불러오기: 순번이 이 값보다 작은 로그만 반환",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "반환할 최대 개수로, 조건에 맞는 최신 항목부터 가져옵니다. 0 또는 생략 시 제한 없음",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -11763,12 +11881,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "`since` 매개변수로 증분 조회를 지원하며, 일련번호가 이 값보다 큰 로그를 반환합니다.\n\n필요한 권한: `guard:read`.",
+        "description": "`since` 매개변수로 증분 조회를 지원하며 순번이 이 값보다 큰 로그를 반환합니다. `before`는 순번이 이 값보다 작은 로그를 반환하여 이전 기록을 불러올 때 사용하고, `limit`는 그중 최신 항목만 반환합니다.\n\n필요한 권한: `guard:read`.",
         "parameters": [
           {
             "description": "증분 조회: 일련번호가 이 값보다 큰 로그만 반환",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "이전 로그 불러오기: 순번이 이 값보다 작은 로그만 반환",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "반환할 최대 개수로, 조건에 맞는 최신 항목부터 가져옵니다. 0 또는 생략 시 제한 없음",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -12291,12 +12425,28 @@
     },
     "/api/logs": {
       "get": {
-        "description": "`since` 매개변수로 증분 조회를 지원합니다.\n\n필요한 권한: `logs:read`.",
+        "description": "`since` 매개변수로 증분 조회를 지원하며 순번이 이 값보다 큰 로그를 반환합니다. `before`는 순번이 이 값보다 작은 로그를 반환하여 이전 기록을 불러올 때 사용하고, `limit`는 그중 최신 항목만 반환합니다.\n\n필요한 권한: `logs:read`.",
         "parameters": [
           {
             "description": "증분 조회: 일련번호가 이 값보다 큰 로그만 반환",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "이전 로그 불러오기: 순번이 이 값보다 작은 로그만 반환",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "반환할 최대 개수로, 조건에 맞는 최신 항목부터 가져옵니다. 0 또는 생략 시 제한 없음",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -12452,12 +12602,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "`since` 매개변수로 증분 조회를 지원하며, 일련번호가 이 값보다 큰 로그를 반환합니다.\n\n필요한 권한: `nettools:read`.",
+        "description": "`since` 매개변수로 증분 조회를 지원하며 순번이 이 값보다 큰 로그를 반환합니다. `before`는 순번이 이 값보다 작은 로그를 반환하여 이전 기록을 불러올 때 사용하고, `limit`는 그중 최신 항목만 반환합니다.\n\n필요한 권한: `nettools:read`.",
         "parameters": [
           {
             "description": "증분 조회: 일련번호가 이 값보다 큰 로그만 반환",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "이전 로그 불러오기: 순번이 이 값보다 작은 로그만 반환",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "반환할 최대 개수로, 조건에 맞는 최신 항목부터 가져옵니다. 0 또는 생략 시 제한 없음",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -13576,12 +13742,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "`since` 매개변수로 증분 조회를 지원하며, 일련번호가 이 값보다 큰 로그를 반환합니다.\n\n필요한 권한: `notify:read`.",
+        "description": "`since` 매개변수로 증분 조회를 지원하며 순번이 이 값보다 큰 로그를 반환합니다. `before`는 순번이 이 값보다 작은 로그를 반환하여 이전 기록을 불러올 때 사용하고, `limit`는 그중 최신 항목만 반환합니다.\n\n필요한 권한: `notify:read`.",
         "parameters": [
           {
             "description": "증분 조회: 일련번호가 이 값보다 큰 로그만 반환",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "이전 로그 불러오기: 순번이 이 값보다 작은 로그만 반환",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "반환할 최대 개수로, 조건에 맞는 최신 항목부터 가져옵니다. 0 또는 생략 시 제한 없음",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -14119,12 +14301,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "`since` 매개변수로 증분 조회를 지원하며, 일련번호가 이 값보다 큰 로그를 반환합니다.\n\n필요한 권한: `portforward:read`.",
+        "description": "`since` 매개변수로 증분 조회를 지원하며 순번이 이 값보다 큰 로그를 반환합니다. `before`는 순번이 이 값보다 작은 로그를 반환하여 이전 기록을 불러올 때 사용하고, `limit`는 그중 최신 항목만 반환합니다.\n\n필요한 권한: `portforward:read`.",
         "parameters": [
           {
             "description": "증분 조회: 일련번호가 이 값보다 큰 로그만 반환",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "이전 로그 불러오기: 순번이 이 값보다 작은 로그만 반환",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "반환할 최대 개수로, 조건에 맞는 최신 항목부터 가져옵니다. 0 또는 생략 시 제한 없음",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -15397,12 +15595,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "`since` 매개변수로 증분 조회를 지원하며, 일련번호가 이 값보다 큰 로그를 반환합니다.\n\n필요한 권한: `ssl:read`.",
+        "description": "`since` 매개변수로 증분 조회를 지원하며 순번이 이 값보다 큰 로그를 반환합니다. `before`는 순번이 이 값보다 작은 로그를 반환하여 이전 기록을 불러올 때 사용하고, `limit`는 그중 최신 항목만 반환합니다.\n\n필요한 권한: `ssl:read`.",
         "parameters": [
           {
             "description": "증분 조회: 일련번호가 이 값보다 큰 로그만 반환",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "이전 로그 불러오기: 순번이 이 값보다 작은 로그만 반환",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "반환할 최대 개수로, 조건에 맞는 최신 항목부터 가져옵니다. 0 또는 생략 시 제한 없음",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -16102,12 +16316,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "`since` 매개변수로 증분 조회를 지원하며, 일련번호가 이 값보다 큰 로그를 반환합니다.\n\n필요한 권한: `storage:read`.",
+        "description": "`since` 매개변수로 증분 조회를 지원하며 순번이 이 값보다 큰 로그를 반환합니다. `before`는 순번이 이 값보다 작은 로그를 반환하여 이전 기록을 불러올 때 사용하고, `limit`는 그중 최신 항목만 반환합니다.\n\n필요한 권한: `storage:read`.",
         "parameters": [
           {
             "description": "증분 조회: 일련번호가 이 값보다 큰 로그만 반환",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "이전 로그 불러오기: 순번이 이 값보다 작은 로그만 반환",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "반환할 최대 개수로, 조건에 맞는 최신 항목부터 가져옵니다. 0 또는 생략 시 제한 없음",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -16604,12 +16834,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "`since` 매개변수로 증분 조회를 지원하며, 일련번호가 이 값보다 큰 로그를 반환합니다.\n\n필요한 권한: `stun:read`.",
+        "description": "`since` 매개변수로 증분 조회를 지원하며 순번이 이 값보다 큰 로그를 반환합니다. `before`는 순번이 이 값보다 작은 로그를 반환하여 이전 기록을 불러올 때 사용하고, `limit`는 그중 최신 항목만 반환합니다.\n\n필요한 권한: `stun:read`.",
         "parameters": [
           {
             "description": "증분 조회: 일련번호가 이 값보다 큰 로그만 반환",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "이전 로그 불러오기: 순번이 이 값보다 작은 로그만 반환",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "반환할 최대 개수로, 조건에 맞는 최신 항목부터 가져옵니다. 0 또는 생략 시 제한 없음",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -18085,12 +18331,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "`since` 매개변수로 증분 조회를 지원하며, 일련번호가 이 값보다 큰 로그를 반환합니다.\n\n필요한 권한: `tailscale:read`.",
+        "description": "`since` 매개변수로 증분 조회를 지원하며 순번이 이 값보다 큰 로그를 반환합니다. `before`는 순번이 이 값보다 작은 로그를 반환하여 이전 기록을 불러올 때 사용하고, `limit`는 그중 최신 항목만 반환합니다.\n\n필요한 권한: `tailscale:read`.",
         "parameters": [
           {
             "description": "증분 조회: 일련번호가 이 값보다 큰 로그만 반환",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "이전 로그 불러오기: 순번이 이 값보다 작은 로그만 반환",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "반환할 최대 개수로, 조건에 맞는 최신 항목부터 가져옵니다. 0 또는 생략 시 제한 없음",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -19230,12 +19492,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "`since` 매개변수로 증분 조회를 지원하며, 일련번호가 이 값보다 큰 로그를 반환합니다.\n\n필요한 권한: `waf:read`.",
+        "description": "`since` 매개변수로 증분 조회를 지원하며 순번이 이 값보다 큰 로그를 반환합니다. `before`는 순번이 이 값보다 작은 로그를 반환하여 이전 기록을 불러올 때 사용하고, `limit`는 그중 최신 항목만 반환합니다.\n\n필요한 권한: `waf:read`.",
         "parameters": [
           {
             "description": "증분 조회: 일련번호가 이 값보다 큰 로그만 반환",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "이전 로그 불러오기: 순번이 이 값보다 작은 로그만 반환",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "반환할 최대 개수로, 조건에 맞는 최신 항목부터 가져옵니다. 0 또는 생략 시 제한 없음",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -19340,12 +19618,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "`since` 매개변수로 증분 조회를 지원하며, 일련번호가 이 값보다 큰 로그를 반환합니다.\n\n필요한 권한: `webdav:read`.",
+        "description": "`since` 매개변수로 증분 조회를 지원하며 순번이 이 값보다 큰 로그를 반환합니다. `before`는 순번이 이 값보다 작은 로그를 반환하여 이전 기록을 불러올 때 사용하고, `limit`는 그중 최신 항목만 반환합니다.\n\n필요한 권한: `webdav:read`.",
         "parameters": [
           {
             "description": "증분 조회: 일련번호가 이 값보다 큰 로그만 반환",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "이전 로그 불러오기: 순번이 이 값보다 작은 로그만 반환",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "반환할 최대 개수로, 조건에 맞는 최신 항목부터 가져옵니다. 0 또는 생략 시 제한 없음",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -20866,12 +21160,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "`since` 매개변수로 증분 조회를 지원하며, 일련번호가 이 값보다 큰 로그를 반환합니다.\n\n필요한 권한: `webservice:read`.",
+        "description": "`since` 매개변수로 증분 조회를 지원하며 순번이 이 값보다 큰 로그를 반환합니다. `before`는 순번이 이 값보다 작은 로그를 반환하여 이전 기록을 불러올 때 사용하고, `limit`는 그중 최신 항목만 반환합니다.\n\n필요한 권한: `webservice:read`.",
         "parameters": [
           {
             "description": "증분 조회: 일련번호가 이 값보다 큰 로그만 반환",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "이전 로그 불러오기: 순번이 이 값보다 작은 로그만 반환",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "반환할 최대 개수로, 조건에 맞는 최신 항목부터 가져옵니다. 0 또는 생략 시 제한 없음",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -22467,12 +22777,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "`since` 매개변수로 증분 조회를 지원하며, 일련번호가 이 값보다 큰 로그를 반환합니다.\n\n필요한 권한: `webterminal:read`.",
+        "description": "`since` 매개변수로 증분 조회를 지원하며 순번이 이 값보다 큰 로그를 반환합니다. `before`는 순번이 이 값보다 작은 로그를 반환하여 이전 기록을 불러올 때 사용하고, `limit`는 그중 최신 항목만 반환합니다.\n\n필요한 권한: `webterminal:read`.",
         "parameters": [
           {
             "description": "증분 조회: 일련번호가 이 값보다 큰 로그만 반환",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "이전 로그 불러오기: 순번이 이 값보다 작은 로그만 반환",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "반환할 최대 개수로, 조건에 맞는 최신 항목부터 가져옵니다. 0 또는 생략 시 제한 없음",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -24934,12 +25260,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "`since` 매개변수로 증분 조회를 지원하며, 일련번호가 이 값보다 큰 로그를 반환합니다.\n\n필요한 권한: `wol:read`.",
+        "description": "`since` 매개변수로 증분 조회를 지원하며 순번이 이 값보다 큰 로그를 반환합니다. `before`는 순번이 이 값보다 작은 로그를 반환하여 이전 기록을 불러올 때 사용하고, `limit`는 그중 최신 항목만 반환합니다.\n\n필요한 권한: `wol:read`.",
         "parameters": [
           {
             "description": "증분 조회: 일련번호가 이 값보다 큰 로그만 반환",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "이전 로그 불러오기: 순번이 이 값보다 작은 로그만 반환",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "반환할 최대 개수로, 조건에 맞는 최신 항목부터 가져옵니다. 0 또는 생략 시 제한 없음",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }

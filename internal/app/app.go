@@ -748,20 +748,40 @@ func readUpload(fh *multipart.FileHeader) ([]byte, error) {
 	return io.ReadAll(io.LimitReader(f, 32<<20))
 }
 
-// logsHandler 支持 ?since=<seq> 增量拉取。
+// logsHandler 支持 ?since=<seq> 增量拉取；?before=<seq> 拉取更早的日志；?limit=<n> 只返回其中最新的 n 条。
 func (a *App) logsHandler(buf *logbuf.Buffer) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var since uint64
-		if s := r.URL.Query().Get("since"); s != "" {
-			v, err := strconv.ParseUint(s, 10, 64)
-			if err != nil {
-				httpx.Error(w, http.StatusBadRequest, "since 参数无效")
-				return
-			}
-			since = v
+		q := r.URL.Query()
+		since, ok1 := parseSeq(q.Get("since"))
+		before, ok2 := parseSeq(q.Get("before"))
+		limit, ok3 := 0, true
+		if v := q.Get("limit"); v != "" {
+			n, err := strconv.Atoi(v)
+			limit, ok3 = n, err == nil && n >= 0
 		}
-		httpx.OK(w, buf.Since(since))
+		// 错误信息写成完整字面量，便于按语言翻译
+		switch {
+		case !ok1:
+			httpx.Error(w, http.StatusBadRequest, "since 参数无效")
+			return
+		case !ok2:
+			httpx.Error(w, http.StatusBadRequest, "before 参数无效")
+			return
+		case !ok3:
+			httpx.Error(w, http.StatusBadRequest, "limit 参数无效")
+			return
+		}
+		httpx.OK(w, buf.Range(since, before, limit))
 	}
+}
+
+// parseSeq 解析日志序号参数，空串视为 0。
+func parseSeq(s string) (uint64, bool) {
+	if s == "" {
+		return 0, true
+	}
+	v, err := strconv.ParseUint(s, 10, 64)
+	return v, err == nil
 }
 
 // staticHandler 提供前端单页应用，未知路径回退到 index.html。

@@ -1186,6 +1186,9 @@
       },
       "ssl.Deploy": {
         "properties": {
+          "certName": {
+            "type": "string"
+          },
           "command": {
             "type": "string"
           },
@@ -1210,6 +1213,9 @@
           },
           "enable": {
             "type": "boolean"
+          },
+          "keyName": {
+            "type": "string"
           },
           "remark": {
             "type": "string"
@@ -3230,12 +3236,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "`since` パラメーターによる増分取得に対応しており、このシーケンス番号より大きいログを返します。\n\n必要な権限: `backup:read`。",
+        "description": "`since` パラメーターによる差分取得に対応し、シーケンス番号がこの値より大きいログを返します。`before` はシーケンス番号がこの値より小さいログを返し、過去の記録の読み込みに使います。`limit` はその中の最新の数件のみを返します。\n\n必要な権限: `backup:read`。",
         "parameters": [
           {
             "description": "増分取得：このシーケンス番号より大きいログのみ返します",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "過去のログを読み込む：シーケンス番号がこの値より小さいログのみを返します",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "返す最大件数。条件に合う最新のものから取ります。0 または省略時は無制限",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -4032,12 +4054,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "`since` パラメーターによる増分取得に対応しており、このシーケンス番号より大きいログを返します。\n\n必要な権限: `cloudflared:read`。",
+        "description": "`since` パラメーターによる差分取得に対応し、シーケンス番号がこの値より大きいログを返します。`before` はシーケンス番号がこの値より小さいログを返し、過去の記録の読み込みに使います。`limit` はその中の最新の数件のみを返します。\n\n必要な権限: `cloudflared:read`。",
         "parameters": [
           {
             "description": "増分取得：このシーケンス番号より大きいログのみ返します",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "過去のログを読み込む：シーケンス番号がこの値より小さいログのみを返します",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "返す最大件数。条件に合う最新のものから取ります。0 または省略時は無制限",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -4704,12 +4742,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "`since` パラメーターによる増分取得に対応しており、このシーケンス番号より大きいログを返します。\n\n必要な権限: `cron:read`。",
+        "description": "`since` パラメーターによる差分取得に対応し、シーケンス番号がこの値より大きいログを返します。`before` はシーケンス番号がこの値より小さいログを返し、過去の記録の読み込みに使います。`limit` はその中の最新の数件のみを返します。\n\n必要な権限: `cron:read`。",
         "parameters": [
           {
             "description": "増分取得：このシーケンス番号より大きいログのみ返します",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "過去のログを読み込む：シーケンス番号がこの値より小さいログのみを返します",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "返す最大件数。条件に合う最新のものから取ります。0 または省略時は無制限",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -5438,12 +5492,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "`since` パラメーターによる増分取得に対応しており、このシーケンス番号より大きいログを返します。\n\n必要な権限: `ddns:read`。",
+        "description": "`since` パラメーターによる差分取得に対応し、シーケンス番号がこの値より大きいログを返します。`before` はシーケンス番号がこの値より小さいログを返し、過去の記録の読み込みに使います。`limit` はその中の最新の数件のみを返します。\n\n必要な権限: `ddns:read`。",
         "parameters": [
           {
             "description": "増分取得：このシーケンス番号より大きいログのみ返します",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "過去のログを読み込む：シーケンス番号がこの値より小さいログのみを返します",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "返す最大件数。条件に合う最新のものから取ります。0 または省略時は無制限",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -9018,12 +9088,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "`since` パラメーターによる増分取得に対応しており、このシーケンス番号より大きいログを返します。\n\n必要な権限: `docker:read`。",
+        "description": "`since` パラメーターによる差分取得に対応し、シーケンス番号がこの値より大きいログを返します。`before` はシーケンス番号がこの値より小さいログを返し、過去の記録の読み込みに使います。`limit` はその中の最新の数件のみを返します。\n\n必要な権限: `docker:read`。",
         "parameters": [
           {
             "description": "増分取得：このシーケンス番号より大きいログのみ返します",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "過去のログを読み込む：シーケンス番号がこの値より小さいログのみを返します",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "返す最大件数。条件に合う最新のものから取ります。0 または省略時は無制限",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -10236,12 +10322,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "`since` パラメーターによる増分取得に対応しており、このシーケンス番号より大きいログを返します。\n\n必要な権限: `frp:read`。",
+        "description": "`since` パラメーターによる差分取得に対応し、シーケンス番号がこの値より大きいログを返します。`before` はシーケンス番号がこの値より小さいログを返し、過去の記録の読み込みに使います。`limit` はその中の最新の数件のみを返します。\n\n必要な権限: `frp:read`。",
         "parameters": [
           {
             "description": "増分取得：このシーケンス番号より大きいログのみ返します",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "過去のログを読み込む：シーケンス番号がこの値より小さいログのみを返します",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "返す最大件数。条件に合う最新のものから取ります。0 または省略時は無制限",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -10847,12 +10949,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "`since` パラメーターによる増分取得に対応しており、このシーケンス番号より大きいログを返します。\n\n必要な権限: `ftp:read`。",
+        "description": "`since` パラメーターによる差分取得に対応し、シーケンス番号がこの値より大きいログを返します。`before` はシーケンス番号がこの値より小さいログを返し、過去の記録の読み込みに使います。`limit` はその中の最新の数件のみを返します。\n\n必要な権限: `ftp:read`。",
         "parameters": [
           {
             "description": "増分取得：このシーケンス番号より大きいログのみ返します",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "過去のログを読み込む：シーケンス番号がこの値より小さいログのみを返します",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "返す最大件数。条件に合う最新のものから取ります。0 または省略時は無制限",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -11763,12 +11881,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "`since` パラメーターによる増分取得に対応しており、このシーケンス番号より大きいログを返します。\n\n必要な権限: `guard:read`。",
+        "description": "`since` パラメーターによる差分取得に対応し、シーケンス番号がこの値より大きいログを返します。`before` はシーケンス番号がこの値より小さいログを返し、過去の記録の読み込みに使います。`limit` はその中の最新の数件のみを返します。\n\n必要な権限: `guard:read`。",
         "parameters": [
           {
             "description": "増分取得：このシーケンス番号より大きいログのみ返します",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "過去のログを読み込む：シーケンス番号がこの値より小さいログのみを返します",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "返す最大件数。条件に合う最新のものから取ります。0 または省略時は無制限",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -12291,12 +12425,28 @@
     },
     "/api/logs": {
       "get": {
-        "description": "`since` パラメーターによる増分取得に対応しています。\n\n必要な権限: `logs:read`。",
+        "description": "`since` パラメーターによる差分取得に対応し、シーケンス番号がこの値より大きいログを返します。`before` はシーケンス番号がこの値より小さいログを返し、過去の記録の読み込みに使います。`limit` はその中の最新の数件のみを返します。\n\n必要な権限: `logs:read`。",
         "parameters": [
           {
             "description": "増分取得：このシーケンス番号より大きいログのみ返します",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "過去のログを読み込む：シーケンス番号がこの値より小さいログのみを返します",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "返す最大件数。条件に合う最新のものから取ります。0 または省略時は無制限",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -12452,12 +12602,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "`since` パラメーターによる増分取得に対応しており、このシーケンス番号より大きいログを返します。\n\n必要な権限: `nettools:read`。",
+        "description": "`since` パラメーターによる差分取得に対応し、シーケンス番号がこの値より大きいログを返します。`before` はシーケンス番号がこの値より小さいログを返し、過去の記録の読み込みに使います。`limit` はその中の最新の数件のみを返します。\n\n必要な権限: `nettools:read`。",
         "parameters": [
           {
             "description": "増分取得：このシーケンス番号より大きいログのみ返します",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "過去のログを読み込む：シーケンス番号がこの値より小さいログのみを返します",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "返す最大件数。条件に合う最新のものから取ります。0 または省略時は無制限",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -13576,12 +13742,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "`since` パラメーターによる増分取得に対応しており、このシーケンス番号より大きいログを返します。\n\n必要な権限: `notify:read`。",
+        "description": "`since` パラメーターによる差分取得に対応し、シーケンス番号がこの値より大きいログを返します。`before` はシーケンス番号がこの値より小さいログを返し、過去の記録の読み込みに使います。`limit` はその中の最新の数件のみを返します。\n\n必要な権限: `notify:read`。",
         "parameters": [
           {
             "description": "増分取得：このシーケンス番号より大きいログのみ返します",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "過去のログを読み込む：シーケンス番号がこの値より小さいログのみを返します",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "返す最大件数。条件に合う最新のものから取ります。0 または省略時は無制限",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -14119,12 +14301,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "`since` パラメーターによる増分取得に対応しており、このシーケンス番号より大きいログを返します。\n\n必要な権限: `portforward:read`。",
+        "description": "`since` パラメーターによる差分取得に対応し、シーケンス番号がこの値より大きいログを返します。`before` はシーケンス番号がこの値より小さいログを返し、過去の記録の読み込みに使います。`limit` はその中の最新の数件のみを返します。\n\n必要な権限: `portforward:read`。",
         "parameters": [
           {
             "description": "増分取得：このシーケンス番号より大きいログのみ返します",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "過去のログを読み込む：シーケンス番号がこの値より小さいログのみを返します",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "返す最大件数。条件に合う最新のものから取ります。0 または省略時は無制限",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -15397,12 +15595,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "`since` パラメーターによる増分取得に対応しており、このシーケンス番号より大きいログを返します。\n\n必要な権限: `ssl:read`。",
+        "description": "`since` パラメーターによる差分取得に対応し、シーケンス番号がこの値より大きいログを返します。`before` はシーケンス番号がこの値より小さいログを返し、過去の記録の読み込みに使います。`limit` はその中の最新の数件のみを返します。\n\n必要な権限: `ssl:read`。",
         "parameters": [
           {
             "description": "増分取得：このシーケンス番号より大きいログのみ返します",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "過去のログを読み込む：シーケンス番号がこの値より小さいログのみを返します",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "返す最大件数。条件に合う最新のものから取ります。0 または省略時は無制限",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -16102,12 +16316,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "`since` パラメーターによる増分取得に対応しており、このシーケンス番号より大きいログを返します。\n\n必要な権限: `storage:read`。",
+        "description": "`since` パラメーターによる差分取得に対応し、シーケンス番号がこの値より大きいログを返します。`before` はシーケンス番号がこの値より小さいログを返し、過去の記録の読み込みに使います。`limit` はその中の最新の数件のみを返します。\n\n必要な権限: `storage:read`。",
         "parameters": [
           {
             "description": "増分取得：このシーケンス番号より大きいログのみ返します",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "過去のログを読み込む：シーケンス番号がこの値より小さいログのみを返します",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "返す最大件数。条件に合う最新のものから取ります。0 または省略時は無制限",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -16604,12 +16834,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "`since` パラメーターによる増分取得に対応しており、このシーケンス番号より大きいログを返します。\n\n必要な権限: `stun:read`。",
+        "description": "`since` パラメーターによる差分取得に対応し、シーケンス番号がこの値より大きいログを返します。`before` はシーケンス番号がこの値より小さいログを返し、過去の記録の読み込みに使います。`limit` はその中の最新の数件のみを返します。\n\n必要な権限: `stun:read`。",
         "parameters": [
           {
             "description": "増分取得：このシーケンス番号より大きいログのみ返します",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "過去のログを読み込む：シーケンス番号がこの値より小さいログのみを返します",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "返す最大件数。条件に合う最新のものから取ります。0 または省略時は無制限",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -18085,12 +18331,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "`since` パラメーターによる増分取得に対応しており、このシーケンス番号より大きいログを返します。\n\n必要な権限: `tailscale:read`。",
+        "description": "`since` パラメーターによる差分取得に対応し、シーケンス番号がこの値より大きいログを返します。`before` はシーケンス番号がこの値より小さいログを返し、過去の記録の読み込みに使います。`limit` はその中の最新の数件のみを返します。\n\n必要な権限: `tailscale:read`。",
         "parameters": [
           {
             "description": "増分取得：このシーケンス番号より大きいログのみ返します",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "過去のログを読み込む：シーケンス番号がこの値より小さいログのみを返します",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "返す最大件数。条件に合う最新のものから取ります。0 または省略時は無制限",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -19230,12 +19492,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "`since` パラメーターによる増分取得に対応しており、このシーケンス番号より大きいログを返します。\n\n必要な権限: `waf:read`。",
+        "description": "`since` パラメーターによる差分取得に対応し、シーケンス番号がこの値より大きいログを返します。`before` はシーケンス番号がこの値より小さいログを返し、過去の記録の読み込みに使います。`limit` はその中の最新の数件のみを返します。\n\n必要な権限: `waf:read`。",
         "parameters": [
           {
             "description": "増分取得：このシーケンス番号より大きいログのみ返します",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "過去のログを読み込む：シーケンス番号がこの値より小さいログのみを返します",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "返す最大件数。条件に合う最新のものから取ります。0 または省略時は無制限",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -19340,12 +19618,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "`since` パラメーターによる増分取得に対応しており、このシーケンス番号より大きいログを返します。\n\n必要な権限: `webdav:read`。",
+        "description": "`since` パラメーターによる差分取得に対応し、シーケンス番号がこの値より大きいログを返します。`before` はシーケンス番号がこの値より小さいログを返し、過去の記録の読み込みに使います。`limit` はその中の最新の数件のみを返します。\n\n必要な権限: `webdav:read`。",
         "parameters": [
           {
             "description": "増分取得：このシーケンス番号より大きいログのみ返します",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "過去のログを読み込む：シーケンス番号がこの値より小さいログのみを返します",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "返す最大件数。条件に合う最新のものから取ります。0 または省略時は無制限",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -20866,12 +21160,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "`since` パラメーターによる増分取得に対応しており、このシーケンス番号より大きいログを返します。\n\n必要な権限: `webservice:read`。",
+        "description": "`since` パラメーターによる差分取得に対応し、シーケンス番号がこの値より大きいログを返します。`before` はシーケンス番号がこの値より小さいログを返し、過去の記録の読み込みに使います。`limit` はその中の最新の数件のみを返します。\n\n必要な権限: `webservice:read`。",
         "parameters": [
           {
             "description": "増分取得：このシーケンス番号より大きいログのみ返します",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "過去のログを読み込む：シーケンス番号がこの値より小さいログのみを返します",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "返す最大件数。条件に合う最新のものから取ります。0 または省略時は無制限",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -22467,12 +22777,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "`since` パラメーターによる増分取得に対応しており、このシーケンス番号より大きいログを返します。\n\n必要な権限: `webterminal:read`。",
+        "description": "`since` パラメーターによる差分取得に対応し、シーケンス番号がこの値より大きいログを返します。`before` はシーケンス番号がこの値より小さいログを返し、過去の記録の読み込みに使います。`limit` はその中の最新の数件のみを返します。\n\n必要な権限: `webterminal:read`。",
         "parameters": [
           {
             "description": "増分取得：このシーケンス番号より大きいログのみ返します",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "過去のログを読み込む：シーケンス番号がこの値より小さいログのみを返します",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "返す最大件数。条件に合う最新のものから取ります。0 または省略時は無制限",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -24934,12 +25260,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "`since` パラメーターによる増分取得に対応しており、このシーケンス番号より大きいログを返します。\n\n必要な権限: `wol:read`。",
+        "description": "`since` パラメーターによる差分取得に対応し、シーケンス番号がこの値より大きいログを返します。`before` はシーケンス番号がこの値より小さいログを返し、過去の記録の読み込みに使います。`limit` はその中の最新の数件のみを返します。\n\n必要な権限: `wol:read`。",
         "parameters": [
           {
             "description": "増分取得：このシーケンス番号より大きいログのみ返します",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "過去のログを読み込む：シーケンス番号がこの値より小さいログのみを返します",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "返す最大件数。条件に合う最新のものから取ります。0 または省略時は無制限",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }

@@ -1186,6 +1186,9 @@
       },
       "ssl.Deploy": {
         "properties": {
+          "certName": {
+            "type": "string"
+          },
           "command": {
             "type": "string"
           },
@@ -1210,6 +1213,9 @@
           },
           "enable": {
             "type": "boolean"
+          },
+          "keyName": {
+            "type": "string"
           },
           "remark": {
             "type": "string"
@@ -3230,12 +3236,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Prend en charge le paramètre `since` pour la récupération incrémentale, renvoie les journaux dont le numéro de séquence est supérieur à cette valeur.\n\nPermission requise : `backup:read`.",
+        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les plus récentes d'entre elles.\n\nPermission requise : `backup:read`.",
         "parameters": [
           {
             "description": "Récupération incrémentale : ne renvoie que les journaux dont le numéro de séquence est supérieur à cette valeur",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Charger les journaux plus anciens : ne renvoie que les journaux dont le numéro de séquence est inférieur à cette valeur",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Nombre maximal d'entrées renvoyées, en prenant les plus récentes qui correspondent ; 0 ou absent signifie sans limite",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -4032,12 +4054,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Prend en charge le paramètre `since` pour la récupération incrémentale, renvoie les journaux dont le numéro de séquence est supérieur à cette valeur.\n\nPermission requise : `cloudflared:read`.",
+        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les plus récentes d'entre elles.\n\nPermission requise : `cloudflared:read`.",
         "parameters": [
           {
             "description": "Récupération incrémentale : ne renvoie que les journaux dont le numéro de séquence est supérieur à cette valeur",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Charger les journaux plus anciens : ne renvoie que les journaux dont le numéro de séquence est inférieur à cette valeur",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Nombre maximal d'entrées renvoyées, en prenant les plus récentes qui correspondent ; 0 ou absent signifie sans limite",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -4704,12 +4742,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Prend en charge le paramètre `since` pour la récupération incrémentale, renvoie les journaux dont le numéro de séquence est supérieur à cette valeur.\n\nPermission requise : `cron:read`.",
+        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les plus récentes d'entre elles.\n\nPermission requise : `cron:read`.",
         "parameters": [
           {
             "description": "Récupération incrémentale : ne renvoie que les journaux dont le numéro de séquence est supérieur à cette valeur",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Charger les journaux plus anciens : ne renvoie que les journaux dont le numéro de séquence est inférieur à cette valeur",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Nombre maximal d'entrées renvoyées, en prenant les plus récentes qui correspondent ; 0 ou absent signifie sans limite",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -5438,12 +5492,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Prend en charge le paramètre `since` pour la récupération incrémentale, renvoie les journaux dont le numéro de séquence est supérieur à cette valeur.\n\nPermission requise : `ddns:read`.",
+        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les plus récentes d'entre elles.\n\nPermission requise : `ddns:read`.",
         "parameters": [
           {
             "description": "Récupération incrémentale : ne renvoie que les journaux dont le numéro de séquence est supérieur à cette valeur",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Charger les journaux plus anciens : ne renvoie que les journaux dont le numéro de séquence est inférieur à cette valeur",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Nombre maximal d'entrées renvoyées, en prenant les plus récentes qui correspondent ; 0 ou absent signifie sans limite",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -9018,12 +9088,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Prend en charge le paramètre `since` pour la récupération incrémentale, renvoie les journaux dont le numéro de séquence est supérieur à cette valeur.\n\nPermission requise : `docker:read`.",
+        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les plus récentes d'entre elles.\n\nPermission requise : `docker:read`.",
         "parameters": [
           {
             "description": "Récupération incrémentale : ne renvoie que les journaux dont le numéro de séquence est supérieur à cette valeur",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Charger les journaux plus anciens : ne renvoie que les journaux dont le numéro de séquence est inférieur à cette valeur",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Nombre maximal d'entrées renvoyées, en prenant les plus récentes qui correspondent ; 0 ou absent signifie sans limite",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -10236,12 +10322,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Prend en charge le paramètre `since` pour la récupération incrémentale, renvoie les journaux dont le numéro de séquence est supérieur à cette valeur.\n\nPermission requise : `frp:read`.",
+        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les plus récentes d'entre elles.\n\nPermission requise : `frp:read`.",
         "parameters": [
           {
             "description": "Récupération incrémentale : ne renvoie que les journaux dont le numéro de séquence est supérieur à cette valeur",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Charger les journaux plus anciens : ne renvoie que les journaux dont le numéro de séquence est inférieur à cette valeur",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Nombre maximal d'entrées renvoyées, en prenant les plus récentes qui correspondent ; 0 ou absent signifie sans limite",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -10847,12 +10949,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Prend en charge le paramètre `since` pour la récupération incrémentale, renvoie les journaux dont le numéro de séquence est supérieur à cette valeur.\n\nPermission requise : `ftp:read`.",
+        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les plus récentes d'entre elles.\n\nPermission requise : `ftp:read`.",
         "parameters": [
           {
             "description": "Récupération incrémentale : ne renvoie que les journaux dont le numéro de séquence est supérieur à cette valeur",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Charger les journaux plus anciens : ne renvoie que les journaux dont le numéro de séquence est inférieur à cette valeur",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Nombre maximal d'entrées renvoyées, en prenant les plus récentes qui correspondent ; 0 ou absent signifie sans limite",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -11763,12 +11881,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Prend en charge le paramètre `since` pour la récupération incrémentale, renvoie les journaux dont le numéro de séquence est supérieur à cette valeur.\n\nPermission requise : `guard:read`.",
+        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les plus récentes d'entre elles.\n\nPermission requise : `guard:read`.",
         "parameters": [
           {
             "description": "Récupération incrémentale : ne renvoie que les journaux dont le numéro de séquence est supérieur à cette valeur",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Charger les journaux plus anciens : ne renvoie que les journaux dont le numéro de séquence est inférieur à cette valeur",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Nombre maximal d'entrées renvoyées, en prenant les plus récentes qui correspondent ; 0 ou absent signifie sans limite",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -12291,12 +12425,28 @@
     },
     "/api/logs": {
       "get": {
-        "description": "Prend en charge le paramètre `since` pour la récupération incrémentale.\n\nPermission requise : `logs:read`.",
+        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les plus récentes d'entre elles.\n\nPermission requise : `logs:read`.",
         "parameters": [
           {
             "description": "Récupération incrémentale : ne renvoie que les journaux dont le numéro de séquence est supérieur à cette valeur",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Charger les journaux plus anciens : ne renvoie que les journaux dont le numéro de séquence est inférieur à cette valeur",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Nombre maximal d'entrées renvoyées, en prenant les plus récentes qui correspondent ; 0 ou absent signifie sans limite",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -12452,12 +12602,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Prend en charge le paramètre `since` pour la récupération incrémentale, renvoie les journaux dont le numéro de séquence est supérieur à cette valeur.\n\nPermission requise : `nettools:read`.",
+        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les plus récentes d'entre elles.\n\nPermission requise : `nettools:read`.",
         "parameters": [
           {
             "description": "Récupération incrémentale : ne renvoie que les journaux dont le numéro de séquence est supérieur à cette valeur",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Charger les journaux plus anciens : ne renvoie que les journaux dont le numéro de séquence est inférieur à cette valeur",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Nombre maximal d'entrées renvoyées, en prenant les plus récentes qui correspondent ; 0 ou absent signifie sans limite",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -13576,12 +13742,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Prend en charge le paramètre `since` pour la récupération incrémentale, renvoie les journaux dont le numéro de séquence est supérieur à cette valeur.\n\nPermission requise : `notify:read`.",
+        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les plus récentes d'entre elles.\n\nPermission requise : `notify:read`.",
         "parameters": [
           {
             "description": "Récupération incrémentale : ne renvoie que les journaux dont le numéro de séquence est supérieur à cette valeur",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Charger les journaux plus anciens : ne renvoie que les journaux dont le numéro de séquence est inférieur à cette valeur",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Nombre maximal d'entrées renvoyées, en prenant les plus récentes qui correspondent ; 0 ou absent signifie sans limite",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -14119,12 +14301,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Prend en charge le paramètre `since` pour la récupération incrémentale, renvoie les journaux dont le numéro de séquence est supérieur à cette valeur.\n\nPermission requise : `portforward:read`.",
+        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les plus récentes d'entre elles.\n\nPermission requise : `portforward:read`.",
         "parameters": [
           {
             "description": "Récupération incrémentale : ne renvoie que les journaux dont le numéro de séquence est supérieur à cette valeur",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Charger les journaux plus anciens : ne renvoie que les journaux dont le numéro de séquence est inférieur à cette valeur",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Nombre maximal d'entrées renvoyées, en prenant les plus récentes qui correspondent ; 0 ou absent signifie sans limite",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -15397,12 +15595,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Prend en charge le paramètre `since` pour la récupération incrémentale, renvoie les journaux dont le numéro de séquence est supérieur à cette valeur.\n\nPermission requise : `ssl:read`.",
+        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les plus récentes d'entre elles.\n\nPermission requise : `ssl:read`.",
         "parameters": [
           {
             "description": "Récupération incrémentale : ne renvoie que les journaux dont le numéro de séquence est supérieur à cette valeur",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Charger les journaux plus anciens : ne renvoie que les journaux dont le numéro de séquence est inférieur à cette valeur",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Nombre maximal d'entrées renvoyées, en prenant les plus récentes qui correspondent ; 0 ou absent signifie sans limite",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -16102,12 +16316,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Prend en charge le paramètre `since` pour la récupération incrémentale, renvoie les journaux dont le numéro de séquence est supérieur à cette valeur.\n\nPermission requise : `storage:read`.",
+        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les plus récentes d'entre elles.\n\nPermission requise : `storage:read`.",
         "parameters": [
           {
             "description": "Récupération incrémentale : ne renvoie que les journaux dont le numéro de séquence est supérieur à cette valeur",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Charger les journaux plus anciens : ne renvoie que les journaux dont le numéro de séquence est inférieur à cette valeur",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Nombre maximal d'entrées renvoyées, en prenant les plus récentes qui correspondent ; 0 ou absent signifie sans limite",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -16604,12 +16834,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Prend en charge le paramètre `since` pour la récupération incrémentale, renvoie les journaux dont le numéro de séquence est supérieur à cette valeur.\n\nPermission requise : `stun:read`.",
+        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les plus récentes d'entre elles.\n\nPermission requise : `stun:read`.",
         "parameters": [
           {
             "description": "Récupération incrémentale : ne renvoie que les journaux dont le numéro de séquence est supérieur à cette valeur",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Charger les journaux plus anciens : ne renvoie que les journaux dont le numéro de séquence est inférieur à cette valeur",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Nombre maximal d'entrées renvoyées, en prenant les plus récentes qui correspondent ; 0 ou absent signifie sans limite",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -18085,12 +18331,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Prend en charge le paramètre `since` pour la récupération incrémentale, renvoie les journaux dont le numéro de séquence est supérieur à cette valeur.\n\nPermission requise : `tailscale:read`.",
+        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les plus récentes d'entre elles.\n\nPermission requise : `tailscale:read`.",
         "parameters": [
           {
             "description": "Récupération incrémentale : ne renvoie que les journaux dont le numéro de séquence est supérieur à cette valeur",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Charger les journaux plus anciens : ne renvoie que les journaux dont le numéro de séquence est inférieur à cette valeur",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Nombre maximal d'entrées renvoyées, en prenant les plus récentes qui correspondent ; 0 ou absent signifie sans limite",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -19230,12 +19492,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Prend en charge le paramètre `since` pour la récupération incrémentale, renvoie les journaux dont le numéro de séquence est supérieur à cette valeur.\n\nPermission requise : `waf:read`.",
+        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les plus récentes d'entre elles.\n\nPermission requise : `waf:read`.",
         "parameters": [
           {
             "description": "Récupération incrémentale : ne renvoie que les journaux dont le numéro de séquence est supérieur à cette valeur",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Charger les journaux plus anciens : ne renvoie que les journaux dont le numéro de séquence est inférieur à cette valeur",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Nombre maximal d'entrées renvoyées, en prenant les plus récentes qui correspondent ; 0 ou absent signifie sans limite",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -19340,12 +19618,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Prend en charge le paramètre `since` pour la récupération incrémentale, renvoie les journaux dont le numéro de séquence est supérieur à cette valeur.\n\nPermission requise : `webdav:read`.",
+        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les plus récentes d'entre elles.\n\nPermission requise : `webdav:read`.",
         "parameters": [
           {
             "description": "Récupération incrémentale : ne renvoie que les journaux dont le numéro de séquence est supérieur à cette valeur",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Charger les journaux plus anciens : ne renvoie que les journaux dont le numéro de séquence est inférieur à cette valeur",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Nombre maximal d'entrées renvoyées, en prenant les plus récentes qui correspondent ; 0 ou absent signifie sans limite",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -20866,12 +21160,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Prend en charge le paramètre `since` pour la récupération incrémentale, renvoie les journaux dont le numéro de séquence est supérieur à cette valeur.\n\nPermission requise : `webservice:read`.",
+        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les plus récentes d'entre elles.\n\nPermission requise : `webservice:read`.",
         "parameters": [
           {
             "description": "Récupération incrémentale : ne renvoie que les journaux dont le numéro de séquence est supérieur à cette valeur",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Charger les journaux plus anciens : ne renvoie que les journaux dont le numéro de séquence est inférieur à cette valeur",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Nombre maximal d'entrées renvoyées, en prenant les plus récentes qui correspondent ; 0 ou absent signifie sans limite",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -22467,12 +22777,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Prend en charge le paramètre `since` pour la récupération incrémentale, renvoie les journaux dont le numéro de séquence est supérieur à cette valeur.\n\nPermission requise : `webterminal:read`.",
+        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les plus récentes d'entre elles.\n\nPermission requise : `webterminal:read`.",
         "parameters": [
           {
             "description": "Récupération incrémentale : ne renvoie que les journaux dont le numéro de séquence est supérieur à cette valeur",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Charger les journaux plus anciens : ne renvoie que les journaux dont le numéro de séquence est inférieur à cette valeur",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Nombre maximal d'entrées renvoyées, en prenant les plus récentes qui correspondent ; 0 ou absent signifie sans limite",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -24934,12 +25260,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Prend en charge le paramètre `since` pour la récupération incrémentale, renvoie les journaux dont le numéro de séquence est supérieur à cette valeur.\n\nPermission requise : `wol:read`.",
+        "description": "Prend en charge la récupération incrémentale avec le paramètre `since`, qui renvoie les journaux dont le numéro de séquence est supérieur à cette valeur ; `before` renvoie les journaux dont le numéro de séquence est inférieur à cette valeur, pour charger les entrées plus anciennes ; `limit` ne renvoie que les plus récentes d'entre elles.\n\nPermission requise : `wol:read`.",
         "parameters": [
           {
             "description": "Récupération incrémentale : ne renvoie que les journaux dont le numéro de séquence est supérieur à cette valeur",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Charger les journaux plus anciens : ne renvoie que les journaux dont le numéro de séquence est inférieur à cette valeur",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Nombre maximal d'entrées renvoyées, en prenant les plus récentes qui correspondent ; 0 ou absent signifie sans limite",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }

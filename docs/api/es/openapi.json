@@ -1186,6 +1186,9 @@
       },
       "ssl.Deploy": {
         "properties": {
+          "certName": {
+            "type": "string"
+          },
           "command": {
             "type": "string"
           },
@@ -1210,6 +1213,9 @@
           },
           "enable": {
             "type": "boolean"
+          },
+          "keyName": {
+            "type": "string"
           },
           "remark": {
             "type": "string"
@@ -3230,12 +3236,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Admite el parámetro `since` para obtención incremental; devuelve registros con número de secuencia mayor que ese valor.\n\nPermiso necesario: `backup:read`.",
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con número de secuencia mayor que este valor; `before` devuelve los registros con número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las más recientes de ellas.\n\nPermiso necesario: `backup:read`.",
         "parameters": [
           {
             "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Cargar registros anteriores: devuelve solo los registros con número de secuencia menor que este valor",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Número máximo de entradas a devolver, tomando las más recientes que coincidan; 0 u omitido significa sin límite",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -4032,12 +4054,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Admite el parámetro `since` para obtención incremental; devuelve registros con número de secuencia mayor que ese valor.\n\nPermiso necesario: `cloudflared:read`.",
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con número de secuencia mayor que este valor; `before` devuelve los registros con número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las más recientes de ellas.\n\nPermiso necesario: `cloudflared:read`.",
         "parameters": [
           {
             "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Cargar registros anteriores: devuelve solo los registros con número de secuencia menor que este valor",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Número máximo de entradas a devolver, tomando las más recientes que coincidan; 0 u omitido significa sin límite",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -4704,12 +4742,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Admite el parámetro `since` para obtención incremental; devuelve registros con número de secuencia mayor que ese valor.\n\nPermiso necesario: `cron:read`.",
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con número de secuencia mayor que este valor; `before` devuelve los registros con número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las más recientes de ellas.\n\nPermiso necesario: `cron:read`.",
         "parameters": [
           {
             "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Cargar registros anteriores: devuelve solo los registros con número de secuencia menor que este valor",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Número máximo de entradas a devolver, tomando las más recientes que coincidan; 0 u omitido significa sin límite",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -5438,12 +5492,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Admite el parámetro `since` para obtención incremental; devuelve registros con número de secuencia mayor que ese valor.\n\nPermiso necesario: `ddns:read`.",
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con número de secuencia mayor que este valor; `before` devuelve los registros con número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las más recientes de ellas.\n\nPermiso necesario: `ddns:read`.",
         "parameters": [
           {
             "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Cargar registros anteriores: devuelve solo los registros con número de secuencia menor que este valor",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Número máximo de entradas a devolver, tomando las más recientes que coincidan; 0 u omitido significa sin límite",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -9018,12 +9088,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Admite el parámetro `since` para obtención incremental; devuelve registros con número de secuencia mayor que ese valor.\n\nPermiso necesario: `docker:read`.",
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con número de secuencia mayor que este valor; `before` devuelve los registros con número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las más recientes de ellas.\n\nPermiso necesario: `docker:read`.",
         "parameters": [
           {
             "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Cargar registros anteriores: devuelve solo los registros con número de secuencia menor que este valor",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Número máximo de entradas a devolver, tomando las más recientes que coincidan; 0 u omitido significa sin límite",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -10236,12 +10322,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Admite el parámetro `since` para obtención incremental; devuelve registros con número de secuencia mayor que ese valor.\n\nPermiso necesario: `frp:read`.",
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con número de secuencia mayor que este valor; `before` devuelve los registros con número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las más recientes de ellas.\n\nPermiso necesario: `frp:read`.",
         "parameters": [
           {
             "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Cargar registros anteriores: devuelve solo los registros con número de secuencia menor que este valor",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Número máximo de entradas a devolver, tomando las más recientes que coincidan; 0 u omitido significa sin límite",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -10847,12 +10949,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Admite el parámetro `since` para obtención incremental; devuelve registros con número de secuencia mayor que ese valor.\n\nPermiso necesario: `ftp:read`.",
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con número de secuencia mayor que este valor; `before` devuelve los registros con número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las más recientes de ellas.\n\nPermiso necesario: `ftp:read`.",
         "parameters": [
           {
             "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Cargar registros anteriores: devuelve solo los registros con número de secuencia menor que este valor",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Número máximo de entradas a devolver, tomando las más recientes que coincidan; 0 u omitido significa sin límite",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -11763,12 +11881,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Admite el parámetro `since` para obtención incremental; devuelve registros con número de secuencia mayor que ese valor.\n\nPermiso necesario: `guard:read`.",
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con número de secuencia mayor que este valor; `before` devuelve los registros con número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las más recientes de ellas.\n\nPermiso necesario: `guard:read`.",
         "parameters": [
           {
             "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Cargar registros anteriores: devuelve solo los registros con número de secuencia menor que este valor",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Número máximo de entradas a devolver, tomando las más recientes que coincidan; 0 u omitido significa sin límite",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -12291,12 +12425,28 @@
     },
     "/api/logs": {
       "get": {
-        "description": "Admite el parámetro `since` para obtención incremental.\n\nPermiso necesario: `logs:read`.",
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con número de secuencia mayor que este valor; `before` devuelve los registros con número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las más recientes de ellas.\n\nPermiso necesario: `logs:read`.",
         "parameters": [
           {
             "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Cargar registros anteriores: devuelve solo los registros con número de secuencia menor que este valor",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Número máximo de entradas a devolver, tomando las más recientes que coincidan; 0 u omitido significa sin límite",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -12452,12 +12602,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Admite el parámetro `since` para obtención incremental; devuelve registros con número de secuencia mayor que ese valor.\n\nPermiso necesario: `nettools:read`.",
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con número de secuencia mayor que este valor; `before` devuelve los registros con número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las más recientes de ellas.\n\nPermiso necesario: `nettools:read`.",
         "parameters": [
           {
             "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Cargar registros anteriores: devuelve solo los registros con número de secuencia menor que este valor",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Número máximo de entradas a devolver, tomando las más recientes que coincidan; 0 u omitido significa sin límite",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -13576,12 +13742,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Admite el parámetro `since` para obtención incremental; devuelve registros con número de secuencia mayor que ese valor.\n\nPermiso necesario: `notify:read`.",
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con número de secuencia mayor que este valor; `before` devuelve los registros con número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las más recientes de ellas.\n\nPermiso necesario: `notify:read`.",
         "parameters": [
           {
             "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Cargar registros anteriores: devuelve solo los registros con número de secuencia menor que este valor",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Número máximo de entradas a devolver, tomando las más recientes que coincidan; 0 u omitido significa sin límite",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -14119,12 +14301,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Admite el parámetro `since` para obtención incremental; devuelve registros con número de secuencia mayor que ese valor.\n\nPermiso necesario: `portforward:read`.",
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con número de secuencia mayor que este valor; `before` devuelve los registros con número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las más recientes de ellas.\n\nPermiso necesario: `portforward:read`.",
         "parameters": [
           {
             "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Cargar registros anteriores: devuelve solo los registros con número de secuencia menor que este valor",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Número máximo de entradas a devolver, tomando las más recientes que coincidan; 0 u omitido significa sin límite",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -15397,12 +15595,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Admite el parámetro `since` para obtención incremental; devuelve registros con número de secuencia mayor que ese valor.\n\nPermiso necesario: `ssl:read`.",
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con número de secuencia mayor que este valor; `before` devuelve los registros con número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las más recientes de ellas.\n\nPermiso necesario: `ssl:read`.",
         "parameters": [
           {
             "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Cargar registros anteriores: devuelve solo los registros con número de secuencia menor que este valor",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Número máximo de entradas a devolver, tomando las más recientes que coincidan; 0 u omitido significa sin límite",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -16102,12 +16316,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Admite el parámetro `since` para obtención incremental; devuelve registros con número de secuencia mayor que ese valor.\n\nPermiso necesario: `storage:read`.",
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con número de secuencia mayor que este valor; `before` devuelve los registros con número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las más recientes de ellas.\n\nPermiso necesario: `storage:read`.",
         "parameters": [
           {
             "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Cargar registros anteriores: devuelve solo los registros con número de secuencia menor que este valor",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Número máximo de entradas a devolver, tomando las más recientes que coincidan; 0 u omitido significa sin límite",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -16604,12 +16834,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Admite el parámetro `since` para obtención incremental; devuelve registros con número de secuencia mayor que ese valor.\n\nPermiso necesario: `stun:read`.",
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con número de secuencia mayor que este valor; `before` devuelve los registros con número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las más recientes de ellas.\n\nPermiso necesario: `stun:read`.",
         "parameters": [
           {
             "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Cargar registros anteriores: devuelve solo los registros con número de secuencia menor que este valor",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Número máximo de entradas a devolver, tomando las más recientes que coincidan; 0 u omitido significa sin límite",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -18085,12 +18331,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Admite el parámetro `since` para obtención incremental; devuelve registros con número de secuencia mayor que ese valor.\n\nPermiso necesario: `tailscale:read`.",
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con número de secuencia mayor que este valor; `before` devuelve los registros con número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las más recientes de ellas.\n\nPermiso necesario: `tailscale:read`.",
         "parameters": [
           {
             "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Cargar registros anteriores: devuelve solo los registros con número de secuencia menor que este valor",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Número máximo de entradas a devolver, tomando las más recientes que coincidan; 0 u omitido significa sin límite",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -19230,12 +19492,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Admite el parámetro `since` para obtención incremental; devuelve registros con número de secuencia mayor que ese valor.\n\nPermiso necesario: `waf:read`.",
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con número de secuencia mayor que este valor; `before` devuelve los registros con número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las más recientes de ellas.\n\nPermiso necesario: `waf:read`.",
         "parameters": [
           {
             "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Cargar registros anteriores: devuelve solo los registros con número de secuencia menor que este valor",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Número máximo de entradas a devolver, tomando las más recientes que coincidan; 0 u omitido significa sin límite",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -19340,12 +19618,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Admite el parámetro `since` para obtención incremental; devuelve registros con número de secuencia mayor que ese valor.\n\nPermiso necesario: `webdav:read`.",
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con número de secuencia mayor que este valor; `before` devuelve los registros con número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las más recientes de ellas.\n\nPermiso necesario: `webdav:read`.",
         "parameters": [
           {
             "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Cargar registros anteriores: devuelve solo los registros con número de secuencia menor que este valor",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Número máximo de entradas a devolver, tomando las más recientes que coincidan; 0 u omitido significa sin límite",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -20866,12 +21160,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Admite el parámetro `since` para obtención incremental; devuelve registros con número de secuencia mayor que ese valor.\n\nPermiso necesario: `webservice:read`.",
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con número de secuencia mayor que este valor; `before` devuelve los registros con número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las más recientes de ellas.\n\nPermiso necesario: `webservice:read`.",
         "parameters": [
           {
             "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Cargar registros anteriores: devuelve solo los registros con número de secuencia menor que este valor",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Número máximo de entradas a devolver, tomando las más recientes que coincidan; 0 u omitido significa sin límite",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -22467,12 +22777,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Admite el parámetro `since` para obtención incremental; devuelve registros con número de secuencia mayor que ese valor.\n\nPermiso necesario: `webterminal:read`.",
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con número de secuencia mayor que este valor; `before` devuelve los registros con número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las más recientes de ellas.\n\nPermiso necesario: `webterminal:read`.",
         "parameters": [
           {
             "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Cargar registros anteriores: devuelve solo los registros con número de secuencia menor que este valor",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Número máximo de entradas a devolver, tomando las más recientes que coincidan; 0 u omitido significa sin límite",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -24934,12 +25260,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Admite el parámetro `since` para obtención incremental; devuelve registros con número de secuencia mayor que ese valor.\n\nPermiso necesario: `wol:read`.",
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con número de secuencia mayor que este valor; `before` devuelve los registros con número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las más recientes de ellas.\n\nPermiso necesario: `wol:read`.",
         "parameters": [
           {
             "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Cargar registros anteriores: devuelve solo los registros con número de secuencia menor que este valor",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Número máximo de entradas a devolver, tomando las más recientes que coincidan; 0 u omitido significa sin límite",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }

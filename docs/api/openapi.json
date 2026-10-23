@@ -1186,6 +1186,9 @@
       },
       "ssl.Deploy": {
         "properties": {
+          "certName": {
+            "type": "string"
+          },
           "command": {
             "type": "string"
           },
@@ -1210,6 +1213,9 @@
           },
           "enable": {
             "type": "boolean"
+          },
+          "keyName": {
+            "type": "string"
           },
           "remark": {
             "type": "string"
@@ -3230,12 +3236,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "支持 `since` 参数增量拉取，返回序号大于该值的日志。\n\n所需权限：`backup:read`。",
+        "description": "支持 `since` 参数增量拉取，返回序号大于该值的日志；`before` 返回序号小于该值的日志，用于加载更早的记录；`limit` 只返回其中最新的若干条。\n\n所需权限：`backup:read`。",
         "parameters": [
           {
             "description": "增量拉取：只返回序号大于该值的日志",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "加载更早的日志：只返回序号小于该值的日志",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "最多返回的条数，取符合条件的最新几条；0 或不传表示不限",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -4032,12 +4054,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "支持 `since` 参数增量拉取，返回序号大于该值的日志。\n\n所需权限：`cloudflared:read`。",
+        "description": "支持 `since` 参数增量拉取，返回序号大于该值的日志；`before` 返回序号小于该值的日志，用于加载更早的记录；`limit` 只返回其中最新的若干条。\n\n所需权限：`cloudflared:read`。",
         "parameters": [
           {
             "description": "增量拉取：只返回序号大于该值的日志",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "加载更早的日志：只返回序号小于该值的日志",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "最多返回的条数，取符合条件的最新几条；0 或不传表示不限",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -4704,12 +4742,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "支持 `since` 参数增量拉取，返回序号大于该值的日志。\n\n所需权限：`cron:read`。",
+        "description": "支持 `since` 参数增量拉取，返回序号大于该值的日志；`before` 返回序号小于该值的日志，用于加载更早的记录；`limit` 只返回其中最新的若干条。\n\n所需权限：`cron:read`。",
         "parameters": [
           {
             "description": "增量拉取：只返回序号大于该值的日志",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "加载更早的日志：只返回序号小于该值的日志",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "最多返回的条数，取符合条件的最新几条；0 或不传表示不限",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -5438,12 +5492,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "支持 `since` 参数增量拉取，返回序号大于该值的日志。\n\n所需权限：`ddns:read`。",
+        "description": "支持 `since` 参数增量拉取，返回序号大于该值的日志；`before` 返回序号小于该值的日志，用于加载更早的记录；`limit` 只返回其中最新的若干条。\n\n所需权限：`ddns:read`。",
         "parameters": [
           {
             "description": "增量拉取：只返回序号大于该值的日志",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "加载更早的日志：只返回序号小于该值的日志",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "最多返回的条数，取符合条件的最新几条；0 或不传表示不限",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -9018,12 +9088,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "支持 `since` 参数增量拉取，返回序号大于该值的日志。\n\n所需权限：`docker:read`。",
+        "description": "支持 `since` 参数增量拉取，返回序号大于该值的日志；`before` 返回序号小于该值的日志，用于加载更早的记录；`limit` 只返回其中最新的若干条。\n\n所需权限：`docker:read`。",
         "parameters": [
           {
             "description": "增量拉取：只返回序号大于该值的日志",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "加载更早的日志：只返回序号小于该值的日志",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "最多返回的条数，取符合条件的最新几条；0 或不传表示不限",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -10236,12 +10322,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "支持 `since` 参数增量拉取，返回序号大于该值的日志。\n\n所需权限：`frp:read`。",
+        "description": "支持 `since` 参数增量拉取，返回序号大于该值的日志；`before` 返回序号小于该值的日志，用于加载更早的记录；`limit` 只返回其中最新的若干条。\n\n所需权限：`frp:read`。",
         "parameters": [
           {
             "description": "增量拉取：只返回序号大于该值的日志",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "加载更早的日志：只返回序号小于该值的日志",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "最多返回的条数，取符合条件的最新几条；0 或不传表示不限",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -10847,12 +10949,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "支持 `since` 参数增量拉取，返回序号大于该值的日志。\n\n所需权限：`ftp:read`。",
+        "description": "支持 `since` 参数增量拉取，返回序号大于该值的日志；`before` 返回序号小于该值的日志，用于加载更早的记录；`limit` 只返回其中最新的若干条。\n\n所需权限：`ftp:read`。",
         "parameters": [
           {
             "description": "增量拉取：只返回序号大于该值的日志",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "加载更早的日志：只返回序号小于该值的日志",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "最多返回的条数，取符合条件的最新几条；0 或不传表示不限",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -11763,12 +11881,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "支持 `since` 参数增量拉取，返回序号大于该值的日志。\n\n所需权限：`guard:read`。",
+        "description": "支持 `since` 参数增量拉取，返回序号大于该值的日志；`before` 返回序号小于该值的日志，用于加载更早的记录；`limit` 只返回其中最新的若干条。\n\n所需权限：`guard:read`。",
         "parameters": [
           {
             "description": "增量拉取：只返回序号大于该值的日志",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "加载更早的日志：只返回序号小于该值的日志",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "最多返回的条数，取符合条件的最新几条；0 或不传表示不限",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -12291,12 +12425,28 @@
     },
     "/api/logs": {
       "get": {
-        "description": "支持 `since` 参数增量拉取。\n\n所需权限：`logs:read`。",
+        "description": "支持 `since` 参数增量拉取，返回序号大于该值的日志；`before` 返回序号小于该值的日志，用于加载更早的记录；`limit` 只返回其中最新的若干条。\n\n所需权限：`logs:read`。",
         "parameters": [
           {
             "description": "增量拉取：只返回序号大于该值的日志",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "加载更早的日志：只返回序号小于该值的日志",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "最多返回的条数，取符合条件的最新几条；0 或不传表示不限",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -12452,12 +12602,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "支持 `since` 参数增量拉取，返回序号大于该值的日志。\n\n所需权限：`nettools:read`。",
+        "description": "支持 `since` 参数增量拉取，返回序号大于该值的日志；`before` 返回序号小于该值的日志，用于加载更早的记录；`limit` 只返回其中最新的若干条。\n\n所需权限：`nettools:read`。",
         "parameters": [
           {
             "description": "增量拉取：只返回序号大于该值的日志",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "加载更早的日志：只返回序号小于该值的日志",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "最多返回的条数，取符合条件的最新几条；0 或不传表示不限",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -13576,12 +13742,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "支持 `since` 参数增量拉取，返回序号大于该值的日志。\n\n所需权限：`notify:read`。",
+        "description": "支持 `since` 参数增量拉取，返回序号大于该值的日志；`before` 返回序号小于该值的日志，用于加载更早的记录；`limit` 只返回其中最新的若干条。\n\n所需权限：`notify:read`。",
         "parameters": [
           {
             "description": "增量拉取：只返回序号大于该值的日志",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "加载更早的日志：只返回序号小于该值的日志",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "最多返回的条数，取符合条件的最新几条；0 或不传表示不限",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -14119,12 +14301,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "支持 `since` 参数增量拉取，返回序号大于该值的日志。\n\n所需权限：`portforward:read`。",
+        "description": "支持 `since` 参数增量拉取，返回序号大于该值的日志；`before` 返回序号小于该值的日志，用于加载更早的记录；`limit` 只返回其中最新的若干条。\n\n所需权限：`portforward:read`。",
         "parameters": [
           {
             "description": "增量拉取：只返回序号大于该值的日志",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "加载更早的日志：只返回序号小于该值的日志",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "最多返回的条数，取符合条件的最新几条；0 或不传表示不限",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -15397,12 +15595,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "支持 `since` 参数增量拉取，返回序号大于该值的日志。\n\n所需权限：`ssl:read`。",
+        "description": "支持 `since` 参数增量拉取，返回序号大于该值的日志；`before` 返回序号小于该值的日志，用于加载更早的记录；`limit` 只返回其中最新的若干条。\n\n所需权限：`ssl:read`。",
         "parameters": [
           {
             "description": "增量拉取：只返回序号大于该值的日志",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "加载更早的日志：只返回序号小于该值的日志",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "最多返回的条数，取符合条件的最新几条；0 或不传表示不限",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -16102,12 +16316,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "支持 `since` 参数增量拉取，返回序号大于该值的日志。\n\n所需权限：`storage:read`。",
+        "description": "支持 `since` 参数增量拉取，返回序号大于该值的日志；`before` 返回序号小于该值的日志，用于加载更早的记录；`limit` 只返回其中最新的若干条。\n\n所需权限：`storage:read`。",
         "parameters": [
           {
             "description": "增量拉取：只返回序号大于该值的日志",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "加载更早的日志：只返回序号小于该值的日志",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "最多返回的条数，取符合条件的最新几条；0 或不传表示不限",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -16604,12 +16834,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "支持 `since` 参数增量拉取，返回序号大于该值的日志。\n\n所需权限：`stun:read`。",
+        "description": "支持 `since` 参数增量拉取，返回序号大于该值的日志；`before` 返回序号小于该值的日志，用于加载更早的记录；`limit` 只返回其中最新的若干条。\n\n所需权限：`stun:read`。",
         "parameters": [
           {
             "description": "增量拉取：只返回序号大于该值的日志",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "加载更早的日志：只返回序号小于该值的日志",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "最多返回的条数，取符合条件的最新几条；0 或不传表示不限",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -18085,12 +18331,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "支持 `since` 参数增量拉取，返回序号大于该值的日志。\n\n所需权限：`tailscale:read`。",
+        "description": "支持 `since` 参数增量拉取，返回序号大于该值的日志；`before` 返回序号小于该值的日志，用于加载更早的记录；`limit` 只返回其中最新的若干条。\n\n所需权限：`tailscale:read`。",
         "parameters": [
           {
             "description": "增量拉取：只返回序号大于该值的日志",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "加载更早的日志：只返回序号小于该值的日志",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "最多返回的条数，取符合条件的最新几条；0 或不传表示不限",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -19230,12 +19492,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "支持 `since` 参数增量拉取，返回序号大于该值的日志。\n\n所需权限：`waf:read`。",
+        "description": "支持 `since` 参数增量拉取，返回序号大于该值的日志；`before` 返回序号小于该值的日志，用于加载更早的记录；`limit` 只返回其中最新的若干条。\n\n所需权限：`waf:read`。",
         "parameters": [
           {
             "description": "增量拉取：只返回序号大于该值的日志",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "加载更早的日志：只返回序号小于该值的日志",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "最多返回的条数，取符合条件的最新几条；0 或不传表示不限",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -19340,12 +19618,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "支持 `since` 参数增量拉取，返回序号大于该值的日志。\n\n所需权限：`webdav:read`。",
+        "description": "支持 `since` 参数增量拉取，返回序号大于该值的日志；`before` 返回序号小于该值的日志，用于加载更早的记录；`limit` 只返回其中最新的若干条。\n\n所需权限：`webdav:read`。",
         "parameters": [
           {
             "description": "增量拉取：只返回序号大于该值的日志",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "加载更早的日志：只返回序号小于该值的日志",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "最多返回的条数，取符合条件的最新几条；0 或不传表示不限",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -20866,12 +21160,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "支持 `since` 参数增量拉取，返回序号大于该值的日志。\n\n所需权限：`webservice:read`。",
+        "description": "支持 `since` 参数增量拉取，返回序号大于该值的日志；`before` 返回序号小于该值的日志，用于加载更早的记录；`limit` 只返回其中最新的若干条。\n\n所需权限：`webservice:read`。",
         "parameters": [
           {
             "description": "增量拉取：只返回序号大于该值的日志",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "加载更早的日志：只返回序号小于该值的日志",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "最多返回的条数，取符合条件的最新几条；0 或不传表示不限",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -22467,12 +22777,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "支持 `since` 参数增量拉取，返回序号大于该值的日志。\n\n所需权限：`webterminal:read`。",
+        "description": "支持 `since` 参数增量拉取，返回序号大于该值的日志；`before` 返回序号小于该值的日志，用于加载更早的记录；`limit` 只返回其中最新的若干条。\n\n所需权限：`webterminal:read`。",
         "parameters": [
           {
             "description": "增量拉取：只返回序号大于该值的日志",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "加载更早的日志：只返回序号小于该值的日志",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "最多返回的条数，取符合条件的最新几条；0 或不传表示不限",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -24934,12 +25260,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "支持 `since` 参数增量拉取，返回序号大于该值的日志。\n\n所需权限：`wol:read`。",
+        "description": "支持 `since` 参数增量拉取，返回序号大于该值的日志；`before` 返回序号小于该值的日志，用于加载更早的记录；`limit` 只返回其中最新的若干条。\n\n所需权限：`wol:read`。",
         "parameters": [
           {
             "description": "增量拉取：只返回序号大于该值的日志",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "加载更早的日志：只返回序号小于该值的日志",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "最多返回的条数，取符合条件的最新几条；0 或不传表示不限",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }

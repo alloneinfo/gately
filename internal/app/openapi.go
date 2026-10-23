@@ -60,9 +60,9 @@ func (a *App) buildDoc() docModel {
 		key := r.Method + " " + r.Path
 		ep := endpoint{Method: r.Method, Path: r.Path, Scope: apitoken.Required(r.Method, r.Path)}
 		ep.Tag = docTag(r, titles)
-		// 日志接口支持 since 增量拉取
+		// 日志接口支持 since 增量拉取、before 加载更早的日志、limit 限制条数
 		if r.Method == http.MethodGet && (r.Path == "/api/logs" || (r.Module != "" && r.Path == "/api/"+r.Module+"/logs")) {
-			ep.Query = []string{"since"}
+			ep.Query = []string{"since", "before", "limit"}
 		}
 		d, hasDoc := a.routeDocs[key]
 		if hasDoc {
@@ -247,7 +247,7 @@ func (m docModel) operation(e endpoint) map[string]any {
 	}
 	for _, q := range e.Query {
 		params = append(params, map[string]any{"name": q, "in": "query", "schema": map[string]any{"type": "integer"},
-			"description": "增量拉取：只返回序号大于该值的日志"})
+			"description": logQueryDesc[q]})
 	}
 	if len(params) > 0 {
 		op["parameters"] = params
@@ -273,6 +273,13 @@ func (m docModel) operation(e endpoint) map[string]any {
 	}
 	op["responses"] = responses
 	return op
+}
+
+// logQueryDesc 是日志接口查询参数的说明。
+var logQueryDesc = map[string]string{
+	"since":  "增量拉取：只返回序号大于该值的日志",
+	"before": "加载更早的日志：只返回序号小于该值的日志",
+	"limit":  "最多返回的条数，取符合条件的最新几条；0 或不传表示不限",
 }
 
 func (a *App) handleOpenAPI(w http.ResponseWriter, r *http.Request) {

@@ -41,7 +41,8 @@
     "levelWarn": "Warnung und höher",
     "levelError": "Nur Fehler",
     "autoScroll": "Automatisch scrollen",
-    "empty": "Noch keine Protokolle"
+    "empty": "Noch keine Protokolle",
+    "loadEarlier": "Ältere Protokolle laden"
   },
   "scopeTags": {
     "allWrite": "Vollzugriff",

@@ -1186,6 +1186,9 @@
       },
       "ssl.Deploy": {
         "properties": {
+          "certName": {
+            "type": "string"
+          },
           "command": {
             "type": "string"
           },
@@ -1210,6 +1213,9 @@
           },
           "enable": {
             "type": "boolean"
+          },
+          "keyName": {
+            "type": "string"
           },
           "remark": {
             "type": "string"
@@ -3230,12 +3236,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Supports incremental fetching with the `since` parameter; returns logs with a sequence number greater than this value.\n\nRequired permission: `backup:read`.",
+        "description": "Supports incremental fetching with the `since` parameter, returning logs with a sequence number greater than this value; `before` returns logs with a sequence number less than this value, for loading earlier entries; `limit` returns only the newest entries among them.\n\nRequired permission: `backup:read`.",
         "parameters": [
           {
             "description": "Incremental fetch: returns only logs with a sequence number greater than this value",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Load earlier logs: returns only logs with a sequence number less than this value",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Maximum number of entries to return, taking the newest matching ones; 0 or omitted means no limit",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -4032,12 +4054,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Supports incremental fetching with the `since` parameter; returns logs with a sequence number greater than this value.\n\nRequired permission: `cloudflared:read`.",
+        "description": "Supports incremental fetching with the `since` parameter, returning logs with a sequence number greater than this value; `before` returns logs with a sequence number less than this value, for loading earlier entries; `limit` returns only the newest entries among them.\n\nRequired permission: `cloudflared:read`.",
         "parameters": [
           {
             "description": "Incremental fetch: returns only logs with a sequence number greater than this value",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Load earlier logs: returns only logs with a sequence number less than this value",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Maximum number of entries to return, taking the newest matching ones; 0 or omitted means no limit",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -4704,12 +4742,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Supports incremental fetching with the `since` parameter; returns logs with a sequence number greater than this value.\n\nRequired permission: `cron:read`.",
+        "description": "Supports incremental fetching with the `since` parameter, returning logs with a sequence number greater than this value; `before` returns logs with a sequence number less than this value, for loading earlier entries; `limit` returns only the newest entries among them.\n\nRequired permission: `cron:read`.",
         "parameters": [
           {
             "description": "Incremental fetch: returns only logs with a sequence number greater than this value",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Load earlier logs: returns only logs with a sequence number less than this value",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Maximum number of entries to return, taking the newest matching ones; 0 or omitted means no limit",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -5438,12 +5492,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Supports incremental fetching with the `since` parameter; returns logs with a sequence number greater than this value.\n\nRequired permission: `ddns:read`.",
+        "description": "Supports incremental fetching with the `since` parameter, returning logs with a sequence number greater than this value; `before` returns logs with a sequence number less than this value, for loading earlier entries; `limit` returns only the newest entries among them.\n\nRequired permission: `ddns:read`.",
         "parameters": [
           {
             "description": "Incremental fetch: returns only logs with a sequence number greater than this value",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Load earlier logs: returns only logs with a sequence number less than this value",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Maximum number of entries to return, taking the newest matching ones; 0 or omitted means no limit",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -9018,12 +9088,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Supports incremental fetching with the `since` parameter; returns logs with a sequence number greater than this value.\n\nRequired permission: `docker:read`.",
+        "description": "Supports incremental fetching with the `since` parameter, returning logs with a sequence number greater than this value; `before` returns logs with a sequence number less than this value, for loading earlier entries; `limit` returns only the newest entries among them.\n\nRequired permission: `docker:read`.",
         "parameters": [
           {
             "description": "Incremental fetch: returns only logs with a sequence number greater than this value",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Load earlier logs: returns only logs with a sequence number less than this value",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Maximum number of entries to return, taking the newest matching ones; 0 or omitted means no limit",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -10236,12 +10322,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Supports incremental fetching with the `since` parameter; returns logs with a sequence number greater than this value.\n\nRequired permission: `frp:read`.",
+        "description": "Supports incremental fetching with the `since` parameter, returning logs with a sequence number greater than this value; `before` returns logs with a sequence number less than this value, for loading earlier entries; `limit` returns only the newest entries among them.\n\nRequired permission: `frp:read`.",
         "parameters": [
           {
             "description": "Incremental fetch: returns only logs with a sequence number greater than this value",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Load earlier logs: returns only logs with a sequence number less than this value",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Maximum number of entries to return, taking the newest matching ones; 0 or omitted means no limit",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -10847,12 +10949,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Supports incremental fetching with the `since` parameter; returns logs with a sequence number greater than this value.\n\nRequired permission: `ftp:read`.",
+        "description": "Supports incremental fetching with the `since` parameter, returning logs with a sequence number greater than this value; `before` returns logs with a sequence number less than this value, for loading earlier entries; `limit` returns only the newest entries among them.\n\nRequired permission: `ftp:read`.",
         "parameters": [
           {
             "description": "Incremental fetch: returns only logs with a sequence number greater than this value",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Load earlier logs: returns only logs with a sequence number less than this value",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Maximum number of entries to return, taking the newest matching ones; 0 or omitted means no limit",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -11763,12 +11881,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Supports incremental fetching with the `since` parameter; returns logs with a sequence number greater than this value.\n\nRequired permission: `guard:read`.",
+        "description": "Supports incremental fetching with the `since` parameter, returning logs with a sequence number greater than this value; `before` returns logs with a sequence number less than this value, for loading earlier entries; `limit` returns only the newest entries among them.\n\nRequired permission: `guard:read`.",
         "parameters": [
           {
             "description": "Incremental fetch: returns only logs with a sequence number greater than this value",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Load earlier logs: returns only logs with a sequence number less than this value",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Maximum number of entries to return, taking the newest matching ones; 0 or omitted means no limit",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -12291,12 +12425,28 @@
     },
     "/api/logs": {
       "get": {
-        "description": "Supports incremental fetching with the `since` parameter.\n\nRequired permission: `logs:read`.",
+        "description": "Supports incremental fetching with the `since` parameter, returning logs with a sequence number greater than this value; `before` returns logs with a sequence number less than this value, for loading earlier entries; `limit` returns only the newest entries among them.\n\nRequired permission: `logs:read`.",
         "parameters": [
           {
             "description": "Incremental fetch: returns only logs with a sequence number greater than this value",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Load earlier logs: returns only logs with a sequence number less than this value",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Maximum number of entries to return, taking the newest matching ones; 0 or omitted means no limit",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -12452,12 +12602,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Supports incremental fetching with the `since` parameter; returns logs with a sequence number greater than this value.\n\nRequired permission: `nettools:read`.",
+        "description": "Supports incremental fetching with the `since` parameter, returning logs with a sequence number greater than this value; `before` returns logs with a sequence number less than this value, for loading earlier entries; `limit` returns only the newest entries among them.\n\nRequired permission: `nettools:read`.",
         "parameters": [
           {
             "description": "Incremental fetch: returns only logs with a sequence number greater than this value",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Load earlier logs: returns only logs with a sequence number less than this value",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Maximum number of entries to return, taking the newest matching ones; 0 or omitted means no limit",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -13576,12 +13742,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Supports incremental fetching with the `since` parameter; returns logs with a sequence number greater than this value.\n\nRequired permission: `notify:read`.",
+        "description": "Supports incremental fetching with the `since` parameter, returning logs with a sequence number greater than this value; `before` returns logs with a sequence number less than this value, for loading earlier entries; `limit` returns only the newest entries among them.\n\nRequired permission: `notify:read`.",
         "parameters": [
           {
             "description": "Incremental fetch: returns only logs with a sequence number greater than this value",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Load earlier logs: returns only logs with a sequence number less than this value",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Maximum number of entries to return, taking the newest matching ones; 0 or omitted means no limit",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -14119,12 +14301,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Supports incremental fetching with the `since` parameter; returns logs with a sequence number greater than this value.\n\nRequired permission: `portforward:read`.",
+        "description": "Supports incremental fetching with the `since` parameter, returning logs with a sequence number greater than this value; `before` returns logs with a sequence number less than this value, for loading earlier entries; `limit` returns only the newest entries among them.\n\nRequired permission: `portforward:read`.",
         "parameters": [
           {
             "description": "Incremental fetch: returns only logs with a sequence number greater than this value",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Load earlier logs: returns only logs with a sequence number less than this value",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Maximum number of entries to return, taking the newest matching ones; 0 or omitted means no limit",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -15397,12 +15595,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Supports incremental fetching with the `since` parameter; returns logs with a sequence number greater than this value.\n\nRequired permission: `ssl:read`.",
+        "description": "Supports incremental fetching with the `since` parameter, returning logs with a sequence number greater than this value; `before` returns logs with a sequence number less than this value, for loading earlier entries; `limit` returns only the newest entries among them.\n\nRequired permission: `ssl:read`.",
         "parameters": [
           {
             "description": "Incremental fetch: returns only logs with a sequence number greater than this value",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Load earlier logs: returns only logs with a sequence number less than this value",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Maximum number of entries to return, taking the newest matching ones; 0 or omitted means no limit",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -16102,12 +16316,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Supports incremental fetching with the `since` parameter; returns logs with a sequence number greater than this value.\n\nRequired permission: `storage:read`.",
+        "description": "Supports incremental fetching with the `since` parameter, returning logs with a sequence number greater than this value; `before` returns logs with a sequence number less than this value, for loading earlier entries; `limit` returns only the newest entries among them.\n\nRequired permission: `storage:read`.",
         "parameters": [
           {
             "description": "Incremental fetch: returns only logs with a sequence number greater than this value",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Load earlier logs: returns only logs with a sequence number less than this value",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Maximum number of entries to return, taking the newest matching ones; 0 or omitted means no limit",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -16604,12 +16834,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Supports incremental fetching with the `since` parameter; returns logs with a sequence number greater than this value.\n\nRequired permission: `stun:read`.",
+        "description": "Supports incremental fetching with the `since` parameter, returning logs with a sequence number greater than this value; `before` returns logs with a sequence number less than this value, for loading earlier entries; `limit` returns only the newest entries among them.\n\nRequired permission: `stun:read`.",
         "parameters": [
           {
             "description": "Incremental fetch: returns only logs with a sequence number greater than this value",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Load earlier logs: returns only logs with a sequence number less than this value",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Maximum number of entries to return, taking the newest matching ones; 0 or omitted means no limit",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -18085,12 +18331,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Supports incremental fetching with the `since` parameter; returns logs with a sequence number greater than this value.\n\nRequired permission: `tailscale:read`.",
+        "description": "Supports incremental fetching with the `since` parameter, returning logs with a sequence number greater than this value; `before` returns logs with a sequence number less than this value, for loading earlier entries; `limit` returns only the newest entries among them.\n\nRequired permission: `tailscale:read`.",
         "parameters": [
           {
             "description": "Incremental fetch: returns only logs with a sequence number greater than this value",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Load earlier logs: returns only logs with a sequence number less than this value",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Maximum number of entries to return, taking the newest matching ones; 0 or omitted means no limit",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -19230,12 +19492,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Supports incremental fetching with the `since` parameter; returns logs with a sequence number greater than this value.\n\nRequired permission: `waf:read`.",
+        "description": "Supports incremental fetching with the `since` parameter, returning logs with a sequence number greater than this value; `before` returns logs with a sequence number less than this value, for loading earlier entries; `limit` returns only the newest entries among them.\n\nRequired permission: `waf:read`.",
         "parameters": [
           {
             "description": "Incremental fetch: returns only logs with a sequence number greater than this value",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Load earlier logs: returns only logs with a sequence number less than this value",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Maximum number of entries to return, taking the newest matching ones; 0 or omitted means no limit",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -19340,12 +19618,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Supports incremental fetching with the `since` parameter; returns logs with a sequence number greater than this value.\n\nRequired permission: `webdav:read`.",
+        "description": "Supports incremental fetching with the `since` parameter, returning logs with a sequence number greater than this value; `before` returns logs with a sequence number less than this value, for loading earlier entries; `limit` returns only the newest entries among them.\n\nRequired permission: `webdav:read`.",
         "parameters": [
           {
             "description": "Incremental fetch: returns only logs with a sequence number greater than this value",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Load earlier logs: returns only logs with a sequence number less than this value",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Maximum number of entries to return, taking the newest matching ones; 0 or omitted means no limit",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -20866,12 +21160,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Supports incremental fetching with the `since` parameter; returns logs with a sequence number greater than this value.\n\nRequired permission: `webservice:read`.",
+        "description": "Supports incremental fetching with the `since` parameter, returning logs with a sequence number greater than this value; `before` returns logs with a sequence number less than this value, for loading earlier entries; `limit` returns only the newest entries among them.\n\nRequired permission: `webservice:read`.",
         "parameters": [
           {
             "description": "Incremental fetch: returns only logs with a sequence number greater than this value",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Load earlier logs: returns only logs with a sequence number less than this value",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Maximum number of entries to return, taking the newest matching ones; 0 or omitted means no limit",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -22467,12 +22777,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Supports incremental fetching with the `since` parameter; returns logs with a sequence number greater than this value.\n\nRequired permission: `webterminal:read`.",
+        "description": "Supports incremental fetching with the `since` parameter, returning logs with a sequence number greater than this value; `before` returns logs with a sequence number less than this value, for loading earlier entries; `limit` returns only the newest entries among them.\n\nRequired permission: `webterminal:read`.",
         "parameters": [
           {
             "description": "Incremental fetch: returns only logs with a sequence number greater than this value",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Load earlier logs: returns only logs with a sequence number less than this value",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Maximum number of entries to return, taking the newest matching ones; 0 or omitted means no limit",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -24934,12 +25260,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Supports incremental fetching with the `since` parameter; returns logs with a sequence number greater than this value.\n\nRequired permission: `wol:read`.",
+        "description": "Supports incremental fetching with the `since` parameter, returning logs with a sequence number greater than this value; `before` returns logs with a sequence number less than this value, for loading earlier entries; `limit` returns only the newest entries among them.\n\nRequired permission: `wol:read`.",
         "parameters": [
           {
             "description": "Incremental fetch: returns only logs with a sequence number greater than this value",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Load earlier logs: returns only logs with a sequence number less than this value",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Maximum number of entries to return, taking the newest matching ones; 0 or omitted means no limit",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }

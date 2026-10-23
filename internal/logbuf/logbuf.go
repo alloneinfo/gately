@@ -76,16 +76,36 @@ func (b *Buffer) Add(level, source, msg string) {
 
 // Since 返回序号大于 seq 的全部日志（按时间顺序）。seq 为 0 时返回全部。
 func (b *Buffer) Since(seq uint64) []Entry {
+	return b.Range(seq, 0, 0)
+}
+
+// Range 返回序号在 (after, before) 之间的日志，before 为 0 表示不限；limit 大于 0 时只保留其中最新的 limit 条。
+// 缓冲内日志按序号递增排列，从最新一条往前扫描，只为结果分配内存，增量轮询时不会按整个缓冲大小分配。
+func (b *Buffer) Range(after, before uint64, limit int) []Entry {
 	b.mu.Lock()
 	defer b.mu.Unlock()
-	out := make([]Entry, 0, b.count)
-	for i := 0; i < b.count; i++ {
-		e := b.entries[(b.start+i)%len(b.entries)]
-		if e.Seq > seq {
-			out = append(out, e)
+	// 先从新到旧找出结果区间 [lo, hi)（相对 start 的偏移）
+	hi := b.count
+	for hi > 0 && before > 0 && b.at(hi-1).Seq >= before {
+		hi--
+	}
+	lo := hi
+	for lo > 0 && b.at(lo-1).Seq > after {
+		if limit > 0 && hi-lo >= limit {
+			break
 		}
+		lo--
+	}
+	out := make([]Entry, 0, hi-lo)
+	for i := lo; i < hi; i++ {
+		out = append(out, b.at(i))
 	}
 	return out
+}
+
+// at 返回从最旧一条起第 i 条日志，调用方需持有锁。
+func (b *Buffer) at(i int) Entry {
+	return b.entries[(b.start+i)%len(b.entries)]
 }
 
 // Clear 清空缓冲（开启落盘时同时删除日志文件），序号继续递增，保证前端增量拉取不会错乱。

@@ -1072,6 +1072,7 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 
 | Campo | Tipo |
 | --- | --- |
+| `certName` | string |
 | `command` | string |
 | `connection` | string |
 | `containers` | Array de string |
@@ -1079,6 +1080,7 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | `deployedHash` | string |
 | `dir` | string |
 | `enable` | boolean |
+| `keyName` | string |
 | `remark` | string |
 | `type` | string |
 

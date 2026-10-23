@@ -1186,6 +1186,9 @@
       },
       "ssl.Deploy": {
         "properties": {
+          "certName": {
+            "type": "string"
+          },
           "command": {
             "type": "string"
           },
@@ -1210,6 +1213,9 @@
           },
           "enable": {
             "type": "boolean"
+          },
+          "keyName": {
+            "type": "string"
           },
           "remark": {
             "type": "string"
@@ -3230,12 +3236,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Suporta o parâmetro `since` para busca incremental, retornando logs com número de sequência maior que este valor.\n\nPermissão necessária: `backup:read`.",
+        "description": "Suporta busca incremental com o parâmetro `since`, retornando logs com número de sequência maior que este valor; `before` retorna logs com número de sequência menor que este valor, para carregar entradas anteriores; `limit` retorna apenas as mais recentes entre elas.\n\nPermissão necessária: `backup:read`.",
         "parameters": [
           {
             "description": "Busca incremental: retorna apenas logs com número de sequência maior que este valor",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Carregar logs anteriores: retorna apenas logs com número de sequência menor que este valor",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Número máximo de entradas retornadas, pegando as mais recentes que correspondem; 0 ou omitido significa sem limite",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -4032,12 +4054,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Suporta o parâmetro `since` para busca incremental, retornando logs com número de sequência maior que este valor.\n\nPermissão necessária: `cloudflared:read`.",
+        "description": "Suporta busca incremental com o parâmetro `since`, retornando logs com número de sequência maior que este valor; `before` retorna logs com número de sequência menor que este valor, para carregar entradas anteriores; `limit` retorna apenas as mais recentes entre elas.\n\nPermissão necessária: `cloudflared:read`.",
         "parameters": [
           {
             "description": "Busca incremental: retorna apenas logs com número de sequência maior que este valor",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Carregar logs anteriores: retorna apenas logs com número de sequência menor que este valor",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Número máximo de entradas retornadas, pegando as mais recentes que correspondem; 0 ou omitido significa sem limite",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -4704,12 +4742,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Suporta o parâmetro `since` para busca incremental, retornando logs com número de sequência maior que este valor.\n\nPermissão necessária: `cron:read`.",
+        "description": "Suporta busca incremental com o parâmetro `since`, retornando logs com número de sequência maior que este valor; `before` retorna logs com número de sequência menor que este valor, para carregar entradas anteriores; `limit` retorna apenas as mais recentes entre elas.\n\nPermissão necessária: `cron:read`.",
         "parameters": [
           {
             "description": "Busca incremental: retorna apenas logs com número de sequência maior que este valor",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Carregar logs anteriores: retorna apenas logs com número de sequência menor que este valor",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Número máximo de entradas retornadas, pegando as mais recentes que correspondem; 0 ou omitido significa sem limite",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -5438,12 +5492,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Suporta o parâmetro `since` para busca incremental, retornando logs com número de sequência maior que este valor.\n\nPermissão necessária: `ddns:read`.",
+        "description": "Suporta busca incremental com o parâmetro `since`, retornando logs com número de sequência maior que este valor; `before` retorna logs com número de sequência menor que este valor, para carregar entradas anteriores; `limit` retorna apenas as mais recentes entre elas.\n\nPermissão necessária: `ddns:read`.",
         "parameters": [
           {
             "description": "Busca incremental: retorna apenas logs com número de sequência maior que este valor",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Carregar logs anteriores: retorna apenas logs com número de sequência menor que este valor",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Número máximo de entradas retornadas, pegando as mais recentes que correspondem; 0 ou omitido significa sem limite",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -9018,12 +9088,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Suporta o parâmetro `since` para busca incremental, retornando logs com número de sequência maior que este valor.\n\nPermissão necessária: `docker:read`.",
+        "description": "Suporta busca incremental com o parâmetro `since`, retornando logs com número de sequência maior que este valor; `before` retorna logs com número de sequência menor que este valor, para carregar entradas anteriores; `limit` retorna apenas as mais recentes entre elas.\n\nPermissão necessária: `docker:read`.",
         "parameters": [
           {
             "description": "Busca incremental: retorna apenas logs com número de sequência maior que este valor",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Carregar logs anteriores: retorna apenas logs com número de sequência menor que este valor",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Número máximo de entradas retornadas, pegando as mais recentes que correspondem; 0 ou omitido significa sem limite",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -10236,12 +10322,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Suporta o parâmetro `since` para busca incremental, retornando logs com número de sequência maior que este valor.\n\nPermissão necessária: `frp:read`.",
+        "description": "Suporta busca incremental com o parâmetro `since`, retornando logs com número de sequência maior que este valor; `before` retorna logs com número de sequência menor que este valor, para carregar entradas anteriores; `limit` retorna apenas as mais recentes entre elas.\n\nPermissão necessária: `frp:read`.",
         "parameters": [
           {
             "description": "Busca incremental: retorna apenas logs com número de sequência maior que este valor",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Carregar logs anteriores: retorna apenas logs com número de sequência menor que este valor",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Número máximo de entradas retornadas, pegando as mais recentes que correspondem; 0 ou omitido significa sem limite",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -10847,12 +10949,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Suporta o parâmetro `since` para busca incremental, retornando logs com número de sequência maior que este valor.\n\nPermissão necessária: `ftp:read`.",
+        "description": "Suporta busca incremental com o parâmetro `since`, retornando logs com número de sequência maior que este valor; `before` retorna logs com número de sequência menor que este valor, para carregar entradas anteriores; `limit` retorna apenas as mais recentes entre elas.\n\nPermissão necessária: `ftp:read`.",
         "parameters": [
           {
             "description": "Busca incremental: retorna apenas logs com número de sequência maior que este valor",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Carregar logs anteriores: retorna apenas logs com número de sequência menor que este valor",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Número máximo de entradas retornadas, pegando as mais recentes que correspondem; 0 ou omitido significa sem limite",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -11763,12 +11881,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Suporta o parâmetro `since` para busca incremental, retornando logs com número de sequência maior que este valor.\n\nPermissão necessária: `guard:read`.",
+        "description": "Suporta busca incremental com o parâmetro `since`, retornando logs com número de sequência maior que este valor; `before` retorna logs com número de sequência menor que este valor, para carregar entradas anteriores; `limit` retorna apenas as mais recentes entre elas.\n\nPermissão necessária: `guard:read`.",
         "parameters": [
           {
             "description": "Busca incremental: retorna apenas logs com número de sequência maior que este valor",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Carregar logs anteriores: retorna apenas logs com número de sequência menor que este valor",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Número máximo de entradas retornadas, pegando as mais recentes que correspondem; 0 ou omitido significa sem limite",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -12291,12 +12425,28 @@
     },
     "/api/logs": {
       "get": {
-        "description": "Suporta o parâmetro `since` para busca incremental.\n\nPermissão necessária: `logs:read`.",
+        "description": "Suporta busca incremental com o parâmetro `since`, retornando logs com número de sequência maior que este valor; `before` retorna logs com número de sequência menor que este valor, para carregar entradas anteriores; `limit` retorna apenas as mais recentes entre elas.\n\nPermissão necessária: `logs:read`.",
         "parameters": [
           {
             "description": "Busca incremental: retorna apenas logs com número de sequência maior que este valor",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Carregar logs anteriores: retorna apenas logs com número de sequência menor que este valor",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Número máximo de entradas retornadas, pegando as mais recentes que correspondem; 0 ou omitido significa sem limite",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -12452,12 +12602,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Suporta o parâmetro `since` para busca incremental, retornando logs com número de sequência maior que este valor.\n\nPermissão necessária: `nettools:read`.",
+        "description": "Suporta busca incremental com o parâmetro `since`, retornando logs com número de sequência maior que este valor; `before` retorna logs com número de sequência menor que este valor, para carregar entradas anteriores; `limit` retorna apenas as mais recentes entre elas.\n\nPermissão necessária: `nettools:read`.",
         "parameters": [
           {
             "description": "Busca incremental: retorna apenas logs com número de sequência maior que este valor",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Carregar logs anteriores: retorna apenas logs com número de sequência menor que este valor",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Número máximo de entradas retornadas, pegando as mais recentes que correspondem; 0 ou omitido significa sem limite",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -13576,12 +13742,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Suporta o parâmetro `since` para busca incremental, retornando logs com número de sequência maior que este valor.\n\nPermissão necessária: `notify:read`.",
+        "description": "Suporta busca incremental com o parâmetro `since`, retornando logs com número de sequência maior que este valor; `before` retorna logs com número de sequência menor que este valor, para carregar entradas anteriores; `limit` retorna apenas as mais recentes entre elas.\n\nPermissão necessária: `notify:read`.",
         "parameters": [
           {
             "description": "Busca incremental: retorna apenas logs com número de sequência maior que este valor",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Carregar logs anteriores: retorna apenas logs com número de sequência menor que este valor",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Número máximo de entradas retornadas, pegando as mais recentes que correspondem; 0 ou omitido significa sem limite",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -14119,12 +14301,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Suporta o parâmetro `since` para busca incremental, retornando logs com número de sequência maior que este valor.\n\nPermissão necessária: `portforward:read`.",
+        "description": "Suporta busca incremental com o parâmetro `since`, retornando logs com número de sequência maior que este valor; `before` retorna logs com número de sequência menor que este valor, para carregar entradas anteriores; `limit` retorna apenas as mais recentes entre elas.\n\nPermissão necessária: `portforward:read`.",
         "parameters": [
           {
             "description": "Busca incremental: retorna apenas logs com número de sequência maior que este valor",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Carregar logs anteriores: retorna apenas logs com número de sequência menor que este valor",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Número máximo de entradas retornadas, pegando as mais recentes que correspondem; 0 ou omitido significa sem limite",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -15397,12 +15595,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Suporta o parâmetro `since` para busca incremental, retornando logs com número de sequência maior que este valor.\n\nPermissão necessária: `ssl:read`.",
+        "description": "Suporta busca incremental com o parâmetro `since`, retornando logs com número de sequência maior que este valor; `before` retorna logs com número de sequência menor que este valor, para carregar entradas anteriores; `limit` retorna apenas as mais recentes entre elas.\n\nPermissão necessária: `ssl:read`.",
         "parameters": [
           {
             "description": "Busca incremental: retorna apenas logs com número de sequência maior que este valor",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Carregar logs anteriores: retorna apenas logs com número de sequência menor que este valor",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Número máximo de entradas retornadas, pegando as mais recentes que correspondem; 0 ou omitido significa sem limite",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -16102,12 +16316,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Suporta o parâmetro `since` para busca incremental, retornando logs com número de sequência maior que este valor.\n\nPermissão necessária: `storage:read`.",
+        "description": "Suporta busca incremental com o parâmetro `since`, retornando logs com número de sequência maior que este valor; `before` retorna logs com número de sequência menor que este valor, para carregar entradas anteriores; `limit` retorna apenas as mais recentes entre elas.\n\nPermissão necessária: `storage:read`.",
         "parameters": [
           {
             "description": "Busca incremental: retorna apenas logs com número de sequência maior que este valor",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Carregar logs anteriores: retorna apenas logs com número de sequência menor que este valor",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Número máximo de entradas retornadas, pegando as mais recentes que correspondem; 0 ou omitido significa sem limite",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -16604,12 +16834,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Suporta o parâmetro `since` para busca incremental, retornando logs com número de sequência maior que este valor.\n\nPermissão necessária: `stun:read`.",
+        "description": "Suporta busca incremental com o parâmetro `since`, retornando logs com número de sequência maior que este valor; `before` retorna logs com número de sequência menor que este valor, para carregar entradas anteriores; `limit` retorna apenas as mais recentes entre elas.\n\nPermissão necessária: `stun:read`.",
         "parameters": [
           {
             "description": "Busca incremental: retorna apenas logs com número de sequência maior que este valor",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Carregar logs anteriores: retorna apenas logs com número de sequência menor que este valor",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Número máximo de entradas retornadas, pegando as mais recentes que correspondem; 0 ou omitido significa sem limite",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -18085,12 +18331,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Suporta o parâmetro `since` para busca incremental, retornando logs com número de sequência maior que este valor.\n\nPermissão necessária: `tailscale:read`.",
+        "description": "Suporta busca incremental com o parâmetro `since`, retornando logs com número de sequência maior que este valor; `before` retorna logs com número de sequência menor que este valor, para carregar entradas anteriores; `limit` retorna apenas as mais recentes entre elas.\n\nPermissão necessária: `tailscale:read`.",
         "parameters": [
           {
             "description": "Busca incremental: retorna apenas logs com número de sequência maior que este valor",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Carregar logs anteriores: retorna apenas logs com número de sequência menor que este valor",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Número máximo de entradas retornadas, pegando as mais recentes que correspondem; 0 ou omitido significa sem limite",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -19230,12 +19492,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Suporta o parâmetro `since` para busca incremental, retornando logs com número de sequência maior que este valor.\n\nPermissão necessária: `waf:read`.",
+        "description": "Suporta busca incremental com o parâmetro `since`, retornando logs com número de sequência maior que este valor; `before` retorna logs com número de sequência menor que este valor, para carregar entradas anteriores; `limit` retorna apenas as mais recentes entre elas.\n\nPermissão necessária: `waf:read`.",
         "parameters": [
           {
             "description": "Busca incremental: retorna apenas logs com número de sequência maior que este valor",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Carregar logs anteriores: retorna apenas logs com número de sequência menor que este valor",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Número máximo de entradas retornadas, pegando as mais recentes que correspondem; 0 ou omitido significa sem limite",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -19340,12 +19618,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Suporta o parâmetro `since` para busca incremental, retornando logs com número de sequência maior que este valor.\n\nPermissão necessária: `webdav:read`.",
+        "description": "Suporta busca incremental com o parâmetro `since`, retornando logs com número de sequência maior que este valor; `before` retorna logs com número de sequência menor que este valor, para carregar entradas anteriores; `limit` retorna apenas as mais recentes entre elas.\n\nPermissão necessária: `webdav:read`.",
         "parameters": [
           {
             "description": "Busca incremental: retorna apenas logs com número de sequência maior que este valor",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Carregar logs anteriores: retorna apenas logs com número de sequência menor que este valor",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Número máximo de entradas retornadas, pegando as mais recentes que correspondem; 0 ou omitido significa sem limite",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -20866,12 +21160,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Suporta o parâmetro `since` para busca incremental, retornando logs com número de sequência maior que este valor.\n\nPermissão necessária: `webservice:read`.",
+        "description": "Suporta busca incremental com o parâmetro `since`, retornando logs com número de sequência maior que este valor; `before` retorna logs com número de sequência menor que este valor, para carregar entradas anteriores; `limit` retorna apenas as mais recentes entre elas.\n\nPermissão necessária: `webservice:read`.",
         "parameters": [
           {
             "description": "Busca incremental: retorna apenas logs com número de sequência maior que este valor",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Carregar logs anteriores: retorna apenas logs com número de sequência menor que este valor",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Número máximo de entradas retornadas, pegando as mais recentes que correspondem; 0 ou omitido significa sem limite",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -22467,12 +22777,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Suporta o parâmetro `since` para busca incremental, retornando logs com número de sequência maior que este valor.\n\nPermissão necessária: `webterminal:read`.",
+        "description": "Suporta busca incremental com o parâmetro `since`, retornando logs com número de sequência maior que este valor; `before` retorna logs com número de sequência menor que este valor, para carregar entradas anteriores; `limit` retorna apenas as mais recentes entre elas.\n\nPermissão necessária: `webterminal:read`.",
         "parameters": [
           {
             "description": "Busca incremental: retorna apenas logs com número de sequência maior que este valor",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Carregar logs anteriores: retorna apenas logs com número de sequência menor que este valor",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Número máximo de entradas retornadas, pegando as mais recentes que correspondem; 0 ou omitido significa sem limite",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -24934,12 +25260,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Suporta o parâmetro `since` para busca incremental, retornando logs com número de sequência maior que este valor.\n\nPermissão necessária: `wol:read`.",
+        "description": "Suporta busca incremental com o parâmetro `since`, retornando logs com número de sequência maior que este valor; `before` retorna logs com número de sequência menor que este valor, para carregar entradas anteriores; `limit` retorna apenas as mais recentes entre elas.\n\nPermissão necessária: `wol:read`.",
         "parameters": [
           {
             "description": "Busca incremental: retorna apenas logs com número de sequência maior que este valor",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Carregar logs anteriores: retorna apenas logs com número de sequência menor que este valor",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Número máximo de entradas retornadas, pegando as mais recentes que correspondem; 0 ou omitido significa sem limite",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }

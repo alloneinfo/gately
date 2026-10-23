@@ -1072,6 +1072,7 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 
 | Champ | Type |
 | --- | --- |
+| `certName` | string |
 | `command` | string |
 | `connection` | string |
 | `containers` | Tableau de string |
@@ -1079,6 +1080,7 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | `deployedHash` | string |
 | `dir` | string |
 | `enable` | boolean |
+| `keyName` | string |
 | `remark` | string |
 | `type` | string |
 

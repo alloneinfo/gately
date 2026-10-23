@@ -1072,6 +1072,7 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 
 | Field | Type |
 | --- | --- |
+| `certName` | string |
 | `command` | string |
 | `connection` | string |
 | `containers` | Array of string |
@@ -1079,6 +1080,7 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | `deployedHash` | string |
 | `dir` | string |
 | `enable` | boolean |
+| `keyName` | string |
 | `remark` | string |
 | `type` | string |
 

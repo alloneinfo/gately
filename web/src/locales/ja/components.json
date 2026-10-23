@@ -41,7 +41,8 @@
     "levelWarn": "警告以上",
     "levelError": "エラーのみ",
     "autoScroll": "自動スクロール",
-    "empty": "ログがありません"
+    "empty": "ログがありません",
+    "loadEarlier": "以前のログを読み込む"
   },
   "scopeTags": {
     "allWrite": "すべて読み書き",

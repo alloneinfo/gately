@@ -41,7 +41,8 @@
     "levelWarn": "Avertissement et supérieur",
     "levelError": "Erreurs uniquement",
     "autoScroll": "Défilement automatique",
-    "empty": "Aucun journal"
+    "empty": "Aucun journal",
+    "loadEarlier": "Charger les journaux plus anciens"
   },
   "scopeTags": {
     "allWrite": "Accès complet",

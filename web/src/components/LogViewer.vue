@@ -11,8 +11,11 @@
       <el-button v-if="clearable" size="small" text :icon="Trash2" class="clear" @click="clear">{{ t('common.clear') }}</el-button>
     </div>
     <div ref="box" class="box mono" :style="height ? { height } : undefined">
+      <div v-if="hasMore" class="more">
+        <el-button size="small" text :loading="loadingMore" @click="loadEarlier">{{ t('components.logViewer.loadEarlier') }}</el-button>
+      </div>
       <div v-for="e in visible" :key="e.seq" :class="['line', e.level]">
-        <span class="time">{{ formatTime(e.time) }}</span>
+        <span class="time">{{ e.timeText }}</span>
         <span class="lvl">{{ e.level.toUpperCase() }}</span>
         <span v-if="e.source" class="src">[{{ e.source }}]</span>
         <span>{{ e.message }}</span>
@@ -23,59 +26,121 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, nextTick, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Trash2 } from 'lucide-vue-next'
 import { api, type LogEntry } from '../api'
+import { usePolling } from '../composables/usePolling'
 
 const { t } = useI18n()
 
 // height 可覆盖默认高度，例如独立日志页填满可视区域
 const props = defineProps<{ url: string; clearable?: boolean; height?: string }>()
 
-const entries = ref<LogEntry[]>([])
+// 首次只拉最近 PAGE 条，更早的日志点“加载更早的日志”按页补充；轮询追加后最多保留 MAX 条
+const PAGE = 200
+const MAX = 2000
+
+// 时间在拉取时格式化一次，轮询刷新列表时不必逐行重复格式化
+type Row = LogEntry & { timeText: string }
+
+const entries = ref<Row[]>([])
 const level = ref('all')
 const follow = ref(true)
 const box = ref<HTMLElement>()
+// 缓冲中可能还有更早的日志
+const hasMore = ref(false)
+const loadingMore = ref(false)
 let lastSeq = 0
-let timer: number | undefined
+let loaded = false
 
 const order = { debug: 0, info: 1, warn: 2, error: 3 }
 const visible = computed(() =>
   level.value !== 'all' ? entries.value.filter((e) => order[e.level] >= order[level.value as keyof typeof order]) : entries.value,
 )
 
-function formatTime(t: string) {
-  return new Date(t).toLocaleString()
+function toRows(list: LogEntry[]): Row[] {
+  return list.map((e) => ({ ...e, timeText: new Date(e.time).toLocaleString() }))
 }
 
-// 按序号增量拉取，只追加新日志
+async function scrollToEnd() {
+  if (follow.value) {
+    await nextTick()
+    box.value?.scrollTo({ top: box.value.scrollHeight })
+  }
+}
+
+// 首次拉取最近一页，之后按序号增量拉取，只追加新日志
 async function poll() {
   try {
+    if (!loaded) {
+      const list = await api.get<LogEntry[]>(`${props.url}?since=0&limit=${PAGE}`)
+      loaded = true
+      hasMore.value = list.length >= PAGE
+      entries.value = toRows(list)
+      if (list.length) {
+        lastSeq = list[list.length - 1].seq
+      }
+      await scrollToEnd()
+      return
+    }
     const list = await api.get<LogEntry[]>(`${props.url}?since=${lastSeq}`)
     if (list.length) {
       lastSeq = list[list.length - 1].seq
-      entries.value = entries.value.concat(list).slice(-2000)
-      if (follow.value) {
-        await nextTick()
-        box.value?.scrollTo({ top: box.value.scrollHeight })
+      const next = entries.value.concat(toRows(list))
+      if (next.length > MAX) {
+        // 超出上限时丢掉最旧的部分，仍可通过“加载更早的日志”找回
+        hasMore.value = true
       }
+      entries.value = next.slice(-MAX)
+      await scrollToEnd()
     }
   } catch {
     // 网络抖动时下一轮重试
   }
 }
 
+// loadEarlier 拉取当前最早一条之前的一页日志，并保持当前可见位置不跳动
+async function loadEarlier() {
+  const first = entries.value[0]
+  if (!first || loadingMore.value) {
+    return
+  }
+  loadingMore.value = true
+  try {
+    const list = await api.get<LogEntry[]>(`${props.url}?before=${first.seq}&limit=${PAGE}`)
+    hasMore.value = list.length >= PAGE
+    if (!list.length) {
+      return
+    }
+    const el = box.value
+    const oldHeight = el?.scrollHeight ?? 0
+    entries.value = toRows(list).concat(entries.value)
+    await nextTick()
+    if (el) {
+      el.scrollTop += el.scrollHeight - oldHeight
+    }
+  } catch {
+    // 失败时保留按钮，用户可再次点击
+  } finally {
+    loadingMore.value = false
+  }
+}
+
 async function clear() {
   await api.del(props.url)
   entries.value = []
+  hasMore.value = false
 }
 
-onMounted(() => {
-  poll()
-  timer = window.setInterval(poll, 2000)
+// 每 2 秒增量拉取，标签页在后台时暂停
+const polling = usePolling(poll, 2000)
+
+onMounted(async () => {
+  // 首次拉取完成后再开始轮询，避免首屏请求较慢时重复拉取
+  await poll()
+  polling.start()
 })
-onBeforeUnmount(() => window.clearInterval(timer))
 </script>
 
 <style scoped>
@@ -102,6 +167,13 @@ onBeforeUnmount(() => window.clearInterval(timer))
 .line {
   white-space: pre-wrap;
   word-break: break-all;
+  /* 滚动区域外的行跳过布局与绘制，日志多时首屏与滚动更流畅；auto 让浏览器记住已渲染行的真实高度 */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 19px;
+}
+.more {
+  text-align: center;
+  margin-bottom: 4px;
 }
 .time {
   color: var(--el-text-color-secondary);

@@ -41,7 +41,8 @@
     "levelWarn": "Advertencia y superiores",
     "levelError": "Solo errores",
     "autoScroll": "Desplazamiento automático",
-    "empty": "Aún no hay registros"
+    "empty": "Aún no hay registros",
+    "loadEarlier": "Cargar registros anteriores"
   },
   "scopeTags": {
     "allWrite": "Acceso total",

@@ -41,7 +41,8 @@
     "levelWarn": "Aviso e acima",
     "levelError": "Somente erros",
     "autoScroll": "Rolagem automática",
-    "empty": "Nenhum log ainda"
+    "empty": "Nenhum log ainda",
+    "loadEarlier": "Carregar logs anteriores"
   },
   "scopeTags": {
     "allWrite": "Acesso total",

@@ -1072,6 +1072,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 
 | 欄位 | 類型 |
 | --- | --- |
+| `certName` | string |
 | `command` | string |
 | `connection` | string |
 | `containers` | 陣列 of string |
@@ -1079,6 +1080,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `deployedHash` | string |
 | `dir` | string |
 | `enable` | boolean |
+| `keyName` | string |
 | `remark` | string |
 | `type` | string |
 

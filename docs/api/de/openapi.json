@@ -1186,6 +1186,9 @@
       },
       "ssl.Deploy": {
         "properties": {
+          "certName": {
+            "type": "string"
+          },
           "command": {
             "type": "string"
           },
@@ -1210,6 +1213,9 @@
           },
           "enable": {
             "type": "boolean"
+          },
+          "keyName": {
+            "type": "string"
           },
           "remark": {
             "type": "string"
@@ -3230,12 +3236,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Unterstützt den Parameter `since` für inkrementellen Abruf und gibt Protokolle mit einer größeren Sequenznummer zurück.\n\nErforderliche Berechtigung: `backup:read`.",
+        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since`, der Protokolle mit einer Sequenznummer größer als dieser Wert zurückgibt; `before` gibt Protokolle mit einer Sequenznummer kleiner als dieser Wert zurück, um ältere Einträge zu laden; `limit` gibt davon nur die neuesten zurück.\n\nErforderliche Berechtigung: `backup:read`.",
         "parameters": [
           {
             "description": "Inkrementeller Abruf: gibt nur Protokolle mit einer größeren Sequenznummer zurück",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Ältere Protokolle laden: gibt nur Protokolle mit einer Sequenznummer kleiner als dieser Wert zurück",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Maximale Anzahl zurückgegebener Einträge, wobei die neuesten passenden genommen werden; 0 oder weggelassen bedeutet unbegrenzt",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -4032,12 +4054,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Unterstützt den Parameter `since` für inkrementellen Abruf und gibt Protokolle mit einer größeren Sequenznummer zurück.\n\nErforderliche Berechtigung: `cloudflared:read`.",
+        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since`, der Protokolle mit einer Sequenznummer größer als dieser Wert zurückgibt; `before` gibt Protokolle mit einer Sequenznummer kleiner als dieser Wert zurück, um ältere Einträge zu laden; `limit` gibt davon nur die neuesten zurück.\n\nErforderliche Berechtigung: `cloudflared:read`.",
         "parameters": [
           {
             "description": "Inkrementeller Abruf: gibt nur Protokolle mit einer größeren Sequenznummer zurück",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Ältere Protokolle laden: gibt nur Protokolle mit einer Sequenznummer kleiner als dieser Wert zurück",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Maximale Anzahl zurückgegebener Einträge, wobei die neuesten passenden genommen werden; 0 oder weggelassen bedeutet unbegrenzt",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -4704,12 +4742,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Unterstützt den Parameter `since` für inkrementellen Abruf und gibt Protokolle mit einer größeren Sequenznummer zurück.\n\nErforderliche Berechtigung: `cron:read`.",
+        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since`, der Protokolle mit einer Sequenznummer größer als dieser Wert zurückgibt; `before` gibt Protokolle mit einer Sequenznummer kleiner als dieser Wert zurück, um ältere Einträge zu laden; `limit` gibt davon nur die neuesten zurück.\n\nErforderliche Berechtigung: `cron:read`.",
         "parameters": [
           {
             "description": "Inkrementeller Abruf: gibt nur Protokolle mit einer größeren Sequenznummer zurück",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Ältere Protokolle laden: gibt nur Protokolle mit einer Sequenznummer kleiner als dieser Wert zurück",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Maximale Anzahl zurückgegebener Einträge, wobei die neuesten passenden genommen werden; 0 oder weggelassen bedeutet unbegrenzt",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -5438,12 +5492,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Unterstützt den Parameter `since` für inkrementellen Abruf und gibt Protokolle mit einer größeren Sequenznummer zurück.\n\nErforderliche Berechtigung: `ddns:read`.",
+        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since`, der Protokolle mit einer Sequenznummer größer als dieser Wert zurückgibt; `before` gibt Protokolle mit einer Sequenznummer kleiner als dieser Wert zurück, um ältere Einträge zu laden; `limit` gibt davon nur die neuesten zurück.\n\nErforderliche Berechtigung: `ddns:read`.",
         "parameters": [
           {
             "description": "Inkrementeller Abruf: gibt nur Protokolle mit einer größeren Sequenznummer zurück",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Ältere Protokolle laden: gibt nur Protokolle mit einer Sequenznummer kleiner als dieser Wert zurück",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Maximale Anzahl zurückgegebener Einträge, wobei die neuesten passenden genommen werden; 0 oder weggelassen bedeutet unbegrenzt",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -9018,12 +9088,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Unterstützt den Parameter `since` für inkrementellen Abruf und gibt Protokolle mit einer größeren Sequenznummer zurück.\n\nErforderliche Berechtigung: `docker:read`.",
+        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since`, der Protokolle mit einer Sequenznummer größer als dieser Wert zurückgibt; `before` gibt Protokolle mit einer Sequenznummer kleiner als dieser Wert zurück, um ältere Einträge zu laden; `limit` gibt davon nur die neuesten zurück.\n\nErforderliche Berechtigung: `docker:read`.",
         "parameters": [
           {
             "description": "Inkrementeller Abruf: gibt nur Protokolle mit einer größeren Sequenznummer zurück",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Ältere Protokolle laden: gibt nur Protokolle mit einer Sequenznummer kleiner als dieser Wert zurück",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Maximale Anzahl zurückgegebener Einträge, wobei die neuesten passenden genommen werden; 0 oder weggelassen bedeutet unbegrenzt",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -10236,12 +10322,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Unterstützt den Parameter `since` für inkrementellen Abruf und gibt Protokolle mit einer größeren Sequenznummer zurück.\n\nErforderliche Berechtigung: `frp:read`.",
+        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since`, der Protokolle mit einer Sequenznummer größer als dieser Wert zurückgibt; `before` gibt Protokolle mit einer Sequenznummer kleiner als dieser Wert zurück, um ältere Einträge zu laden; `limit` gibt davon nur die neuesten zurück.\n\nErforderliche Berechtigung: `frp:read`.",
         "parameters": [
           {
             "description": "Inkrementeller Abruf: gibt nur Protokolle mit einer größeren Sequenznummer zurück",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Ältere Protokolle laden: gibt nur Protokolle mit einer Sequenznummer kleiner als dieser Wert zurück",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Maximale Anzahl zurückgegebener Einträge, wobei die neuesten passenden genommen werden; 0 oder weggelassen bedeutet unbegrenzt",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -10847,12 +10949,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Unterstützt den Parameter `since` für inkrementellen Abruf und gibt Protokolle mit einer größeren Sequenznummer zurück.\n\nErforderliche Berechtigung: `ftp:read`.",
+        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since`, der Protokolle mit einer Sequenznummer größer als dieser Wert zurückgibt; `before` gibt Protokolle mit einer Sequenznummer kleiner als dieser Wert zurück, um ältere Einträge zu laden; `limit` gibt davon nur die neuesten zurück.\n\nErforderliche Berechtigung: `ftp:read`.",
         "parameters": [
           {
             "description": "Inkrementeller Abruf: gibt nur Protokolle mit einer größeren Sequenznummer zurück",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Ältere Protokolle laden: gibt nur Protokolle mit einer Sequenznummer kleiner als dieser Wert zurück",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Maximale Anzahl zurückgegebener Einträge, wobei die neuesten passenden genommen werden; 0 oder weggelassen bedeutet unbegrenzt",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -11763,12 +11881,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Unterstützt den Parameter `since` für inkrementellen Abruf und gibt Protokolle mit einer größeren Sequenznummer zurück.\n\nErforderliche Berechtigung: `guard:read`.",
+        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since`, der Protokolle mit einer Sequenznummer größer als dieser Wert zurückgibt; `before` gibt Protokolle mit einer Sequenznummer kleiner als dieser Wert zurück, um ältere Einträge zu laden; `limit` gibt davon nur die neuesten zurück.\n\nErforderliche Berechtigung: `guard:read`.",
         "parameters": [
           {
             "description": "Inkrementeller Abruf: gibt nur Protokolle mit einer größeren Sequenznummer zurück",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Ältere Protokolle laden: gibt nur Protokolle mit einer Sequenznummer kleiner als dieser Wert zurück",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Maximale Anzahl zurückgegebener Einträge, wobei die neuesten passenden genommen werden; 0 oder weggelassen bedeutet unbegrenzt",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -12291,12 +12425,28 @@
     },
     "/api/logs": {
       "get": {
-        "description": "Unterstützt den Parameter `since` für inkrementellen Abruf.\n\nErforderliche Berechtigung: `logs:read`.",
+        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since`, der Protokolle mit einer Sequenznummer größer als dieser Wert zurückgibt; `before` gibt Protokolle mit einer Sequenznummer kleiner als dieser Wert zurück, um ältere Einträge zu laden; `limit` gibt davon nur die neuesten zurück.\n\nErforderliche Berechtigung: `logs:read`.",
         "parameters": [
           {
             "description": "Inkrementeller Abruf: gibt nur Protokolle mit einer größeren Sequenznummer zurück",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Ältere Protokolle laden: gibt nur Protokolle mit einer Sequenznummer kleiner als dieser Wert zurück",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Maximale Anzahl zurückgegebener Einträge, wobei die neuesten passenden genommen werden; 0 oder weggelassen bedeutet unbegrenzt",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -12452,12 +12602,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Unterstützt den Parameter `since` für inkrementellen Abruf und gibt Protokolle mit einer größeren Sequenznummer zurück.\n\nErforderliche Berechtigung: `nettools:read`.",
+        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since`, der Protokolle mit einer Sequenznummer größer als dieser Wert zurückgibt; `before` gibt Protokolle mit einer Sequenznummer kleiner als dieser Wert zurück, um ältere Einträge zu laden; `limit` gibt davon nur die neuesten zurück.\n\nErforderliche Berechtigung: `nettools:read`.",
         "parameters": [
           {
             "description": "Inkrementeller Abruf: gibt nur Protokolle mit einer größeren Sequenznummer zurück",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Ältere Protokolle laden: gibt nur Protokolle mit einer Sequenznummer kleiner als dieser Wert zurück",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Maximale Anzahl zurückgegebener Einträge, wobei die neuesten passenden genommen werden; 0 oder weggelassen bedeutet unbegrenzt",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -13576,12 +13742,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Unterstützt den Parameter `since` für inkrementellen Abruf und gibt Protokolle mit einer größeren Sequenznummer zurück.\n\nErforderliche Berechtigung: `notify:read`.",
+        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since`, der Protokolle mit einer Sequenznummer größer als dieser Wert zurückgibt; `before` gibt Protokolle mit einer Sequenznummer kleiner als dieser Wert zurück, um ältere Einträge zu laden; `limit` gibt davon nur die neuesten zurück.\n\nErforderliche Berechtigung: `notify:read`.",
         "parameters": [
           {
             "description": "Inkrementeller Abruf: gibt nur Protokolle mit einer größeren Sequenznummer zurück",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Ältere Protokolle laden: gibt nur Protokolle mit einer Sequenznummer kleiner als dieser Wert zurück",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Maximale Anzahl zurückgegebener Einträge, wobei die neuesten passenden genommen werden; 0 oder weggelassen bedeutet unbegrenzt",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -14119,12 +14301,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Unterstützt den Parameter `since` für inkrementellen Abruf und gibt Protokolle mit einer größeren Sequenznummer zurück.\n\nErforderliche Berechtigung: `portforward:read`.",
+        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since`, der Protokolle mit einer Sequenznummer größer als dieser Wert zurückgibt; `before` gibt Protokolle mit einer Sequenznummer kleiner als dieser Wert zurück, um ältere Einträge zu laden; `limit` gibt davon nur die neuesten zurück.\n\nErforderliche Berechtigung: `portforward:read`.",
         "parameters": [
           {
             "description": "Inkrementeller Abruf: gibt nur Protokolle mit einer größeren Sequenznummer zurück",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Ältere Protokolle laden: gibt nur Protokolle mit einer Sequenznummer kleiner als dieser Wert zurück",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Maximale Anzahl zurückgegebener Einträge, wobei die neuesten passenden genommen werden; 0 oder weggelassen bedeutet unbegrenzt",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -15397,12 +15595,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Unterstützt den Parameter `since` für inkrementellen Abruf und gibt Protokolle mit einer größeren Sequenznummer zurück.\n\nErforderliche Berechtigung: `ssl:read`.",
+        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since`, der Protokolle mit einer Sequenznummer größer als dieser Wert zurückgibt; `before` gibt Protokolle mit einer Sequenznummer kleiner als dieser Wert zurück, um ältere Einträge zu laden; `limit` gibt davon nur die neuesten zurück.\n\nErforderliche Berechtigung: `ssl:read`.",
         "parameters": [
           {
             "description": "Inkrementeller Abruf: gibt nur Protokolle mit einer größeren Sequenznummer zurück",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Ältere Protokolle laden: gibt nur Protokolle mit einer Sequenznummer kleiner als dieser Wert zurück",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Maximale Anzahl zurückgegebener Einträge, wobei die neuesten passenden genommen werden; 0 oder weggelassen bedeutet unbegrenzt",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -16102,12 +16316,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Unterstützt den Parameter `since` für inkrementellen Abruf und gibt Protokolle mit einer größeren Sequenznummer zurück.\n\nErforderliche Berechtigung: `storage:read`.",
+        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since`, der Protokolle mit einer Sequenznummer größer als dieser Wert zurückgibt; `before` gibt Protokolle mit einer Sequenznummer kleiner als dieser Wert zurück, um ältere Einträge zu laden; `limit` gibt davon nur die neuesten zurück.\n\nErforderliche Berechtigung: `storage:read`.",
         "parameters": [
           {
             "description": "Inkrementeller Abruf: gibt nur Protokolle mit einer größeren Sequenznummer zurück",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Ältere Protokolle laden: gibt nur Protokolle mit einer Sequenznummer kleiner als dieser Wert zurück",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Maximale Anzahl zurückgegebener Einträge, wobei die neuesten passenden genommen werden; 0 oder weggelassen bedeutet unbegrenzt",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -16604,12 +16834,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Unterstützt den Parameter `since` für inkrementellen Abruf und gibt Protokolle mit einer größeren Sequenznummer zurück.\n\nErforderliche Berechtigung: `stun:read`.",
+        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since`, der Protokolle mit einer Sequenznummer größer als dieser Wert zurückgibt; `before` gibt Protokolle mit einer Sequenznummer kleiner als dieser Wert zurück, um ältere Einträge zu laden; `limit` gibt davon nur die neuesten zurück.\n\nErforderliche Berechtigung: `stun:read`.",
         "parameters": [
           {
             "description": "Inkrementeller Abruf: gibt nur Protokolle mit einer größeren Sequenznummer zurück",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Ältere Protokolle laden: gibt nur Protokolle mit einer Sequenznummer kleiner als dieser Wert zurück",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Maximale Anzahl zurückgegebener Einträge, wobei die neuesten passenden genommen werden; 0 oder weggelassen bedeutet unbegrenzt",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -18085,12 +18331,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Unterstützt den Parameter `since` für inkrementellen Abruf und gibt Protokolle mit einer größeren Sequenznummer zurück.\n\nErforderliche Berechtigung: `tailscale:read`.",
+        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since`, der Protokolle mit einer Sequenznummer größer als dieser Wert zurückgibt; `before` gibt Protokolle mit einer Sequenznummer kleiner als dieser Wert zurück, um ältere Einträge zu laden; `limit` gibt davon nur die neuesten zurück.\n\nErforderliche Berechtigung: `tailscale:read`.",
         "parameters": [
           {
             "description": "Inkrementeller Abruf: gibt nur Protokolle mit einer größeren Sequenznummer zurück",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Ältere Protokolle laden: gibt nur Protokolle mit einer Sequenznummer kleiner als dieser Wert zurück",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Maximale Anzahl zurückgegebener Einträge, wobei die neuesten passenden genommen werden; 0 oder weggelassen bedeutet unbegrenzt",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -19230,12 +19492,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Unterstützt den Parameter `since` für inkrementellen Abruf und gibt Protokolle mit einer größeren Sequenznummer zurück.\n\nErforderliche Berechtigung: `waf:read`.",
+        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since`, der Protokolle mit einer Sequenznummer größer als dieser Wert zurückgibt; `before` gibt Protokolle mit einer Sequenznummer kleiner als dieser Wert zurück, um ältere Einträge zu laden; `limit` gibt davon nur die neuesten zurück.\n\nErforderliche Berechtigung: `waf:read`.",
         "parameters": [
           {
             "description": "Inkrementeller Abruf: gibt nur Protokolle mit einer größeren Sequenznummer zurück",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Ältere Protokolle laden: gibt nur Protokolle mit einer Sequenznummer kleiner als dieser Wert zurück",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Maximale Anzahl zurückgegebener Einträge, wobei die neuesten passenden genommen werden; 0 oder weggelassen bedeutet unbegrenzt",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -19340,12 +19618,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Unterstützt den Parameter `since` für inkrementellen Abruf und gibt Protokolle mit einer größeren Sequenznummer zurück.\n\nErforderliche Berechtigung: `webdav:read`.",
+        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since`, der Protokolle mit einer Sequenznummer größer als dieser Wert zurückgibt; `before` gibt Protokolle mit einer Sequenznummer kleiner als dieser Wert zurück, um ältere Einträge zu laden; `limit` gibt davon nur die neuesten zurück.\n\nErforderliche Berechtigung: `webdav:read`.",
         "parameters": [
           {
             "description": "Inkrementeller Abruf: gibt nur Protokolle mit einer größeren Sequenznummer zurück",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Ältere Protokolle laden: gibt nur Protokolle mit einer Sequenznummer kleiner als dieser Wert zurück",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Maximale Anzahl zurückgegebener Einträge, wobei die neuesten passenden genommen werden; 0 oder weggelassen bedeutet unbegrenzt",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -20866,12 +21160,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Unterstützt den Parameter `since` für inkrementellen Abruf und gibt Protokolle mit einer größeren Sequenznummer zurück.\n\nErforderliche Berechtigung: `webservice:read`.",
+        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since`, der Protokolle mit einer Sequenznummer größer als dieser Wert zurückgibt; `before` gibt Protokolle mit einer Sequenznummer kleiner als dieser Wert zurück, um ältere Einträge zu laden; `limit` gibt davon nur die neuesten zurück.\n\nErforderliche Berechtigung: `webservice:read`.",
         "parameters": [
           {
             "description": "Inkrementeller Abruf: gibt nur Protokolle mit einer größeren Sequenznummer zurück",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Ältere Protokolle laden: gibt nur Protokolle mit einer Sequenznummer kleiner als dieser Wert zurück",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Maximale Anzahl zurückgegebener Einträge, wobei die neuesten passenden genommen werden; 0 oder weggelassen bedeutet unbegrenzt",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -22467,12 +22777,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Unterstützt den Parameter `since` für inkrementellen Abruf und gibt Protokolle mit einer größeren Sequenznummer zurück.\n\nErforderliche Berechtigung: `webterminal:read`.",
+        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since`, der Protokolle mit einer Sequenznummer größer als dieser Wert zurückgibt; `before` gibt Protokolle mit einer Sequenznummer kleiner als dieser Wert zurück, um ältere Einträge zu laden; `limit` gibt davon nur die neuesten zurück.\n\nErforderliche Berechtigung: `webterminal:read`.",
         "parameters": [
           {
             "description": "Inkrementeller Abruf: gibt nur Protokolle mit einer größeren Sequenznummer zurück",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Ältere Protokolle laden: gibt nur Protokolle mit einer Sequenznummer kleiner als dieser Wert zurück",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Maximale Anzahl zurückgegebener Einträge, wobei die neuesten passenden genommen werden; 0 oder weggelassen bedeutet unbegrenzt",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }
@@ -24934,12 +25260,28 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Unterstützt den Parameter `since` für inkrementellen Abruf und gibt Protokolle mit einer größeren Sequenznummer zurück.\n\nErforderliche Berechtigung: `wol:read`.",
+        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since`, der Protokolle mit einer Sequenznummer größer als dieser Wert zurückgibt; `before` gibt Protokolle mit einer Sequenznummer kleiner als dieser Wert zurück, um ältere Einträge zu laden; `limit` gibt davon nur die neuesten zurück.\n\nErforderliche Berechtigung: `wol:read`.",
         "parameters": [
           {
             "description": "Inkrementeller Abruf: gibt nur Protokolle mit einer größeren Sequenznummer zurück",
             "in": "query",
             "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Ältere Protokolle laden: gibt nur Protokolle mit einer Sequenznummer kleiner als dieser Wert zurück",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Maximale Anzahl zurückgegebener Einträge, wobei die neuesten passenden genommen werden; 0 oder weggelassen bedeutet unbegrenzt",
+            "in": "query",
+            "name": "limit",
             "schema": {
               "type": "integer"
             }

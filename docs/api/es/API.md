@@ -1072,6 +1072,7 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 
 | Campo | Tipo |
 | --- | --- |
+| `certName` | string |
 | `command` | string |
 | `connection` | string |
 | `containers` | Lista de string |
@@ -1079,6 +1080,7 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | `deployedHash` | string |
 | `dir` | string |
 | `enable` | boolean |
+| `keyName` | string |
 | `remark` | string |
 | `type` | string |
 

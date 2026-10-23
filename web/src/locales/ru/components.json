@@ -41,7 +41,8 @@
     "levelWarn": "Warning и выше",
     "levelError": "Только ошибки",
     "autoScroll": "Автопрокрутка",
-    "empty": "Журналов пока нет"
+    "empty": "Журналов пока нет",
+    "loadEarlier": "Загрузить более ранние журналы"
   },
   "scopeTags": {
     "allWrite": "Полный доступ",

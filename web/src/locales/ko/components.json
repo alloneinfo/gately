@@ -41,7 +41,8 @@
     "levelWarn": "경고 이상",
     "levelError": "오류만",
     "autoScroll": "자동 스크롤",
-    "empty": "로그가 없습니다"
+    "empty": "로그가 없습니다",
+    "loadEarlier": "이전 로그 불러오기"
   },
   "scopeTags": {
     "allWrite": "전체 읽기/쓰기",

@@ -41,7 +41,8 @@
     "levelWarn": "警告及以上",
     "levelError": "仅错误",
     "autoScroll": "自动滚动",
-    "empty": "暂无日志"
+    "empty": "暂无日志",
+    "loadEarlier": "加载更早的日志"
   },
   "scopeTags": {
     "allWrite": "全部读写",
