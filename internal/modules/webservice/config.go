@@ -120,6 +120,18 @@ type Site struct {
 
 	// scope 为 监听器key/站点key，运行时用于隔离会话 Cookie，不持久化
 	scope string
+	// authBase 为登录页等认证保留路径的前缀，空表示 authPath；OIDC 身份提供方的登录页使用 oidcPath
+	authBase string
+	// loginClient 为登录后将前往的应用名称，显示在登录页副标题中（仅 OIDC 登录页）
+	loginClient string
+}
+
+// authPrefix 返回站点认证保留路径的前缀。
+func (s Site) authPrefix() string {
+	if s.authBase != "" {
+		return s.authBase
+	}
+	return authPath
 }
 
 // Listener 是一个监听端口及其站点。
@@ -161,6 +173,8 @@ type Settings struct {
 	AuthUsers []AuthUser `json:"authUsers"`
 	// SSODomain 为共享用户登录态的 Cookie 域（如 example.com），设置后该域及其子域名下的站点登录一次即可通用
 	SSODomain string `json:"ssoDomain"`
+	// OIDC 为内置的 OIDC 身份提供方，把共享用户提供给支持 OpenID Connect 的应用登录
+	OIDC OIDCSettings `json:"oidc"`
 }
 
 type fileConfig struct {

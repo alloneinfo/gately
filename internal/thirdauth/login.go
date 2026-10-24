@@ -118,18 +118,24 @@ func Sign(secret []byte, kind string, v any, ttl time.Duration) string {
 
 // Verify 校验签名、类型与有效期，并把内容解码到 out。
 func Verify(secret []byte, kind, token string, out any) error {
+	_, err := VerifyExp(secret, kind, token, out)
+	return err
+}
+
+// VerifyExp 与 Verify 相同，另外返回过期时间（Unix 秒），用于推算签发时间。
+func VerifyExp(secret []byte, kind, token string, out any) (int64, error) {
 	p, sig, ok := strings.Cut(token, ".")
 	if !ok {
-		return errors.New("格式错误")
+		return 0, errors.New("格式错误")
 	}
 	m := hmac.New(sha256.New, secret)
 	m.Write([]byte(p))
 	if !hmac.Equal([]byte(sig), []byte(hex.EncodeToString(m.Sum(nil)))) {
-		return errors.New("签名无效")
+		return 0, errors.New("签名无效")
 	}
 	raw, err := base64.RawURLEncoding.DecodeString(p)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	var env struct {
 		K string          `json:"k"`
@@ -137,15 +143,15 @@ func Verify(secret []byte, kind, token string, out any) error {
 		E int64           `json:"e"`
 	}
 	if err := json.Unmarshal(raw, &env); err != nil {
-		return err
+		return 0, err
 	}
 	if env.K != kind {
-		return errors.New("类型不匹配")
+		return 0, errors.New("类型不匹配")
 	}
 	if time.Now().Unix() > env.E {
-		return errors.New("已过期，请重新登录")
+		return 0, errors.New("已过期，请重新登录")
 	}
-	return json.Unmarshal(env.V, out)
+	return env.E, json.Unmarshal(env.V, out)
 }
 
 // RandomNonce 生成随机串，用于把登录流程绑定到发起登录的浏览器。

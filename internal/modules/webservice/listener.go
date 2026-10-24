@@ -120,6 +120,10 @@ func (l *listenerRunner) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+	// 内置 OIDC 身份提供方只在签发者域名的协议路径上处理，其余请求照常按站点路由
+	if l.auth != nil && l.auth.serveOIDC(w, r, l.log) {
+		return
+	}
 	s := l.route(r.Host)
 	if s == nil {
 		writeNotFound(w, r, "站点不存在", "这个域名没有配置对应的站点，请检查访问地址是否正确。")

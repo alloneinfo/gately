@@ -27,6 +27,10 @@ type AuthUser struct {
 	// TOTPSecret 为 Base32 密钥，留空表示不启用二次验证；读取时脱敏
 	TOTPSecret string `json:"totpSecret"`
 	Remark     string `json:"remark"`
+	// Email、DisplayName、Groups 为可选的身份信息，供内置 OIDC 身份提供方作为 email、name、groups 声明提供给应用
+	Email       string   `json:"email,omitempty"`
+	DisplayName string   `json:"displayName,omitempty"`
+	Groups      []string `json:"groups,omitempty"`
 }
 
 // ssoCookie 是共享用户跨站登录态的 Cookie 名称。
@@ -215,6 +219,20 @@ func normalizeAuthUsers(users []AuthUser, old []AuthUser) ([]AuthUser, error) {
 			return nil, fmt.Errorf("共享用户 %s 的 TOTP 密钥无效", u.Name)
 		}
 		u.Remark = strings.TrimSpace(u.Remark)
+		u.Email = strings.TrimSpace(u.Email)
+		if u.Email != "" && (!strings.Contains(u.Email, "@") || strings.ContainsAny(u.Email, " \t<>")) {
+			return nil, fmt.Errorf("共享用户 %s 的邮箱 %q 无效", u.Name, u.Email)
+		}
+		u.DisplayName = strings.TrimSpace(u.DisplayName)
+		u.Groups = uniqueList(cleanList(u.Groups))
+		for _, g := range u.Groups {
+			if strings.ContainsAny(g, " \t,") {
+				return nil, fmt.Errorf("共享用户 %s 的分组 %q 无效（不能包含空格或逗号）", u.Name, g)
+			}
+		}
+		if len(u.Groups) == 0 {
+			u.Groups = nil
+		}
 		out = append(out, u)
 	}
 	return out, nil

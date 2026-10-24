@@ -47,6 +47,8 @@ type authenticator struct {
 
 	// shared 为共享认证用户与单点登录域，设置变更时整体替换
 	shared sharedStore
+	// oidc 为内置 OIDC 身份提供方的配置，未启用时为空
+	oidc oidcHolder
 }
 
 func (a *authenticator) setOAuth(env oauthEnv) {
@@ -305,7 +307,7 @@ func (a *authenticator) check(w http.ResponseWriter, r *http.Request, s Site) bo
 const loginSrc = `{{define "body"}}<section class="card login"{{if .Pending}} aria-hidden="true"{{end}}>
 <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="16" r="1"/><rect x="3" y="10" width="18" height="12" rx="2"/><path d="M7 10V7a5 5 0 0 1 10 0v3"/></svg></div>
 <h1>{{.T.title}}</h1>
-<p class="sub">{{.T.subtitle}}</p>
+<p class="sub">{{if .Client}}{{printf .T.clientSubtitle .Client}}{{else}}{{.T.subtitle}}{{end}}</p>
 <div class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg><span>{{.Host}}</span></div>
 {{if and .Error (not .Pending)}}<div class="alert" role="alert"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg><span>{{.Error}}</span></div>{{end}}
 {{if .HasPassword}}<form method="post" action="{{.Action}}" data-once>
@@ -376,23 +378,24 @@ body:has(.modal){overflow:hidden}
 
 // loginTexts 为登录页文案，中文为翻译键。
 var loginTexts = map[string]string{
-	"pageTitle":    "登录",
-	"title":        "登录以继续访问",
-	"subtitle":     "此站点已开启访问保护，请先验证身份",
-	"username":     "用户名",
-	"usernamePh":   "请输入用户名",
-	"password":     "密码",
-	"passwordPh":   "请输入密码",
-	"showPassword": "显示或隐藏密码",
-	"submit":       "登录",
-	"or":           "或使用以下方式",
-	"loginWith":    "使用 %s 登录",
-	"totpTitle":    "两步验证",
-	"totpPrompt":   "打开验证器应用，输入当前显示的 6 位动态验证码",
-	"code":         "动态验证码",
-	"verify":       "验证",
-	"totpAuto":     "输满 6 位后自动提交",
-	"back":         "返回重新登录",
+	"pageTitle":      "登录",
+	"title":          "登录以继续访问",
+	"subtitle":       "此站点已开启访问保护，请先验证身份",
+	"clientSubtitle": "验证身份后将继续登录 %s",
+	"username":       "用户名",
+	"usernamePh":     "请输入用户名",
+	"password":       "密码",
+	"passwordPh":     "请输入密码",
+	"showPassword":   "显示或隐藏密码",
+	"submit":         "登录",
+	"or":             "或使用以下方式",
+	"loginWith":      "使用 %s 登录",
+	"totpTitle":      "两步验证",
+	"totpPrompt":     "打开验证器应用，输入当前显示的 6 位动态验证码",
+	"code":           "动态验证码",
+	"verify":         "验证",
+	"totpAuto":       "输满 6 位后自动提交",
+	"back":           "返回重新登录",
 }
 
 func init() {
@@ -449,19 +452,20 @@ const totpStepTTL = 5 * time.Minute
 
 func (a *authenticator) handleLogin(w http.ResponseWriter, r *http.Request, s Site, ip string) {
 	host := hostOnly(r.Host)
+	base := s.authPrefix()
 	data := map[string]any{
-		"Host": host, "Action": authPath + "/login", "Next": safeNext(r.URL.Query().Get("next")),
+		"Host": host, "Action": base + "/login", "Next": safeNext(r.URL.Query().Get("next")), "Client": s.loginClient,
 		"HasPassword": len(s.Users) > 0 || s.SharedUsers, "Providers": a.siteProviders(s), "StartURL": oauthStart,
 		// 从验证码对话框返回时带回用户名，免得重新输入
 		"Username": r.URL.Query().Get("u"),
 	}
-	if r.URL.Path == authPath+"/logout" {
+	if r.URL.Path == base+"/logout" {
 		http.SetCookie(w, &http.Cookie{Name: cookieName(s), Value: "", Path: "/", MaxAge: -1})
 		if domain := a.shared.get().ssoFor(host); domain != "" && s.SharedUsers {
 			// 单点登录的会话写在父域，退出时一并清除
 			http.SetCookie(w, &http.Cookie{Name: ssoCookie, Value: "", Path: "/", Domain: domain, MaxAge: -1})
 		}
-		http.Redirect(w, r, authPath+"/login", http.StatusFound)
+		http.Redirect(w, r, base+"/login", http.StatusFound)
 		return
 	}
 	status := http.StatusOK

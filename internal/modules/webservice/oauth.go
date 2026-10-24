@@ -35,6 +35,11 @@ func (a *authenticator) verifyBlob(kind, token string, out any) error {
 	return thirdauth.Verify(a.secret, kind, token, out)
 }
 
+// verifyBlobExp 与 verifyBlob 相同，另外返回过期时间（Unix 秒）。
+func (a *authenticator) verifyBlobExp(kind, token string, out any) (int64, error) {
+	return thirdauth.VerifyExp(a.secret, kind, token, out)
+}
+
 // oauthState 在跳转身份提供方时携带，回调时用于定位原站点。
 type oauthState struct {
 	Provider string `json:"p"`

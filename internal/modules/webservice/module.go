@@ -70,10 +70,24 @@ func (m *Module) Init(env module.Env) error {
 			return err
 		}
 	}
+	// 手工编辑配置启用了 OIDC 但没有签名密钥时补生成，避免身份提供方无法启动
+	if o := &m.cfg.Settings.OIDC; o.Enable && o.SigningKey == "" {
+		k, err := newOIDCKey()
+		if err != nil {
+			return err
+		}
+		o.SigningKey = k
+		if err := m.saveLocked(); err != nil {
+			return err
+		}
+	}
 	m.auth = newAuthenticator(m.cfg.Settings.AuthSecret)
 	m.auth.setBanSeconds(m.cfg.Settings.AutoBanSeconds)
 	m.applyOAuthLocked()
 	m.auth.shared.set(m.cfg.Settings.AuthUsers, m.cfg.Settings.SSODomain)
+	if err := m.auth.oidc.set(m.cfg.Settings.OIDC); err != nil {
+		m.logs.Add(logbuf.LevelWarn, "", "OIDC 身份提供方未启动: "+err.Error())
+	}
 	// 已导入过 GeoIP 数据库时随模块加载，失败只记录日志
 	if _, err := os.Stat(m.geoipPath()); err == nil {
 		if err := geoip.Default.Load(m.geoipPath()); err != nil {
@@ -244,11 +258,14 @@ func (m *Module) Routes(r module.Router) {
 			s.OAuthProviders[i].ClientSecret = crud.Mask(s.OAuthProviders[i].ClientSecret)
 		}
 		s.AuthUsers = maskAuthUsers(s.AuthUsers)
+		s.OIDC = maskOIDC(s.OIDC)
 		httpx.OK(w, s)
 	})
 	r.HandleFunc("POST /totp-secret", m.handleNewTOTP)
 	module.DocOf(r, "POST /totp-secret", module.Doc{Summary: "为共享用户生成新的 TOTP 密钥（不保存，保存设置后生效）", Req: &totpRequest{}, Resp: &totpResponse{}})
 	r.HandleFunc("PUT /settings", m.handlePutSettings)
+	module.DocOf(r, "GET /settings", module.Doc{Summary: "读取 Web 服务全局设置", Resp: &Settings{}})
+	module.DocOf(r, "PUT /settings", module.Doc{Summary: "保存 Web 服务全局设置", Req: &Settings{}, Resp: &Settings{}})
 	r.HandleFunc("GET /stats", m.handleStats)
 	r.HandleFunc("GET /metrics", m.handleMetrics)
 	module.DocOf(r, "GET /stats", module.Doc{Summary: "站点分钟级统计（?listener=&site=&minutes=）", Resp: &SiteStatsView{}})
@@ -321,6 +338,10 @@ func (m *Module) handlePutSettings(w http.ResponseWriter, r *http.Request) {
 		httpx.Error(w, http.StatusBadRequest, "%v", err)
 		return
 	}
+	if err := normalizeOIDC(&s.OIDC, old.OIDC); err != nil {
+		httpx.Error(w, http.StatusBadRequest, "%v", err)
+		return
+	}
 	if s.AutoBanSeconds < 0 || time.Duration(s.AutoBanSeconds)*time.Second > maxBanDuration {
 		httpx.Error(w, http.StatusBadRequest, "自动封禁时长需在 0 到 30 天之间")
 		return
@@ -334,6 +355,9 @@ func (m *Module) handlePutSettings(w http.ResponseWriter, r *http.Request) {
 	}
 	m.applyOAuthLocked()
 	m.auth.shared.set(s.AuthUsers, s.SSODomain)
+	if err := m.auth.oidc.set(s.OIDC); err != nil {
+		m.logs.Add(logbuf.LevelWarn, "", "OIDC 身份提供方未启动: "+err.Error())
+	}
 	// 可信代理在监听层校验 PROXY 协议来源，变化时接收 PROXY 协议的监听器需要重新监听；
 	// 其余设置只需热替换站点表，避免断开正经由这些监听器访问的管理界面（包括本次保存请求）
 	trustedChanged := !slices.Equal(old.TrustedProxies, s.TrustedProxies)
@@ -348,6 +372,7 @@ func (m *Module) handlePutSettings(w http.ResponseWriter, r *http.Request) {
 		s.OAuthProviders[i].ClientSecret = crud.Mask(s.OAuthProviders[i].ClientSecret)
 	}
 	s.AuthUsers = maskAuthUsers(s.AuthUsers)
+	s.OIDC = maskOIDC(s.OIDC)
 	httpx.OK(w, s)
 }
 

@@ -147,6 +147,9 @@ type Problem struct {
 	Retry bool
 	// Lock 用锁形图标（访问受限类提示），默认按状态码选择图标
 	Lock bool
+	// Action 非空时显示一个主按钮，跳转到该站内地址；ActionText 为按钮文字（中文原文）
+	Action     string
+	ActionText string
 }
 
 // icon 按错误类型选择图标：search（找不到）、lock（受限）、unplug（后端不可达）、alert（其他）。
@@ -168,9 +171,10 @@ const errorSrc = `{{define "body"}}<section class="card err">
 <h1>{{.Title}}</h1>
 <p class="sub">{{.Detail}}</p>
 {{if .Hint}}<div class="hint">{{.Hint}}</div>{{end}}
-{{if or .Retry .Home}}<div class="actions">
+{{if or .Retry .Home .Action}}<div class="actions">
+{{if .Action}}<a class="btn primary" href="{{.Action}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/></svg>{{.ActionText}}</a>{{end}}
 {{if .Retry}}<a class="btn primary" href="" onclick="location.reload();return false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>{{.T.retry}}</a>{{end}}
-{{if .Home}}<a class="btn {{if .Retry}}ghost{{else}}primary{{end}}" href="/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>{{.T.home}}</a>{{end}}
+{{if .Home}}<a class="btn {{if or .Retry .Action}}ghost{{else}}primary{{end}}" href="/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>{{.T.home}}</a>{{end}}
 </div>{{end}}
 <div class="meta"><span>{{.T.status}} {{.Code}} {{.Status}}</span><span>{{.Time}}</span></div>
 </section>
@@ -200,16 +204,18 @@ func Error(w http.ResponseWriter, r *http.Request, p Problem) {
 	lang := i18n.RequestLang(r)
 	title := i18n.Tr(lang, p.Title)
 	Render(w, p.Code, "error", lang, errorTexts, map[string]any{
-		"PageTitle": fmt.Sprintf("%d · %s", p.Code, title),
-		"Code":      p.Code,
-		"Icon":      p.icon(),
-		"Status":    http.StatusText(p.Code),
-		"Title":     title,
-		"Detail":    i18n.Tr(lang, p.Detail),
-		"Hint":      i18n.Tr(lang, p.Hint),
-		"Home":      p.Home,
-		"Retry":     p.Retry || p.Code >= 500,
-		"Host":      r.Host,
-		"Time":      time.Now().UTC().Format("2006-01-02 15:04:05 UTC"),
+		"PageTitle":  fmt.Sprintf("%d · %s", p.Code, title),
+		"Code":       p.Code,
+		"Icon":       p.icon(),
+		"Status":     http.StatusText(p.Code),
+		"Title":      title,
+		"Detail":     i18n.Tr(lang, p.Detail),
+		"Hint":       i18n.Tr(lang, p.Hint),
+		"Home":       p.Home,
+		"Action":     p.Action,
+		"ActionText": i18n.Tr(lang, p.ActionText),
+		"Retry":      p.Retry || p.Code >= 500,
+		"Host":       r.Host,
+		"Time":       time.Now().UTC().Format("2006-01-02 15:04:05 UTC"),
 	})
 }
