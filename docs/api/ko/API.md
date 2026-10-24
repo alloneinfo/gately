@@ -47,6 +47,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `docker` | Docker 관리 | `docker:read`、`docker:write` |
 | `webdav` | WebDAV 서비스 | `webdav:read`、`webdav:write` |
 | `ftp` | FTP 서비스 | `ftp:read`、`ftp:write` |
+| `smb` | SMB 서비스 | `smb:read`、`smb:write` |
 | `storage` | 스토리지 마운트 | `storage:read`、`storage:write` |
 | `notify` | 알림 센터 | `notify:read`、`notify:write` |
 | `nettools` | 네트워크 진단 | `nettools:read`、`nettools:write` |
@@ -420,6 +421,15 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/ftp/logs` | `ftp:write` | 모듈 실행 로그 비우기 |
 | GET | `/api/ftp/settings` | `ftp:read` | FTP 설정 읽기 |
 | PUT | `/api/ftp/settings` | `ftp:write` | FTP 설정 저장 |
+
+## SMB 서비스
+
+| 메서드 | 경로 | 필요 권한 | 설명 |
+| --- | --- | --- | --- |
+| GET | `/api/smb/logs` | `smb:read` | 모듈 실행 로그 보기 |
+| DELETE | `/api/smb/logs` | `smb:write` | 모듈 실행 로그 비우기 |
+| GET | `/api/smb/settings` | `smb:read` | SMB 설정 조회 |
+| PUT | `/api/smb/settings` | `smb:write` | SMB 설정 저장 |
 
 ## 스토리지 마운트
 

@@ -1,7 +1,7 @@
 <template>
   <div class="g-card">
     <div class="g-card-head">
-      <div class="g-card-title"><Users :size="16" />{{ t('fileUsers.title') }} <span class="g-card-desc">{{ t('fileUsers.desc') }}</span></div>
+      <div class="g-card-title"><Users :size="16" />{{ t('fileUsers.title') }} <span class="g-card-desc">{{ desc || t('fileUsers.desc') }}</span></div>
       <el-button size="small" :icon="UserPlus" @click="users.push({ name: '', password: '', root: '', readOnly: false })">{{ t('fileUsers.addUser') }}</el-button>
     </div>
     <div class="g-card-body">
@@ -18,7 +18,7 @@
               <el-input v-model="u.root" placeholder="/data/share" class="mono" />
               <el-button link type="primary" size="small" class="u-multi" @click="toMulti(u)">{{ t('fileUsers.mountMultiple') }}</el-button>
             </template>
-            <span v-else class="u-summary">{{ t('fileUsers.mountSummary', { count: u.mounts.length }) }}</span>
+            <span v-else class="u-summary">{{ t(mountSummaryKey || 'fileUsers.mountSummary', { count: u.mounts.length }) }}</span>
           </div>
           <div class="u-cell u-ro">
             <label class="u-label">{{ t('fileUsers.readOnly') }}</label>
@@ -29,7 +29,7 @@
         </div>
         <div v-if="u.mounts?.length" class="m-list">
           <div v-for="(mt, j) in u.mounts" :key="j" class="m-row">
-            <div class="u-cell"><label class="u-label">{{ t('common.name') }}</label><el-input v-model="mt.name" :placeholder="t('fileUsers.displayName')" /></div>
+            <div class="u-cell"><label class="u-label">{{ t('common.name') }}</label><el-input v-model="mt.name" :placeholder="mountNamePlaceholder || t('fileUsers.displayName')" /></div>
             <div class="u-cell m-path"><label class="u-label">{{ t('fileUsers.directory') }}</label><el-input v-model="mt.path" placeholder="/data/share" class="mono" /></div>
             <div class="u-cell u-ro"><label class="u-label">{{ t('fileUsers.readOnly') }}</label><el-switch v-model="mt.readOnly" /></div>
             <div class="u-cell u-del"><el-button text type="danger" :icon="Trash2" :aria-label="t('fileUsers.deleteDirectory')" @click="removeMount(u, j)" /></div>
@@ -62,6 +62,8 @@ export interface FileUser {
 
 const { t } = useI18n()
 const users = defineModel<FileUser[]>({ required: true })
+// 以下文案可由使用方覆盖：SMB 中每个目录是一个共享，说明与占位提示不同于 FTP / WebDAV
+defineProps<{ desc?: string; mountSummaryKey?: string; mountNamePlaceholder?: string }>()
 
 // toMulti 把单目录用户转换为多目录：已填写的目录成为第一个挂载
 function toMulti(u: FileUser) {

@@ -64,6 +64,10 @@
       "title": "FTP 服務",
       "desc": "FTP / FTPS 檔案分享服務"
     },
+    "smb": {
+      "title": "SMB 服務",
+      "desc": "SMB 檔案分享服務"
+    },
     "wol": {
       "title": "網路喚醒",
       "desc": "遠端喚醒區域網路裝置"

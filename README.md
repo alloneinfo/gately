@@ -54,6 +54,7 @@ Gately is fully open source, so users and the community can read the source and 
 | Wake-on-LAN | Magic packet broadcast, online detection |
 | WebDAV | Multiple users, per-user directories, read-only mode |
 | FTP | Multiple users, per-user directories, read-only mode, FTPS and passive port ranges |
+| SMB | Multiple users, per-user shares backed by one or more directories, read-only mode, SMB 2/3, encryption and Bonjour discovery |
 | Storage mounts | Local directories, remote WebDAV mounts and SMB shares, online file manager |
 | Scheduled tasks | Cron expressions, commands or HTTP requests, run history |
 | Security and settings | Passkey (WebAuthn) sign-in, two-factor authentication (TOTP), read-only accounts, login rate limiting, secure entry path, LAN-only access, HTTPS for the admin UI, multiple API tokens (per-module read/write grants), custom DNS (DoH supported), time zone, config backup and restore, real client address from trusted local reverse proxies, turn feature modules on or off (disabled modules start no services and serve no API) |

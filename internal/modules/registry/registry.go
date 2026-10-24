@@ -16,6 +16,7 @@ import (
 	"github.com/wangwanjie/gately/internal/modules/nettools"
 	"github.com/wangwanjie/gately/internal/modules/notify"
 	"github.com/wangwanjie/gately/internal/modules/portforward"
+	"github.com/wangwanjie/gately/internal/modules/smb"
 	"github.com/wangwanjie/gately/internal/modules/ssl"
 	"github.com/wangwanjie/gately/internal/modules/storage"
 	"github.com/wangwanjie/gately/internal/modules/stun"
@@ -72,6 +73,7 @@ func New() (mods []module.Module, certs *ssl.Module) {
 		dock,
 		webdav.New(certs),
 		ftp.New(certs),
+		smb.New(),
 		files,
 		notify.New(),
 		nettools.New(),

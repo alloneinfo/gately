@@ -19,4 +19,4 @@ You can turn off a whole module under "Settings → Modules". A disabled module 
 | Network Diagnostics | Ping, traceroute, port probe, DNS lookup, speed test, LAN scan | [View](/en/docs/modules/nettools) |
 | Notification Center | Multi-channel event push and rules | [View](/en/docs/modules/notify) |
 | Configuration Backup | Encrypted backups, retention policy, scheduled backup and restore | [View](/en/docs/modules/backup) |
-| File and Ops Tools | WebDAV, FTP, storage mounts, Wake-on-LAN, scheduled tasks | [View](/en/docs/modules/tools) |
+| File and Ops Tools | WebDAV, FTP, SMB, storage mounts, Wake-on-LAN, scheduled tasks | [View](/en/docs/modules/tools) |

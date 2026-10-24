@@ -47,6 +47,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `docker` | Docker 管理 | `docker:read`、`docker:write` |
 | `webdav` | WebDAV サービス | `webdav:read`、`webdav:write` |
 | `ftp` | FTP サービス | `ftp:read`、`ftp:write` |
+| `smb` | SMB サービス | `smb:read`、`smb:write` |
 | `storage` | ストレージマウント | `storage:read`、`storage:write` |
 | `notify` | 通知センター | `notify:read`、`notify:write` |
 | `nettools` | ネットワーク診断 | `nettools:read`、`nettools:write` |
@@ -420,6 +421,15 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/ftp/logs` | `ftp:write` | モジュールの実行ログを消去 |
 | GET | `/api/ftp/settings` | `ftp:read` | FTP 設定を読み取り |
 | PUT | `/api/ftp/settings` | `ftp:write` | FTP 設定を保存 |
+
+## SMB サービス
+
+| メソッド | パス | 必要な権限 | 説明 |
+| --- | --- | --- | --- |
+| GET | `/api/smb/logs` | `smb:read` | モジュールの実行ログを表示 |
+| DELETE | `/api/smb/logs` | `smb:write` | モジュールの実行ログを消去 |
+| GET | `/api/smb/settings` | `smb:read` | SMB 設定を取得 |
+| PUT | `/api/smb/settings` | `smb:write` | SMB 設定を保存 |
 
 ## ストレージマウント
 

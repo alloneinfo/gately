@@ -54,6 +54,7 @@ Gately es totalmente abierto para que usuarios y comunidad puedan revisar direct
 | Wake-on-LAN | Difusión de paquetes mágicos, detección de estado en línea |
 | WebDAV | Multiusuario, directorio independiente por usuario, solo lectura |
 | FTP | Multiusuario, directorio independiente por usuario, solo lectura, compatible con FTPS y rango de puertos pasivos |
+| SMB | Multiusuario, recursos compartidos por usuario con uno o varios directorios, solo lectura, compatible con SMB 2/3, cifrado y descubrimiento Bonjour |
 | Montajes de almacenamiento | Directorios locales, montajes WebDAV remotos y recursos compartidos SMB, gestión de archivos en línea |
 | Tareas programadas | Expresiones cron, comandos o solicitudes HTTP, historial de ejecuciones |
 | Seguridad y ajustes | Inicio de sesión con passkey (WebAuthn), verificación en dos pasos (TOTP), cuentas de solo lectura, limitación de intentos de inicio de sesión, entrada de seguridad, acceso solo desde la red interna, HTTPS para la interfaz de administración, varios tokens de API (permisos de lectura/escritura por módulo), DNS personalizado (compatible con DoH), zona horaria, copia de seguridad y restauración de la configuración, dirección real del cliente desde proxies inversos locales de confianza, activación o desactivación de módulos de funciones (los módulos desactivados no inician servicios ni ofrecen API) |

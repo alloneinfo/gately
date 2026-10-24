@@ -64,6 +64,10 @@
       "title": "FTP サービス",
       "desc": "FTP / FTPS ファイル共有サービス"
     },
+    "smb": {
+      "title": "SMB サービス",
+      "desc": "SMB ファイル共有サービス"
+    },
     "wol": {
       "title": "Wake-on-LAN",
       "desc": "LAN 内のデバイスをリモートで起動"

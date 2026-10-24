@@ -19,4 +19,4 @@ Vous pouvez désactiver un module entier dans « Paramètres → Modules ». Un 
 | Diagnostic réseau | Ping, traceroute, test de port, résolution DNS, test de débit, scan du réseau local | [Consulter](/fr/docs/modules/nettools) |
 | Centre de notifications | Envoi d'événements multicanal et règles | [Consulter](/fr/docs/modules/notify) |
 | Sauvegarde de la configuration | Sauvegardes chiffrées, politique de rétention, sauvegarde planifiée et restauration | [Consulter](/fr/docs/modules/backup) |
-| Outils fichiers et exploitation | WebDAV, FTP, montages de stockage, Wake-on-LAN, tâches planifiées | [Consulter](/fr/docs/modules/tools) |
+| Outils fichiers et exploitation | WebDAV, FTP, SMB, montages de stockage, Wake-on-LAN, tâches planifiées | [Consulter](/fr/docs/modules/tools) |

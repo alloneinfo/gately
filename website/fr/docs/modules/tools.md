@@ -34,6 +34,32 @@ Configurez-le dans « Service FTP » du groupe « Services de fichiers ». FTP e
 | `disableActiveMode` | Désactivé | Utilise uniquement le mode passif, mieux adapté aux environnements NAT |
 | `users` | Aucun | Plusieurs utilisateurs, avec les mêmes champs que WebDAV : `name`, `password`, `root`, `readOnly` ou `mounts` ; les noms d'utilisateur doivent être uniques |
 
+## SMB
+
+Configurez-le dans « Service SMB » du groupe « Services de fichiers » pour partager des répertoires locaux avec l’Explorateur Windows, le Finder de macOS, Linux et les clients SMB des téléphones et téléviseurs. L’implémentation du protocole est intégrée à Gately (basée sur [gosamba](https://github.com/ahmetozer/gosamba)) et prend en charge SMB 2.0.2 à 3.1.1, l’authentification NTLMv2 et la signature, avec un chiffrement SMB 3 obligatoire en option ; SMB 1 n’est pas pris en charge. Disponible uniquement sous Linux et macOS.
+
+| Champ | Par défaut | Description |
+| --- | --- | --- |
+| `enable` | Désactivé | Active le service ; au moins un utilisateur est requis lorsqu'il est activé |
+| `listenIp` | Vide | Adresse d'écoute ; laissez vide pour écouter sur toutes les adresses |
+| `port` | 445 | Port d'écoute. Windows se connecte uniquement au 445 ; si le Samba fourni avec un NAS comme fnOS ou Synology utilise déjà le 445, choisissez un autre port, que macOS, Linux et la plupart des lecteurs peuvent indiquer dans l’adresse |
+| `requireEncryption` | Désactivé | Exige le chiffrement SMB 3 pour chaque connexion ; les anciens appareils et certains téléviseurs limités à SMB 2 ne pourront plus se connecter |
+| `mdns` | Désactivé | Annonce le service via Bonjour pour qu’il apparaisse dans Réseau du Finder de macOS |
+| `users` | Aucun | Plusieurs utilisateurs avec les mêmes champs que WebDAV : `name`, `password`, `root`, `readOnly` ou `mounts` ; les noms d’utilisateur sont insensibles à la casse et uniques |
+
+Les partages appartiennent aux utilisateurs, et un utilisateur connecté ne voit et n’ouvre que les siens :
+
+- **Répertoire unique** : le partage porte le nom de l’utilisateur, par exemple `\\192.168.1.2\alice` pour l’utilisateur `alice`.
+- **Plusieurs répertoires** : chaque répertoire est un partage dont `name` est le nom (insensible à la casse et unique par utilisateur), et chacun peut être en lecture seule. Des utilisateurs différents peuvent avoir des partages du même nom, chacun pointant vers son propre répertoire.
+
+Les noms d’utilisateur et de partage ne peuvent pas contenir `" / \ [ ] : ; | = , + * ? < >` ni commencer ou se terminer par `.`. L’authentification NTLM a besoin du mot de passe en clair : les utilisateurs dont le mot de passe est stocké sous forme de hachage bcrypt doivent le redéfinir. Les fichiers sont lus et écrits sous l’identité du processus Gately.
+
+« Adresses de connexion », en bas de la page, liste l’adresse de chaque partage d’après les paramètres enregistrés :
+
+- Windows : saisissez `\\hôte\partage` dans la barre d’adresse de l’Explorateur, ou exécutez `net use Z: \\hôte\partage /user:utilisateur`
+- macOS : dans le Finder, choisissez Aller → Se connecter au serveur et saisissez `smb://hôte:port/partage` (le port peut être omis pour 445)
+- Linux : `mount -t cifs //hôte/partage /mnt -o username=utilisateur,port=port`
+
 ## Montages de stockage
 
 Ajoutez des montages dans « Montages de stockage » du groupe « Services de fichiers », et gérez les fichiers en ligne depuis la page.

@@ -64,6 +64,10 @@
       "title": "FTP Service",
       "desc": "FTP / FTPS file sharing service"
     },
+    "smb": {
+      "title": "SMB Service",
+      "desc": "SMB file sharing service"
+    },
     "wol": {
       "title": "Wake-on-LAN",
       "desc": "Wake up devices on your LAN remotely"

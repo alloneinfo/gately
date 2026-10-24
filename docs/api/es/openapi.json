@@ -15689,6 +15689,305 @@
         "x-token-allowed": true
       }
     },
+    "/api/smb/logs": {
+      "delete": {
+        "description": "Permiso necesario: `smb:write`.",
+        "responses": {
+          "200": {
+            "description": "Correcto"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parámetros de solicitud incorrectos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token no válido, caducado o sin sesión iniciada"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Al token le falta el permiso necesario"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Vaciar los registros de ejecución del módulo",
+        "tags": [
+          "Servicio SMB"
+        ],
+        "x-required-scope": "smb:write",
+        "x-token-allowed": true
+      },
+      "get": {
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos).\n\nPermiso necesario: `smb:read`.",
+        "parameters": [
+          {
+            "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",
+            "in": "query",
+            "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Cargar registros anteriores: devuelve solo los registros con número de secuencia menor que este valor",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Número máximo de entradas a devolver, tomando las más recientes que coincidan; 0 u omitido significa sin límite",
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Nivel mínimo: debug, info, warn o error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Etiqueta de origen, coincidencia exacta sin distinguir mayúsculas",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Palabras clave: separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un - inicial excluye",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Dirección del cliente: dirección completa, CIDR o parte de una dirección, separadas por comas",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Parte del nombre del sitio o del dominio",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Código de estado como 404, 4xx, 500-599, separados por comas",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Hora de inicio, RFC 3339 o marca de tiempo en milisegundos",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Hora de fin, RFC 3339 o marca de tiempo en milisegundos",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Correcto"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parámetros de solicitud incorrectos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token no válido, caducado o sin sesión iniciada"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Al token le falta el permiso necesario"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Ver los registros de ejecución del módulo",
+        "tags": [
+          "Servicio SMB"
+        ],
+        "x-required-scope": "smb:read",
+        "x-token-allowed": true
+      }
+    },
+    "/api/smb/settings": {
+      "get": {
+        "description": "`supported` indica si este sistema puede ejecutar el servicio SMB (solo Linux y macOS).\n\nPermiso necesario: `smb:read`.",
+        "responses": {
+          "200": {
+            "description": "Correcto"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parámetros de solicitud incorrectos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token no válido, caducado o sin sesión iniciada"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Al token le falta el permiso necesario"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Obtener la configuración de SMB",
+        "tags": [
+          "Servicio SMB"
+        ],
+        "x-required-scope": "smb:read",
+        "x-token-allowed": true
+      },
+      "put": {
+        "description": "Permiso necesario: `smb:write`.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Correcto"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parámetros de solicitud incorrectos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token no válido, caducado o sin sesión iniciada"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Al token le falta el permiso necesario"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Guardar la configuración de SMB",
+        "tags": [
+          "Servicio SMB"
+        ],
+        "x-required-scope": "smb:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/ssl/certs": {
       "get": {
         "description": "Permiso necesario: `ssl:read`.",
@@ -26790,6 +27089,9 @@
       "name": "Servicio FTP"
     },
     {
+      "name": "Servicio SMB"
+    },
+    {
       "name": "Montajes de almacenamiento"
     },
     {
@@ -26831,6 +27133,7 @@
     "docker",
     "webdav",
     "ftp",
+    "smb",
     "storage",
     "notify",
     "nettools",

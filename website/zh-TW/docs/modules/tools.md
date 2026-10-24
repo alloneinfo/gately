@@ -34,6 +34,32 @@
 | `disableActiveMode` | 關閉 | 僅使用被動模式，更適合 NAT 環境 |
 | `users` | 無 | 多使用者，欄位同 WebDAV：`name`、`password`、`root`、`readOnly` 或 `mounts`，使用者名稱不可重複 |
 
+## SMB
+
+在「檔案服務」分組的「SMB 服務」中設定，把本機目錄分享給 Windows 檔案總管、macOS Finder、Linux 以及手機、電視上的 SMB 用戶端。協定實作內建於 Gately（基於 [gosamba](https://github.com/ahmetozer/gosamba)），支援 SMB 2.0.2 ~ 3.1.1、NTLMv2 認證與簽章，可要求 SMB 3 加密，不支援 SMB 1。僅 Linux 與 macOS 上可用。
+
+| 欄位 | 預設值 | 說明 |
+| --- | --- | --- |
+| `enable` | 關閉 | 啟用服務，啟用時至少需要一位使用者 |
+| `listenIp` | 空 | 監聽位址，留空監聽所有位址 |
+| `port` | 445 | 監聽連接埠。Windows 只能連線 445；飛牛、群暉等 NAS 內建的 Samba 已佔用 445 時需改用其他連接埠，macOS、Linux 與多數播放器可以在位址中指定連接埠 |
+| `requireEncryption` | 關閉 | 要求所有連線使用 SMB 3 加密，只支援 SMB 2 的舊裝置與部分電視將無法連線 |
+| `mdns` | 關閉 | 透過 Bonjour 廣播服務，macOS Finder 的「網路」中可以直接看到 |
+| `users` | 無 | 多使用者，欄位同 WebDAV：`name`、`password`、`root`、`readOnly` 或 `mounts`，使用者名稱不區分大小寫且不可重複 |
+
+共享依使用者劃分，使用者登入後只能看到並連線自己的共享：
+
+- **單一目錄**：共享名稱為使用者名稱，例如使用者 `alice` 的位址為 `\\192.168.1.2\alice`。
+- **多個目錄**：每個目錄是一個共享，`name` 即共享名稱（同一使用者內不區分大小寫、不重複），可分別設為唯讀。不同使用者可以有同名共享，各自指向自己的目錄。
+
+使用者名稱與共享名稱不能包含 `" / \ [ ] : ; | = , + * ? < >`，也不能以 `.` 開頭或結尾。NTLM 認證需要明文密碼，密碼以 bcrypt 雜湊儲存的使用者需要重新設定密碼。檔案以 Gately 行程的身分讀寫。
+
+頁面下方的「連線位址」依已儲存的設定列出每個共享的位址：
+
+- Windows：檔案總管網址列輸入 `\\主機\共享名稱`，或執行 `net use Z: \\主機\共享名稱 /user:使用者名稱`
+- macOS：Finder「前往 → 連接伺服器」，輸入 `smb://主機:連接埠/共享名稱`（445 連接埠可省略）
+- Linux：`mount -t cifs //主機/共享名稱 /mnt -o username=使用者名稱,port=連接埠`
+
 ## 儲存掛載
 
 在「檔案服務」分組的「儲存掛載」中新增掛載點，在頁面內線上管理檔案。

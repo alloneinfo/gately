@@ -47,6 +47,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `docker` | Docker 管理 | `docker:read`、`docker:write` |
 | `webdav` | WebDAV 服务 | `webdav:read`、`webdav:write` |
 | `ftp` | FTP 服务 | `ftp:read`、`ftp:write` |
+| `smb` | SMB 服务 | `smb:read`、`smb:write` |
 | `storage` | 存储挂载 | `storage:read`、`storage:write` |
 | `notify` | 通知中心 | `notify:read`、`notify:write` |
 | `nettools` | 网络诊断 | `nettools:read`、`nettools:write` |
@@ -420,6 +421,15 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/ftp/logs` | `ftp:write` | 清空模块运行日志 |
 | GET | `/api/ftp/settings` | `ftp:read` | 读取 FTP 设置 |
 | PUT | `/api/ftp/settings` | `ftp:write` | 保存 FTP 设置 |
+
+## SMB 服务
+
+| 方法 | 路径 | 所需权限 | 说明 |
+| --- | --- | --- | --- |
+| GET | `/api/smb/logs` | `smb:read` | 查看模块运行日志 |
+| DELETE | `/api/smb/logs` | `smb:write` | 清空模块运行日志 |
+| GET | `/api/smb/settings` | `smb:read` | 读取 SMB 设置 |
+| PUT | `/api/smb/settings` | `smb:write` | 保存 SMB 设置 |
 
 ## 存储挂载
 

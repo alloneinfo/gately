@@ -64,6 +64,10 @@
       "title": "FTP 服务",
       "desc": "FTP / FTPS 文件共享服务"
     },
+    "smb": {
+      "title": "SMB 服务",
+      "desc": "SMB 文件共享服务"
+    },
     "wol": {
       "title": "网络唤醒",
       "desc": "远程唤醒局域网设备"

@@ -47,6 +47,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `docker` | Docker management | `docker:read`、`docker:write` |
 | `webdav` | WebDAV Service | `webdav:read`、`webdav:write` |
 | `ftp` | FTP service | `ftp:read`、`ftp:write` |
+| `smb` | SMB Service | `smb:read`、`smb:write` |
 | `storage` | Storage Mounts | `storage:read`、`storage:write` |
 | `notify` | Notification center | `notify:read`、`notify:write` |
 | `nettools` | Network diagnostics | `nettools:read`、`nettools:write` |
@@ -420,6 +421,15 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | DELETE | `/api/ftp/logs` | `ftp:write` | Clear module runtime logs |
 | GET | `/api/ftp/settings` | `ftp:read` | Read FTP settings |
 | PUT | `/api/ftp/settings` | `ftp:write` | Save FTP settings |
+
+## SMB Service
+
+| Method | Path | Required permission | Description |
+| --- | --- | --- | --- |
+| GET | `/api/smb/logs` | `smb:read` | View module runtime logs |
+| DELETE | `/api/smb/logs` | `smb:write` | Clear module runtime logs |
+| GET | `/api/smb/settings` | `smb:read` | Get SMB settings |
+| PUT | `/api/smb/settings` | `smb:write` | Save SMB settings |
 
 ## Storage Mounts
 

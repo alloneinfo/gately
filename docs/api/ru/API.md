@@ -47,6 +47,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `docker` | Управление Docker | `docker:read`、`docker:write` |
 | `webdav` | WebDAV-сервер | `webdav:read`、`webdav:write` |
 | `ftp` | Служба FTP | `ftp:read`、`ftp:write` |
+| `smb` | Служба SMB | `smb:read`、`smb:write` |
 | `storage` | Монтирование хранилищ | `storage:read`、`storage:write` |
 | `notify` | Центр уведомлений | `notify:read`、`notify:write` |
 | `nettools` | Диагностика сети | `nettools:read`、`nettools:write` |
@@ -420,6 +421,15 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/ftp/logs` | `ftp:write` | Очистить журнал работы модуля |
 | GET | `/api/ftp/settings` | `ftp:read` | Чтение настроек FTP |
 | PUT | `/api/ftp/settings` | `ftp:write` | Сохранить настройки FTP |
+
+## Служба SMB
+
+| Метод | Путь | Необходимое право | Описание |
+| --- | --- | --- | --- |
+| GET | `/api/smb/logs` | `smb:read` | Просмотр журнала работы модуля |
+| DELETE | `/api/smb/logs` | `smb:write` | Очистить журнал работы модуля |
+| GET | `/api/smb/settings` | `smb:read` | Получить настройки SMB |
+| PUT | `/api/smb/settings` | `smb:write` | Сохранить настройки SMB |
 
 ## Монтирование хранилищ
 

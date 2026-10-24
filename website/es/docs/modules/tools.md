@@ -34,6 +34,32 @@ Se configura en «Servicio FTP», dentro del grupo «Servicios de archivos». Se
 | `disableActiveMode` | Desactivado | Usa solo el modo pasivo, más adecuado para entornos con NAT |
 | `users` | Ninguno | Varios usuarios, con los mismos campos que WebDAV: `name`, `password`, `root`, `readOnly` o `mounts`; los nombres de usuario deben ser únicos |
 
+## SMB
+
+Se configura en «Servicio SMB», dentro del grupo «Servicios de archivos», y comparte directorios locales con el Explorador de Windows, el Finder de macOS, Linux y los clientes SMB de móviles y televisores. La implementación del protocolo viene integrada en Gately (basada en [gosamba](https://github.com/ahmetozer/gosamba)) y admite SMB 2.0.2 a 3.1.1, autenticación NTLMv2 y firma, con cifrado SMB 3 obligatorio opcional; SMB 1 no se admite. Solo está disponible en Linux y macOS.
+
+| Campo | Por defecto | Descripción |
+| --- | --- | --- |
+| `enable` | Desactivado | Activa el servicio; cuando está activado se requiere al menos un usuario |
+| `listenIp` | Vacío | Dirección de escucha; déjalo vacío para escuchar en todas las direcciones |
+| `port` | 445 | Puerto de escucha. Windows solo se conecta al 445; si el Samba incluido en un NAS como fnOS o Synology ya usa el 445, elige otro puerto, que macOS, Linux y la mayoría de reproductores pueden indicar en la dirección |
+| `requireEncryption` | Desactivado | Exige cifrado SMB 3 en todas las conexiones; los dispositivos antiguos y algunos televisores que solo admiten SMB 2 no podrán conectarse |
+| `mdns` | Desactivado | Anuncia el servicio por Bonjour para que aparezca en Red del Finder de macOS |
+| `users` | Ninguno | Varios usuarios con los mismos campos que WebDAV: `name`, `password`, `root`, `readOnly` o `mounts`; los nombres de usuario no distinguen mayúsculas y no pueden repetirse |
+
+Los recursos compartidos pertenecen a cada usuario, y un usuario conectado solo ve y abre los suyos:
+
+- **Un solo directorio**: el recurso compartido lleva el nombre del usuario, por ejemplo `\\192.168.1.2\alice` para el usuario `alice`.
+- **Varios directorios**: cada directorio es un recurso compartido cuyo nombre es `name` (sin distinguir mayúsculas y único por usuario), y cada uno puede ser de solo lectura. Usuarios distintos pueden tener recursos con el mismo nombre, cada uno apuntando a su propio directorio.
+
+Los nombres de usuario y de recurso no pueden contener `" / \ [ ] : ; | = , + * ? < >` ni empezar o terminar en `.`. La autenticación NTLM necesita la contraseña en texto plano, así que los usuarios cuya contraseña esté guardada como hash bcrypt deben volver a establecerla. Los archivos se leen y escriben con la identidad del proceso de Gately.
+
+«Direcciones de conexión», al final de la página, muestra la dirección de cada recurso según la configuración guardada:
+
+- Windows: escribe `\\host\recurso` en la barra de direcciones del Explorador o ejecuta `net use Z: \\host\recurso /user:usuario`
+- macOS: en el Finder elige Ir → Conectarse al servidor e introduce `smb://host:puerto/recurso` (el puerto 445 puede omitirse)
+- Linux: `mount -t cifs //host/recurso /mnt -o username=usuario,port=puerto`
+
 ## Montajes de almacenamiento
 
 Añade montajes en «Montajes de almacenamiento», dentro del grupo «Servicios de archivos», y administra los archivos en línea desde la página.

@@ -64,6 +64,10 @@
       "title": "FTP 서비스",
       "desc": "FTP / FTPS 파일 공유 서비스"
     },
+    "smb": {
+      "title": "SMB 서비스",
+      "desc": "SMB 파일 공유 서비스"
+    },
     "wol": {
       "title": "Wake-on-LAN",
       "desc": "LAN 기기를 원격으로 깨우기"

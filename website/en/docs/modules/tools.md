@@ -34,6 +34,32 @@ Configure it under "FTP Service" in the "File Services" group. FTP and FTPS are 
 | `disableActiveMode` | Off | Use passive mode only, which suits NAT environments better |
 | `users` | None | Multiple users, with the same fields as WebDAV: `name`, `password`, `root`, `readOnly` or `mounts`; user names must be unique |
 
+## SMB
+
+Configure it under "SMB Service" in the "File Services" group to share local directories with Windows Explorer, the macOS Finder, Linux and SMB clients on phones and TVs. The protocol implementation is built into Gately (based on [gosamba](https://github.com/ahmetozer/gosamba)) and supports SMB 2.0.2 to 3.1.1, NTLMv2 authentication and signing, with optional mandatory SMB 3 encryption; SMB 1 is not supported. Available on Linux and macOS only.
+
+| Field | Default | Description |
+| --- | --- | --- |
+| `enable` | Off | Enable the service; at least one user is required when enabled |
+| `listenIp` | Empty | Listen address; leave empty to listen on all addresses |
+| `port` | 445 | Listen port. Windows only connects to 445; when the Samba that ships with a NAS such as fnOS or Synology already uses 445, choose another port, which macOS, Linux and most media players can put in the address |
+| `requireEncryption` | Off | Require SMB 3 encryption on every connection; older devices and some TVs that only speak SMB 2 will not be able to connect |
+| `mdns` | Off | Advertise the service over Bonjour so it shows up under Network in the macOS Finder |
+| `users` | None | Multiple users with the same fields as WebDAV: `name`, `password`, `root`, `readOnly` or `mounts`; user names are case-insensitive and must be unique |
+
+Shares belong to users, and a signed-in user only sees and connects to their own shares:
+
+- **Single directory**: the share is named after the user, for example `\\192.168.1.2\alice` for the user `alice`.
+- **Multiple directories**: each directory is a share whose `name` is the share name (case-insensitive and unique per user), and each can be read-only. Different users can have shares with the same name, each pointing at their own directory.
+
+User and share names cannot contain `" / \ [ ] : ; | = , + * ? < >` and cannot start or end with `.`. NTLM authentication needs the plain password, so users whose password is stored as a bcrypt hash must set it again. Files are read and written as the Gately process.
+
+"Connection addresses" at the bottom of the page lists the address of every share from the saved settings:
+
+- Windows: enter `\\host\share` in the Explorer address bar, or run `net use Z: \\host\share /user:username`
+- macOS: in the Finder choose Go → Connect to Server and enter `smb://host:port/share` (the port can be left out for 445)
+- Linux: `mount -t cifs //host/share /mnt -o username=username,port=port`
+
 ## Storage Mounts
 
 Add mounts under "Storage Mounts" in the "File Services" group, and manage files online on the page.

@@ -178,6 +178,8 @@ var apiCatalog = map[string]epDoc{
 	"PUT /api/webdav/settings":                           {Summary: "保存 WebDAV 设置", Body: true},
 	"GET /api/ftp/settings":                              {Summary: "读取 FTP 设置"},
 	"PUT /api/ftp/settings":                              {Summary: "保存 FTP 设置", Body: true},
+	"GET /api/smb/settings":                              {Summary: "读取 SMB 设置", Desc: "`supported` 表示当前系统能否运行 SMB 服务（仅 Linux 与 macOS）。"},
+	"PUT /api/smb/settings":                              {Summary: "保存 SMB 设置", Body: true},
 	"GET /api/storage/files/{key}/list":                  {Summary: "列出存储目录"},
 	"GET /api/storage/files/{key}/download":              {Summary: "下载存储文件", Desc: "需要写权限。"},
 	"POST /api/storage/files/{key}/upload":               {Summary: "上传文件到存储"},

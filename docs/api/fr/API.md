@@ -47,6 +47,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `docker` | Gestion Docker | `docker:read`、`docker:write` |
 | `webdav` | Service WebDAV | `webdav:read`、`webdav:write` |
 | `ftp` | Service FTP | `ftp:read`、`ftp:write` |
+| `smb` | Service SMB | `smb:read`、`smb:write` |
 | `storage` | Montages de stockage | `storage:read`、`storage:write` |
 | `notify` | Centre de notifications | `notify:read`、`notify:write` |
 | `nettools` | Diagnostic réseau | `nettools:read`、`nettools:write` |
@@ -420,6 +421,15 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | DELETE | `/api/ftp/logs` | `ftp:write` | Vider les journaux d'exécution d'un module |
 | GET | `/api/ftp/settings` | `ftp:read` | Lire les paramètres FTP |
 | PUT | `/api/ftp/settings` | `ftp:write` | Enregistrer les paramètres FTP |
+
+## Service SMB
+
+| Méthode | Chemin | Permission requise | Description |
+| --- | --- | --- | --- |
+| GET | `/api/smb/logs` | `smb:read` | Consulter les journaux d'exécution d'un module |
+| DELETE | `/api/smb/logs` | `smb:write` | Vider les journaux d'exécution d'un module |
+| GET | `/api/smb/settings` | `smb:read` | Lire les paramètres SMB |
+| PUT | `/api/smb/settings` | `smb:write` | Enregistrer les paramètres SMB |
 
 ## Montages de stockage
 

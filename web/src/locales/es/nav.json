@@ -64,6 +64,10 @@
       "title": "Servicio FTP",
       "desc": "Servicio para compartir archivos por FTP / FTPS"
     },
+    "smb": {
+      "title": "Servicio SMB",
+      "desc": "Servicio para compartir archivos por SMB"
+    },
     "wol": {
       "title": "Wake-on-LAN",
       "desc": "Enciende dispositivos de tu red local de forma remota"

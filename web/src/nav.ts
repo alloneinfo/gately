@@ -11,6 +11,7 @@ import {
   Cloud,
   Container,
   FolderSync,
+  FolderTree,
   HardDrive,
   Globe,
   History,
@@ -83,6 +84,7 @@ export const navGroups: NavGroup[] = [
       { path: '/storage', titleKey: 'nav.items.storage.title', icon: HardDrive, moduleId: 'storage', descKey: 'nav.items.storage.desc' },
       { path: '/webdav', titleKey: 'nav.items.webdav.title', icon: FolderSync, moduleId: 'webdav', descKey: 'nav.items.webdav.desc' },
       { path: '/ftp', titleKey: 'nav.items.ftp.title', icon: Server, moduleId: 'ftp', descKey: 'nav.items.ftp.desc' },
+      { path: '/smb', titleKey: 'nav.items.smb.title', icon: FolderTree, moduleId: 'smb', descKey: 'nav.items.smb.desc' },
     ],
   },
   {

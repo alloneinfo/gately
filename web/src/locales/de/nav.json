@@ -64,6 +64,10 @@
       "title": "FTP-Dienst",
       "desc": "FTP- / FTPS-Dateifreigabedienst"
     },
+    "smb": {
+      "title": "SMB-Dienst",
+      "desc": "SMB-Dateifreigabedienst"
+    },
     "wol": {
       "title": "Wake-on-LAN",
       "desc": "Geräte im LAN aus der Ferne aufwecken"

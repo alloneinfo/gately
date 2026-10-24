@@ -15689,6 +15689,305 @@
         "x-token-allowed": true
       }
     },
+    "/api/smb/logs": {
+      "delete": {
+        "description": "必要な権限: `smb:write`。",
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "リクエストパラメーターが不正です"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンが無効、期限切れ、または未ログインです"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンに必要な権限がありません"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "モジュールの実行ログを消去",
+        "tags": [
+          "SMB サービス"
+        ],
+        "x-required-scope": "smb:write",
+        "x-token-allowed": true
+      },
+      "get": {
+        "description": "`since` パラメーターで増分取得でき、シーケンス番号がこの値より大きいログを返します。`before` はシーケンス番号がこの値より小さいログを返し、古い記録の読み込みに使います。`limit` はそのうち最新の指定件数だけを返し、メモリ内で足りない場合はログファイルに残っている履歴も検索します。フィルターパラメーター：`level` 最低レベル、`source` ソース、`q` キーワード（スペース区切りはすべてを含む、二重引用符でフレーズ、先頭の `-` で除外）、`ip` クライアントアドレス（完全なアドレス、CIDR またはアドレスの一部、複数はカンマ区切り）、`host` サイト名またはドメイン、`status` ステータスコード（`404`、`4xx`、`500-599` など）、`from`・`to` 時間範囲（RFC 3339 またはミリ秒タイムスタンプ）。\n\n必要な権限: `smb:read`。",
+        "parameters": [
+          {
+            "description": "増分取得：このシーケンス番号より大きいログのみ返します",
+            "in": "query",
+            "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "過去のログを読み込む：シーケンス番号がこの値より小さいログのみを返します",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "返す最大件数。条件に合う最新のものから取ります。0 または省略時は無制限",
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "最低レベル：debug、info、warn、error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "ソースラベル（大文字小文字を区別しない完全一致）",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "キーワード：スペース区切りはすべてを含む、二重引用符でフレーズ、先頭の - で除外",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "クライアントアドレス：完全なアドレス、CIDR またはアドレスの一部、複数はカンマ区切り",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "サイト名またはドメインの一部",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "ステータスコード（404、4xx、500-599 など、複数はカンマ区切り）",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "開始時刻（RFC 3339 またはミリ秒タイムスタンプ）",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "終了時刻（RFC 3339 またはミリ秒タイムスタンプ）",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "リクエストパラメーターが不正です"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンが無効、期限切れ、または未ログインです"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンに必要な権限がありません"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "モジュールの実行ログを表示",
+        "tags": [
+          "SMB サービス"
+        ],
+        "x-required-scope": "smb:read",
+        "x-token-allowed": true
+      }
+    },
+    "/api/smb/settings": {
+      "get": {
+        "description": "`supported` は現在のシステムで SMB サービスを実行できるかを示します（Linux と macOS のみ）。\n\n必要な権限: `smb:read`。",
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "リクエストパラメーターが不正です"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンが無効、期限切れ、または未ログインです"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンに必要な権限がありません"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "SMB 設定を取得",
+        "tags": [
+          "SMB サービス"
+        ],
+        "x-required-scope": "smb:read",
+        "x-token-allowed": true
+      },
+      "put": {
+        "description": "必要な権限: `smb:write`。",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "リクエストパラメーターが不正です"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンが無効、期限切れ、または未ログインです"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンに必要な権限がありません"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "SMB 設定を保存",
+        "tags": [
+          "SMB サービス"
+        ],
+        "x-required-scope": "smb:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/ssl/certs": {
       "get": {
         "description": "必要な権限: `ssl:read`。",
@@ -26790,6 +27089,9 @@
       "name": "FTP サービス"
     },
     {
+      "name": "SMB サービス"
+    },
+    {
       "name": "ストレージマウント"
     },
     {
@@ -26831,6 +27133,7 @@
     "docker",
     "webdav",
     "ftp",
+    "smb",
     "storage",
     "notify",
     "nettools",

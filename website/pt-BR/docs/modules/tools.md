@@ -34,6 +34,32 @@ Configure em "Serviço FTP", no grupo "Serviços de arquivos". FTP e FTPS são c
 | `disableActiveMode` | Desativado | Usa apenas o modo passivo, mais adequado a ambientes com NAT |
 | `users` | Nenhum | Vários usuários, com os mesmos campos do WebDAV: `name`, `password`, `root`, `readOnly` ou `mounts`; os nomes de usuário devem ser únicos |
 
+## SMB
+
+Configure em "Serviço SMB", no grupo "Serviços de arquivos", para compartilhar diretórios locais com o Explorador de Arquivos do Windows, o Finder do macOS, Linux e clientes SMB de celulares e TVs. A implementação do protocolo vem embutida no Gately (baseada no [gosamba](https://github.com/ahmetozer/gosamba)) e suporta SMB 2.0.2 a 3.1.1, autenticação NTLMv2 e assinatura, com criptografia SMB 3 obrigatória opcional; SMB 1 não é suportado. Disponível apenas no Linux e no macOS.
+
+| Campo | Padrão | Descrição |
+| --- | --- | --- |
+| `enable` | Desativado | Ativa o serviço; ao ativar, pelo menos um usuário é necessário |
+| `listenIp` | Vazio | Endereço de escuta; deixe em branco para escutar em todos os endereços |
+| `port` | 445 | Porta de escuta. O Windows só se conecta à 445; se o Samba que acompanha um NAS como fnOS ou Synology já usa a 445, escolha outra porta, que macOS, Linux e a maioria dos players permitem informar no endereço |
+| `requireEncryption` | Desativado | Exige criptografia SMB 3 em todas as conexões; dispositivos antigos e algumas TVs que só suportam SMB 2 não conseguirão se conectar |
+| `mdns` | Desativado | Anuncia o serviço via Bonjour para que apareça em Rede no Finder do macOS |
+| `users` | Nenhum | Vários usuários com os mesmos campos do WebDAV: `name`, `password`, `root`, `readOnly` ou `mounts`; nomes de usuário não diferenciam maiúsculas e não podem se repetir |
+
+Os compartilhamentos pertencem aos usuários, e um usuário conectado só vê e acessa os seus:
+
+- **Um único diretório**: o compartilhamento tem o nome do usuário, por exemplo `\\192.168.1.2\alice` para o usuário `alice`.
+- **Vários diretórios**: cada diretório é um compartilhamento cujo nome é `name` (sem diferenciar maiúsculas e único por usuário), e cada um pode ser somente leitura. Usuários diferentes podem ter compartilhamentos com o mesmo nome, cada um apontando para o próprio diretório.
+
+Nomes de usuário e de compartilhamento não podem conter `" / \ [ ] : ; | = , + * ? < >` nem começar ou terminar com `.`. A autenticação NTLM precisa da senha em texto puro, então usuários cuja senha está salva como hash bcrypt precisam defini-la novamente. Os arquivos são lidos e gravados com a identidade do processo do Gately.
+
+"Endereços de conexão", no fim da página, lista o endereço de cada compartilhamento a partir das configurações salvas:
+
+- Windows: digite `\\host\compartilhamento` na barra de endereços do Explorador ou execute `net use Z: \\host\compartilhamento /user:usuário`
+- macOS: no Finder, escolha Ir → Conectar ao Servidor e digite `smb://host:porta/compartilhamento` (a porta pode ser omitida para 445)
+- Linux: `mount -t cifs //host/compartilhamento /mnt -o username=usuário,port=porta`
+
 ## Montagens de armazenamento
 
 Adicione montagens em "Montagens de armazenamento", no grupo "Serviços de arquivos", e gerencie os arquivos online na própria página.

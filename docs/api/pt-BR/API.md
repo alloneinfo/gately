@@ -47,6 +47,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `docker` | Gerenciamento do Docker | `docker:read`、`docker:write` |
 | `webdav` | Serviço WebDAV | `webdav:read`、`webdav:write` |
 | `ftp` | Serviço FTP | `ftp:read`、`ftp:write` |
+| `smb` | Serviço SMB | `smb:read`、`smb:write` |
 | `storage` | Montagens de armazenamento | `storage:read`、`storage:write` |
 | `notify` | Central de notificações | `notify:read`、`notify:write` |
 | `nettools` | Diagnóstico de rede | `nettools:read`、`nettools:write` |
@@ -420,6 +421,15 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | DELETE | `/api/ftp/logs` | `ftp:write` | Limpar logs de execução do módulo |
 | GET | `/api/ftp/settings` | `ftp:read` | Ler configurações do FTP |
 | PUT | `/api/ftp/settings` | `ftp:write` | Salvar configurações do FTP |
+
+## Serviço SMB
+
+| Método | Caminho | Permissão necessária | Descrição |
+| --- | --- | --- | --- |
+| GET | `/api/smb/logs` | `smb:read` | Ver logs de execução do módulo |
+| DELETE | `/api/smb/logs` | `smb:write` | Limpar logs de execução do módulo |
+| GET | `/api/smb/settings` | `smb:read` | Obter configurações do SMB |
+| PUT | `/api/smb/settings` | `smb:write` | Salvar configurações do SMB |
 
 ## Montagens de armazenamento
 

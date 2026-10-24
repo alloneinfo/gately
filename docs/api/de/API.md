@@ -47,6 +47,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `docker` | Docker-Verwaltung | `docker:read`、`docker:write` |
 | `webdav` | WebDAV-Dienst | `webdav:read`、`webdav:write` |
 | `ftp` | FTP-Dienst | `ftp:read`、`ftp:write` |
+| `smb` | SMB-Dienst | `smb:read`、`smb:write` |
 | `storage` | Speicher-Einbindungen | `storage:read`、`storage:write` |
 | `notify` | Benachrichtigungszentrale | `notify:read`、`notify:write` |
 | `nettools` | Netzwerkdiagnose | `nettools:read`、`nettools:write` |
@@ -420,6 +421,15 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | DELETE | `/api/ftp/logs` | `ftp:write` | Modulprotokolle leeren |
 | GET | `/api/ftp/settings` | `ftp:read` | FTP-Einstellungen lesen |
 | PUT | `/api/ftp/settings` | `ftp:write` | FTP-Einstellungen speichern |
+
+## SMB-Dienst
+
+| Methode | Pfad | Erforderliche Berechtigung | Beschreibung |
+| --- | --- | --- | --- |
+| GET | `/api/smb/logs` | `smb:read` | Laufzeitprotokolle eines Moduls anzeigen |
+| DELETE | `/api/smb/logs` | `smb:write` | Modulprotokolle leeren |
+| GET | `/api/smb/settings` | `smb:read` | SMB-Einstellungen abrufen |
+| PUT | `/api/smb/settings` | `smb:write` | SMB-Einstellungen speichern |
 
 ## Speicher-Einbindungen
 

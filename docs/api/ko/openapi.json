@@ -15689,6 +15689,305 @@
         "x-token-allowed": true
       }
     },
+    "/api/smb/logs": {
+      "delete": {
+        "description": "필요한 권한: `smb:write`.",
+        "responses": {
+          "200": {
+            "description": "성공"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "요청 매개변수 오류"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰이 유효하지 않거나 만료되었거나 로그인하지 않음"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰에 필요한 권한이 없음"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "모듈 실행 로그 비우기",
+        "tags": [
+          "SMB 서비스"
+        ],
+        "x-required-scope": "smb:write",
+        "x-token-allowed": true
+      },
+      "get": {
+        "description": "`since` 매개변수로 증분 조회하며 시퀀스 번호가 이 값보다 큰 로그를 반환합니다. `before`는 시퀀스 번호가 이 값보다 작은 로그를 반환하여 이전 기록을 불러올 때 사용합니다. `limit`은 그중 최신 항목만 반환하며, 메모리에 부족하면 로그 파일에 보관된 기록도 검색합니다. 필터 매개변수: `level` 최소 수준, `source` 소스, `q` 키워드(공백으로 구분하면 모두 포함, 큰따옴표로 구문 묶기, 앞의 `-`는 제외), `ip` 클라이언트 주소(전체 주소, CIDR 또는 주소 일부, 여러 개는 쉼표로 구분), `host` 사이트 이름 또는 도메인, `status` 상태 코드(`404`, `4xx`, `500-599` 등), `from`·`to` 시간 범위(RFC 3339 또는 밀리초 타임스탬프).\n\n필요한 권한: `smb:read`.",
+        "parameters": [
+          {
+            "description": "증분 조회: 일련번호가 이 값보다 큰 로그만 반환",
+            "in": "query",
+            "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "이전 로그 불러오기: 순번이 이 값보다 작은 로그만 반환",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "반환할 최대 개수로, 조건에 맞는 최신 항목부터 가져옵니다. 0 또는 생략 시 제한 없음",
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "최소 수준: debug, info, warn 또는 error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "소스 레이블, 대소문자 구분 없이 정확히 일치",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "키워드: 공백으로 구분하면 모두 포함, 큰따옴표로 구문 묶기, 앞의 - 는 제외",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "클라이언트 주소: 전체 주소, CIDR 또는 주소 일부, 여러 개는 쉼표로 구분",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "사이트 이름 또는 도메인의 일부",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "상태 코드(예: 404, 4xx, 500-599), 여러 개는 쉼표로 구분",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "시작 시간, RFC 3339 또는 밀리초 타임스탬프",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "종료 시간, RFC 3339 또는 밀리초 타임스탬프",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "성공"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "요청 매개변수 오류"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰이 유효하지 않거나 만료되었거나 로그인하지 않음"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰에 필요한 권한이 없음"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "모듈 실행 로그 보기",
+        "tags": [
+          "SMB 서비스"
+        ],
+        "x-required-scope": "smb:read",
+        "x-token-allowed": true
+      }
+    },
+    "/api/smb/settings": {
+      "get": {
+        "description": "`supported` 는 현재 시스템에서 SMB 서비스를 실행할 수 있는지 나타냅니다(Linux 와 macOS 만).\n\n필요한 권한: `smb:read`.",
+        "responses": {
+          "200": {
+            "description": "성공"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "요청 매개변수 오류"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰이 유효하지 않거나 만료되었거나 로그인하지 않음"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰에 필요한 권한이 없음"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "SMB 설정 조회",
+        "tags": [
+          "SMB 서비스"
+        ],
+        "x-required-scope": "smb:read",
+        "x-token-allowed": true
+      },
+      "put": {
+        "description": "필요한 권한: `smb:write`.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "성공"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "요청 매개변수 오류"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰이 유효하지 않거나 만료되었거나 로그인하지 않음"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰에 필요한 권한이 없음"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "SMB 설정 저장",
+        "tags": [
+          "SMB 서비스"
+        ],
+        "x-required-scope": "smb:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/ssl/certs": {
       "get": {
         "description": "필요한 권한: `ssl:read`.",
@@ -26790,6 +27089,9 @@
       "name": "FTP 서비스"
     },
     {
+      "name": "SMB 서비스"
+    },
+    {
       "name": "스토리지 마운트"
     },
     {
@@ -26831,6 +27133,7 @@
     "docker",
     "webdav",
     "ftp",
+    "smb",
     "storage",
     "notify",
     "nettools",

@@ -34,6 +34,32 @@ Konfiguration unter „FTP-Dienst“ in der Gruppe „Dateidienste“. FTP und F
 | `disableActiveMode` | Aus | Nur passiven Modus verwenden, was für NAT-Umgebungen besser geeignet ist |
 | `users` | Keine | Mehrere Benutzer mit denselben Feldern wie bei WebDAV: `name`, `password`, `root`, `readOnly` oder `mounts`; Benutzernamen müssen eindeutig sein |
 
+## SMB
+
+Konfiguration unter „SMB-Dienst“ in der Gruppe „Dateidienste“; damit werden lokale Verzeichnisse für den Windows-Explorer, den macOS-Finder, Linux sowie SMB-Clients auf Smartphones und Fernsehern freigegeben. Die Protokollimplementierung ist in Gately eingebaut (basierend auf [gosamba](https://github.com/ahmetozer/gosamba)) und unterstützt SMB 2.0.2 bis 3.1.1, NTLMv2-Authentifizierung und Signierung sowie optional erzwungene SMB-3-Verschlüsselung; SMB 1 wird nicht unterstützt. Nur unter Linux und macOS verfügbar.
+
+| Feld | Standard | Beschreibung |
+| --- | --- | --- |
+| `enable` | Aus | Dienst aktivieren; bei aktiviertem Dienst ist mindestens ein Benutzer erforderlich |
+| `listenIp` | Leer | Listen-Adresse; leer lassen, um auf allen Adressen zu lauschen |
+| `port` | 445 | Listen-Port. Windows verbindet sich nur mit 445; belegt das mitgelieferte Samba eines NAS wie fnOS oder Synology bereits 445, wählen Sie einen anderen Port, den macOS, Linux und die meisten Player in der Adresse angeben können |
+| `requireEncryption` | Aus | Verlangt SMB-3-Verschlüsselung für jede Verbindung; ältere Geräte und manche Fernseher, die nur SMB 2 beherrschen, können sich dann nicht verbinden |
+| `mdns` | Aus | Kündigt den Dienst per Bonjour an, sodass er im macOS-Finder unter Netzwerk erscheint |
+| `users` | Keine | Mehrere Benutzer mit denselben Feldern wie WebDAV: `name`, `password`, `root`, `readOnly` oder `mounts`; Benutzernamen sind unabhängig von Groß-/Kleinschreibung eindeutig |
+
+Freigaben gehören zu Benutzern; ein angemeldeter Benutzer sieht und verbindet nur seine eigenen Freigaben:
+
+- **Ein Verzeichnis**: Die Freigabe heißt wie der Benutzer, zum Beispiel `\\192.168.1.2\alice` für den Benutzer `alice`.
+- **Mehrere Verzeichnisse**: Jedes Verzeichnis ist eine Freigabe mit `name` als Freigabename (pro Benutzer eindeutig, ohne Beachtung der Groß-/Kleinschreibung) und kann einzeln schreibgeschützt sein. Verschiedene Benutzer können gleichnamige Freigaben haben, die jeweils auf ihr eigenes Verzeichnis zeigen.
+
+Benutzer- und Freigabenamen dürfen `" / \ [ ] : ; | = , + * ? < >` nicht enthalten und nicht mit `.` beginnen oder enden. Die NTLM-Authentifizierung benötigt das Klartextpasswort; Benutzer, deren Passwort als bcrypt-Hash gespeichert ist, müssen es neu festlegen. Dateien werden mit der Identität des Gately-Prozesses gelesen und geschrieben.
+
+„Verbindungsadressen“ unten auf der Seite listet die Adresse jeder Freigabe aus den gespeicherten Einstellungen:
+
+- Windows: `\\Host\Freigabe` in die Adressleiste des Explorers eingeben oder `net use Z: \\Host\Freigabe /user:Benutzer` ausführen
+- macOS: im Finder Gehe zu → Mit Server verbinden wählen und `smb://Host:Port/Freigabe` eingeben (bei 445 kann der Port entfallen)
+- Linux: `mount -t cifs //Host/Freigabe /mnt -o username=Benutzer,port=Port`
+
 ## Speicher-Einbindungen
 
 Fügen Sie Einbindungen unter „Speicher-Einbindungen“ in der Gruppe „Dateidienste“ hinzu und verwalten Sie Dateien online auf der Seite.

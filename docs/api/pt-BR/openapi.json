@@ -15689,6 +15689,305 @@
         "x-token-allowed": true
       }
     },
+    "/api/smb/logs": {
+      "delete": {
+        "description": "Permissão necessária: `smb:write`.",
+        "responses": {
+          "200": {
+            "description": "Sucesso"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parâmetros da requisição inválidos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token inválido, expirado ou sem login"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "O token não tem a permissão necessária"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Limpar logs de execução do módulo",
+        "tags": [
+          "Serviço SMB"
+        ],
+        "x-required-scope": "smb:write",
+        "x-token-allowed": true
+      },
+      "get": {
+        "description": "Permite busca incremental com o parâmetro `since`, retornando logs com número de sequência maior que esse valor; `before` retorna logs com número de sequência menor que esse valor, para carregar entradas anteriores; `limit` retorna apenas as entradas mais recentes e, quando a memória não tem o suficiente, também procura no histórico guardado nos arquivos de log. Parâmetros de filtro: `level` nível mínimo, `source` origem, `q` palavras-chave (separadas por espaço, todas devem corresponder; aspas duplas agrupam uma frase; um `-` inicial exclui), `ip` endereço do cliente (endereço completo, CIDR ou parte do endereço, separados por vírgula), `host` nome do site ou domínio, `status` código de status (como `404`, `4xx`, `500-599`), `from` e `to` intervalo de tempo (RFC 3339 ou carimbo de data/hora em milissegundos).\n\nPermissão necessária: `smb:read`.",
+        "parameters": [
+          {
+            "description": "Busca incremental: retorna apenas logs com número de sequência maior que este valor",
+            "in": "query",
+            "name": "since",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Carregar logs anteriores: retorna apenas logs com número de sequência menor que este valor",
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Número máximo de entradas retornadas, pegando as mais recentes que correspondem; 0 ou omitido significa sem limite",
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Nível mínimo: debug, info, warn ou error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Rótulo de origem, correspondência exata sem diferenciar maiúsculas",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Palavras-chave: separadas por espaço, todas devem corresponder; aspas duplas agrupam uma frase; um - inicial exclui",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Endereço do cliente: endereço completo, CIDR ou parte do endereço, separados por vírgula",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Parte do nome do site ou do domínio",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Código de status como 404, 4xx, 500-599, separados por vírgula",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Hora de início, RFC 3339 ou carimbo de data/hora em milissegundos",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Hora de término, RFC 3339 ou carimbo de data/hora em milissegundos",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parâmetros da requisição inválidos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token inválido, expirado ou sem login"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "O token não tem a permissão necessária"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Ver logs de execução do módulo",
+        "tags": [
+          "Serviço SMB"
+        ],
+        "x-required-scope": "smb:read",
+        "x-token-allowed": true
+      }
+    },
+    "/api/smb/settings": {
+      "get": {
+        "description": "`supported` indica se este sistema pode executar o serviço SMB (somente Linux e macOS).\n\nPermissão necessária: `smb:read`.",
+        "responses": {
+          "200": {
+            "description": "Sucesso"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parâmetros da requisição inválidos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token inválido, expirado ou sem login"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "O token não tem a permissão necessária"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Obter configurações do SMB",
+        "tags": [
+          "Serviço SMB"
+        ],
+        "x-required-scope": "smb:read",
+        "x-token-allowed": true
+      },
+      "put": {
+        "description": "Permissão necessária: `smb:write`.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sucesso"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parâmetros da requisição inválidos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token inválido, expirado ou sem login"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "O token não tem a permissão necessária"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Salvar configurações do SMB",
+        "tags": [
+          "Serviço SMB"
+        ],
+        "x-required-scope": "smb:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/ssl/certs": {
       "get": {
         "description": "Permissão necessária: `ssl:read`.",
@@ -26790,6 +27089,9 @@
       "name": "Serviço FTP"
     },
     {
+      "name": "Serviço SMB"
+    },
+    {
       "name": "Montagens de armazenamento"
     },
     {
@@ -26831,6 +27133,7 @@
     "docker",
     "webdav",
     "ftp",
+    "smb",
     "storage",
     "notify",
     "nettools",

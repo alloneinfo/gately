@@ -54,6 +54,7 @@ Gately ist vollständig quelloffen, sodass Nutzer und Community Quellcode und Ko
 | Wake-on-LAN | Magic-Packet-Broadcast, Online-Erkennung |
 | WebDAV | Mehrere Benutzer, eigene Verzeichnisse, schreibgeschützt |
 | FTP | Mehrere Benutzer, eigene Verzeichnisse, schreibgeschützt, mit FTPS und passivem Portbereich |
+| SMB | Mehrere Benutzer, Freigaben je Benutzer aus einem oder mehreren Verzeichnissen, schreibgeschützt, mit SMB 2/3, Verschlüsselung und Bonjour-Erkennung |
 | Speicher-Einbindungen | Lokale Verzeichnisse, entfernte WebDAV-Mounts und SMB-Freigaben, Dateiverwaltung online |
 | Geplante Aufgaben | cron-Ausdrücke, Befehle oder HTTP-Anfragen, Ausführungsprotokoll |
 | Sicherheit und Einstellungen | Anmeldung per Passkey (WebAuthn), Zwei-Faktor-Authentifizierung (TOTP), schreibgeschützte Konten, Ratenbegrenzung bei fehlgeschlagenen Anmeldungen, Sicherheitseinstieg, Zugriff nur aus dem internen Netz, HTTPS für die Verwaltungsoberfläche, mehrere API-Tokens (Lese-/Schreibrechte je Modul), benutzerdefiniertes DNS (mit DoH-Unterstützung), Zeitzone, Konfigurationsbackup und -wiederherstellung, echte Client-Adresse von vertrauenswürdigen lokalen Reverse-Proxys, Funktionsmodule ein- und ausschalten (deaktivierte Module starten keine Dienste und stellen keine API bereit) |
