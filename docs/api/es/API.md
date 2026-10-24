@@ -1234,6 +1234,7 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | `displayName` | string |
 | `email` | string |
 | `groups` | Lista de string |
+| `id` | string |
 | `name` | string |
 | `password` | string |
 | `remark` | string |

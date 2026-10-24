@@ -16,6 +16,7 @@ import (
 	"net/http"
 	"net/url"
 	"slices"
+	"strconv"
 	"strings"
 	"sync/atomic"
 	"time"
@@ -23,6 +24,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/wangwanjie/gately/internal/crud"
+	"github.com/wangwanjie/gately/internal/geoip"
 	"github.com/wangwanjie/gately/internal/logbuf"
 	"github.com/wangwanjie/gately/internal/webpage"
 )
@@ -65,11 +67,19 @@ const (
 	oidcLogoutPath    = oidcPath + "/logout"
 	oidcLoginPath     = oidcPath + "/login"
 
+	// oidcReauthParam 为强制重新登录（prompt=login、max_age）时附加在授权地址上的签名标记
+	oidcReauthParam = "gately_reauth"
+
 	oidcCodeTTL    = 2 * time.Minute
 	oidcTokenTTL   = time.Hour
 	oidcRefreshTTL = 30 * 24 * time.Hour
 	// oidcMinSecret 为明文客户端密钥的最短长度
 	oidcMinSecret = 16
+	// oidcMaxForm 为各接口请求体的大小上限，oidcMaxParam 为 state、nonce 的长度上限
+	oidcMaxForm  = 64 << 10
+	oidcMaxParam = 512
+	// oidcReauthTTL 为强制重新登录标记的有效期，需在此时间内完成登录
+	oidcReauthTTL = 30 * time.Minute
 )
 
 // oidcScopes 为支持的 scope；应用请求的其他 scope 会被忽略。
@@ -77,8 +87,10 @@ var oidcScopes = []string{"openid", "profile", "email", "groups", "offline_acces
 
 // oidcEnv 是 OIDC 身份提供方的运行时副本，设置变更时整体替换。
 type oidcEnv struct {
-	issuer  string
-	host    string
+	issuer string
+	host   string
+	// secure 为 true 表示签发者地址为 https，协议路径不在明文连接上提供
+	secure  bool
 	key     *rsa.PrivateKey
 	kid     string
 	clients map[string]OIDCClient
@@ -105,7 +117,7 @@ func (h *oidcHolder) set(s OIDCSettings) error {
 		h.p.Store(nil)
 		return err
 	}
-	env := &oidcEnv{issuer: strings.TrimRight(s.Issuer, "/"), host: hostOnly(u.Host), key: key, kid: jwkThumbprint(&key.PublicKey), clients: map[string]OIDCClient{}}
+	env := &oidcEnv{issuer: strings.TrimRight(s.Issuer, "/"), host: hostOnly(u.Host), secure: u.Scheme == "https", key: key, kid: jwkThumbprint(&key.PublicKey), clients: map[string]OIDCClient{}}
 	for _, c := range s.Clients {
 		env.clients[c.ID] = c
 	}
@@ -174,10 +186,13 @@ func normalizeOIDC(s *OIDCSettings, old OIDCSettings) error {
 	if s.Enable && s.Issuer == "" {
 		return errors.New("启用 OIDC 身份提供方需要填写签发者地址")
 	}
-	prev := map[string]OIDCClient{}
-	for _, c := range old.Clients {
-		prev[c.ID] = c
+	// 未修改密钥的机密客户端先统一成占位符，再按 Client ID 恢复原密钥；改了 Client ID 时按位置对应原条目
+	for i := range s.Clients {
+		if c := &s.Clients[i]; !c.Public && c.Secret == "" {
+			c.Secret = crud.SecretMask
+		}
 	}
+	crud.KeepSecrets(old.Clients, s.Clients, func(c *OIDCClient) string { return c.ID }, func(c *OIDCClient) *string { return &c.Secret })
 	seen := map[string]bool{}
 	for i := range s.Clients {
 		c := &s.Clients[i]
@@ -196,8 +211,8 @@ func normalizeOIDC(s *OIDCSettings, old OIDCSettings) error {
 		} else {
 			switch {
 			case c.Secret == "" || c.Secret == crud.SecretMask:
-				// 未修改密钥
-				c.Secret = prev[c.ID].Secret
+				// 占位符没能对应到原客户端（新增客户端未填写密钥）
+				c.Secret = ""
 			case strings.HasPrefix(c.Secret, "$2"):
 				if _, err := bcrypt.Cost([]byte(c.Secret)); err != nil {
 					return fmt.Errorf("OIDC 客户端 %s 的密钥哈希无效", c.ID)
@@ -268,6 +283,11 @@ func (e *oidcEnv) signJWT(typ string, claims map[string]any) string {
 
 // verifyJWT 校验本签发者签出的 JWT：签名、类型、签发者与有效期。
 func (e *oidcEnv) verifyJWT(token, typ string) (map[string]any, error) {
+	return e.parseJWT(token, typ, true)
+}
+
+// parseJWT 校验签名、类型与签发者；checkExp 为 false 时不检查有效期（退出时的 id_token_hint 允许已过期）。
+func (e *oidcEnv) parseJWT(token, typ string, checkExp bool) (map[string]any, error) {
 	parts := strings.Split(token, ".")
 	if len(parts) != 3 {
 		return nil, errors.New("malformed token")
@@ -290,8 +310,11 @@ func (e *oidcEnv) verifyJWT(token, typ string) (map[string]any, error) {
 	if json.Unmarshal(cb, &c) != nil {
 		return nil, errors.New("malformed token")
 	}
+	if c["iss"] != e.issuer {
+		return nil, errors.New("unexpected issuer")
+	}
 	exp, _ := c["exp"].(float64)
-	if c["iss"] != e.issuer || int64(exp) < time.Now().Unix() {
+	if checkExp && int64(exp) < time.Now().Unix() {
 		return nil, errors.New("token expired")
 	}
 	return c, nil
@@ -315,8 +338,9 @@ func jwkThumbprint(pub *rsa.PublicKey) string {
 
 // oidcCode 是授权码的内容，签名后作为 code 返回给应用，只能兑换一次。
 type oidcCode struct {
-	Client    string `json:"c"`
-	Redirect  string `json:"r"`
+	Client   string `json:"c"`
+	Redirect string `json:"r"`
+	// User 为共享用户的不可变 ID
 	User      string `json:"u"`
 	Cred      string `json:"k"`
 	Scope     string `json:"s"`
@@ -327,28 +351,65 @@ type oidcCode struct {
 
 // oidcRefresh 是刷新令牌的内容；用户修改密码或 TOTP、客户端被删除后失效。
 type oidcRefresh struct {
-	Client   string `json:"c"`
+	Client string `json:"c"`
+	// User 为共享用户的不可变 ID
 	User     string `json:"u"`
 	Cred     string `json:"k"`
 	Scope    string `json:"s"`
 	AuthTime int64  `json:"t"`
 }
 
-// serveOIDC 在签发者域名上处理 OIDC 协议路径，返回 false 表示不是 OIDC 请求，交给站点继续处理。
-func (a *authenticator) serveOIDC(w http.ResponseWriter, r *http.Request, log *logbuf.Logger) bool {
+// oidcTarget 判断请求是否为签发者域名上的 OIDC 协议路径：是则返回当前配置，否则返回 nil，交给站点继续处理。
+func (a *authenticator) oidcTarget(r *http.Request) *oidcEnv {
 	e := a.oidc.get()
 	if e == nil || hostOnly(r.Host) != e.host {
-		return false
+		return nil
 	}
 	p := r.URL.Path
 	if p != oidcDiscoveryPath && p != oidcPath && !strings.HasPrefix(p, oidcPath+"/") {
-		return false
+		return nil
 	}
-	if a.banned(clientAddr(r).Addr()) {
-		http.Error(w, "403 Forbidden", http.StatusForbidden)
+	return e
+}
+
+// requestIsHTTPS 判断访客是否经 HTTPS 访问：TLS 直连，或本机、内网的反向代理以 X-Forwarded-Proto: https 转发。
+// 浏览器自身不会发送该头，公网来源（包括经 PROXY 协议还原出的真实地址）带上它也不被采信。
+func requestIsHTTPS(r *http.Request) bool {
+	if r.TLS != nil {
 		return true
 	}
-	w.Header().Set("Cache-Control", "no-store")
+	return strings.EqualFold(strings.TrimSpace(r.Header.Get("X-Forwarded-Proto")), "https") && geoip.IsLocal(clientAddr(r).Addr())
+}
+
+// serveOIDC 在签发者域名上处理 OIDC 协议路径（调用方已通过 oidcTarget 确认，并执行过签发者域名所在站点的访问控制）。
+func (a *authenticator) serveOIDC(w http.ResponseWriter, r *http.Request, e *oidcEnv, log *logbuf.Logger) {
+	p := r.URL.Path
+	if a.banned(clientAddr(r).Addr()) {
+		http.Error(w, "403 Forbidden", http.StatusForbidden)
+		return
+	}
+	// 发现文档与公钥可以缓存，其余接口涉及登录态与令牌，禁止缓存
+	if p == oidcDiscoveryPath || p == oidcJWKSPath {
+		w.Header().Set("Cache-Control", "public, max-age=300")
+	} else {
+		w.Header().Set("Cache-Control", "no-store")
+	}
+	// 签发者为 https 时不在明文连接上提供登录页与令牌接口，避免密码与令牌明文传输、会话 Cookie 缺少 Secure：
+	// GET、HEAD 永久跳转到签发者地址上的同一路径，其余请求直接拒绝
+	if e.secure && !requestIsHTTPS(r) {
+		switch {
+		case r.Method == http.MethodGet || r.Method == http.MethodHead:
+			http.Redirect(w, r, e.issuer+r.URL.RequestURI(), http.StatusMovedPermanently)
+		case p == oidcTokenPath:
+			oauthError(w, http.StatusBadRequest, "invalid_request", "the issuer requires HTTPS")
+		default:
+			http.NotFound(w, r)
+		}
+		return
+	}
+	if r.Body != nil {
+		r.Body = http.MaxBytesReader(w, r.Body, oidcMaxForm)
+	}
 	lg := log.With(logbuf.Fields{logbuf.FieldIP: clientAddr(r).Addr().String(), logbuf.FieldHost: e.host, logbuf.FieldMethod: r.Method, logbuf.FieldPath: p})
 	switch p {
 	case oidcDiscoveryPath:
@@ -372,7 +433,6 @@ func (a *authenticator) serveOIDC(w http.ResponseWriter, r *http.Request, log *l
 	default:
 		http.NotFound(w, r)
 	}
-	return true
 }
 
 // oidcCORS 允许浏览器中的单页应用跨域读取发现文档、公钥并兑换令牌（这些接口不依赖 Cookie）。
@@ -417,7 +477,9 @@ func (e *oidcEnv) discovery() map[string]any {
 		"code_challenge_methods_supported":      []string{"S256"},
 		"claims_supported":                      []string{"iss", "sub", "aud", "exp", "iat", "auth_time", "nonce", "azp", "at_hash", "name", "preferred_username", "nickname", "email", "email_verified", "groups"},
 		"request_parameter_supported":           false,
-		"claims_parameter_supported":            false,
+		// 授权响应（含错误响应）都带 iss 参数（RFC 9207），应用可据此防御混淆攻击
+		"authorization_response_iss_parameter_supported": true,
+		"claims_parameter_supported":                     false,
 	}
 }
 
@@ -485,13 +547,25 @@ func (c OIDCClient) displayName() string {
 	return c.ID
 }
 
+// oidcReauth 是强制重新登录时附加在授权地址上的标记：要求登录时间晚于 Since（秒），签名防止访客伪造以跳过重新登录。
+// 同一秒内完成的登录无法与之前的会话区分，按未重新登录处理。
+type oidcReauth struct {
+	Since int64 `json:"t"`
+}
+
 // oidcAuthorize 处理授权请求：校验客户端与回调地址，未登录时转到登录页，登录后签发授权码跳回应用。
 func (a *authenticator) oidcAuthorize(w http.ResponseWriter, r *http.Request, e *oidcEnv, lg *logbuf.Logger) {
 	if r.Method != http.MethodGet && r.Method != http.MethodPost {
 		http.Error(w, "405 Method Not Allowed", http.StatusMethodNotAllowed)
 		return
 	}
-	_ = r.ParseForm()
+	// 只拒绝超出大小上限的请求体；其余解析错误（如查询串中的分号）沿用能解析出的参数
+	if err := r.ParseForm(); err != nil {
+		if mbe := (*http.MaxBytesError)(nil); errors.As(err, &mbe) {
+			oidcErrorPage(w, r, "请求无效", "授权请求过大，请回到应用重新发起登录。", "")
+			return
+		}
+	}
 	q := r.Form
 	c, ok := e.clients[q.Get("client_id")]
 	if !ok {
@@ -516,6 +590,12 @@ func (a *authenticator) oidcAuthorize(w http.ResponseWriter, r *http.Request, e 
 		u.RawQuery = v.Encode()
 		http.Redirect(w, r, u.String(), http.StatusFound)
 	}
+	if len(q.Get("state")) > oidcMaxParam || len(q.Get("nonce")) > oidcMaxParam {
+		// 过长的 state 不再带回应用
+		q.Del("state")
+		fail("invalid_request", "state or nonce is too long")
+		return
+	}
 	if q.Get("request") != "" || q.Get("request_uri") != "" {
 		fail("request_not_supported", "request objects are not supported")
 		return
@@ -533,13 +613,17 @@ func (a *authenticator) oidcAuthorize(w http.ResponseWriter, r *http.Request, e 
 		fail("invalid_scope", "the openid scope is required")
 		return
 	}
+	if c.Public {
+		// 公共客户端无法保管刷新令牌，也无法安全轮换，不授予 offline_access
+		scope = withoutScope(scope, "offline_access")
+	}
 	challenge := q.Get("code_challenge")
 	if challenge != "" {
 		if q.Get("code_challenge_method") != "S256" {
 			fail("invalid_request", "only code_challenge_method=S256 is supported")
 			return
 		}
-		if len(challenge) != 43 {
+		if len(challenge) != 43 || !pkceChars(challenge) {
 			fail("invalid_request", "invalid code_challenge")
 			return
 		}
@@ -547,20 +631,59 @@ func (a *authenticator) oidcAuthorize(w http.ResponseWriter, r *http.Request, e 
 		fail("invalid_request", "public clients must use PKCE")
 		return
 	}
-	u, authTime, logged := a.oidcSessionUser(r, e)
 	prompt := strings.Fields(q.Get("prompt"))
+	none := slices.Contains(prompt, "none")
+	if none && len(prompt) > 1 {
+		fail("invalid_request", "prompt=none cannot be combined with other values")
+		return
+	}
+	maxAge := int64(-1)
+	if v := q.Get("max_age"); v != "" {
+		n, err := strconv.ParseInt(v, 10, 64)
+		if err != nil || n < 0 {
+			fail("invalid_request", "invalid max_age")
+			return
+		}
+		maxAge = n
+	}
+	// 去掉旧的重新登录标记，跳转登录页时按需附加新的
+	var reauth oidcReauth
+	reauthOK := a.verifyBlob("oidc-reauth", q.Get(oidcReauthParam), &reauth) == nil
+	q.Del(oidcReauthParam)
+	toLogin := func(marker bool) {
+		// 登录后回到授权地址继续；POST 发起的授权请求改写为等价的 GET 地址
+		if marker {
+			q.Set(oidcReauthParam, a.signBlob("oidc-reauth", oidcReauth{Since: time.Now().Unix()}, oidcReauthTTL))
+		}
+		next := oidcAuthorizePath + "?" + q.Encode()
+		http.Redirect(w, r, oidcLoginPath+"?next="+url.QueryEscape(next)+"&client="+url.QueryEscape(c.ID), http.StatusFound)
+	}
+	u, authTime, logged := a.oidcSessionUser(r, e)
 	if !logged {
-		if slices.Contains(prompt, "none") {
+		if none {
 			fail("login_required", "the user is not logged in")
 			return
 		}
-		// 登录后回到授权地址继续；POST 发起的授权请求改写为等价的 GET 地址
-		next := oidcAuthorizePath + "?" + q.Encode()
-		http.Redirect(w, r, oidcLoginPath+"?next="+url.QueryEscape(next)+"&client="+url.QueryEscape(c.ID), http.StatusFound)
+		toLogin(false)
+		return
+	}
+	// prompt=login 或超过 max_age 时要求重新输入密码；带着标记回来且登录时间晚于标记签发的那一秒，说明刚刚重新登录过
+	fresh := reauthOK && authTime > reauth.Since
+	if !fresh && (slices.Contains(prompt, "login") || (maxAge >= 0 && time.Now().Unix()-authTime > maxAge)) {
+		if none {
+			fail("login_required", "re-authentication is required")
+			return
+		}
+		toLogin(true)
 		return
 	}
 	if !clientAllows(c, u) {
 		lg.With(logbuf.Fields{logbuf.FieldUser: u.Name}).Warnf("OIDC：%s 不在应用 %s 的允许列表中", u.Name, c.displayName())
+		if none {
+			// 静默登录不显示页面，按协议告知应用
+			fail("access_denied", "the user is not allowed to use this application")
+			return
+		}
 		// 提供“换个账号登录”：退出签发者上的登录后回到同一个授权请求
 		switchURL := oidcLogoutPath + "?switch=" + url.QueryEscape(oidcAuthorizePath+"?"+q.Encode())
 		webpage.Error(w, r, webpage.Problem{Code: http.StatusForbidden, Title: "没有使用该应用的权限", Lock: true,
@@ -568,7 +691,7 @@ func (a *authenticator) oidcAuthorize(w http.ResponseWriter, r *http.Request, e 
 			Hint:   u.Name + " → " + c.displayName(), Action: switchURL, ActionText: "换个账号登录"})
 		return
 	}
-	code := a.signBlob("oidc-code", oidcCode{Client: c.ID, Redirect: redirect, User: u.Name, Cred: a.sharedCred(u), Scope: scope,
+	code := a.signBlob("oidc-code", oidcCode{Client: c.ID, Redirect: redirect, User: u.ID, Cred: a.sharedCred(u), Scope: scope,
 		Nonce: q.Get("nonce"), Challenge: challenge, AuthTime: authTime}, oidcCodeTTL)
 	lg.With(logbuf.Fields{logbuf.FieldUser: u.Name}).Infof("OIDC：%s 登录应用 %s", u.Name, c.displayName())
 	target, _ := url.Parse(redirect)
@@ -582,14 +705,33 @@ func (a *authenticator) oidcAuthorize(w http.ResponseWriter, r *http.Request, e 
 	http.Redirect(w, r, target.String(), http.StatusFound)
 }
 
+// withoutScope 从 scope 中去掉指定项。
+func withoutScope(scope, drop string) string {
+	return strings.Join(slices.DeleteFunc(strings.Fields(scope), func(s string) bool { return s == drop }), " ")
+}
+
+// pkceChars 判断字符串是否只含 RFC 7636 允许的字符（A-Z a-z 0-9 - . _ ~）。
+func pkceChars(s string) bool {
+	for _, c := range s {
+		if !(c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c >= '0' && c <= '9' || strings.ContainsRune("-._~", c)) {
+			return false
+		}
+	}
+	return true
+}
+
 // oidcErrorPage 在无法安全跳回应用时直接向用户展示错误，extra 为附加的原始信息（如收到的回调地址）。
 func oidcErrorPage(w http.ResponseWriter, r *http.Request, title, detail, extra string) {
 	webpage.Error(w, r, webpage.Problem{Code: http.StatusBadRequest, Title: title, Detail: detail, Hint: extra})
 }
 
 // oidcSessionUser 返回签发者域名上已登录的共享用户及登录时间（单点登录 Cookie 或签发者自身的会话）。
+// 两种会话同时有效时取最近登录的一个，重新登录后的登录时间才能被 prompt=login、max_age 识别。
 func (a *authenticator) oidcSessionUser(r *http.Request, e *oidcEnv) (AuthUser, int64, bool) {
 	s := e.loginSite(r)
+	var best AuthUser
+	var bestTime int64
+	found := false
 	for _, name := range []string{cookieName(s), ssoCookie} {
 		c, err := r.Cookie(name)
 		if err != nil {
@@ -600,10 +742,11 @@ func (a *authenticator) oidcSessionUser(r *http.Request, e *oidcEnv) (AuthUser, 
 		if err != nil || !sess.Shared || !a.validShared(r, s, &sess) {
 			continue
 		}
-		u := a.shared.get().users[sess.User]
-		return u, exp - int64(sessionTTL/time.Second), true
+		if t := exp - int64(sessionTTL/time.Second); !found || t > bestTime {
+			best, bestTime, found = a.shared.get().users[sess.User], t, true
+		}
 	}
-	return AuthUser{}, 0, false
+	return best, bestTime, found
 }
 
 // clientAuth 校验令牌接口的客户端身份：client_secret_basic、client_secret_post，或公共客户端只带 client_id。
@@ -641,7 +784,7 @@ func (a *authenticator) oidcToken(w http.ResponseWriter, r *http.Request, e *oid
 		oauthError(w, http.StatusMethodNotAllowed, "invalid_request", "use POST")
 		return
 	}
-	r.Body = http.MaxBytesReader(w, r.Body, 64<<10)
+	// 请求体大小已在 serveOIDC 中限制
 	if err := r.ParseForm(); err != nil {
 		oauthError(w, http.StatusBadRequest, "invalid_request", "invalid form body")
 		return
@@ -683,7 +826,7 @@ func (a *authenticator) oidcExchangeCode(w http.ResponseWriter, r *http.Request,
 	verifier := r.PostForm.Get("code_verifier")
 	if code.Challenge != "" || verifier != "" {
 		sum := sha256.Sum256([]byte(verifier))
-		if len(verifier) < 43 || len(verifier) > 128 || subtle.ConstantTimeCompare([]byte(b64.EncodeToString(sum[:])), []byte(code.Challenge)) != 1 {
+		if len(verifier) < 43 || len(verifier) > 128 || !pkceChars(verifier) || subtle.ConstantTimeCompare([]byte(b64.EncodeToString(sum[:])), []byte(code.Challenge)) != 1 {
 			grantError(w, lg, c, "PKCE verification failed")
 			return
 		}
@@ -701,6 +844,11 @@ func (a *authenticator) oidcExchangeCode(w http.ResponseWriter, r *http.Request,
 }
 
 func (a *authenticator) oidcRefreshToken(w http.ResponseWriter, r *http.Request, e *oidcEnv, c OIDCClient, lg *logbuf.Logger) {
+	if c.Public {
+		// 公共客户端不签发刷新令牌（无法轮换，泄露后可长期使用）
+		grantError(w, lg, c, "refresh tokens are not issued to public clients")
+		return
+	}
 	var rt oidcRefresh
 	if err := a.verifyBlob("oidc-refresh", r.PostForm.Get("refresh_token"), &rt); err != nil || rt.Client != c.ID {
 		grantError(w, lg, c, "invalid or expired refresh token")
@@ -732,18 +880,27 @@ func grantError(w http.ResponseWriter, lg *logbuf.Logger, c OIDCClient, desc str
 	oauthError(w, http.StatusBadRequest, "invalid_grant", desc)
 }
 
-// oidcUser 返回凭据指纹仍然一致的共享用户：修改密码或 TOTP、删除用户后已签发的授权码与刷新令牌失效。
-func (a *authenticator) oidcUser(name, cred string) (AuthUser, bool) {
-	u, ok := a.shared.get().users[name]
+// oidcUser 按 ID 返回凭据指纹仍然一致的共享用户：修改密码或 TOTP、改名、删除用户后，
+// 已签发的授权码、刷新令牌与 Access Token 失效。
+func (a *authenticator) oidcUser(id, cred string) (AuthUser, bool) {
+	u, ok := a.shared.get().userByID(id)
 	if !ok || subtle.ConstantTimeCompare([]byte(cred), []byte(a.sharedCred(u))) != 1 {
 		return AuthUser{}, false
 	}
 	return u, true
 }
 
+// subject 返回用户在 OIDC 中的 sub：不可变的随机 ID，改名后不变，删除后再建同名用户也不会相同。
+func (u AuthUser) subject() string {
+	if u.ID != "" {
+		return u.ID
+	}
+	return u.Name
+}
+
 // userClaims 按 scope 返回用户声明。
 func userClaims(u AuthUser, scope string) map[string]any {
-	m := map[string]any{"sub": u.Name}
+	m := map[string]any{"sub": u.subject()}
 	if hasScope(scope, "profile") {
 		name := u.DisplayName
 		if name == "" {
@@ -769,8 +926,9 @@ func userClaims(u AuthUser, scope string) map[string]any {
 func (a *authenticator) issueTokens(w http.ResponseWriter, e *oidcEnv, c OIDCClient, u AuthUser, scope, nonce string, authTime int64, newRefresh bool) {
 	now := time.Now()
 	exp := now.Add(oidcTokenTTL).Unix()
-	access := e.signJWT("at+jwt", map[string]any{"iss": e.issuer, "sub": u.Name, "aud": c.ID, "client_id": c.ID,
-		"scope": scope, "iat": now.Unix(), "exp": exp, "jti": randomNonce()})
+	// gately_cred 为用户凭据指纹：修改密码或 TOTP 后，用户信息接口不再接受此前签发的 Access Token
+	access := e.signJWT("at+jwt", map[string]any{"iss": e.issuer, "sub": u.subject(), "aud": c.ID, "client_id": c.ID,
+		"scope": scope, "iat": now.Unix(), "exp": exp, "jti": randomNonce(), "gately_cred": a.sharedCred(u)})
 	atHash := sha256.Sum256([]byte(access))
 	claims := userClaims(u, scope)
 	claims["iss"], claims["aud"], claims["azp"] = e.issuer, c.ID, c.ID
@@ -783,8 +941,9 @@ func (a *authenticator) issueTokens(w http.ResponseWriter, e *oidcEnv, c OIDCCli
 	}
 	resp := map[string]any{"access_token": access, "token_type": "Bearer", "expires_in": int(oidcTokenTTL / time.Second),
 		"id_token": e.signJWT("JWT", claims), "scope": scope}
-	if newRefresh && hasScope(scope, "offline_access") {
-		resp["refresh_token"] = a.signBlob("oidc-refresh", oidcRefresh{Client: c.ID, User: u.Name, Cred: a.sharedCred(u), Scope: scope, AuthTime: authTime}, oidcRefreshTTL)
+	// 只给机密客户端签发刷新令牌；公共客户端的 scope 在授权时已去掉 offline_access
+	if newRefresh && !c.Public && hasScope(scope, "offline_access") {
+		resp["refresh_token"] = a.signBlob("oidc-refresh", oidcRefresh{Client: c.ID, User: u.ID, Cred: a.sharedCred(u), Scope: scope, AuthTime: authTime}, oidcRefreshTTL)
 	}
 	w.Header().Set("Pragma", "no-cache")
 	writeJSON(w, http.StatusOK, resp)
@@ -796,9 +955,15 @@ func (a *authenticator) oidcUserinfo(w http.ResponseWriter, r *http.Request, e *
 		w.WriteHeader(http.StatusNoContent)
 		return
 	}
-	token, ok := strings.CutPrefix(r.Header.Get("Authorization"), "Bearer ")
-	if !ok && r.Method == http.MethodPost {
-		_ = r.ParseForm()
+	token := ""
+	// Bearer 方案名不区分大小写（RFC 7235）
+	if scheme, cred, ok := strings.Cut(r.Header.Get("Authorization"), " "); ok && strings.EqualFold(scheme, "Bearer") {
+		token = cred
+	} else if r.Method == http.MethodPost {
+		if err := r.ParseForm(); err != nil {
+			oauthError(w, http.StatusBadRequest, "invalid_request", "invalid form body")
+			return
+		}
 		token = r.PostForm.Get("access_token")
 	}
 	claims, err := e.verifyJWT(strings.TrimSpace(token), "at+jwt")
@@ -806,19 +971,21 @@ func (a *authenticator) oidcUserinfo(w http.ResponseWriter, r *http.Request, e *
 		oauthError(w, http.StatusUnauthorized, "invalid_token", err.Error())
 		return
 	}
-	name, _ := claims["sub"].(string)
+	sub, _ := claims["sub"].(string)
+	cred, _ := claims["gately_cred"].(string)
 	cid, _ := claims["client_id"].(string)
 	scope, _ := claims["scope"].(string)
-	u, ok := a.shared.get().users[name]
+	u, ok := a.oidcUser(sub, cred)
 	c, cok := e.clients[cid]
 	if !ok || !cok || !clientAllows(c, u) {
-		oauthError(w, http.StatusUnauthorized, "invalid_token", "the user or client no longer exists")
+		oauthError(w, http.StatusUnauthorized, "invalid_token", "the token has been revoked")
 		return
 	}
 	writeJSON(w, http.StatusOK, userClaims(u, scope))
 }
 
-// oidcLogout 处理应用发起的退出：清除签发者上的登录态（含单点登录 Cookie），回调地址与客户端同源时跳回应用。
+// oidcLogout 处理应用发起的退出：清除签发者上的登录态（含单点登录 Cookie），回调地址属于该客户端时跳回应用。
+// 客户端由签名有效的 id_token_hint（允许已过期）或 client_id 确定，两者同时提供时必须一致。
 func (a *authenticator) oidcLogout(w http.ResponseWriter, r *http.Request, e *oidcEnv) {
 	_ = r.ParseForm()
 	s := e.loginSite(r)
@@ -826,27 +993,17 @@ func (a *authenticator) oidcLogout(w http.ResponseWriter, r *http.Request, e *oi
 	if domain := a.shared.get().ssoFor(hostOnly(r.Host)); domain != "" {
 		http.SetCookie(w, &http.Cookie{Name: ssoCookie, Value: "", Path: "/", Domain: domain, MaxAge: -1})
 	}
-	cid := r.Form.Get("client_id")
-	if hint := r.Form.Get("id_token_hint"); hint != "" && cid == "" {
-		// 过期的 ID Token 也可作为提示，只取其中的 aud 判断回调地址
-		if parts := strings.Split(hint, "."); len(parts) == 3 {
-			var c struct {
-				Aud string `json:"aud"`
-			}
-			if b, err := b64.DecodeString(parts[1]); err == nil && json.Unmarshal(b, &c) == nil {
-				cid = c.Aud
-			}
-		}
-	}
 	// 从“没有使用该应用的权限”页换账号：退出后带着原授权请求回到登录页
 	if sw := r.Form.Get("switch"); strings.HasPrefix(sw, oidcAuthorizePath+"?") && safeNext(sw) == sw {
 		http.Redirect(w, r, oidcLoginPath+"?next="+url.QueryEscape(sw), http.StatusFound)
 		return
 	}
 	if target := r.Form.Get("post_logout_redirect_uri"); target != "" {
-		if c, ok := e.clients[cid]; ok && sameOriginAny(target, c.RedirectURIs) {
+		c, ok := e.logoutClient(r.Form.Get("id_token_hint"), r.Form.Get("client_id"))
+		// 回调地址需为该客户端登记的回调地址，或与其中之一同源
+		if ok && (slices.Contains(c.RedirectURIs, target) || sameOriginAny(target, c.RedirectURIs)) {
 			u, _ := url.Parse(target)
-			if st := r.Form.Get("state"); st != "" {
+			if st := r.Form.Get("state"); st != "" && len(st) <= oidcMaxParam {
 				v := u.Query()
 				v.Set("state", st)
 				u.RawQuery = v.Encode()
@@ -856,6 +1013,27 @@ func (a *authenticator) oidcLogout(w http.ResponseWriter, r *http.Request, e *oi
 		}
 	}
 	http.Redirect(w, r, oidcLoginPath, http.StatusFound)
+}
+
+// logoutClient 确定退出请求所属的客户端：id_token_hint 需为本签发者签出的 ID Token（不检查有效期），
+// 与 client_id 同时提供时两者必须一致；签名无效或不一致时不跳回任何应用。
+func (e *oidcEnv) logoutClient(hint, cid string) (OIDCClient, bool) {
+	if hint != "" {
+		claims, err := e.parseJWT(hint, "JWT", false)
+		if err != nil {
+			return OIDCClient{}, false
+		}
+		aud, _ := claims["aud"].(string)
+		if aud == "" || (cid != "" && cid != aud) {
+			return OIDCClient{}, false
+		}
+		cid = aud
+	}
+	if cid == "" {
+		return OIDCClient{}, false
+	}
+	c, ok := e.clients[cid]
+	return c, ok
 }
 
 // sameOriginAny 判断地址是否与任一回调地址同源（协议、域名、端口一致）。

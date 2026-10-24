@@ -465,30 +465,43 @@ func (h *siteHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	}()
 
-	if h.auth.banned(client.Addr()) {
-		http.Error(rec, "403 Forbidden", http.StatusForbidden)
+	release, ok := h.accessCheck(rec, r)
+	if !ok {
 		return
+	}
+	defer release()
+	h.pipeline.ServeHTTP(rec, r)
+}
+
+// accessCheck 执行站点的访问控制：封禁、IP 名单、国家过滤与限流。不通过时已写出 403 或 429 并返回 false；
+// 通过时返回的 release 需在请求结束后调用，以释放限流的并发计数。签发者域名上的 OIDC 协议路径同样经过这里。
+func (h *siteHandler) accessCheck(w http.ResponseWriter, r *http.Request) (release func(), ok bool) {
+	client := clientAddr(r)
+	noop := func() {}
+	if h.auth.banned(client.Addr()) {
+		http.Error(w, "403 Forbidden", http.StatusForbidden)
+		return noop, false
 	}
 	if !h.allowedIP(client.Addr(), h.matchRule(r.URL.Path)) {
 		h.reqLog(r).Warnf("拒绝 %s 访问 %s（访问控制）", client.Addr(), r.Host)
-		http.Error(rec, "403 Forbidden", http.StatusForbidden)
-		return
+		http.Error(w, "403 Forbidden", http.StatusForbidden)
+		return noop, false
 	}
 	if !h.countryAllowed(client.Addr()) {
 		h.reqLog(r).Warnf("拒绝 %s 访问 %s（国家过滤：%s）", client.Addr(), r.Host, geoip.Default.Country(client.Addr()))
-		http.Error(rec, "403 Forbidden", http.StatusForbidden)
-		return
+		http.Error(w, "403 Forbidden", http.StatusForbidden)
+		return noop, false
 	}
 	if h.limiter != nil {
-		release, retry, ok := h.limiter.acquire(limitKeyAddr(client.Addr()))
+		rel, retry, ok := h.limiter.acquire(limitKeyAddr(client.Addr()))
 		if !ok {
-			rec.Header().Set("Retry-After", retryAfterSeconds(retry))
-			http.Error(rec, "429 Too Many Requests", http.StatusTooManyRequests)
-			return
+			w.Header().Set("Retry-After", retryAfterSeconds(retry))
+			http.Error(w, "429 Too Many Requests", http.StatusTooManyRequests)
+			return noop, false
 		}
-		defer release()
+		return rel, true
 	}
-	h.pipeline.ServeHTTP(rec, r)
+	return noop, true
 }
 
 // serveInner 处理跨域、认证并交给站点处理器。

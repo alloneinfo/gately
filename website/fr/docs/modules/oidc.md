@@ -23,6 +23,8 @@ Les deux peuvent être utilisés ensemble : un même utilisateur partagé peut p
    - Groupes : fournis sous forme de claim `groups` ; ils peuvent être associés au rôle d'administrateur dans l'application, ou servir à limiter les utilisateurs autorisés à se connecter à une application.
 3. Préparez un domaine pour l'émetteur, par exemple `auth.example.com` : faites-le pointer vers l'hôte de Gately, préparez dans [Certificats SSL](/fr/docs/modules/ssl) un certificat qui le couvre, puis vérifiez qu'un listener HTTPS reçoit bien les requêtes de ce domaine. Inutile de créer un site pour ce domaine : Gately reconnaît ses chemins OIDC sur tous les listeners. Un domaine dédié est recommandé ; les autres chemins de ce domaine restent traités par les sites comme d'habitude.
 
+Lorsque l'URL de l'émetteur est en `https`, les requêtes GET vers les chemins OIDC en HTTP non chiffré sont redirigées vers HTTPS et les autres requêtes sont refusées : mots de passe et jetons ne circulent jamais en clair. Si un autre proxy inverse placé devant termine TLS et transmet à Gately en HTTP, il doit ajouter `X-Forwarded-Proto: https` ; Gately ne fait confiance à cet en-tête que s'il provient de la machine locale ou du réseau interne. Lorsque le domaine de l'émetteur correspond à un site (site par défaut compris) sur un listener, la liste d'autorisation et la liste de blocage d'IP, les listes d'IP abonnées, le filtre de pays et la limitation de débit de ce site s'appliquent aussi aux chemins OIDC, ce qui permet de limiter la page de connexion au réseau interne.
+
 ## Activation
 
 Dans « Service Web → Paramètres globaux → Fournisseur d'identité OIDC » :
@@ -56,9 +58,9 @@ Chaque application raccordée correspond à un client :
 | Nom | Affiché sur la page de connexion, par exemple « Vérifiez votre identité pour continuer vers Gitea » |
 | Client ID | Uniquement des lettres, des chiffres et `- . _ ~` ; à saisir dans l'application |
 | Client Secret | Au moins 16 caractères ; cliquez sur « Générer » pour obtenir une clé aléatoire de 43 caractères. Après l'enregistrement, seul le hachage bcrypt est conservé et le secret ne peut plus être affiché : copiez-le dans l'application avant d'enregistrer. En cas de perte, régénérez-le et reportez-le dans l'application. Vous pouvez aussi saisir directement un hachage bcrypt existant (commençant par `$2a$`, `$2b$` ou `$2y$`) |
-| Client public | À cocher pour les clients qui ne peuvent pas garder un secret, comme les applications monopages ou mobiles : pas de secret, PKCE (S256) obligatoire |
+| Client public | À cocher pour les clients qui ne peuvent pas garder un secret, comme les applications monopages ou mobiles : pas de secret, PKCE (S256) obligatoire, aucun jeton d'actualisation émis |
 | URI de redirection | Une par ligne, comparée caractère par caractère au `redirect_uri` envoyé par l'application : schéma, port, chemin et paramètres de requête doivent tous correspondre |
-| Utilisateurs autorisés | Un nom d'utilisateur par ligne, ou `group:nom` ; il suffit de remplir l'une des lignes pour se connecter. Vide signifie tous les utilisateurs partagés |
+| Utilisateurs autorisés | Un nom d'utilisateur par ligne, ou `group:nom` ; il suffit de remplir l'une des lignes pour se connecter. Vide signifie tous les utilisateurs partagés. La correspondance se fait par nom d'utilisateur : après avoir renommé un utilisateur partagé, mettez aussi cette liste à jour |
 
 ::: tip Si vous ne connaissez pas l'URI de redirection
 Enregistrez d'abord n'importe quelle adresse, puis lancez une connexion depuis l'application. Gately s'arrête sur la page d'erreur « URI de redirection non concordante », qui affiche l'adresse réellement envoyée par l'application ; copiez-la telle quelle dans l'URI de redirection du client.
@@ -78,23 +80,25 @@ Les clients sont enregistrés par l'administrateur : Gately les considère comme
 
 | scope | Claims renvoyés |
 | --- | --- |
-| `openid` (obligatoire) | `sub` : nom de l'utilisateur partagé |
+| `openid` (obligatoire) | `sub` : identifiant fixe de l'utilisateur partagé, généré aléatoirement et conservé en cas de renommage ; un utilisateur recréé sous le même nom après suppression reçoit un nouvel identifiant et ne reprend pas le compte de l'ancien utilisateur dans l'application |
 | `profile` | `name` (nom affiché, ou nom d'utilisateur s'il est vide), `preferred_username`, `nickname` (nom d'utilisateur) |
 | `email` | `email`, `email_verified` (renvoyés seulement si un e-mail est renseigné) |
 | `groups` | `groups` : liste des groupes |
-| `offline_access` | Émet en plus un jeton d'actualisation |
+| `offline_access` | Émet en plus un jeton d'actualisation, clients confidentiels uniquement |
 
 L'ID Token contient aussi `iss`, `aud`, `azp`, `exp`, `iat`, `auth_time`, `nonce` et `at_hash`. L'ID Token et l'Access Token sont tous deux des JWT signés en RS256. Les autres scopes demandés par l'application sont ignorés.
 
-Détails du protocole : seul le flux par code d'autorisation (`response_type=code`) est pris en charge, et le résultat de l'autorisation est renvoyé dans les paramètres de requête (`response_mode=query`) ; le point de terminaison de jeton accepte les méthodes d'authentification `client_secret_basic` et `client_secret_post`, et les clients publics utilisent `none` ; PKCE ne prend en charge que `S256` ; `prompt=none` est pris en charge et renvoie `login_required` en l'absence de connexion.
+Détails du protocole : seul le flux par code d'autorisation (`response_type=code`) est pris en charge, et le résultat de l'autorisation est renvoyé dans les paramètres de requête (`response_mode=query`) ; le point de terminaison de jeton accepte les méthodes d'authentification `client_secret_basic` et `client_secret_post`, et les clients publics utilisent `none` ; PKCE ne prend en charge que `S256` ; `prompt=none` est pris en charge et renvoie `login_required` en l'absence de connexion et `access_denied` si l'utilisateur n'a pas accès à cette application ; avec `prompt=login`, ou si la connexion date de plus de `max_age`, l'utilisateur doit ressaisir son mot de passe.
+
+Le point de terminaison de déconnexion accepte `id_token_hint`, `client_id` et `post_logout_redirect_uri` : `id_token_hint` doit être un ID Token émis par cet émetteur (même expiré), et `post_logout_redirect_uri` doit être l'une des URI de redirection enregistrées pour le client ou avoir la même origine que l'une d'elles ; sinon, l'utilisateur reste sur la page de connexion après la déconnexion.
 
 ## Durées de validité et révocation
 
 - Code d'autorisation : 2 minutes, à usage unique ;
 - ID Token et Access Token : 1 heure ;
 - Jeton d'actualisation : 30 jours ; le jeton d'origine est conservé lors de l'actualisation ;
-- Après la modification du mot de passe ou du TOTP d'un utilisateur partagé, la suppression de l'utilisateur, son retrait de la liste des utilisateurs autorisés d'un client ou la suppression du client, les codes d'autorisation et jetons d'actualisation non encore échangés sont immédiatement invalidés, et le point de terminaison d'infos utilisateur refuse aussi les Access Tokens déjà émis. La session déjà ouverte dans l'application est gérée par l'application elle-même ; au besoin, déconnectez cet utilisateur dans l'application ;
-- La modification de l'e-mail, du nom affiché ou des groupes n'affecte pas les sessions existantes ; elle prend effet à la prochaine connexion ou actualisation du jeton ;
+- Après la modification du mot de passe ou du TOTP d'un utilisateur partagé, son renommage, la suppression de l'utilisateur, son retrait de la liste des utilisateurs autorisés d'un client ou la suppression du client, les codes d'autorisation non encore échangés, les jetons d'actualisation et les Access Tokens déjà émis sont immédiatement invalidés (le point de terminaison d'infos utilisateur refuse les anciens Access Tokens). La session déjà ouverte dans l'application est gérée par l'application elle-même ; au besoin, déconnectez cet utilisateur dans l'application ;
+- Après la modification de l'e-mail, du nom affiché ou des groupes, le point de terminaison d'infos utilisateur renvoie aussitôt les nouvelles valeurs, et les claims de l'ID Token sont mis à jour à la prochaine connexion ou actualisation du jeton ; lorsque la liste des utilisateurs autorisés accorde l'accès par groupe, retirer l'utilisateur du groupe prend effet immédiatement ;
 - La clé de signature est stockée dans `settings.oidc.signingKey` du fichier de configuration du service Web `webservice.json`. Pour la changer, arrêtez Gately, supprimez ce champ puis redémarrez : une nouvelle clé est générée et tous les jetons déjà émis deviennent invalides.
 
 ## Exemples de configuration d'applications

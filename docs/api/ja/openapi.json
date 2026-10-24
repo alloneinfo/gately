@@ -1567,6 +1567,9 @@
             },
             "type": "array"
           },
+          "id": {
+            "type": "string"
+          },
           "name": {
             "type": "string"
           },

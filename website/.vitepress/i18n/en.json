@@ -160,7 +160,7 @@
       },
       {
         "title": "Web Services",
-        "text": "Per-domain reverse proxy, redirects and static files; HTTPS, HTTP/3, WebSocket and PROXY protocol; weighted multi-backend policies, health checks, compression, rate limiting and response caching; can stand in for nginx: path backends, forward auth, and shared users with TOTP and single sign-on."
+        "text": "Per-domain reverse proxy, redirects and static files; HTTPS, HTTP/3, WebSocket and PROXY protocol; weighted multi-backend policies, health checks, compression, rate limiting and response caching; can stand in for nginx: path backends, forward auth, and shared users with TOTP and single sign-on, plus a built-in OIDC identity provider."
       },
       {
         "title": "WAF Firewall",

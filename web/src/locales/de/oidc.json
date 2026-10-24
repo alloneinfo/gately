@@ -13,12 +13,12 @@
     "jwks": "Öffentliche Schlüssel",
     "logout": "Abmelden"
   },
-  "scopesHelp": "Unterstützte Scopes: openid, profile, email, groups, offline_access. ID-Tokens werden mit RS256 signiert; PKCE (S256) wird unterstützt.",
+  "scopesHelp": "Unterstützte Scopes: openid, profile, email, groups, offline_access (nur vertrauliche Clients). ID-Tokens werden mit RS256 signiert; PKCE (S256) wird unterstützt.",
   "clients": "Clients",
   "namePlaceholder": "Name, z. B. Gitea",
   "idPlaceholder": "z. B. gitea",
   "public": "Öffentlicher Client",
-  "publicHelp": "Für Single-Page- und Mobil-Apps, die kein Secret geheim halten können: kein Secret, PKCE erforderlich",
+  "publicHelp": "Für Single-Page- und Mobil-Apps, die kein Secret geheim halten können: kein Secret, PKCE erforderlich, keine Refresh-Tokens",
   "confidentialHelp": "Serverseitige Anwendungen authentifizieren sich mit dem Client Secret, z. B. Gitea, OpenList, Grafana",
   "secretPlaceholder": "Mindestens 16 Zeichen oder auf Erzeugen klicken",
   "secretKeep": "Gesetzt, leer lassen zum Beibehalten",
@@ -30,7 +30,7 @@
   "redirectHelp": "Muss exakt mit der von der Anwendung gesendeten redirect_uri übereinstimmen. Ist sie falsch, endet die Anmeldung auf einer Fehlerseite, die die tatsächlich gesendete Adresse zum Kopieren anzeigt.",
   "allow": "Erlaubte Benutzer",
   "allowPlaceholder": "Ein Benutzername pro Zeile oder group:Name",
-  "allowHelp": "Leer lassen, damit sich alle gemeinsamen Benutzer bei dieser Anwendung anmelden können. Gruppen werden bei den gemeinsamen Benutzern festgelegt",
+  "allowHelp": "Leer lassen, damit sich alle gemeinsamen Benutzer bei dieser Anwendung anmelden können. Benutzer werden über den Namen zugeordnet; nach einer Umbenennung diese Liste anpassen. Gruppen werden bei den gemeinsamen Benutzern festgelegt",
   "addClient": "Client hinzufügen",
   "docs": "Einrichtungsbeispiele für gängige Anwendungen"
 }

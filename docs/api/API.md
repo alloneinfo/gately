@@ -1234,6 +1234,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `displayName` | string |
 | `email` | string |
 | `groups` | 数组 of string |
+| `id` | string |
 | `name` | string |
 | `password` | string |
 | `remark` | string |

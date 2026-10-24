@@ -2,12 +2,14 @@ package webservice
 
 import (
 	"crypto/hmac"
+	"crypto/rand"
 	"crypto/sha256"
 	"crypto/subtle"
 	"encoding/hex"
 	"errors"
 	"fmt"
 	"net/http"
+	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -21,6 +23,9 @@ import (
 // AuthUser 是可在多个站点共用的认证用户。站点开启“使用共享用户”后，网页认证与基本认证都接受这些用户，
 // 设置了 TOTP 的用户在网页登录时还需输入动态验证码（相当于 Authelia 的 two_factor 策略）。
 type AuthUser struct {
+	// ID 为不可变的随机标识，保存时自动生成，改名后保持不变；内置 OIDC 身份提供方用它作为 sub，
+	// 删除用户后再建同名用户会得到新的 ID，不会继承原用户在各应用中的身份
+	ID   string `json:"id,omitempty"`
 	Name string `json:"name"`
 	// Password 保存 bcrypt 哈希；接口提交明文时自动哈希，读取时脱敏
 	Password string `json:"password"`
@@ -39,6 +44,8 @@ const ssoCookie = "gately_sso"
 // sharedEnv 是共享用户与单点登录域的运行时副本。
 type sharedEnv struct {
 	users map[string]AuthUser
+	// byID 为 ID 到用户名的索引，供 OIDC 按 sub 查找用户
+	byID map[string]string
 	// domain 为单点登录 Cookie 域，空表示每个站点单独登录
 	domain string
 }
@@ -50,11 +57,15 @@ type sharedStore struct {
 
 func (s *sharedStore) set(users []AuthUser, domain string) {
 	m := make(map[string]AuthUser, len(users))
+	ids := make(map[string]string, len(users))
 	for _, u := range users {
 		m[u.Name] = u
+		if u.ID != "" {
+			ids[u.ID] = u.Name
+		}
 	}
 	s.mu.Lock()
-	s.env = sharedEnv{users: m, domain: strings.ToLower(strings.Trim(domain, ". "))}
+	s.env = sharedEnv{users: m, byID: ids, domain: strings.ToLower(strings.Trim(domain, ". "))}
 	s.mu.Unlock()
 }
 
@@ -62,6 +73,48 @@ func (s *sharedStore) get() sharedEnv {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	return s.env
+}
+
+// userByID 按不可变 ID 查找共享用户。
+func (e sharedEnv) userByID(id string) (AuthUser, bool) {
+	name, ok := e.byID[id]
+	if !ok || id == "" {
+		return AuthUser{}, false
+	}
+	u, ok := e.users[name]
+	return u, ok
+}
+
+// newAuthUserID 生成共享用户的随机 ID（128 位，十六进制）。
+func newAuthUserID() string {
+	b := make([]byte, 16)
+	_, _ = rand.Read(b)
+	return hex.EncodeToString(b)
+}
+
+// validAuthUserID 限制 ID 只含字母、数字、- 与 _，便于作为 OIDC 的 sub 在各应用中保存。
+func validAuthUserID(id string) bool {
+	if id == "" || len(id) > 64 {
+		return false
+	}
+	for _, c := range id {
+		if !(c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c >= '0' && c <= '9' || c == '-' || c == '_') {
+			return false
+		}
+	}
+	return true
+}
+
+// ensureAuthUserIDs 为缺少 ID 的共享用户补生成 ID（老配置升级），返回是否有改动。
+func ensureAuthUserIDs(users []AuthUser) bool {
+	changed := false
+	for i := range users {
+		if users[i].ID == "" {
+			users[i].ID = newAuthUserID()
+			changed = true
+		}
+	}
+	return changed
 }
 
 // ssoFor 返回 host 可使用的单点登录 Cookie 域；host 不在该域下时返回空。
@@ -178,15 +231,24 @@ func (a *authenticator) validSSOCookie(r *http.Request, s Site) bool {
 }
 
 // normalizeAuthUsers 校验共享用户并处理密码与 TOTP：明文密码哈希保存，脱敏占位符恢复旧值。
+// 提交的用户按 ID 与原用户对应，改名后不重新输入密码也能保留原密码与 TOTP；没有 ID 的用户视为新用户并生成 ID。
+// 为兼容不认识 ID 的老调用方，整个列表都没有 ID 时改按用户名对应。
 func normalizeAuthUsers(users []AuthUser, old []AuthUser) ([]AuthUser, error) {
-	prev := map[string]AuthUser{}
+	prevByID := map[string]AuthUser{}
+	prevByName := map[string]AuthUser{}
 	for _, u := range old {
-		prev[u.Name] = u
+		if u.ID != "" {
+			prevByID[u.ID] = u
+		}
+		prevByName[u.Name] = u
 	}
+	legacy := !slices.ContainsFunc(users, func(u AuthUser) bool { return strings.TrimSpace(u.ID) != "" })
 	seen := map[string]bool{}
+	seenID := map[string]bool{}
 	out := make([]AuthUser, 0, len(users))
 	for _, u := range users {
 		u.Name = strings.TrimSpace(u.Name)
+		u.ID = strings.TrimSpace(u.ID)
 		if u.Name == "" || strings.ContainsAny(u.Name, ": ") {
 			return nil, fmt.Errorf("共享用户名 %q 无效（不能为空或包含空格、冒号）", u.Name)
 		}
@@ -194,7 +256,25 @@ func normalizeAuthUsers(users []AuthUser, old []AuthUser) ([]AuthUser, error) {
 			return nil, fmt.Errorf("共享用户 %s 重复", u.Name)
 		}
 		seen[u.Name] = true
-		o := prev[u.Name]
+		var o AuthUser
+		switch {
+		case u.ID != "":
+			if !validAuthUserID(u.ID) {
+				return nil, fmt.Errorf("共享用户 %s 的 ID 无效", u.Name)
+			}
+			// 未知的 ID（例如从其他实例导入）原样保留
+			o = prevByID[u.ID]
+		case legacy:
+			o = prevByName[u.Name]
+			u.ID = o.ID
+		}
+		if u.ID == "" {
+			u.ID = newAuthUserID()
+		}
+		if seenID[u.ID] {
+			return nil, fmt.Errorf("共享用户 %s 的 ID 与其他用户重复", u.Name)
+		}
+		seenID[u.ID] = true
 		switch {
 		case u.Password == "" || u.Password == crud.SecretMask:
 			// 未修改密码

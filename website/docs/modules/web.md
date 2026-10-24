@@ -112,6 +112,7 @@ https://auth.example.com/__gately_auth/oauth/callback
 在「全局设置 → 共享用户」中：
 
 - 添加用户名与密码；密码以 bcrypt 哈希保存，接口不会返回。要启用 TOTP，点「启用 TOTP」，用验证器 App（Google Authenticator、1Password 等）扫描二维码并保存；重新生成会使旧密钥失效；
+- 可选填写邮箱、显示名和分组，[OIDC 单点登录](/docs/modules/oidc) 会把它们作为 `email`、`name`、`groups` 声明提供给应用，OIDC 客户端的允许用户可用 `group:分组名` 按分组授权；
 - 单点登录域，例如 `example.com`：在该域或其子域名下的任一站点登录后，其他站点无需再登录。它使用父域 Cookie（`gately_sso`，有效期 7 天），不会转发给后端。留空则每个站点单独登录。
 
 在站点的「安全」页，在网页认证或基本认证旁勾选「使用共享用户」；站点自有的用户仍然可用。

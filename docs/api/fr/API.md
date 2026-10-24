@@ -1234,6 +1234,7 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | `displayName` | string |
 | `email` | string |
 | `groups` | Tableau de string |
+| `id` | string |
 | `name` | string |
 | `password` | string |
 | `remark` | string |

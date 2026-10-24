@@ -474,7 +474,11 @@ func (a *authenticator) handleLogin(w http.ResponseWriter, r *http.Request, s Si
 		data["Next"] = safeNext(r.PostForm.Get("next"))
 		next, _ := data["Next"].(string)
 		key := limitKey(ip)
-		if !a.reserve(key) {
+		if !sameOriginPost(r) {
+			// 其他网站代为提交的登录表单（登录 CSRF）：不校验密码，也不计入失败次数
+			data["Error"] = "请求来源无效，请刷新登录页后重试"
+			status = http.StatusForbidden
+		} else if !a.reserve(key) {
 			data["Error"] = "失败次数过多，请稍后再试"
 		} else if token := r.PostForm.Get("pending"); token != "" && s.SharedUsers {
 			// 第二步：校验动态验证码
@@ -525,7 +529,7 @@ func (a *authenticator) handleLogin(w http.ResponseWriter, r *http.Request, s Si
 			}
 		}
 	}
-	if _, failed := data["Error"]; failed {
+	if _, failed := data["Error"]; failed && status == http.StatusOK {
 		status = http.StatusUnauthorized
 	}
 	lang := i18n.RequestLang(r)
@@ -534,6 +538,23 @@ func (a *authenticator) handleLogin(w http.ResponseWriter, r *http.Request, s Si
 	}
 	data["PageTitle"] = i18n.Tr(lang, loginTexts["pageTitle"]) + " · " + host
 	webpage.Render(w, status, "ws-login", lang, loginTexts, data)
+}
+
+// sameOriginPost 判断表单是否由本域名的页面提交：有 Origin 头时其域名需与请求的域名一致（Origin: null 视为跨站），
+// 没有 Origin 时再看 Referer；两者都没有（老旧客户端、脚本）时放行，以免影响非浏览器的登录。
+func sameOriginPost(r *http.Request) bool {
+	src := r.Header.Get("Origin")
+	if src == "" {
+		src = r.Header.Get("Referer")
+		if src == "" {
+			return true
+		}
+	}
+	u, err := url.Parse(src)
+	if err != nil || u.Host == "" {
+		return false
+	}
+	return hostOnly(u.Host) == hostOnly(r.Host)
 }
 
 // finishTOTPStep 校验验证码步骤的凭据与动态验证码；expired 为 true 表示凭据无效或已过期，需要重新输入密码。

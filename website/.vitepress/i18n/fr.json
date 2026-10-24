@@ -160,7 +160,7 @@
       },
       {
         "title": "Services Web",
-        "text": "Proxy inverse par domaine, redirections et fichiers statiques ; HTTPS, HTTP/3, WebSocket et protocole PROXY ; plusieurs serveurs d'origine avec poids et stratégies, vérifications d'état, compression, limitation de débit et cache des réponses ; peut remplacer nginx : backends par chemin, authentification déléguée et utilisateurs partagés avec TOTP et authentification unique."
+        "text": "Proxy inverse par domaine, redirections et fichiers statiques ; HTTPS, HTTP/3, WebSocket et protocole PROXY ; plusieurs serveurs d'origine avec poids et stratégies, vérifications d'état, compression, limitation de débit et cache des réponses ; peut remplacer nginx : backends par chemin, authentification déléguée et utilisateurs partagés avec TOTP et authentification unique, ainsi qu'un fournisseur d'identité OIDC intégré."
       },
       {
         "title": "Pare-feu WAF",

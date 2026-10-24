@@ -1234,6 +1234,7 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | `displayName` | string |
 | `email` | string |
 | `groups` | Array de string |
+| `id` | string |
 | `name` | string |
 | `password` | string |
 | `remark` | string |

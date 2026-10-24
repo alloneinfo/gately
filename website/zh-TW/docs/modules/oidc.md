@@ -23,6 +23,8 @@ Gately 內建一個 OpenID Connect（OIDC）身分提供者，把 [Web 服務](/
    - 群組：作為 `groups` 聲明，可在應用程式中對應為管理員，也可以用來限制哪些使用者能登入某個應用程式。
 3. 準備一個簽發者網域，例如 `auth.example.com`：解析到 Gately 所在的主機，並在 [SSL 憑證](/zh-TW/docs/modules/ssl) 中準備好涵蓋它的憑證，再確認某個 HTTPS 監聽能收到這個網域的請求。這個網域不需要建站台，Gately 會在所有監聽上識別它的 OIDC 路徑；建議使用獨立的網域，這個網域上的其他路徑照常按站台處理。
 
+簽發者位址為 `https` 時，透過明文 HTTP 存取 OIDC 路徑的 GET 請求會被重新導向到 HTTPS，其他請求被拒絕，密碼和權杖不會明文傳輸。前面還有一層反向代理終止 TLS、再以 HTTP 轉發給 Gately 時，代理需要帶上 `X-Forwarded-Proto: https`，Gately 只信任本機和內網來源的這個請求標頭。簽發者網域在某個監聽上能比對到站台（含預設站台）時，該站台的 IP 黑白名單、訂閱 IP 清單、國家過濾和限流同樣作用於 OIDC 路徑，可以藉此把登入頁限制在內網。
+
 ## 啟用
 
 在「Web 服務 → 全域設定 → OIDC 身分提供者」中：
@@ -56,9 +58,9 @@ Gately 內建一個 OpenID Connect（OIDC）身分提供者，把 [Web 服務](/
 | 名稱 | 顯示在登入頁上，例如「驗證身分後將繼續登入 Gitea」 |
 | Client ID | 只能包含字母、數字和 `- . _ ~`，填到應用程式中 |
 | Client Secret | 至少 16 個字元；點「產生」得到 43 位隨機金鑰。儲存後只保留 bcrypt 雜湊，無法再次查看，請在儲存前複製到應用程式中；遺失時重新產生並同步到應用程式。也可以直接填寫既有的 bcrypt 雜湊（以 `$2a$`、`$2b$` 或 `$2y$` 開頭） |
-| 公開用戶端 | 單頁應用程式、手機 App 等無法保存金鑰的用戶端勾選此項：不使用金鑰，必須使用 PKCE（S256） |
+| 公開用戶端 | 單頁應用程式、手機 App 等無法保存金鑰的用戶端勾選此項：不使用金鑰，必須使用 PKCE（S256），不簽發重新整理權杖 |
 | 回呼位址 | 每行一個，與應用程式送來的 `redirect_uri` 逐字比較，協定、連接埠、路徑和查詢參數都要一致 |
-| 允許的使用者 | 每行一個使用者名稱，或 `group:群組名`，符合任意一行即可登入；留空表示所有共用使用者 |
+| 允許的使用者 | 每行一個使用者名稱，或 `group:群組名`，符合任意一行即可登入；留空表示所有共用使用者。按使用者名稱比對，共用使用者改名後要同步修改這裡 |
 
 ::: tip 不確定回呼位址時
 先隨便填一個位址儲存，在應用程式中點一次登入。Gately 會停在「回呼位址不符」的錯誤頁，頁面上顯示應用程式實際送來的位址，原樣複製到用戶端的回呼位址即可。
@@ -78,23 +80,25 @@ Gately 內建一個 OpenID Connect（OIDC）身分提供者，把 [Web 服務](/
 
 | scope | 回傳的聲明 |
 | --- | --- |
-| `openid`（必需） | `sub`：共用使用者名稱 |
+| `openid`（必需） | `sub`：共用使用者的固定 ID，隨機產生，改名後不變；刪除使用者後再建同名使用者會得到新的 ID，不會接管原使用者在應用程式中的帳號 |
 | `profile` | `name`（顯示名稱，未填時為使用者名稱）、`preferred_username`、`nickname`（使用者名稱） |
 | `email` | `email`、`email_verified`（填寫了電子郵件時才回傳） |
 | `groups` | `groups`：群組清單 |
-| `offline_access` | 額外簽發重新整理權杖 |
+| `offline_access` | 額外簽發重新整理權杖，僅機密用戶端 |
 
 ID Token 另含 `iss`、`aud`、`azp`、`exp`、`iat`、`auth_time`、`nonce`、`at_hash`。ID Token 和 Access Token 都是 RS256 簽章的 JWT。應用程式請求的其他 scope 會被忽略。
 
-協定細節：只支援授權碼模式（`response_type=code`），授權結果透過查詢參數回傳（`response_mode=query`）；權杖端點接受 `client_secret_basic` 與 `client_secret_post` 兩種驗證方式，公開用戶端使用 `none`；PKCE 只支援 `S256`；支援 `prompt=none`，未登入時回傳 `login_required`。
+協定細節：只支援授權碼模式（`response_type=code`），授權結果透過查詢參數回傳（`response_mode=query`）；權杖端點接受 `client_secret_basic` 與 `client_secret_post` 兩種驗證方式，公開用戶端使用 `none`；PKCE 只支援 `S256`；支援 `prompt=none`，未登入時回傳 `login_required`，沒有該應用程式權限時回傳 `access_denied`；`prompt=login` 或登入時間超過 `max_age` 時要求使用者重新輸入密碼。
+
+登出位址接受 `id_token_hint`、`client_id` 和 `post_logout_redirect_uri`：`id_token_hint` 須是本簽發者簽發的 ID Token（允許已過期），`post_logout_redirect_uri` 必須是該用戶端登記的回呼位址，或與其中之一同源，否則登出後停在登入頁。
 
 ## 有效期與失效
 
 - 授權碼：2 分鐘，只能使用一次；
 - ID Token、Access Token：1 小時；
 - 重新整理權杖：30 天，重新整理時沿用原權杖；
-- 修改共用使用者的密碼或 TOTP、刪除使用者、把使用者移出用戶端的允許清單、刪除用戶端後，尚未兌換的授權碼和重新整理權杖立即失效，使用者資訊端點也會拒絕已簽發的 Access Token。應用程式內已經建立的登入狀態由應用程式自己管理，需要時請在應用程式中讓該使用者登出；
-- 修改電子郵件、顯示名稱或群組不影響既有工作階段，下次登入或重新整理權杖時生效；
+- 修改共用使用者的密碼或 TOTP、改名、刪除使用者、把使用者移出用戶端的允許清單、刪除用戶端後，尚未兌換的授權碼、重新整理權杖和已簽發的 Access Token 立即失效（使用者資訊端點拒絕舊的 Access Token）。應用程式內已經建立的登入狀態由應用程式自己管理，需要時請在應用程式中讓該使用者登出；
+- 修改電子郵件、顯示名稱或群組後，使用者資訊端點立即回傳新值，ID Token 中的聲明在下次登入或重新整理權杖時更新；允許清單按群組授權時，把使用者移出群組立即生效；
 - 簽章金鑰儲存在 Web 服務設定檔 `webservice.json` 的 `settings.oidc.signingKey` 中。需要更換時停止 Gately，刪除這個欄位後啟動，會產生新金鑰，所有已簽發的權杖隨之失效。
 
 ## 應用程式設定範例

@@ -13,12 +13,12 @@
     "jwks": "Chaves públicas",
     "logout": "Sair"
   },
-  "scopesHelp": "Scopes suportados: openid, profile, email, groups, offline_access. Os ID tokens são assinados com RS256; PKCE (S256) é suportado.",
+  "scopesHelp": "Scopes suportados: openid, profile, email, groups, offline_access (somente clientes confidenciais). Os ID tokens são assinados com RS256; PKCE (S256) é suportado.",
   "clients": "Clientes",
   "namePlaceholder": "Nome, ex.: Gitea",
   "idPlaceholder": "ex.: gitea",
   "public": "Cliente público",
-  "publicHelp": "Para aplicativos de página única e móveis que não conseguem guardar um segredo: sem segredo, PKCE obrigatório",
+  "publicHelp": "Para aplicativos de página única e móveis que não conseguem guardar um segredo: sem segredo, PKCE obrigatório, sem refresh tokens",
   "confidentialHelp": "Aplicativos de servidor se autenticam com o Client Secret, ex.: Gitea, OpenList, Grafana",
   "secretPlaceholder": "Pelo menos 16 caracteres, ou clique em Gerar",
   "secretKeep": "Definido, deixe vazio para manter",
@@ -30,7 +30,7 @@
   "redirectHelp": "Precisa ser idêntica ao redirect_uri enviado pelo aplicativo. Se estiver errada, o login para numa página de erro que mostra o endereço realmente enviado, pronto para copiar.",
   "allow": "Usuários permitidos",
   "allowPlaceholder": "Um nome de usuário por linha, ou group:nome",
-  "allowHelp": "Vazio permite que todos os usuários compartilhados entrem neste aplicativo. Os grupos são definidos nos usuários compartilhados",
+  "allowHelp": "Vazio permite que todos os usuários compartilhados entrem neste aplicativo. Os usuários são identificados pelo nome: atualize esta lista ao renomear um usuário. Os grupos são definidos nos usuários compartilhados",
   "addClient": "Adicionar cliente",
   "docs": "Exemplos de configuração de aplicativos comuns"
 }

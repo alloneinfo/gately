@@ -23,6 +23,8 @@ Gately 内置一个 OpenID Connect（OIDC）身份提供方，把 [Web 服务](/
    - 分组：作为 `groups` 声明，可在应用中映射为管理员，也可以用来限制哪些用户能登录某个应用。
 3. 准备一个签发者域名，例如 `auth.example.com`：解析到 Gately 所在的主机，并在 [SSL 证书](/docs/modules/ssl) 中准备好覆盖它的证书，再确认某个 HTTPS 监听能收到这个域名的请求。这个域名不需要建站点，Gately 会在所有监听上识别它的 OIDC 路径；建议使用独立的域名，这个域名上的其他路径照常按站点处理。
 
+签发者地址为 `https` 时，通过明文 HTTP 访问 OIDC 路径的 GET 请求会被跳转到 HTTPS，其他请求被拒绝，密码和令牌不会明文传输。前面还有一层反向代理终止 TLS、再以 HTTP 转发给 Gately 时，代理需要带上 `X-Forwarded-Proto: https`，Gately 只信任本机和内网来源的这个请求头。签发者域名在某个监听上能匹配到站点（含默认站点）时，该站点的 IP 黑白名单、订阅 IP 列表、国家过滤和限流同样作用于 OIDC 路径，可以借此把登录页限制在内网。
+
 ## 启用
 
 在「Web 服务 → 全局设置 → OIDC 身份提供方」中：
@@ -56,9 +58,9 @@ Gately 内置一个 OpenID Connect（OIDC）身份提供方，把 [Web 服务](/
 | 名称 | 显示在登录页上，例如「验证身份后将继续登录 Gitea」 |
 | Client ID | 只能包含字母、数字和 `- . _ ~`，填到应用中 |
 | Client Secret | 至少 16 个字符；点「生成」得到 43 位随机密钥。保存后只保留 bcrypt 哈希，无法再次查看，请在保存前复制到应用中；遗失时重新生成并同步到应用。也可以直接填写已有的 bcrypt 哈希（以 `$2a$`、`$2b$` 或 `$2y$` 开头） |
-| 公共客户端 | 单页应用、手机 App 等无法保存密钥的客户端勾选此项：不使用密钥，必须使用 PKCE（S256） |
+| 公共客户端 | 单页应用、手机 App 等无法保存密钥的客户端勾选此项：不使用密钥，必须使用 PKCE（S256），不签发刷新令牌 |
 | 回调地址 | 每行一个，与应用发来的 `redirect_uri` 逐字比较，协议、端口、路径和查询参数都要一致 |
-| 允许的用户 | 每行一个用户名，或 `group:分组名`，满足任意一行即可登录；留空表示全部共享用户 |
+| 允许的用户 | 每行一个用户名，或 `group:分组名`，满足任意一行即可登录；留空表示全部共享用户。按用户名匹配，共享用户改名后要同步修改这里 |
 
 ::: tip 不确定回调地址时
 先随便填一个地址保存，在应用中点一次登录。Gately 会停在「回调地址不匹配」的错误页，页面上显示应用实际发来的地址，原样复制到客户端的回调地址即可。
@@ -78,23 +80,25 @@ Gately 内置一个 OpenID Connect（OIDC）身份提供方，把 [Web 服务](/
 
 | scope | 返回的声明 |
 | --- | --- |
-| `openid`（必需） | `sub`：共享用户名 |
+| `openid`（必需） | `sub`：共享用户的固定 ID，随机生成，改名后不变；删除用户后再建同名用户会得到新的 ID，不会接管原用户在应用中的账号 |
 | `profile` | `name`（显示名，未填时为用户名）、`preferred_username`、`nickname`（用户名） |
 | `email` | `email`、`email_verified`（填写了邮箱时才返回） |
 | `groups` | `groups`：分组列表 |
-| `offline_access` | 额外签发刷新令牌 |
+| `offline_access` | 额外签发刷新令牌，仅机密客户端 |
 
 ID Token 另含 `iss`、`aud`、`azp`、`exp`、`iat`、`auth_time`、`nonce`、`at_hash`。ID Token 和 Access Token 都是 RS256 签名的 JWT。应用请求的其他 scope 会被忽略。
 
-协议细节：只支持授权码模式（`response_type=code`），授权结果通过查询参数返回（`response_mode=query`）；令牌接口接受 `client_secret_basic` 与 `client_secret_post` 两种认证方式，公共客户端使用 `none`；PKCE 只支持 `S256`；支持 `prompt=none`，未登录时返回 `login_required`。
+协议细节：只支持授权码模式（`response_type=code`），授权结果通过查询参数返回（`response_mode=query`）；令牌接口接受 `client_secret_basic` 与 `client_secret_post` 两种认证方式，公共客户端使用 `none`；PKCE 只支持 `S256`；支持 `prompt=none`，未登录时返回 `login_required`，没有该应用权限时返回 `access_denied`；`prompt=login` 或登录时间超过 `max_age` 时要求用户重新输入密码。
+
+退出地址接受 `id_token_hint`、`client_id` 和 `post_logout_redirect_uri`：`id_token_hint` 须是本签发者签发的 ID Token（允许已过期），`post_logout_redirect_uri` 必须是该客户端登记的回调地址，或与其中之一同源，否则退出后停在登录页。
 
 ## 有效期与失效
 
 - 授权码：2 分钟，只能使用一次；
 - ID Token、Access Token：1 小时；
 - 刷新令牌：30 天，刷新时沿用原令牌；
-- 修改共享用户的密码或 TOTP、删除用户、把用户移出客户端的允许列表、删除客户端后，尚未兑换的授权码和刷新令牌立即失效，用户信息接口也会拒绝已签发的 Access Token。应用内已经建立的登录状态由应用自己管理，需要时请在应用中让该用户退出；
-- 修改邮箱、显示名或分组不影响已有会话，下次登录或刷新令牌时生效；
+- 修改共享用户的密码或 TOTP、改名、删除用户、把用户移出客户端的允许列表、删除客户端后，尚未兑换的授权码、刷新令牌和已签发的 Access Token 立即失效（用户信息接口拒绝旧的 Access Token）。应用内已经建立的登录状态由应用自己管理，需要时请在应用中让该用户退出；
+- 修改邮箱、显示名或分组后，用户信息接口立即返回新值，ID Token 中的声明在下次登录或刷新令牌时更新；允许列表按分组授权时，把用户移出分组立即生效；
 - 签名密钥保存在 Web 服务配置文件 `webservice.json` 的 `settings.oidc.signingKey` 中。需要更换时停止 Gately，删除这个字段后启动，会生成新密钥，所有已签发的令牌随之失效。
 
 ## 应用配置示例

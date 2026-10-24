@@ -23,6 +23,8 @@ You can use both at the same time: the same shared user can pass a site's web au
    - Groups: the `groups` claim; applications can map it to administrators, and it can also limit which users may sign in to an application.
 3. Prepare an issuer domain, such as `auth.example.com`: point it at the host running Gately, prepare a certificate covering it in [SSL Certificates](/en/docs/modules/ssl), and make sure an HTTPS listener receives requests for this domain. The domain needs no site; Gately recognizes its OIDC paths on every listener. A dedicated domain is recommended; other paths on this domain are handled by sites as usual.
 
+When the issuer URL uses `https`, GET requests to the OIDC paths over plain HTTP are redirected to HTTPS and other requests are rejected, so passwords and tokens never travel in plain text. If another reverse proxy in front terminates TLS and forwards to Gately over HTTP, it must send `X-Forwarded-Proto: https`; Gately trusts this header only from the local host and private networks. When the issuer domain matches a site (including the default site) on a listener, that site's IP allowlist and blocklist, subscribed IP lists, country filter and rate limiting also apply to the OIDC paths, which you can use to restrict the login page to your internal network.
+
 ## Enabling
 
 In "Web Service → Global settings → OIDC identity provider":
@@ -56,9 +58,9 @@ Each connected application has its own client:
 | Name | Shown on the login page, for example "Verify your identity to continue to Gitea" |
 | Client ID | Letters, digits and `- . _ ~` only; enter it in the application |
 | Client Secret | At least 16 characters; click "Generate" for a random 43-character secret. Only its bcrypt hash is kept after saving and it cannot be shown again, so copy it into the application before saving; if lost, generate a new one and update the application. You can also enter an existing bcrypt hash (starting with `$2a$`, `$2b$` or `$2y$`) |
-| Public client | Tick this for single-page apps, mobile apps and other clients that cannot keep a secret: no secret is used and PKCE (S256) is required |
+| Public client | Tick this for single-page apps, mobile apps and other clients that cannot keep a secret: no secret is used, PKCE (S256) is required and no refresh token is issued |
 | Redirect URIs | One per line, compared character by character with the `redirect_uri` sent by the application; scheme, port, path and query must all match |
-| Allowed users | One username per line, or `group:name`; matching any line allows sign-in. Leave empty to allow every shared user |
+| Allowed users | One username per line, or `group:name`; matching any line allows sign-in. Leave empty to allow every shared user. Matching is by username, so update this list after renaming a shared user |
 
 ::: tip When you are not sure about the redirect URI
 Save any address first, then click sign-in once in the application. Gately stops at the "Redirect URI mismatch" error page, which shows the address the application actually sent; copy it as is into the client's redirect URIs.
@@ -78,23 +80,25 @@ Clients are registered by the administrator, so Gately treats them as trusted ap
 
 | scope | Claims returned |
 | --- | --- |
-| `openid` (required) | `sub`: the shared username |
+| `openid` (required) | `sub`: a fixed ID of the shared user, generated randomly and unchanged by renaming; a user created with the same name after deleting the old one gets a new ID and does not take over the old user's account in the application |
 | `profile` | `name` (display name, or the username when empty), `preferred_username`, `nickname` (username) |
 | `email` | `email`, `email_verified` (only when an email is set) |
 | `groups` | `groups`: list of groups |
-| `offline_access` | A refresh token is issued as well |
+| `offline_access` | A refresh token is issued as well, confidential clients only |
 
 The ID Token also contains `iss`, `aud`, `azp`, `exp`, `iat`, `auth_time`, `nonce` and `at_hash`. Both the ID Token and the Access Token are JWTs signed with RS256. Any other scope requested by the application is ignored.
 
-Protocol details: only the authorization code flow is supported (`response_type=code`), and the result is returned in query parameters (`response_mode=query`); the token endpoint accepts `client_secret_basic` and `client_secret_post` authentication, and public clients use `none`; PKCE supports `S256` only; `prompt=none` is supported and returns `login_required` when the user is not signed in.
+Protocol details: only the authorization code flow is supported (`response_type=code`), and the result is returned in query parameters (`response_mode=query`); the token endpoint accepts `client_secret_basic` and `client_secret_post` authentication, and public clients use `none`; PKCE supports `S256` only; `prompt=none` is supported and returns `login_required` when the user is not signed in and `access_denied` when the user may not use the application; `prompt=login`, or a sign-in older than `max_age`, makes the user enter the password again.
+
+The logout endpoint accepts `id_token_hint`, `client_id` and `post_logout_redirect_uri`: `id_token_hint` must be an ID Token issued by this issuer (expired tokens are accepted), and `post_logout_redirect_uri` must be one of the client's registered redirect URIs or share an origin with one of them; otherwise the user stays on the login page after signing out.
 
 ## Lifetimes and revocation
 
 - Authorization code: 2 minutes, single use;
 - ID Token, Access Token: 1 hour;
 - Refresh token: 30 days; the same token is kept when refreshing;
-- Changing a shared user's password or TOTP, deleting the user, removing the user from a client's allowed users or deleting the client immediately invalidates unredeemed authorization codes and refresh tokens, and the user info endpoint also rejects Access Tokens already issued. Sessions already established inside the application are managed by the application itself; sign the user out there when needed;
-- Changing the email, display name or groups does not affect existing sessions; it takes effect at the next sign-in or token refresh;
+- Changing a shared user's password or TOTP, renaming or deleting the user, removing the user from a client's allowed users or deleting the client immediately invalidates unredeemed authorization codes, refresh tokens and Access Tokens already issued (the user info endpoint rejects old Access Tokens). Sessions already established inside the application are managed by the application itself; sign the user out there when needed;
+- After changing the email, display name or groups, the user info endpoint returns the new values immediately, and the claims in the ID Token are updated at the next sign-in or token refresh; when a client's allowed users grant access by group, removing the user from the group takes effect immediately;
 - The signing key is stored in `settings.oidc.signingKey` of the Web Service configuration file `webservice.json`. To replace it, stop Gately, delete this field and start it again; a new key is generated and every token already issued becomes invalid.
 
 ## Application setup examples

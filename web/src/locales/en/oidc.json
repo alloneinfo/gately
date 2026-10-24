@@ -13,12 +13,12 @@
     "jwks": "Public keys",
     "logout": "Sign out"
   },
-  "scopesHelp": "Supported scopes: openid, profile, email, groups, offline_access. ID tokens are signed with RS256; PKCE (S256) is supported.",
+  "scopesHelp": "Supported scopes: openid, profile, email, groups, offline_access (confidential clients only). ID tokens are signed with RS256; PKCE (S256) is supported.",
   "clients": "Clients",
   "namePlaceholder": "Name, e.g. Gitea",
   "idPlaceholder": "e.g. gitea",
   "public": "Public client",
-  "publicHelp": "For single-page apps and mobile apps that cannot keep a secret: no secret, PKCE required",
+  "publicHelp": "For single-page apps and mobile apps that cannot keep a secret: no secret, PKCE required, no refresh tokens",
   "confidentialHelp": "Server-side applications authenticate with the Client Secret, e.g. Gitea, OpenList, Grafana",
   "secretPlaceholder": "At least 16 characters, or click Generate",
   "secretKeep": "Set, leave empty to keep",
@@ -30,7 +30,7 @@
   "redirectHelp": "Must match the redirect_uri sent by the application exactly. If it is wrong, sign-in stops at an error page that shows the address the application actually sent, ready to copy.",
   "allow": "Allowed users",
   "allowPlaceholder": "One username per line, or group:name",
-  "allowHelp": "Leave empty to let every shared user sign in to this application. Groups are set on shared users",
+  "allowHelp": "Leave empty to let every shared user sign in to this application. Users are matched by name, so update this list after renaming a user. Groups are set on shared users",
   "addClient": "Add client",
   "docs": "Setup examples for common applications"
 }

@@ -160,7 +160,7 @@
       },
       {
         "title": "Serviços Web",
-        "text": "Proxy reverso por domínio, redirecionamentos e arquivos estáticos; HTTPS, HTTP/3, WebSocket e protocolo PROXY; políticas com vários backends e pesos, health checks, compressão, limitação de taxa e cache de respostas; pode substituir o nginx: backends por caminho, autenticação delegada e usuários compartilhados com TOTP e login único."
+        "text": "Proxy reverso por domínio, redirecionamentos e arquivos estáticos; HTTPS, HTTP/3, WebSocket e protocolo PROXY; políticas com vários backends e pesos, health checks, compressão, limitação de taxa e cache de respostas; pode substituir o nginx: backends por caminho, autenticação delegada e usuários compartilhados com TOTP e login único, além de um provedor OIDC integrado."
       },
       {
         "title": "Firewall WAF",

@@ -112,6 +112,7 @@ Defina as contas uma só vez e use-as em vários sites, com verificação em doi
 Em "Configurações globais → Usuários compartilhados":
 
 - Adicione usuários com um nome de usuário e uma senha. As senhas são armazenadas como hashes bcrypt e nunca são retornadas pela API. Para adicionar o TOTP, clique em "Ativar TOTP", escaneie o QR code com um app autenticador (Google Authenticator, 1Password etc.) e salve. Gerar a chave novamente invalida a anterior;
+- Opcionalmente, informe e-mail, nome de exibição e grupos; o [login único OIDC](/pt-BR/docs/modules/oidc) os entrega aos aplicativos como as declarações `email`, `name` e `groups`, e os usuários permitidos de um cliente OIDC podem liberar acesso por grupo com `group:nome`;
 - Domínio de SSO, como `example.com`: depois de entrar em qualquer site desse domínio ou de seus subdomínios, os outros sites ali não pedem novo login. Usa um cookie de domínio pai (`gately_sso`, válido por 7 dias) que nunca é repassado aos backends. Deixe vazio para entrar em cada site separadamente.
 
 Em um site, marque "Usar usuários compartilhados" junto à autenticação web ou básica. Os usuários próprios do site continuam funcionando também.

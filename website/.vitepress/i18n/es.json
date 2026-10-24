@@ -160,7 +160,7 @@
       },
       {
         "title": "Servicios web",
-        "text": "Proxy inverso, redirecciones y archivos estáticos por dominio; HTTPS, HTTP/3, WebSocket y protocolo PROXY; políticas con varios backends ponderados, comprobaciones de estado, compresión, límite de peticiones y caché de respuestas; puede sustituir a nginx: backends por ruta, autenticación delegada y usuarios compartidos con TOTP e inicio de sesión único."
+        "text": "Proxy inverso, redirecciones y archivos estáticos por dominio; HTTPS, HTTP/3, WebSocket y protocolo PROXY; políticas con varios backends ponderados, comprobaciones de estado, compresión, límite de peticiones y caché de respuestas; puede sustituir a nginx: backends por ruta, autenticación delegada y usuarios compartidos con TOTP e inicio de sesión único, además de un proveedor OIDC integrado."
       },
       {
         "title": "Cortafuegos WAF",

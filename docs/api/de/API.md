@@ -1234,6 +1234,7 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | `displayName` | string |
 | `email` | string |
 | `groups` | Array von string |
+| `id` | string |
 | `name` | string |
 | `password` | string |
 | `remark` | string |

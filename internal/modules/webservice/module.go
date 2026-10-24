@@ -81,6 +81,12 @@ func (m *Module) Init(env module.Env) error {
 			return err
 		}
 	}
+	// 老配置中的共享用户没有 ID：加载时补生成并立即保存，保证 OIDC 的 sub 从此保持稳定
+	if ensureAuthUserIDs(m.cfg.Settings.AuthUsers) {
+		if err := m.saveLocked(); err != nil {
+			return err
+		}
+	}
 	m.auth = newAuthenticator(m.cfg.Settings.AuthSecret)
 	m.auth.setBanSeconds(m.cfg.Settings.AutoBanSeconds)
 	m.applyOAuthLocked()

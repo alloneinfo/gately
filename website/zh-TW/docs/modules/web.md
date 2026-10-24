@@ -112,6 +112,7 @@ https://auth.example.com/__gately_auth/oauth/callback
 在「全域設定 → 共用使用者」中：
 
 - 新增使用者名稱與密碼；密碼以 bcrypt 雜湊儲存，API 不會回傳。要啟用 TOTP，點「啟用 TOTP」，用驗證器 App（Google Authenticator、1Password 等）掃描 QR Code 並儲存；重新產生會使舊金鑰失效；
+- 可選填電子郵件、顯示名稱和群組，[OIDC 單一登入](/zh-TW/docs/modules/oidc) 會把它們作為 `email`、`name`、`groups` 聲明提供給應用程式，OIDC 用戶端的允許使用者可用 `group:群組名` 按群組授權；
 - 單一登入網域，例如 `example.com`：在該網域或其子網域下的任一站台登入後，其他站台無需再登入。它使用父網域 Cookie（`gately_sso`，有效期 7 天），不會轉發給後端。留空則每個站台單獨登入。
 
 在站台的「安全」頁，於網頁驗證或基本驗證旁勾選「使用共用使用者」；站台自有的使用者仍然可用。

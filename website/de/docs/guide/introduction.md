@@ -30,7 +30,7 @@ Gately bündelt DDNS, STUN-Traversal, Reverse Proxy und mehr und ist vollständi
 
 ## Funktionsübersicht
 
-Dynamisches DNS, STUN-Traversal, Portweiterleitung, SSL-Zertifikate, Web-Dienste (Reverse Proxy, Zugriffskontrolle, Health-Checks, Caching und Ratenbegrenzung, Traffic-Statistiken), WAF-Firewall, Tailscale, frp, Cloudflare Tunnel, Docker-Verwaltung, Web-Terminal, Netzwerkdiagnose, Wake-on-LAN, WebDAV, FTP, SMB, Speicher-Einbindungen, geplante Aufgaben, Benachrichtigungszentrale und Konfigurationssicherung sowie Zwei-Faktor-Authentifizierung, sicherer Einstiegspfad, API-Token, CLI und MCP. Details finden Sie in der [Modulübersicht](/de/docs/modules/).
+Dynamisches DNS, STUN-Traversal, Portweiterleitung, SSL-Zertifikate, Web-Dienste (Reverse Proxy, Zugriffskontrolle, Health-Checks, Caching und Ratenbegrenzung, Traffic-Statistiken, OIDC-Single-Sign-on), WAF-Firewall, Tailscale, frp, Cloudflare Tunnel, Docker-Verwaltung, Web-Terminal, Netzwerkdiagnose, Wake-on-LAN, WebDAV, FTP, SMB, Speicher-Einbindungen, geplante Aufgaben, Benachrichtigungszentrale und Konfigurationssicherung sowie Zwei-Faktor-Authentifizierung, sicherer Einstiegspfad, API-Token, CLI und MCP. Details finden Sie in der [Modulübersicht](/de/docs/modules/).
 
 ## Nächste Schritte
 

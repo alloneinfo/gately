@@ -112,6 +112,7 @@ Legen Sie Konten einmal an und nutzen Sie sie auf mehreren Sites, optional mit T
 Unter „Globale Einstellungen → Gemeinsame Benutzer“:
 
 - Fügen Sie Benutzer mit Benutzername und Passwort hinzu. Passwörter werden als bcrypt-Hashes gespeichert und nie von der API zurückgegeben. Für TOTP klicken Sie auf „TOTP aktivieren“, scannen den QR-Code mit einer Authenticator-App (Google Authenticator, 1Password usw.) und speichern. Ein neu erzeugter Schlüssel macht den alten ungültig;
+- Optional E-Mail, Anzeigename und Gruppen angeben; [OIDC-Single-Sign-on](/de/docs/modules/oidc) gibt sie als Claims `email`, `name` und `groups` an Anwendungen weiter, und die erlaubten Benutzer eines OIDC-Clients können mit `group:Name` gruppenweise freigeben;
 - SSO-Domain, etwa `example.com`: Nach der Anmeldung auf einer beliebigen Site unter dieser Domain oder ihren Subdomains brauchen die anderen Sites dort keine weitere Anmeldung. Dafür dient ein Cookie auf der übergeordneten Domain (`gately_sso`, 7 Tage gültig), das nie an Backends weitergereicht wird. Leer lassen, um sich auf jeder Site einzeln anzumelden.
 
 Aktivieren Sie bei einer Site neben der Web- oder Basic-Authentifizierung „Gemeinsame Benutzer verwenden“. Die eigenen Benutzer der Site funktionieren weiterhin.

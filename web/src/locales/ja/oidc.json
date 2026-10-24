@@ -13,12 +13,12 @@
     "jwks": "公開鍵",
     "logout": "ログアウト"
   },
-  "scopesHelp": "対応 scope：openid、profile、email、groups、offline_access。ID トークンは RS256 で署名し、PKCE（S256）に対応しています。",
+  "scopesHelp": "対応 scope：openid、profile、email、groups、offline_access（機密クライアントのみ）。ID トークンは RS256 で署名し、PKCE（S256）に対応しています。",
   "clients": "クライアント",
   "namePlaceholder": "名前（例：Gitea）",
   "idPlaceholder": "例：gitea",
   "public": "パブリッククライアント",
-  "publicHelp": "シングルページアプリやモバイルアプリなどシークレットを秘匿できないクライアント向け：シークレットを使わず、PKCE が必須です",
+  "publicHelp": "シングルページアプリやモバイルアプリなどシークレットを秘匿できないクライアント向け：シークレットを使わず、PKCE が必須で、リフレッシュトークンは発行しません",
   "confidentialHelp": "サーバー側のアプリは Client Secret で認証します（例：Gitea、OpenList、Grafana）",
   "secretPlaceholder": "16 文字以上、または「生成」をクリック",
   "secretKeep": "設定済み、空欄なら変更しません",
@@ -30,7 +30,7 @@
   "redirectHelp": "アプリが送る redirect_uri と完全に一致させる必要があります。誤っているとログインがエラーページで止まり、アプリが実際に送ったアドレスが表示されるので、それをコピーしてください。",
   "allow": "許可するユーザー",
   "allowPlaceholder": "1 行に 1 つのユーザー名、または group:グループ名",
-  "allowHelp": "空欄にするとすべての共有ユーザーがこのアプリにログインできます。グループは共有ユーザーで設定します",
+  "allowHelp": "空欄にするとすべての共有ユーザーがこのアプリにログインできます。ユーザー名で照合するため、ユーザー名を変更したらここも更新してください。グループは共有ユーザーで設定します",
   "addClient": "クライアントを追加",
   "docs": "主なアプリの設定例"
 }

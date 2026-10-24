@@ -1234,6 +1234,7 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | `displayName` | string |
 | `email` | string |
 | `groups` | Array of string |
+| `id` | string |
 | `name` | string |
 | `password` | string |
 | `remark` | string |

@@ -160,7 +160,7 @@
       },
       {
         "title": "Web-Dienste",
-        "text": "Reverse Proxy pro Domain, Weiterleitungen und statische Dateien; HTTPS, HTTP/3, WebSocket und PROXY-Protokoll; gewichtete Multi-Backend-Strategien, Health-Checks, Kompression, Ratenbegrenzung und Antwort-Caching; ersetzt nginx: Backends pro Pfad, Forward-Auth sowie gemeinsame Benutzer mit TOTP und Single Sign-on."
+        "text": "Reverse Proxy pro Domain, Weiterleitungen und statische Dateien; HTTPS, HTTP/3, WebSocket und PROXY-Protokoll; gewichtete Multi-Backend-Strategien, Health-Checks, Kompression, Ratenbegrenzung und Antwort-Caching; ersetzt nginx: Backends pro Pfad, Forward-Auth sowie gemeinsame Benutzer mit TOTP und Single Sign-on sowie ein integrierter OIDC-Identitätsanbieter."
       },
       {
         "title": "WAF-Firewall",

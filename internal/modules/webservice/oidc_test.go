@@ -374,7 +374,9 @@ func TestOIDCAuthorizationCodeFlow(t *testing.T) {
 		t.Fatalf("授权码重放应失败: %d %v", st, out)
 	}
 	claims := f.verify(out["id_token"].(string))
-	want := map[string]any{"iss": f.issuer, "aud": "gitea", "azp": "gitea", "sub": "alice", "nonce": "n-1", "email": "alice@example.com",
+	// sub 为共享用户不可变的随机 ID，用户名在 preferred_username 中
+	aliceID := f.users[0].ID
+	want := map[string]any{"iss": f.issuer, "aud": "gitea", "azp": "gitea", "sub": aliceID, "nonce": "n-1", "email": "alice@example.com",
 		"email_verified": true, "name": "Alice Liddell", "preferred_username": "alice"}
 	for k, v := range want {
 		if claims[k] != v {
@@ -393,7 +395,7 @@ func TestOIDCAuthorizationCodeFlow(t *testing.T) {
 	if claims["at_hash"] != base64.RawURLEncoding.EncodeToString(sum[:16]) {
 		t.Error("at_hash 与 Access Token 不一致")
 	}
-	if ac := f.verify(access); ac["client_id"] != "gitea" || ac["sub"] != "alice" {
+	if ac := f.verify(access); ac["client_id"] != "gitea" || ac["sub"] != aliceID {
 		t.Errorf("Access Token 声明不正确: %v", ac)
 	}
 
@@ -401,7 +403,7 @@ func TestOIDCAuthorizationCodeFlow(t *testing.T) {
 	resp, body := f.do("GET", oidcUserinfoPath, nil, map[string]string{"Authorization": "Bearer " + access})
 	var info map[string]any
 	_ = json.Unmarshal([]byte(body), &info)
-	if resp.StatusCode != 200 || info["sub"] != "alice" || info["email"] != "alice@example.com" {
+	if resp.StatusCode != 200 || info["sub"] != aliceID || info["email"] != "alice@example.com" {
 		t.Fatalf("用户信息: %d %s", resp.StatusCode, body)
 	}
 	if resp, _ := f.do("GET", oidcUserinfoPath, nil, map[string]string{"Authorization": "Bearer " + out["id_token"].(string)}); resp.StatusCode != 401 {
@@ -596,7 +598,7 @@ func TestOIDCTOTPAndSSO(t *testing.T) {
 		t.Fatalf("单点登录后兑换: %d %v", st, out)
 	}
 	c := f.verify(out["id_token"].(string))
-	if c["sub"] != "carol" {
+	if c["sub"] != f.users[2].ID || c["preferred_username"] != "carol" {
 		t.Fatalf("ID Token 用户不正确: %v", c)
 	}
 	if at, _ := c["auth_time"].(float64); time.Since(time.Unix(int64(at), 0)) > time.Minute {
@@ -653,7 +655,7 @@ func TestOIDCWithGenericClient(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if id.Primary != "alice@example.com" || len(id.Aliases) != 1 || id.Aliases[0] != "alice" {
+	if id.Primary != "alice@example.com" || len(id.Aliases) != 1 || id.Aliases[0] != f.users[0].ID {
 		t.Fatalf("通用客户端得到的身份不正确: %+v", id)
 	}
 }
@@ -713,5 +715,406 @@ func TestOIDCSettingsAPI(t *testing.T) {
 	out.OIDC.Enable = false
 	if code, _ := put(out); code != 200 || m.auth.oidc.get() != nil || m.cfg.Settings.OIDC.SigningKey != key {
 		t.Fatalf("关闭后应停止服务并保留密钥: %d", code)
+	}
+}
+
+// reloadSites 在监听器上追加站点并热替换站点表。
+func (f *oidcFixture) reloadSites(extra ...Site) {
+	f.t.Helper()
+	cfg := f.r.cfg
+	cfg.Sites = append(append([]Site{}, cfg.Sites...), extra...)
+	if err := cfg.Validate(); err != nil {
+		f.t.Fatal(err)
+	}
+	if err := f.r.reload(cfg, nil); err != nil {
+		f.t.Fatal(err)
+	}
+}
+
+// setIssuer 更换签发者地址（域名不变）。
+func (f *oidcFixture) setIssuer(issuer string) {
+	f.t.Helper()
+	f.set.Issuer = issuer
+	if err := f.r.auth.oidc.set(f.set); err != nil {
+		f.t.Fatal(err)
+	}
+	f.issuer = issuer
+}
+
+// exchange 用授权码换取令牌（gitea 客户端，client_secret_basic）。
+func (f *oidcFixture) exchange(code string) map[string]any {
+	f.t.Helper()
+	st, out := f.token(url.Values{"grant_type": {"authorization_code"}, "code": {code}, "redirect_uri": {oidcTestRedirect}}, "gitea", oidcTestSecret)
+	if st != 200 {
+		f.t.Fatalf("兑换授权码: %d %v", st, out)
+	}
+	return out
+}
+
+// TestOIDCHTTPSIssuer 验证签发者为 https 时，明文连接上的协议路径跳转到 https 或被拒绝，不显示登录页、不签发令牌。
+func TestOIDCHTTPSIssuer(t *testing.T) {
+	f := newOIDCFixture(t, "auth.test", "")
+	f.setIssuer("https://auth.test")
+	q := authorizeQuery("gitea", oidcTestRedirect)
+	resp, _ := f.do("GET", oidcAuthorizePath+"?"+q.Encode(), nil, nil)
+	if resp.StatusCode != http.StatusMovedPermanently || resp.Header.Get("Location") != "https://auth.test"+oidcAuthorizePath+"?"+q.Encode() {
+		t.Fatalf("明文 GET 应永久跳转到签发者地址: %d %s", resp.StatusCode, resp.Header.Get("Location"))
+	}
+	if resp, _ := f.do("GET", oidcDiscoveryPath, nil, nil); resp.StatusCode != http.StatusMovedPermanently {
+		t.Fatalf("发现文档同样应跳转: %d", resp.StatusCode)
+	}
+	// 明文提交密码被拒绝，也不写出会话 Cookie
+	resp, _ = f.do("POST", oidcLoginPath, url.Values{"username": {"alice"}, "password": {"alice-pw"}, "next": {"/"}}, nil)
+	if resp.StatusCode != http.StatusNotFound || len(resp.Cookies()) != 0 {
+		t.Fatalf("明文登录应被拒绝: %d %v", resp.StatusCode, resp.Cookies())
+	}
+	st, out := f.token(url.Values{"grant_type": {"authorization_code"}, "code": {"x"}}, "gitea", oidcTestSecret)
+	if st != http.StatusBadRequest || out["error"] != "invalid_request" {
+		t.Fatalf("明文令牌请求应返回 invalid_request: %d %v", st, out)
+	}
+	// 本机或内网的反向代理已终止 TLS、以 X-Forwarded-Proto: https 转发时照常提供
+	resp, body := f.do("GET", oidcDiscoveryPath, nil, map[string]string{"X-Forwarded-Proto": "https"})
+	if resp.StatusCode != 200 || !strings.Contains(body, `"issuer":"https://auth.test"`) {
+		t.Fatalf("经 HTTPS 反向代理转发时应提供发现文档: %d %s", resp.StatusCode, body)
+	}
+	if !strings.Contains(resp.Header.Get("Cache-Control"), "max-age=300") {
+		t.Fatalf("发现文档应允许缓存: %s", resp.Header.Get("Cache-Control"))
+	}
+}
+
+// TestOIDCIssuerSiteAccessControl 验证签发者域名配有站点时，该站点的 IP 访问控制与限流同样作用于 OIDC 协议路径。
+func TestOIDCIssuerSiteAccessControl(t *testing.T) {
+	f := newOIDCFixture(t, "auth.test", "")
+	if resp, _ := f.do("GET", oidcDiscoveryPath, nil, nil); resp.StatusCode != 200 {
+		t.Fatalf("没有站点时照常提供: %d", resp.StatusCode)
+	}
+	f.reloadSites(Site{Enable: true, Key: "auth", Domains: []string{"auth.test"}, Targets: []string{"http://127.0.0.1:1"}, IPMode: IPModeBlacklist, IPList: []string{"127.0.0.1"}})
+	for _, p := range []string{oidcDiscoveryPath, oidcAuthorizePath + "?" + authorizeQuery("gitea", oidcTestRedirect).Encode(), oidcLoginPath} {
+		if resp, _ := f.do("GET", p, nil, nil); resp.StatusCode != http.StatusForbidden {
+			t.Fatalf("黑名单中的地址访问 %s 应被拒绝: %d", p, resp.StatusCode)
+		}
+	}
+	if st, _ := f.token(url.Values{"grant_type": {"authorization_code"}}, "gitea", oidcTestSecret); st != http.StatusForbidden {
+		t.Fatalf("黑名单中的地址不能调用令牌接口: %d", st)
+	}
+	// 站点限流同样生效
+	f.r.cfg.Sites = f.r.cfg.Sites[:len(f.r.cfg.Sites)-1]
+	f.reloadSites(Site{Enable: true, Key: "auth", Domains: []string{"auth.test"}, Targets: []string{"http://127.0.0.1:1"}, RateLimit: RateLimit{Enable: true, Rate: 0.001, Burst: 1}})
+	if resp, _ := f.do("GET", oidcDiscoveryPath, nil, nil); resp.StatusCode != 200 {
+		t.Fatalf("限流额度内应正常访问: %d", resp.StatusCode)
+	}
+	if resp, _ := f.do("GET", oidcDiscoveryPath, nil, nil); resp.StatusCode != http.StatusTooManyRequests {
+		t.Fatalf("超过站点限流应返回 429: %d", resp.StatusCode)
+	}
+}
+
+// TestOIDCAccessTokenRevocation 验证修改密码后已签发的 Access Token 不能再查询用户信息，Bearer 不区分大小写。
+func TestOIDCAccessTokenRevocation(t *testing.T) {
+	f := newOIDCFixture(t, "auth.test", "")
+	out := f.exchange(f.code(authorizeQuery("gitea", oidcTestRedirect), f.login("alice", "alice-pw")))
+	access := out["access_token"].(string)
+	if resp, _ := f.do("GET", oidcUserinfoPath, nil, map[string]string{"Authorization": "bearer " + access}); resp.StatusCode != 200 {
+		t.Fatalf("小写 bearer 应被接受: %d", resp.StatusCode)
+	}
+	users := append([]AuthUser{}, f.users...)
+	users[0].Password = "$2a$10$" + strings.Repeat("b", 53)
+	f.r.auth.shared.set(users, "")
+	resp, _ := f.do("GET", oidcUserinfoPath, nil, map[string]string{"Authorization": "Bearer " + access})
+	if resp.StatusCode != http.StatusUnauthorized || !strings.Contains(resp.Header.Get("WWW-Authenticate"), "invalid_token") {
+		t.Fatalf("修改密码后 Access Token 应失效: %d", resp.StatusCode)
+	}
+	if resp, _ := f.do("GET", oidcUserinfoPath, nil, nil); resp.StatusCode != http.StatusUnauthorized || !strings.HasPrefix(resp.Header.Get("WWW-Authenticate"), "Bearer") {
+		t.Fatalf("缺少令牌应返回 401 与 WWW-Authenticate: %d", resp.StatusCode)
+	}
+}
+
+// TestOIDCPromptLoginAndMaxAge 验证 prompt=login 与 max_age 要求重新登录，重新登录后不再循环跳转。
+func TestOIDCPromptLoginAndMaxAge(t *testing.T) {
+	f := newOIDCFixture(t, "auth.test", "")
+	old := f.login("alice", "alice-pw")
+	// 已登录且未要求重新登录：直接签发授权码；max_age 足够大时同样
+	f.code(authorizeQuery("gitea", oidcTestRedirect, "max_age", "3600"), old)
+	for _, extra := range [][]string{{"prompt", "login"}, {"max_age", "0"}} {
+		q := authorizeQuery("gitea", oidcTestRedirect, extra...)
+		resp, loc := f.authorize(q, old)
+		next := loc.Query().Get("next")
+		if resp.StatusCode != 302 || loc.Path != oidcLoginPath || !strings.Contains(next, oidcReauthParam+"=") {
+			t.Fatalf("%v 应要求重新登录: %d %s", extra, resp.StatusCode, loc)
+		}
+		// 不重新登录、直接带着标记回来：仍要求登录
+		if _, again := f.authorize(mustQuery(t, next), old); again.Path != oidcLoginPath {
+			t.Fatalf("%v 未重新登录不应签发授权码: %s", extra, again)
+		}
+		// 伪造的标记无效
+		forged := mustQuery(t, next)
+		forged.Set(oidcReauthParam, "forged")
+		if _, again := f.authorize(forged, old); again.Path != oidcLoginPath {
+			t.Fatalf("伪造的重新登录标记不应生效: %s", again)
+		}
+		// 重新登录（晚于标记签发的那一秒）后回到授权地址，签发授权码，不再循环
+		time.Sleep(1100 * time.Millisecond)
+		resp, _ = f.do("POST", oidcLoginPath, url.Values{"username": {"alice"}, "password": {"alice-pw"}, "next": {next}}, nil)
+		if resp.StatusCode != 302 || resp.Header.Get("Location") != next {
+			t.Fatalf("重新登录后应回到授权地址: %d %s", resp.StatusCode, resp.Header.Get("Location"))
+		}
+		fresh := resp.Cookies()[0]
+		code := f.code(mustQuery(t, next), fresh)
+		c := f.verify(f.exchange(code)["id_token"].(string))
+		if at, _ := c["auth_time"].(float64); time.Since(time.Unix(int64(at), 0)) > 5*time.Second {
+			t.Fatalf("auth_time 应为重新登录的时间: %v", c["auth_time"])
+		}
+	}
+	// prompt=none 不能与 login 同时使用；需要重新登录时静默请求返回 login_required
+	if _, loc := f.authorize(authorizeQuery("gitea", oidcTestRedirect, "prompt", "none login"), old); loc.Query().Get("error") != "invalid_request" {
+		t.Fatalf("prompt=none login 应返回 invalid_request: %s", loc)
+	}
+	if _, loc := f.authorize(authorizeQuery("gitea", oidcTestRedirect, "prompt", "none", "max_age", "0"), old); loc.Query().Get("error") != "login_required" {
+		t.Fatalf("prompt=none 且超过 max_age 应返回 login_required: %s", loc)
+	}
+	if _, loc := f.authorize(authorizeQuery("gitea", oidcTestRedirect, "max_age", "-1"), old); loc.Query().Get("error") != "invalid_request" {
+		t.Fatalf("无效的 max_age 应返回 invalid_request: %s", loc)
+	}
+}
+
+func mustQuery(t *testing.T, uri string) url.Values {
+	t.Helper()
+	u, err := url.Parse(uri)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return u.Query()
+}
+
+// TestOIDCPublicClientNoRefresh 验证公共客户端不获得刷新令牌，也不能使用刷新授权。
+func TestOIDCPublicClientNoRefresh(t *testing.T) {
+	f := newOIDCFixture(t, "auth.test", "")
+	verifier, challenge := pkcePair()
+	code := f.code(authorizeQuery("spa", oidcTestSPA, "scope", "openid offline_access", "code_challenge", challenge, "code_challenge_method", "S256"), f.login("alice", "alice-pw"))
+	st, out := f.token(url.Values{"grant_type": {"authorization_code"}, "code": {code}, "redirect_uri": {oidcTestSPA}, "client_id": {"spa"}, "code_verifier": {verifier}}, "", "")
+	if st != 200 || out["refresh_token"] != nil || out["scope"] != "openid" {
+		t.Fatalf("公共客户端不应获得刷新令牌: %d %v", st, out)
+	}
+	if st, out := f.token(url.Values{"grant_type": {"refresh_token"}, "refresh_token": {"x"}, "client_id": {"spa"}}, "", ""); st != 400 || out["error"] != "invalid_grant" {
+		t.Fatalf("公共客户端的刷新请求应被拒绝: %d %v", st, out)
+	}
+}
+
+// TestSharedUserIDs 验证共享用户的不可变 ID：自动生成、改名保留（连同密码与 TOTP）、删除后同名新建得到新 ID。
+func TestSharedUserIDs(t *testing.T) {
+	totp := auth.NewTOTPSecret()
+	users, err := normalizeAuthUsers([]AuthUser{{Name: "alice", Password: "pw", TOTPSecret: totp}, {Name: "bob", Password: "pw"}}, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	alice := users[0]
+	if !validAuthUserID(alice.ID) || alice.ID == users[1].ID {
+		t.Fatalf("应为每个用户生成不同的 ID: %+v", users)
+	}
+	// 改名且不重新输入密码：按 ID 保留原密码、TOTP 与 ID
+	masked := maskAuthUsers(users)
+	masked[0].Name = "alice2"
+	renamed, err := normalizeAuthUsers(masked, users)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if renamed[0].ID != alice.ID || renamed[0].Password != alice.Password || renamed[0].TOTPSecret != totp {
+		t.Fatalf("改名后应保留 ID、密码与 TOTP: %+v", renamed[0])
+	}
+	// 删除后再建同名用户：新用户不带 ID，得到新的 ID，也不继承密码
+	recreated, err := normalizeAuthUsers([]AuthUser{maskAuthUsers(users)[1], {Name: "alice", Password: "new-pw"}}, users)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if recreated[1].ID == alice.ID || recreated[1].Password == alice.Password || recreated[1].TOTPSecret != "" {
+		t.Fatalf("同名新用户应得到新的 ID: %+v", recreated[1])
+	}
+	if _, err := normalizeAuthUsers([]AuthUser{maskAuthUsers(users)[1], {Name: "alice"}}, users); err == nil {
+		t.Fatal("同名新用户需要设置密码")
+	}
+	// 不认识 ID 的老调用方（整个列表都没有 ID）：按用户名对应
+	legacy, err := normalizeAuthUsers([]AuthUser{{Name: "alice", Password: crud.SecretMask, TOTPSecret: crud.SecretMask}}, users)
+	if err != nil || legacy[0].ID != alice.ID || legacy[0].Password != alice.Password {
+		t.Fatalf("没有 ID 的列表应按用户名保留原用户: %v %+v", err, legacy)
+	}
+	for _, bad := range [][]AuthUser{
+		{{ID: "a b", Name: "x", Password: "pw"}},
+		{{ID: "same", Name: "x", Password: "pw"}, {ID: "same", Name: "y", Password: "pw"}},
+	} {
+		if _, err := normalizeAuthUsers(bad, nil); err == nil {
+			t.Errorf("无效或重复的 ID 应被拒绝: %+v", bad)
+		}
+	}
+}
+
+// TestOIDCSubjectStable 验证 sub 为不可变 ID：改名后不变，删除后再建同名用户得到不同的 sub。
+func TestOIDCSubjectStable(t *testing.T) {
+	f := newOIDCFixture(t, "auth.test", "")
+	sub := func(user, pass string) any {
+		t.Helper()
+		return f.verify(f.exchange(f.code(authorizeQuery("gitea", oidcTestRedirect), f.login(user, pass)))["id_token"].(string))["sub"]
+	}
+	before := sub("alice", "alice-pw")
+	masked := maskAuthUsers(f.users)
+	masked[0].Name = "alice-renamed"
+	renamed, err := normalizeAuthUsers(masked, f.users)
+	if err != nil {
+		t.Fatal(err)
+	}
+	f.r.auth.shared.set(renamed, "")
+	if got := sub("alice-renamed", "alice-pw"); got != before {
+		t.Fatalf("改名后 sub 应保持不变: %v → %v", before, got)
+	}
+	// 删除后再建同名用户
+	again, err := normalizeAuthUsers([]AuthUser{masked[1], masked[2], {Name: "alice", Password: "alice-pw"}}, renamed)
+	if err != nil {
+		t.Fatal(err)
+	}
+	f.r.auth.shared.set(again, "")
+	if got := sub("alice", "alice-pw"); got == before {
+		t.Fatal("删除后同名新建的用户不应继承原用户的 sub")
+	}
+}
+
+// TestSharedUserIDsOnLoad 验证老配置加载时为共享用户补生成 ID 并立即保存，重启后 ID 不变。
+func TestSharedUserIDsOnLoad(t *testing.T) {
+	dir := t.TempDir()
+	st, _ := config.Open(dir)
+	users, _ := normalizeAuthUsers([]AuthUser{{Name: "alice", Password: "pw"}}, nil)
+	users[0].ID = ""
+	if err := st.Save(ID, fileConfig{Settings: Settings{Enable: true, AuthSecret: "s", AuthUsers: users}}); err != nil {
+		t.Fatal(err)
+	}
+	load := func() string {
+		m := New(nil, nil)
+		if err := m.Init(module.Env{Store: st, Logs: logbuf.New(50, log.New(io.Discard, "", 0))}); err != nil {
+			t.Fatal(err)
+		}
+		return m.cfg.Settings.AuthUsers[0].ID
+	}
+	first := load()
+	if first == "" || load() != first {
+		t.Fatalf("加载时应补生成并保存 ID: %q", first)
+	}
+}
+
+// TestOIDCClientRenameKeepsSecret 验证修改 Client ID 而不重新输入密钥时保留原密钥。
+func TestOIDCClientRenameKeepsSecret(t *testing.T) {
+	old := OIDCSettings{Enable: true, Issuer: "https://auth.x.test", Clients: []OIDCClient{{ID: "gitea", Secret: oidcTestSecret, RedirectURIs: []string{oidcTestRedirect}}}}
+	if err := normalizeOIDC(&old, OIDCSettings{}); err != nil {
+		t.Fatal(err)
+	}
+	for _, secret := range []string{crud.SecretMask, ""} {
+		s := maskOIDC(old)
+		s.Clients[0].ID, s.Clients[0].Secret = "gitea2", secret
+		if err := normalizeOIDC(&s, old); err != nil || s.Clients[0].Secret != old.Clients[0].Secret {
+			t.Fatalf("改 Client ID 后应保留原密钥（提交 %q）: %v", secret, err)
+		}
+	}
+	// 新增客户端不填写密钥仍然报错
+	s := maskOIDC(old)
+	s.Clients = append(s.Clients, OIDCClient{ID: "new", RedirectURIs: []string{oidcTestRedirect}})
+	if err := normalizeOIDC(&s, old); err == nil {
+		t.Fatal("新增的机密客户端需要设置密钥")
+	}
+}
+
+// TestOIDCLogoutRedirect 验证退出后的跳转：客户端由签名有效的 id_token_hint 或 client_id 确定，两者需一致。
+func TestOIDCLogoutRedirect(t *testing.T) {
+	f := newOIDCFixture(t, "auth.test", "")
+	idToken := f.exchange(f.code(authorizeQuery("gitea", oidcTestRedirect), f.login("alice", "alice-pw")))["id_token"].(string)
+	logout := func(params url.Values) string {
+		resp, _ := f.do("GET", oidcLogoutPath+"?"+params.Encode(), nil, nil)
+		return resp.Header.Get("Location")
+	}
+	target := "https://git.test/"
+	if loc := logout(url.Values{"id_token_hint": {idToken}, "post_logout_redirect_uri": {target}}); loc != target {
+		t.Fatalf("签名有效的 id_token_hint 应确定客户端: %s", loc)
+	}
+	if loc := logout(url.Values{"id_token_hint": {idToken}, "client_id": {"spa"}, "post_logout_redirect_uri": {oidcTestSPA}}); loc != oidcLoginPath {
+		t.Fatalf("id_token_hint 与 client_id 不一致时不应跳回: %s", loc)
+	}
+	// 伪造的 id_token_hint（未签名，aud 指向 gitea）不被采信
+	parts := strings.Split(idToken, ".")
+	forged := parts[0] + "." + parts[1] + "." + base64.RawURLEncoding.EncodeToString([]byte("bad"))
+	if loc := logout(url.Values{"id_token_hint": {forged}, "post_logout_redirect_uri": {target}}); loc != oidcLoginPath {
+		t.Fatalf("签名无效的 id_token_hint 不应跳回: %s", loc)
+	}
+	if loc := logout(url.Values{"post_logout_redirect_uri": {target}}); loc != oidcLoginPath {
+		t.Fatalf("无法确定客户端时不应跳回: %s", loc)
+	}
+	if loc := logout(url.Values{"client_id": {"spa"}, "post_logout_redirect_uri": {oidcTestSPA}}); loc != oidcTestSPA {
+		t.Fatalf("登记过的回调地址应可跳回: %s", loc)
+	}
+}
+
+// TestOIDCPromptNoneDenied 验证静默登录时用户不在允许列表中返回 access_denied，而不是显示页面。
+func TestOIDCPromptNoneDenied(t *testing.T) {
+	f := newOIDCFixture(t, "auth.test", "")
+	resp, loc := f.authorize(authorizeQuery("dev-only", oidcTestRedirect, "prompt", "none"), f.login("bob", "bob-pw"))
+	if resp.StatusCode != 302 || loc.Query().Get("error") != "access_denied" || loc.Query().Get("state") != "st-1" {
+		t.Fatalf("prompt=none 且无权限应返回 access_denied: %d %s", resp.StatusCode, loc)
+	}
+}
+
+// TestLoginCSRF 验证其他网站代为提交的登录表单被拒绝。
+func TestLoginCSRF(t *testing.T) {
+	f := newOIDCFixture(t, "auth.test", "")
+	form := url.Values{"username": {"alice"}, "password": {"alice-pw"}, "next": {"/"}}
+	for _, hdr := range []map[string]string{{"Origin": "https://evil.test"}, {"Origin": "null"}, {"Referer": "https://evil.test/page"}} {
+		resp, _ := f.do("POST", oidcLoginPath, form, hdr)
+		if resp.StatusCode != http.StatusForbidden || len(resp.Cookies()) != 0 {
+			t.Fatalf("跨站提交的登录表单应被拒绝 %v: %d", hdr, resp.StatusCode)
+		}
+	}
+	for _, hdr := range []map[string]string{{"Origin": "https://auth.test"}, {"Referer": "https://auth.test" + oidcLoginPath}, nil} {
+		if resp, _ := f.do("POST", oidcLoginPath, form, hdr); resp.StatusCode != http.StatusFound {
+			t.Fatalf("同源提交应正常登录 %v: %d", hdr, resp.StatusCode)
+		}
+	}
+	// 普通站点的登录页同样检查
+	req, _ := http.NewRequest("POST", "http://"+f.addr+authPath+"/login", strings.NewReader(form.Encode()))
+	req.Host = "a.sso.test"
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Set("Origin", "https://evil.test")
+	resp, err := f.c.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp.Body.Close()
+	if resp.StatusCode != http.StatusForbidden {
+		t.Fatalf("站点登录页也应拒绝跨站提交: %d", resp.StatusCode)
+	}
+}
+
+// TestOIDCInputLimits 验证发现文档声明 iss 参数、state 长度上限与 PKCE verifier 字符集。
+func TestOIDCInputLimits(t *testing.T) {
+	f := newOIDCFixture(t, "auth.test", "")
+	_, body := f.do("GET", oidcDiscoveryPath, nil, nil)
+	if !strings.Contains(body, `"authorization_response_iss_parameter_supported":true`) {
+		t.Fatalf("发现文档应声明授权响应带 iss: %s", body)
+	}
+	cookie := f.login("alice", "alice-pw")
+	_, loc := f.authorize(authorizeQuery("gitea", oidcTestRedirect, "state", strings.Repeat("s", oidcMaxParam+1)), cookie)
+	if loc.Query().Get("error") != "invalid_request" || loc.Query().Get("state") != "" {
+		t.Fatalf("过长的 state 应返回 invalid_request 且不带回: %s", loc)
+	}
+	if _, loc := f.authorize(authorizeQuery("gitea", oidcTestRedirect, "nonce", strings.Repeat("n", oidcMaxParam+1)), cookie); loc.Query().Get("error") != "invalid_request" {
+		t.Fatalf("过长的 nonce 应返回 invalid_request: %s", loc)
+	}
+	// verifier 含 RFC 7636 不允许的字符时，即使哈希一致也拒绝
+	verifier := strings.Repeat("v!", 25)
+	sum := sha256.Sum256([]byte(verifier))
+	challenge := base64.RawURLEncoding.EncodeToString(sum[:])
+	code := f.code(authorizeQuery("spa", oidcTestSPA, "code_challenge", challenge, "code_challenge_method", "S256"), cookie)
+	if st, _ := f.token(url.Values{"grant_type": {"authorization_code"}, "code": {code}, "redirect_uri": {oidcTestSPA}, "client_id": {"spa"}, "code_verifier": {verifier}}, "", ""); st != 400 {
+		t.Fatalf("非法字符的 code_verifier 应被拒绝: %d", st)
+	}
+	// 请求体超过上限
+	big := url.Values{"grant_type": {"authorization_code"}, "pad": {strings.Repeat("x", oidcMaxForm)}}
+	if st, out := f.token(big, "gitea", oidcTestSecret); st != 400 || out["error"] != "invalid_request" {
+		t.Fatalf("过大的请求体应被拒绝: %d %v", st, out)
+	}
+	if resp, _ := f.do("GET", oidcAuthorizePath+"?"+authorizeQuery("gitea", oidcTestRedirect).Encode(), nil, nil, cookie); !strings.Contains(resp.Header.Get("Cache-Control"), "no-store") {
+		t.Fatal("授权接口不应被缓存")
 	}
 }

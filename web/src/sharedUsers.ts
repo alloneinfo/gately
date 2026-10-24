@@ -1,6 +1,8 @@
 // AuthUser 为共享认证用户。接口返回的密码与 TOTP 密钥为脱敏占位符：
 // 编辑时密码框显示为空（hasPassword 标记已设置），保存时由 toAPI 还原占位符表示不修改
 export interface AuthUser {
+  // 后端生成的不可变 ID（OIDC 的 sub），编辑时原样提交以便改名后保留密码与身份；新用户不带 ID，由后端生成
+  id?: string
   name: string
   password: string
   totpSecret: string

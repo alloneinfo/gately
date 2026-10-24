@@ -23,6 +23,8 @@ Beides lässt sich gleichzeitig nutzen: Derselbe gemeinsame Benutzer kann die We
    - Gruppen: werden als Claim `groups` übergeben; sie lassen sich in der Anwendung auf Administratoren abbilden oder dazu nutzen, festzulegen, welche Benutzer sich bei einer Anwendung anmelden dürfen.
 3. Bereiten Sie eine Aussteller-Domain vor, zum Beispiel `auth.example.com`: Sie muss auf den Host von Gately auflösen, unter [SSL-Zertifikate](/de/docs/modules/ssl) muss ein Zertifikat bereitstehen, das sie abdeckt, und ein HTTPS-Listener muss Anfragen für diese Domain empfangen. Für die Domain ist keine Site nötig; Gately erkennt ihre OIDC-Pfade auf allen Listenern. Eine eigene Domain wird empfohlen; andere Pfade auf dieser Domain werden wie gewohnt von den Sites behandelt.
 
+Verwendet die Aussteller-URL `https`, werden GET-Anfragen an die OIDC-Pfade über unverschlüsseltes HTTP auf HTTPS umgeleitet und andere Anfragen abgelehnt, sodass Passwörter und Tokens nie im Klartext übertragen werden. Beendet ein weiterer vorgeschalteter Reverse Proxy TLS und leitet per HTTP an Gately weiter, muss er `X-Forwarded-Proto: https` mitsenden; Gately vertraut diesem Header nur, wenn er vom lokalen Host oder aus dem internen Netz kommt. Passt die Aussteller-Domain auf einem Listener zu einer Site (einschließlich der Standard-Site), gelten deren IP-Allowlist und -Blocklist, abonnierte IP-Listen, Länderfilter und Ratenbegrenzung auch für die OIDC-Pfade; so lässt sich die Anmeldeseite auf das interne Netz beschränken.
+
 ## Aktivieren
 
 Unter „Web-Dienst → Globale Einstellungen → OIDC-Identitätsanbieter“:
@@ -56,9 +58,9 @@ Jede angebundene Anwendung entspricht einem Client:
 | Name | Wird auf der Anmeldeseite angezeigt, zum Beispiel „Bestätigen Sie Ihre Identität, um mit Gitea fortzufahren“ |
 | Client ID | Nur Buchstaben, Ziffern und `- . _ ~`; wird in der Anwendung eingetragen |
 | Client Secret | Mindestens 16 Zeichen; „Erzeugen“ liefert einen zufälligen Schlüssel mit 43 Zeichen. Nach dem Speichern wird nur der bcrypt-Hash aufbewahrt, das Secret lässt sich nicht erneut anzeigen. Kopieren Sie es daher vor dem Speichern in die Anwendung; geht es verloren, erzeugen Sie ein neues und übernehmen es in die Anwendung. Sie können auch direkt einen vorhandenen bcrypt-Hash eintragen (beginnend mit `$2a$`, `$2b$` oder `$2y$`) |
-| Öffentlicher Client | Für Clients, die kein Secret sicher speichern können, etwa Single-Page- und Mobil-Apps: Es wird kein Secret verwendet, PKCE (S256) ist Pflicht |
+| Öffentlicher Client | Für Clients, die kein Secret sicher speichern können, etwa Single-Page- und Mobil-Apps: Es wird kein Secret verwendet, PKCE (S256) ist Pflicht, und es werden keine Refresh Tokens ausgestellt |
 | Weiterleitungs-URIs | Eine pro Zeile; wird Zeichen für Zeichen mit der von der Anwendung gesendeten `redirect_uri` verglichen, Schema, Port, Pfad und Query-Parameter müssen übereinstimmen |
-| Erlaubte Benutzer | Ein Benutzername pro Zeile oder `group:Name`; wer eine beliebige Zeile erfüllt, darf sich anmelden. Leer bedeutet alle gemeinsamen Benutzer |
+| Erlaubte Benutzer | Ein Benutzername pro Zeile oder `group:Name`; wer eine beliebige Zeile erfüllt, darf sich anmelden. Leer bedeutet alle gemeinsamen Benutzer. Der Abgleich erfolgt über den Benutzernamen; nach dem Umbenennen eines gemeinsamen Benutzers muss diese Liste angepasst werden |
 
 ::: tip Wenn die Weiterleitungs-URI unklar ist
 Tragen Sie zunächst eine beliebige Adresse ein, speichern Sie und klicken Sie in der Anwendung einmal auf Anmelden. Gately bleibt auf der Fehlerseite „Weiterleitungs-URI stimmt nicht überein“ stehen, die die tatsächlich von der Anwendung gesendete Adresse anzeigt. Kopieren Sie sie unverändert in die Weiterleitungs-URIs des Clients.
@@ -78,23 +80,25 @@ Clients werden vom Administrator registriert; Gately betrachtet sie als vertraue
 
 | scope | Zurückgegebene Claims |
 | --- | --- |
-| `openid` (erforderlich) | `sub`: Name des gemeinsamen Benutzers |
+| `openid` (erforderlich) | `sub`: feste ID des gemeinsamen Benutzers, zufällig erzeugt und beim Umbenennen unverändert; wird ein Benutzer gelöscht und unter demselben Namen neu angelegt, erhält er eine neue ID und übernimmt das Konto des alten Benutzers in der Anwendung nicht |
 | `profile` | `name` (Anzeigename, ohne Eintrag der Benutzername), `preferred_username`, `nickname` (Benutzername) |
 | `email` | `email`, `email_verified` (nur wenn eine E-Mail eingetragen ist) |
 | `groups` | `groups`: Liste der Gruppen |
-| `offline_access` | Zusätzlich wird ein Refresh Token ausgestellt |
+| `offline_access` | Zusätzlich wird ein Refresh Token ausgestellt, nur für vertrauliche Clients |
 
 Das ID Token enthält außerdem `iss`, `aud`, `azp`, `exp`, `iat`, `auth_time`, `nonce` und `at_hash`. ID Token und Access Token sind mit RS256 signierte JWTs. Andere von der Anwendung angeforderte Scopes werden ignoriert.
 
-Protokolldetails: Unterstützt wird nur der Authorization-Code-Flow (`response_type=code`), das Ergebnis wird über Query-Parameter zurückgegeben (`response_mode=query`). Der Token-Endpunkt akzeptiert die Authentifizierungsmethoden `client_secret_basic` und `client_secret_post`, öffentliche Clients verwenden `none`. PKCE unterstützt nur `S256`. `prompt=none` wird unterstützt und liefert ohne Anmeldung `login_required`.
+Protokolldetails: Unterstützt wird nur der Authorization-Code-Flow (`response_type=code`), das Ergebnis wird über Query-Parameter zurückgegeben (`response_mode=query`). Der Token-Endpunkt akzeptiert die Authentifizierungsmethoden `client_secret_basic` und `client_secret_post`, öffentliche Clients verwenden `none`. PKCE unterstützt nur `S256`. `prompt=none` wird unterstützt und liefert ohne Anmeldung `login_required`, ohne Berechtigung für die Anwendung `access_denied`. Bei `prompt=login` oder wenn die Anmeldung länger als `max_age` zurückliegt, muss der Benutzer sein Passwort erneut eingeben.
+
+Der Abmelde-Endpunkt akzeptiert `id_token_hint`, `client_id` und `post_logout_redirect_uri`: `id_token_hint` muss ein von diesem Aussteller ausgestelltes ID Token sein (auch abgelaufen), und `post_logout_redirect_uri` muss eine der für den Client eingetragenen Weiterleitungs-URIs sein oder denselben Ursprung wie eine davon haben; andernfalls bleibt der Benutzer nach dem Abmelden auf der Anmeldeseite.
 
 ## Gültigkeit und Widerruf
 
 - Autorisierungscode: 2 Minuten, nur einmal verwendbar;
 - ID Token, Access Token: 1 Stunde;
 - Refresh Token: 30 Tage; beim Aktualisieren wird das bisherige Token weiterverwendet;
-- Wird das Passwort oder TOTP eines gemeinsamen Benutzers geändert, der Benutzer gelöscht, aus der Liste der erlaubten Benutzer eines Clients entfernt oder der Client gelöscht, werden noch nicht eingelöste Autorisierungscodes und Refresh Tokens sofort ungültig, und der Benutzerinfo-Endpunkt weist bereits ausgestellte Access Tokens zurück. Bestehende Anmeldesitzungen innerhalb einer Anwendung verwaltet die Anwendung selbst; melden Sie den Benutzer bei Bedarf in der Anwendung ab;
-- Änderungen an E-Mail, Anzeigename oder Gruppen wirken sich nicht auf bestehende Sitzungen aus, sondern gelten ab der nächsten Anmeldung oder Token-Aktualisierung;
+- Wird das Passwort oder TOTP eines gemeinsamen Benutzers geändert, der Benutzer umbenannt, gelöscht, aus der Liste der erlaubten Benutzer eines Clients entfernt oder der Client gelöscht, werden noch nicht eingelöste Autorisierungscodes, Refresh Tokens und bereits ausgestellte Access Tokens sofort ungültig (der Benutzerinfo-Endpunkt weist alte Access Tokens zurück). Bestehende Anmeldesitzungen innerhalb einer Anwendung verwaltet die Anwendung selbst; melden Sie den Benutzer bei Bedarf in der Anwendung ab;
+- Nach Änderungen an E-Mail, Anzeigename oder Gruppen liefert der Benutzerinfo-Endpunkt sofort die neuen Werte; die Claims im ID Token werden bei der nächsten Anmeldung oder Token-Aktualisierung aktualisiert. Gewährt die Liste der erlaubten Benutzer den Zugriff über eine Gruppe, wirkt das Entfernen des Benutzers aus der Gruppe sofort;
 - Der Signaturschlüssel steht in `settings.oidc.signingKey` der Konfigurationsdatei `webservice.json` des Web-Dienstes. Um ihn zu wechseln, stoppen Sie Gately, löschen dieses Feld und starten neu; es wird ein neuer Schlüssel erzeugt, und alle ausgestellten Tokens werden damit ungültig.
 
 ## Konfigurationsbeispiele für Anwendungen

@@ -13,12 +13,12 @@
     "jwks": "Clés publiques",
     "logout": "Déconnexion"
   },
-  "scopesHelp": "Scopes pris en charge : openid, profile, email, groups, offline_access. Les ID tokens sont signés en RS256 ; PKCE (S256) est pris en charge.",
+  "scopesHelp": "Scopes pris en charge : openid, profile, email, groups, offline_access (clients confidentiels uniquement). Les ID tokens sont signés en RS256 ; PKCE (S256) est pris en charge.",
   "clients": "Clients",
   "namePlaceholder": "Nom, ex. Gitea",
   "idPlaceholder": "ex. gitea",
   "public": "Client public",
-  "publicHelp": "Pour les applications monopages et mobiles qui ne peuvent pas garder un secret : pas de secret, PKCE obligatoire",
+  "publicHelp": "Pour les applications monopages et mobiles qui ne peuvent pas garder un secret : pas de secret, PKCE obligatoire, pas de refresh token",
   "confidentialHelp": "Les applications côté serveur s'authentifient avec le Client Secret, ex. Gitea, OpenList, Grafana",
   "secretPlaceholder": "Au moins 16 caractères, ou cliquez sur Générer",
   "secretKeep": "Défini, laisser vide pour conserver",
@@ -30,7 +30,7 @@
   "redirectHelp": "Doit correspondre exactement au redirect_uri envoyé par l'application. En cas d'erreur, la connexion s'arrête sur une page qui affiche l'adresse réellement envoyée, prête à copier.",
   "allow": "Utilisateurs autorisés",
   "allowPlaceholder": "Un nom d'utilisateur par ligne, ou group:nom",
-  "allowHelp": "Vide pour autoriser tous les utilisateurs partagés à se connecter à cette application. Les groupes se définissent sur les utilisateurs partagés",
+  "allowHelp": "Vide pour autoriser tous les utilisateurs partagés à se connecter à cette application. Les utilisateurs sont identifiés par leur nom : mettez cette liste à jour après un renommage. Les groupes se définissent sur les utilisateurs partagés",
   "addClient": "Ajouter un client",
   "docs": "Exemples de configuration des applications courantes"
 }

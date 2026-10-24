@@ -13,12 +13,12 @@
     "jwks": "公鑰",
     "logout": "登出"
   },
-  "scopesHelp": "支援的 scope：openid、profile、email、groups、offline_access。ID Token 使用 RS256 簽章，支援 PKCE（S256）。",
+  "scopesHelp": "支援的 scope：openid、profile、email、groups、offline_access（僅機密用戶端）。ID Token 使用 RS256 簽章，支援 PKCE（S256）。",
   "clients": "用戶端",
   "namePlaceholder": "名稱，如 Gitea",
   "idPlaceholder": "例如 gitea",
   "public": "公開用戶端",
-  "publicHelp": "單頁應用程式、手機 App 等無法保密金鑰的用戶端：不使用金鑰，必須使用 PKCE",
+  "publicHelp": "單頁應用程式、手機 App 等無法保密金鑰的用戶端：不使用金鑰，必須使用 PKCE，不簽發重新整理權杖",
   "confidentialHelp": "伺服器端應用程式用 Client Secret 驗證，例如 Gitea、OpenList、Grafana",
   "secretPlaceholder": "至少 16 個字元，可點「產生」",
   "secretKeep": "已設定，留空不修改",
@@ -30,7 +30,7 @@
   "redirectHelp": "必須與應用程式送來的 redirect_uri 完全一致。填錯時登入會停在錯誤頁，頁面上會顯示應用程式實際送來的位址，複製過來即可。",
   "allow": "允許的使用者",
   "allowPlaceholder": "每行一個使用者名稱，或 group:群組名",
-  "allowHelp": "留空表示所有共用使用者都能登入該應用程式；群組在共用使用者中設定",
+  "allowHelp": "留空表示所有共用使用者都能登入該應用程式；依使用者名稱比對，使用者改名後需同步修改；群組在共用使用者中設定",
   "addClient": "新增用戶端",
   "docs": "各應用程式的設定範例"
 }

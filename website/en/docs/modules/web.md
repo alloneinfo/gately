@@ -112,6 +112,7 @@ Define accounts once and use them on several sites, with optional TOTP two-step 
 In "Global settings → Shared users":
 
 - Add users with a username and a password. Passwords are stored as bcrypt hashes and never returned by the API. To add TOTP, click "Enable TOTP", scan the QR code with an authenticator app (Google Authenticator, 1Password and so on) and save. Regenerating the key invalidates the old one;
+- Optionally fill in an email, display name and groups; [OIDC single sign-on](/en/docs/modules/oidc) passes them to applications as the `email`, `name` and `groups` claims, and an OIDC client's allowed users can grant access by group with `group:name`;
 - SSO domain, such as `example.com`: after signing in on any site under that domain or its subdomains, the other sites there need no further sign-in. It uses a parent-domain cookie (`gately_sso`, valid for 7 days) that is never forwarded to backends. Leave it empty to sign in on each site separately.
 
 On a site, tick "Use shared users" next to web or Basic authentication. The site's own users keep working as well.

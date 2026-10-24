@@ -23,6 +23,8 @@ Ambos pueden usarse a la vez: el mismo usuario compartido puede pasar la autenti
    - Grupos: se entregan como claim `groups`; en la aplicación pueden asignarse a administradores y también sirven para limitar qué usuarios pueden iniciar sesión en una aplicación.
 3. Prepara un dominio para el emisor, por ejemplo `auth.example.com`: haz que resuelva al host donde está Gately, prepara en [Certificados SSL](/es/docs/modules/ssl) un certificado que lo cubra y comprueba que algún listener HTTPS recibe las peticiones de ese dominio. No hace falta crear un sitio para este dominio: Gately reconoce sus rutas OIDC en todos los listeners. Se recomienda un dominio dedicado; las demás rutas de ese dominio se siguen tratando como cualquier sitio.
 
+Cuando la URL del emisor usa `https`, las peticiones GET a las rutas OIDC por HTTP sin cifrar se redirigen a HTTPS y las demás se rechazan, de modo que contraseñas y tokens nunca viajan en texto plano. Si delante hay otro proxy inverso que termina TLS y reenvía a Gately por HTTP, ese proxy debe enviar `X-Forwarded-Proto: https`; Gately solo confía en esta cabecera cuando llega desde el propio equipo o desde la red interna. Cuando el dominio del emisor coincide con un sitio (incluido el sitio por defecto) en algún listener, las listas de IP permitidas y bloqueadas, las listas de IP suscritas, el filtro de países y el límite de peticiones de ese sitio también se aplican a las rutas OIDC, lo que permite limitar la página de inicio de sesión a la red interna.
+
 ## Activación
 
 En «Servicios web → Ajustes globales → Proveedor de identidad OIDC»:
@@ -56,9 +58,9 @@ Cada aplicación conectada corresponde a un cliente:
 | Nombre | Se muestra en la página de inicio de sesión, por ejemplo «Verifica tu identidad para continuar en Gitea» |
 | Client ID | Solo puede contener letras, números y `- . _ ~`; se introduce en la aplicación |
 | Client Secret | Al menos 16 caracteres; pulsa «Generar» para obtener una clave aleatoria de 43 caracteres. Al guardar solo se conserva el hash bcrypt y no se puede volver a ver, así que cópialo en la aplicación antes de guardar; si lo pierdes, genéralo de nuevo y actualízalo en la aplicación. También puedes introducir directamente un hash bcrypt existente (que empiece por `$2a$`, `$2b$` o `$2y$`) |
-| Cliente público | Márcalo para clientes que no pueden guardar un secreto, como aplicaciones de una sola página o apps móviles: no usan secreto y PKCE (S256) es obligatorio |
+| Cliente público | Márcalo para clientes que no pueden guardar un secreto, como aplicaciones de una sola página o apps móviles: no usan secreto, PKCE (S256) es obligatorio y no reciben token de actualización |
 | URI de redirección | Una por línea; se compara carácter a carácter con el `redirect_uri` que envía la aplicación, así que esquema, puerto, ruta y parámetros de consulta deben coincidir |
-| Usuarios permitidos | Un nombre de usuario por línea, o `group:nombre`; basta con cumplir cualquier línea para iniciar sesión. Vacío significa todos los usuarios compartidos |
+| Usuarios permitidos | Un nombre de usuario por línea, o `group:nombre`; basta con cumplir cualquier línea para iniciar sesión. Vacío significa todos los usuarios compartidos. La comparación es por nombre de usuario, así que si renombras un usuario compartido actualiza también esta lista |
 
 ::: tip Si no sabes la URI de redirección
 Guarda primero cualquier dirección y pulsa una vez iniciar sesión en la aplicación. Gately se detendrá en la página de error «La URI de redirección no coincide», que muestra la dirección que envió realmente la aplicación; cópiala tal cual en la URI de redirección del cliente.
@@ -78,23 +80,25 @@ Los clientes los registra el administrador, así que Gately los trata como aplic
 
 | scope | Claims devueltos |
 | --- | --- |
-| `openid` (obligatorio) | `sub`: nombre del usuario compartido |
+| `openid` (obligatorio) | `sub`: ID fijo del usuario compartido, generado al azar y que se mantiene al renombrarlo; si eliminas el usuario y creas otro con el mismo nombre, este recibe un ID nuevo y no hereda la cuenta del usuario anterior en la aplicación |
 | `profile` | `name` (nombre visible, o el nombre de usuario si está vacío), `preferred_username`, `nickname` (nombre de usuario) |
 | `email` | `email`, `email_verified` (solo si se ha indicado un correo) |
 | `groups` | `groups`: lista de grupos |
-| `offline_access` | Emite además un token de actualización |
+| `offline_access` | Emite además un token de actualización, solo para clientes confidenciales |
 
 El ID Token incluye también `iss`, `aud`, `azp`, `exp`, `iat`, `auth_time`, `nonce` y `at_hash`. Tanto el ID Token como el Access Token son JWT firmados con RS256. Los demás scopes que pida la aplicación se ignoran.
 
-Detalles del protocolo: solo se admite el flujo de código de autorización (`response_type=code`), y el resultado de la autorización se devuelve en parámetros de consulta (`response_mode=query`); el endpoint de token acepta los métodos de autenticación `client_secret_basic` y `client_secret_post`, y los clientes públicos usan `none`; PKCE solo admite `S256`; se admite `prompt=none`, que devuelve `login_required` si no hay sesión iniciada.
+Detalles del protocolo: solo se admite el flujo de código de autorización (`response_type=code`), y el resultado de la autorización se devuelve en parámetros de consulta (`response_mode=query`); el endpoint de token acepta los métodos de autenticación `client_secret_basic` y `client_secret_post`, y los clientes públicos usan `none`; PKCE solo admite `S256`; se admite `prompt=none`, que devuelve `login_required` si no hay sesión iniciada y `access_denied` si el usuario no tiene permiso para esa aplicación; con `prompt=login`, o si el inicio de sesión es anterior a `max_age`, se pide al usuario que vuelva a introducir la contraseña.
+
+El endpoint de cierre de sesión acepta `id_token_hint`, `client_id` y `post_logout_redirect_uri`: `id_token_hint` debe ser un ID Token emitido por este emisor (se aceptan caducados) y `post_logout_redirect_uri` debe ser una de las URI de redirección registradas para el cliente o tener el mismo origen que alguna de ellas; si no, tras cerrar sesión se queda en la página de inicio de sesión.
 
 ## Validez e invalidación
 
 - Código de autorización: 2 minutos, de un solo uso;
 - ID Token y Access Token: 1 hora;
 - Token de actualización: 30 días; al refrescar se reutiliza el token original;
-- Al cambiar la contraseña o el TOTP de un usuario compartido, eliminar el usuario, quitarlo de la lista de usuarios permitidos de un cliente o eliminar el cliente, los códigos de autorización y tokens de actualización aún no canjeados se invalidan al instante, y el endpoint de información de usuario también rechaza los Access Tokens ya emitidos. La sesión ya creada dentro de la aplicación la gestiona la propia aplicación; si hace falta, cierra la sesión de ese usuario en la aplicación;
-- Cambiar el correo, el nombre visible o los grupos no afecta a las sesiones existentes; se aplica en el siguiente inicio de sesión o al refrescar el token;
+- Al cambiar la contraseña o el TOTP de un usuario compartido, renombrarlo, eliminarlo, quitarlo de la lista de usuarios permitidos de un cliente o eliminar el cliente, los códigos de autorización aún no canjeados, los tokens de actualización y los Access Tokens ya emitidos se invalidan al instante (el endpoint de información de usuario rechaza los Access Tokens antiguos). La sesión ya creada dentro de la aplicación la gestiona la propia aplicación; si hace falta, cierra la sesión de ese usuario en la aplicación;
+- Tras cambiar el correo, el nombre visible o los grupos, el endpoint de información de usuario devuelve los valores nuevos al instante, y los claims del ID Token se actualizan en el siguiente inicio de sesión o al refrescar el token; si la lista de usuarios permitidos autoriza por grupo, sacar al usuario del grupo surte efecto al instante;
 - La clave de firma se guarda en `settings.oidc.signingKey` del archivo de configuración de Servicios web `webservice.json`. Para cambiarla, detén Gately, elimina ese campo y vuelve a iniciarlo: se generará una clave nueva y todos los tokens emitidos dejarán de ser válidos.
 
 ## Ejemplos de configuración de aplicaciones

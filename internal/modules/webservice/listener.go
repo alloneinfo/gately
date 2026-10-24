@@ -121,8 +121,19 @@ func (l *listenerRunner) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	// 内置 OIDC 身份提供方只在签发者域名的协议路径上处理，其余请求照常按站点路由
-	if l.auth != nil && l.auth.serveOIDC(w, r, l.log) {
-		return
+	if l.auth != nil {
+		if e := l.auth.oidcTarget(r); e != nil {
+			// 签发者域名配有站点时，先执行该站点的访问控制（IP 名单、国家过滤、限流），不能借协议路径绕过
+			if s := l.route(r.Host); s != nil {
+				release, ok := s.accessCheck(w, r)
+				if !ok {
+					return
+				}
+				defer release()
+			}
+			l.auth.serveOIDC(w, r, e, l.log)
+			return
+		}
 	}
 	s := l.route(r.Host)
 	if s == nil {

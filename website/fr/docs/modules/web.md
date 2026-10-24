@@ -112,6 +112,7 @@ Définissez les comptes une seule fois et utilisez-les sur plusieurs sites, avec
 Dans « Paramètres globaux → Utilisateurs partagés » :
 
 - Ajoutez des utilisateurs avec un nom d'utilisateur et un mot de passe. Les mots de passe sont stockés sous forme de hash bcrypt et ne sont jamais renvoyés par l'API. Pour ajouter le TOTP, cliquez sur « Activer le TOTP », scannez le QR code avec une application d'authentification (Google Authenticator, 1Password, etc.) puis enregistrez. Régénérer la clé invalide l'ancienne ;
+- Indiquez éventuellement une adresse e-mail, un nom affiché et des groupes ; l'[authentification unique OIDC](/fr/docs/modules/oidc) les transmet aux applications sous forme de revendications `email`, `name` et `groups`, et les utilisateurs autorisés d'un client OIDC peuvent accorder l'accès par groupe avec `group:nom` ;
 - Domaine SSO, comme `example.com` : après connexion sur n'importe quel site de ce domaine ou de ses sous-domaines, les autres sites n'exigent plus de connexion. Il repose sur un cookie de domaine parent (`gately_sso`, valable 7 jours) qui n'est jamais transmis aux backends. Laissez vide pour vous connecter séparément sur chaque site.
 
 Sur un site, cochez « Utiliser les utilisateurs partagés » à côté de l'authentification web ou Basic. Les utilisateurs propres au site continuent de fonctionner.

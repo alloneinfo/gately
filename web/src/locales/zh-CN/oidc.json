@@ -13,12 +13,12 @@
     "jwks": "公钥",
     "logout": "退出"
   },
-  "scopesHelp": "支持的 scope：openid、profile、email、groups、offline_access。ID Token 使用 RS256 签名，支持 PKCE（S256）。",
+  "scopesHelp": "支持的 scope：openid、profile、email、groups、offline_access（仅机密客户端）。ID Token 使用 RS256 签名，支持 PKCE（S256）。",
   "clients": "客户端",
   "namePlaceholder": "名称，如 Gitea",
   "idPlaceholder": "例如 gitea",
   "public": "公共客户端",
-  "publicHelp": "单页应用、手机 App 等无法保密密钥的客户端：不使用密钥，必须使用 PKCE",
+  "publicHelp": "单页应用、手机 App 等无法保密密钥的客户端：不使用密钥，必须使用 PKCE，不签发刷新令牌",
   "confidentialHelp": "服务端应用用 Client Secret 认证，例如 Gitea、OpenList、Grafana",
   "secretPlaceholder": "至少 16 个字符，可点「生成」",
   "secretKeep": "已设置，留空不修改",
@@ -30,7 +30,7 @@
   "redirectHelp": "必须与应用发来的 redirect_uri 完全一致。填错时登录会停在错误页，页面上会显示应用实际发来的地址，复制过来即可。",
   "allow": "允许的用户",
   "allowPlaceholder": "每行一个用户名，或 group:分组名",
-  "allowHelp": "留空表示全部共享用户都能登录该应用；分组在共享用户中设置",
+  "allowHelp": "留空表示全部共享用户都能登录该应用；按用户名匹配，用户改名后需同步修改；分组在共享用户中设置",
   "addClient": "添加客户端",
   "docs": "各应用的配置示例"
 }
