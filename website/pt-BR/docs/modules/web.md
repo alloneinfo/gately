@@ -105,7 +105,7 @@ Como funciona:
 - Os cabeçalhos de identidade enviados pelos visitantes são sempre removidos, para que não possam ser forjados;
 - Funciona com as regras por caminho e o "Escopo da autenticação", de modo que apenas alguns caminhos (por exemplo `/admin`) exijam login, e com os links de compartilhamento temporários.
 
-### Usuários compartilhados: TOTP e login único
+### Usuários compartilhados: TOTP e login único {#shared-users}
 
 Defina as contas uma só vez e use-as em vários sites, com verificação em dois fatores TOTP opcional. Cobre o que muita gente usa o Authelia para fazer.
 
@@ -122,6 +122,8 @@ Comportamento:
 - Alterar a senha ou a chave TOTP de um usuário encerra as sessões desse usuário;
 - A autenticação básica aceita apenas usuários compartilhados sem TOTP, porque o prompt de senha do navegador não tem onde digitar um código;
 - As tentativas malsucedidas contam para o mesmo limite de tentativas e banimento automático dos demais logins.
+
+Para que Gitea, OpenList, Grafana e outros aplicativos saibam qual usuário entrou, ofereça os usuários compartilhados a eles pelo [login único OIDC](/pt-BR/docs/modules/oidc).
 
 ## Controle de acesso
 

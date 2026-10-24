@@ -1175,6 +1175,18 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | `webhook` | `webhook.Config` |
 | `webhookOnlyOnChange` | boolean |
 
+### thirdauth.Provider
+
+| Champ | Type |
+| --- | --- |
+| `clientId` | string |
+| `clientSecret` | string |
+| `issuer` | string |
+| `key` | string |
+| `name` | string |
+| `proxy` | string |
+| `type` | string |
+
 ### waf.Instance
 
 | Champ | Type |
@@ -1214,6 +1226,18 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | `successContent` | Tableau de string |
 | `timeout` | integer |
 | `url` | string |
+
+### webservice.AuthUser
+
+| Champ | Type |
+| --- | --- |
+| `displayName` | string |
+| `email` | string |
+| `groups` | Tableau de string |
+| `name` | string |
+| `password` | string |
+| `remark` | string |
+| `totpSecret` | string |
 
 ### webservice.BanInfo
 
@@ -1293,6 +1317,27 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | `requestHeaders` | Tableau de string |
 | `targets` | Tableau de string |
 
+### webservice.OIDCClient
+
+| Champ | Type |
+| --- | --- |
+| `allow` | Tableau de string |
+| `id` | string |
+| `name` | string |
+| `public` | boolean |
+| `redirectUris` | Tableau de string |
+| `remark` | string |
+| `secret` | string |
+
+### webservice.OIDCSettings
+
+| Champ | Type |
+| --- | --- |
+| `clients` | Tableau de `webservice.OIDCClient` |
+| `enable` | boolean |
+| `issuer` | string |
+| `signingKey` | string |
+
 ### webservice.PathRule
 
 | Champ | Type |
@@ -1330,6 +1375,20 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | `pattern` | string |
 | `redirect` | boolean |
 | `to` | string |
+
+### webservice.Settings
+
+| Champ | Type |
+| --- | --- |
+| `authSecret` | string |
+| `authUsers` | Tableau de `webservice.AuthUser` |
+| `autoBanSeconds` | integer |
+| `enable` | boolean |
+| `oauthCallbackBase` | string |
+| `oauthProviders` | Tableau de `thirdauth.Provider` |
+| `oidc` | `webservice.OIDCSettings` |
+| `ssoDomain` | string |
+| `trustedProxies` | Tableau de string |
 
 ### webservice.ShareLink
 

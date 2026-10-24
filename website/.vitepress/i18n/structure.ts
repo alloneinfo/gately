@@ -52,6 +52,7 @@ export const sidebarGroups: SidebarGroup[] = [
       'modules/portforward',
       'modules/ssl',
       'modules/web',
+      'modules/oidc',
       'modules/waf',
       'modules/guard',
       'modules/tunnels',

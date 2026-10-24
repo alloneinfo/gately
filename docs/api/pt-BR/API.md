@@ -1175,6 +1175,18 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | `webhook` | `webhook.Config` |
 | `webhookOnlyOnChange` | boolean |
 
+### thirdauth.Provider
+
+| Campo | Tipo |
+| --- | --- |
+| `clientId` | string |
+| `clientSecret` | string |
+| `issuer` | string |
+| `key` | string |
+| `name` | string |
+| `proxy` | string |
+| `type` | string |
+
 ### waf.Instance
 
 | Campo | Tipo |
@@ -1214,6 +1226,18 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | `successContent` | Array de string |
 | `timeout` | integer |
 | `url` | string |
+
+### webservice.AuthUser
+
+| Campo | Tipo |
+| --- | --- |
+| `displayName` | string |
+| `email` | string |
+| `groups` | Array de string |
+| `name` | string |
+| `password` | string |
+| `remark` | string |
+| `totpSecret` | string |
 
 ### webservice.BanInfo
 
@@ -1293,6 +1317,27 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | `requestHeaders` | Array de string |
 | `targets` | Array de string |
 
+### webservice.OIDCClient
+
+| Campo | Tipo |
+| --- | --- |
+| `allow` | Array de string |
+| `id` | string |
+| `name` | string |
+| `public` | boolean |
+| `redirectUris` | Array de string |
+| `remark` | string |
+| `secret` | string |
+
+### webservice.OIDCSettings
+
+| Campo | Tipo |
+| --- | --- |
+| `clients` | Array de `webservice.OIDCClient` |
+| `enable` | boolean |
+| `issuer` | string |
+| `signingKey` | string |
+
 ### webservice.PathRule
 
 | Campo | Tipo |
@@ -1330,6 +1375,20 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | `pattern` | string |
 | `redirect` | boolean |
 | `to` | string |
+
+### webservice.Settings
+
+| Campo | Tipo |
+| --- | --- |
+| `authSecret` | string |
+| `authUsers` | Array de `webservice.AuthUser` |
+| `autoBanSeconds` | integer |
+| `enable` | boolean |
+| `oauthCallbackBase` | string |
+| `oauthProviders` | Array de `thirdauth.Provider` |
+| `oidc` | `webservice.OIDCSettings` |
+| `ssoDomain` | string |
+| `trustedProxies` | Array de string |
 
 ### webservice.ShareLink
 

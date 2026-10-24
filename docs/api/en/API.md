@@ -1175,6 +1175,18 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | `webhook` | `webhook.Config` |
 | `webhookOnlyOnChange` | boolean |
 
+### thirdauth.Provider
+
+| Field | Type |
+| --- | --- |
+| `clientId` | string |
+| `clientSecret` | string |
+| `issuer` | string |
+| `key` | string |
+| `name` | string |
+| `proxy` | string |
+| `type` | string |
+
 ### waf.Instance
 
 | Field | Type |
@@ -1214,6 +1226,18 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | `successContent` | Array of string |
 | `timeout` | integer |
 | `url` | string |
+
+### webservice.AuthUser
+
+| Field | Type |
+| --- | --- |
+| `displayName` | string |
+| `email` | string |
+| `groups` | Array of string |
+| `name` | string |
+| `password` | string |
+| `remark` | string |
+| `totpSecret` | string |
 
 ### webservice.BanInfo
 
@@ -1293,6 +1317,27 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | `requestHeaders` | Array of string |
 | `targets` | Array of string |
 
+### webservice.OIDCClient
+
+| Field | Type |
+| --- | --- |
+| `allow` | Array of string |
+| `id` | string |
+| `name` | string |
+| `public` | boolean |
+| `redirectUris` | Array of string |
+| `remark` | string |
+| `secret` | string |
+
+### webservice.OIDCSettings
+
+| Field | Type |
+| --- | --- |
+| `clients` | Array of `webservice.OIDCClient` |
+| `enable` | boolean |
+| `issuer` | string |
+| `signingKey` | string |
+
 ### webservice.PathRule
 
 | Field | Type |
@@ -1330,6 +1375,20 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | `pattern` | string |
 | `redirect` | boolean |
 | `to` | string |
+
+### webservice.Settings
+
+| Field | Type |
+| --- | --- |
+| `authSecret` | string |
+| `authUsers` | Array of `webservice.AuthUser` |
+| `autoBanSeconds` | integer |
+| `enable` | boolean |
+| `oauthCallbackBase` | string |
+| `oauthProviders` | Array of `thirdauth.Provider` |
+| `oidc` | `webservice.OIDCSettings` |
+| `ssoDomain` | string |
+| `trustedProxies` | Array of string |
 
 ### webservice.ShareLink
 

@@ -11,6 +11,7 @@ Puedes desactivar un módulo completo en «Ajustes → Módulos». Un módulo de
 | Reenvío de puertos | TCP / UDP, IPv4 / IPv6, rangos de puertos, conmutación por error entre varios destinos, límites de conexiones, estadísticas de tráfico | [Ver](/es/docs/modules/portforward) |
 | Certificados SSL | Emisión y renovación automáticas con ACME DNS-01, subida de certificados, exportación a un directorio con scripts | [Ver](/es/docs/modules/ssl) |
 | Servicios web | Proxy inverso, redirecciones, archivos estáticos, HTTPS, autenticación, control de acceso, balanceo de carga y comprobaciones de estado, caché y límite de peticiones, estadísticas de acceso | [Ver](/es/docs/modules/web) |
+| Inicio de sesión único OIDC | Ofrece los usuarios compartidos a Gitea, OpenList, Grafana y otras apps mediante OpenID Connect; sustituye al OIDC de Authelia | [Ver](/es/docs/modules/oidc) |
 | Cortafuegos WAF | Coraza + OWASP CRS v4 | [Ver](/es/docs/modules/waf) |
 | Prevención de intrusiones | Reglas de registros (al estilo fail2ban), puertos trampa y detección de escaneos, con bloqueos sincronizados en nftables | [Ver](/es/docs/modules/guard) |
 | Tailscale / frp / cloudflared | Redes y traversal NAT con binarios oficiales gestionados | [Ver](/es/docs/modules/tunnels) |

@@ -11,6 +11,7 @@ Vous pouvez désactiver un module entier dans « Paramètres → Modules ». Un 
 | Redirection de ports | TCP / UDP, IPv4 / IPv6, plages de ports, basculement multi-cibles, limites de connexions, statistiques de trafic | [Consulter](/fr/docs/modules/portforward) |
 | Certificats SSL | Émission et renouvellement automatiques ACME DNS-01, import, mappage vers un répertoire avec scripts | [Consulter](/fr/docs/modules/ssl) |
 | Services Web | Proxy inverse, redirections, fichiers statiques, HTTPS, authentification, contrôle d'accès, répartition de charge et vérifications d'état, cache et limitation de débit, statistiques d'accès | [Consulter](/fr/docs/modules/web) |
+| Authentification unique OIDC | Propose les utilisateurs partagés à Gitea, OpenList, Grafana et d'autres applications via OpenID Connect ; remplace l'OIDC d'Authelia | [Consulter](/fr/docs/modules/oidc) |
 | Pare-feu WAF | Coraza + OWASP CRS v4 | [Consulter](/fr/docs/modules/waf) |
 | Prévention d'intrusion | Règles de journaux (à la fail2ban), ports pièges et détection de scan, bannissements synchronisés dans nftables | [Consulter](/fr/docs/modules/guard) |
 | Tailscale / frp / cloudflared | Réseau et traversée NAT avec des binaires officiels gérés | [Consulter](/fr/docs/modules/tunnels) |

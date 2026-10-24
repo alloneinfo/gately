@@ -105,7 +105,7 @@ https://auth.example.com/__gately_auth/oauth/callback
 - 訪客自帶的身分標頭一律刪除，無法偽造；
 - 可與路徑規則和「驗證範圍」搭配，只讓部分路徑（如 `/admin`）需要登入，也可與臨時分享連結搭配。
 
-### 共用使用者：TOTP 與單一登入
+### 共用使用者：TOTP 與單一登入 {#shared-users}
 
 帳號只需定義一次，就能用於多個站台，並可選擇啟用 TOTP 二次驗證，涵蓋了很多人使用 Authelia 的主要目的。
 
@@ -122,6 +122,8 @@ https://auth.example.com/__gately_auth/oauth/callback
 - 修改使用者的密碼或 TOTP 金鑰後，該使用者既有的工作階段立即失效；
 - 基本驗證只接受未啟用 TOTP 的共用使用者，因為瀏覽器的密碼彈出視窗沒有地方輸入驗證碼；
 - 失敗次數與其他登入共用同一套限流與自動封鎖。
+
+要讓 Gitea、OpenList、Grafana 等應用程式識別登入的是哪個使用者，可以把共用使用者透過 [OIDC 單一登入](/zh-TW/docs/modules/oidc) 提供給應用程式。
 
 ## 存取控制
 

@@ -11,6 +11,7 @@ You can turn off a whole module under "Settings → Modules". A disabled module 
 | Port Forwarding | TCP / UDP, IPv4 / IPv6, port ranges, multi-target failover, connection limits, traffic statistics | [View](/en/docs/modules/portforward) |
 | SSL Certificates | Automatic ACME DNS-01 issuance and renewal, upload, mapping to a directory with scripts | [View](/en/docs/modules/ssl) |
 | Web Services | Reverse proxy, redirects, static files, HTTPS, authentication, access control, load balancing and health checks, caching and rate limiting, access statistics | [View](/en/docs/modules/web) |
+| OIDC single sign-on | Offers the shared users to Gitea, OpenList, Grafana and other apps over OpenID Connect, replacing Authelia's OIDC provider | [View](/en/docs/modules/oidc) |
 | WAF Firewall | Coraza + OWASP CRS v4 | [View](/en/docs/modules/waf) |
 | Intrusion Prevention | Log jails (fail2ban-style), trap ports and port-scan detection, with bans synced to nftables | [View](/en/docs/modules/guard) |
 | Tailscale / frp / cloudflared | Networking and NAT traversal with managed official binaries | [View](/en/docs/modules/tunnels) |

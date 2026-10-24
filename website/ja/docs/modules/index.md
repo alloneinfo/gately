@@ -11,6 +11,7 @@ Gately の各機能は独立したモジュールで、個別に有効化・無�
 | ポート転送 | TCP / UDP、IPv4 / IPv6、ポート範囲、複数ターゲットのフェイルオーバー、接続数制限、トラフィック統計 | [開く](/ja/docs/modules/portforward) |
 | SSL 証明書 | ACME DNS-01 による自動発行・更新、アップロード、ディレクトリへのマッピングとスクリプト実行 | [開く](/ja/docs/modules/ssl) |
 | Web サービス | リバースプロキシ、リダイレクト、静的ファイル、HTTPS、認証、アクセス制御、負荷分散とヘルスチェック、キャッシュとレート制限、アクセス統計 | [開く](/ja/docs/modules/web) |
+| OIDC シングルサインオン | 共有ユーザーを OpenID Connect で Gitea、OpenList、Grafana などのアプリに提供し、Authelia の OIDC の代わりになる | [開く](/ja/docs/modules/oidc) |
 | WAF ファイアウォール | Coraza + OWASP CRS v4 | [開く](/ja/docs/modules/waf) |
 | 侵入防御 | ログルール（fail2ban 風）、おとりポート、ポートスキャン検出。ブロックは nftables に同期 | [開く](/ja/docs/modules/guard) |
 | Tailscale / frp / cloudflared | 公式バイナリを管理するネットワーク接続と NAT 越え | [開く](/ja/docs/modules/tunnels) |

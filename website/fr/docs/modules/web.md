@@ -105,7 +105,7 @@ Fonctionnement :
 - Les en-têtes d'identité envoyés par les visiteurs sont toujours supprimés, ils ne peuvent donc pas être falsifiés ;
 - Elle fonctionne avec les règles de chemin et le « Périmètre d'authentification », de sorte que seuls certains chemins (par exemple `/admin`) exigent une connexion, ainsi qu'avec les liens de partage temporaires.
 
-### Utilisateurs partagés : TOTP et authentification unique
+### Utilisateurs partagés : TOTP et authentification unique {#shared-users}
 
 Définissez les comptes une seule fois et utilisez-les sur plusieurs sites, avec une vérification en deux étapes TOTP facultative. Cela couvre ce pour quoi beaucoup de gens font tourner Authelia.
 
@@ -122,6 +122,8 @@ Comportement :
 - Changer le mot de passe ou la clé TOTP d'un utilisateur met fin à ses sessions ;
 - L'authentification Basic n'accepte que les utilisateurs partagés sans TOTP, car l'invite de mot de passe du navigateur ne permet pas de saisir un code ;
 - Les échecs comptent dans la même limitation de débit et le même bannissement automatique que les autres connexions.
+
+Pour que Gitea, OpenList, Grafana et les autres applications sachent quel utilisateur s'est connecté, proposez-leur les utilisateurs partagés via l'[authentification unique OIDC](/fr/docs/modules/oidc).
 
 ## Contrôle d'accès
 

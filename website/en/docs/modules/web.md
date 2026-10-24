@@ -105,7 +105,7 @@ How it works:
 - Identity headers sent by visitors are always removed, so they cannot be forged;
 - It works with path rules and "Authentication scope", so only some paths (for example `/admin`) need a login, and with temporary share links.
 
-### Shared users: TOTP and single sign-on
+### Shared users: TOTP and single sign-on {#shared-users}
 
 Define accounts once and use them on several sites, with optional TOTP two-step verification. It covers what many people run Authelia for.
 
@@ -122,6 +122,8 @@ Behavior:
 - Changing a user's password or TOTP key ends that user's sessions;
 - Basic authentication accepts only shared users without TOTP, because a browser password prompt has nowhere to enter a code;
 - Failed attempts count towards the same rate limit and automatic ban as other sign-ins.
+
+To let Gitea, OpenList, Grafana and other applications know which user signed in, offer the shared users to them through [OIDC single sign-on](/en/docs/modules/oidc).
 
 ## Access control
 

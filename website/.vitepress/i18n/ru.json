@@ -33,6 +33,7 @@
       "modules/portforward": "Проброс портов",
       "modules/ssl": "SSL-сертификаты",
       "modules/web": "Веб-службы",
+      "modules/oidc": "Единый вход OIDC",
       "modules/waf": "Брандмауэр WAF",
       "modules/guard": "Защита от вторжений",
       "modules/tunnels": "Tailscale / frp / cloudflared",

@@ -33,6 +33,7 @@
       "modules/portforward": "端口转发",
       "modules/ssl": "SSL 证书",
       "modules/web": "Web 服务",
+      "modules/oidc": "OIDC 单点登录",
       "modules/waf": "WAF 防火墙",
       "modules/guard": "入侵防护",
       "modules/tunnels": "Tailscale / frp / cloudflared",

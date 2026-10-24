@@ -105,7 +105,7 @@ Cómo funciona:
 - Las cabeceras de identidad enviadas por los visitantes se eliminan siempre, por lo que no se pueden falsificar;
 - Funciona con las reglas por ruta y el «Ámbito de autenticación», de modo que solo algunas rutas (por ejemplo `/admin`) requieran inicio de sesión, y con los enlaces temporales para compartir.
 
-### Usuarios compartidos: TOTP e inicio de sesión único
+### Usuarios compartidos: TOTP e inicio de sesión único {#shared-users}
 
 Define las cuentas una sola vez y úsalas en varios sitios, con verificación en dos pasos TOTP opcional. Cubre lo que muchas personas buscan al ejecutar Authelia.
 
@@ -122,6 +122,8 @@ Comportamiento:
 - Cambiar la contraseña o la clave TOTP de un usuario cierra las sesiones de ese usuario;
 - La autenticación básica solo acepta usuarios compartidos sin TOTP, porque el aviso de contraseña del navegador no tiene dónde introducir un código;
 - Los intentos fallidos cuentan para el mismo límite de intentos y bloqueo automático que los demás inicios de sesión.
+
+Para que Gitea, OpenList, Grafana y otras aplicaciones sepan qué usuario ha iniciado sesión, ofrece los usuarios compartidos mediante el [inicio de sesión único OIDC](/es/docs/modules/oidc).
 
 ## Control de acceso
 

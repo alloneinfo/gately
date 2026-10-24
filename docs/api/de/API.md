@@ -1175,6 +1175,18 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | `webhook` | `webhook.Config` |
 | `webhookOnlyOnChange` | boolean |
 
+### thirdauth.Provider
+
+| Feld | Typ |
+| --- | --- |
+| `clientId` | string |
+| `clientSecret` | string |
+| `issuer` | string |
+| `key` | string |
+| `name` | string |
+| `proxy` | string |
+| `type` | string |
+
 ### waf.Instance
 
 | Feld | Typ |
@@ -1214,6 +1226,18 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | `successContent` | Array von string |
 | `timeout` | integer |
 | `url` | string |
+
+### webservice.AuthUser
+
+| Feld | Typ |
+| --- | --- |
+| `displayName` | string |
+| `email` | string |
+| `groups` | Array von string |
+| `name` | string |
+| `password` | string |
+| `remark` | string |
+| `totpSecret` | string |
 
 ### webservice.BanInfo
 
@@ -1293,6 +1317,27 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | `requestHeaders` | Array von string |
 | `targets` | Array von string |
 
+### webservice.OIDCClient
+
+| Feld | Typ |
+| --- | --- |
+| `allow` | Array von string |
+| `id` | string |
+| `name` | string |
+| `public` | boolean |
+| `redirectUris` | Array von string |
+| `remark` | string |
+| `secret` | string |
+
+### webservice.OIDCSettings
+
+| Feld | Typ |
+| --- | --- |
+| `clients` | Array von `webservice.OIDCClient` |
+| `enable` | boolean |
+| `issuer` | string |
+| `signingKey` | string |
+
 ### webservice.PathRule
 
 | Feld | Typ |
@@ -1330,6 +1375,20 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | `pattern` | string |
 | `redirect` | boolean |
 | `to` | string |
+
+### webservice.Settings
+
+| Feld | Typ |
+| --- | --- |
+| `authSecret` | string |
+| `authUsers` | Array von `webservice.AuthUser` |
+| `autoBanSeconds` | integer |
+| `enable` | boolean |
+| `oauthCallbackBase` | string |
+| `oauthProviders` | Array von `thirdauth.Provider` |
+| `oidc` | `webservice.OIDCSettings` |
+| `ssoDomain` | string |
+| `trustedProxies` | Array von string |
 
 ### webservice.ShareLink
 

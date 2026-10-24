@@ -105,7 +105,7 @@ So funktioniert es:
 - Von Besuchern gesendete Identitäts-Header werden immer entfernt, sie lassen sich also nicht fälschen;
 - Es funktioniert mit Pfadregeln und dem „Authentifizierungsbereich“, sodass nur manche Pfade (zum Beispiel `/admin`) eine Anmeldung brauchen, sowie mit temporären Freigabelinks.
 
-### Gemeinsame Benutzer: TOTP und Single Sign-on
+### Gemeinsame Benutzer: TOTP und Single Sign-on {#shared-users}
 
 Legen Sie Konten einmal an und nutzen Sie sie auf mehreren Sites, optional mit TOTP-Zwei-Faktor-Prüfung. Das deckt ab, wofür viele Authelia betreiben.
 
@@ -122,6 +122,8 @@ Verhalten:
 - Ändert sich Passwort oder TOTP-Schlüssel eines Benutzers, werden dessen Sitzungen beendet;
 - Die Basic-Authentifizierung akzeptiert nur gemeinsame Benutzer ohne TOTP, weil eine Passwortabfrage des Browsers keine Möglichkeit bietet, einen Code einzugeben;
 - Fehlgeschlagene Versuche zählen für dieselbe Ratenbegrenzung und automatische Sperre wie andere Anmeldungen.
+
+Damit Gitea, OpenList, Grafana und andere Anwendungen wissen, welcher Benutzer angemeldet ist, stellen Sie ihnen die gemeinsamen Benutzer über [OIDC-Single-Sign-on](/de/docs/modules/oidc) bereit.
 
 ## Zugriffskontrolle
 

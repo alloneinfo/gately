@@ -33,6 +33,7 @@
       "modules/portforward": "Redirection de ports",
       "modules/ssl": "Certificats SSL",
       "modules/web": "Services Web",
+      "modules/oidc": "Authentification unique OIDC",
       "modules/waf": "Pare-feu WAF",
       "modules/guard": "Prévention d'intrusion",
       "modules/tunnels": "Tailscale / frp / cloudflared",

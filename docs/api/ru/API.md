@@ -1175,6 +1175,18 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `webhook` | `webhook.Config` |
 | `webhookOnlyOnChange` | boolean |
 
+### thirdauth.Provider
+
+| Поле | Тип |
+| --- | --- |
+| `clientId` | string |
+| `clientSecret` | string |
+| `issuer` | string |
+| `key` | string |
+| `name` | string |
+| `proxy` | string |
+| `type` | string |
+
 ### waf.Instance
 
 | Поле | Тип |
@@ -1214,6 +1226,18 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `successContent` | Массив из string |
 | `timeout` | integer |
 | `url` | string |
+
+### webservice.AuthUser
+
+| Поле | Тип |
+| --- | --- |
+| `displayName` | string |
+| `email` | string |
+| `groups` | Массив из string |
+| `name` | string |
+| `password` | string |
+| `remark` | string |
+| `totpSecret` | string |
 
 ### webservice.BanInfo
 
@@ -1293,6 +1317,27 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `requestHeaders` | Массив из string |
 | `targets` | Массив из string |
 
+### webservice.OIDCClient
+
+| Поле | Тип |
+| --- | --- |
+| `allow` | Массив из string |
+| `id` | string |
+| `name` | string |
+| `public` | boolean |
+| `redirectUris` | Массив из string |
+| `remark` | string |
+| `secret` | string |
+
+### webservice.OIDCSettings
+
+| Поле | Тип |
+| --- | --- |
+| `clients` | Массив из `webservice.OIDCClient` |
+| `enable` | boolean |
+| `issuer` | string |
+| `signingKey` | string |
+
 ### webservice.PathRule
 
 | Поле | Тип |
@@ -1330,6 +1375,20 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `pattern` | string |
 | `redirect` | boolean |
 | `to` | string |
+
+### webservice.Settings
+
+| Поле | Тип |
+| --- | --- |
+| `authSecret` | string |
+| `authUsers` | Массив из `webservice.AuthUser` |
+| `autoBanSeconds` | integer |
+| `enable` | boolean |
+| `oauthCallbackBase` | string |
+| `oauthProviders` | Массив из `thirdauth.Provider` |
+| `oidc` | `webservice.OIDCSettings` |
+| `ssoDomain` | string |
+| `trustedProxies` | Массив из string |
 
 ### webservice.ShareLink
 

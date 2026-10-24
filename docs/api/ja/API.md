@@ -1175,6 +1175,18 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `webhook` | `webhook.Config` |
 | `webhookOnlyOnChange` | boolean |
 
+### thirdauth.Provider
+
+| フィールド | 型 |
+| --- | --- |
+| `clientId` | string |
+| `clientSecret` | string |
+| `issuer` | string |
+| `key` | string |
+| `name` | string |
+| `proxy` | string |
+| `type` | string |
+
 ### waf.Instance
 
 | フィールド | 型 |
@@ -1214,6 +1226,18 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `successContent` | 配列 of string |
 | `timeout` | integer |
 | `url` | string |
+
+### webservice.AuthUser
+
+| フィールド | 型 |
+| --- | --- |
+| `displayName` | string |
+| `email` | string |
+| `groups` | 配列 of string |
+| `name` | string |
+| `password` | string |
+| `remark` | string |
+| `totpSecret` | string |
 
 ### webservice.BanInfo
 
@@ -1293,6 +1317,27 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `requestHeaders` | 配列 of string |
 | `targets` | 配列 of string |
 
+### webservice.OIDCClient
+
+| フィールド | 型 |
+| --- | --- |
+| `allow` | 配列 of string |
+| `id` | string |
+| `name` | string |
+| `public` | boolean |
+| `redirectUris` | 配列 of string |
+| `remark` | string |
+| `secret` | string |
+
+### webservice.OIDCSettings
+
+| フィールド | 型 |
+| --- | --- |
+| `clients` | 配列 of `webservice.OIDCClient` |
+| `enable` | boolean |
+| `issuer` | string |
+| `signingKey` | string |
+
 ### webservice.PathRule
 
 | フィールド | 型 |
@@ -1330,6 +1375,20 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `pattern` | string |
 | `redirect` | boolean |
 | `to` | string |
+
+### webservice.Settings
+
+| フィールド | 型 |
+| --- | --- |
+| `authSecret` | string |
+| `authUsers` | 配列 of `webservice.AuthUser` |
+| `autoBanSeconds` | integer |
+| `enable` | boolean |
+| `oauthCallbackBase` | string |
+| `oauthProviders` | 配列 of `thirdauth.Provider` |
+| `oidc` | `webservice.OIDCSettings` |
+| `ssoDomain` | string |
+| `trustedProxies` | 配列 of string |
 
 ### webservice.ShareLink
 

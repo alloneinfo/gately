@@ -11,6 +11,7 @@ Gately의 각 기능은 독립된 모듈이며 따로 켜고 끄고 설정할 �
 | 포트 포워딩 | TCP / UDP, IPv4 / IPv6, 포트 범위, 다중 대상 장애 조치, 연결 수 제한, 트래픽 통계 | [보기](/ko/docs/modules/portforward) |
 | SSL 인증서 | ACME DNS-01 자동 발급과 갱신, 업로드, 디렉터리 매핑과 스크립트 실행 | [보기](/ko/docs/modules/ssl) |
 | 웹 서비스 | 리버스 프록시, 리다이렉트, 정적 파일, HTTPS, 인증, 접근 제어, 로드 밸런싱과 헬스 체크, 캐시와 속도 제한, 접속 통계 | [보기](/ko/docs/modules/web) |
+| OIDC 통합 로그인 | 공유 사용자를 OpenID Connect로 Gitea, OpenList, Grafana 등 앱에 제공, Authelia의 OIDC 대체 | [보기](/ko/docs/modules/oidc) |
 | WAF 방화벽 | Coraza + OWASP CRS v4 | [보기](/ko/docs/modules/waf) |
 | 침입 방지 | 로그 규칙(fail2ban 방식), 미끼 포트, 포트 스캔 탐지, 차단을 nftables에 동기화 | [보기](/ko/docs/modules/guard) |
 | Tailscale / frp / cloudflared | 공식 바이너리를 관리하는 네트워킹 및 NAT 통과 | [보기](/ko/docs/modules/tunnels) |

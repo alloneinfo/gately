@@ -1175,6 +1175,18 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `webhook` | `webhook.Config` |
 | `webhookOnlyOnChange` | boolean |
 
+### thirdauth.Provider
+
+| 字段 | 类型 |
+| --- | --- |
+| `clientId` | string |
+| `clientSecret` | string |
+| `issuer` | string |
+| `key` | string |
+| `name` | string |
+| `proxy` | string |
+| `type` | string |
+
 ### waf.Instance
 
 | 字段 | 类型 |
@@ -1214,6 +1226,18 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `successContent` | 数组 of string |
 | `timeout` | integer |
 | `url` | string |
+
+### webservice.AuthUser
+
+| 字段 | 类型 |
+| --- | --- |
+| `displayName` | string |
+| `email` | string |
+| `groups` | 数组 of string |
+| `name` | string |
+| `password` | string |
+| `remark` | string |
+| `totpSecret` | string |
 
 ### webservice.BanInfo
 
@@ -1293,6 +1317,27 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `requestHeaders` | 数组 of string |
 | `targets` | 数组 of string |
 
+### webservice.OIDCClient
+
+| 字段 | 类型 |
+| --- | --- |
+| `allow` | 数组 of string |
+| `id` | string |
+| `name` | string |
+| `public` | boolean |
+| `redirectUris` | 数组 of string |
+| `remark` | string |
+| `secret` | string |
+
+### webservice.OIDCSettings
+
+| 字段 | 类型 |
+| --- | --- |
+| `clients` | 数组 of `webservice.OIDCClient` |
+| `enable` | boolean |
+| `issuer` | string |
+| `signingKey` | string |
+
 ### webservice.PathRule
 
 | 字段 | 类型 |
@@ -1330,6 +1375,20 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `pattern` | string |
 | `redirect` | boolean |
 | `to` | string |
+
+### webservice.Settings
+
+| 字段 | 类型 |
+| --- | --- |
+| `authSecret` | string |
+| `authUsers` | 数组 of `webservice.AuthUser` |
+| `autoBanSeconds` | integer |
+| `enable` | boolean |
+| `oauthCallbackBase` | string |
+| `oauthProviders` | 数组 of `thirdauth.Provider` |
+| `oidc` | `webservice.OIDCSettings` |
+| `ssoDomain` | string |
+| `trustedProxies` | 数组 of string |
 
 ### webservice.ShareLink
 

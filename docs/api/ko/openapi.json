@@ -1428,6 +1428,32 @@
         },
         "type": "object"
       },
+      "thirdauth.Provider": {
+        "properties": {
+          "clientId": {
+            "type": "string"
+          },
+          "clientSecret": {
+            "type": "string"
+          },
+          "issuer": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "proxy": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "waf.Instance": {
         "properties": {
           "bodyLimitAction": {
@@ -1522,6 +1548,35 @@
             "type": "integer"
           },
           "url": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "webservice.AuthUser": {
+        "properties": {
+          "displayName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "groups": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "name": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          },
+          "remark": {
+            "type": "string"
+          },
+          "totpSecret": {
             "type": "string"
           }
         },
@@ -1705,6 +1760,58 @@
         },
         "type": "object"
       },
+      "webservice.OIDCClient": {
+        "properties": {
+          "allow": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "public": {
+            "type": "boolean"
+          },
+          "redirectUris": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "remark": {
+            "type": "string"
+          },
+          "secret": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "webservice.OIDCSettings": {
+        "properties": {
+          "clients": {
+            "items": {
+              "$ref": "#/components/schemas/webservice.OIDCClient"
+            },
+            "type": "array"
+          },
+          "enable": {
+            "type": "boolean"
+          },
+          "issuer": {
+            "type": "string"
+          },
+          "signingKey": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "webservice.PathRule": {
         "properties": {
           "auth": {
@@ -1781,6 +1888,47 @@
           },
           "to": {
             "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "webservice.Settings": {
+        "properties": {
+          "authSecret": {
+            "type": "string"
+          },
+          "authUsers": {
+            "items": {
+              "$ref": "#/components/schemas/webservice.AuthUser"
+            },
+            "type": "array"
+          },
+          "autoBanSeconds": {
+            "type": "integer"
+          },
+          "enable": {
+            "type": "boolean"
+          },
+          "oauthCallbackBase": {
+            "type": "string"
+          },
+          "oauthProviders": {
+            "items": {
+              "$ref": "#/components/schemas/thirdauth.Provider"
+            },
+            "type": "array"
+          },
+          "oidc": {
+            "$ref": "#/components/schemas/webservice.OIDCSettings"
+          },
+          "ssoDomain": {
+            "type": "string"
+          },
+          "trustedProxies": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
           }
         },
         "type": "object"
@@ -22809,6 +22957,13 @@
         "description": "필요한 권한: `webservice:read`.",
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/webservice.Settings"
+                }
+              }
+            },
             "description": "성공"
           },
           "400": {
@@ -22860,13 +23015,20 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object"
+                "$ref": "#/components/schemas/webservice.Settings"
               }
             }
           }
         },
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/webservice.Settings"
+                }
+              }
+            },
             "description": "성공"
           },
           "400": {

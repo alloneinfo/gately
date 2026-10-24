@@ -1175,6 +1175,18 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `webhook` | `webhook.Config` |
 | `webhookOnlyOnChange` | boolean |
 
+### thirdauth.Provider
+
+| 필드 | 타입 |
+| --- | --- |
+| `clientId` | string |
+| `clientSecret` | string |
+| `issuer` | string |
+| `key` | string |
+| `name` | string |
+| `proxy` | string |
+| `type` | string |
+
 ### waf.Instance
 
 | 필드 | 타입 |
@@ -1214,6 +1226,18 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `successContent` | Array of string |
 | `timeout` | integer |
 | `url` | string |
+
+### webservice.AuthUser
+
+| 필드 | 타입 |
+| --- | --- |
+| `displayName` | string |
+| `email` | string |
+| `groups` | Array of string |
+| `name` | string |
+| `password` | string |
+| `remark` | string |
+| `totpSecret` | string |
 
 ### webservice.BanInfo
 
@@ -1293,6 +1317,27 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `requestHeaders` | Array of string |
 | `targets` | Array of string |
 
+### webservice.OIDCClient
+
+| 필드 | 타입 |
+| --- | --- |
+| `allow` | Array of string |
+| `id` | string |
+| `name` | string |
+| `public` | boolean |
+| `redirectUris` | Array of string |
+| `remark` | string |
+| `secret` | string |
+
+### webservice.OIDCSettings
+
+| 필드 | 타입 |
+| --- | --- |
+| `clients` | Array of `webservice.OIDCClient` |
+| `enable` | boolean |
+| `issuer` | string |
+| `signingKey` | string |
+
 ### webservice.PathRule
 
 | 필드 | 타입 |
@@ -1330,6 +1375,20 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `pattern` | string |
 | `redirect` | boolean |
 | `to` | string |
+
+### webservice.Settings
+
+| 필드 | 타입 |
+| --- | --- |
+| `authSecret` | string |
+| `authUsers` | Array of `webservice.AuthUser` |
+| `autoBanSeconds` | integer |
+| `enable` | boolean |
+| `oauthCallbackBase` | string |
+| `oauthProviders` | Array of `thirdauth.Provider` |
+| `oidc` | `webservice.OIDCSettings` |
+| `ssoDomain` | string |
+| `trustedProxies` | Array of string |
 
 ### webservice.ShareLink
 

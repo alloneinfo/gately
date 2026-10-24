@@ -11,6 +11,7 @@ Unter „Einstellungen → Module“ können Sie ein ganzes Modul ausschalten. E
 | Portweiterleitung | TCP / UDP, IPv4 / IPv6, Portbereiche, Failover über mehrere Ziele, Verbindungslimits, Traffic-Statistiken | [Ansehen](/de/docs/modules/portforward) |
 | SSL-Zertifikate | Automatische ACME-DNS-01-Ausstellung und -Erneuerung, Upload, Zuordnung zu einem Verzeichnis mit Skripten | [Ansehen](/de/docs/modules/ssl) |
 | Web-Dienste | Reverse Proxy, Weiterleitungen, statische Dateien, HTTPS, Authentifizierung, Zugriffskontrolle, Lastverteilung und Health-Checks, Caching und Ratenbegrenzung, Zugriffsstatistiken | [Ansehen](/de/docs/modules/web) |
+| OIDC-Single-Sign-on | Stellt die gemeinsamen Benutzer Gitea, OpenList, Grafana und anderen Apps per OpenID Connect bereit; ersetzt das OIDC von Authelia | [Ansehen](/de/docs/modules/oidc) |
 | WAF-Firewall | Coraza + OWASP CRS v4 | [Ansehen](/de/docs/modules/waf) |
 | Einbruchschutz | Protokollregeln (wie fail2ban), Köderports und Portscan-Erkennung, Sperren werden in nftables übertragen | [Ansehen](/de/docs/modules/guard) |
 | Tailscale / frp / cloudflared | Vernetzung und NAT-Traversal mit verwalteten offiziellen Binärdateien | [Ansehen](/de/docs/modules/tunnels) |

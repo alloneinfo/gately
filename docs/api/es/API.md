@@ -1175,6 +1175,18 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | `webhook` | `webhook.Config` |
 | `webhookOnlyOnChange` | boolean |
 
+### thirdauth.Provider
+
+| Campo | Tipo |
+| --- | --- |
+| `clientId` | string |
+| `clientSecret` | string |
+| `issuer` | string |
+| `key` | string |
+| `name` | string |
+| `proxy` | string |
+| `type` | string |
+
 ### waf.Instance
 
 | Campo | Tipo |
@@ -1214,6 +1226,18 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | `successContent` | Lista de string |
 | `timeout` | integer |
 | `url` | string |
+
+### webservice.AuthUser
+
+| Campo | Tipo |
+| --- | --- |
+| `displayName` | string |
+| `email` | string |
+| `groups` | Lista de string |
+| `name` | string |
+| `password` | string |
+| `remark` | string |
+| `totpSecret` | string |
 
 ### webservice.BanInfo
 
@@ -1293,6 +1317,27 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | `requestHeaders` | Lista de string |
 | `targets` | Lista de string |
 
+### webservice.OIDCClient
+
+| Campo | Tipo |
+| --- | --- |
+| `allow` | Lista de string |
+| `id` | string |
+| `name` | string |
+| `public` | boolean |
+| `redirectUris` | Lista de string |
+| `remark` | string |
+| `secret` | string |
+
+### webservice.OIDCSettings
+
+| Campo | Tipo |
+| --- | --- |
+| `clients` | Lista de `webservice.OIDCClient` |
+| `enable` | boolean |
+| `issuer` | string |
+| `signingKey` | string |
+
 ### webservice.PathRule
 
 | Campo | Tipo |
@@ -1330,6 +1375,20 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | `pattern` | string |
 | `redirect` | boolean |
 | `to` | string |
+
+### webservice.Settings
+
+| Campo | Tipo |
+| --- | --- |
+| `authSecret` | string |
+| `authUsers` | Lista de `webservice.AuthUser` |
+| `autoBanSeconds` | integer |
+| `enable` | boolean |
+| `oauthCallbackBase` | string |
+| `oauthProviders` | Lista de `thirdauth.Provider` |
+| `oidc` | `webservice.OIDCSettings` |
+| `ssoDomain` | string |
+| `trustedProxies` | Lista de string |
 
 ### webservice.ShareLink
 

@@ -11,6 +11,7 @@ Gately 的每项能力是一个独立模块，可单独启停、单独配置，�
 | 端口转发 | TCP / UDP、IPv4 / IPv6、端口段、多目标故障转移、连接数限制、流量统计 | [查看](/docs/modules/portforward) |
 | SSL 证书 | ACME DNS-01 自动签发与续期、上传、映射到目录并执行脚本 | [查看](/docs/modules/ssl) |
 | Web 服务 | 反向代理、重定向、静态文件、HTTPS、认证、访问控制、负载均衡与健康检查、缓存与限流、访问统计 | [查看](/docs/modules/web) |
+| OIDC 单点登录 | 把共享用户以 OpenID Connect 提供给 Gitea、OpenList、Grafana 等应用登录，可替代 Authelia 的 OIDC | [查看](/docs/modules/oidc) |
 | WAF 防火墙 | Coraza + OWASP CRS v4 | [查看](/docs/modules/waf) |
 | 入侵防护 | 日志规则（类 fail2ban）、诱饵端口、端口扫描检测，封禁同步到 nftables | [查看](/docs/modules/guard) |
 | Tailscale / frp / cloudflared | 托管官方二进制的组网与内网穿透 | [查看](/docs/modules/tunnels) |

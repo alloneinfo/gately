@@ -33,6 +33,7 @@
       "modules/portforward": "포트 포워딩",
       "modules/ssl": "SSL 인증서",
       "modules/web": "웹 서비스",
+      "modules/oidc": "OIDC 통합 로그인",
       "modules/waf": "WAF 방화벽",
       "modules/guard": "침입 방지",
       "modules/tunnels": "Tailscale / frp / cloudflared",
