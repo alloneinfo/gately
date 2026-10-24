@@ -21,17 +21,29 @@
 | 靜態檔案 | 目錄需為絕對路徑；關閉「目錄列表」時，目錄請求只在存在 `index.html` 時回傳。「無副檔名網址」在檔案不存在時再嘗試 `路徑.html` 與 `路徑/index.html`（適用於 VitePress 等產生器，相當於 nginx 的 `try_files $uri $uri.html $uri/index.html`）；「404 頁面」填寫目錄內的路徑，如 `404.html`，以 404 狀態回傳 |
 | 固定文字 | 自訂內容、`Content-Type`（預設 `text/plain; charset=utf-8`）與狀態碼（100-599，預設 200） |
 
-反向代理站台的其他選項：
-
-- 使用後端 Host：Host 標頭改為後端位址，關閉時保留用戶端請求的 Host；
-- 略過後端憑證驗證、關閉 Keep-Alive；
-- 向後端送出 PROXY 協定（v2 標頭，傳遞真實用戶端 IP，需要後端支援）；
-- 加入 `X-Forwarded-For` / `X-Forwarded-Proto` / `X-Forwarded-Host` / `X-Forwarded-Port` 與 `X-Real-IP`；
-- 使用造訪網域作為 SNI（僅 HTTPS 後端）：握手時傳送訪客使用的網域，並依它驗證憑證，相當於 nginx 的 `proxy_ssl_server_name on; proxy_ssl_name $host`。後端依 SNI 分流時（例如 frp 的 `vhost_https`）需要開啟。每個後端使用獨立的連線池，不同網域的連線不會互相重用。
-
 所有類型的站台都可設定存取日誌、跨來源（CORS）、自訂請求標頭與回應標頭（每行 `Key: Value`，Value 留空表示刪除該標頭），並可引用一個 [WAF 防火牆](/zh-TW/docs/modules/waf) 實例（實例不存在或停用時放行）。請求標頭、回應標頭與 Content-Type 的編輯方式見 [請求標頭與回應標頭](#headers)。
 
 存取日誌會記錄用戶端 IP、網域、站點名稱與狀態碼，可在日誌中依站點、狀態碼、來源 IP 等條件篩選，見 [執行日誌的檢視與篩選](/zh-TW/docs/guide/configuration)。
+
+### 反向代理選項 {#proxy-options}
+
+位於站點編輯框「基本」頁的「選項」，旁邊的問號圖示可在介面中查看簡要說明並跳到本節。
+
+| 選項 | 作用 | 什麼時候開啟 |
+| --- | --- | --- |
+| 略過後端憑證驗證 | 連線 HTTPS 後端時不驗證憑證 | 後端使用自簽或過期憑證，如 NAS、路由器管理頁的 https 連接埠。關閉驗證後無法確認後端身分，只建議用於內網後端 |
+| Host 使用後端位址 | 送往後端的 Host 標頭改為後端位址；關閉時（預設）保留訪客請求的 Host | 後端只認自己的位址，例如回傳 400 / 403、跳到錯誤位址或提示 Host 不符；反向代理到公網網站或 CDN 時通常需要。後端按網域區分站點，或需要用造訪網域產生連結時保持關閉 |
+| 停用連線重用 | 每個請求都建立新的後端連線（關閉 Keep-Alive） | 後端偶爾出現連線被重設、請求卡住，或不支援長連線。會增加一些延遲，正常情況保持關閉 |
+| 新增 X-Forwarded-* | 寫入 `X-Forwarded-For` / `X-Forwarded-Proto` / `X-Forwarded-Host` / `X-Forwarded-Port` 與 `X-Real-IP`，告訴後端訪客的真實 IP、原始協定、網域和連接埠 | 後端需要記錄真實 IP，或要知道外部是 HTTPS 才能產生正確連結（否則可能跳回 http 或登入後循環跳轉）。多數應用建議開啟 |
+| 向後端傳送 PROXY v2 | 在 TCP 連線開頭附加 PROXY 協定 v2 標頭，傳遞真實用戶端 IP | 後端不讀 HTTP 標頭但支援 PROXY 協定，如另一層 Gately、haproxy、開啟 `proxy_protocol` 的 nginx。後端未設定接收時所有請求都會失敗，不確定時保持關閉 |
+| 使用造訪網域作為 SNI | 僅 HTTPS 後端：交握時傳送訪客使用的網域並據此驗證憑證，相當於 nginx 的 `proxy_ssl_server_name on; proxy_ssl_name $host` | 後端在同一連接埠按網域選擇憑證或分流，如 frp 的 `vhost_https`、託管多個 HTTPS 站點的 nginx。每個後端使用獨立的連線池，不同網域的連線不會互相重用 |
+
+常見組合：
+
+- 反向代理內網的 Web 應用（如 `http://192.168.1.10:5000`）：只開「新增 X-Forwarded-*」；
+- 後端是自簽憑證的 https 位址：再開「略過後端憑證驗證」；
+- 反向代理公網網站或第三方服務：開「Host 使用後端位址」；
+- 後端前面還有按 SNI 分流的服務（如 frp `vhost_https`）：開「使用造訪網域作為 SNI」。
 
 ### 請求標頭與回應標頭 {#headers}
 

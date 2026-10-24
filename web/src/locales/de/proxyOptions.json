@@ -1,0 +1,10 @@
+{
+  "title": "Erläuterung der Optionen",
+  "docsLink": "Ausführliche Anleitung auf der Website",
+  "skipVerify": "Aktivieren, wenn das Backend HTTPS mit selbstsigniertem oder abgelaufenem Zertifikat nutzt, etwa der https-Port eines NAS oder Router-Menüs. Die Identität des Backends wird nicht mehr geprüft, daher nur für Backends im LAN verwenden.",
+  "targetHost": "Standardmäßig wird die vom Besucher verwendete Domain unverändert ans Backend gegeben. Aktivieren, wenn das Backend nur seine eigene Adresse akzeptiert, z. B. bei 400 / 403, Weiterleitung auf eine falsche Adresse oder Host-Fehlern; bei öffentlichen Diensten meist nötig.",
+  "noKeepAlive": "Standardmäßig werden Verbindungen zum Backend wiederverwendet, um Latenz zu sparen. Aktivieren, wenn das Backend gelegentlich Verbindungen zurücksetzt, Anfragen hängen oder es kein Keep-Alive unterstützt; jede Anfrage baut dann eine neue Verbindung auf.",
+  "forwarded": "Teilt dem Backend echte IP, ursprüngliches Protokoll (http / https), Domain und Port des Besuchers mit. Aktivieren, wenn das Backend echte IPs protokolliert oder wissen muss, dass außen HTTPS genutzt wird, um korrekte Links zu erzeugen; für die meisten Anwendungen empfohlen.",
+  "sendProxy": "Stellt der Verbindung einen PROXY-Protokoll-Header voran, um die echte IP zu übergeben – für Backends, die keine HTTP-Header lesen, etwa ein weiteres Gately, haproxy oder nginx mit proxy_protocol. Backends ohne passende Konfiguration schlagen sofort fehl; im Zweifel ausgeschaltet lassen.",
+  "sniFromHost": "Nur für HTTPS-Backends: sendet beim Handshake die vom Besucher verwendete Domain und prüft das Zertifikat dagegen. Aktivieren, wenn das Backend auf einem Port Zertifikate oder Weiterleitung nach Domain wählt, etwa frp vhost_https oder ein nginx mit mehreren HTTPS-Sites."
+}

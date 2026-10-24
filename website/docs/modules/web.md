@@ -21,17 +21,29 @@
 | 静态文件 | 目录需为绝对路径；关闭「目录列表」时，目录请求只在存在 `index.html` 时返回。「无扩展名地址」在文件不存在时再尝试 `路径.html` 与 `路径/index.html`（适用于 VitePress 等生成器，相当于 nginx 的 `try_files $uri $uri.html $uri/index.html`）；「404 页面」填写目录内的路径，如 `404.html`，以 404 状态返回 |
 | 固定文本 | 自定义内容、`Content-Type`（默认 `text/plain; charset=utf-8`）与状态码（100-599，默认 200） |
 
-反向代理站点的其他选项：
-
-- 使用后端 Host：Host 头改为后端地址，关闭时保留客户端请求的 Host；
-- 跳过后端证书校验、关闭 Keep-Alive；
-- 向后端发送 PROXY 协议（v2 头，传递真实客户端 IP，需要后端支持）；
-- 添加 `X-Forwarded-For` / `X-Forwarded-Proto` / `X-Forwarded-Host` / `X-Forwarded-Port` 与 `X-Real-IP`；
-- 使用访问域名作为 SNI（仅 HTTPS 后端）：握手时发送访客使用的域名，并按它校验证书，相当于 nginx 的 `proxy_ssl_server_name on; proxy_ssl_name $host`。后端按 SNI 分流时（例如 frp 的 `vhost_https`）需要开启。每个后端使用独立的连接池，不同域名的连接不会互相复用。
-
 所有类型的站点均可设置访问日志、跨域（CORS）、自定义请求头与响应头（每行 `Key: Value`，Value 留空表示删除该头），并可引用一个 [WAF 防火墙](/docs/modules/waf) 实例（实例不存在或停用时放行）。请求头、响应头与 Content-Type 的编辑方式见 [请求头与响应头](#headers)。
 
 访问日志会记录客户端 IP、域名、站点名称与状态码，可在日志中按站点、状态码、来源 IP 等条件筛选，见 [运行日志的查看与筛选](/docs/guide/configuration)。
+
+### 反向代理选项 {#proxy-options}
+
+位于站点编辑框「基本」页的「选项」，旁边的问号图标可在界面中查看简要说明并跳转到本节。
+
+| 选项 | 作用 | 什么时候开启 |
+| --- | --- | --- |
+| 跳过后端证书校验 | 连接 HTTPS 后端时不验证证书 | 后端使用自签名或过期证书，如 NAS、路由器管理页的 https 端口。关闭校验后无法确认后端身份，只建议用于内网后端 |
+| Host 使用后端地址 | 发往后端的 Host 头改为后端地址；关闭时（默认）保留访客请求的 Host | 后端只认自己的地址，例如返回 400 / 403、跳转到错误地址或提示 Host 不匹配；反代到公网网站或 CDN 时通常需要。后端按域名区分站点，或需要用访问域名生成链接时保持关闭 |
+| 禁用连接复用 | 每个请求都新建到后端的连接（关闭 Keep-Alive） | 后端偶尔出现连接被重置、请求卡住，或不支持长连接。会增加一些延迟，正常情况保持关闭 |
+| 添加 X-Forwarded-* | 写入 `X-Forwarded-For` / `X-Forwarded-Proto` / `X-Forwarded-Host` / `X-Forwarded-Port` 与 `X-Real-IP`，告诉后端访客的真实 IP、原始协议、域名和端口 | 后端需要记录真实 IP，或要知道外部是 HTTPS 才能生成正确链接（否则可能跳回 http 或登录后循环跳转）。多数应用建议开启 |
+| 向后端发送 PROXY v2 | 在 TCP 连接开头附加 PROXY 协议 v2 头，传递真实客户端 IP | 后端不读 HTTP 头但支持 PROXY 协议，如另一层 Gately、haproxy、开启 `proxy_protocol` 的 nginx。后端未配置接收时所有请求都会失败，不确定时保持关闭 |
+| 使用访问域名作为 SNI | 仅 HTTPS 后端：握手时发送访客使用的域名并按它校验证书，相当于 nginx 的 `proxy_ssl_server_name on; proxy_ssl_name $host` | 后端在同一端口按域名选择证书或分流，如 frp 的 `vhost_https`、托管多个 HTTPS 站点的 nginx。每个后端使用独立的连接池，不同域名的连接不会互相复用 |
+
+常见组合：
+
+- 反代内网的 Web 应用（如 `http://192.168.1.10:5000`）：只开「添加 X-Forwarded-*」；
+- 后端是自签名证书的 https 地址：再开「跳过后端证书校验」；
+- 反代公网网站或第三方服务：开「Host 使用后端地址」；
+- 后端前面还有按 SNI 分流的服务（如 frp `vhost_https`）：开「使用访问域名作为 SNI」。
 
 ### 请求头与响应头 {#headers}
 

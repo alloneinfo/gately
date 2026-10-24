@@ -21,17 +21,29 @@ Saving a change to a site or to the default site swaps the site list in place: t
 | Static files | The directory must be an absolute path. With "Directory listing" off, a directory request returns a response only when `index.html` exists. "Clean URLs" tries `path.html` and `path/index.html` when a file is missing (for VitePress and similar generators, like nginx `try_files $uri $uri.html $uri/index.html`). "404 page" is a path inside the directory, such as `404.html`, returned with status 404 |
 | Fixed text | Custom content, `Content-Type` (default `text/plain; charset=utf-8`) and status code (100-599, default 200) |
 
-Other options for reverse proxy sites:
-
-- Use backend Host: the Host header is changed to the backend address; when off, the Host from the client request is kept;
-- Skip backend certificate verification, disable Keep-Alive;
-- Send the PROXY protocol to the backend (v2 header, passes the real client IP, requires backend support);
-- Add `X-Forwarded-For` / `X-Forwarded-Proto` / `X-Forwarded-Host` / `X-Forwarded-Port` and `X-Real-IP`;
-- Use the visited domain as SNI (HTTPS backends only): the handshake carries the domain the visitor used and the certificate is checked against it, like nginx `proxy_ssl_server_name on; proxy_ssl_name $host`. Turn it on when the backend routes by SNI, for example frp's `vhost_https`. Every backend has its own connection pool, so connections are never reused across domains.
-
 Sites of every type can set an access log, cross-origin (CORS), custom request and response headers (one `Key: Value` per line; an empty Value removes that header), and can reference a [WAF Firewall](/en/docs/modules/waf) instance (if the instance does not exist or is disabled, requests pass through). See [Request and response headers](#headers) for how request headers, response headers and Content-Type are edited.
 
 Access log entries record the client IP, domain, site name and status code, so the log can be filtered by site, status code, client IP and more; see [viewing and filtering runtime logs](/en/docs/guide/configuration).
+
+### Reverse proxy options {#proxy-options}
+
+These are the "Options" on the "Basic" tab of the site editor. The question mark icon next to them shows a short explanation in the interface and links to this section.
+
+| Option | What it does | When to turn it on |
+| --- | --- | --- |
+| Skip backend certificate verification | Does not verify the certificate when connecting to an HTTPS backend | The backend uses a self-signed or expired certificate, such as the https port of a NAS or router admin page. The backend identity can no longer be confirmed, so use it only for LAN backends |
+| Use backend address as Host | Sets the Host header sent to the backend to the backend address; when off (default) the Host from the visitor request is kept | The backend only accepts its own address, e.g. it returns 400 / 403, redirects to the wrong address or reports a Host mismatch; usually needed when proxying to public websites or CDNs. Keep it off when the backend separates sites by domain or builds links with the visited domain |
+| Disable connection reuse | Opens a new backend connection for every request (Keep-Alive off) | The backend sometimes resets connections, requests hang, or it does not support persistent connections. Adds some latency, so keep it off normally |
+| Add X-Forwarded-* | Writes `X-Forwarded-For` / `X-Forwarded-Proto` / `X-Forwarded-Host` / `X-Forwarded-Port` and `X-Real-IP`, telling the backend the visitor's real IP, original protocol, domain and port | The backend logs real IPs or must know the outside is HTTPS to build correct links (otherwise it may bounce back to http or loop after login). Recommended for most apps |
+| Send PROXY v2 to the backend | Prepends a PROXY protocol v2 header to the TCP connection to pass the real client IP | The backend does not read HTTP headers but supports the PROXY protocol, such as another Gately, haproxy or nginx with `proxy_protocol`. If the backend is not configured to accept it, every request fails, so leave it off if unsure |
+| Use the visited domain as SNI | HTTPS backends only: sends the domain the visitor used during the handshake and verifies the certificate against it, like nginx `proxy_ssl_server_name on; proxy_ssl_name $host` | The backend selects certificates or routes by domain on one port, such as frp `vhost_https` or an nginx hosting several HTTPS sites. Every backend has its own connection pool, so connections are never reused across domains |
+
+Common combinations:
+
+- Proxying a LAN web app (e.g. `http://192.168.1.10:5000`): turn on only "Add X-Forwarded-*";
+- The backend is an https address with a self-signed certificate: also turn on "Skip backend certificate verification";
+- Proxying a public website or third-party service: turn on "Use backend address as Host";
+- Another service in front of the backend routes by SNI (e.g. frp `vhost_https`): turn on "Use the visited domain as SNI".
 
 ### Request and response headers {#headers}
 

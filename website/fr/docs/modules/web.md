@@ -21,17 +21,29 @@ Enregistrer une modification d'un site ou du site par défaut remplace la liste 
 | Fichiers statiques | Le répertoire doit être un chemin absolu. Avec « Liste du répertoire » désactivée, une requête sur un répertoire n'obtient de réponse que si `index.html` existe. « URL sans extension » essaie `path.html` et `path/index.html` lorsqu'un fichier est introuvable (pour VitePress et les générateurs similaires, comme `try_files $uri $uri.html $uri/index.html` de nginx). « Page 404 » est un chemin à l'intérieur du répertoire, comme `404.html`, renvoyé avec le statut 404 |
 | Texte fixe | Contenu personnalisé, `Content-Type` (`text/plain; charset=utf-8` par défaut) et code de statut (100-599, 200 par défaut) |
 
-Autres options des sites en proxy inverse :
-
-- Utiliser l'hôte du backend : l'en-tête Host est remplacé par l'adresse du backend ; lorsque l'option est désactivée, le Host de la requête du client est conservé ;
-- Ignorer la vérification du certificat du backend, désactiver Keep-Alive ;
-- Envoyer le protocole PROXY au backend (en-tête v2, transmet l'IP réelle du client, nécessite la prise en charge côté backend) ;
-- Ajouter `X-Forwarded-For` / `X-Forwarded-Proto` / `X-Forwarded-Host` / `X-Forwarded-Port` et `X-Real-IP` ;
-- Utiliser le domaine visité comme SNI (backends HTTPS uniquement) : la poignée de main TLS porte le domaine utilisé par le visiteur et le certificat est vérifié par rapport à lui, comme avec `proxy_ssl_server_name on; proxy_ssl_name $host` de nginx. Activez-la lorsque le backend route selon le SNI, par exemple le `vhost_https` de frp. Chaque backend a son propre pool de connexions, les connexions ne sont donc jamais réutilisées d'un domaine à l'autre.
-
 Les sites de tous types peuvent définir un journal d'accès, le cross-origin (CORS), des en-têtes de requête et de réponse personnalisés (un `Key: Value` par ligne ; une Value vide supprime cet en-tête), et peuvent référencer une instance de [Pare-feu WAF](/fr/docs/modules/waf) (si l'instance n'existe pas ou est désactivée, les requêtes passent sans filtrage). Voir [En-têtes de requête et de réponse](#headers) pour la modification des en-têtes de requête, des en-têtes de réponse et du Content-Type.
 
 Les entrées du journal d'accès enregistrent l'IP du client, le domaine, le nom du site et le code d'état : le journal peut ainsi être filtré par site, code d'état, IP source, etc. Voir [consulter et filtrer les journaux d'exécution](/fr/docs/guide/configuration).
+
+### Options du proxy inverse {#proxy-options}
+
+Ce sont les « Options » de l'onglet « Général » de l'éditeur de site. L'icône point d'interrogation à côté affiche une courte explication dans l'interface et renvoie à cette section.
+
+| Option | Effet | Quand l'activer |
+| --- | --- | --- |
+| Ignorer la vérification du certificat du backend | Ne vérifie pas le certificat lors de la connexion à un backend HTTPS | Le backend utilise un certificat auto-signé ou expiré, comme le port https d'un NAS ou de l'interface d'un routeur. L'identité du backend ne peut plus être confirmée : à réserver aux backends du réseau local |
+| Utiliser l'adresse du backend comme Host | Remplace l'en-tête Host envoyé au backend par l'adresse du backend ; désactivé (par défaut), le Host de la requête du visiteur est conservé | Le backend n'accepte que sa propre adresse, par ex. erreur 400 / 403, redirection vers une mauvaise adresse ou Host non reconnu ; généralement nécessaire vers des sites publics ou des CDN. Laissez désactivé si le backend distingue les sites par domaine ou génère des liens avec le domaine visité |
+| Désactiver la réutilisation des connexions | Ouvre une nouvelle connexion au backend pour chaque requête (Keep-Alive désactivé) | Le backend réinitialise parfois les connexions, des requêtes se bloquent ou il ne gère pas les connexions persistantes. Ajoute un peu de latence ; laissez désactivé en temps normal |
+| Ajouter X-Forwarded-* | Écrit `X-Forwarded-For` / `X-Forwarded-Proto` / `X-Forwarded-Host` / `X-Forwarded-Port` et `X-Real-IP` pour transmettre au backend l'IP réelle, le protocole d'origine, le domaine et le port du visiteur | Le backend journalise les vraies IP ou doit savoir que l'extérieur est en HTTPS pour générer des liens corrects (sinon il peut revenir en http ou boucler après connexion). Recommandé pour la plupart des applications |
+| Envoyer PROXY v2 au backend | Ajoute un en-tête de protocole PROXY v2 au début de la connexion TCP pour transmettre l'IP réelle du client | Le backend ne lit pas les en-têtes HTTP mais gère le protocole PROXY : un autre Gately, haproxy ou nginx avec `proxy_protocol`. Si le backend n'est pas configuré pour l'accepter, toutes les requêtes échouent ; laissez désactivé en cas de doute |
+| Utiliser le domaine visité comme SNI | Backends HTTPS uniquement : envoie lors de la négociation le domaine utilisé par le visiteur et vérifie le certificat avec, comme nginx `proxy_ssl_server_name on; proxy_ssl_name $host` | Le backend choisit certificat ou routage selon le domaine sur un même port, comme frp `vhost_https` ou un nginx hébergeant plusieurs sites HTTPS. Chaque backend a son propre pool de connexions, jamais partagé entre domaines |
+
+Combinaisons courantes :
+
+- Proxy vers une application web du réseau local (par ex. `http://192.168.1.10:5000`) : activez seulement « Ajouter X-Forwarded-* » ;
+- Le backend est une adresse https avec certificat auto-signé : activez aussi « Ignorer la vérification du certificat du backend » ;
+- Proxy vers un site public ou un service tiers : activez « Utiliser l'adresse du backend comme Host » ;
+- Un service placé devant le backend route selon le SNI (par ex. frp `vhost_https`) : activez « Utiliser le domaine visité comme SNI ».
 
 ### En-têtes de requête et de réponse {#headers}
 

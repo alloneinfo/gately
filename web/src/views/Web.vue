@@ -167,7 +167,11 @@
               <el-form-item :label="t('web.targets')" required>
                 <el-input v-model="targetsText" type="textarea" :rows="2" class="mono" :placeholder="t('web.targetsPlaceholder')" />
               </el-form-item>
-              <el-form-item :label="t('web.options')">
+              <el-form-item>
+                <template #label>
+                  <!-- 表单标签是顶端对齐的 flex 容器，文字与问号需包一层才能垂直居中 -->
+                  <span class="label-with-help">{{ t('web.options') }}<ProxyOptionsHelp /></span>
+                </template>
                 <el-checkbox v-model="site.insecureSkipVerify">{{ t('web.optSkipVerify') }}</el-checkbox>
                 <el-checkbox v-model="site.useTargetHost">{{ t('web.optTargetHost') }}</el-checkbox>
                 <el-checkbox v-model="site.disableKeepAlives">{{ t('web.optNoKeepAlive') }}</el-checkbox>
@@ -365,6 +369,7 @@ import { useListText, splitLines } from '../composables/useListText'
 import ListInput from '../components/ListInput.vue'
 import HeaderEditor from '../components/HeaderEditor.vue'
 import ContentTypeInput from '../components/ContentTypeInput.vue'
+import ProxyOptionsHelp from '../components/ProxyOptionsHelp.vue'
 import { usePolling } from '../composables/usePolling'
 
 interface Site {
@@ -871,6 +876,11 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+.label-with-help {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
 .listener-hint {
   margin-bottom: 16px;
 }

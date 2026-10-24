@@ -1,0 +1,10 @@
+{
+  "title": "Sobre estas opções",
+  "docsLink": "Ver o guia detalhado no site",
+  "skipVerify": "Ative quando o backend usa HTTPS com certificado autoassinado ou expirado, como a porta https de um NAS ou do painel do roteador. A identidade do backend deixa de ser verificada, então use apenas com backends da rede local.",
+  "targetHost": "Por padrão o domínio usado pelo visitante é repassado ao backend sem mudanças. Ative quando o backend só aceita o próprio endereço, por ex. retorna 400 / 403, redireciona para o endereço errado ou acusa Host incompatível; costuma ser necessário com serviços públicos.",
+  "noKeepAlive": "Por padrão as conexões com o backend são reaproveitadas para reduzir a latência. Ative quando o backend às vezes reinicia conexões, requisições travam ou ele não suporta keep-alive; cada requisição abrirá uma nova conexão.",
+  "forwarded": "Informa ao backend o IP real, o protocolo original (http / https), o domínio e a porta do visitante. Ative quando o backend registra IPs reais ou precisa saber que o acesso externo é HTTPS para gerar links corretos; recomendado para a maioria dos apps.",
+  "sendProxy": "Adiciona um cabeçalho do protocolo PROXY no início da conexão para repassar o IP real, para backends que não leem cabeçalhos HTTP, como outro Gately, haproxy ou nginx com proxy_protocol. Backends não configurados para recebê-lo falham na hora; na dúvida, deixe desligado.",
+  "sniFromHost": "Só para backends HTTPS: envia no handshake o domínio usado pelo visitante e valida o certificado com ele. Ative quando o backend escolhe certificado ou roteamento por domínio na mesma porta, como frp vhost_https ou um nginx com vários sites HTTPS."
+}

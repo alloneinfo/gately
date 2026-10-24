@@ -21,17 +21,29 @@ Wird eine Site oder die Standard-Site gespeichert, wird die Site-Liste an Ort un
 | Statische Dateien | Das Verzeichnis muss ein absoluter Pfad sein. Ist „Verzeichnisauflistung“ aus, liefert eine Verzeichnisanfrage nur dann eine Antwort, wenn `index.html` existiert. „URLs ohne Endung“ probiert `path.html` und `path/index.html`, wenn eine Datei fehlt (für VitePress und ähnliche Generatoren, wie nginx `try_files $uri $uri.html $uri/index.html`). „404-Seite“ ist ein Pfad innerhalb des Verzeichnisses, etwa `404.html`, der mit Status 404 ausgeliefert wird |
 | Fester Text | Eigener Inhalt, `Content-Type` (Standard `text/plain; charset=utf-8`) und Statuscode (100-599, Standard 200) |
 
-Weitere Optionen für Reverse-Proxy-Sites:
-
-- Backend-Host verwenden: Der Host-Header wird auf die Backend-Adresse geändert; ist die Option aus, bleibt der Host der Client-Anfrage erhalten;
-- Prüfung des Backend-Zertifikats überspringen, Keep-Alive deaktivieren;
-- PROXY-Protokoll an das Backend senden (v2-Header, reicht die echte Client-IP durch, setzt Unterstützung durch das Backend voraus);
-- `X-Forwarded-For` / `X-Forwarded-Proto` / `X-Forwarded-Host` / `X-Forwarded-Port` und `X-Real-IP` hinzufügen;
-- Aufgerufene Domain als SNI verwenden (nur HTTPS-Backends): Der Handshake trägt die vom Besucher verwendete Domain, und das Zertifikat wird dagegen geprüft, wie bei nginx `proxy_ssl_server_name on; proxy_ssl_name $host`. Aktivieren Sie die Option, wenn das Backend nach SNI routet, zum Beispiel bei `vhost_https` von frp. Jedes Backend hat seinen eigenen Verbindungspool, daher werden Verbindungen nie domainübergreifend wiederverwendet.
-
 Sites jedes Typs können ein Zugriffslog, Cross-Origin (CORS) sowie eigene Request- und Response-Header festlegen (je Zeile ein `Key: Value`; ein leerer Value entfernt den Header) und auf eine Instanz der [WAF-Firewall](/de/docs/modules/waf) verweisen (existiert die Instanz nicht oder ist sie deaktiviert, werden Anfragen durchgelassen). Wie Anfrage-Header, Antwort-Header und Content-Type bearbeitet werden, steht unter [Anfrage- und Antwort-Header](#headers).
 
 Einträge im Zugriffslog enthalten Client-IP, Domain, Site-Name und Statuscode, sodass sich das Protokoll nach Site, Statuscode, Quell-IP und mehr filtern lässt; siehe [Laufzeitprotokolle anzeigen und filtern](/de/docs/guide/configuration).
+
+### Reverse-Proxy-Optionen {#proxy-options}
+
+Das sind die „Optionen“ im Tab „Allgemein“ des Site-Editors. Das Fragezeichen daneben zeigt in der Oberfläche eine Kurzbeschreibung und verlinkt auf diesen Abschnitt.
+
+| Option | Wirkung | Wann einschalten |
+| --- | --- | --- |
+| Zertifikatsprüfung des Backends überspringen | Prüft das Zertifikat beim Verbinden mit einem HTTPS-Backend nicht | Das Backend nutzt ein selbstsigniertes oder abgelaufenes Zertifikat, etwa der https-Port eines NAS oder Router-Menüs. Die Identität des Backends lässt sich dann nicht mehr bestätigen, daher nur für Backends im LAN verwenden |
+| Backend-Adresse als Host verwenden | Setzt den an das Backend gesendeten Host-Header auf die Backend-Adresse; ausgeschaltet (Standard) bleibt der Host der Besucheranfrage erhalten | Das Backend akzeptiert nur seine eigene Adresse, z. B. bei 400 / 403, Weiterleitung auf eine falsche Adresse oder Host-Fehlern; bei öffentlichen Websites oder CDNs meist nötig. Ausgeschaltet lassen, wenn das Backend Sites nach Domain trennt oder Links mit der aufgerufenen Domain erzeugt |
+| Verbindungswiederverwendung deaktivieren | Baut für jede Anfrage eine neue Verbindung zum Backend auf (Keep-Alive aus) | Das Backend setzt gelegentlich Verbindungen zurück, Anfragen hängen oder es unterstützt keine dauerhaften Verbindungen. Erhöht die Latenz etwas, daher normalerweise ausgeschaltet lassen |
+| X-Forwarded-* hinzufügen | Schreibt `X-Forwarded-For` / `X-Forwarded-Proto` / `X-Forwarded-Host` / `X-Forwarded-Port` und `X-Real-IP` und teilt dem Backend echte IP, ursprüngliches Protokoll, Domain und Port des Besuchers mit | Das Backend protokolliert echte IPs oder muss wissen, dass außen HTTPS genutzt wird, um korrekte Links zu erzeugen (sonst springt es auf http zurück oder leitet nach dem Login endlos um). Für die meisten Anwendungen empfohlen |
+| PROXY v2 an das Backend senden | Stellt der TCP-Verbindung einen PROXY-Protokoll-v2-Header voran, um die echte Client-IP zu übergeben | Das Backend liest keine HTTP-Header, unterstützt aber das PROXY-Protokoll, etwa ein weiteres Gately, haproxy oder nginx mit `proxy_protocol`. Ist das Backend nicht dafür konfiguriert, schlägt jede Anfrage fehl; im Zweifel ausgeschaltet lassen |
+| Aufgerufene Domain als SNI verwenden | Nur HTTPS-Backends: sendet beim Handshake die vom Besucher verwendete Domain und prüft das Zertifikat dagegen, wie nginx `proxy_ssl_server_name on; proxy_ssl_name $host` | Das Backend wählt auf einem Port Zertifikat oder Weiterleitung nach Domain, etwa frp `vhost_https` oder ein nginx mit mehreren HTTPS-Sites. Jedes Backend hat einen eigenen Verbindungspool, Verbindungen werden nie domainübergreifend wiederverwendet |
+
+Typische Kombinationen:
+
+- Web-App im LAN (z. B. `http://192.168.1.10:5000`) weiterleiten: nur „X-Forwarded-* hinzufügen“ einschalten;
+- Das Backend ist eine https-Adresse mit selbstsigniertem Zertifikat: zusätzlich „Zertifikatsprüfung des Backends überspringen“;
+- Öffentliche Website oder fremden Dienst weiterleiten: „Backend-Adresse als Host verwenden“ einschalten;
+- Vor dem Backend sitzt ein Dienst, der nach SNI verteilt (z. B. frp `vhost_https`): „Aufgerufene Domain als SNI verwenden“ einschalten.
 
 ### Anfrage- und Antwort-Header {#headers}
 

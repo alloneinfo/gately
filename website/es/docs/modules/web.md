@@ -21,17 +21,29 @@ Al guardar un cambio en un sitio o en el sitio por defecto, la lista de sitios s
 | Archivos estáticos | El directorio debe ser una ruta absoluta. Con «Listado de directorios» desactivado, una petición a un directorio solo devuelve respuesta si existe `index.html`. «URL sin extensión» prueba `ruta.html` y `ruta/index.html` cuando falta un archivo (para VitePress y generadores similares, como `try_files $uri $uri.html $uri/index.html` de nginx). «Página 404» es una ruta dentro del directorio, como `404.html`, que se devuelve con estado 404 |
 | Texto fijo | Contenido personalizado, `Content-Type` (por defecto `text/plain; charset=utf-8`) y código de estado (100-599, por defecto 200) |
 
-Otras opciones de los sitios de proxy inverso:
-
-- Usar el Host del backend: la cabecera Host se cambia a la dirección del backend; si está desactivado, se conserva el Host de la petición del cliente;
-- Omitir la verificación del certificado del backend, desactivar Keep-Alive;
-- Enviar el protocolo PROXY al backend (cabecera v2, transmite la IP real del cliente, requiere compatibilidad del backend);
-- Añadir `X-Forwarded-For` / `X-Forwarded-Proto` / `X-Forwarded-Host` / `X-Forwarded-Port` y `X-Real-IP`;
-- Usar el dominio visitado como SNI (solo backends HTTPS): el handshake lleva el dominio que usó el visitante y el certificado se verifica con él, como `proxy_ssl_server_name on; proxy_ssl_name $host` de nginx. Actívalo cuando el backend enrute por SNI, por ejemplo `vhost_https` de frp. Cada backend tiene su propio pool de conexiones, así que las conexiones nunca se reutilizan entre dominios.
-
 Los sitios de cualquier tipo pueden definir un registro de acceso, orígenes cruzados (CORS), cabeceras de petición y respuesta personalizadas (un `Clave: Valor` por línea; un Valor vacío elimina esa cabecera) y pueden hacer referencia a una instancia de [Cortafuegos WAF](/es/docs/modules/waf) (si la instancia no existe o está desactivada, las peticiones pasan sin filtrar). Consulta [Cabeceras de petición y de respuesta](#headers) para ver cómo se editan las cabeceras de petición, las de respuesta y el Content-Type.
 
 Las entradas del registro de acceso guardan la IP del cliente, el dominio, el nombre del sitio y el código de estado, de modo que el registro se puede filtrar por sitio, código de estado, IP de origen y más; consulte [ver y filtrar los registros de ejecución](/es/docs/guide/configuration).
+
+### Opciones del proxy inverso {#proxy-options}
+
+Son las «Opciones» de la pestaña «Básico» del editor de sitios. El icono de interrogación junto a ellas muestra una explicación breve en la interfaz y enlaza con esta sección.
+
+| Opción | Qué hace | Cuándo activarla |
+| --- | --- | --- |
+| Omitir verificación del certificado del backend | No verifica el certificado al conectar con un backend HTTPS | El backend usa un certificado autofirmado o caducado, como el puerto https de un NAS o del panel de un router. Ya no se puede confirmar la identidad del backend, así que úsala solo con backends de la red local |
+| Usar la dirección del backend como Host | Cambia la cabecera Host enviada al backend por la dirección del backend; desactivada (por defecto) se conserva el Host de la petición del visitante | El backend solo acepta su propia dirección, p. ej. devuelve 400 / 403, redirige a una dirección errónea o indica que el Host no coincide; suele hacer falta con sitios públicos o CDN. Mantenla desactivada si el backend separa sitios por dominio o genera enlaces con el dominio visitado |
+| Desactivar reutilización de conexiones | Abre una conexión nueva con el backend en cada petición (Keep-Alive desactivado) | El backend a veces reinicia conexiones, las peticiones se quedan colgadas o no admite conexiones persistentes. Añade algo de latencia; normalmente mantenla desactivada |
+| Añadir X-Forwarded-* | Escribe `X-Forwarded-For` / `X-Forwarded-Proto` / `X-Forwarded-Host` / `X-Forwarded-Port` y `X-Real-IP` para indicar al backend la IP real, el protocolo original, el dominio y el puerto del visitante | El backend registra IP reales o necesita saber que fuera se usa HTTPS para generar enlaces correctos (si no, puede volver a http o entrar en un bucle tras iniciar sesión). Recomendada para la mayoría de aplicaciones |
+| Enviar PROXY v2 al backend | Antepone a la conexión TCP una cabecera del protocolo PROXY v2 para pasar la IP real del cliente | El backend no lee cabeceras HTTP pero admite el protocolo PROXY, como otro Gately, haproxy o nginx con `proxy_protocol`. Si el backend no está configurado para aceptarla, todas las peticiones fallan; si dudas, déjala desactivada |
+| Usar el dominio visitado como SNI | Solo backends HTTPS: envía en el handshake el dominio que usó el visitante y verifica el certificado con él, como nginx `proxy_ssl_server_name on; proxy_ssl_name $host` | El backend elige certificado o enrutamiento por dominio en un mismo puerto, como frp `vhost_https` o un nginx con varios sitios HTTPS. Cada backend tiene su propio pool de conexiones, que nunca se reutilizan entre dominios |
+
+Combinaciones habituales:
+
+- Proxy hacia una aplicación web de la red local (p. ej. `http://192.168.1.10:5000`): activa solo «Añadir X-Forwarded-*»;
+- El backend es una dirección https con certificado autofirmado: activa también «Omitir verificación del certificado del backend»;
+- Proxy hacia un sitio público o un servicio de terceros: activa «Usar la dirección del backend como Host»;
+- Delante del backend hay un servicio que enruta por SNI (p. ej. frp `vhost_https`): activa «Usar el dominio visitado como SNI».
 
 ### Cabeceras de petición y de respuesta {#headers}
 
