@@ -132,6 +132,8 @@
   "sharedUsersHelp": "可在多個站點共用的登入帳號，可為每個使用者啟用 TOTP 二次驗證；站點在「網頁認證」中勾選「使用共用使用者」後生效，可取代 Authelia 等外部認證",
   "ssoDomain": "單一登入網域",
   "ssoDomainHelp": "例如 example.com：共用使用者在該網域及其子網域的任一站點登入後，其他站點無需再登入；留空則每個站點單獨登入",
+  "oidcDivider": "OIDC 身分提供者",
+  "oidcIntro": "把上面的共用使用者提供給 Gitea、OpenList、Grafana 等支援 OpenID Connect 的應用程式登入，應用程式能區分不同使用者，可取代 Authelia 的 OIDC 功能。",
   "sharedUsersSite": "共用使用者",
   "sharedUsersSiteLabel": "使用共用使用者（支援 TOTP 與單一登入）",
   "sharedUsersSiteHelp": "在 Web 服務全域設定中管理共用使用者；可與下方站點自有使用者同時使用"

@@ -21,6 +21,25 @@
         <el-button v-if="u.totpSecret" size="small" text type="danger" @click="u.totpSecret = ''">{{ t('sharedUsers.totpDisable') }}</el-button>
         <el-input v-model="u.remark" :placeholder="t('common.remark')" class="remark" />
       </div>
+      <!-- 可选的身份信息：OIDC 身份提供方把它们作为 email、name、groups 声明提供给应用 -->
+      <div class="user-row profile">
+        <el-input v-model="u.email" :placeholder="t('sharedUsers.emailPlaceholder')" class="half" />
+        <el-input v-model="u.displayName" :placeholder="t('sharedUsers.displayNamePlaceholder')" class="half" />
+      </div>
+      <div class="user-row">
+        <el-select
+          v-model="u.groups"
+          multiple
+          filterable
+          allow-create
+          default-first-option
+          :reserve-keyword="false"
+          :placeholder="t('sharedUsers.groupsPlaceholder')"
+          class="groups"
+        >
+          <el-option v-for="g in allGroups" :key="g" :label="g" :value="g" />
+        </el-select>
+      </div>
     </div>
     <el-button size="small" :icon="Plus" @click="add">{{ t('sharedUsers.add') }}</el-button>
 
@@ -38,7 +57,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { Plus, Trash2 } from 'lucide-vue-next'
@@ -53,9 +72,11 @@ const qr = ref('')
 const qrSecret = ref('')
 const qrName = ref('')
 const loadingIndex = ref(-1)
+// 已用过的分组，作为其他用户的候选项
+const allGroups = computed(() => [...new Set(model.value.flatMap((u) => u.groups ?? []))].sort())
 
 function add() {
-  model.value.push({ name: '', password: '', totpSecret: '', remark: '' })
+  model.value.push({ name: '', password: '', totpSecret: '', remark: '', email: '', displayName: '', groups: [] })
 }
 
 // setupTOTP 生成新密钥并展示二维码；保存设置后生效，旧密钥同时作废
@@ -102,9 +123,20 @@ async function setupTOTP(u: AuthUser, i: number) {
   width: 160px;
   flex: none;
 }
-.remark {
+.remark,
+.groups,
+.half {
   flex: 1;
   min-width: 0;
+}
+@media (max-width: 640px) {
+  .user-row.profile {
+    flex-wrap: wrap;
+  }
+  .user-row.profile > * {
+    width: 100%;
+    flex: 1 1 100%;
+  }
 }
 .qr-wrap {
   display: flex;

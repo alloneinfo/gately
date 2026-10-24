@@ -5,6 +5,10 @@ export interface AuthUser {
   password: string
   totpSecret: string
   remark: string
+  // 可选的身份信息，供 OIDC 身份提供方作为 email、name、groups 声明提供给应用
+  email?: string
+  displayName?: string
+  groups?: string[]
   hasPassword?: boolean
 }
 

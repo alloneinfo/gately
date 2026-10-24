@@ -329,6 +329,9 @@
           <el-input v-if="settings" v-model="settings.ssoDomain" class="w-260" placeholder="example.com" />
           <div class="form-help">{{ t('web.ssoDomainHelp') }}</div>
         </el-form-item>
+        <el-divider content-position="left">{{ t('web.oidcDivider') }}</el-divider>
+        <div class="form-help oidc-intro">{{ t('web.oidcIntro') }}</div>
+        <OIDCProvider v-if="settings" v-model="settings.oidc" />
         <AccessSettings v-if="settings" v-model:auto-ban-seconds="settings.autoBanSeconds" />
         <IPListsManager v-if="settings" @changed="loadIPLists" />
       </el-form>
@@ -355,6 +358,8 @@ import { useCompactView } from '../composables/useCompactView'
 import { useCollapsed } from '../composables/useCollapsed'
 import OAuthProviders from '../components/OAuthProviders.vue'
 import SharedUsers from '../components/SharedUsers.vue'
+import OIDCProvider from '../components/OIDCProvider.vue'
+import { oidcFromAPI, oidcToAPI, type OIDCSettings } from '../oidc'
 import { type AuthUser, fromAPI, toAPI } from '../sharedUsers'
 import AccessSettings from '../components/AccessSettings.vue'
 import IPListsManager from '../components/IPListsManager.vue'
@@ -501,6 +506,7 @@ interface WebSettings {
   autoBanSeconds: number
   authUsers: AuthUser[]
   ssoDomain: string
+  oidc: OIDCSettings
 }
 const settings = ref<WebSettings>()
 // 定时刷新，标签页在后台时暂停
@@ -833,9 +839,11 @@ async function resetDefaultSite(lv: ListenerView) {
 }
 
 async function fetchSettings() {
-  const s = await api.get<Omit<WebSettings, 'oauthProviders' | 'authUsers'> & { oauthProviders: OAuthProvider[] | null; authUsers: AuthUser[] | null }>('/api/webservice/settings')
+  const s = await api.get<
+    Omit<WebSettings, 'oauthProviders' | 'authUsers' | 'oidc'> & { oauthProviders: OAuthProvider[] | null; authUsers: AuthUser[] | null; oidc?: Partial<OIDCSettings> | null }
+  >('/api/webservice/settings')
   moduleEnabled.value = s.enable
-  return { ...s, oauthProviders: s.oauthProviders ?? [], authUsers: fromAPI(s.authUsers), ssoDomain: s.ssoDomain ?? '' }
+  return { ...s, oauthProviders: s.oauthProviders ?? [], authUsers: fromAPI(s.authUsers), ssoDomain: s.ssoDomain ?? '', oidc: oidcFromAPI(s.oidc) }
 }
 
 async function openSettings() {
@@ -848,7 +856,7 @@ async function enableModule() {
   enabling.value = true
   try {
     const s = await fetchSettings()
-    await api.put('/api/webservice/settings', { ...s, enable: true, authUsers: toAPI(s.authUsers) })
+    await api.put('/api/webservice/settings', { ...s, enable: true, authUsers: toAPI(s.authUsers), oidc: oidcToAPI(s.oidc) })
     ElMessage.success(t('web.moduleEnabled'))
     await Promise.all([fetchSettings(), load()])
   } catch (e) {
@@ -860,7 +868,11 @@ async function enableModule() {
 
 async function saveSettings() {
   try {
-    await api.put('/api/webservice/settings', { ...settings.value, authUsers: toAPI(settings.value?.authUsers ?? []) })
+    const s = settings.value
+    if (!s) {
+      return
+    }
+    await api.put('/api/webservice/settings', { ...s, authUsers: toAPI(s.authUsers), oidc: oidcToAPI(s.oidc) })
     settingsVisible.value = false
     ElMessage.success(t('common.saved'))
     await Promise.all([fetchSettings(), load()])
@@ -888,6 +900,9 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+.oidc-intro {
+  margin: -4px 0 14px;
+}
 .label-with-help {
   display: inline-flex;
   align-items: center;

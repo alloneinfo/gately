@@ -10,5 +10,8 @@
   "add": "Ajouter un utilisateur partagé",
   "nameFirst": "Saisissez d'abord le nom d'utilisateur",
   "qrTitle": "TOTP de {name}",
-  "qrHelp": "Scannez avec une application d'authentification (Google Authenticator, 1Password…) ou saisissez la clé. Effectif après enregistrement ; régénérer invalide l'ancienne clé"
+  "qrHelp": "Scannez avec une application d'authentification (Google Authenticator, 1Password…) ou saisissez la clé. Effectif après enregistrement ; régénérer invalide l'ancienne clé",
+  "emailPlaceholder": "E-mail (facultatif)",
+  "displayNamePlaceholder": "Nom affiché (facultatif)",
+  "groupsPlaceholder": "Groupes (facultatif, Entrée pour ajouter)"
 }

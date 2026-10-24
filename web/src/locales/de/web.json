@@ -132,6 +132,8 @@
   "sharedUsersHelp": "Anmeldekonten für mehrere Sites, je Benutzer optional mit TOTP. Eine Site nutzt sie, wenn unter Web-Auth „Gemeinsame Benutzer verwenden“ aktiviert ist; ersetzt externe Authentifizierung wie Authelia",
   "ssoDomain": "SSO-Domain",
   "ssoDomainHelp": "z. B. example.com: Nach der Anmeldung auf einer Site dieser Domain oder ihrer Subdomains ist auf den anderen keine erneute Anmeldung nötig. Leer = Anmeldung pro Site",
+  "oidcDivider": "OIDC-Identitätsanbieter",
+  "oidcIntro": "Ermöglicht Gitea, OpenList, Grafana und anderen OpenID-Connect-Anwendungen die Anmeldung mit den oben stehenden gemeinsamen Benutzern, sodass jede Anwendung weiß, wer angemeldet ist. Kann den OIDC-Anbieter von Authelia ersetzen.",
   "sharedUsersSite": "Gemeinsame Benutzer",
   "sharedUsersSiteLabel": "Gemeinsame Benutzer verwenden (TOTP und Single Sign-on)",
   "sharedUsersSiteHelp": "Verwaltung in den globalen Einstellungen des Webdienstes; zusätzlich zu den eigenen Benutzern der Site"

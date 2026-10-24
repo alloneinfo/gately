@@ -10,5 +10,8 @@
   "add": "共有ユーザーを追加",
   "nameFirst": "先にユーザー名を入力してください",
   "qrTitle": "{name} の TOTP",
-  "qrHelp": "認証アプリ（Google Authenticator、1Password など）でスキャンするか鍵を手入力してください。設定を保存すると有効になり、再生成すると古い鍵は無効になります"
+  "qrHelp": "認証アプリ（Google Authenticator、1Password など）でスキャンするか鍵を手入力してください。設定を保存すると有効になり、再生成すると古い鍵は無効になります",
+  "emailPlaceholder": "メール（任意）",
+  "displayNamePlaceholder": "表示名（任意）",
+  "groupsPlaceholder": "グループ（任意、Enter で追加）"
 }

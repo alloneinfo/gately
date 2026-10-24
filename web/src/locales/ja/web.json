@@ -132,6 +132,8 @@
   "sharedUsersHelp": "複数サイトで共用するログインアカウントで、ユーザーごとに TOTP の 2 段階認証を有効にできます。サイトの Web 認証で「共有ユーザーを使う」をオンにすると有効になり、Authelia などの外部認証の代わりになります",
   "ssoDomain": "SSO ドメイン",
   "ssoDomainHelp": "例：example.com。共有ユーザーがこのドメインとサブドメインのいずれかのサイトでログインすると、他のサイトでは再ログイン不要です。空ならサイトごとにログイン",
+  "oidcDivider": "OIDC ID プロバイダー",
+  "oidcIntro": "上の共有ユーザーで Gitea、OpenList、Grafana など OpenID Connect 対応アプリにログインできるようにします。アプリ側でユーザーを区別でき、Authelia の OIDC 機能の代わりになります。",
   "sharedUsersSite": "共有ユーザー",
   "sharedUsersSiteLabel": "共有ユーザーを使う（TOTP とシングルサインオン）",
   "sharedUsersSiteHelp": "共有ユーザーは Web サービスの全体設定で管理します。下のサイト独自ユーザーと併用できます"
