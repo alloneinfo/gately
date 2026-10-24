@@ -1,6 +1,6 @@
 # Introduction
 
-Gately is an open-source, auditable network gateway toolkit for home networks, NAS boxes, cloud hosts and servers of all kinds. DDNS, STUN NAT traversal, port forwarding, reverse proxy, certificates, WAF and more are bundled into a single ~32 MB binary, and Lucky configurations can be imported in one click.
+Gately is an open-source, auditable network gateway toolkit for home networks, NAS boxes, cloud hosts and servers of all kinds. DDNS, STUN NAT traversal, port forwarding, reverse proxy, certificates, WAF and more are bundled into a single ~32 MB binary.
 
 ## Why Gately
 
@@ -14,7 +14,7 @@ Software that sits on the network edge and holds DNS keys and certificate privat
 ## Design principles
 
 1. **Transparency**: no connections to project servers by default; every outbound address is visible, editable and can be turned off.
-2. **Migratable**: `.lkcf` configuration import is supported.
+2. **Migratable**: existing configurations such as nginx sites can be imported; imported rules are disabled by default for a gradual switchover.
 3. **Auditable configuration**: plain JSON (file mode 0600) that goes straight into git for diffs and rollbacks.
 4. **Single-file deployment**: one static binary with the frontend embedded, supporting Docker, systemd and OpenWrt.
 
@@ -35,5 +35,5 @@ Dynamic DNS, STUN traversal, port forwarding, SSL certificates, web services (re
 ## Next steps
 
 - Want to try it right away: [Quick Start](/en/docs/guide/quick-start)
-- Already using Lucky: [Migration guide](/en/docs/guide/migration)
+- Migrating from existing tools: [Migration guide](/en/docs/guide/migration)
 - Care about privacy and security: [Security Model & Privacy Promise](/en/docs/guide/security)

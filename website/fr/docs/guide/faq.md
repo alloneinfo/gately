@@ -28,10 +28,6 @@ Oui. Chaque version fournit des paquets OpenWrt : le `.ipk` pour OpenWrt 24.10 e
 
 La redirection de ports, STUN et les services Web écoutent directement sur les ports de l'hôte. Avec le réseau bridge, il faut publier soi-même chaque port utilisé.
 
-## Peut-il fonctionner en parallèle de Lucky ?
-
-Oui. Le port d'administration est par défaut 16680, sans conflit avec le 16601 de Lucky. Les règles importées sont désactivées par défaut pour ne pas entrer en concurrence avec un Lucky encore actif sur les ports et les mappages UPnP du routeur.
-
 ## Pourquoi dois-je fournir moi-même les binaires de Tailscale, frp et cloudflared ?
 
 Ces trois modules supervisent les programmes externes officiels. Gately ne les embarque pas, ce qui permet d'utiliser à tout moment la dernière version amont. Consultez [Configuration et options d'exécution](/fr/docs/guide/configuration) pour savoir où les placer.

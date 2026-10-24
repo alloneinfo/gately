@@ -25,7 +25,7 @@
       "guide/install": "Installation",
       "guide/configuration": "Konfiguration & Laufzeitoptionen",
       "guide/cli-mcp": "CLI & MCP",
-      "guide/migration": "Migration von Lucky",
+      "guide/migration": "Migrationsanleitung",
       "guide/faq": "FAQ",
       "modules/index": "Modulübersicht",
       "modules/ddns": "Dynamisches DNS (DDNS)",
@@ -267,10 +267,6 @@
     "fullInstall": "Vollständige Installationsanleitung →",
     "faqTitle": "FAQ",
     "faqs": [
-      {
-        "q": "Kann ich meine bestehende Lucky-Konfiguration direkt übernehmen?",
-        "a": "Ja. Wählen Sie unter Einstellungen → Sicherung & Migration eine .lkcf-Datei oder ein Zip der gesamten Site-Konfiguration, prüfen Sie die Vorschau und importieren Sie. Importierte Regeln sind standardmäßig deaktiviert, sodass Sie parallel zu Lucky arbeiten, Modul für Modul umschalten und jederzeit zurückwechseln können."
-      },
       {
         "q": "Muss Gately sich mit Ihren Servern verbinden?",
         "a": "Nein. Gately verbindet sich standardmäßig mit keinem Projektserver und übermittelt keine Daten."

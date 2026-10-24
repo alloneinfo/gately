@@ -33,7 +33,3 @@ A Webhook can be called when the IP changes or a sync fails.
 - Create a sub-account key limited to DNS record editing for your DNS provider. Avoid using the main account key;
 - After creating a task, click "Force sync" to confirm that the record has been updated;
 - The public-IP lookup address no longer depends on any service operated by the project, and you can change it in a task at any time.
-
-## Migrating from Lucky
-
-DDNS tasks can be imported from `lucky_ddns.lkcf`, covering 11 providers. Lucky's official IP lookup addresses are removed during import. See the [Migration Guide](/en/docs/guide/migration) for details.

@@ -17,8 +17,6 @@ Jeder Benutzer kann auf ein Verzeichnis abgebildet werden oder mehrere Verzeichn
 - **Einzelnes Verzeichnis**: `root` und `readOnly` setzen. Nach der Anmeldung ist das Wurzelverzeichnis dieses Verzeichnis.
 - **Mehrere Verzeichnisse**: Klicken Sie in der Oberfläche auf „Mehrere Verzeichnisse einbinden“ oder tragen Sie mehrere Einträge in `mounts` ein. Jeder Eintrag hat `name` (Anzeigename, darf kein `/` enthalten und muss pro Benutzer eindeutig sein), `path` (einen absoluten Pfad) und `readOnly`. Nach der Anmeldung listet das Wurzelverzeichnis die Verzeichnisse nach Namen auf. Das Wurzelverzeichnis selbst ist nicht beschreibbar, und Dateien lassen sich nicht zwischen verschiedenen Verzeichnissen verschieben.
 
-Bei der Migration von Lucky wird die Einbindungsliste eines Benutzers in mehrere Verzeichnisse umgewandelt, und Benutzer, die in Lucky mehrfach mit gleichem Namen und Passwort vorkommen, werden zu einem Benutzer zusammengeführt.
-
 ## FTP
 
 Konfiguration unter „FTP-Dienst“ in der Gruppe „Dateidienste“. FTP und FTPS werden unterstützt.
@@ -36,8 +34,6 @@ Konfiguration unter „FTP-Dienst“ in der Gruppe „Dateidienste“. FTP und F
 | `disableActiveMode` | Aus | Nur passiven Modus verwenden, was für NAT-Umgebungen besser geeignet ist |
 | `users` | Keine | Mehrere Benutzer mit denselben Feldern wie bei WebDAV: `name`, `password`, `root`, `readOnly` oder `mounts`; Benutzernamen müssen eindeutig sein |
 
-Dienstparameter und Benutzer lassen sich aus der FTP-Konfiguration von Lucky importieren (siehe [Migration von Lucky](/de/docs/guide/migration)).
-
 ## Speicher-Einbindungen
 
 Fügen Sie Einbindungen unter „Speicher-Einbindungen“ in der Gruppe „Dateidienste“ hinzu und verwalten Sie Dateien online auf der Seite.
@@ -51,8 +47,6 @@ Fügen Sie Einbindungen unter „Speicher-Einbindungen“ in der Gruppe „Datei
 | `skipVerify` | Prüfung des HTTPS-Zertifikats überspringen (für `webdav`) |
 | `domain` | Domäne oder Arbeitsgruppe für die SMB-Anmeldung, meist leer (für `smb`) |
 | `readOnly` | Schreibgeschützt einbinden; der Dateimanager lehnt jeden Schreibvorgang ab |
-
-Lokale Verzeichnisse und WebDAV-Speicher lassen sich aus der Speicherverwaltung von Lucky importieren. Alibaba Cloud Drive und Systemeinbindungen werden nicht migriert.
 
 Der Online-Dateimanager unterstützt das Durchsuchen von Verzeichnissen, das Herunterladen von Dateien, Streaming-Uploads (die ganze Datei wird nicht in den Arbeitsspeicher geladen), das Anlegen von Verzeichnissen, Umbenennen und Löschen. Eine Einbindung kann als Zielort einer Sicherungsaufgabe dienen: Sicherungsdateien werden in das angegebene Verzeichnis der Einbindung geschrieben, und alte Dateien werden gemäß der Aufbewahrungsrichtlinie bereinigt.
 

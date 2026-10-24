@@ -25,7 +25,7 @@
       "guide/install": "安装部署",
       "guide/configuration": "配置与运行参数",
       "guide/cli-mcp": "命令行与 MCP",
-      "guide/migration": "从 Lucky 迁移",
+      "guide/migration": "迁移指南",
       "guide/faq": "常见问题",
       "modules/index": "模块总览",
       "modules/ddns": "动态域名 DDNS",
@@ -267,10 +267,6 @@
     "fullInstall": "完整安装文档 →",
     "faqTitle": "常见问题",
     "faqs": [
-      {
-        "q": "可以直接迁移现有 Lucky 配置吗？",
-        "a": "可以。在「设置 → 备份与迁移」选择 .lkcf 文件或整站配置 zip，预览后导入。导入的规则默认停用，可与 Lucky 并存，逐个模块切换，也随时可以回退。"
-      },
       {
         "q": "需要联网到你们的服务器吗？",
         "a": "不需要。Gately 默认不连接任何项目方服务器，也不会上报信息。"

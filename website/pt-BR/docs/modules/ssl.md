@@ -42,7 +42,3 @@ Ao editar o certificado, destinos com configuração inalterada não são implan
 ## Nota de segurança
 
 As chaves privadas ficam no `ssl.json` do diretório de configuração. Guarde esse arquivo com cuidado e, se for versioná-lo, confirme que o repositório é privado.
-
-## Migrar do Lucky
-
-Certificados já emitidos são importados como estão e não são solicitados de novo antes de expirar. No ZeroSSL, uma nova conta ACME é registrada com as credenciais EAB do Lucky. Veja os detalhes no [Guia de migração](/pt-BR/docs/guide/migration).

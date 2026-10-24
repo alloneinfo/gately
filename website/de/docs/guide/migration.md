@@ -33,7 +33,7 @@ Unterstützte Dateien:
 | lucky_reverseproxy.lkcf | Web-Dienste | Sites, Authentifizierung, WAF-Verweise (ist die WAF einer Unterregel auf main gesetzt, wird die Instanz der Listen-Regel übernommen) |
 | lucky_coraza.lkcf | WAF-Firewall | Der Instanz-Schlüssel bleibt erhalten, Site-Verweise bleiben gültig |
 | lucky_wol.lkcf | Wake-on-LAN | |
-| lucky_webterminal.lkcf | Web-Terminal | SSH-Verbindungen; beim ersten Verbinden wird der Host-Fingerabdruck gespeichert |
+| lucky_webterminal.lkcf | Web-Terminal | SSH- und Telnet-Verbindungen, Proxys, `keyFile`, `workDir`, Timeouts, Umgebungsvariablen, Verzeichnisse für den Schnellzugriff, Sitzungseinstellungen, globale Kurzbefehle sowie Nutzungsvereinbarung und 2FA-Secret; beim ersten SSH-Verbinden wird der Host-Fingerabdruck gespeichert |
 | lucky_webdav.lkcf | WebDAV | Die Einbindungsliste eines Benutzers wird zu mehreren Verzeichnissen, Benutzer mit gleichem Namen und Passwort werden zusammengeführt; Verweise auf Einbindungen der Speicherverwaltung werden zu den jeweiligen lokalen Verzeichnissen aufgelöst |
 | lucky_ftpserver.lkcf | FTP | Listen-Port, Bereich der passiven Ports, TLS- und Timeout-Parameter sowie Benutzer (Behandlung wie bei WebDAV) |
 | lucky_storagemanagement.lkcf | Speicher-Einbindungen | Lokale Verzeichnisse und WebDAV-Speicher; Alibaba Cloud Drive, Systemeinbindungen und Zugriffs-Proxys werden nicht migriert |

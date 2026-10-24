@@ -96,7 +96,3 @@ SSH 연결을 처음 맺을 때 서버의 호스트 지문을 기록하고 신�
 ## API
 
 전체 API 설명은 [웹 터미널 API](/ko/docs/reference/webterminal-api)를 참고하세요.
-
-## Lucky에서 마이그레이션
-
-`lucky_webterminal.lkcf`를 가져올 수 있으며 SSH와 Telnet 연결, 프록시, `keyFile`, `workDir`, 타임아웃, 환경 변수, 빠른 접근 디렉터리, 세션 설정, 전역 빠른 명령, 사용자 약관과 2FA 키를 포함합니다. SSH 연결은 처음 연결할 때 호스트 지문을 기록합니다.

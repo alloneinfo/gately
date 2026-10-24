@@ -28,10 +28,6 @@ Ja. Jede Version enthält OpenWrt-Pakete: das `.ipk` für OpenWrt 24.10 und ält
 
 Portweiterleitung, STUN und Web-Dienste lauschen direkt auf Ports des Hosts. Beim Bridge-Netzwerk müssen Sie jeden verwendeten Port selbst veröffentlichen.
 
-## Kann es parallel zu Lucky laufen?
-
-Ja. Der Verwaltungsport ist standardmäßig 16680 und kollidiert nicht mit dem Port 16601 von Lucky. Importierte Regeln sind standardmäßig deaktiviert, damit sie nicht mit einem noch laufenden Lucky um Ports und UPnP-Zuordnungen des Routers konkurrieren.
-
 ## Warum muss ich die Binärdateien von Tailscale, frp und cloudflared selbst bereitstellen?
 
 Diese drei Module betreiben die offiziellen externen Programme. Gately liefert sie nicht mit, sodass Sie stets die neueste Upstream-Version nutzen können. Wohin Sie sie legen, steht unter [Konfiguration & Laufzeitoptionen](/de/docs/guide/configuration).

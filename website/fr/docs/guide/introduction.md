@@ -1,6 +1,6 @@
 # Introduction
 
-Gately est une boîte à outils de passerelle réseau open source et auditable, destinée aux réseaux domestiques, aux NAS, aux serveurs cloud et à tous types de serveurs. DDNS, traversée NAT STUN, redirection de ports, proxy inverse, certificats, WAF et bien plus sont réunis dans un seul binaire d'environ 32 Mo, et les configurations Lucky s'importent en un clic.
+Gately est une boîte à outils de passerelle réseau open source et auditable, destinée aux réseaux domestiques, aux NAS, aux serveurs cloud et à tous types de serveurs. DDNS, traversée NAT STUN, redirection de ports, proxy inverse, certificats, WAF et bien plus sont réunis dans un seul binaire d'environ 32 Mo.
 
 ## Pourquoi Gately
 
@@ -14,7 +14,7 @@ Un logiciel placé à la frontière du réseau, qui détient des clés DNS et de
 ## Principes de conception
 
 1. **Transparence** : aucune connexion aux serveurs du projet par défaut ; chaque adresse externe est visible, modifiable et désactivable.
-2. **Migration facile** : import de configurations `.lkcf` pris en charge.
+2. **Migration facile** : import de configurations existantes, comme des sites nginx ; les règles importées sont désactivées par défaut pour une bascule progressive.
 3. **Configuration auditable** : JSON en clair (droits 0600) qui se versionne directement avec git pour les diff et les retours arrière.
 4. **Déploiement en un seul fichier** : un binaire statique avec le frontend intégré, compatible Docker, systemd et OpenWrt.
 
@@ -35,5 +35,5 @@ DNS dynamique, traversée STUN, redirection de ports, certificats SSL, services 
 ## Étapes suivantes
 
 - Pour essayer tout de suite : [Démarrage rapide](/fr/docs/guide/quick-start)
-- Vous utilisez déjà Lucky : [Guide de migration](/fr/docs/guide/migration)
+- Migrer depuis des outils existants : [Guide de migration](/fr/docs/guide/migration)
 - Vous tenez à la confidentialité et à la sécurité : [Modèle de sécurité et engagement de confidentialité](/fr/docs/guide/security)

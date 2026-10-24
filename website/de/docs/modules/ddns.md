@@ -33,7 +33,3 @@ Bei einer IP-Änderung oder einer fehlgeschlagenen Synchronisierung kann ein Web
 - Legen Sie beim DNS-Anbieter einen Schlüssel für ein Unterkonto an, der auf das Bearbeiten von DNS-Einträgen beschränkt ist. Vermeiden Sie den Schlüssel des Hauptkontos;
 - Klicken Sie nach dem Anlegen einer Aufgabe auf „Sync erzwingen“, um zu prüfen, ob der Eintrag aktualisiert wurde;
 - Die Adresse zur Abfrage der öffentlichen IP hängt von keinem vom Projekt betriebenen Dienst ab und lässt sich jederzeit in einer Aufgabe ändern.
-
-## Migration von Lucky
-
-DDNS-Aufgaben lassen sich aus `lucky_ddns.lkcf` importieren, mit 11 Anbietern. Die offiziellen IP-Abfrageadressen von Lucky werden beim Import entfernt. Details finden Sie in der [Migrationsanleitung](/de/docs/guide/migration).

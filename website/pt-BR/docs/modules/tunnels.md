@@ -28,14 +28,12 @@ Tokens e chaves são armazenados com permissão 0600. O token do cloudflared é 
 - **Cliente frpc**: proxies tcp / udp / http / https / stcp / xtcp; adicionar ou remover um tem efeito imediato;
 - **Servidor frps**: lista de portas permitidas, subdomínios, painel;
 - **Importar configuração existente**: "Importar configuração", no cabeçalho da página, aceita `frpc.ini` / `frps.ini` antigos (incluindo a seção `[common]`) e `toml` do frp 0.52+. Você pode escolher um arquivo ou colar o conteúdo. Veja primeiro a prévia do resultado e dos campos ignorados e depois confirme a importação. No cliente, é possível acrescentar (proxies com o mesmo nome permanecem inalterados) ou substituir todos os proxies. A importação não altera o estado de ativação e também pode ser chamada pela API em `POST /api/frp/import`.
-- **Migrar do Lucky**: a primeira instância de cliente e a primeira instância de servidor em `lucky_frp.lkcf` podem ser importadas diretamente. Veja [Migrar do Lucky](/pt-BR/docs/guide/migration).
 
 ## Cloudflare Tunnel
 
 - Túneis com token e túneis temporários trycloudflare;
 - Vários túneis com reinício automático;
 - Exibe o endereço público.
-- Túneis que usam token de túnel podem ser importados do Lucky.
 
 ## Como escolher
 

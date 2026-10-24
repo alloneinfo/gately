@@ -42,7 +42,3 @@ docker run -d --name gately --network host \
 | 把一個連接埠轉發到內網另一台裝置 | [連接埠轉發](/zh-TW/docs/modules/portforward) |
 | 用一個網域和 HTTPS 存取多個內網服務 | [SSL 憑證](/zh-TW/docs/modules/ssl) + [Web 服務](/zh-TW/docs/modules/web) |
 | 異地組網 | [Tailscale / frp](/zh-TW/docs/modules/tunnels) |
-
-## 從 Lucky 遷移
-
-已經在使用 Lucky 時，不必重新設定：在「設定 → 備份與遷移」匯入 `.lkcf` 或整站設定 zip 即可，詳見 [遷移指南](/zh-TW/docs/guide/migration)。

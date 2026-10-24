@@ -33,7 +33,7 @@ Gately 可以直接讀取 Lucky 的 `.lkcf` 設定檔，或 Lucky「備份設定
 | lucky_reverseproxy.lkcf | Web 服務 | 站台、驗證、WAF 引用（子規則 WAF 為 main 時沿用監聽規則的實例） |
 | lucky_coraza.lkcf | WAF 防火牆 | 沿用實例 key，站台引用保持有效 |
 | lucky_wol.lkcf | 網路喚醒 | |
-| lucky_webterminal.lkcf | Web 終端機 | SSH 連線；首次連線時記錄主機指紋 |
+| lucky_webterminal.lkcf | Web 終端機 | SSH 與 Telnet 連線、代理、`keyFile`、`workDir`、逾時、環境變數、快速存取目錄、工作階段設定、全域快捷命令，以及使用者協議與 2FA 金鑰；SSH 連線首次連線時會記錄主機指紋 |
 | lucky_webdav.lkcf | WebDAV | 使用者的掛載清單轉為多個目錄，同名同密碼的使用者合併；引用儲存管理的掛載解析為對應的本機目錄 |
 | lucky_ftpserver.lkcf | FTP | 監聽連接埠、被動連接埠範圍、TLS 與逾時參數，以及使用者（處理方式同 WebDAV） |
 | lucky_storagemanagement.lkcf | 儲存掛載 | 本機目錄與 WebDAV 儲存；阿里雲盤、系統掛載與存取代理不遷移 |

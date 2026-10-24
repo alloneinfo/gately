@@ -17,8 +17,6 @@ Cada usuário pode ser mapeado para um diretório ou montar vários diretórios:
 - **Diretório único**: defina `root` e `readOnly`. Após o login, a raiz é esse diretório.
 - **Vários diretórios**: clique em "Montar vários diretórios" na interface ou preencha várias entradas em `mounts`. Cada entrada tem `name` (nome de exibição, não pode conter `/` e é único para cada usuário), `path` (um caminho absoluto) e `readOnly`. Após o login, a raiz lista os diretórios pelo nome. A própria raiz não é gravável, e arquivos não podem ser movidos entre diretórios diferentes.
 
-Na migração do Lucky, a lista de montagens de um usuário é convertida em vários diretórios, e usuários que aparecem mais de uma vez no Lucky com o mesmo nome e a mesma senha são mesclados em um só.
-
 ## FTP
 
 Configure em "Serviço FTP", no grupo "Serviços de arquivos". FTP e FTPS são compatíveis.
@@ -36,8 +34,6 @@ Configure em "Serviço FTP", no grupo "Serviços de arquivos". FTP e FTPS são c
 | `disableActiveMode` | Desativado | Usa apenas o modo passivo, mais adequado a ambientes com NAT |
 | `users` | Nenhum | Vários usuários, com os mesmos campos do WebDAV: `name`, `password`, `root`, `readOnly` ou `mounts`; os nomes de usuário devem ser únicos |
 
-Os parâmetros do serviço e os usuários podem ser importados da configuração de FTP do Lucky (veja [Migrar do Lucky](/pt-BR/docs/guide/migration)).
-
 ## Montagens de armazenamento
 
 Adicione montagens em "Montagens de armazenamento", no grupo "Serviços de arquivos", e gerencie os arquivos online na própria página.
@@ -51,8 +47,6 @@ Adicione montagens em "Montagens de armazenamento", no grupo "Serviços de arqui
 | `skipVerify` | Ignora a validação do certificado HTTPS (usado por `webdav`) |
 | `domain` | Domínio ou grupo de trabalho para a autenticação SMB, normalmente vazio (usado por `smb`) |
 | `readOnly` | Monta como somente leitura; o gerenciador de arquivos rejeita qualquer operação de escrita |
-
-Diretórios locais e armazenamentos WebDAV podem ser importados do gerenciamento de armazenamento do Lucky. Aliyun Drive e montagens do sistema não são migrados.
 
 O gerenciador de arquivos online permite navegar por diretórios, baixar arquivos, enviar em streaming (o arquivo inteiro não é carregado na memória), criar diretórios, renomear e excluir. Uma montagem pode servir como local de destino de uma tarefa de backup: os arquivos de backup são gravados no diretório indicado na montagem, e os arquivos antigos são removidos de acordo com a política de retenção.
 

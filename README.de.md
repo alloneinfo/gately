@@ -2,7 +2,7 @@
 
 [English](README.md) | [简体中文](README.zh-CN.md) | [繁體中文](README.zh-TW.md) | [日本語](README.ja.md) | [한국어](README.ko.md) | [Español](README.es.md) | [Français](README.fr.md) | **Deutsch** | [Русский](README.ru.md) | [Português (Brasil)](README.pt-BR.md)
 
-Ein quelloffenes, prüfbares Toolkit für Netzwerk-Gateways – für Heimnetz, NAS, Cloud-Hosts und beliebige Server. DDNS, STUN-Traversal, Portweiterleitung, Reverse-Proxy, Zertifikate, WAF und weitere gängige Funktionen sind in einer einzigen Datei von etwa 32 MB vereint; bestehende Lucky-Konfigurationen lassen sich importieren.
+Ein quelloffenes, prüfbares Toolkit für Netzwerk-Gateways – für Heimnetz, NAS, Cloud-Hosts und beliebige Server. DDNS, STUN-Traversal, Portweiterleitung, Reverse-Proxy, Zertifikate, WAF und weitere gängige Funktionen sind in einer einzigen Datei von etwa 32 MB vereint.
 
 > **fnOS-Nutzer:** Gately gibt es als native fnOS-App. Sie ist in das **einheitliche fnOS-Gateway** eingebunden, öffnet sich über das Symbol auf dem fnOS-Desktop und funktioniert unter derselben Adresse, die Sie für fnOS verwenden, auch über Ihre Remote-Domain – ohne zusätzlich freigegebenen Port. Nach dem Aktivieren können sich **fnOS-Administratoren direkt mit ihrer fnOS-Sitzung anmelden**, ohne Gately-Passwort und ohne Bestätigungscode. Siehe [Native fnOS-App](#native-fnos-app).
 
@@ -60,7 +60,7 @@ Gately ist vollständig quelloffen, sodass Nutzer und Community Quellcode und Ko
 | Native fnOS-App | Offline-`.fpk`-Pakete (x86 / ARM); in das einheitliche fnOS-Gateway eingebunden, Start über das Symbol auf dem fnOS-Desktop, auch über Ihre Remote-Domain von fnOS erreichbar; fnOS-Administratoren können sich mit ihrer fnOS-Sitzung anmelden (standardmäßig aus); läuft als root, um auf 80/443 zu lauschen und Docker zu verwalten |
 | Audit und Verlauf | Audit-Log für Anmeldungen, Konfigurationsänderungen und Zugriffe auf sensible Inhalte (Request-Bodys und Geheimnisse werden nie protokolliert); jede überschriebene Konfigurationsdatei behält ihre früheren Versionen mit Diff und Rollback per Klick; deklaratives Konfigurationsverzeichnis (`-apply`) für GitOps |
 | Monitoring und Selbsttest | Globaler Prometheus-Endpunkt `/api/metrics` (Zertifikate, DDNS, STUN, Portweiterleitung, Web-Dienste) mit fertigem Grafana-Dashboard; Netzwerk-Selbsttest per Klick (öffentliche IP, CGNAT, Uhrzeit, Ports 80/443, DDNS-Auflösung, Zertifikatsablauf, HTTPS-Sites ohne Zertifikat, frp-Proxy-Konflikte) |
-| Migration | Import von Lucky-`.lkcf`-Dateien oder Konfigurations-ZIPs der gesamten Instanz: Portweiterleitung, DDNS, STUN, Zertifikate, Reverse-Proxy, WAF, Wake-on-LAN, Web-Terminal, WebDAV, Grundeinstellungen; Import von nginx-Konfigurationen (auch die Ausgabe von `nginx -T`): Reverse-Proxy und upstream, statische Verzeichnisse, Weiterleitungen, Backends pro Pfad, Zugriffskontrolle, `auth_request` wird zu Forward-Auth |
+| Migration | Import von nginx-Konfigurationen (auch die Ausgabe von `nginx -T`): Reverse-Proxy und upstream, statische Verzeichnisse, Weiterleitungen, Backends pro Pfad, Zugriffskontrolle, `auth_request` wird zu Forward-Auth |
 
 ## Leistung
 
@@ -156,10 +156,6 @@ Beim Upgrade von einer älteren Version wird das bisherige globale API-Token aut
 
 Diese drei Module verwalten offizielle externe Programme (automatischer Neustart, Logs werden in der Oberfläche gesammelt). Gately selbst enthält sie nicht, sodass stets die neueste Upstream-Version genutzt werden kann. Die Programme werden in dieser Reihenfolge gesucht: der in den Moduleinstellungen angegebene Pfad, `PATH`, das Unterverzeichnis `bin/` im Konfigurationsverzeichnis. Bei Docker-Deployments legen Sie die Binärdatei einfach in das eingebundene Konfigurationsverzeichnis, z. B. `./gately-data/bin/frpc`; für Tailscale müssen `tailscale` und `tailscaled` bereitgestellt werden. Token und Schlüssel in den Konfigurationsdateien werden mit Berechtigung 0600 gespeichert; das cloudflared-Token wird über eine Umgebungsvariable übergeben und taucht nicht in der Prozessliste auf.
 
-### Migration von Lucky
-
-Siehe die [Migrationsanleitung](https://gately.cn/de/docs/guide/migration). Kurzfassung: Wählen Sie unter „Einstellungen → Aus Lucky importieren“ die Datei `lucky_*.lkcf` aus dem Lucky-Konfigurationsverzeichnis, prüfen Sie die Vorschau und importieren Sie. Importierte Regeln sind standardmäßig deaktiviert; deaktivieren Sie Modul für Modul in Lucky und aktivieren Sie es in Gately.
-
 ## Entwicklung
 
 Voraussetzungen: Go 1.26+, Node.js 24+, pnpm.
@@ -179,7 +175,6 @@ Einige Tests werden standardmäßig übersprungen und brauchen zusätzliche Vora
 | --- | --- |
 | ACME-End-to-End (Pebble) | pebble und pebble-challtestsrv installieren, `GATELY_PEBBLE_BIN` und `GATELY_PEBBLE_SRC` setzen (läuft in der CI automatisch) |
 | Echte öffentliche STUN-Server | `GATELY_NET_TEST=1` |
-| Import-Prüfung mit echter Lucky-Konfiguration | `GATELY_LUCKY_SAMPLE` usw., siehe `TestImportRealSample` im jeweiligen Modul |
 
 Verzeichnisstruktur und Technologieauswahl siehe [docs/de/ROADMAP.md](docs/de/ROADMAP.md).
 
@@ -187,8 +182,8 @@ Der Quellcode der Website ([gately.cn](https://gately.cn)) liegt in `website/` u
 
 ## Beitragsrichtlinien
 
-- Die Kompatibilität mit Lucky beruht auf öffentlich beobachtbarem Verhalten, Schnittstellen und Konfigurationsformaten. Reichen Sie keinen Code ein, der aus Lucky-Binärdateien oder Frontend-Artefakten kopiert wurde.
-- Neue Module benötigen: Konfigurationsstruktur und Validierung, Start/Stopp zur Laufzeit, REST-Schnittstelle, Unit-Tests; Module, die sich von Lucky migrieren lassen, implementieren `luckyimport.Importer`, Module, die ihren Status auf der Übersichtsseite anzeigen sollen, implementieren `module.Summarizer`.
+- Code zur Kompatibilität darf nur auf öffentlich beobachtbarem Verhalten, Schnittstellen und Konfigurationsformaten beruhen. Reichen Sie keinen Code ein, der aus fremden Binärdateien oder Frontend-Artefakten kopiert wurde.
+- Neue Module benötigen: Konfigurationsstruktur und Validierung, Start/Stopp zur Laufzeit, REST-Schnittstelle, Unit-Tests; Module, die ihren Status auf der Übersichtsseite anzeigen sollen, implementieren `module.Summarizer`.
 - Code-Kommentare werden auf Chinesisch verfasst; Kontrollanweisungen müssen geschweifte Klammern verwenden.
 
 ## Community

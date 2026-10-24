@@ -42,7 +42,3 @@ Lors de la modification d'un certificat, les déploiements dont les réglages de
 ## Note de sécurité
 
 Les clés privées sont stockées dans `ssl.json`, dans le répertoire de configuration. Conservez ce fichier en lieu sûr, et assurez-vous que le dépôt est privé si vous le placez sous gestion de versions.
-
-## Migration depuis Lucky
-
-Les certificats déjà émis sont importés tels quels et ne sont pas redemandés avant leur expiration. ZeroSSL enregistre un nouveau compte ACME à partir des identifiants EAB de Lucky. Consultez le [Guide de migration](/fr/docs/guide/migration) pour plus de détails.

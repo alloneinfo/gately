@@ -17,8 +17,6 @@ Chaque utilisateur peut être associé à un seul répertoire, ou monter plusieu
 - **Répertoire unique** : définissez `root` et `readOnly`. Après la connexion, la racine est ce répertoire.
 - **Plusieurs répertoires** : cliquez sur « Monter plusieurs répertoires » dans l'interface, ou renseignez plusieurs entrées dans `mounts`. Chaque entrée comporte `name` (nom affiché, ne peut pas contenir `/`, unique pour un même utilisateur), `path` (un chemin absolu) et `readOnly`. Après la connexion, la racine liste les répertoires par nom. La racine elle-même n'est pas modifiable, et les fichiers ne peuvent pas être déplacés d'un répertoire à un autre.
 
-Lors d'une migration depuis Lucky, la liste de montages d'un utilisateur est convertie en plusieurs répertoires, et les utilisateurs qui apparaissent plusieurs fois dans Lucky avec le même nom et le même mot de passe sont fusionnés en un seul.
-
 ## FTP
 
 Configurez-le dans « Service FTP » du groupe « Services de fichiers ». FTP et FTPS sont pris en charge.
@@ -36,8 +34,6 @@ Configurez-le dans « Service FTP » du groupe « Services de fichiers ». FTP e
 | `disableActiveMode` | Désactivé | Utilise uniquement le mode passif, mieux adapté aux environnements NAT |
 | `users` | Aucun | Plusieurs utilisateurs, avec les mêmes champs que WebDAV : `name`, `password`, `root`, `readOnly` ou `mounts` ; les noms d'utilisateur doivent être uniques |
 
-Les paramètres du service et les utilisateurs peuvent être importés depuis la configuration FTP de Lucky (voir [Migrer depuis Lucky](/fr/docs/guide/migration)).
-
 ## Montages de stockage
 
 Ajoutez des montages dans « Montages de stockage » du groupe « Services de fichiers », et gérez les fichiers en ligne depuis la page.
@@ -51,8 +47,6 @@ Ajoutez des montages dans « Montages de stockage » du groupe « Services de fi
 | `skipVerify` | Ignore la vérification du certificat HTTPS (utilisé par `webdav`) |
 | `domain` | Domaine ou groupe de travail pour l'authentification SMB, généralement vide (utilisé par `smb`) |
 | `readOnly` | Monte en lecture seule ; le gestionnaire de fichiers rejette toute opération d'écriture |
-
-Les répertoires locaux et les stockages WebDAV peuvent être importés depuis la gestion du stockage de Lucky. Alibaba Cloud Drive et les montages système ne sont pas migrés.
 
 Le gestionnaire de fichiers en ligne permet de parcourir les répertoires, télécharger des fichiers, téléverser en flux (le fichier entier n'est pas chargé en mémoire), créer des répertoires, renommer et supprimer. Un montage peut servir d'emplacement cible pour une tâche de sauvegarde : les fichiers de sauvegarde sont écrits dans le répertoire indiqué du montage, et les anciens fichiers sont supprimés selon la politique de rétention.
 

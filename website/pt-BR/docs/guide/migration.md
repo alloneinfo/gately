@@ -33,7 +33,7 @@ Arquivos compatíveis:
 | lucky_reverseproxy.lkcf | Serviços Web | Sites, autenticação e referências a WAF (quando o WAF da sub-regra é main, usa a instância da regra de escuta) |
 | lucky_coraza.lkcf | Firewall WAF | Mantém a key da instância, e as referências dos sites continuam válidas |
 | lucky_wol.lkcf | Wake-on-LAN | |
-| lucky_webterminal.lkcf | Terminal Web | Conexões SSH; a impressão digital do host é registrada na primeira conexão |
+| lucky_webterminal.lkcf | Terminal Web | Conexões SSH e Telnet, proxies, `keyFile`, `workDir`, timeouts, variáveis de ambiente, diretórios de acesso rápido, configurações de sessão, atalhos globais, o termo de uso e o segredo do 2FA; a impressão digital do host é registrada na primeira conexão SSH |
 | lucky_webdav.lkcf | WebDAV | A lista de montagens do usuário vira vários diretórios, e usuários com o mesmo nome e senha são mesclados; montagens que referenciam o gerenciamento de armazenamento são resolvidas para o diretório local correspondente |
 | lucky_ftpserver.lkcf | FTP | Porta de escuta, intervalo de portas passivas, TLS e parâmetros de timeout, além dos usuários (tratados como no WebDAV) |
 | lucky_storagemanagement.lkcf | Montagens de armazenamento | Diretórios locais e armazenamento WebDAV; Aliyun Drive, montagens do sistema e proxy de acesso não são migrados |

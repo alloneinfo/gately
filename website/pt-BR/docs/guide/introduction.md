@@ -1,6 +1,6 @@
 # Introdução
 
-O Gately é um kit de gateway de rede de código aberto e auditável, para redes domésticas, NAS, servidores em nuvem e servidores de todo tipo. DDNS, travessia de NAT com STUN, redirecionamento de portas, proxy reverso, certificados, WAF e mais vêm reunidos em um único binário de cerca de 32 MB, e as configurações do Lucky podem ser importadas.
+O Gately é um kit de gateway de rede de código aberto e auditável, para redes domésticas, NAS, servidores em nuvem e servidores de todo tipo. DDNS, travessia de NAT com STUN, redirecionamento de portas, proxy reverso, certificados, WAF e mais vêm reunidos em um único binário de cerca de 32 MB.
 
 ## Por que o Gately
 
@@ -14,7 +14,7 @@ O Gately reúne DDNS, travessia STUN, proxy reverso e outros recursos e é total
 ## Princípios de design
 
 1. **Transparência**: por padrão, nenhuma conexão com servidores do projeto; todo endereço externo é visível, editável e pode ser desativado.
-2. **Migração fácil**: importação de `.lkcf`.
+2. **Migração fácil**: importação de configurações existentes, como sites do nginx; as regras importadas ficam desativadas por padrão, para uma transição gradual.
 3. **Configuração auditável**: JSON em texto simples (permissão de arquivo 0600) que vai direto para o git, com diff e rollback.
 4. **Implantação em um único arquivo**: um binário estático com o frontend embutido, compatível com Docker, systemd e OpenWrt.
 
@@ -35,5 +35,5 @@ DNS dinâmico, travessia STUN, redirecionamento de portas, certificados SSL, ser
 ## Próximos passos
 
 - Quer testar agora: [Início rápido](/pt-BR/docs/guide/quick-start)
-- Já usa o Lucky: [Guia de migração](/pt-BR/docs/guide/migration)
+- Vindo de outras ferramentas: [Guia de migração](/pt-BR/docs/guide/migration)
 - Se importa com privacidade e segurança: [Modelo de segurança e compromisso de privacidade](/pt-BR/docs/guide/security)

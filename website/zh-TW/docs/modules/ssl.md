@@ -42,7 +42,3 @@
 ## 安全提示
 
 私鑰儲存在設定目錄的 `ssl.json` 中，請妥善保管該檔案，納入版本庫時確認儲存庫為私有。
-
-## 從 Lucky 遷移
-
-已簽發的憑證可原樣匯入，到期前不會重新申請。ZeroSSL 沿用 Lucky 中的 EAB 憑據註冊新的 ACME 帳號。詳見 [遷移指南](/zh-TW/docs/guide/migration)。

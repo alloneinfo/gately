@@ -2,7 +2,7 @@
 
 [English](README.md) | [简体中文](README.zh-CN.md) | [繁體中文](README.zh-TW.md) | [日本語](README.ja.md) | [한국어](README.ko.md) | **Español** | [Français](README.fr.md) | [Deutsch](README.de.md) | [Русский](README.ru.md) | [Português (Brasil)](README.pt-BR.md)
 
-Conjunto de herramientas de puerta de enlace de red, de código abierto y auditable, para redes domésticas, NAS, hosts en la nube y todo tipo de servidores. DDNS, túneles STUN, reenvío de puertos, proxy inverso, certificados, WAF y otras funciones habituales se integran en un único archivo de unos 32 MB, y es posible importar configuraciones existentes de Lucky.
+Conjunto de herramientas de puerta de enlace de red, de código abierto y auditable, para redes domésticas, NAS, hosts en la nube y todo tipo de servidores. DDNS, túneles STUN, reenvío de puertos, proxy inverso, certificados, WAF y otras funciones habituales se integran en un único archivo de unos 32 MB.
 
 > **Usuarios de fnOS:** Gately se distribuye como aplicación nativa de fnOS. Se integra en la **pasarela unificada de fnOS**, de modo que se abre desde el icono del escritorio de fnOS y funciona en la misma dirección que usas para fnOS, incluido tu dominio remoto, sin abrir ningún puerto adicional. Si lo activas, **los administradores de fnOS pueden iniciar sesión directamente con su sesión de fnOS**, sin contraseña de Gately ni código de verificación en dos pasos. Consulta [Aplicación nativa para fnOS](#aplicación-nativa-para-fnos).
 
@@ -60,7 +60,7 @@ Gately es totalmente abierto para que usuarios y comunidad puedan revisar direct
 | Aplicación nativa para fnOS | Paquetes `.fpk` sin conexión (x86 / ARM); integrada en la pasarela unificada de fnOS, se abre desde el icono del escritorio de fnOS y funciona a través de tu dominio remoto de fnOS; los administradores de fnOS pueden iniciar sesión con su sesión de fnOS (desactivado por defecto); se ejecuta como root para escuchar en 80/443 y gestionar Docker |
 | Auditoría e historial | Registro de auditoría de inicios de sesión, cambios de configuración y accesos a contenido sensible (nunca registra cuerpos de petición ni secretos); cada archivo de configuración sobrescrito conserva sus versiones anteriores con comparación de diferencias y reversión con un clic; directorio de configuración declarativa (`-apply`) para GitOps |
 | Monitorización y autodiagnóstico | Endpoint global de Prometheus `/api/metrics` (certificados, DDNS, STUN, reenvío de puertos, servicios web) con un panel de Grafana listo para usar; autodiagnóstico de red con un clic (IP pública, CGNAT, reloj, puertos 80/443, resolución DDNS, vencimiento de certificados, sitios HTTPS sin certificado, conflictos de proxies frp) |
-| Migración | Importa `.lkcf` de Lucky o el zip de configuración completa: reenvío de puertos, DDNS, STUN, certificados, proxy inverso, WAF, Wake-on-LAN, terminal web, WebDAV, ajustes básicos; importación de configuración de nginx (admite la salida de `nginx -T`): proxy inverso y upstream, directorios estáticos, redirecciones, backends por ruta, control de acceso, con `auth_request` convertido en autenticación delegada |
+| Migración | Importación de configuración de nginx (admite la salida de `nginx -T`): proxy inverso y upstream, directorios estáticos, redirecciones, backends por ruta, control de acceso, con `auth_request` convertido en autenticación delegada |
 
 ## Rendimiento
 
@@ -156,10 +156,6 @@ Al actualizar desde una versión anterior, el token de API global original se co
 
 Estos tres módulos gestionan programas externos oficiales (reinicio automático, registros agregados en la interfaz). Gately no los incluye, de modo que siempre puedes usar la última versión del proyecto original. Los programas se buscan en este orden: la ruta indicada en la configuración del módulo, `PATH` y el subdirectorio `bin/` del directorio de configuración. En despliegues con Docker, basta con colocar el binario en el directorio de configuración montado, por ejemplo `./gately-data/bin/frpc`; Tailscale requiere proporcionar tanto `tailscale` como `tailscaled`. Los tokens y claves de los archivos de configuración se guardan con permisos 0600, y el token de cloudflared se pasa mediante una variable de entorno, por lo que no aparece en la lista de procesos.
 
-### Migrar desde Lucky
-
-Consulta la [guía de migración](https://gately.cn/es/docs/guide/migration). Pasos resumidos: en «Ajustes → Importar desde Lucky», selecciona el archivo `lucky_*.lkcf` del directorio de configuración de Lucky, revisa la vista previa e importa; las reglas importadas quedan desactivadas por defecto, así que desactívalas en Lucky y actívalas en Gately módulo por módulo.
-
 ## Desarrollo
 
 Requisitos: Go 1.26+, Node.js 24+, pnpm.
@@ -179,7 +175,6 @@ Algunas pruebas se omiten por defecto y requieren condiciones adicionales:
 | --- | --- |
 | ACME de extremo a extremo (Pebble) | Instala pebble y pebble-challtestsrv y define `GATELY_PEBBLE_BIN` y `GATELY_PEBBLE_SRC` (se ejecuta automáticamente en CI) |
 | Servidores STUN públicos reales | `GATELY_NET_TEST=1` |
-| Verificar la importación con una configuración real de Lucky | `GATELY_LUCKY_SAMPLE`, etc.; consulta `TestImportRealSample` en cada módulo |
 
 La estructura de directorios y la selección tecnológica están en [docs/es/ROADMAP.md](docs/es/ROADMAP.md).
 
@@ -187,8 +182,8 @@ El código del sitio web ([gately.cn](https://gately.cn)) está en `website/` y 
 
 ## Normas de contribución
 
-- La compatibilidad con Lucky se basa en comportamientos, interfaces y formatos de configuración observables públicamente. No envíes código copiado de los binarios o de los artefactos del frontend de Lucky.
-- Los módulos nuevos requieren: estructura de configuración y validación, inicio y parada en tiempo de ejecución, interfaz REST y pruebas unitarias; los módulos que se puedan migrar desde Lucky implementan `luckyimport.Importer`, y los que quieran mostrar su estado en la página de resumen implementan `module.Summarizer`.
+- El código de compatibilidad debe basarse únicamente en el comportamiento, las interfaces y los formatos de configuración observables públicamente. No envíes código copiado de los binarios o del frontend de software de terceros.
+- Los módulos nuevos requieren: estructura de configuración y validación, inicio y parada en tiempo de ejecución, interfaz REST y pruebas unitarias; los módulos que quieran mostrar su estado en la página de resumen implementan `module.Summarizer`.
 - Los comentarios del código se escriben en chino; las sentencias de control deben usar siempre llaves.
 
 ## Comunidad

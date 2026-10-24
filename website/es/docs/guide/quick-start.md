@@ -42,7 +42,3 @@ Elige el módulo que se ajuste a tu necesidad:
 | Reenviar un puerto a otro dispositivo de tu red local | [Reenvío de puertos](/es/docs/modules/portforward) |
 | Acceder a varios servicios de la red local con un solo dominio y HTTPS | [Certificados SSL](/es/docs/modules/ssl) + [Servicios web](/es/docs/modules/web) |
 | Conectar redes en ubicaciones distintas | [Tailscale / frp](/es/docs/modules/tunnels) |
-
-## Migrar desde Lucky
-
-Si ya usas Lucky, no hace falta volver a configurarlo todo. Importa un archivo `.lkcf` o un zip de configuración del sitio completo en «Ajustes → Copia de seguridad y migración». Consulta la [Guía de migración](/es/docs/guide/migration).

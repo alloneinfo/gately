@@ -17,8 +17,6 @@ Each user can map to one directory, or mount several directories:
 - **Single directory**: set `root` and `readOnly`. After login, the root is that directory.
 - **Multiple directories**: click "Mount multiple directories" in the UI, or fill in several entries in `mounts`. Each entry has `name` (display name, cannot contain `/`, unique within one user), `path` (an absolute path) and `readOnly`. After login, the root lists the directories by name. The root itself is not writable, and files cannot be moved between different directories.
 
-When migrating from Lucky, a user's mount list is converted into multiple directories, and users that appear more than once in Lucky with the same name and password are merged into one user.
-
 ## FTP
 
 Configure it under "FTP Service" in the "File Services" group. FTP and FTPS are supported.
@@ -36,8 +34,6 @@ Configure it under "FTP Service" in the "File Services" group. FTP and FTPS are 
 | `disableActiveMode` | Off | Use passive mode only, which suits NAT environments better |
 | `users` | None | Multiple users, with the same fields as WebDAV: `name`, `password`, `root`, `readOnly` or `mounts`; user names must be unique |
 
-Service parameters and users can be imported from Lucky's FTP configuration (see [Migrating from Lucky](/en/docs/guide/migration)).
-
 ## Storage Mounts
 
 Add mounts under "Storage Mounts" in the "File Services" group, and manage files online on the page.
@@ -51,8 +47,6 @@ Add mounts under "Storage Mounts" in the "File Services" group, and manage files
 | `skipVerify` | Skip HTTPS certificate verification (used by `webdav`) |
 | `domain` | Domain or workgroup for SMB authentication, usually empty (used by `smb`) |
 | `readOnly` | Mount read-only; the file manager rejects every write operation |
-
-Local directories and WebDAV storages can be imported from Lucky's storage management. Alibaba Cloud Drive and system mounts are not migrated.
 
 The online file manager supports browsing directories, downloading files, streaming uploads (the whole file is not loaded into memory), creating directories, renaming and deleting. A mount can serve as the target location of a backup task: backup files are written to the specified directory in the mount, and old files are pruned according to the retention policy.
 

@@ -28,14 +28,12 @@ Les jetons et les clés sont stockés avec les permissions 0600. Le jeton cloudf
 - **Client frpc** : proxys tcp / udp / http / https / stcp / xtcp ; l'ajout ou la suppression d'un proxy est appliqué immédiatement ;
 - **Serveur frps** : liste d'autorisation de ports, sous-domaines, tableau de bord ;
 - **Importer une configuration existante** : « Importer la configuration » dans l'en-tête de la page prend en charge les anciens `frpc.ini` / `frps.ini` (y compris la section `[common]`) et le `toml` de frp 0.52+. Vous pouvez choisir un fichier ou coller son contenu. Vérifiez d'abord l'aperçu du résultat et des champs ignorés, puis confirmez l'import. Pour le client, vous pouvez choisir d'ajouter les proxys (ceux du même nom restent inchangés) ou de remplacer tous les proxys. L'import ne modifie pas l'état d'activation et peut aussi être appelé via l'API avec `POST /api/frp/import`.
-- **Migration depuis Lucky** : la première instance cliente et la première instance serveur de `lucky_frp.lkcf` peuvent être importées directement. Voir [Migrer depuis Lucky](/fr/docs/guide/migration).
 
 ## Tunnel Cloudflare
 
 - Tunnels à jeton et tunnels temporaires trycloudflare ;
 - Plusieurs tunnels avec redémarrage automatique ;
 - Affichage de l'adresse publique.
-- Les tunnels utilisant un jeton de tunnel peuvent être importés depuis Lucky.
 
 ## Comment choisir
 

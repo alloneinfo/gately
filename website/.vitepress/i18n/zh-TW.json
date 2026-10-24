@@ -25,7 +25,7 @@
       "guide/install": "安裝部署",
       "guide/configuration": "設定與執行參數",
       "guide/cli-mcp": "命令列與 MCP",
-      "guide/migration": "從 Lucky 遷移",
+      "guide/migration": "遷移指南",
       "guide/faq": "常見問題",
       "modules/index": "模組總覽",
       "modules/ddns": "動態網域 DDNS",
@@ -267,10 +267,6 @@
     "fullInstall": "完整安裝文件 →",
     "faqTitle": "常見問題",
     "faqs": [
-      {
-        "q": "可以直接遷移現有的 Lucky 設定嗎？",
-        "a": "可以。在「設定 → 備份與遷移」選擇 .lkcf 檔案或整站設定 zip，預覽後匯入。匯入的規則預設停用，可與 Lucky 並存，逐個模組切換，也隨時可以退回。"
-      },
       {
         "q": "需要連線到你們的伺服器嗎？",
         "a": "不需要。Gately 預設不連線任何專案方伺服器，也不會回報資訊。"

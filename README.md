@@ -2,7 +2,7 @@
 
 **English** | [简体中文](README.zh-CN.md) | [繁體中文](README.zh-TW.md) | [日本語](README.ja.md) | [한국어](README.ko.md) | [Español](README.es.md) | [Français](README.fr.md) | [Deutsch](README.de.md) | [Русский](README.ru.md) | [Português (Brasil)](README.pt-BR.md)
 
-An open-source, auditable network gateway toolkit for home networks, NAS boxes, cloud hosts, and servers of all kinds. DDNS, STUN traversal, port forwarding, reverse proxy, certificates, WAF, and more ship in a single ~32 MB file, and existing Lucky configurations can be imported.
+An open-source, auditable network gateway toolkit for home networks, NAS boxes, cloud hosts, and servers of all kinds. DDNS, STUN traversal, port forwarding, reverse proxy, certificates, WAF, and more ship in a single ~32 MB file.
 
 > **fnOS users:** Gately ships as a native fnOS app. It plugs into the **fnOS unified gateway**, so it opens from the fnOS desktop icon and works over the same address you use for fnOS, including your remote domain, with no extra port to open. Once enabled, **fnOS administrators can sign in directly with their fnOS session**, without a Gately password or two-step code. See [fnOS native app](#fnos-native-app).
 
@@ -60,7 +60,7 @@ Gately is fully open source, so users and the community can read the source and 
 | fnOS native app | Offline `.fpk` packages (x86 / ARM); integrated with the fnOS unified gateway, opens from the fnOS desktop icon and works over your remote fnOS domain; fnOS administrators can sign in with their fnOS session (off by default); runs as root to listen on 80/443 and manage Docker |
 | Audit and history | Audit log of sign-ins, configuration changes and access to sensitive content (never records request bodies or secrets); every overwritten config file keeps its previous versions with diff and one-click rollback; declarative config directory (`-apply`) for GitOps |
 | Monitoring and self-check | Global Prometheus endpoint `/api/metrics` (certificates, DDNS, STUN, port forwarding, web services) with a ready-made Grafana dashboard; one-click network self-check (public IP, CGNAT, clock, ports 80/443, DDNS resolution, certificate expiry, HTTPS sites missing a certificate, frp proxy conflicts) |
-| Migration | Import a Lucky `.lkcf` file or a full-site config zip: port forwarding, DDNS, STUN, certificates, reverse proxy, WAF, Wake-on-LAN, web terminal, WebDAV, basic settings; import nginx config (including `nginx -T` output): reverse proxies and upstreams, static directories, redirects, per-path backends, access control, with `auth_request` converted to forward auth |
+| Migration | Import nginx config (including `nginx -T` output): reverse proxies and upstreams, static directories, redirects, per-path backends, access control, with `auth_request` converted to forward auth |
 
 ## Performance
 
@@ -156,10 +156,6 @@ When upgrading from an older version, the previous global API token becomes a "l
 
 These three modules manage the official external programs (automatic restart, logs aggregated in the UI). Gately does not bundle them, so you can always run the latest upstream release. Programs are located in this order: the path set in the module settings, `PATH`, then the `bin/` subdirectory of the config directory. For Docker deployments, drop the binary into the mounted config directory, for example `./gately-data/bin/frpc`; Tailscale needs both `tailscale` and `tailscaled`. Tokens and keys in config files are stored with 0600 permissions, and the cloudflared token is passed via an environment variable so it never appears in the process list.
 
-### Migrating from Lucky
-
-See the [migration guide](docs/en/MIGRATION.md). In short: under "Settings → Import from Lucky", choose the `lucky_*.lkcf` file from your Lucky config directory, preview it, then import. Imported rules are disabled by default; go module by module, disabling in Lucky and enabling in Gately.
-
 ## Development
 
 Requirements: Go 1.26+, Node.js 24+, pnpm.
@@ -179,7 +175,6 @@ Some tests are skipped by default and need extra setup:
 | --- | --- |
 | ACME end-to-end (Pebble) | Install pebble and pebble-challtestsrv, set `GATELY_PEBBLE_BIN` and `GATELY_PEBBLE_SRC` (runs automatically in CI) |
 | Real public STUN servers | `GATELY_NET_TEST=1` |
-| Import validation with a real Lucky config | `GATELY_LUCKY_SAMPLE` and others, see `TestImportRealSample` in each module |
 
 For the directory layout and technology choices, see [docs/en/ROADMAP.md](docs/en/ROADMAP.md).
 
@@ -187,8 +182,8 @@ The website ([gately.cn](https://gately.cn)) source lives in `website/` and is b
 
 ## Contributing
 
-- Lucky compatibility is based on publicly observable behavior, interfaces, and configuration formats. Do not submit code copied from Lucky binaries or frontend bundles.
-- A new module needs a config schema with validation, runtime start/stop, REST endpoints, and unit tests. Modules that can be migrated from Lucky implement `luckyimport.Importer`; modules that want to show status on the overview page implement `module.Summarizer`.
+- Compatibility code must be based on publicly observable behavior, interfaces and configuration formats only. Do not submit code copied from binaries or frontend artifacts of third-party software.
+- A new module needs a config schema with validation, runtime start/stop, REST endpoints, and unit tests. Modules that want to show status on the overview page implement `module.Summarizer`.
 - Code comments are written in Chinese; control statements must use braces.
 
 ## Community

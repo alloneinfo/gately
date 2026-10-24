@@ -33,7 +33,7 @@ Gately의 「설정 → 백업 및 마이그레이션」을 열고 `lucky_*.lkcf
 | lucky_reverseproxy.lkcf | 웹 서비스 | 사이트, 인증, WAF 참조(하위 규칙의 WAF가 main이면 수신 규칙의 인스턴스를 그대로 사용) |
 | lucky_coraza.lkcf | WAF 방화벽 | 인스턴스 key를 그대로 사용하므로 사이트 참조가 유지됩니다 |
 | lucky_wol.lkcf | Wake-on-LAN | |
-| lucky_webterminal.lkcf | 웹 터미널 | SSH 연결. 처음 연결할 때 호스트 지문을 기록합니다 |
+| lucky_webterminal.lkcf | 웹 터미널 | SSH와 Telnet 연결, 프록시, `keyFile`, `workDir`, 타임아웃, 환경 변수, 빠른 접근 디렉터리, 세션 설정, 전역 빠른 명령, 사용자 약관과 2FA 키. SSH 연결은 처음 연결할 때 호스트 지문을 기록합니다 |
 | lucky_webdav.lkcf | WebDAV | 사용자의 마운트 목록은 여러 디렉터리로 변환하고 이름과 비밀번호가 같은 사용자는 병합합니다. 스토리지 관리의 마운트를 참조하면 해당 로컬 디렉터리로 해석합니다 |
 | lucky_ftpserver.lkcf | FTP | 수신 포트, 패시브 포트 범위, TLS와 타임아웃 매개변수, 사용자(처리 방식은 WebDAV와 같음) |
 | lucky_storagemanagement.lkcf | 스토리지 마운트 | 로컬 디렉터리와 WebDAV 스토리지. Aliyun Drive, 시스템 마운트, 접근 프록시는 가져오지 않습니다 |

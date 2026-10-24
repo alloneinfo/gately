@@ -96,7 +96,3 @@ Aktivieren Sie vor dem Einschalten der lokalen Shell die Zwei-Faktor-Authentifiz
 ## API
 
 Die vollständige API-Referenz finden Sie in der [Web-Terminal-API](/de/docs/reference/webterminal-api).
-
-## Migration von Lucky
-
-`lucky_webterminal.lkcf` lässt sich importieren. Das umfasst SSH- und Telnet-Verbindungen, Proxys, `keyFile`, `workDir`, Timeouts, Umgebungsvariablen, Verzeichnisse für den Schnellzugriff, Sitzungseinstellungen, globale Kurzbefehle sowie die Nutzungsvereinbarung und das 2FA-Secret. SSH-Verbindungen speichern beim ersten Verbinden den Host-Fingerabdruck.

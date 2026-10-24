@@ -96,7 +96,3 @@ SSH 接続を初めて確立するときにサーバーのホストフィンガ�
 ## API
 
 API の詳細は [Web ターミナル API](/ja/docs/reference/webterminal-api) を参照してください。
-
-## Lucky からの移行
-
-`lucky_webterminal.lkcf` をインポートできます。SSH と Telnet の接続、プロキシ、`keyFile`、`workDir`、タイムアウト、環境変数、クイックアクセスのディレクトリ、セッション設定、共通のクイックコマンド、さらに利用規約と 2FA のシークレットが含まれます。SSH 接続では、初回接続時にホストフィンガープリントが記録されます。

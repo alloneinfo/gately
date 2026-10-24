@@ -96,7 +96,3 @@ Antes de ativar o shell local, ative a autenticação em dois fatores na interfa
 ## API
 
 Veja a referência completa da API na [API do Terminal Web](/pt-BR/docs/reference/webterminal-api).
-
-## Migrar do Lucky
-
-O `lucky_webterminal.lkcf` pode ser importado. Ele cobre conexões SSH e Telnet, proxies, `keyFile`, `workDir`, timeouts, variáveis de ambiente, diretórios de acesso rápido, configurações de sessão, atalhos globais, o termo de uso e o segredo do 2FA. As conexões SSH registram a impressão digital do host na primeira conexão.

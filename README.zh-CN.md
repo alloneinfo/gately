@@ -2,7 +2,7 @@
 
 [English](README.md) | **简体中文** | [繁體中文](README.zh-TW.md) | [日本語](README.ja.md) | [한국어](README.ko.md) | [Español](README.es.md) | [Français](README.fr.md) | [Deutsch](README.de.md) | [Русский](README.ru.md) | [Português (Brasil)](README.pt-BR.md)
 
-开源、可审计的网络网关工具集，家庭网络、NAS、云主机与各类服务器均可使用。DDNS、STUN 穿透、端口转发、反向代理、证书、WAF 等常用能力集成在一个约 32 MB 的单文件中，并支持导入已有的 Lucky 配置。
+开源、可审计的网络网关工具集，家庭网络、NAS、云主机与各类服务器均可使用。DDNS、STUN 穿透、端口转发、反向代理、证书、WAF 等常用能力集成在一个约 32 MB 的单文件中。
 
 > **飞牛 fnOS 用户**：Gately 提供飞牛原生应用。它接入**飞牛统一网关**，点击飞牛桌面图标即可打开，远程访问飞牛的域名同样可用，无需额外开放端口；开启后还支持**飞牛管理员登录态直接登录**，无需再输入 Gately 密码与两步验证码。详见[飞牛原生应用](#飞牛原生应用)。
 
@@ -60,7 +60,7 @@ Gately 完全开源，用户和社区可以直接审阅源码与配置。对于�
 | 飞牛原生应用 | 离线 `.fpk` 安装包（x86 / ARM）；接入飞牛统一网关，从飞牛桌面图标打开，远程域名同样可用；飞牛管理员可凭飞牛登录态直接登录（默认关闭）；以 root 运行，可监听 80/443 并管理 Docker |
 | 审计与历史 | 操作审计日志：登录、配置变更、访问敏感内容（不记录请求体与任何密钥）；每次覆盖配置文件前保留旧版本，可对比差异并一键回滚；声明式配置目录（`-apply`），便于 GitOps |
 | 监控与自检 | 全局 Prometheus 指标 `/api/metrics`（证书、DDNS、STUN、端口转发、Web 服务），附 Grafana 面板；一键网络自检（公网 IP、运营商 NAT、系统时间、80/443 端口、DDNS 解析、证书到期、HTTPS 站点缺少证书、frp 代理冲突） |
-| 迁移 | 导入 Lucky 的 `.lkcf` 或整站配置 zip：端口转发、DDNS、STUN、证书、反向代理、WAF、网络唤醒、Web 终端、WebDAV、基础设置；导入 nginx 配置（支持 `nginx -T` 输出）：反向代理与 upstream、静态目录、跳转、分路径后端、访问控制，`auth_request` 转换为转发认证 |
+| 迁移 | 导入 nginx 配置（支持 `nginx -T` 输出）：反向代理与 upstream、静态目录、跳转、分路径后端、访问控制，`auth_request` 转换为转发认证 |
 
 ## 性能
 
@@ -156,10 +156,6 @@ curl -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns/tasks
 
 这三个模块托管官方的外部程序（自动重启、日志汇总到界面），Gately 本体不内置它们，因此始终可以使用上游的最新版本。程序按以下顺序查找：模块设置中填写的路径、`PATH`、配置目录下的 `bin/` 子目录。Docker 部署时把二进制放进挂载的配置目录即可，例如 `./gately-data/bin/frpc`；Tailscale 需要同时提供 `tailscale` 与 `tailscaled`。配置文件中的令牌与密钥以 0600 权限保存，cloudflared 的令牌通过环境变量传递，不会出现在进程列表中。
 
-### 从 Lucky 迁移
-
-见 [迁移指南](docs/MIGRATION.md)。简要步骤：在「设置 → 从 Lucky 导入」选择 Lucky 配置目录中的 `lucky_*.lkcf` 文件，预览后导入；导入的规则默认停用，按模块逐个在 Lucky 中停用、在 Gately 中启用。
-
 ## 开发
 
 依赖：Go 1.26+、Node.js 24+、pnpm。
@@ -179,7 +175,6 @@ make lint     # gofmt、go vet、前端类型检查
 | --- | --- |
 | ACME 端到端（Pebble） | 安装 pebble 与 pebble-challtestsrv，设置 `GATELY_PEBBLE_BIN`、`GATELY_PEBBLE_SRC`（CI 中自动运行） |
 | 真实公共 STUN 服务器 | `GATELY_NET_TEST=1` |
-| 用真实 Lucky 配置验证导入 | `GATELY_LUCKY_SAMPLE` 等，见各模块 `TestImportRealSample` |
 
 目录结构与技术选型见 [docs/ROADMAP.md](docs/ROADMAP.md)。
 
@@ -187,8 +182,8 @@ make lint     # gofmt、go vet、前端类型检查
 
 ## 贡献约定
 
-- 与 Lucky 的兼容基于公开可观察的行为、接口和配置格式。请勿提交从 Lucky 二进制或前端产物中复制的代码。
-- 新模块需要：配置结构与校验、运行时启停、REST 接口、单元测试；能从 Lucky 迁移的模块实现 `luckyimport.Importer`，希望在总览页展示状态的模块实现 `module.Summarizer`。
+- 兼容性代码只能基于公开可观察的行为、接口和配置格式，请勿提交从第三方二进制或前端产物中复制的代码。
+- 新模块需要：配置结构与校验、运行时启停、REST 接口、单元测试；希望在总览页展示状态的模块实现 `module.Summarizer`。
 - 代码注释使用中文；控制语句必须使用大括号。
 
 ## 交流群

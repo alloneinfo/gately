@@ -33,7 +33,7 @@ Supported files:
 | lucky_reverseproxy.lkcf | Web Services | Sites, authentication, and WAF references (when a sub-rule's WAF is `main`, the listener rule's instance is reused) |
 | lucky_coraza.lkcf | WAF Firewall | Instance keys are preserved, so site references remain valid |
 | lucky_wol.lkcf | Wake-on-LAN | |
-| lucky_webterminal.lkcf | Web Terminal | SSH connections; the host fingerprint is recorded on first connect |
+| lucky_webterminal.lkcf | Web Terminal | SSH and Telnet connections, proxies, `keyFile`, `workDir`, timeouts, environment variables, quick access directories, session settings, global shortcuts, and the user agreement and 2FA secret; SSH connections record the host fingerprint on first connect |
 | lucky_webdav.lkcf | WebDAV | A user's mount list becomes multiple directories, and users with the same name and password are merged; mounts that reference Storage resolve to the corresponding local directories |
 | lucky_ftpserver.lkcf | FTP | Listen port, passive port range, TLS and timeout parameters, plus users (handled the same way as WebDAV) |
 | lucky_storagemanagement.lkcf | Storage Mounts | Local directories and WebDAV storage; Alibaba Cloud Drive, system mounts, and access proxies are not migrated |

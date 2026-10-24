@@ -83,7 +83,3 @@ Defina o endereço de escuta como o endereço público do servidor para que não
 ## Dica de implantação
 
 O redirecionamento de portas escuta diretamente nas portas do host. Em implantações com Docker, recomendamos `--network host`.
-
-## Migrar do Lucky
-
-As regras podem ser importadas de `lucky_portforward.lkcf`. Opções como criptografia TLS / de fluxo e limitação de velocidade ainda não são compatíveis, e um aviso é exibido durante a importação.

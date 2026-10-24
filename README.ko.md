@@ -2,7 +2,7 @@
 
 [English](README.md) | [简体中文](README.zh-CN.md) | [繁體中文](README.zh-TW.md) | [日本語](README.ja.md) | **한국어** | [Español](README.es.md) | [Français](README.fr.md) | [Deutsch](README.de.md) | [Русский](README.ru.md) | [Português (Brasil)](README.pt-BR.md)
 
-가정 네트워크, NAS, 클라우드 호스트, 각종 서버에서 사용할 수 있는 오픈소스 · 감사 가능한 네트워크 게이트웨이 도구 모음입니다. DDNS, STUN 터널링, 포트 포워딩, 리버스 프록시, 인증서, WAF 등 자주 쓰는 기능을 약 32 MB의 단일 파일에 담았으며, 기존 Lucky 설정을 가져올 수 있습니다.
+가정 네트워크, NAS, 클라우드 호스트, 각종 서버에서 사용할 수 있는 오픈소스 · 감사 가능한 네트워크 게이트웨이 도구 모음입니다. DDNS, STUN 터널링, 포트 포워딩, 리버스 프록시, 인증서, WAF 등 자주 쓰는 기능을 약 32 MB의 단일 파일에 담았습니다.
 
 > **fnOS 사용자:** Gately는 fnOS 네이티브 앱으로도 제공됩니다. **fnOS 통합 게이트웨이**에 연결되므로 fnOS 바탕 화면 아이콘으로 열 수 있고, 원격 도메인을 포함해 fnOS에 접속하는 주소 그대로 사용할 수 있으며 포트를 따로 열 필요가 없습니다. 기능을 켜면 **fnOS 관리자는 fnOS 로그인 상태로 바로 로그인**할 수 있어 Gately 비밀번호나 2단계 인증 코드가 필요 없습니다. 자세한 내용은 [fnOS 네이티브 앱](#fnos-네이티브-앱)을 참고하세요.
 
@@ -60,7 +60,7 @@ Gately는 완전한 오픈소스로, 사용자와 커뮤니티가 소스 코드�
 | fnOS 네이티브 앱 | 오프라인 `.fpk` 패키지(x86 / ARM). fnOS 통합 게이트웨이와 연동되어 fnOS 바탕 화면 아이콘으로 열고 fnOS 원격 도메인으로도 접속. fnOS 관리자는 fnOS 로그인 상태로 로그인 가능(기본 비활성). 80/443 수신과 Docker 관리를 위해 root로 실행 |
 | 감사 및 이력 | 로그인, 설정 변경, 민감한 콘텐츠 접근을 기록하는 감사 로그(요청 본문과 비밀 값은 기록하지 않음). 덮어쓴 설정 파일마다 이전 버전을 보관하며 차이 비교와 원클릭 롤백 지원. GitOps용 선언적 설정 디렉터리(`-apply`) |
 | 모니터링 및 자가 점검 | 전역 Prometheus 엔드포인트 `/api/metrics`(인증서, DDNS, STUN, 포트 포워딩, 웹 서비스)와 바로 쓸 수 있는 Grafana 대시보드. 원클릭 네트워크 자가 점검(공인 IP, CGNAT, 시스템 시간, 80/443 포트, DDNS 해석, 인증서 만료, 인증서가 없는 HTTPS 사이트, frp 프록시 충돌) |
-| 마이그레이션 | Lucky의 `.lkcf` 또는 전체 사이트 설정 zip 가져오기: 포트 포워딩, DDNS, STUN, 인증서, 리버스 프록시, WAF, Wake-on-LAN, 웹 터미널, WebDAV, 기본 설정. nginx 설정 가져오기(`nginx -T` 출력 지원): 리버스 프록시와 upstream, 정적 디렉터리, 리디렉션, 경로별 백엔드, 접근 제어, `auth_request`는 포워드 인증으로 변환 |
+| 마이그레이션 | nginx 설정 가져오기(`nginx -T` 출력 지원): 리버스 프록시와 upstream, 정적 디렉터리, 리디렉션, 경로별 백엔드, 접근 제어, `auth_request`는 포워드 인증으로 변환 |
 
 ## 성능
 
@@ -156,10 +156,6 @@ curl -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns/tasks
 
 이 세 모듈은 공식 외부 프로그램을 관리합니다(자동 재시작, 로그를 UI에 집계). Gately 본체에는 포함되어 있지 않으므로 항상 업스트림의 최신 버전을 사용할 수 있습니다. 프로그램은 다음 순서로 찾습니다. 모듈 설정에 입력한 경로, `PATH`, 설정 디렉터리 아래의 `bin/` 하위 디렉터리. Docker 배포에서는 마운트한 설정 디렉터리에 바이너리를 넣으면 됩니다(예: `./gately-data/bin/frpc`). Tailscale은 `tailscale`과 `tailscaled`를 모두 제공해야 합니다. 설정 파일의 토큰과 키는 0600 권한으로 저장되며, cloudflared 토큰은 환경 변수로 전달되어 프로세스 목록에 나타나지 않습니다.
 
-### Lucky에서 마이그레이션
-
-[마이그레이션 가이드](https://gately.cn/ko/docs/guide/migration)를 참고하세요. 간단한 절차: "설정 → Lucky에서 가져오기"에서 Lucky 설정 디렉터리의 `lucky_*.lkcf` 파일을 선택하고 미리보기 후 가져옵니다. 가져온 규칙은 기본적으로 비활성 상태이므로, 모듈별로 하나씩 Lucky에서 끄고 Gately에서 켜세요.
-
 ## 개발
 
 요구 사항: Go 1.26+, Node.js 24+, pnpm.
@@ -179,7 +175,6 @@ make lint     # gofmt, go vet, 프런트엔드 타입 검사
 | --- | --- |
 | ACME 엔드투엔드(Pebble) | pebble과 pebble-challtestsrv를 설치하고 `GATELY_PEBBLE_BIN`, `GATELY_PEBBLE_SRC`를 설정(CI에서는 자동 실행) |
 | 실제 공용 STUN 서버 | `GATELY_NET_TEST=1` |
-| 실제 Lucky 설정으로 가져오기 검증 | `GATELY_LUCKY_SAMPLE` 등, 각 모듈의 `TestImportRealSample` 참고 |
 
 디렉터리 구조와 기술 선정은 [docs/ko/ROADMAP.md](docs/ko/ROADMAP.md)를 참고하세요.
 
@@ -187,8 +182,8 @@ make lint     # gofmt, go vet, 프런트엔드 타입 검사
 
 ## 기여 규칙
 
-- Lucky와의 호환성은 공개적으로 관찰 가능한 동작, 인터페이스, 설정 형식에 기반합니다. Lucky 바이너리나 프런트엔드 산출물에서 복사한 코드는 제출하지 마세요.
-- 새 모듈에는 설정 구조와 검증, 런타임 시작/중지, REST 인터페이스, 단위 테스트가 필요합니다. Lucky에서 마이그레이션할 수 있는 모듈은 `luckyimport.Importer`를 구현하고, 개요 페이지에 상태를 표시하려는 모듈은 `module.Summarizer`를 구현합니다.
+- 호환성 코드는 공개적으로 관찰 가능한 동작, 인터페이스, 설정 포맷만을 기준으로 해야 합니다. 서드파티 소프트웨어의 바이너리나 프런트엔드 산출물에서 복사한 코드는 제출하지 마세요.
+- 새 모듈에는 설정 구조와 검증, 런타임 시작/중지, REST 인터페이스, 단위 테스트가 필요합니다. 개요 페이지에 상태를 표시하려는 모듈은 `module.Summarizer`를 구현합니다.
 - 코드 주석은 중국어로 작성하며, 제어문에는 반드시 중괄호를 사용해야 합니다.
 
 ## 커뮤니티

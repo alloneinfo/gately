@@ -42,7 +42,3 @@ Wählen Sie das Modul, das zu Ihrem Bedarf passt:
 | Einen Port an ein anderes Gerät im LAN weiterleiten | [Portweiterleitung](/de/docs/modules/portforward) |
 | Mehrere LAN-Dienste über eine Domain mit HTTPS erreichen | [SSL-Zertifikate](/de/docs/modules/ssl) + [Web-Dienste](/de/docs/modules/web) |
 | Standorte miteinander vernetzen | [Tailscale / frp](/de/docs/modules/tunnels) |
-
-## Migration von Lucky
-
-Wenn Sie bereits Lucky nutzen, müssen Sie nichts neu konfigurieren. Importieren Sie unter „Einstellungen → Sicherung & Migration“ eine `.lkcf`-Datei oder ein Zip der gesamten Site-Konfiguration. Siehe die [Migrationsanleitung](/de/docs/guide/migration).

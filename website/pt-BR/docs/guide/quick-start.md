@@ -42,7 +42,3 @@ Escolha o módulo que atende à sua necessidade:
 | Encaminhar uma porta para outro dispositivo da rede local | [Redirecionamento de portas](/pt-BR/docs/modules/portforward) |
 | Acessar vários serviços da rede local por um domínio com HTTPS | [Certificados SSL](/pt-BR/docs/modules/ssl) + [Serviços Web](/pt-BR/docs/modules/web) |
 | Conectar redes em locais diferentes | [Tailscale / frp](/pt-BR/docs/modules/tunnels) |
-
-## Migrar do Lucky
-
-Se você já usa o Lucky, não precisa configurar tudo de novo. Importe um arquivo `.lkcf` ou um zip de configuração do site inteiro em "Configurações → Backup e migração". Veja o [Guia de migração](/pt-BR/docs/guide/migration).

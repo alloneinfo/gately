@@ -33,7 +33,7 @@ Gately の「設定 → バックアップと移行」を開き、すべての `
 | lucky_reverseproxy.lkcf | Web サービス | サイト、認証、WAF 参照（サブルールの WAF が main の場合は待ち受けルールのインスタンスを引き継ぎます） |
 | lucky_coraza.lkcf | WAF ファイアウォール | インスタンスキーを引き継ぐため、サイトからの参照は有効なままです |
 | lucky_wol.lkcf | Wake-on-LAN | |
-| lucky_webterminal.lkcf | Web ターミナル | SSH 接続。初回接続時にホストフィンガープリントを記録します |
+| lucky_webterminal.lkcf | Web ターミナル | SSH と Telnet の接続、プロキシ、`keyFile`、`workDir`、タイムアウト、環境変数、クイックアクセスのディレクトリ、セッション設定、共通のクイックコマンド、利用規約と 2FA のシークレット。SSH 接続では初回接続時にホストフィンガープリントを記録します |
 | lucky_webdav.lkcf | WebDAV | ユーザーのマウント一覧は複数のディレクトリに変換され、同名・同パスワードのユーザーは統合されます。ストレージ管理を参照するマウントは対応するローカルディレクトリに解決されます |
 | lucky_ftpserver.lkcf | FTP | 待ち受けポート、パッシブポート範囲、TLS とタイムアウトのパラメーター、およびユーザー（扱いは WebDAV と同じ） |
 | lucky_storagemanagement.lkcf | ストレージマウント | ローカルディレクトリと WebDAV ストレージ。Alibaba Cloud Drive、システムマウント、アクセスプロキシは移行されません |

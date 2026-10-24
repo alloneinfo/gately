@@ -83,7 +83,3 @@ Réglez l'adresse d'écoute sur l'adresse publique du serveur afin d'éviter tou
 ## Conseil de déploiement
 
 La redirection de ports écoute directement sur les ports de l'hôte. Pour un déploiement Docker, `--network host` est recommandé.
-
-## Migration depuis Lucky
-
-Les règles peuvent être importées depuis `lucky_portforward.lkcf`. Les options telles que le chiffrement TLS / de flux et la limitation de débit ne sont pas encore prises en charge, et un avertissement s'affiche lors de l'import.

@@ -42,7 +42,3 @@ Docker 管理機能が不要な場合は、`docker.sock` のマウントを外�
 | 1 つのポートを LAN 内の別のデバイスに転送したい | [ポート転送](/ja/docs/modules/portforward) |
 | 1 つのドメイン名と HTTPS で複数の LAN 内サービスにアクセスしたい | [SSL 証明書](/ja/docs/modules/ssl) + [Web サービス](/ja/docs/modules/web) |
 | 拠点間をつなぐネットワークを構築したい | [Tailscale / frp](/ja/docs/modules/tunnels) |
-
-## Lucky からの移行
-
-すでに Lucky を使っている場合、設定し直す必要はありません。「設定 → バックアップと移行」で `.lkcf` またはサイト全体の設定 zip をインポートするだけです。詳しくは [移行ガイド](/ja/docs/guide/migration) を参照してください。

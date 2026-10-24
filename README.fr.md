@@ -2,7 +2,7 @@
 
 [English](README.md) | [简体中文](README.zh-CN.md) | [繁體中文](README.zh-TW.md) | [日本語](README.ja.md) | [한국어](README.ko.md) | [Español](README.es.md) | **Français** | [Deutsch](README.de.md) | [Русский](README.ru.md) | [Português (Brasil)](README.pt-BR.md)
 
-Boîte à outils de passerelle réseau open source et auditable, pour les réseaux domestiques, les NAS, les hôtes cloud et toutes sortes de serveurs. DDNS, traversée NAT STUN, redirection de ports, reverse proxy, certificats, WAF et autres fonctions courantes sont réunis dans un seul fichier d'environ 32 Mo, avec import possible des configurations Lucky existantes.
+Boîte à outils de passerelle réseau open source et auditable, pour les réseaux domestiques, les NAS, les hôtes cloud et toutes sortes de serveurs. DDNS, traversée NAT STUN, redirection de ports, reverse proxy, certificats, WAF et autres fonctions courantes sont réunis dans un seul fichier d'environ 32 Mo.
 
 > **Utilisateurs de fnOS :** Gately est disponible en application native fnOS. Elle s'intègre à la **passerelle unifiée fnOS** : elle s'ouvre depuis l'icône du bureau fnOS et fonctionne sur la même adresse que fnOS, y compris votre domaine distant, sans port supplémentaire à ouvrir. Une fois l'option activée, **les administrateurs fnOS se connectent directement avec leur session fnOS**, sans mot de passe Gately ni code à deux facteurs. Voir [Application native fnOS](#application-native-fnos).
 
@@ -60,7 +60,7 @@ Gately est entièrement open source afin que les utilisateurs et la communauté 
 | Application native fnOS | Paquets `.fpk` hors ligne (x86 / ARM) ; intégrée à la passerelle unifiée fnOS, s'ouvre depuis l'icône du bureau fnOS et fonctionne via votre domaine fnOS distant ; les administrateurs fnOS peuvent se connecter avec leur session fnOS (désactivé par défaut) ; s'exécute en root pour écouter sur 80/443 et gérer Docker |
 | Audit et historique | Journal d'audit des connexions, des modifications de configuration et des accès aux contenus sensibles (n'enregistre jamais les corps de requête ni les secrets) ; chaque fichier de configuration écrasé conserve ses versions précédentes, avec diff et restauration en un clic ; répertoire de configuration déclarative (`-apply`) pour le GitOps |
 | Supervision et autodiagnostic | Point de terminaison Prometheus global `/api/metrics` (certificats, DDNS, STUN, redirection de ports, services web) avec un tableau de bord Grafana prêt à l'emploi ; autodiagnostic réseau en un clic (IP publique, CGNAT, horloge, ports 80/443, résolution DDNS, expiration des certificats, sites HTTPS sans certificat, conflits de proxys frp) |
-| Migration | Import du `.lkcf` de Lucky ou du zip de configuration complète : redirection de ports, DDNS, STUN, certificats, reverse proxy, WAF, Wake-on-LAN, terminal web, WebDAV, paramètres de base ; import de configuration nginx (sortie de `nginx -T` acceptée) : reverse proxy et upstream, répertoires statiques, redirections, backends par chemin, contrôle d'accès, `auth_request` converti en authentification déléguée |
+| Migration | Import de configuration nginx (sortie de `nginx -T` acceptée) : reverse proxy et upstream, répertoires statiques, redirections, backends par chemin, contrôle d'accès, `auth_request` converti en authentification déléguée |
 
 ## Performances
 
@@ -156,10 +156,6 @@ Lors d'une mise à niveau depuis une ancienne version, l'ancien jeton d'API glob
 
 Ces trois modules gèrent des programmes externes officiels (redémarrage automatique, journaux regroupés dans l'interface). Gately ne les embarque pas, ce qui permet d'utiliser toujours la dernière version amont. Les programmes sont recherchés dans cet ordre : le chemin indiqué dans les paramètres du module, `PATH`, puis le sous-répertoire `bin/` du répertoire de configuration. Avec un déploiement Docker, placez simplement le binaire dans le répertoire de configuration monté, par exemple `./gately-data/bin/frpc` ; Tailscale nécessite de fournir à la fois `tailscale` et `tailscaled`. Les jetons et clés des fichiers de configuration sont enregistrés avec les permissions 0600, et le jeton de cloudflared est transmis par variable d'environnement, il n'apparaît donc pas dans la liste des processus.
 
-### Migrer depuis Lucky
-
-Consultez le [guide de migration](https://gately.cn/fr/docs/guide/migration). En bref : dans « Paramètres → Importer depuis Lucky », sélectionnez le fichier `lucky_*.lkcf` du répertoire de configuration de Lucky, vérifiez l'aperçu puis importez ; les règles importées sont désactivées par défaut, désactivez-les dans Lucky et activez-les dans Gately module par module.
-
 ## Développement
 
 Prérequis : Go 1.26+, Node.js 24+, pnpm.
@@ -179,7 +175,6 @@ Certains tests sont ignorés par défaut et nécessitent des conditions supplém
 | --- | --- |
 | ACME de bout en bout (Pebble) | Installer pebble et pebble-challtestsrv, définir `GATELY_PEBBLE_BIN` et `GATELY_PEBBLE_SRC` (exécuté automatiquement en CI) |
 | Serveurs STUN publics réels | `GATELY_NET_TEST=1` |
-| Vérification de l'import avec une vraie configuration Lucky | `GATELY_LUCKY_SAMPLE`, etc. ; voir `TestImportRealSample` dans chaque module |
 
 La structure des répertoires et les choix techniques sont décrits dans [docs/fr/ROADMAP.md](docs/fr/ROADMAP.md).
 
@@ -187,8 +182,8 @@ Le code source du site web ([gately.cn](https://gately.cn)) se trouve dans `webs
 
 ## Règles de contribution
 
-- La compatibilité avec Lucky repose sur des comportements, interfaces et formats de configuration publiquement observables. Ne soumettez pas de code copié depuis les binaires ou les artefacts frontend de Lucky.
-- Un nouveau module nécessite : une structure de configuration avec validation, un démarrage/arrêt à l'exécution, une interface REST et des tests unitaires ; les modules migrables depuis Lucky implémentent `luckyimport.Importer`, et ceux qui souhaitent afficher leur état sur la page de synthèse implémentent `module.Summarizer`.
+- Le code de compatibilité doit reposer uniquement sur des comportements, interfaces et formats de configuration observables publiquement. Ne soumettez pas de code copié des binaires ou du frontend d'un logiciel tiers.
+- Un nouveau module nécessite : une structure de configuration avec validation, un démarrage/arrêt à l'exécution, une interface REST et des tests unitaires ; les modules qui souhaitent afficher leur état sur la page de synthèse implémentent `module.Summarizer`.
 - Les commentaires de code sont rédigés en chinois ; les instructions de contrôle doivent toujours utiliser des accolades.
 
 ## Communauté

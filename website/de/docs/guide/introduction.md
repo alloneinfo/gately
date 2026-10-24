@@ -1,6 +1,6 @@
 # Einführung
 
-Gately ist ein quelloffenes, prüfbares Toolkit für Netzwerk-Gateways, gedacht für Heimnetze, NAS, Cloud-Hosts und Server aller Art. DDNS, STUN-NAT-Traversal, Portweiterleitung, Reverse Proxy, Zertifikate, WAF und mehr stecken in einer einzigen Binärdatei von rund 32 MB, und Lucky-Konfigurationen lassen sich importieren.
+Gately ist ein quelloffenes, prüfbares Toolkit für Netzwerk-Gateways, gedacht für Heimnetze, NAS, Cloud-Hosts und Server aller Art. DDNS, STUN-NAT-Traversal, Portweiterleitung, Reverse Proxy, Zertifikate, WAF und mehr stecken in einer einzigen Binärdatei von rund 32 MB.
 
 ## Warum Gately
 
@@ -14,7 +14,7 @@ Gately bündelt DDNS, STUN-Traversal, Reverse Proxy und mehr und ist vollständi
 ## Designprinzipien
 
 1. **Transparenz**: standardmäßig keine Verbindungen zu Projektservern; jede ausgehende Adresse ist sichtbar, änderbar und abschaltbar.
-2. **Migrierbarkeit**: Mit `.lkcf`-Import.
+2. **Migrierbarkeit**: Bestehende Konfigurationen wie nginx-Sites lassen sich importieren; importierte Regeln sind standardmäßig deaktiviert, sodass Sie schrittweise umstellen können.
 3. **Prüfbare Konfiguration**: einfaches JSON (Dateirechte 0600), das sich direkt für Diffs und Rollbacks in Git ablegen lässt.
 4. **Bereitstellung als einzelne Datei**: eine statische Binärdatei mit eingebettetem Frontend, mit Unterstützung für Docker, systemd und OpenWrt.
 
@@ -35,5 +35,5 @@ Dynamisches DNS, STUN-Traversal, Portweiterleitung, SSL-Zertifikate, Web-Dienste
 ## Nächste Schritte
 
 - Sofort ausprobieren: [Schnellstart](/de/docs/guide/quick-start)
-- Sie nutzen bereits Lucky: [Migrationsanleitung](/de/docs/guide/migration)
+- Umstieg von bestehenden Tools: [Migrationsanleitung](/de/docs/guide/migration)
 - Datenschutz und Sicherheit im Blick: [Sicherheitsmodell & Datenschutzversprechen](/de/docs/guide/security)

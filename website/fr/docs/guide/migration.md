@@ -33,7 +33,7 @@ Fichiers pris en charge :
 | lucky_reverseproxy.lkcf | Services Web | Sites, authentification, références WAF (si le WAF d'une sous-règle vaut main, l'instance de la règle d'écoute est reprise) |
 | lucky_coraza.lkcf | Pare-feu WAF | Reprend les clés d'instance, les références des sites restent valides |
 | lucky_wol.lkcf | Wake-on-LAN | |
-| lucky_webterminal.lkcf | Terminal Web | Connexions SSH ; l'empreinte de l'hôte est enregistrée à la première connexion |
+| lucky_webterminal.lkcf | Terminal Web | Connexions SSH et Telnet, proxys, `keyFile`, `workDir`, délais, variables d'environnement, dossiers d'accès rapide, paramètres de session, raccourcis globaux, ainsi que le contrat d'utilisation et le secret 2FA ; pour les connexions SSH, l'empreinte de l'hôte est enregistrée à la première connexion |
 | lucky_webdav.lkcf | WebDAV | La liste de montages d'un utilisateur devient plusieurs dossiers, les utilisateurs de même nom et même mot de passe sont fusionnés ; les montages référençant la gestion du stockage sont résolus vers le dossier local correspondant |
 | lucky_ftpserver.lkcf | FTP | Port d'écoute, plage de ports passifs, TLS et délais, ainsi que les utilisateurs (traités comme pour WebDAV) |
 | lucky_storagemanagement.lkcf | Montages de stockage | Dossiers locaux et stockages WebDAV ; Aliyun Drive, montages système et proxy d'accès ne sont pas migrés |

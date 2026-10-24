@@ -2,7 +2,7 @@
 
 [English](README.md) | [简体中文](README.zh-CN.md) | **繁體中文** | [日本語](README.ja.md) | [한국어](README.ko.md) | [Español](README.es.md) | [Français](README.fr.md) | [Deutsch](README.de.md) | [Русский](README.ru.md) | [Português (Brasil)](README.pt-BR.md)
 
-開源、可稽核的網路閘道工具集，家用網路、NAS、雲端主機與各類伺服器皆可使用。DDNS、STUN 穿透、連接埠轉發、反向代理、憑證、WAF 等常用功能整合在一個約 32 MB 的單一檔案中，並支援匯入既有的 Lucky 設定。
+開源、可稽核的網路閘道工具集，家用網路、NAS、雲端主機與各類伺服器皆可使用。DDNS、STUN 穿透、連接埠轉發、反向代理、憑證、WAF 等常用功能整合在一個約 32 MB 的單一檔案中。
 
 > **飛牛 fnOS 使用者**：Gately 提供飛牛原生應用。它接入**飛牛統一閘道**，點擊飛牛桌面圖示即可開啟，遠端存取飛牛的網域同樣可用，無需額外開放連接埠；開啟後還支援**飛牛管理員登入狀態直接登入**，無需再輸入 Gately 密碼與兩步驟驗證碼。詳見[飛牛原生應用](#飛牛原生應用)。
 
@@ -60,7 +60,7 @@ Gately 完全開源，使用者和社群可以直接檢視原始碼與設定。�
 | 飛牛原生應用 | 離線 `.fpk` 安裝包（x86 / ARM）；接入飛牛統一閘道，從飛牛桌面圖示開啟，遠端網域同樣可用；飛牛管理員可憑飛牛登入狀態直接登入（預設關閉）；以 root 執行，可監聽 80/443 並管理 Docker |
 | 稽核與歷史 | 操作稽核日誌：登入、設定變更、存取敏感內容（不記錄請求內容與任何金鑰）；每次覆寫設定檔前保留舊版本，可比對差異並一鍵回滾；宣告式設定目錄（`-apply`），便於 GitOps |
 | 監控與自檢 | 全域 Prometheus 指標 `/api/metrics`（憑證、DDNS、STUN、連接埠轉發、Web 服務），附 Grafana 儀表板；一鍵網路自檢（公網 IP、電信商 NAT（CGNAT）、系統時間、80/443 連接埠、DDNS 解析、憑證到期、HTTPS 站台缺少憑證、frp 代理衝突） |
-| 遷移 | 匯入 Lucky 的 `.lkcf` 或整站設定 zip：連接埠轉發、DDNS、STUN、憑證、反向代理、WAF、網路喚醒、Web 終端機、WebDAV、基礎設定；匯入 nginx 設定（支援 `nginx -T` 輸出）：反向代理與 upstream、靜態目錄、跳轉、分路徑後端、存取控制，`auth_request` 轉換為轉發認證 |
+| 遷移 | 匯入 nginx 設定（支援 `nginx -T` 輸出）：反向代理與 upstream、靜態目錄、跳轉、分路徑後端、存取控制，`auth_request` 轉換為轉發認證 |
 
 ## 效能
 
@@ -156,10 +156,6 @@ curl -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns/tasks
 
 這三個模組託管官方的外部程式（自動重啟、日誌彙整到介面），Gately 本體不內建它們，因此始終可以使用上游的最新版本。程式依下列順序尋找：模組設定中填寫的路徑、`PATH`、設定目錄下的 `bin/` 子目錄。Docker 部署時把二進位檔放進掛載的設定目錄即可，例如 `./gately-data/bin/frpc`；Tailscale 需要同時提供 `tailscale` 與 `tailscaled`。設定檔中的權杖與金鑰以 0600 權限儲存，cloudflared 的權杖透過環境變數傳遞，不會出現在處理程序清單中。
 
-### 從 Lucky 遷移
-
-見[遷移指南](https://gately.cn/zh-TW/docs/guide/migration)。簡要步驟：在「設定 → 從 Lucky 匯入」選擇 Lucky 設定目錄中的 `lucky_*.lkcf` 檔案，預覽後匯入；匯入的規則預設停用，依模組逐一在 Lucky 中停用、在 Gately 中啟用。
-
 ## 開發
 
 相依套件：Go 1.26+、Node.js 24+、pnpm。
@@ -179,7 +175,6 @@ make lint     # gofmt、go vet、前端型別檢查
 | --- | --- |
 | ACME 端對端（Pebble） | 安裝 pebble 與 pebble-challtestsrv，設定 `GATELY_PEBBLE_BIN`、`GATELY_PEBBLE_SRC`（CI 中自動執行） |
 | 真實公共 STUN 伺服器 | `GATELY_NET_TEST=1` |
-| 以真實 Lucky 設定驗證匯入 | `GATELY_LUCKY_SAMPLE` 等，見各模組 `TestImportRealSample` |
 
 目錄結構與技術選型見 [docs/zh-TW/ROADMAP.md](docs/zh-TW/ROADMAP.md)。
 
@@ -187,8 +182,8 @@ make lint     # gofmt、go vet、前端型別檢查
 
 ## 貢獻約定
 
-- 與 Lucky 的相容性基於公開可觀察的行為、介面和設定格式。請勿提交從 Lucky 二進位檔或前端產物中複製的程式碼。
-- 新模組需要：設定結構與驗證、執行階段啟停、REST 介面、單元測試；能從 Lucky 遷移的模組實作 `luckyimport.Importer`，希望在總覽頁顯示狀態的模組實作 `module.Summarizer`。
+- 相容性程式碼只能建立在公開可觀察的行為、介面和設定格式上，請勿提交從第三方執行檔或前端產物中複製的程式碼。
+- 新模組需要：設定結構與驗證、執行階段啟停、REST 介面、單元測試；希望在總覽頁顯示狀態的模組實作 `module.Summarizer`。
 - 程式碼註解使用中文；控制語句必須使用大括號。
 
 ## 交流群

@@ -28,14 +28,12 @@ Docker 部署時把執行檔放進掛載的設定目錄即可，例如 `./gately
 - **frpc 用戶端**：tcp / udp / http / https / stcp / xtcp 代理，新增刪除即生效；
 - **frps 伺服器端**：連接埠白名單、子網域、控制台；
 - **匯入既有設定**：頁首的「匯入設定」支援舊版 `frpc.ini` / `frps.ini`（含 `[common]` 段）和 frp 0.52+ 的 `toml`，可選擇檔案或貼上內容。先預覽解析結果與被忽略的欄位，再確認匯入；用戶端可選擇附加（同名代理保持不變）或取代全部代理。匯入不會改變啟用狀態，也可透過介面 `POST /api/frp/import` 呼叫。
-- **從 Lucky 遷移**：`lucky_frp.lkcf` 中的第一個用戶端實例與第一個伺服器端實例可直接匯入，見 [從 Lucky 遷移](/zh-TW/docs/guide/migration)。
 
 ## Cloudflare 通道
 
 - 權杖通道與 trycloudflare 臨時通道；
 - 多通道、自動重啟；
 - 顯示公網位址。
-- 可從 Lucky 匯入使用通道權杖的通道。
 
 ## 如何選擇
 

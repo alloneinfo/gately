@@ -17,8 +17,6 @@ Cada usuario puede apuntar a un directorio o montar varios directorios:
 - **Un solo directorio**: define `root` y `readOnly`. Tras iniciar sesión, la raíz es ese directorio.
 - **Varios directorios**: pulsa «Montar varios directorios» en la interfaz, o rellena varias entradas en `mounts`. Cada entrada tiene `name` (nombre visible, no puede contener `/` y es único dentro de un mismo usuario), `path` (una ruta absoluta) y `readOnly`. Tras iniciar sesión, la raíz lista los directorios por nombre. La propia raíz no admite escritura y los archivos no se pueden mover entre directorios distintos.
 
-Al migrar desde Lucky, la lista de montajes de un usuario se convierte en varios directorios, y los usuarios que aparecen varias veces en Lucky con el mismo nombre y contraseña se fusionan en un solo usuario.
-
 ## FTP
 
 Se configura en «Servicio FTP», dentro del grupo «Servicios de archivos». Se admiten FTP y FTPS.
@@ -36,8 +34,6 @@ Se configura en «Servicio FTP», dentro del grupo «Servicios de archivos». Se
 | `disableActiveMode` | Desactivado | Usa solo el modo pasivo, más adecuado para entornos con NAT |
 | `users` | Ninguno | Varios usuarios, con los mismos campos que WebDAV: `name`, `password`, `root`, `readOnly` o `mounts`; los nombres de usuario deben ser únicos |
 
-Los parámetros del servicio y los usuarios se pueden importar desde la configuración FTP de Lucky (consulta [Migrar desde Lucky](/es/docs/guide/migration)).
-
 ## Montajes de almacenamiento
 
 Añade montajes en «Montajes de almacenamiento», dentro del grupo «Servicios de archivos», y administra los archivos en línea desde la página.
@@ -51,8 +47,6 @@ Añade montajes en «Montajes de almacenamiento», dentro del grupo «Servicios 
 | `skipVerify` | Omite la verificación del certificado HTTPS (lo usa `webdav`) |
 | `domain` | Dominio o grupo de trabajo para la autenticación SMB, normalmente vacío (lo usa `smb`) |
 | `readOnly` | Montaje de solo lectura; el gestor de archivos rechaza cualquier operación de escritura |
-
-Los directorios locales y los almacenamientos WebDAV se pueden importar desde la gestión de almacenamiento de Lucky. Alibaba Cloud Drive y los montajes del sistema no se migran.
 
 El gestor de archivos en línea permite explorar directorios, descargar archivos, subir en streaming (el archivo completo no se carga en memoria), crear directorios, renombrar y eliminar. Un montaje puede servir como ubicación de destino de una tarea de copia de seguridad: los archivos de copia se escriben en el directorio indicado del montaje y los archivos antiguos se eliminan según la política de retención.
 

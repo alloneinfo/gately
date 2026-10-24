@@ -83,7 +83,3 @@ backend web
 ## 部署提示
 
 端口转发直接监听宿主机端口，Docker 部署推荐使用 `--network host`。
-
-## 从 Lucky 迁移
-
-规则可从 `lucky_portforward.lkcf` 导入；TLS / 流加密、限速等选项暂不支持，导入时会给出提示。

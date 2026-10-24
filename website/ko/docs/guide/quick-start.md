@@ -42,7 +42,3 @@ Docker 관리 기능이 필요 없다면 `docker.sock` 마운트를 생략해도
 | 포트 하나를 내부망의 다른 기기로 전달하고 싶다 | [포트 포워딩](/ko/docs/modules/portforward) |
 | 도메인 하나와 HTTPS로 여러 내부 서비스에 접속하고 싶다 | [SSL 인증서](/ko/docs/modules/ssl) + [웹 서비스](/ko/docs/modules/web) |
 | 원격지 간 네트워크를 연결하고 싶다 | [Tailscale / frp](/ko/docs/modules/tunnels) |
-
-## Lucky에서 마이그레이션
-
-이미 Lucky를 사용 중이라면 다시 설정할 필요가 없습니다. 「설정 → 백업 및 마이그레이션」에서 `.lkcf` 또는 사이트 전체 설정 zip을 가져오면 됩니다. 자세한 내용은 [마이그레이션 가이드](/ko/docs/guide/migration)를 참고하세요.

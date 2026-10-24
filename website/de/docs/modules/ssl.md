@@ -42,7 +42,3 @@ Beim Bearbeiten eines Zertifikats werden Bereitstellungen, deren Zieleinstellung
 ## Sicherheitshinweis
 
 Private Schlüssel werden in `ssl.json` im Konfigurationsverzeichnis gespeichert. Bewahren Sie diese Datei sicher auf und stellen Sie sicher, dass das Repository privat ist, wenn Sie sie unter Versionsverwaltung stellen.
-
-## Migration von Lucky
-
-Bereits ausgestellte Zertifikate werden unverändert importiert und vor ihrem Ablauf nicht erneut beantragt. ZeroSSL registriert mit den EAB-Zugangsdaten aus Lucky ein neues ACME-Konto. Details finden Sie in der [Migrationsanleitung](/de/docs/guide/migration).

@@ -28,10 +28,6 @@ Yes. Every release ships OpenWrt packages: the `.ipk` for OpenWrt 24.10 and earl
 
 Port forwarding, STUN and web services listen directly on host ports. With bridge networking you have to publish every port in use yourself.
 
-## Can it run alongside Lucky?
-
-Yes. The admin port defaults to 16680, which does not conflict with Lucky's 16601. Imported rules are disabled by default so they do not compete with a still-running Lucky for ports and router UPnP mappings.
-
 ## Why do I have to supply the Tailscale, frp and cloudflared binaries myself?
 
 These three modules supervise the official external programs. Gately does not bundle them, so you can always use the latest upstream version. See [Configuration & Runtime Options](/en/docs/guide/configuration) for where to put them.

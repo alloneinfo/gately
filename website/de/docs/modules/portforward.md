@@ -83,7 +83,3 @@ Setzen Sie die Listen-Adresse auf die öffentliche Adresse des Servers, damit es
 ## Hinweis zur Bereitstellung
 
 Die Portweiterleitung lauscht direkt auf Ports des Hosts. Bei Docker-Bereitstellungen empfehlen wir `--network host`.
-
-## Migration von Lucky
-
-Regeln lassen sich aus `lucky_portforward.lkcf` importieren. Optionen wie TLS-/Stream-Verschlüsselung und Ratenbegrenzung werden noch nicht unterstützt, beim Import erscheint dazu ein Hinweis.

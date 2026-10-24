@@ -42,7 +42,3 @@ When you edit a certificate, deployments whose target settings did not change ar
 ## Security note
 
 Private keys are stored in `ssl.json` in the configuration directory. Keep that file safe, and make sure the repository is private if you put it under version control.
-
-## Migrating from Lucky
-
-Certificates that are already issued are imported as they are and are not requested again before they expire. ZeroSSL registers a new ACME account using the EAB credentials from Lucky. See the [Migration Guide](/en/docs/guide/migration) for details.

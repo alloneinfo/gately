@@ -83,7 +83,3 @@ Define la dirección de escucha como la dirección pública del servidor para qu
 ## Consejo de despliegue
 
 El reenvío de puertos escucha directamente en puertos del host. En despliegues con Docker se recomienda `--network host`.
-
-## Migrar desde Lucky
-
-Las reglas se pueden importar desde `lucky_portforward.lkcf`. Las opciones como el cifrado TLS / de flujo y el límite de velocidad aún no se admiten, y durante la importación se muestra un aviso.

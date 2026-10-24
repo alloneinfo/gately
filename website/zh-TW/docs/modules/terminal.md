@@ -96,7 +96,3 @@ SSH 連線首次建立時記錄伺服器主機指紋並信任，之後每次連�
 ## 介面
 
 完整介面說明請見 [Web 終端機 API](/zh-TW/docs/reference/webterminal-api)。
-
-## 從 Lucky 遷移
-
-可匯入 `lucky_webterminal.lkcf`，包含 SSH 與 Telnet 連線、代理、`keyFile`、`workDir`、逾時、環境變數、快速存取目錄、工作階段設定、全域快捷命令，以及使用者協議與 2FA 金鑰。SSH 連線首次連線時會記錄主機指紋。

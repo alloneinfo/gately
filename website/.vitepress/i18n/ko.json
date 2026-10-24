@@ -25,7 +25,7 @@
       "guide/install": "설치 및 배포",
       "guide/configuration": "설정 및 실행 옵션",
       "guide/cli-mcp": "명령줄 및 MCP",
-      "guide/migration": "Lucky에서 마이그레이션",
+      "guide/migration": "마이그레이션 가이드",
       "guide/faq": "자주 묻는 질문",
       "modules/index": "모듈 개요",
       "modules/ddns": "동적 DNS (DDNS)",
@@ -267,10 +267,6 @@
     "fullInstall": "전체 설치 가이드 →",
     "faqTitle": "자주 묻는 질문",
     "faqs": [
-      {
-        "q": "기존 Lucky 설정을 바로 마이그레이션할 수 있나요?",
-        "a": "가능합니다. 설정 → 백업 및 마이그레이션에서 .lkcf 파일 또는 사이트 전체 설정 zip을 선택해 미리 본 뒤 가져오면 됩니다. 가져온 규칙은 기본적으로 비활성화되어 있으므로 Lucky와 함께 실행하면서 모듈별로 전환하고 언제든 되돌릴 수 있습니다."
-      },
       {
         "q": "프로젝트 서버에 연결해야 하나요?",
         "a": "아니요. Gately는 기본적으로 어떤 프로젝트 서버에도 연결하지 않으며 아무것도 보고하지 않습니다."

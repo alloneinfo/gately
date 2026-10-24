@@ -83,7 +83,3 @@ backend web
 ## 部署提示
 
 連接埠轉發直接監聽主機的連接埠，Docker 部署建議使用 `--network host`。
-
-## 從 Lucky 遷移
-
-規則可從 `lucky_portforward.lkcf` 匯入；TLS / 串流加密、限速等選項暫不支援，匯入時會給出提示。

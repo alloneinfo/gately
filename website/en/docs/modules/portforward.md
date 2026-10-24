@@ -83,7 +83,3 @@ Set the listen address to the server's public address so that it does not clash 
 ## Deployment tip
 
 Port forwarding listens on host ports directly. For Docker deployments, `--network host` is recommended.
-
-## Migrating from Lucky
-
-Rules can be imported from `lucky_portforward.lkcf`. Options such as TLS / stream encryption and rate limiting are not supported yet, and a notice is shown during import.
