@@ -92,7 +92,11 @@
               <el-radio-button value="custom">{{ t('waf.customSecLang') }}</el-radio-button>
             </el-radio-group>
             <el-input v-model="r.remark" size="small" :placeholder="t('common.remark')" class="rs-remark" />
-            <el-button text type="danger" size="small" :icon="Trash2" :aria-label="t('waf.deleteRuleSet')" @click="editing.ruleSets.splice(i, 1)" />
+            <span class="rs-ops">
+              <el-button text size="small" :icon="ChevronUp" :disabled="i === 0" :aria-label="t('waf.moveUp')" :title="t('waf.moveUp')" @click="moveRuleSet(i, -1)" />
+              <el-button text size="small" :icon="ChevronDown" :disabled="i === editing.ruleSets.length - 1" :aria-label="t('waf.moveDown')" :title="t('waf.moveDown')" @click="moveRuleSet(i, 1)" />
+              <el-button text type="danger" size="small" :icon="Trash2" :aria-label="t('waf.deleteRuleSet')" @click="editing.ruleSets.splice(i, 1)" />
+            </span>
           </div>
           <el-select
             v-if="r.type === 'crs'"
@@ -108,6 +112,7 @@
             <el-option v-for="f in crsFiles" :key="f" :label="f" :value="f" />
           </el-select>
           <el-input v-else v-model="r.param" type="textarea" :rows="4" class="mono" placeholder='SecRule REQUEST_URI "@beginsWith /admin" "id:10001,phase:1,deny,status:403"' />
+          <div v-if="r.type === 'custom'" class="help block">{{ t('waf.customHelp') }}</div>
         </div>
         <el-button size="small" :icon="Plus" @click="editing.ruleSets.push({ enable: true, remark: '', type: 'crs', param: '' })">{{ t('waf.addRuleSet') }}</el-button>
         <el-form-item :label="t('common.remark')" class="remark"><el-input v-model="editing.remark" /></el-form-item>
@@ -125,7 +130,7 @@
 import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
-import { Pencil, Plus, ShieldHalf, Trash2 } from 'lucide-vue-next'
+import { ChevronDown, ChevronUp, Pencil, Plus, ShieldHalf, Trash2 } from 'lucide-vue-next'
 import { api } from '../api'
 import PageHeader from '../components/PageHeader.vue'
 import CompactToggle from '../components/CompactToggle.vue'
@@ -203,6 +208,16 @@ function instStatus(w: InstanceView): { type: StatusType; text: string; title?: 
 
 function crsSelected(r: RuleSet) {
   return r.param.split('\n').map((s) => s.trim()).filter(Boolean)
+}
+
+// 规则组按列表顺序加载，同一阶段内排在前面的先执行，交换相邻两项即可调整顺序
+function moveRuleSet(i: number, d: number) {
+  const list = editing.value.ruleSets
+  const j = i + d
+  if (j < 0 || j >= list.length) {
+    return
+  }
+  ;[list[i], list[j]] = [list[j], list[i]]
 }
 
 async function load() {
@@ -310,6 +325,13 @@ onMounted(async () => {
 }
 .rs-remark {
   width: 200px;
+}
+.rs-ops {
+  display: inline-flex;
+  align-items: center;
+}
+.rs-ops .el-button + .el-button {
+  margin-left: 0;
 }
 .remark {
   margin-top: 16px;
