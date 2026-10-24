@@ -31,6 +31,8 @@ Otras opciones de los sitios de proxy inverso:
 
 Los sitios de cualquier tipo pueden definir un registro de acceso, orígenes cruzados (CORS), cabeceras de petición y respuesta personalizadas (un `Clave: Valor` por línea; un Valor vacío elimina esa cabecera) y pueden hacer referencia a una instancia de [Cortafuegos WAF](/es/docs/modules/waf) (si la instancia no existe o está desactivada, las peticiones pasan sin filtrar).
 
+Las entradas del registro de acceso guardan la IP del cliente, el dominio, el nombre del sitio y el código de estado, de modo que el registro se puede filtrar por sitio, código de estado, IP de origen y más; consulte [ver y filtrar los registros de ejecución](/es/docs/guide/configuration).
+
 ## Transporte y protocolos
 
 - HTTPS: usa un certificado del módulo [Certificados SSL](/es/docs/modules/ssl) que cubra el dominio;

@@ -316,7 +316,7 @@ func (h *siteHandler) tryShare(w http.ResponseWriter, r *http.Request) (handled,
 			Name: shareCookieName(h.site), Value: h.auth.signBlob("share", sess, ttl),
 			Path: "/", Expires: now.Add(ttl), HttpOnly: true, Secure: r.TLS != nil, SameSite: http.SameSiteLaxMode,
 		})
-		h.log.Infof("分享链接「%s」被兑换（%s）", link.Name, clientAddr(r).Addr())
+		h.reqLog(r).Infof("分享链接「%s」被兑换（%s）", link.Name, clientAddr(r).Addr())
 		q := r.URL.Query()
 		q.Del(shareParam)
 		target := *r.URL

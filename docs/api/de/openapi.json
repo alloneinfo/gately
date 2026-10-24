@@ -3239,7 +3239,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since`, der Protokolle mit einer Sequenznummer größer als dieser Wert zurückgibt; `before` gibt Protokolle mit einer Sequenznummer kleiner als dieser Wert zurück, um ältere Einträge zu laden; `limit` gibt davon nur die neuesten zurück.\n\nErforderliche Berechtigung: `backup:read`.",
+        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden).\n\nErforderliche Berechtigung: `backup:read`.",
         "parameters": [
           {
             "description": "Inkrementeller Abruf: gibt nur Protokolle mit einer größeren Sequenznummer zurück",
@@ -3263,6 +3263,70 @@
             "name": "limit",
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "description": "Mindeststufe: debug, info, warn oder error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Quellbezeichnung, exakte Übereinstimmung ohne Groß-/Kleinschreibung",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Suchbegriffe: durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes - schließt aus",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Client-Adresse: vollständige Adresse, CIDR oder Adressteil, durch Kommas getrennt",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Teil des Site-Namens oder der Domain",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Statuscode wie 404, 4xx, 500-599, durch Kommas getrennt",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Startzeit, RFC 3339 oder Zeitstempel in Millisekunden",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Endzeit, RFC 3339 oder Zeitstempel in Millisekunden",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -4057,7 +4121,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since`, der Protokolle mit einer Sequenznummer größer als dieser Wert zurückgibt; `before` gibt Protokolle mit einer Sequenznummer kleiner als dieser Wert zurück, um ältere Einträge zu laden; `limit` gibt davon nur die neuesten zurück.\n\nErforderliche Berechtigung: `cloudflared:read`.",
+        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden).\n\nErforderliche Berechtigung: `cloudflared:read`.",
         "parameters": [
           {
             "description": "Inkrementeller Abruf: gibt nur Protokolle mit einer größeren Sequenznummer zurück",
@@ -4081,6 +4145,70 @@
             "name": "limit",
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "description": "Mindeststufe: debug, info, warn oder error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Quellbezeichnung, exakte Übereinstimmung ohne Groß-/Kleinschreibung",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Suchbegriffe: durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes - schließt aus",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Client-Adresse: vollständige Adresse, CIDR oder Adressteil, durch Kommas getrennt",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Teil des Site-Namens oder der Domain",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Statuscode wie 404, 4xx, 500-599, durch Kommas getrennt",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Startzeit, RFC 3339 oder Zeitstempel in Millisekunden",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Endzeit, RFC 3339 oder Zeitstempel in Millisekunden",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -4745,7 +4873,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since`, der Protokolle mit einer Sequenznummer größer als dieser Wert zurückgibt; `before` gibt Protokolle mit einer Sequenznummer kleiner als dieser Wert zurück, um ältere Einträge zu laden; `limit` gibt davon nur die neuesten zurück.\n\nErforderliche Berechtigung: `cron:read`.",
+        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden).\n\nErforderliche Berechtigung: `cron:read`.",
         "parameters": [
           {
             "description": "Inkrementeller Abruf: gibt nur Protokolle mit einer größeren Sequenznummer zurück",
@@ -4769,6 +4897,70 @@
             "name": "limit",
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "description": "Mindeststufe: debug, info, warn oder error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Quellbezeichnung, exakte Übereinstimmung ohne Groß-/Kleinschreibung",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Suchbegriffe: durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes - schließt aus",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Client-Adresse: vollständige Adresse, CIDR oder Adressteil, durch Kommas getrennt",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Teil des Site-Namens oder der Domain",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Statuscode wie 404, 4xx, 500-599, durch Kommas getrennt",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Startzeit, RFC 3339 oder Zeitstempel in Millisekunden",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Endzeit, RFC 3339 oder Zeitstempel in Millisekunden",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -5495,7 +5687,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since`, der Protokolle mit einer Sequenznummer größer als dieser Wert zurückgibt; `before` gibt Protokolle mit einer Sequenznummer kleiner als dieser Wert zurück, um ältere Einträge zu laden; `limit` gibt davon nur die neuesten zurück.\n\nErforderliche Berechtigung: `ddns:read`.",
+        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden).\n\nErforderliche Berechtigung: `ddns:read`.",
         "parameters": [
           {
             "description": "Inkrementeller Abruf: gibt nur Protokolle mit einer größeren Sequenznummer zurück",
@@ -5519,6 +5711,70 @@
             "name": "limit",
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "description": "Mindeststufe: debug, info, warn oder error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Quellbezeichnung, exakte Übereinstimmung ohne Groß-/Kleinschreibung",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Suchbegriffe: durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes - schließt aus",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Client-Adresse: vollständige Adresse, CIDR oder Adressteil, durch Kommas getrennt",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Teil des Site-Namens oder der Domain",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Statuscode wie 404, 4xx, 500-599, durch Kommas getrennt",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Startzeit, RFC 3339 oder Zeitstempel in Millisekunden",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Endzeit, RFC 3339 oder Zeitstempel in Millisekunden",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -9091,7 +9347,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since`, der Protokolle mit einer Sequenznummer größer als dieser Wert zurückgibt; `before` gibt Protokolle mit einer Sequenznummer kleiner als dieser Wert zurück, um ältere Einträge zu laden; `limit` gibt davon nur die neuesten zurück.\n\nErforderliche Berechtigung: `docker:read`.",
+        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden).\n\nErforderliche Berechtigung: `docker:read`.",
         "parameters": [
           {
             "description": "Inkrementeller Abruf: gibt nur Protokolle mit einer größeren Sequenznummer zurück",
@@ -9115,6 +9371,70 @@
             "name": "limit",
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "description": "Mindeststufe: debug, info, warn oder error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Quellbezeichnung, exakte Übereinstimmung ohne Groß-/Kleinschreibung",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Suchbegriffe: durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes - schließt aus",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Client-Adresse: vollständige Adresse, CIDR oder Adressteil, durch Kommas getrennt",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Teil des Site-Namens oder der Domain",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Statuscode wie 404, 4xx, 500-599, durch Kommas getrennt",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Startzeit, RFC 3339 oder Zeitstempel in Millisekunden",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Endzeit, RFC 3339 oder Zeitstempel in Millisekunden",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -10325,7 +10645,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since`, der Protokolle mit einer Sequenznummer größer als dieser Wert zurückgibt; `before` gibt Protokolle mit einer Sequenznummer kleiner als dieser Wert zurück, um ältere Einträge zu laden; `limit` gibt davon nur die neuesten zurück.\n\nErforderliche Berechtigung: `frp:read`.",
+        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden).\n\nErforderliche Berechtigung: `frp:read`.",
         "parameters": [
           {
             "description": "Inkrementeller Abruf: gibt nur Protokolle mit einer größeren Sequenznummer zurück",
@@ -10349,6 +10669,70 @@
             "name": "limit",
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "description": "Mindeststufe: debug, info, warn oder error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Quellbezeichnung, exakte Übereinstimmung ohne Groß-/Kleinschreibung",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Suchbegriffe: durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes - schließt aus",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Client-Adresse: vollständige Adresse, CIDR oder Adressteil, durch Kommas getrennt",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Teil des Site-Namens oder der Domain",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Statuscode wie 404, 4xx, 500-599, durch Kommas getrennt",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Startzeit, RFC 3339 oder Zeitstempel in Millisekunden",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Endzeit, RFC 3339 oder Zeitstempel in Millisekunden",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -10952,7 +11336,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since`, der Protokolle mit einer Sequenznummer größer als dieser Wert zurückgibt; `before` gibt Protokolle mit einer Sequenznummer kleiner als dieser Wert zurück, um ältere Einträge zu laden; `limit` gibt davon nur die neuesten zurück.\n\nErforderliche Berechtigung: `ftp:read`.",
+        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden).\n\nErforderliche Berechtigung: `ftp:read`.",
         "parameters": [
           {
             "description": "Inkrementeller Abruf: gibt nur Protokolle mit einer größeren Sequenznummer zurück",
@@ -10976,6 +11360,70 @@
             "name": "limit",
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "description": "Mindeststufe: debug, info, warn oder error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Quellbezeichnung, exakte Übereinstimmung ohne Groß-/Kleinschreibung",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Suchbegriffe: durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes - schließt aus",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Client-Adresse: vollständige Adresse, CIDR oder Adressteil, durch Kommas getrennt",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Teil des Site-Namens oder der Domain",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Statuscode wie 404, 4xx, 500-599, durch Kommas getrennt",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Startzeit, RFC 3339 oder Zeitstempel in Millisekunden",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Endzeit, RFC 3339 oder Zeitstempel in Millisekunden",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -11884,7 +12332,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since`, der Protokolle mit einer Sequenznummer größer als dieser Wert zurückgibt; `before` gibt Protokolle mit einer Sequenznummer kleiner als dieser Wert zurück, um ältere Einträge zu laden; `limit` gibt davon nur die neuesten zurück.\n\nErforderliche Berechtigung: `guard:read`.",
+        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden).\n\nErforderliche Berechtigung: `guard:read`.",
         "parameters": [
           {
             "description": "Inkrementeller Abruf: gibt nur Protokolle mit einer größeren Sequenznummer zurück",
@@ -11908,6 +12356,70 @@
             "name": "limit",
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "description": "Mindeststufe: debug, info, warn oder error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Quellbezeichnung, exakte Übereinstimmung ohne Groß-/Kleinschreibung",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Suchbegriffe: durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes - schließt aus",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Client-Adresse: vollständige Adresse, CIDR oder Adressteil, durch Kommas getrennt",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Teil des Site-Namens oder der Domain",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Statuscode wie 404, 4xx, 500-599, durch Kommas getrennt",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Startzeit, RFC 3339 oder Zeitstempel in Millisekunden",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Endzeit, RFC 3339 oder Zeitstempel in Millisekunden",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -12428,7 +12940,7 @@
     },
     "/api/logs": {
       "get": {
-        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since`, der Protokolle mit einer Sequenznummer größer als dieser Wert zurückgibt; `before` gibt Protokolle mit einer Sequenznummer kleiner als dieser Wert zurück, um ältere Einträge zu laden; `limit` gibt davon nur die neuesten zurück.\n\nErforderliche Berechtigung: `logs:read`.",
+        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden).\n\nErforderliche Berechtigung: `logs:read`.",
         "parameters": [
           {
             "description": "Inkrementeller Abruf: gibt nur Protokolle mit einer größeren Sequenznummer zurück",
@@ -12452,6 +12964,70 @@
             "name": "limit",
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "description": "Mindeststufe: debug, info, warn oder error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Quellbezeichnung, exakte Übereinstimmung ohne Groß-/Kleinschreibung",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Suchbegriffe: durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes - schließt aus",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Client-Adresse: vollständige Adresse, CIDR oder Adressteil, durch Kommas getrennt",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Teil des Site-Namens oder der Domain",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Statuscode wie 404, 4xx, 500-599, durch Kommas getrennt",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Startzeit, RFC 3339 oder Zeitstempel in Millisekunden",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Endzeit, RFC 3339 oder Zeitstempel in Millisekunden",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -12605,7 +13181,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since`, der Protokolle mit einer Sequenznummer größer als dieser Wert zurückgibt; `before` gibt Protokolle mit einer Sequenznummer kleiner als dieser Wert zurück, um ältere Einträge zu laden; `limit` gibt davon nur die neuesten zurück.\n\nErforderliche Berechtigung: `nettools:read`.",
+        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden).\n\nErforderliche Berechtigung: `nettools:read`.",
         "parameters": [
           {
             "description": "Inkrementeller Abruf: gibt nur Protokolle mit einer größeren Sequenznummer zurück",
@@ -12629,6 +13205,70 @@
             "name": "limit",
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "description": "Mindeststufe: debug, info, warn oder error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Quellbezeichnung, exakte Übereinstimmung ohne Groß-/Kleinschreibung",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Suchbegriffe: durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes - schließt aus",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Client-Adresse: vollständige Adresse, CIDR oder Adressteil, durch Kommas getrennt",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Teil des Site-Namens oder der Domain",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Statuscode wie 404, 4xx, 500-599, durch Kommas getrennt",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Startzeit, RFC 3339 oder Zeitstempel in Millisekunden",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Endzeit, RFC 3339 oder Zeitstempel in Millisekunden",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -13745,7 +14385,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since`, der Protokolle mit einer Sequenznummer größer als dieser Wert zurückgibt; `before` gibt Protokolle mit einer Sequenznummer kleiner als dieser Wert zurück, um ältere Einträge zu laden; `limit` gibt davon nur die neuesten zurück.\n\nErforderliche Berechtigung: `notify:read`.",
+        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden).\n\nErforderliche Berechtigung: `notify:read`.",
         "parameters": [
           {
             "description": "Inkrementeller Abruf: gibt nur Protokolle mit einer größeren Sequenznummer zurück",
@@ -13769,6 +14409,70 @@
             "name": "limit",
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "description": "Mindeststufe: debug, info, warn oder error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Quellbezeichnung, exakte Übereinstimmung ohne Groß-/Kleinschreibung",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Suchbegriffe: durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes - schließt aus",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Client-Adresse: vollständige Adresse, CIDR oder Adressteil, durch Kommas getrennt",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Teil des Site-Namens oder der Domain",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Statuscode wie 404, 4xx, 500-599, durch Kommas getrennt",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Startzeit, RFC 3339 oder Zeitstempel in Millisekunden",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Endzeit, RFC 3339 oder Zeitstempel in Millisekunden",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -14304,7 +15008,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since`, der Protokolle mit einer Sequenznummer größer als dieser Wert zurückgibt; `before` gibt Protokolle mit einer Sequenznummer kleiner als dieser Wert zurück, um ältere Einträge zu laden; `limit` gibt davon nur die neuesten zurück.\n\nErforderliche Berechtigung: `portforward:read`.",
+        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden).\n\nErforderliche Berechtigung: `portforward:read`.",
         "parameters": [
           {
             "description": "Inkrementeller Abruf: gibt nur Protokolle mit einer größeren Sequenznummer zurück",
@@ -14328,6 +15032,70 @@
             "name": "limit",
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "description": "Mindeststufe: debug, info, warn oder error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Quellbezeichnung, exakte Übereinstimmung ohne Groß-/Kleinschreibung",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Suchbegriffe: durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes - schließt aus",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Client-Adresse: vollständige Adresse, CIDR oder Adressteil, durch Kommas getrennt",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Teil des Site-Namens oder der Domain",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Statuscode wie 404, 4xx, 500-599, durch Kommas getrennt",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Startzeit, RFC 3339 oder Zeitstempel in Millisekunden",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Endzeit, RFC 3339 oder Zeitstempel in Millisekunden",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -15598,7 +16366,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since`, der Protokolle mit einer Sequenznummer größer als dieser Wert zurückgibt; `before` gibt Protokolle mit einer Sequenznummer kleiner als dieser Wert zurück, um ältere Einträge zu laden; `limit` gibt davon nur die neuesten zurück.\n\nErforderliche Berechtigung: `ssl:read`.",
+        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden).\n\nErforderliche Berechtigung: `ssl:read`.",
         "parameters": [
           {
             "description": "Inkrementeller Abruf: gibt nur Protokolle mit einer größeren Sequenznummer zurück",
@@ -15622,6 +16390,70 @@
             "name": "limit",
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "description": "Mindeststufe: debug, info, warn oder error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Quellbezeichnung, exakte Übereinstimmung ohne Groß-/Kleinschreibung",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Suchbegriffe: durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes - schließt aus",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Client-Adresse: vollständige Adresse, CIDR oder Adressteil, durch Kommas getrennt",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Teil des Site-Namens oder der Domain",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Statuscode wie 404, 4xx, 500-599, durch Kommas getrennt",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Startzeit, RFC 3339 oder Zeitstempel in Millisekunden",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Endzeit, RFC 3339 oder Zeitstempel in Millisekunden",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -16319,7 +17151,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since`, der Protokolle mit einer Sequenznummer größer als dieser Wert zurückgibt; `before` gibt Protokolle mit einer Sequenznummer kleiner als dieser Wert zurück, um ältere Einträge zu laden; `limit` gibt davon nur die neuesten zurück.\n\nErforderliche Berechtigung: `storage:read`.",
+        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden).\n\nErforderliche Berechtigung: `storage:read`.",
         "parameters": [
           {
             "description": "Inkrementeller Abruf: gibt nur Protokolle mit einer größeren Sequenznummer zurück",
@@ -16343,6 +17175,70 @@
             "name": "limit",
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "description": "Mindeststufe: debug, info, warn oder error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Quellbezeichnung, exakte Übereinstimmung ohne Groß-/Kleinschreibung",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Suchbegriffe: durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes - schließt aus",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Client-Adresse: vollständige Adresse, CIDR oder Adressteil, durch Kommas getrennt",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Teil des Site-Namens oder der Domain",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Statuscode wie 404, 4xx, 500-599, durch Kommas getrennt",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Startzeit, RFC 3339 oder Zeitstempel in Millisekunden",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Endzeit, RFC 3339 oder Zeitstempel in Millisekunden",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -16837,7 +17733,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since`, der Protokolle mit einer Sequenznummer größer als dieser Wert zurückgibt; `before` gibt Protokolle mit einer Sequenznummer kleiner als dieser Wert zurück, um ältere Einträge zu laden; `limit` gibt davon nur die neuesten zurück.\n\nErforderliche Berechtigung: `stun:read`.",
+        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden).\n\nErforderliche Berechtigung: `stun:read`.",
         "parameters": [
           {
             "description": "Inkrementeller Abruf: gibt nur Protokolle mit einer größeren Sequenznummer zurück",
@@ -16861,6 +17757,70 @@
             "name": "limit",
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "description": "Mindeststufe: debug, info, warn oder error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Quellbezeichnung, exakte Übereinstimmung ohne Groß-/Kleinschreibung",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Suchbegriffe: durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes - schließt aus",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Client-Adresse: vollständige Adresse, CIDR oder Adressteil, durch Kommas getrennt",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Teil des Site-Namens oder der Domain",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Statuscode wie 404, 4xx, 500-599, durch Kommas getrennt",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Startzeit, RFC 3339 oder Zeitstempel in Millisekunden",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Endzeit, RFC 3339 oder Zeitstempel in Millisekunden",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -18334,7 +19294,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since`, der Protokolle mit einer Sequenznummer größer als dieser Wert zurückgibt; `before` gibt Protokolle mit einer Sequenznummer kleiner als dieser Wert zurück, um ältere Einträge zu laden; `limit` gibt davon nur die neuesten zurück.\n\nErforderliche Berechtigung: `tailscale:read`.",
+        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden).\n\nErforderliche Berechtigung: `tailscale:read`.",
         "parameters": [
           {
             "description": "Inkrementeller Abruf: gibt nur Protokolle mit einer größeren Sequenznummer zurück",
@@ -18358,6 +19318,70 @@
             "name": "limit",
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "description": "Mindeststufe: debug, info, warn oder error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Quellbezeichnung, exakte Übereinstimmung ohne Groß-/Kleinschreibung",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Suchbegriffe: durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes - schließt aus",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Client-Adresse: vollständige Adresse, CIDR oder Adressteil, durch Kommas getrennt",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Teil des Site-Namens oder der Domain",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Statuscode wie 404, 4xx, 500-599, durch Kommas getrennt",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Startzeit, RFC 3339 oder Zeitstempel in Millisekunden",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Endzeit, RFC 3339 oder Zeitstempel in Millisekunden",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -19495,7 +20519,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since`, der Protokolle mit einer Sequenznummer größer als dieser Wert zurückgibt; `before` gibt Protokolle mit einer Sequenznummer kleiner als dieser Wert zurück, um ältere Einträge zu laden; `limit` gibt davon nur die neuesten zurück.\n\nErforderliche Berechtigung: `waf:read`.",
+        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden).\n\nErforderliche Berechtigung: `waf:read`.",
         "parameters": [
           {
             "description": "Inkrementeller Abruf: gibt nur Protokolle mit einer größeren Sequenznummer zurück",
@@ -19519,6 +20543,70 @@
             "name": "limit",
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "description": "Mindeststufe: debug, info, warn oder error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Quellbezeichnung, exakte Übereinstimmung ohne Groß-/Kleinschreibung",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Suchbegriffe: durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes - schließt aus",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Client-Adresse: vollständige Adresse, CIDR oder Adressteil, durch Kommas getrennt",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Teil des Site-Namens oder der Domain",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Statuscode wie 404, 4xx, 500-599, durch Kommas getrennt",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Startzeit, RFC 3339 oder Zeitstempel in Millisekunden",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Endzeit, RFC 3339 oder Zeitstempel in Millisekunden",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -19621,7 +20709,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since`, der Protokolle mit einer Sequenznummer größer als dieser Wert zurückgibt; `before` gibt Protokolle mit einer Sequenznummer kleiner als dieser Wert zurück, um ältere Einträge zu laden; `limit` gibt davon nur die neuesten zurück.\n\nErforderliche Berechtigung: `webdav:read`.",
+        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden).\n\nErforderliche Berechtigung: `webdav:read`.",
         "parameters": [
           {
             "description": "Inkrementeller Abruf: gibt nur Protokolle mit einer größeren Sequenznummer zurück",
@@ -19645,6 +20733,70 @@
             "name": "limit",
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "description": "Mindeststufe: debug, info, warn oder error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Quellbezeichnung, exakte Übereinstimmung ohne Groß-/Kleinschreibung",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Suchbegriffe: durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes - schließt aus",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Client-Adresse: vollständige Adresse, CIDR oder Adressteil, durch Kommas getrennt",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Teil des Site-Namens oder der Domain",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Statuscode wie 404, 4xx, 500-599, durch Kommas getrennt",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Startzeit, RFC 3339 oder Zeitstempel in Millisekunden",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Endzeit, RFC 3339 oder Zeitstempel in Millisekunden",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -21163,7 +22315,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since`, der Protokolle mit einer Sequenznummer größer als dieser Wert zurückgibt; `before` gibt Protokolle mit einer Sequenznummer kleiner als dieser Wert zurück, um ältere Einträge zu laden; `limit` gibt davon nur die neuesten zurück.\n\nErforderliche Berechtigung: `webservice:read`.",
+        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden).\n\nErforderliche Berechtigung: `webservice:read`.",
         "parameters": [
           {
             "description": "Inkrementeller Abruf: gibt nur Protokolle mit einer größeren Sequenznummer zurück",
@@ -21187,6 +22339,70 @@
             "name": "limit",
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "description": "Mindeststufe: debug, info, warn oder error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Quellbezeichnung, exakte Übereinstimmung ohne Groß-/Kleinschreibung",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Suchbegriffe: durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes - schließt aus",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Client-Adresse: vollständige Adresse, CIDR oder Adressteil, durch Kommas getrennt",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Teil des Site-Namens oder der Domain",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Statuscode wie 404, 4xx, 500-599, durch Kommas getrennt",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Startzeit, RFC 3339 oder Zeitstempel in Millisekunden",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Endzeit, RFC 3339 oder Zeitstempel in Millisekunden",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -22780,7 +23996,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since`, der Protokolle mit einer Sequenznummer größer als dieser Wert zurückgibt; `before` gibt Protokolle mit einer Sequenznummer kleiner als dieser Wert zurück, um ältere Einträge zu laden; `limit` gibt davon nur die neuesten zurück.\n\nErforderliche Berechtigung: `webterminal:read`.",
+        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden).\n\nErforderliche Berechtigung: `webterminal:read`.",
         "parameters": [
           {
             "description": "Inkrementeller Abruf: gibt nur Protokolle mit einer größeren Sequenznummer zurück",
@@ -22804,6 +24020,70 @@
             "name": "limit",
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "description": "Mindeststufe: debug, info, warn oder error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Quellbezeichnung, exakte Übereinstimmung ohne Groß-/Kleinschreibung",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Suchbegriffe: durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes - schließt aus",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Client-Adresse: vollständige Adresse, CIDR oder Adressteil, durch Kommas getrennt",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Teil des Site-Namens oder der Domain",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Statuscode wie 404, 4xx, 500-599, durch Kommas getrennt",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Startzeit, RFC 3339 oder Zeitstempel in Millisekunden",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Endzeit, RFC 3339 oder Zeitstempel in Millisekunden",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -25263,7 +26543,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since`, der Protokolle mit einer Sequenznummer größer als dieser Wert zurückgibt; `before` gibt Protokolle mit einer Sequenznummer kleiner als dieser Wert zurück, um ältere Einträge zu laden; `limit` gibt davon nur die neuesten zurück.\n\nErforderliche Berechtigung: `wol:read`.",
+        "description": "Unterstützt inkrementelles Abrufen mit dem Parameter `since` und liefert Logs mit einer Sequenznummer größer als dieser Wert; `before` liefert Logs mit einer Sequenznummer kleiner als dieser Wert, um ältere Einträge zu laden; `limit` liefert nur die neuesten Einträge davon und durchsucht, wenn der Speicher nicht genug enthält, auch den in den Logdateien aufbewahrten Verlauf. Filterparameter: `level` Mindeststufe, `source` Quelle, `q` Suchbegriffe (durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt aus), `ip` Client-Adresse (vollständige Adresse, CIDR oder Adressteil, mehrere durch Kommas getrennt), `host` Site-Name oder Domain, `status` Statuscode (z. B. `404`, `4xx`, `500-599`), `from` und `to` Zeitraum (RFC 3339 oder Zeitstempel in Millisekunden).\n\nErforderliche Berechtigung: `wol:read`.",
         "parameters": [
           {
             "description": "Inkrementeller Abruf: gibt nur Protokolle mit einer größeren Sequenznummer zurück",
@@ -25287,6 +26567,70 @@
             "name": "limit",
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "description": "Mindeststufe: debug, info, warn oder error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Quellbezeichnung, exakte Übereinstimmung ohne Groß-/Kleinschreibung",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Suchbegriffe: durch Leerzeichen getrennt müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes - schließt aus",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Client-Adresse: vollständige Adresse, CIDR oder Adressteil, durch Kommas getrennt",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Teil des Site-Namens oder der Domain",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Statuscode wie 404, 4xx, 500-599, durch Kommas getrennt",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Startzeit, RFC 3339 oder Zeitstempel in Millisekunden",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Endzeit, RFC 3339 oder Zeitstempel in Millisekunden",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
             }
           }
         ],

@@ -42,7 +42,39 @@
     "levelError": "僅錯誤",
     "autoScroll": "自動捲動",
     "empty": "暫無日誌",
-    "loadEarlier": "載入更早的日誌"
+    "loadEarlier": "載入更早的日誌",
+    "source": "來源",
+    "keyword": "關鍵字",
+    "keywordTip": "空格分隔表示同時包含，雙引號包住短語，詞前加 - 表示排除，例如：GET \"timeout\" -debug",
+    "moreFilters": "更多篩選",
+    "reset": "重設",
+    "ip": "IP 或網段，如 1.2.3.4、10.0.0.0/8",
+    "host": "站點名稱或網域",
+    "status": "狀態碼，如 404、5xx",
+    "to": "結束時間",
+    "fieldTip": "點擊日誌中的來源或欄位標籤可快速依其篩選；記憶體中不夠時會繼續查找日誌檔案裡保留的歷史",
+    "filterBy": "依此篩選",
+    "noMatch": "沒有符合條件的日誌",
+    "range": {
+      "all": "不限時間",
+      "15m": "最近 15 分鐘",
+      "1h": "最近 1 小時",
+      "6h": "最近 6 小時",
+      "24h": "最近 24 小時",
+      "7d": "最近 7 天",
+      "custom": "自訂"
+    },
+    "field": {
+      "ip": "IP",
+      "host": "網域",
+      "site": "站點",
+      "status": "狀態碼",
+      "method": "方法",
+      "path": "路徑",
+      "rule": "規則",
+      "user": "使用者"
+    },
+    "from": "開始時間"
   },
   "scopeTags": {
     "allWrite": "全部讀寫",

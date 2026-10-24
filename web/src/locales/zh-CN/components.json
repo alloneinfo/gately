@@ -42,7 +42,39 @@
     "levelError": "仅错误",
     "autoScroll": "自动滚动",
     "empty": "暂无日志",
-    "loadEarlier": "加载更早的日志"
+    "loadEarlier": "加载更早的日志",
+    "source": "来源",
+    "keyword": "关键词",
+    "keywordTip": "空格分隔表示同时包含，双引号包住短语，词前加 - 表示排除，例如：GET \"timeout\" -debug",
+    "moreFilters": "更多筛选",
+    "reset": "重置",
+    "ip": "IP 或网段，如 1.2.3.4、10.0.0.0/8",
+    "host": "站点名称或域名",
+    "status": "状态码，如 404、5xx",
+    "to": "结束时间",
+    "fieldTip": "点击日志中的来源或字段标签可快速按其筛选；内存中不够时会继续查找日志文件里保留的历史",
+    "filterBy": "按此筛选",
+    "noMatch": "没有符合条件的日志",
+    "range": {
+      "all": "不限时间",
+      "15m": "最近 15 分钟",
+      "1h": "最近 1 小时",
+      "6h": "最近 6 小时",
+      "24h": "最近 24 小时",
+      "7d": "最近 7 天",
+      "custom": "自定义"
+    },
+    "field": {
+      "ip": "IP",
+      "host": "域名",
+      "site": "站点",
+      "status": "状态码",
+      "method": "方法",
+      "path": "路径",
+      "rule": "规则",
+      "user": "用户"
+    },
+    "from": "开始时间"
   },
   "scopeTags": {
     "allWrite": "全部读写",

@@ -25,6 +25,8 @@ type Entry struct {
 	Level   string    `json:"level"`
 	Source  string    `json:"source,omitempty"`
 	Message string    `json:"message"`
+	// Fields 为可选的结构化字段（客户端 IP、域名、状态码等），用于按字段过滤
+	Fields Fields `json:"fields,omitempty"`
 }
 
 // Buffer 是固定容量的环形缓冲，写满后覆盖最旧的日志。
@@ -50,8 +52,13 @@ func New(size int, echo *log.Logger) *Buffer {
 
 // Add 追加一条日志。
 func (b *Buffer) Add(level, source, msg string) {
+	b.AddFields(level, source, msg, nil)
+}
+
+// AddFields 追加一条带结构化字段的日志，fields 写入后不应再修改。
+func (b *Buffer) AddFields(level, source, msg string, fields Fields) {
 	b.mu.Lock()
-	e := Entry{Seq: b.nextSeq, Time: time.Now(), Level: level, Source: source, Message: msg}
+	e := Entry{Seq: b.nextSeq, Time: time.Now(), Level: level, Source: source, Message: msg, Fields: fields}
 	b.nextSeq++
 	idx := (b.start + b.count) % len(b.entries)
 	b.entries[idx] = e
@@ -124,11 +131,28 @@ func (b *Buffer) Clear() {
 type Logger struct {
 	buf    *Buffer
 	source string
+	// fields 为 With 附加的结构化字段，随每条日志写入
+	fields Fields
 }
 
 // Logger 返回带来源标签的写入器，例如每条转发规则一个。
 func (b *Buffer) Logger(source string) *Logger {
 	return &Logger{buf: b, source: source}
+}
+
+// With 返回附带结构化字段的写入器，用于单条日志，例如 log.With(logbuf.Fields{"ip": ip}).Infof(...)。
+// 空值的字段会被忽略。
+func (l *Logger) With(fields Fields) *Logger {
+	merged := make(Fields, len(l.fields)+len(fields))
+	for k, v := range l.fields {
+		merged[k] = v
+	}
+	for k, v := range fields {
+		if v != "" {
+			merged[k] = v
+		}
+	}
+	return &Logger{buf: l.buf, source: l.source, fields: merged}
 }
 
 // Source 返回日志来源标签。
@@ -138,27 +162,27 @@ func (l *Logger) Source() string {
 
 // Log 以指定级别写入一条已格式化的日志，供托管外部进程的输出使用。
 func (l *Logger) Log(level, msg string) {
-	l.buf.Add(level, l.source, msg)
+	l.buf.AddFields(level, l.source, msg, l.fields)
 }
 
 // Debugf 写入调试日志。
 func (l *Logger) Debugf(format string, args ...any) {
-	l.buf.Add(LevelDebug, l.source, fmt.Sprintf(format, args...))
+	l.buf.AddFields(LevelDebug, l.source, fmt.Sprintf(format, args...), l.fields)
 }
 
 // Infof 写入普通日志。
 func (l *Logger) Infof(format string, args ...any) {
-	l.buf.Add(LevelInfo, l.source, fmt.Sprintf(format, args...))
+	l.buf.AddFields(LevelInfo, l.source, fmt.Sprintf(format, args...), l.fields)
 }
 
 // Warnf 写入警告日志。
 func (l *Logger) Warnf(format string, args ...any) {
-	l.buf.Add(LevelWarn, l.source, fmt.Sprintf(format, args...))
+	l.buf.AddFields(LevelWarn, l.source, fmt.Sprintf(format, args...), l.fields)
 }
 
 // Errorf 写入错误日志。
 func (l *Logger) Errorf(format string, args ...any) {
-	l.buf.Add(LevelError, l.source, fmt.Sprintf(format, args...))
+	l.buf.AddFields(LevelError, l.source, fmt.Sprintf(format, args...), l.fields)
 }
 
 // Resize 修改缓冲容量，保留最新的日志。

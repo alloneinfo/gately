@@ -42,7 +42,39 @@
     "levelError": "Errors only",
     "autoScroll": "Auto scroll",
     "empty": "No logs yet",
-    "loadEarlier": "Load earlier logs"
+    "loadEarlier": "Load earlier logs",
+    "source": "Source",
+    "keyword": "Keywords",
+    "keywordTip": "Space-separated terms must all match, double quotes group a phrase, a leading - excludes, e.g. GET \"timeout\" -debug",
+    "moreFilters": "More filters",
+    "reset": "Reset",
+    "ip": "IP or range, e.g. 1.2.3.4, 10.0.0.0/8",
+    "host": "Site name or domain",
+    "status": "Status, e.g. 404, 5xx",
+    "to": "End time",
+    "fieldTip": "Click a source or field tag in the log to filter by it; when memory does not hold enough, the history kept in the log files is searched too",
+    "filterBy": "Filter by this",
+    "noMatch": "No matching logs",
+    "range": {
+      "all": "Any time",
+      "15m": "Last 15 minutes",
+      "1h": "Last hour",
+      "6h": "Last 6 hours",
+      "24h": "Last 24 hours",
+      "7d": "Last 7 days",
+      "custom": "Custom"
+    },
+    "field": {
+      "ip": "IP",
+      "host": "Domain",
+      "site": "Site",
+      "status": "Status",
+      "method": "Method",
+      "path": "Path",
+      "rule": "Rule",
+      "user": "User"
+    },
+    "from": "Start time"
   },
   "scopeTags": {
     "allWrite": "Full access",

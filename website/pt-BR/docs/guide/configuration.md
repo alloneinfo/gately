@@ -53,6 +53,18 @@ Os logs de execução do sistema e de cada módulo são gravados por padrão em 
 - Limpar os logs de um módulo na interface também apaga os arquivos dele;
 - Os backups de configuração não incluem `logs/` nem o log de auditoria `audit.log`.
 
+### Visualizar e filtrar
+
+A página Logs do sistema e o cartão de logs no fim de cada página de módulo usam o mesmo visualizador. As condições abaixo podem ser combinadas; as mudanças valem na hora e só entram as novas entradas que correspondem:
+
+- Nível e origem (escolha uma origem que já apareceu ou digite);
+- Palavras-chave: termos separados por espaço devem corresponder todos, aspas duplas agrupam uma frase e um `-` inicial exclui um termo, por exemplo `GET "timeout" -debug`; as correspondências ficam destacadas. Com a interface em outro idioma, pesquise pelo texto traduzido que aparece na tela;
+- IP em Mais filtros: endereço completo, faixa (como `10.0.0.0/8`) ou parte do endereço, separados por vírgula; quando a entrada não tem um campo de IP próprio, os endereços são reconhecidos no texto, então também funciona com falhas de login e logs da proteção contra intrusão;
+- Intervalo de tempo em Mais filtros: dos últimos 15 minutos aos últimos 7 dias, ou início e fim personalizados;
+- Os logs do Serviço Web também podem ser filtrados por nome do site ou domínio e por código de status (`404`, `4xx`, `500-599`, separados por vírgula); os do Firewall WAF, por domínio, e as detecções registram o domínio e o ID da regra.
+
+Clique numa origem do log, ou numa etiqueta como "Site=…" ou "Domínio=…" no fim da linha, para filtrar por esse valor. Quando as entradas em memória não bastam, Carregar logs anteriores continua pelo histórico guardado nos arquivos de log; com a gravação de logs em disco ativada, a filtragem não fica limitada ao número de linhas mantidas. `GET /api/logs` e `GET /api/<módulo>/logs` aceitam os mesmos parâmetros de filtro; veja a [referência da API](/pt-BR/docs/reference/api-reference).
+
 ## Backup e restauração
 
 Em "Configurações" você encontra o backup e a restauração da configuração, que também é o ponto de entrada para importar configurações do Lucky.

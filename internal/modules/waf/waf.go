@@ -389,7 +389,7 @@ func (m *Module) buildLocked(key string) {
 		c.matched.Add(1)
 		// 只记录有明确消息的规则命中，过滤 CRS 内部的计分规则
 		if r.Message() != "" {
-			log.Warnf("%s", r.ErrorLog())
+			log.With(matchFields(r)).Warnf("%s", r.ErrorLog())
 		}
 	})
 	if err != nil {
@@ -399,7 +399,7 @@ func (m *Module) buildLocked(key string) {
 		return
 	}
 	delete(m.errors, key)
-	c.waf = w
+	c.waf = trackedWAF{w}
 	m.state.Store(key, c)
 }
 
@@ -418,6 +418,8 @@ func (m *Module) Middleware(key string, next http.Handler) http.Handler {
 			return
 		}
 		rec := &blockRecorder{ResponseWriter: w}
+		r, done := trackRequest(r)
+		defer done()
 		txhttp.WrapHandler(c.waf, next).ServeHTTP(rec, r)
 		if rec.blocked {
 			c.blocked.Add(1)

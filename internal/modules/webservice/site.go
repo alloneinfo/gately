@@ -9,6 +9,7 @@ import (
 	"net/http/httputil"
 	"net/netip"
 	"net/url"
+	"strconv"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -67,6 +68,17 @@ type ctxKeyClientAddr struct{}
 func clientAddr(r *http.Request) netip.AddrPort {
 	ap, _ := netip.ParseAddrPort(r.RemoteAddr)
 	return netip.AddrPortFrom(ap.Addr().Unmap(), ap.Port())
+}
+
+// reqLog 返回附带本次请求结构化字段（客户端 IP、域名、站点、方法、路径）的写入器，日志页可按这些字段过滤。
+func (h *siteHandler) reqLog(r *http.Request) *logbuf.Logger {
+	return h.log.With(logbuf.Fields{
+		logbuf.FieldIP:     clientAddr(r).Addr().String(),
+		logbuf.FieldHost:   hostOnly(r.Host),
+		logbuf.FieldSite:   h.site.Name,
+		logbuf.FieldMethod: r.Method,
+		logbuf.FieldPath:   r.URL.Path,
+	})
 }
 
 func newSiteHandler(s Site, log *logbuf.Logger, auth *authenticator, waf WAFProvider) (*siteHandler, error) {
@@ -301,7 +313,7 @@ func (h *siteHandler) newProxy(s Site, p *pool) http.Handler {
 			if up, _ := r.Context().Value(ctxKeyUpstream{}).(*upstream); up != nil && r.Context().Err() == nil {
 				p.fail(up, err)
 			}
-			h.log.Warnf("%s %s%s 后端错误: %v", r.Method, r.Host, r.URL.Path, err)
+			h.reqLog(r).Warnf("%s %s%s 后端错误: %v", r.Method, r.Host, r.URL.Path, err)
 			writeErrorPage(w, r, http.StatusBadGateway, "无法连接到后端服务", "站点的后端服务没有响应，可能未启动或网络不可达。请稍后重试。")
 		},
 		// 流式响应（SSE 等）及时刷新
@@ -443,7 +455,8 @@ func (h *siteHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			if strings.HasPrefix(r.URL.Path, authPath) {
 				uri = r.URL.Path
 			}
-			h.log.Infof("%s %s %s%s %d %dms", client.Addr(), r.Method, r.Host, uri, rec.status, time.Since(start).Milliseconds())
+			h.reqLog(r).With(logbuf.Fields{logbuf.FieldStatus: strconv.Itoa(rec.status)}).
+				Infof("%s %s %s%s %d %dms", client.Addr(), r.Method, r.Host, uri, rec.status, time.Since(start).Milliseconds())
 		}
 	}()
 
@@ -452,12 +465,12 @@ func (h *siteHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if !h.allowedIP(client.Addr(), h.matchRule(r.URL.Path)) {
-		h.log.Warnf("拒绝 %s 访问 %s（访问控制）", client.Addr(), r.Host)
+		h.reqLog(r).Warnf("拒绝 %s 访问 %s（访问控制）", client.Addr(), r.Host)
 		http.Error(rec, "403 Forbidden", http.StatusForbidden)
 		return
 	}
 	if !h.countryAllowed(client.Addr()) {
-		h.log.Warnf("拒绝 %s 访问 %s（国家过滤：%s）", client.Addr(), r.Host, geoip.Default.Country(client.Addr()))
+		h.reqLog(r).Warnf("拒绝 %s 访问 %s（国家过滤：%s）", client.Addr(), r.Host, geoip.Default.Country(client.Addr()))
 		http.Error(rec, "403 Forbidden", http.StatusForbidden)
 		return
 	}

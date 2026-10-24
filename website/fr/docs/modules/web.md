@@ -31,6 +31,8 @@ Autres options des sites en proxy inverse :
 
 Les sites de tous types peuvent définir un journal d'accès, le cross-origin (CORS), des en-têtes de requête et de réponse personnalisés (un `Key: Value` par ligne ; une Value vide supprime cet en-tête), et peuvent référencer une instance de [Pare-feu WAF](/fr/docs/modules/waf) (si l'instance n'existe pas ou est désactivée, les requêtes passent sans filtrage).
 
+Les entrées du journal d'accès enregistrent l'IP du client, le domaine, le nom du site et le code d'état : le journal peut ainsi être filtré par site, code d'état, IP source, etc. Voir [consulter et filtrer les journaux d'exécution](/fr/docs/guide/configuration).
+
 ## Transport et protocoles
 
 - HTTPS : utilise un certificat du module [Certificats SSL](/fr/docs/modules/ssl) qui couvre le domaine ;

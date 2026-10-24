@@ -102,6 +102,12 @@ func TestValidate(t *testing.T) {
 // startRunner 启动一个监听器并返回地址。
 func startRunner(t *testing.T, l Listener, certs CertSource, trusted []string) (string, *listenerRunner) {
 	t.Helper()
+	return startRunnerLogs(t, l, certs, trusted, logbuf.New(200, log.New(io.Discard, "", 0)))
+}
+
+// startRunnerLogs 与 startRunner 相同，日志写入调用方提供的缓冲。
+func startRunnerLogs(t *testing.T, l Listener, certs CertSource, trusted []string, logs *logbuf.Buffer) (string, *listenerRunner) {
+	t.Helper()
 	ln, err := net.Listen("tcp4", "127.0.0.1:0")
 	if err != nil {
 		t.Fatal(err)
@@ -113,7 +119,6 @@ func startRunner(t *testing.T, l Listener, certs CertSource, trusted []string) (
 	if err := l.Validate(); err != nil {
 		t.Fatal(err)
 	}
-	logs := logbuf.New(200, log.New(io.Discard, "", 0))
 	r, err := newListenerRunner(l, logs.Logger("t"), newAuthenticator("secret"), nil)
 	if err != nil {
 		t.Fatal(err)

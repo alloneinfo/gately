@@ -60,9 +60,9 @@ func (a *App) buildDoc() docModel {
 		key := r.Method + " " + r.Path
 		ep := endpoint{Method: r.Method, Path: r.Path, Scope: apitoken.Required(r.Method, r.Path)}
 		ep.Tag = docTag(r, titles)
-		// 日志接口支持 since 增量拉取、before 加载更早的日志、limit 限制条数
+		// 日志接口支持 since 增量拉取、before 加载更早的日志、limit 限制条数，以及按级别、关键词、IP 等过滤
 		if r.Method == http.MethodGet && (r.Path == "/api/logs" || (r.Module != "" && r.Path == "/api/"+r.Module+"/logs")) {
-			ep.Query = []string{"since", "before", "limit"}
+			ep.Query = append([]string{"since", "before", "limit"}, logFilterParams...)
 		}
 		d, hasDoc := a.routeDocs[key]
 		if hasDoc {
@@ -246,7 +246,12 @@ func (m docModel) operation(e endpoint) map[string]any {
 		params = append(params, map[string]any{"name": mt[1], "in": "path", "required": true, "schema": map[string]any{"type": "string"}})
 	}
 	for _, q := range e.Query {
-		params = append(params, map[string]any{"name": q, "in": "query", "schema": map[string]any{"type": "integer"},
+		// 序号与条数为整数，过滤参数为字符串
+		typ := "string"
+		if q == "since" || q == "before" || q == "limit" {
+			typ = "integer"
+		}
+		params = append(params, map[string]any{"name": q, "in": "query", "schema": map[string]any{"type": typ},
 			"description": logQueryDesc[q]})
 	}
 	if len(params) > 0 {
@@ -280,6 +285,14 @@ var logQueryDesc = map[string]string{
 	"since":  "增量拉取：只返回序号大于该值的日志",
 	"before": "加载更早的日志：只返回序号小于该值的日志",
 	"limit":  "最多返回的条数，取符合条件的最新几条；0 或不传表示不限",
+	"level":  "最低级别：debug、info、warn 或 error",
+	"source": "来源标签，不区分大小写精确匹配",
+	"q":      "关键词：空格分隔表示同时包含，双引号包住短语，前缀 - 表示排除",
+	"ip":     "客户端地址：完整地址、CIDR 或地址片段，多个以逗号分隔",
+	"host":   "站点名称或域名的一部分",
+	"status": "状态码，如 404、4xx、500-599，多个以逗号分隔",
+	"from":   "开始时间，RFC 3339 格式或毫秒时间戳",
+	"to":     "结束时间，RFC 3339 格式或毫秒时间戳",
 }
 
 func (a *App) handleOpenAPI(w http.ResponseWriter, r *http.Request) {

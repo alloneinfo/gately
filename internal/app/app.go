@@ -749,6 +749,7 @@ func readUpload(fh *multipart.FileHeader) ([]byte, error) {
 }
 
 // logsHandler 支持 ?since=<seq> 增量拉取；?before=<seq> 拉取更早的日志；?limit=<n> 只返回其中最新的 n 条。
+// 过滤参数见 parseLogFilter，增量拉取与加载更早的日志都只返回满足条件的日志。
 func (a *App) logsHandler(buf *logbuf.Buffer) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		q := r.URL.Query()
@@ -771,7 +772,16 @@ func (a *App) logsHandler(buf *logbuf.Buffer) http.HandlerFunc {
 			httpx.Error(w, http.StatusBadRequest, "limit 参数无效")
 			return
 		}
-		httpx.OK(w, buf.Range(since, before, limit))
+		f, msg := parseLogFilter(q)
+		if msg != "" {
+			httpx.Error(w, http.StatusBadRequest, "%s", msg)
+			return
+		}
+		// 返回的日志会按请求语言翻译，关键词也要能匹配译文
+		if lang := i18n.RequestLang(r); f != nil && lang != i18n.SourceLang {
+			f.Translate = func(s string) string { return i18n.Tr(lang, s) }
+		}
+		httpx.OK(w, buf.Query(since, before, limit, f))
 	}
 }
 

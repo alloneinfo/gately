@@ -53,6 +53,18 @@ Die Laufzeitprotokolle des Systems und aller Module werden standardmäßig nach 
 - Werden die Protokolle eines Moduls in der Oberfläche geleert, werden auch seine Dateien gelöscht;
 - Konfigurationssicherungen enthalten weder `logs/` noch das Audit-Protokoll `audit.log`.
 
+### Anzeigen und filtern
+
+Die Seite Systemprotokolle und die Protokollkarte unten auf jeder Modulseite verwenden denselben Protokollbetrachter. Die folgenden Bedingungen lassen sich kombinieren; Änderungen wirken sofort, und neue Einträge werden nur angehängt, wenn sie zutreffen:
+
+- Stufe und Quelle (eine bereits aufgetretene Quelle auswählen oder eingeben);
+- Suchbegriffe: durch Leerzeichen getrennte Begriffe müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes `-` schließt einen Begriff aus, z. B. `GET "timeout" -debug`; Treffer werden hervorgehoben. Ist die Oberfläche in einer anderen Sprache, suchen Sie mit dem übersetzten Text, den Sie auf dem Bildschirm sehen;
+- IP unter Weitere Filter: vollständige Adresse, Bereich (z. B. `10.0.0.0/8`) oder Adressteil, durch Kommas getrennt; hat ein Eintrag kein eigenes IP-Feld, werden Adressen im Protokolltext erkannt, sodass auch fehlgeschlagene Anmeldungen und Einbruchschutz-Protokolle funktionieren;
+- Zeitraum unter Weitere Filter: von den letzten 15 Minuten bis zu den letzten 7 Tagen oder benutzerdefinierter Beginn und Ende;
+- Protokolle des Webdienstes lassen sich zusätzlich nach Site-Name oder Domain und Statuscode (`404`, `4xx`, `500-599`, durch Kommas getrennt) filtern; die der WAF-Firewall nach Domain, und Treffer enthalten Domain und Regel-ID.
+
+Ein Klick auf eine Quelle im Protokoll oder auf ein Tag wie „Site=…“ oder „Domain=…“ am Zeilenende filtert nach diesem Wert. Reichen die Einträge im Speicher nicht aus, setzt Ältere Protokolle laden die Suche im Verlauf der Protokolldateien fort; bei aktivierter Protokollspeicherung ist das Filtern daher nicht durch die Anzahl der aufbewahrten Protokollzeilen begrenzt. `GET /api/logs` und `GET /api/<Modul>/logs` akzeptieren dieselben Filterparameter, siehe [API-Referenz](/de/docs/reference/api-reference).
+
 ## Sicherung und Wiederherstellung
 
 Unter „Einstellungen“ finden Sie Konfigurationssicherung und -wiederherstellung; dort liegt auch der Einstieg für den Import von Lucky-Konfigurationen.

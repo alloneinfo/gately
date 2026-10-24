@@ -1,34 +1,86 @@
 <template>
   <div class="log-viewer">
     <div class="toolbar">
-      <el-select v-model="level" size="small" style="width: 110px">
+      <el-select v-model="filters.level" size="small" class="f-level">
         <el-option :label="t('components.logViewer.levelAll')" value="all" />
         <el-option :label="t('components.logViewer.levelInfo')" value="info" />
         <el-option :label="t('components.logViewer.levelWarn')" value="warn" />
         <el-option :label="t('components.logViewer.levelError')" value="error" />
       </el-select>
+      <!-- 来源取自已加载的日志，也可以直接输入 -->
+      <el-select
+        v-model="filters.source"
+        size="small"
+        class="f-source"
+        clearable
+        filterable
+        allow-create
+        default-first-option
+        :placeholder="t('components.logViewer.source')"
+      >
+        <el-option v-for="s in sourceOptions" :key="s" :label="s" :value="s" />
+      </el-select>
+      <el-input v-model="filters.q" size="small" class="f-q" clearable :prefix-icon="Search" :placeholder="t('components.logViewer.keyword')">
+        <template #suffix>
+          <el-tooltip :content="t('components.logViewer.keywordTip')" placement="top">
+            <CircleHelp :size="13" class="tip" />
+          </el-tooltip>
+        </template>
+      </el-input>
+      <el-button size="small" :type="advancedCount ? 'primary' : 'default'" :plain="!!advancedCount" :icon="Filter" @click="showAdvanced = !showAdvanced">
+        {{ t('components.logViewer.moreFilters') }}<span v-if="advancedCount" class="count">{{ advancedCount }}</span>
+      </el-button>
+      <el-button v-if="active" size="small" text :icon="RotateCcw" @click="resetFilters">{{ t('components.logViewer.reset') }}</el-button>
       <el-checkbox v-model="follow" size="small">{{ t('components.logViewer.autoScroll') }}</el-checkbox>
       <el-button v-if="clearable" size="small" text :icon="Trash2" class="clear" @click="clear">{{ t('common.clear') }}</el-button>
     </div>
+    <div v-show="showAdvanced" class="toolbar advanced">
+      <el-input v-model="filters.ip" size="small" class="f-ip" clearable :placeholder="t('components.logViewer.ip')" />
+      <el-input v-if="kinds.host" v-model="filters.host" size="small" class="f-host" clearable :placeholder="t('components.logViewer.host')" />
+      <el-input v-if="kinds.status" v-model="filters.status" size="small" class="f-status" clearable :placeholder="t('components.logViewer.status')" />
+      <el-select v-model="filters.range" size="small" class="f-range">
+        <el-option v-for="r in ranges" :key="r" :label="t(`components.logViewer.range.${r}`)" :value="r" />
+      </el-select>
+      <el-date-picker
+        v-if="filters.range === 'custom'"
+        v-model="filters.custom"
+        type="datetimerange"
+        size="small"
+        class="f-custom"
+        :start-placeholder="t('components.logViewer.from')"
+        :end-placeholder="t('components.logViewer.to')"
+      />
+      <span class="hint">{{ t('components.logViewer.fieldTip') }}</span>
+    </div>
+    <div v-if="error" class="error-tip">{{ error }}</div>
     <div ref="box" class="box mono" :style="height ? { height } : undefined">
       <div v-if="hasMore" class="more">
         <el-button size="small" text :loading="loadingMore" @click="loadEarlier">{{ t('components.logViewer.loadEarlier') }}</el-button>
       </div>
-      <div v-for="e in visible" :key="e.seq" :class="['line', e.level]">
+      <div v-for="e in entries" :key="e.seq" :class="['line', e.level]">
         <span class="time">{{ e.timeText }}</span>
         <span class="lvl">{{ e.level.toUpperCase() }}</span>
-        <span v-if="e.source" class="src">[{{ e.source }}]</span>
-        <span>{{ e.message }}</span>
+        <span v-if="e.source" class="src" :title="t('components.logViewer.filterBy')" @click="applyField('source', e.source)">[{{ e.source }}]</span>
+        <span>
+          <template v-for="(p, i) in e.parts" :key="i">
+            <mark v-if="p.hit">{{ p.text }}</mark>
+            <template v-else>{{ p.text }}</template>
+          </template>
+        </span>
+        <!-- 消息里没有出现的字段（例如 WAF 命中日志的域名、访问日志的站点名称）以标签显示，点击即按该字段过滤 -->
+        <span v-for="f in e.extra" :key="f.key" class="field" :title="t('components.logViewer.filterBy')" @click="applyField(f.key, f.value)">
+          {{ fieldLabel(f.key) }}={{ f.value }}
+        </span>
       </div>
-      <div v-if="!visible.length" class="empty">{{ t('components.logViewer.empty') }}</div>
+      <div v-if="!entries.length" class="empty">{{ active ? t('components.logViewer.noMatch') : t('components.logViewer.empty') }}</div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onMounted, ref } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Trash2 } from 'lucide-vue-next'
+import { CircleHelp, Filter, RotateCcw, Search, Trash2 } from 'lucide-vue-next'
 import { api, type LogEntry } from '../api'
 import { usePolling } from '../composables/usePolling'
 
@@ -41,30 +93,175 @@ const props = defineProps<{ url: string; clearable?: boolean; height?: string }>
 const PAGE = 200
 const MAX = 2000
 
-// 时间在拉取时格式化一次，轮询刷新列表时不必逐行重复格式化
-type Row = LogEntry & { timeText: string }
+// 消息按关键词切成片段，命中的片段高亮；extra 为消息中没有出现的字段
+type Part = { text: string; hit: boolean }
+type Row = LogEntry & { timeText: string; parts: Part[]; extra: { key: string; value: string }[] }
+
+// 带结构化字段的模块显示对应的过滤项；IP 对所有日志都可用（没有字段时从消息中识别地址）
+const moduleKinds: Record<string, { host?: boolean; status?: boolean }> = {
+  webservice: { host: true, status: true },
+  waf: { host: true },
+}
+const moduleId = computed(() => props.url.match(/^\/api\/([^/]+)\/logs$/)?.[1] ?? '')
+const kinds = computed(() => moduleKinds[moduleId.value] ?? {})
+
+// 时间范围：相对范围在每次查询时按当前时间计算，新日志仍会持续追加
+const ranges = ['all', '15m', '1h', '6h', '24h', '7d', 'custom'] as const
+type Range = (typeof ranges)[number]
+const rangeMs: Record<string, number> = { '15m': 15 * 60e3, '1h': 3600e3, '6h': 6 * 3600e3, '24h': 24 * 3600e3, '7d': 7 * 24 * 3600e3 }
+
+function emptyFilters() {
+  return { level: 'all', source: '', q: '', ip: '', host: '', status: '', range: 'all' as Range, custom: null as [Date, Date] | null }
+}
+const filters = reactive(emptyFilters())
+const showAdvanced = ref(false)
 
 const entries = ref<Row[]>([])
-const level = ref('all')
 const follow = ref(true)
 const box = ref<HTMLElement>()
 // 缓冲中可能还有更早的日志
 const hasMore = ref(false)
 const loadingMore = ref(false)
+// 过滤参数无效时后端返回的错误
+const error = ref('')
+// 出现过的来源，供来源下拉选择；切换过滤条件后仍保留
+const seenSources = ref<string[]>([])
 let lastSeq = 0
 let loaded = false
 // 轮询裁剪上限：用户每加载一页历史就放宽相应条数，避免刚加载的旧日志被下一次轮询裁掉
 let keep = MAX
-// 清空时递增，丢弃清空前发出、清空后才返回的请求结果
+// 清空或修改过滤条件时递增，丢弃之前发出、之后才返回的请求结果
 let generation = 0
 
-const order = { debug: 0, info: 1, warn: 2, error: 3 }
-const visible = computed(() =>
-  level.value !== 'all' ? entries.value.filter((e) => order[e.level] >= order[level.value as keyof typeof order]) : entries.value,
-)
+const sourceOptions = computed(() => {
+  const list = [...seenSources.value]
+  if (filters.source && !list.includes(filters.source)) {
+    list.unshift(filters.source)
+  }
+  return list
+})
+
+// 高级过滤项中已填写的数量，显示在按钮上
+const advancedCount = computed(() => [filters.ip, kinds.value.host && filters.host, kinds.value.status && filters.status, filters.range !== 'all'].filter(Boolean).length)
+const active = computed(() => filters.level !== 'all' || !!filters.source || !!filters.q.trim() || advancedCount.value > 0)
+
+// filterQuery 把过滤条件拼成查询参数（不含 since/before/limit）
+function filterQuery(): string {
+  const q = new URLSearchParams()
+  if (filters.level !== 'all') {
+    q.set('level', filters.level)
+  }
+  const add = (k: string, v: string) => {
+    if (v.trim()) {
+      q.set(k, v.trim())
+    }
+  }
+  add('source', filters.source)
+  add('q', filters.q)
+  add('ip', filters.ip)
+  if (kinds.value.host) {
+    add('host', filters.host)
+  }
+  if (kinds.value.status) {
+    add('status', filters.status)
+  }
+  if (filters.range === 'custom') {
+    if (filters.custom) {
+      q.set('from', filters.custom[0].toISOString())
+      q.set('to', filters.custom[1].toISOString())
+    }
+  } else if (filters.range !== 'all') {
+    q.set('from', new Date(Date.now() - rangeMs[filters.range]).toISOString())
+  }
+  const s = q.toString()
+  return s ? `&${s}` : ''
+}
+
+// 与后端一致的关键词拆分：空格分隔，双引号包住短语，前缀 - 为排除词（排除词不高亮）
+function highlightTerms(): string[] {
+  const out: string[] = []
+  for (const m of filters.q.matchAll(/(-?)"([^"]+)"|(-?)(\S+)/g)) {
+    const neg = m[1] || m[3]
+    const word = m[2] ?? m[4]
+    if (!neg && word) {
+      out.push(word.toLowerCase())
+    }
+  }
+  return out
+}
+
+function escapeRe(s: string) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
+function splitParts(msg: string, re: RegExp | null): Part[] {
+  if (!re) {
+    return [{ text: msg, hit: false }]
+  }
+  const parts: Part[] = []
+  let last = 0
+  for (const m of msg.matchAll(re)) {
+    const i = m.index ?? 0
+    if (i > last) {
+      parts.push({ text: msg.slice(last, i), hit: false })
+    }
+    parts.push({ text: m[0], hit: true })
+    last = i + m[0].length
+  }
+  if (last < msg.length) {
+    parts.push({ text: msg.slice(last), hit: false })
+  }
+  return parts
+}
 
 function toRows(list: LogEntry[]): Row[] {
-  return list.map((e) => ({ ...e, timeText: new Date(e.time).toLocaleString() }))
+  const terms = highlightTerms()
+  const re = terms.length ? new RegExp(terms.map(escapeRe).join('|'), 'gi') : null
+  const sources = new Set(seenSources.value)
+  const rows = list.map((e) => {
+    if (e.source) {
+      sources.add(e.source)
+    }
+    // 方法、路径等字段通常已在消息里或过于琐碎，只为可用于筛选的字段显示标签
+    const extra = Object.entries(e.fields ?? {})
+      .filter(([k, v]) => tagKeys.includes(k) && v && !e.message.includes(v))
+      .map(([key, value]) => ({ key, value }))
+    return { ...e, timeText: new Date(e.time).toLocaleString(), parts: splitParts(e.message, re), extra }
+  })
+  if (sources.size !== seenSources.value.length) {
+    seenSources.value = [...sources].sort()
+  }
+  return rows
+}
+
+const fieldKeys = ['ip', 'host', 'site', 'status', 'method', 'path', 'rule', 'user']
+const tagKeys = ['ip', 'host', 'site', 'status', 'rule', 'user']
+function fieldLabel(key: string) {
+  return fieldKeys.includes(key) ? t(`components.logViewer.field.${key}`) : key
+}
+
+// applyField 点击来源或字段标签时按该值过滤；没有专门过滤项的字段作为关键词追加
+function applyField(key: string, value: string) {
+  if (key === 'source') {
+    filters.source = value
+    return
+  }
+  if (key === 'ip') {
+    filters.ip = value
+  } else if ((key === 'host' || key === 'site') && kinds.value.host) {
+    filters.host = value
+  } else if (key === 'status' && kinds.value.status) {
+    filters.status = value
+  } else {
+    const word = /\s/.test(value) ? `"${value}"` : value
+    filters.q = filters.q.trim() ? `${filters.q.trim()} ${word}` : word
+    return
+  }
+  showAdvanced.value = true
+}
+
+function resetFilters() {
+  Object.assign(filters, emptyFilters())
 }
 
 async function scrollToEnd() {
@@ -77,13 +274,15 @@ async function scrollToEnd() {
 // 首次拉取最近一页，之后按序号增量拉取，只追加新日志
 async function poll() {
   const gen = generation
+  const fq = filterQuery()
   try {
     if (!loaded) {
-      const list = await api.get<LogEntry[]>(`${props.url}?since=0&limit=${PAGE}`)
+      const list = await api.get<LogEntry[]>(`${props.url}?since=0&limit=${PAGE}${fq}`)
       if (gen !== generation) {
         return
       }
       loaded = true
+      error.value = ''
       hasMore.value = list.length >= PAGE
       entries.value = toRows(list)
       if (list.length) {
@@ -92,7 +291,7 @@ async function poll() {
       await scrollToEnd()
       return
     }
-    const list = await api.get<LogEntry[]>(`${props.url}?since=${lastSeq}`)
+    const list = await api.get<LogEntry[]>(`${props.url}?since=${lastSeq}${fq}`)
     if (gen !== generation) {
       return
     }
@@ -106,8 +305,13 @@ async function poll() {
       entries.value = next.slice(-keep)
       await scrollToEnd()
     }
-  } catch {
-    // 网络抖动时下一轮重试
+  } catch (e) {
+    // 过滤参数无效时显示原因；网络抖动时下一轮重试
+    if (gen === generation && !loaded) {
+      error.value = (e as Error).message
+      entries.value = []
+      hasMore.value = false
+    }
   }
 }
 
@@ -120,7 +324,7 @@ async function loadEarlier() {
   loadingMore.value = true
   const gen = generation
   try {
-    const list = await api.get<LogEntry[]>(`${props.url}?before=${first.seq}&limit=${PAGE}`)
+    const list = await api.get<LogEntry[]>(`${props.url}?before=${first.seq}&limit=${PAGE}${filterQuery()}`)
     if (gen !== generation) {
       return
     }
@@ -145,6 +349,17 @@ async function loadEarlier() {
   }
 }
 
+// reload 丢弃已加载的日志，按当前条件重新拉取最近一页
+function reload() {
+  generation++
+  loaded = false
+  lastSeq = 0
+  keep = MAX
+  hasMore.value = false
+  follow.value = true
+  void poll()
+}
+
 async function clear() {
   await api.del(props.url)
   generation++
@@ -152,6 +367,27 @@ async function clear() {
   hasMore.value = false
   keep = MAX
 }
+
+// 修改过滤条件后稍等片刻再查询，输入关键词时不必每个字都请求一次。
+// 相对时间范围用到 Date.now()，它不是响应式依赖，只有过滤条件本身变化时才会重新计算并触发
+let debounce: number | undefined
+watch(
+  () => filterQuery(),
+  () => {
+    window.clearTimeout(debounce)
+    debounce = window.setTimeout(reload, 350)
+  },
+)
+watch(
+  () => filters.range,
+  (v) => {
+    if (v === 'custom' && !filters.custom) {
+      // 自定义范围默认最近一小时，便于在此基础上调整
+      filters.custom = [new Date(Date.now() - 3600e3), new Date()]
+    }
+  },
+)
+onBeforeUnmount(() => window.clearTimeout(debounce))
 
 // 每 2 秒增量拉取，标签页在后台时暂停
 const polling = usePolling(poll, 2000)
@@ -171,8 +407,53 @@ onMounted(async () => {
   align-items: center;
   margin-bottom: 10px;
 }
+.advanced {
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--el-fill-color-light);
+}
+.f-level {
+  width: 110px;
+}
+.f-source {
+  width: 150px;
+}
+.f-q {
+  width: 240px;
+}
+.f-ip {
+  width: 240px;
+}
+.f-host {
+  width: 180px;
+}
+.f-status {
+  width: 130px;
+}
+.f-range {
+  width: 130px;
+}
+.f-custom {
+  max-width: 360px;
+}
+.tip {
+  cursor: help;
+}
+.count {
+  margin-left: 4px;
+  font-weight: 600;
+}
+.hint {
+  color: var(--el-text-color-secondary);
+  font-size: 12px;
+}
 .clear {
   margin-left: auto;
+}
+.error-tip {
+  color: var(--el-color-danger);
+  font-size: 12px;
+  margin-bottom: 8px;
 }
 .box {
   height: 300px;
@@ -206,6 +487,25 @@ onMounted(async () => {
 .src {
   color: var(--gately-accent);
   margin-right: 6px;
+  cursor: pointer;
+}
+.src:hover,
+.field:hover {
+  text-decoration: underline;
+}
+.field {
+  margin-left: 8px;
+  padding: 0 5px;
+  border-radius: 4px;
+  font-size: 11px;
+  color: var(--el-text-color-secondary);
+  background: var(--el-fill-color);
+  cursor: pointer;
+}
+mark {
+  color: inherit;
+  background: color-mix(in srgb, var(--el-color-warning) 35%, transparent);
+  border-radius: 2px;
 }
 .warn .lvl {
   color: var(--el-color-warning);
@@ -228,6 +528,14 @@ onMounted(async () => {
   .time {
     display: block;
     margin-right: 0;
+  }
+  .f-source,
+  .f-q,
+  .f-ip,
+  .f-host,
+  .f-custom {
+    width: 100%;
+    max-width: none;
   }
 }
 </style>

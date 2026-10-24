@@ -31,6 +31,8 @@
 
 所有類型的站台都可設定存取日誌、跨來源（CORS）、自訂請求標頭與回應標頭（每行 `Key: Value`，Value 留空表示刪除該標頭），並可引用一個 [WAF 防火牆](/zh-TW/docs/modules/waf) 實例（實例不存在或停用時放行）。
 
+存取日誌會記錄用戶端 IP、網域、站點名稱與狀態碼，可在日誌中依站點、狀態碼、來源 IP 等條件篩選，見 [執行日誌的檢視與篩選](/zh-TW/docs/guide/configuration)。
+
 ## 傳輸與協定
 
 - HTTPS：使用 [SSL 憑證](/zh-TW/docs/modules/ssl) 模組中涵蓋該網域的憑證；

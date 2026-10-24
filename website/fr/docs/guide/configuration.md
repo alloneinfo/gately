@@ -53,6 +53,18 @@ Les journaux d'exécution du système et de chaque module sont écrits par défa
 - Effacer les journaux d'un module dans l'interface supprime aussi ses fichiers ;
 - Les sauvegardes de configuration n'incluent ni `logs/` ni le journal d'audit `audit.log`.
 
+### Consulter et filtrer
+
+La page Journaux système et la carte de journaux en bas de chaque page de module utilisent le même visionneur. Les conditions suivantes se combinent ; les modifications s'appliquent immédiatement et seules les nouvelles entrées correspondantes sont ajoutées :
+
+- Niveau et source (choisissez une source déjà apparue ou saisissez-la) ;
+- Mots-clés : les termes séparés par des espaces doivent tous correspondre, les guillemets doubles regroupent une expression, un `-` initial exclut un terme, par exemple `GET "timeout" -debug` ; les correspondances sont surlignées. Si l'interface est dans une autre langue, recherchez avec le texte traduit affiché à l'écran ;
+- IP dans Plus de filtres : adresse complète, plage (comme `10.0.0.0/8`) ou partie d'adresse, séparées par des virgules ; lorsqu'une entrée n'a pas de champ IP propre, les adresses sont reconnues dans le texte, ce qui couvre aussi les échecs de connexion et les journaux de protection contre les intrusions ;
+- Période dans Plus de filtres : des 15 dernières minutes aux 7 derniers jours, ou un début et une fin personnalisés ;
+- Les journaux du Service Web se filtrent aussi par nom de site ou domaine et par code d'état (`404`, `4xx`, `500-599`, séparés par des virgules) ; ceux du Pare-feu WAF par domaine, et les détections enregistrent le domaine et l'ID de la règle.
+
+Cliquez sur une source dans le journal, ou sur une étiquette comme « Site=… » ou « Domaine=… » en fin de ligne, pour filtrer sur cette valeur. Quand les entrées en mémoire ne suffisent pas, Charger les journaux plus anciens poursuit dans l'historique conservé dans les fichiers journaux : avec la persistance des journaux activée, le filtrage n'est donc pas limité par le nombre de lignes conservées. `GET /api/logs` et `GET /api/<module>/logs` acceptent les mêmes paramètres de filtre ; voir la [référence de l'API](/fr/docs/reference/api-reference).
+
 ## Sauvegarde et restauration
 
 « Paramètres » propose la sauvegarde et la restauration de la configuration, et sert aussi de point d'entrée pour importer des configurations Lucky.

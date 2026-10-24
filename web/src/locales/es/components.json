@@ -42,7 +42,39 @@
     "levelError": "Solo errores",
     "autoScroll": "Desplazamiento automático",
     "empty": "Aún no hay registros",
-    "loadEarlier": "Cargar registros anteriores"
+    "loadEarlier": "Cargar registros anteriores",
+    "source": "Origen",
+    "keyword": "Palabras clave",
+    "keywordTip": "Los términos separados por espacios deben coincidir todos, las comillas dobles agrupan una frase y un - inicial excluye, p. ej. GET \"timeout\" -debug",
+    "moreFilters": "Más filtros",
+    "reset": "Restablecer",
+    "ip": "IP o rango, p. ej. 1.2.3.4, 10.0.0.0/8",
+    "host": "Nombre del sitio o dominio",
+    "status": "Estado, p. ej. 404, 5xx",
+    "to": "Fin",
+    "fieldTip": "Haga clic en un origen o una etiqueta de campo del registro para filtrar por él; si la memoria no tiene suficientes, también se busca en el historial guardado en los archivos de registro",
+    "filterBy": "Filtrar por esto",
+    "noMatch": "No hay registros que coincidan",
+    "range": {
+      "all": "Cualquier momento",
+      "15m": "Últimos 15 minutos",
+      "1h": "Última hora",
+      "6h": "Últimas 6 horas",
+      "24h": "Últimas 24 horas",
+      "7d": "Últimos 7 días",
+      "custom": "Personalizado"
+    },
+    "field": {
+      "ip": "IP",
+      "host": "Dominio",
+      "site": "Sitio",
+      "status": "Estado",
+      "method": "Método",
+      "path": "Ruta",
+      "rule": "Regla",
+      "user": "Usuario"
+    },
+    "from": "Inicio"
   },
   "scopeTags": {
     "allWrite": "Acceso total",

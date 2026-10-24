@@ -42,7 +42,39 @@
     "levelError": "Erreurs uniquement",
     "autoScroll": "Défilement automatique",
     "empty": "Aucun journal",
-    "loadEarlier": "Charger les journaux plus anciens"
+    "loadEarlier": "Charger les journaux plus anciens",
+    "source": "Source",
+    "keyword": "Mots-clés",
+    "keywordTip": "Les termes séparés par des espaces doivent tous correspondre, les guillemets doubles regroupent une expression, un - initial exclut, par ex. GET \"timeout\" -debug",
+    "moreFilters": "Plus de filtres",
+    "reset": "Réinitialiser",
+    "ip": "IP ou plage, par ex. 1.2.3.4, 10.0.0.0/8",
+    "host": "Nom du site ou domaine",
+    "status": "Code d’état, par ex. 404, 5xx",
+    "to": "Fin",
+    "fieldTip": "Cliquez sur une source ou une étiquette de champ du journal pour filtrer dessus ; si la mémoire n’en contient pas assez, l’historique conservé dans les fichiers journaux est aussi parcouru",
+    "filterBy": "Filtrer sur cette valeur",
+    "noMatch": "Aucun journal correspondant",
+    "range": {
+      "all": "Toute période",
+      "15m": "15 dernières minutes",
+      "1h": "Dernière heure",
+      "6h": "6 dernières heures",
+      "24h": "24 dernières heures",
+      "7d": "7 derniers jours",
+      "custom": "Personnalisé"
+    },
+    "field": {
+      "ip": "IP",
+      "host": "Domaine",
+      "site": "Site",
+      "status": "État",
+      "method": "Méthode",
+      "path": "Chemin",
+      "rule": "Règle",
+      "user": "Utilisateur"
+    },
+    "from": "Début"
   },
   "scopeTags": {
     "allWrite": "Accès complet",

@@ -42,7 +42,39 @@
     "levelError": "Somente erros",
     "autoScroll": "Rolagem automática",
     "empty": "Nenhum log ainda",
-    "loadEarlier": "Carregar logs anteriores"
+    "loadEarlier": "Carregar logs anteriores",
+    "source": "Origem",
+    "keyword": "Palavras-chave",
+    "keywordTip": "Termos separados por espaço devem corresponder todos, aspas duplas agrupam uma frase e um - inicial exclui, ex.: GET \"timeout\" -debug",
+    "moreFilters": "Mais filtros",
+    "reset": "Redefinir",
+    "ip": "IP ou faixa, ex.: 1.2.3.4, 10.0.0.0/8",
+    "host": "Nome do site ou domínio",
+    "status": "Status, ex.: 404, 5xx",
+    "to": "Fim",
+    "fieldTip": "Clique em uma origem ou etiqueta de campo no log para filtrar por ela; quando a memória não tem o suficiente, o histórico guardado nos arquivos de log também é pesquisado",
+    "filterBy": "Filtrar por isto",
+    "noMatch": "Nenhum log corresponde",
+    "range": {
+      "all": "Qualquer período",
+      "15m": "Últimos 15 minutos",
+      "1h": "Última hora",
+      "6h": "Últimas 6 horas",
+      "24h": "Últimas 24 horas",
+      "7d": "Últimos 7 dias",
+      "custom": "Personalizado"
+    },
+    "field": {
+      "ip": "IP",
+      "host": "Domínio",
+      "site": "Site",
+      "status": "Status",
+      "method": "Método",
+      "path": "Caminho",
+      "rule": "Regra",
+      "user": "Usuário"
+    },
+    "from": "Início"
   },
   "scopeTags": {
     "allWrite": "Acesso total",

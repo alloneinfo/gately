@@ -36,7 +36,7 @@ var crudNouns = map[string]string{
 
 // apiCatalog 以“方法 路径”为键，补充非通用接口的说明。
 var apiCatalog = map[string]epDoc{
-	"GET /api/{module}/logs":                             {Summary: "查看模块运行日志", Desc: "支持 `since` 参数增量拉取，返回序号大于该值的日志；`before` 返回序号小于该值的日志，用于加载更早的记录；`limit` 只返回其中最新的若干条。"},
+	"GET /api/{module}/logs":                             {Summary: "查看模块运行日志", Desc: "支持 `since` 参数增量拉取，返回序号大于该值的日志；`before` 返回序号小于该值的日志，用于加载更早的记录；`limit` 只返回其中最新的若干条，内存中不够时继续查找日志文件里保留的历史。过滤参数：`level` 最低级别，`source` 来源，`q` 关键词（空格分隔表示同时包含，双引号包住短语，前缀 `-` 表示排除），`ip` 客户端地址（完整地址、CIDR 或地址片段，多个以逗号分隔），`host` 站点名称或域名，`status` 状态码（如 `404`、`4xx`、`500-599`），`from`、`to` 时间范围（RFC 3339 或毫秒时间戳）。"},
 	"DELETE /api/{module}/logs":                          {Summary: "清空模块运行日志"},
 	"GET /api/portforward/settings":                      {Summary: "读取端口转发全局设置"},
 	"PUT /api/portforward/settings":                      {Summary: "保存端口转发全局设置", Body: true},
@@ -186,7 +186,7 @@ var apiCatalog = map[string]epDoc{
 	"DELETE /api/storage/files/{key}":                    {Summary: "删除存储文件"},
 	"GET /api/session":                                   {Summary: "查看当前认证身份", Desc: "返回 `username`、`role`（`admin` 或 `readonly`）、`disabledModules`（已关闭的功能模块 ID）与 `defaultPassword`（管理员仍在使用默认密码 `gately.cn` 时为 true，管理界面据此提醒修改）。"},
 	"GET /api/status":                                    {Summary: "查看系统与各模块状态", Desc: "包含主机资源、版本与模块摘要。"},
-	"GET /api/logs":                                      {Summary: "查看系统日志", Desc: "支持 `since` 参数增量拉取，返回序号大于该值的日志；`before` 返回序号小于该值的日志，用于加载更早的记录；`limit` 只返回其中最新的若干条。"},
+	"GET /api/logs":                                      {Summary: "查看系统日志", Desc: "支持 `since` 参数增量拉取，返回序号大于该值的日志；`before` 返回序号小于该值的日志，用于加载更早的记录；`limit` 只返回其中最新的若干条，内存中不够时继续查找日志文件里保留的历史。过滤参数：`level` 最低级别，`source` 来源，`q` 关键词（空格分隔表示同时包含，双引号包住短语，前缀 `-` 表示排除），`ip` 客户端地址（完整地址、CIDR 或地址片段，多个以逗号分隔），`host` 站点名称或域名，`status` 状态码（如 `404`、`4xx`、`500-599`），`from`、`to` 时间范围（RFC 3339 或毫秒时间戳）。"},
 	"GET /api/system/settings":                           {Summary: "读取全局设置", Desc: "仅登录会话可用。只读字段 `modules` 列出全部功能模块及依赖关系，`gatewayAvailable` 表示以飞牛统一网关方式运行。`updateProxy` 为检查更新与在线升级访问 GitHub 时使用的代理。"},
 	"PUT /api/system/settings":                           {Summary: "保存全局设置", Desc: "`disabledModules` 为关闭的功能模块 ID 列表，被其他模块依赖的模块不能关闭，修改后重启生效；`gatewaySSO` 开启飞牛登录态自动登录，仅飞牛安装包有效。", Body: true},
 	"GET /api/system/info":                               {Summary: "查看系统信息"},

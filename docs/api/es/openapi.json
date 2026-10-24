@@ -3239,7 +3239,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con número de secuencia mayor que este valor; `before` devuelve los registros con número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las más recientes de ellas.\n\nPermiso necesario: `backup:read`.",
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos).\n\nPermiso necesario: `backup:read`.",
         "parameters": [
           {
             "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",
@@ -3263,6 +3263,70 @@
             "name": "limit",
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "description": "Nivel mínimo: debug, info, warn o error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Etiqueta de origen, coincidencia exacta sin distinguir mayúsculas",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Palabras clave: separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un - inicial excluye",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Dirección del cliente: dirección completa, CIDR o parte de una dirección, separadas por comas",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Parte del nombre del sitio o del dominio",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Código de estado como 404, 4xx, 500-599, separados por comas",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Hora de inicio, RFC 3339 o marca de tiempo en milisegundos",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Hora de fin, RFC 3339 o marca de tiempo en milisegundos",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -4057,7 +4121,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con número de secuencia mayor que este valor; `before` devuelve los registros con número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las más recientes de ellas.\n\nPermiso necesario: `cloudflared:read`.",
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos).\n\nPermiso necesario: `cloudflared:read`.",
         "parameters": [
           {
             "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",
@@ -4081,6 +4145,70 @@
             "name": "limit",
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "description": "Nivel mínimo: debug, info, warn o error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Etiqueta de origen, coincidencia exacta sin distinguir mayúsculas",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Palabras clave: separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un - inicial excluye",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Dirección del cliente: dirección completa, CIDR o parte de una dirección, separadas por comas",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Parte del nombre del sitio o del dominio",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Código de estado como 404, 4xx, 500-599, separados por comas",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Hora de inicio, RFC 3339 o marca de tiempo en milisegundos",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Hora de fin, RFC 3339 o marca de tiempo en milisegundos",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -4745,7 +4873,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con número de secuencia mayor que este valor; `before` devuelve los registros con número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las más recientes de ellas.\n\nPermiso necesario: `cron:read`.",
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos).\n\nPermiso necesario: `cron:read`.",
         "parameters": [
           {
             "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",
@@ -4769,6 +4897,70 @@
             "name": "limit",
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "description": "Nivel mínimo: debug, info, warn o error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Etiqueta de origen, coincidencia exacta sin distinguir mayúsculas",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Palabras clave: separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un - inicial excluye",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Dirección del cliente: dirección completa, CIDR o parte de una dirección, separadas por comas",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Parte del nombre del sitio o del dominio",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Código de estado como 404, 4xx, 500-599, separados por comas",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Hora de inicio, RFC 3339 o marca de tiempo en milisegundos",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Hora de fin, RFC 3339 o marca de tiempo en milisegundos",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -5495,7 +5687,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con número de secuencia mayor que este valor; `before` devuelve los registros con número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las más recientes de ellas.\n\nPermiso necesario: `ddns:read`.",
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos).\n\nPermiso necesario: `ddns:read`.",
         "parameters": [
           {
             "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",
@@ -5519,6 +5711,70 @@
             "name": "limit",
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "description": "Nivel mínimo: debug, info, warn o error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Etiqueta de origen, coincidencia exacta sin distinguir mayúsculas",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Palabras clave: separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un - inicial excluye",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Dirección del cliente: dirección completa, CIDR o parte de una dirección, separadas por comas",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Parte del nombre del sitio o del dominio",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Código de estado como 404, 4xx, 500-599, separados por comas",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Hora de inicio, RFC 3339 o marca de tiempo en milisegundos",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Hora de fin, RFC 3339 o marca de tiempo en milisegundos",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -9091,7 +9347,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con número de secuencia mayor que este valor; `before` devuelve los registros con número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las más recientes de ellas.\n\nPermiso necesario: `docker:read`.",
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos).\n\nPermiso necesario: `docker:read`.",
         "parameters": [
           {
             "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",
@@ -9115,6 +9371,70 @@
             "name": "limit",
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "description": "Nivel mínimo: debug, info, warn o error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Etiqueta de origen, coincidencia exacta sin distinguir mayúsculas",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Palabras clave: separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un - inicial excluye",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Dirección del cliente: dirección completa, CIDR o parte de una dirección, separadas por comas",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Parte del nombre del sitio o del dominio",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Código de estado como 404, 4xx, 500-599, separados por comas",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Hora de inicio, RFC 3339 o marca de tiempo en milisegundos",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Hora de fin, RFC 3339 o marca de tiempo en milisegundos",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -10325,7 +10645,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con número de secuencia mayor que este valor; `before` devuelve los registros con número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las más recientes de ellas.\n\nPermiso necesario: `frp:read`.",
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos).\n\nPermiso necesario: `frp:read`.",
         "parameters": [
           {
             "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",
@@ -10349,6 +10669,70 @@
             "name": "limit",
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "description": "Nivel mínimo: debug, info, warn o error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Etiqueta de origen, coincidencia exacta sin distinguir mayúsculas",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Palabras clave: separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un - inicial excluye",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Dirección del cliente: dirección completa, CIDR o parte de una dirección, separadas por comas",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Parte del nombre del sitio o del dominio",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Código de estado como 404, 4xx, 500-599, separados por comas",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Hora de inicio, RFC 3339 o marca de tiempo en milisegundos",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Hora de fin, RFC 3339 o marca de tiempo en milisegundos",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -10952,7 +11336,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con número de secuencia mayor que este valor; `before` devuelve los registros con número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las más recientes de ellas.\n\nPermiso necesario: `ftp:read`.",
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos).\n\nPermiso necesario: `ftp:read`.",
         "parameters": [
           {
             "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",
@@ -10976,6 +11360,70 @@
             "name": "limit",
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "description": "Nivel mínimo: debug, info, warn o error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Etiqueta de origen, coincidencia exacta sin distinguir mayúsculas",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Palabras clave: separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un - inicial excluye",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Dirección del cliente: dirección completa, CIDR o parte de una dirección, separadas por comas",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Parte del nombre del sitio o del dominio",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Código de estado como 404, 4xx, 500-599, separados por comas",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Hora de inicio, RFC 3339 o marca de tiempo en milisegundos",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Hora de fin, RFC 3339 o marca de tiempo en milisegundos",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -11884,7 +12332,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con número de secuencia mayor que este valor; `before` devuelve los registros con número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las más recientes de ellas.\n\nPermiso necesario: `guard:read`.",
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos).\n\nPermiso necesario: `guard:read`.",
         "parameters": [
           {
             "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",
@@ -11908,6 +12356,70 @@
             "name": "limit",
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "description": "Nivel mínimo: debug, info, warn o error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Etiqueta de origen, coincidencia exacta sin distinguir mayúsculas",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Palabras clave: separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un - inicial excluye",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Dirección del cliente: dirección completa, CIDR o parte de una dirección, separadas por comas",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Parte del nombre del sitio o del dominio",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Código de estado como 404, 4xx, 500-599, separados por comas",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Hora de inicio, RFC 3339 o marca de tiempo en milisegundos",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Hora de fin, RFC 3339 o marca de tiempo en milisegundos",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -12428,7 +12940,7 @@
     },
     "/api/logs": {
       "get": {
-        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con número de secuencia mayor que este valor; `before` devuelve los registros con número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las más recientes de ellas.\n\nPermiso necesario: `logs:read`.",
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos).\n\nPermiso necesario: `logs:read`.",
         "parameters": [
           {
             "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",
@@ -12452,6 +12964,70 @@
             "name": "limit",
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "description": "Nivel mínimo: debug, info, warn o error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Etiqueta de origen, coincidencia exacta sin distinguir mayúsculas",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Palabras clave: separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un - inicial excluye",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Dirección del cliente: dirección completa, CIDR o parte de una dirección, separadas por comas",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Parte del nombre del sitio o del dominio",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Código de estado como 404, 4xx, 500-599, separados por comas",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Hora de inicio, RFC 3339 o marca de tiempo en milisegundos",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Hora de fin, RFC 3339 o marca de tiempo en milisegundos",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -12605,7 +13181,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con número de secuencia mayor que este valor; `before` devuelve los registros con número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las más recientes de ellas.\n\nPermiso necesario: `nettools:read`.",
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos).\n\nPermiso necesario: `nettools:read`.",
         "parameters": [
           {
             "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",
@@ -12629,6 +13205,70 @@
             "name": "limit",
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "description": "Nivel mínimo: debug, info, warn o error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Etiqueta de origen, coincidencia exacta sin distinguir mayúsculas",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Palabras clave: separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un - inicial excluye",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Dirección del cliente: dirección completa, CIDR o parte de una dirección, separadas por comas",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Parte del nombre del sitio o del dominio",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Código de estado como 404, 4xx, 500-599, separados por comas",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Hora de inicio, RFC 3339 o marca de tiempo en milisegundos",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Hora de fin, RFC 3339 o marca de tiempo en milisegundos",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -13745,7 +14385,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con número de secuencia mayor que este valor; `before` devuelve los registros con número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las más recientes de ellas.\n\nPermiso necesario: `notify:read`.",
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos).\n\nPermiso necesario: `notify:read`.",
         "parameters": [
           {
             "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",
@@ -13769,6 +14409,70 @@
             "name": "limit",
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "description": "Nivel mínimo: debug, info, warn o error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Etiqueta de origen, coincidencia exacta sin distinguir mayúsculas",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Palabras clave: separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un - inicial excluye",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Dirección del cliente: dirección completa, CIDR o parte de una dirección, separadas por comas",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Parte del nombre del sitio o del dominio",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Código de estado como 404, 4xx, 500-599, separados por comas",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Hora de inicio, RFC 3339 o marca de tiempo en milisegundos",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Hora de fin, RFC 3339 o marca de tiempo en milisegundos",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -14304,7 +15008,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con número de secuencia mayor que este valor; `before` devuelve los registros con número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las más recientes de ellas.\n\nPermiso necesario: `portforward:read`.",
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos).\n\nPermiso necesario: `portforward:read`.",
         "parameters": [
           {
             "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",
@@ -14328,6 +15032,70 @@
             "name": "limit",
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "description": "Nivel mínimo: debug, info, warn o error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Etiqueta de origen, coincidencia exacta sin distinguir mayúsculas",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Palabras clave: separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un - inicial excluye",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Dirección del cliente: dirección completa, CIDR o parte de una dirección, separadas por comas",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Parte del nombre del sitio o del dominio",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Código de estado como 404, 4xx, 500-599, separados por comas",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Hora de inicio, RFC 3339 o marca de tiempo en milisegundos",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Hora de fin, RFC 3339 o marca de tiempo en milisegundos",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -15598,7 +16366,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con número de secuencia mayor que este valor; `before` devuelve los registros con número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las más recientes de ellas.\n\nPermiso necesario: `ssl:read`.",
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos).\n\nPermiso necesario: `ssl:read`.",
         "parameters": [
           {
             "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",
@@ -15622,6 +16390,70 @@
             "name": "limit",
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "description": "Nivel mínimo: debug, info, warn o error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Etiqueta de origen, coincidencia exacta sin distinguir mayúsculas",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Palabras clave: separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un - inicial excluye",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Dirección del cliente: dirección completa, CIDR o parte de una dirección, separadas por comas",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Parte del nombre del sitio o del dominio",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Código de estado como 404, 4xx, 500-599, separados por comas",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Hora de inicio, RFC 3339 o marca de tiempo en milisegundos",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Hora de fin, RFC 3339 o marca de tiempo en milisegundos",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -16319,7 +17151,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con número de secuencia mayor que este valor; `before` devuelve los registros con número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las más recientes de ellas.\n\nPermiso necesario: `storage:read`.",
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos).\n\nPermiso necesario: `storage:read`.",
         "parameters": [
           {
             "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",
@@ -16343,6 +17175,70 @@
             "name": "limit",
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "description": "Nivel mínimo: debug, info, warn o error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Etiqueta de origen, coincidencia exacta sin distinguir mayúsculas",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Palabras clave: separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un - inicial excluye",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Dirección del cliente: dirección completa, CIDR o parte de una dirección, separadas por comas",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Parte del nombre del sitio o del dominio",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Código de estado como 404, 4xx, 500-599, separados por comas",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Hora de inicio, RFC 3339 o marca de tiempo en milisegundos",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Hora de fin, RFC 3339 o marca de tiempo en milisegundos",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -16837,7 +17733,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con número de secuencia mayor que este valor; `before` devuelve los registros con número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las más recientes de ellas.\n\nPermiso necesario: `stun:read`.",
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos).\n\nPermiso necesario: `stun:read`.",
         "parameters": [
           {
             "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",
@@ -16861,6 +17757,70 @@
             "name": "limit",
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "description": "Nivel mínimo: debug, info, warn o error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Etiqueta de origen, coincidencia exacta sin distinguir mayúsculas",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Palabras clave: separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un - inicial excluye",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Dirección del cliente: dirección completa, CIDR o parte de una dirección, separadas por comas",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Parte del nombre del sitio o del dominio",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Código de estado como 404, 4xx, 500-599, separados por comas",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Hora de inicio, RFC 3339 o marca de tiempo en milisegundos",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Hora de fin, RFC 3339 o marca de tiempo en milisegundos",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -18334,7 +19294,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con número de secuencia mayor que este valor; `before` devuelve los registros con número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las más recientes de ellas.\n\nPermiso necesario: `tailscale:read`.",
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos).\n\nPermiso necesario: `tailscale:read`.",
         "parameters": [
           {
             "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",
@@ -18358,6 +19318,70 @@
             "name": "limit",
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "description": "Nivel mínimo: debug, info, warn o error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Etiqueta de origen, coincidencia exacta sin distinguir mayúsculas",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Palabras clave: separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un - inicial excluye",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Dirección del cliente: dirección completa, CIDR o parte de una dirección, separadas por comas",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Parte del nombre del sitio o del dominio",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Código de estado como 404, 4xx, 500-599, separados por comas",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Hora de inicio, RFC 3339 o marca de tiempo en milisegundos",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Hora de fin, RFC 3339 o marca de tiempo en milisegundos",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -19495,7 +20519,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con número de secuencia mayor que este valor; `before` devuelve los registros con número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las más recientes de ellas.\n\nPermiso necesario: `waf:read`.",
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos).\n\nPermiso necesario: `waf:read`.",
         "parameters": [
           {
             "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",
@@ -19519,6 +20543,70 @@
             "name": "limit",
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "description": "Nivel mínimo: debug, info, warn o error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Etiqueta de origen, coincidencia exacta sin distinguir mayúsculas",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Palabras clave: separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un - inicial excluye",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Dirección del cliente: dirección completa, CIDR o parte de una dirección, separadas por comas",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Parte del nombre del sitio o del dominio",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Código de estado como 404, 4xx, 500-599, separados por comas",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Hora de inicio, RFC 3339 o marca de tiempo en milisegundos",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Hora de fin, RFC 3339 o marca de tiempo en milisegundos",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -19621,7 +20709,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con número de secuencia mayor que este valor; `before` devuelve los registros con número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las más recientes de ellas.\n\nPermiso necesario: `webdav:read`.",
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos).\n\nPermiso necesario: `webdav:read`.",
         "parameters": [
           {
             "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",
@@ -19645,6 +20733,70 @@
             "name": "limit",
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "description": "Nivel mínimo: debug, info, warn o error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Etiqueta de origen, coincidencia exacta sin distinguir mayúsculas",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Palabras clave: separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un - inicial excluye",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Dirección del cliente: dirección completa, CIDR o parte de una dirección, separadas por comas",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Parte del nombre del sitio o del dominio",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Código de estado como 404, 4xx, 500-599, separados por comas",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Hora de inicio, RFC 3339 o marca de tiempo en milisegundos",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Hora de fin, RFC 3339 o marca de tiempo en milisegundos",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -21163,7 +22315,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con número de secuencia mayor que este valor; `before` devuelve los registros con número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las más recientes de ellas.\n\nPermiso necesario: `webservice:read`.",
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos).\n\nPermiso necesario: `webservice:read`.",
         "parameters": [
           {
             "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",
@@ -21187,6 +22339,70 @@
             "name": "limit",
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "description": "Nivel mínimo: debug, info, warn o error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Etiqueta de origen, coincidencia exacta sin distinguir mayúsculas",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Palabras clave: separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un - inicial excluye",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Dirección del cliente: dirección completa, CIDR o parte de una dirección, separadas por comas",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Parte del nombre del sitio o del dominio",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Código de estado como 404, 4xx, 500-599, separados por comas",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Hora de inicio, RFC 3339 o marca de tiempo en milisegundos",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Hora de fin, RFC 3339 o marca de tiempo en milisegundos",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -22780,7 +23996,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con número de secuencia mayor que este valor; `before` devuelve los registros con número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las más recientes de ellas.\n\nPermiso necesario: `webterminal:read`.",
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos).\n\nPermiso necesario: `webterminal:read`.",
         "parameters": [
           {
             "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",
@@ -22804,6 +24020,70 @@
             "name": "limit",
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "description": "Nivel mínimo: debug, info, warn o error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Etiqueta de origen, coincidencia exacta sin distinguir mayúsculas",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Palabras clave: separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un - inicial excluye",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Dirección del cliente: dirección completa, CIDR o parte de una dirección, separadas por comas",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Parte del nombre del sitio o del dominio",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Código de estado como 404, 4xx, 500-599, separados por comas",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Hora de inicio, RFC 3339 o marca de tiempo en milisegundos",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Hora de fin, RFC 3339 o marca de tiempo en milisegundos",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -25263,7 +26543,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con número de secuencia mayor que este valor; `before` devuelve los registros con número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las más recientes de ellas.\n\nPermiso necesario: `wol:read`.",
+        "description": "Admite la obtención incremental con el parámetro `since`, que devuelve los registros con un número de secuencia mayor que este valor; `before` devuelve los registros con un número de secuencia menor que este valor, para cargar entradas anteriores; `limit` devuelve solo las entradas más recientes y, cuando la memoria no tiene suficientes, también busca en el historial guardado en los archivos de registro. Parámetros de filtro: `level` nivel mínimo, `source` origen, `q` palabras clave (separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un `-` inicial excluye), `ip` dirección del cliente (dirección completa, CIDR o parte de una dirección, separadas por comas), `host` nombre del sitio o dominio, `status` código de estado (como `404`, `4xx`, `500-599`), `from` y `to` intervalo de tiempo (RFC 3339 o marca de tiempo en milisegundos).\n\nPermiso necesario: `wol:read`.",
         "parameters": [
           {
             "description": "Obtención incremental: solo devuelve registros con número de secuencia mayor que este valor",
@@ -25287,6 +26567,70 @@
             "name": "limit",
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "description": "Nivel mínimo: debug, info, warn o error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Etiqueta de origen, coincidencia exacta sin distinguir mayúsculas",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Palabras clave: separadas por espacios deben coincidir todas, las comillas dobles agrupan una frase, un - inicial excluye",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Dirección del cliente: dirección completa, CIDR o parte de una dirección, separadas por comas",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Parte del nombre del sitio o del dominio",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Código de estado como 404, 4xx, 500-599, separados por comas",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Hora de inicio, RFC 3339 o marca de tiempo en milisegundos",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Hora de fin, RFC 3339 o marca de tiempo en milisegundos",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
             }
           }
         ],

@@ -42,7 +42,39 @@
     "levelError": "Nur Fehler",
     "autoScroll": "Automatisch scrollen",
     "empty": "Noch keine Protokolle",
-    "loadEarlier": "Ältere Protokolle laden"
+    "loadEarlier": "Ältere Protokolle laden",
+    "source": "Quelle",
+    "keyword": "Suchbegriffe",
+    "keywordTip": "Durch Leerzeichen getrennte Begriffe müssen alle zutreffen, doppelte Anführungszeichen fassen eine Phrase zusammen, ein vorangestelltes - schließt aus, z. B. GET \"timeout\" -debug",
+    "moreFilters": "Weitere Filter",
+    "reset": "Zurücksetzen",
+    "ip": "IP oder Bereich, z. B. 1.2.3.4, 10.0.0.0/8",
+    "host": "Site-Name oder Domain",
+    "status": "Status, z. B. 404, 5xx",
+    "to": "Ende",
+    "fieldTip": "Klicken Sie auf eine Quelle oder ein Feld-Tag im Log, um danach zu filtern; reicht der Speicher nicht aus, wird auch der in den Logdateien aufbewahrte Verlauf durchsucht",
+    "filterBy": "Danach filtern",
+    "noMatch": "Keine passenden Logs",
+    "range": {
+      "all": "Beliebiger Zeitraum",
+      "15m": "Letzte 15 Minuten",
+      "1h": "Letzte Stunde",
+      "6h": "Letzte 6 Stunden",
+      "24h": "Letzte 24 Stunden",
+      "7d": "Letzte 7 Tage",
+      "custom": "Benutzerdefiniert"
+    },
+    "field": {
+      "ip": "IP",
+      "host": "Domain",
+      "site": "Site",
+      "status": "Status",
+      "method": "Methode",
+      "path": "Pfad",
+      "rule": "Regel",
+      "user": "Benutzer"
+    },
+    "from": "Beginn"
   },
   "scopeTags": {
     "allWrite": "Vollzugriff",

@@ -31,6 +31,8 @@ Outras opções dos sites de proxy reverso:
 
 Sites de qualquer tipo podem definir um log de acesso, cross-origin (CORS), cabeçalhos personalizados de requisição e resposta (um `Key: Value` por linha; um Value vazio remove aquele cabeçalho) e podem referenciar uma instância do [Firewall WAF](/pt-BR/docs/modules/waf) (se a instância não existir ou estiver desativada, as requisições passam direto).
 
+As entradas do log de acesso registram o IP do cliente, o domínio, o nome do site e o código de status, então o log pode ser filtrado por site, código de status, IP de origem e mais; veja [visualizar e filtrar logs de execução](/pt-BR/docs/guide/configuration).
+
 ## Transporte e protocolos
 
 - HTTPS: usa um certificado do módulo de [Certificados SSL](/pt-BR/docs/modules/ssl) que cubra o domínio;

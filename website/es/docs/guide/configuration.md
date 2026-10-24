@@ -53,6 +53,18 @@ Los registros de ejecución del sistema y de cada módulo se escriben por defect
 - Borrar los registros de un módulo en la interfaz también elimina sus archivos;
 - Las copias de seguridad de la configuración no incluyen `logs/` ni el registro de auditoría `audit.log`.
 
+### Ver y filtrar
+
+La página Registros del sistema y la tarjeta de registros al final de cada página de módulo usan el mismo visor. Las siguientes condiciones se pueden combinar; los cambios se aplican al instante y solo se añaden las entradas nuevas que coinciden:
+
+- Nivel y origen (elija un origen que ya haya aparecido o escríbalo);
+- Palabras clave: los términos separados por espacios deben coincidir todos, las comillas dobles agrupan una frase y un `-` inicial excluye un término, por ejemplo `GET "timeout" -debug`; las coincidencias se resaltan. Si la interfaz está en otro idioma, busque con el texto traducido que ve en pantalla;
+- IP en Más filtros: dirección completa, rango (como `10.0.0.0/8`) o parte de una dirección, separadas por comas; cuando una entrada no tiene un campo IP propio, las direcciones se reconocen en el texto, así que también sirve para inicios de sesión fallidos y registros de protección contra intrusiones;
+- Intervalo de tiempo en Más filtros: desde los últimos 15 minutos hasta los últimos 7 días, o un inicio y fin personalizados;
+- Los registros del Servicio web también se pueden filtrar por nombre de sitio o dominio y por código de estado (`404`, `4xx`, `500-599`, separados por comas); los del Cortafuegos WAF, por dominio, y las detecciones registran el dominio y el ID de la regla.
+
+Haga clic en un origen del registro, o en una etiqueta como «Sitio=…» o «Dominio=…» al final de una línea, para filtrar por ese valor. Cuando las entradas en memoria no bastan, Cargar registros anteriores continúa por el historial guardado en los archivos de registro, por lo que con la persistencia de registros activada el filtrado no está limitado por el número de líneas conservadas. `GET /api/logs` y `GET /api/<módulo>/logs` aceptan los mismos parámetros de filtro; consulte la [referencia de la API](/es/docs/reference/api-reference).
+
 ## Copia de seguridad y restauración
 
 «Ajustes» ofrece la copia de seguridad y la restauración de la configuración, y es también el punto de entrada para importar configuraciones de Lucky.

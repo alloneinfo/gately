@@ -31,6 +31,8 @@ Other options for reverse proxy sites:
 
 Sites of every type can set an access log, cross-origin (CORS), custom request and response headers (one `Key: Value` per line; an empty Value removes that header), and can reference a [WAF Firewall](/en/docs/modules/waf) instance (if the instance does not exist or is disabled, requests pass through).
 
+Access log entries record the client IP, domain, site name and status code, so the log can be filtered by site, status code, client IP and more; see [viewing and filtering runtime logs](/en/docs/guide/configuration).
+
 ## Transport and protocols
 
 - HTTPS: uses a certificate from the [SSL Certificates](/en/docs/modules/ssl) module that covers the domain;

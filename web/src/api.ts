@@ -113,6 +113,8 @@ export interface LogEntry {
   level: 'debug' | 'info' | 'warn' | 'error'
   source?: string
   message: string
+  // 可选的结构化字段：ip、host、site、status、method、path、rule 等，可按字段过滤
+  fields?: Record<string, string>
 }
 
 export interface ImportReport {

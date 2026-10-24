@@ -31,6 +31,8 @@ Weitere Optionen für Reverse-Proxy-Sites:
 
 Sites jedes Typs können ein Zugriffslog, Cross-Origin (CORS) sowie eigene Request- und Response-Header festlegen (je Zeile ein `Key: Value`; ein leerer Value entfernt den Header) und auf eine Instanz der [WAF-Firewall](/de/docs/modules/waf) verweisen (existiert die Instanz nicht oder ist sie deaktiviert, werden Anfragen durchgelassen).
 
+Einträge im Zugriffslog enthalten Client-IP, Domain, Site-Name und Statuscode, sodass sich das Protokoll nach Site, Statuscode, Quell-IP und mehr filtern lässt; siehe [Laufzeitprotokolle anzeigen und filtern](/de/docs/guide/configuration).
+
 ## Transport und Protokolle
 
 - HTTPS: nutzt ein Zertifikat aus dem Modul [SSL-Zertifikate](/de/docs/modules/ssl), das die Domain abdeckt;

@@ -1,7 +1,11 @@
 package app
 
 import (
+	"net/url"
 	"path/filepath"
+	"strconv"
+	"strings"
+	"time"
 
 	"github.com/wangwanjie/gately/internal/auth"
 	"github.com/wangwanjie/gately/internal/fsperm"
@@ -57,4 +61,63 @@ func tightenConfigDir(dir string) int {
 		}
 	}
 	return n
+}
+
+// logFilterParams 是日志接口支持的过滤参数，接口文档据此列出查询参数。
+var logFilterParams = []string{"level", "source", "q", "ip", "host", "status", "from", "to"}
+
+// parseLogFilter 解析日志过滤参数：
+//   - level：最低级别（debug、info、warn、error）
+//   - source：来源标签，精确匹配
+//   - q：关键词，空格分隔表示同时包含，双引号包住短语，前缀 - 表示排除
+//   - ip：客户端地址，支持完整地址、CIDR 与地址片段，多个以逗号分隔
+//   - host：站点名称或域名的一部分
+//   - status：状态码，如 404、4xx、500-599，多个以逗号分隔
+//   - from、to：时间范围，RFC 3339 格式或毫秒时间戳
+//
+// 没有任何过滤条件时返回 nil；参数无效时返回错误信息（完整字面量，便于翻译）。
+func parseLogFilter(q url.Values) (*logbuf.Filter, string) {
+	f := &logbuf.Filter{
+		Source: strings.TrimSpace(q.Get("source")),
+		Host:   strings.ToLower(strings.TrimSpace(q.Get("host"))),
+		IP:     logbuf.ParseIP(q.Get("ip")),
+	}
+	if lv := q.Get("level"); lv != "" && lv != "all" {
+		if !logbuf.ValidLevel(lv) {
+			return nil, "level 参数无效"
+		}
+		f.MinLevel = lv
+	}
+	f.Terms, f.Excludes = logbuf.ParseKeywords(q.Get("q"))
+	if v := strings.TrimSpace(q.Get("status")); v != "" {
+		st, ok := logbuf.ParseStatus(v)
+		if !ok {
+			return nil, "状态码格式无效，可填写 404、4xx 或 500-599"
+		}
+		f.Status = st
+	}
+	var ok bool
+	if f.From, ok = parseLogTime(q.Get("from")); !ok {
+		return nil, "from 参数无效"
+	}
+	if f.To, ok = parseLogTime(q.Get("to")); !ok {
+		return nil, "to 参数无效"
+	}
+	if f.Empty() {
+		return nil, ""
+	}
+	return f, ""
+}
+
+// parseLogTime 解析 RFC 3339 时间或毫秒时间戳，空串返回零值。
+func parseLogTime(s string) (time.Time, bool) {
+	s = strings.TrimSpace(s)
+	if s == "" {
+		return time.Time{}, true
+	}
+	if ms, err := strconv.ParseInt(s, 10, 64); err == nil {
+		return time.UnixMilli(ms), true
+	}
+	t, err := time.Parse(time.RFC3339, s)
+	return t, err == nil
 }

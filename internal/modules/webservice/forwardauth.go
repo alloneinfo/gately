@@ -135,7 +135,7 @@ func (f *forwardAuther) check(w http.ResponseWriter, r *http.Request, h *siteHan
 	resp, err := forwardAuthClient.Do(req)
 	if err != nil {
 		if r.Context().Err() == nil {
-			h.log.Warnf("%s 转发认证失败: %v", r.Host, err)
+			h.reqLog(r).Warnf("%s 转发认证失败: %v", r.Host, err)
 		}
 		writeErrorPage(w, r, http.StatusBadGateway, "认证服务不可用", "无法连接到站点配置的认证服务，请稍后重试。")
 		return false

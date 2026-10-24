@@ -3239,7 +3239,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "`since` パラメーターによる差分取得に対応し、シーケンス番号がこの値より大きいログを返します。`before` はシーケンス番号がこの値より小さいログを返し、過去の記録の読み込みに使います。`limit` はその中の最新の数件のみを返します。\n\n必要な権限: `backup:read`。",
+        "description": "`since` パラメーターで増分取得でき、シーケンス番号がこの値より大きいログを返します。`before` はシーケンス番号がこの値より小さいログを返し、古い記録の読み込みに使います。`limit` はそのうち最新の指定件数だけを返し、メモリ内で足りない場合はログファイルに残っている履歴も検索します。フィルターパラメーター：`level` 最低レベル、`source` ソース、`q` キーワード（スペース区切りはすべてを含む、二重引用符でフレーズ、先頭の `-` で除外）、`ip` クライアントアドレス（完全なアドレス、CIDR またはアドレスの一部、複数はカンマ区切り）、`host` サイト名またはドメイン、`status` ステータスコード（`404`、`4xx`、`500-599` など）、`from`・`to` 時間範囲（RFC 3339 またはミリ秒タイムスタンプ）。\n\n必要な権限: `backup:read`。",
         "parameters": [
           {
             "description": "増分取得：このシーケンス番号より大きいログのみ返します",
@@ -3263,6 +3263,70 @@
             "name": "limit",
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "description": "最低レベル：debug、info、warn、error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "ソースラベル（大文字小文字を区別しない完全一致）",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "キーワード：スペース区切りはすべてを含む、二重引用符でフレーズ、先頭の - で除外",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "クライアントアドレス：完全なアドレス、CIDR またはアドレスの一部、複数はカンマ区切り",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "サイト名またはドメインの一部",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "ステータスコード（404、4xx、500-599 など、複数はカンマ区切り）",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "開始時刻（RFC 3339 またはミリ秒タイムスタンプ）",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "終了時刻（RFC 3339 またはミリ秒タイムスタンプ）",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -4057,7 +4121,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "`since` パラメーターによる差分取得に対応し、シーケンス番号がこの値より大きいログを返します。`before` はシーケンス番号がこの値より小さいログを返し、過去の記録の読み込みに使います。`limit` はその中の最新の数件のみを返します。\n\n必要な権限: `cloudflared:read`。",
+        "description": "`since` パラメーターで増分取得でき、シーケンス番号がこの値より大きいログを返します。`before` はシーケンス番号がこの値より小さいログを返し、古い記録の読み込みに使います。`limit` はそのうち最新の指定件数だけを返し、メモリ内で足りない場合はログファイルに残っている履歴も検索します。フィルターパラメーター：`level` 最低レベル、`source` ソース、`q` キーワード（スペース区切りはすべてを含む、二重引用符でフレーズ、先頭の `-` で除外）、`ip` クライアントアドレス（完全なアドレス、CIDR またはアドレスの一部、複数はカンマ区切り）、`host` サイト名またはドメイン、`status` ステータスコード（`404`、`4xx`、`500-599` など）、`from`・`to` 時間範囲（RFC 3339 またはミリ秒タイムスタンプ）。\n\n必要な権限: `cloudflared:read`。",
         "parameters": [
           {
             "description": "増分取得：このシーケンス番号より大きいログのみ返します",
@@ -4081,6 +4145,70 @@
             "name": "limit",
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "description": "最低レベル：debug、info、warn、error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "ソースラベル（大文字小文字を区別しない完全一致）",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "キーワード：スペース区切りはすべてを含む、二重引用符でフレーズ、先頭の - で除外",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "クライアントアドレス：完全なアドレス、CIDR またはアドレスの一部、複数はカンマ区切り",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "サイト名またはドメインの一部",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "ステータスコード（404、4xx、500-599 など、複数はカンマ区切り）",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "開始時刻（RFC 3339 またはミリ秒タイムスタンプ）",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "終了時刻（RFC 3339 またはミリ秒タイムスタンプ）",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -4745,7 +4873,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "`since` パラメーターによる差分取得に対応し、シーケンス番号がこの値より大きいログを返します。`before` はシーケンス番号がこの値より小さいログを返し、過去の記録の読み込みに使います。`limit` はその中の最新の数件のみを返します。\n\n必要な権限: `cron:read`。",
+        "description": "`since` パラメーターで増分取得でき、シーケンス番号がこの値より大きいログを返します。`before` はシーケンス番号がこの値より小さいログを返し、古い記録の読み込みに使います。`limit` はそのうち最新の指定件数だけを返し、メモリ内で足りない場合はログファイルに残っている履歴も検索します。フィルターパラメーター：`level` 最低レベル、`source` ソース、`q` キーワード（スペース区切りはすべてを含む、二重引用符でフレーズ、先頭の `-` で除外）、`ip` クライアントアドレス（完全なアドレス、CIDR またはアドレスの一部、複数はカンマ区切り）、`host` サイト名またはドメイン、`status` ステータスコード（`404`、`4xx`、`500-599` など）、`from`・`to` 時間範囲（RFC 3339 またはミリ秒タイムスタンプ）。\n\n必要な権限: `cron:read`。",
         "parameters": [
           {
             "description": "増分取得：このシーケンス番号より大きいログのみ返します",
@@ -4769,6 +4897,70 @@
             "name": "limit",
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "description": "最低レベル：debug、info、warn、error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "ソースラベル（大文字小文字を区別しない完全一致）",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "キーワード：スペース区切りはすべてを含む、二重引用符でフレーズ、先頭の - で除外",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "クライアントアドレス：完全なアドレス、CIDR またはアドレスの一部、複数はカンマ区切り",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "サイト名またはドメインの一部",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "ステータスコード（404、4xx、500-599 など、複数はカンマ区切り）",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "開始時刻（RFC 3339 またはミリ秒タイムスタンプ）",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "終了時刻（RFC 3339 またはミリ秒タイムスタンプ）",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -5495,7 +5687,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "`since` パラメーターによる差分取得に対応し、シーケンス番号がこの値より大きいログを返します。`before` はシーケンス番号がこの値より小さいログを返し、過去の記録の読み込みに使います。`limit` はその中の最新の数件のみを返します。\n\n必要な権限: `ddns:read`。",
+        "description": "`since` パラメーターで増分取得でき、シーケンス番号がこの値より大きいログを返します。`before` はシーケンス番号がこの値より小さいログを返し、古い記録の読み込みに使います。`limit` はそのうち最新の指定件数だけを返し、メモリ内で足りない場合はログファイルに残っている履歴も検索します。フィルターパラメーター：`level` 最低レベル、`source` ソース、`q` キーワード（スペース区切りはすべてを含む、二重引用符でフレーズ、先頭の `-` で除外）、`ip` クライアントアドレス（完全なアドレス、CIDR またはアドレスの一部、複数はカンマ区切り）、`host` サイト名またはドメイン、`status` ステータスコード（`404`、`4xx`、`500-599` など）、`from`・`to` 時間範囲（RFC 3339 またはミリ秒タイムスタンプ）。\n\n必要な権限: `ddns:read`。",
         "parameters": [
           {
             "description": "増分取得：このシーケンス番号より大きいログのみ返します",
@@ -5519,6 +5711,70 @@
             "name": "limit",
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "description": "最低レベル：debug、info、warn、error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "ソースラベル（大文字小文字を区別しない完全一致）",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "キーワード：スペース区切りはすべてを含む、二重引用符でフレーズ、先頭の - で除外",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "クライアントアドレス：完全なアドレス、CIDR またはアドレスの一部、複数はカンマ区切り",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "サイト名またはドメインの一部",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "ステータスコード（404、4xx、500-599 など、複数はカンマ区切り）",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "開始時刻（RFC 3339 またはミリ秒タイムスタンプ）",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "終了時刻（RFC 3339 またはミリ秒タイムスタンプ）",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -9091,7 +9347,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "`since` パラメーターによる差分取得に対応し、シーケンス番号がこの値より大きいログを返します。`before` はシーケンス番号がこの値より小さいログを返し、過去の記録の読み込みに使います。`limit` はその中の最新の数件のみを返します。\n\n必要な権限: `docker:read`。",
+        "description": "`since` パラメーターで増分取得でき、シーケンス番号がこの値より大きいログを返します。`before` はシーケンス番号がこの値より小さいログを返し、古い記録の読み込みに使います。`limit` はそのうち最新の指定件数だけを返し、メモリ内で足りない場合はログファイルに残っている履歴も検索します。フィルターパラメーター：`level` 最低レベル、`source` ソース、`q` キーワード（スペース区切りはすべてを含む、二重引用符でフレーズ、先頭の `-` で除外）、`ip` クライアントアドレス（完全なアドレス、CIDR またはアドレスの一部、複数はカンマ区切り）、`host` サイト名またはドメイン、`status` ステータスコード（`404`、`4xx`、`500-599` など）、`from`・`to` 時間範囲（RFC 3339 またはミリ秒タイムスタンプ）。\n\n必要な権限: `docker:read`。",
         "parameters": [
           {
             "description": "増分取得：このシーケンス番号より大きいログのみ返します",
@@ -9115,6 +9371,70 @@
             "name": "limit",
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "description": "最低レベル：debug、info、warn、error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "ソースラベル（大文字小文字を区別しない完全一致）",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "キーワード：スペース区切りはすべてを含む、二重引用符でフレーズ、先頭の - で除外",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "クライアントアドレス：完全なアドレス、CIDR またはアドレスの一部、複数はカンマ区切り",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "サイト名またはドメインの一部",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "ステータスコード（404、4xx、500-599 など、複数はカンマ区切り）",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "開始時刻（RFC 3339 またはミリ秒タイムスタンプ）",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "終了時刻（RFC 3339 またはミリ秒タイムスタンプ）",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -10325,7 +10645,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "`since` パラメーターによる差分取得に対応し、シーケンス番号がこの値より大きいログを返します。`before` はシーケンス番号がこの値より小さいログを返し、過去の記録の読み込みに使います。`limit` はその中の最新の数件のみを返します。\n\n必要な権限: `frp:read`。",
+        "description": "`since` パラメーターで増分取得でき、シーケンス番号がこの値より大きいログを返します。`before` はシーケンス番号がこの値より小さいログを返し、古い記録の読み込みに使います。`limit` はそのうち最新の指定件数だけを返し、メモリ内で足りない場合はログファイルに残っている履歴も検索します。フィルターパラメーター：`level` 最低レベル、`source` ソース、`q` キーワード（スペース区切りはすべてを含む、二重引用符でフレーズ、先頭の `-` で除外）、`ip` クライアントアドレス（完全なアドレス、CIDR またはアドレスの一部、複数はカンマ区切り）、`host` サイト名またはドメイン、`status` ステータスコード（`404`、`4xx`、`500-599` など）、`from`・`to` 時間範囲（RFC 3339 またはミリ秒タイムスタンプ）。\n\n必要な権限: `frp:read`。",
         "parameters": [
           {
             "description": "増分取得：このシーケンス番号より大きいログのみ返します",
@@ -10349,6 +10669,70 @@
             "name": "limit",
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "description": "最低レベル：debug、info、warn、error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "ソースラベル（大文字小文字を区別しない完全一致）",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "キーワード：スペース区切りはすべてを含む、二重引用符でフレーズ、先頭の - で除外",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "クライアントアドレス：完全なアドレス、CIDR またはアドレスの一部、複数はカンマ区切り",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "サイト名またはドメインの一部",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "ステータスコード（404、4xx、500-599 など、複数はカンマ区切り）",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "開始時刻（RFC 3339 またはミリ秒タイムスタンプ）",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "終了時刻（RFC 3339 またはミリ秒タイムスタンプ）",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -10952,7 +11336,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "`since` パラメーターによる差分取得に対応し、シーケンス番号がこの値より大きいログを返します。`before` はシーケンス番号がこの値より小さいログを返し、過去の記録の読み込みに使います。`limit` はその中の最新の数件のみを返します。\n\n必要な権限: `ftp:read`。",
+        "description": "`since` パラメーターで増分取得でき、シーケンス番号がこの値より大きいログを返します。`before` はシーケンス番号がこの値より小さいログを返し、古い記録の読み込みに使います。`limit` はそのうち最新の指定件数だけを返し、メモリ内で足りない場合はログファイルに残っている履歴も検索します。フィルターパラメーター：`level` 最低レベル、`source` ソース、`q` キーワード（スペース区切りはすべてを含む、二重引用符でフレーズ、先頭の `-` で除外）、`ip` クライアントアドレス（完全なアドレス、CIDR またはアドレスの一部、複数はカンマ区切り）、`host` サイト名またはドメイン、`status` ステータスコード（`404`、`4xx`、`500-599` など）、`from`・`to` 時間範囲（RFC 3339 またはミリ秒タイムスタンプ）。\n\n必要な権限: `ftp:read`。",
         "parameters": [
           {
             "description": "増分取得：このシーケンス番号より大きいログのみ返します",
@@ -10976,6 +11360,70 @@
             "name": "limit",
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "description": "最低レベル：debug、info、warn、error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "ソースラベル（大文字小文字を区別しない完全一致）",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "キーワード：スペース区切りはすべてを含む、二重引用符でフレーズ、先頭の - で除外",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "クライアントアドレス：完全なアドレス、CIDR またはアドレスの一部、複数はカンマ区切り",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "サイト名またはドメインの一部",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "ステータスコード（404、4xx、500-599 など、複数はカンマ区切り）",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "開始時刻（RFC 3339 またはミリ秒タイムスタンプ）",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "終了時刻（RFC 3339 またはミリ秒タイムスタンプ）",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -11884,7 +12332,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "`since` パラメーターによる差分取得に対応し、シーケンス番号がこの値より大きいログを返します。`before` はシーケンス番号がこの値より小さいログを返し、過去の記録の読み込みに使います。`limit` はその中の最新の数件のみを返します。\n\n必要な権限: `guard:read`。",
+        "description": "`since` パラメーターで増分取得でき、シーケンス番号がこの値より大きいログを返します。`before` はシーケンス番号がこの値より小さいログを返し、古い記録の読み込みに使います。`limit` はそのうち最新の指定件数だけを返し、メモリ内で足りない場合はログファイルに残っている履歴も検索します。フィルターパラメーター：`level` 最低レベル、`source` ソース、`q` キーワード（スペース区切りはすべてを含む、二重引用符でフレーズ、先頭の `-` で除外）、`ip` クライアントアドレス（完全なアドレス、CIDR またはアドレスの一部、複数はカンマ区切り）、`host` サイト名またはドメイン、`status` ステータスコード（`404`、`4xx`、`500-599` など）、`from`・`to` 時間範囲（RFC 3339 またはミリ秒タイムスタンプ）。\n\n必要な権限: `guard:read`。",
         "parameters": [
           {
             "description": "増分取得：このシーケンス番号より大きいログのみ返します",
@@ -11908,6 +12356,70 @@
             "name": "limit",
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "description": "最低レベル：debug、info、warn、error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "ソースラベル（大文字小文字を区別しない完全一致）",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "キーワード：スペース区切りはすべてを含む、二重引用符でフレーズ、先頭の - で除外",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "クライアントアドレス：完全なアドレス、CIDR またはアドレスの一部、複数はカンマ区切り",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "サイト名またはドメインの一部",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "ステータスコード（404、4xx、500-599 など、複数はカンマ区切り）",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "開始時刻（RFC 3339 またはミリ秒タイムスタンプ）",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "終了時刻（RFC 3339 またはミリ秒タイムスタンプ）",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -12428,7 +12940,7 @@
     },
     "/api/logs": {
       "get": {
-        "description": "`since` パラメーターによる差分取得に対応し、シーケンス番号がこの値より大きいログを返します。`before` はシーケンス番号がこの値より小さいログを返し、過去の記録の読み込みに使います。`limit` はその中の最新の数件のみを返します。\n\n必要な権限: `logs:read`。",
+        "description": "`since` パラメーターで増分取得でき、シーケンス番号がこの値より大きいログを返します。`before` はシーケンス番号がこの値より小さいログを返し、古い記録の読み込みに使います。`limit` はそのうち最新の指定件数だけを返し、メモリ内で足りない場合はログファイルに残っている履歴も検索します。フィルターパラメーター：`level` 最低レベル、`source` ソース、`q` キーワード（スペース区切りはすべてを含む、二重引用符でフレーズ、先頭の `-` で除外）、`ip` クライアントアドレス（完全なアドレス、CIDR またはアドレスの一部、複数はカンマ区切り）、`host` サイト名またはドメイン、`status` ステータスコード（`404`、`4xx`、`500-599` など）、`from`・`to` 時間範囲（RFC 3339 またはミリ秒タイムスタンプ）。\n\n必要な権限: `logs:read`。",
         "parameters": [
           {
             "description": "増分取得：このシーケンス番号より大きいログのみ返します",
@@ -12452,6 +12964,70 @@
             "name": "limit",
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "description": "最低レベル：debug、info、warn、error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "ソースラベル（大文字小文字を区別しない完全一致）",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "キーワード：スペース区切りはすべてを含む、二重引用符でフレーズ、先頭の - で除外",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "クライアントアドレス：完全なアドレス、CIDR またはアドレスの一部、複数はカンマ区切り",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "サイト名またはドメインの一部",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "ステータスコード（404、4xx、500-599 など、複数はカンマ区切り）",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "開始時刻（RFC 3339 またはミリ秒タイムスタンプ）",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "終了時刻（RFC 3339 またはミリ秒タイムスタンプ）",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -12605,7 +13181,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "`since` パラメーターによる差分取得に対応し、シーケンス番号がこの値より大きいログを返します。`before` はシーケンス番号がこの値より小さいログを返し、過去の記録の読み込みに使います。`limit` はその中の最新の数件のみを返します。\n\n必要な権限: `nettools:read`。",
+        "description": "`since` パラメーターで増分取得でき、シーケンス番号がこの値より大きいログを返します。`before` はシーケンス番号がこの値より小さいログを返し、古い記録の読み込みに使います。`limit` はそのうち最新の指定件数だけを返し、メモリ内で足りない場合はログファイルに残っている履歴も検索します。フィルターパラメーター：`level` 最低レベル、`source` ソース、`q` キーワード（スペース区切りはすべてを含む、二重引用符でフレーズ、先頭の `-` で除外）、`ip` クライアントアドレス（完全なアドレス、CIDR またはアドレスの一部、複数はカンマ区切り）、`host` サイト名またはドメイン、`status` ステータスコード（`404`、`4xx`、`500-599` など）、`from`・`to` 時間範囲（RFC 3339 またはミリ秒タイムスタンプ）。\n\n必要な権限: `nettools:read`。",
         "parameters": [
           {
             "description": "増分取得：このシーケンス番号より大きいログのみ返します",
@@ -12629,6 +13205,70 @@
             "name": "limit",
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "description": "最低レベル：debug、info、warn、error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "ソースラベル（大文字小文字を区別しない完全一致）",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "キーワード：スペース区切りはすべてを含む、二重引用符でフレーズ、先頭の - で除外",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "クライアントアドレス：完全なアドレス、CIDR またはアドレスの一部、複数はカンマ区切り",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "サイト名またはドメインの一部",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "ステータスコード（404、4xx、500-599 など、複数はカンマ区切り）",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "開始時刻（RFC 3339 またはミリ秒タイムスタンプ）",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "終了時刻（RFC 3339 またはミリ秒タイムスタンプ）",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -13745,7 +14385,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "`since` パラメーターによる差分取得に対応し、シーケンス番号がこの値より大きいログを返します。`before` はシーケンス番号がこの値より小さいログを返し、過去の記録の読み込みに使います。`limit` はその中の最新の数件のみを返します。\n\n必要な権限: `notify:read`。",
+        "description": "`since` パラメーターで増分取得でき、シーケンス番号がこの値より大きいログを返します。`before` はシーケンス番号がこの値より小さいログを返し、古い記録の読み込みに使います。`limit` はそのうち最新の指定件数だけを返し、メモリ内で足りない場合はログファイルに残っている履歴も検索します。フィルターパラメーター：`level` 最低レベル、`source` ソース、`q` キーワード（スペース区切りはすべてを含む、二重引用符でフレーズ、先頭の `-` で除外）、`ip` クライアントアドレス（完全なアドレス、CIDR またはアドレスの一部、複数はカンマ区切り）、`host` サイト名またはドメイン、`status` ステータスコード（`404`、`4xx`、`500-599` など）、`from`・`to` 時間範囲（RFC 3339 またはミリ秒タイムスタンプ）。\n\n必要な権限: `notify:read`。",
         "parameters": [
           {
             "description": "増分取得：このシーケンス番号より大きいログのみ返します",
@@ -13769,6 +14409,70 @@
             "name": "limit",
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "description": "最低レベル：debug、info、warn、error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "ソースラベル（大文字小文字を区別しない完全一致）",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "キーワード：スペース区切りはすべてを含む、二重引用符でフレーズ、先頭の - で除外",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "クライアントアドレス：完全なアドレス、CIDR またはアドレスの一部、複数はカンマ区切り",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "サイト名またはドメインの一部",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "ステータスコード（404、4xx、500-599 など、複数はカンマ区切り）",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "開始時刻（RFC 3339 またはミリ秒タイムスタンプ）",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "終了時刻（RFC 3339 またはミリ秒タイムスタンプ）",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -14304,7 +15008,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "`since` パラメーターによる差分取得に対応し、シーケンス番号がこの値より大きいログを返します。`before` はシーケンス番号がこの値より小さいログを返し、過去の記録の読み込みに使います。`limit` はその中の最新の数件のみを返します。\n\n必要な権限: `portforward:read`。",
+        "description": "`since` パラメーターで増分取得でき、シーケンス番号がこの値より大きいログを返します。`before` はシーケンス番号がこの値より小さいログを返し、古い記録の読み込みに使います。`limit` はそのうち最新の指定件数だけを返し、メモリ内で足りない場合はログファイルに残っている履歴も検索します。フィルターパラメーター：`level` 最低レベル、`source` ソース、`q` キーワード（スペース区切りはすべてを含む、二重引用符でフレーズ、先頭の `-` で除外）、`ip` クライアントアドレス（完全なアドレス、CIDR またはアドレスの一部、複数はカンマ区切り）、`host` サイト名またはドメイン、`status` ステータスコード（`404`、`4xx`、`500-599` など）、`from`・`to` 時間範囲（RFC 3339 またはミリ秒タイムスタンプ）。\n\n必要な権限: `portforward:read`。",
         "parameters": [
           {
             "description": "増分取得：このシーケンス番号より大きいログのみ返します",
@@ -14328,6 +15032,70 @@
             "name": "limit",
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "description": "最低レベル：debug、info、warn、error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "ソースラベル（大文字小文字を区別しない完全一致）",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "キーワード：スペース区切りはすべてを含む、二重引用符でフレーズ、先頭の - で除外",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "クライアントアドレス：完全なアドレス、CIDR またはアドレスの一部、複数はカンマ区切り",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "サイト名またはドメインの一部",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "ステータスコード（404、4xx、500-599 など、複数はカンマ区切り）",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "開始時刻（RFC 3339 またはミリ秒タイムスタンプ）",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "終了時刻（RFC 3339 またはミリ秒タイムスタンプ）",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -15598,7 +16366,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "`since` パラメーターによる差分取得に対応し、シーケンス番号がこの値より大きいログを返します。`before` はシーケンス番号がこの値より小さいログを返し、過去の記録の読み込みに使います。`limit` はその中の最新の数件のみを返します。\n\n必要な権限: `ssl:read`。",
+        "description": "`since` パラメーターで増分取得でき、シーケンス番号がこの値より大きいログを返します。`before` はシーケンス番号がこの値より小さいログを返し、古い記録の読み込みに使います。`limit` はそのうち最新の指定件数だけを返し、メモリ内で足りない場合はログファイルに残っている履歴も検索します。フィルターパラメーター：`level` 最低レベル、`source` ソース、`q` キーワード（スペース区切りはすべてを含む、二重引用符でフレーズ、先頭の `-` で除外）、`ip` クライアントアドレス（完全なアドレス、CIDR またはアドレスの一部、複数はカンマ区切り）、`host` サイト名またはドメイン、`status` ステータスコード（`404`、`4xx`、`500-599` など）、`from`・`to` 時間範囲（RFC 3339 またはミリ秒タイムスタンプ）。\n\n必要な権限: `ssl:read`。",
         "parameters": [
           {
             "description": "増分取得：このシーケンス番号より大きいログのみ返します",
@@ -15622,6 +16390,70 @@
             "name": "limit",
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "description": "最低レベル：debug、info、warn、error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "ソースラベル（大文字小文字を区別しない完全一致）",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "キーワード：スペース区切りはすべてを含む、二重引用符でフレーズ、先頭の - で除外",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "クライアントアドレス：完全なアドレス、CIDR またはアドレスの一部、複数はカンマ区切り",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "サイト名またはドメインの一部",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "ステータスコード（404、4xx、500-599 など、複数はカンマ区切り）",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "開始時刻（RFC 3339 またはミリ秒タイムスタンプ）",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "終了時刻（RFC 3339 またはミリ秒タイムスタンプ）",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -16319,7 +17151,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "`since` パラメーターによる差分取得に対応し、シーケンス番号がこの値より大きいログを返します。`before` はシーケンス番号がこの値より小さいログを返し、過去の記録の読み込みに使います。`limit` はその中の最新の数件のみを返します。\n\n必要な権限: `storage:read`。",
+        "description": "`since` パラメーターで増分取得でき、シーケンス番号がこの値より大きいログを返します。`before` はシーケンス番号がこの値より小さいログを返し、古い記録の読み込みに使います。`limit` はそのうち最新の指定件数だけを返し、メモリ内で足りない場合はログファイルに残っている履歴も検索します。フィルターパラメーター：`level` 最低レベル、`source` ソース、`q` キーワード（スペース区切りはすべてを含む、二重引用符でフレーズ、先頭の `-` で除外）、`ip` クライアントアドレス（完全なアドレス、CIDR またはアドレスの一部、複数はカンマ区切り）、`host` サイト名またはドメイン、`status` ステータスコード（`404`、`4xx`、`500-599` など）、`from`・`to` 時間範囲（RFC 3339 またはミリ秒タイムスタンプ）。\n\n必要な権限: `storage:read`。",
         "parameters": [
           {
             "description": "増分取得：このシーケンス番号より大きいログのみ返します",
@@ -16343,6 +17175,70 @@
             "name": "limit",
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "description": "最低レベル：debug、info、warn、error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "ソースラベル（大文字小文字を区別しない完全一致）",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "キーワード：スペース区切りはすべてを含む、二重引用符でフレーズ、先頭の - で除外",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "クライアントアドレス：完全なアドレス、CIDR またはアドレスの一部、複数はカンマ区切り",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "サイト名またはドメインの一部",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "ステータスコード（404、4xx、500-599 など、複数はカンマ区切り）",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "開始時刻（RFC 3339 またはミリ秒タイムスタンプ）",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "終了時刻（RFC 3339 またはミリ秒タイムスタンプ）",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -16837,7 +17733,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "`since` パラメーターによる差分取得に対応し、シーケンス番号がこの値より大きいログを返します。`before` はシーケンス番号がこの値より小さいログを返し、過去の記録の読み込みに使います。`limit` はその中の最新の数件のみを返します。\n\n必要な権限: `stun:read`。",
+        "description": "`since` パラメーターで増分取得でき、シーケンス番号がこの値より大きいログを返します。`before` はシーケンス番号がこの値より小さいログを返し、古い記録の読み込みに使います。`limit` はそのうち最新の指定件数だけを返し、メモリ内で足りない場合はログファイルに残っている履歴も検索します。フィルターパラメーター：`level` 最低レベル、`source` ソース、`q` キーワード（スペース区切りはすべてを含む、二重引用符でフレーズ、先頭の `-` で除外）、`ip` クライアントアドレス（完全なアドレス、CIDR またはアドレスの一部、複数はカンマ区切り）、`host` サイト名またはドメイン、`status` ステータスコード（`404`、`4xx`、`500-599` など）、`from`・`to` 時間範囲（RFC 3339 またはミリ秒タイムスタンプ）。\n\n必要な権限: `stun:read`。",
         "parameters": [
           {
             "description": "増分取得：このシーケンス番号より大きいログのみ返します",
@@ -16861,6 +17757,70 @@
             "name": "limit",
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "description": "最低レベル：debug、info、warn、error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "ソースラベル（大文字小文字を区別しない完全一致）",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "キーワード：スペース区切りはすべてを含む、二重引用符でフレーズ、先頭の - で除外",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "クライアントアドレス：完全なアドレス、CIDR またはアドレスの一部、複数はカンマ区切り",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "サイト名またはドメインの一部",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "ステータスコード（404、4xx、500-599 など、複数はカンマ区切り）",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "開始時刻（RFC 3339 またはミリ秒タイムスタンプ）",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "終了時刻（RFC 3339 またはミリ秒タイムスタンプ）",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -18334,7 +19294,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "`since` パラメーターによる差分取得に対応し、シーケンス番号がこの値より大きいログを返します。`before` はシーケンス番号がこの値より小さいログを返し、過去の記録の読み込みに使います。`limit` はその中の最新の数件のみを返します。\n\n必要な権限: `tailscale:read`。",
+        "description": "`since` パラメーターで増分取得でき、シーケンス番号がこの値より大きいログを返します。`before` はシーケンス番号がこの値より小さいログを返し、古い記録の読み込みに使います。`limit` はそのうち最新の指定件数だけを返し、メモリ内で足りない場合はログファイルに残っている履歴も検索します。フィルターパラメーター：`level` 最低レベル、`source` ソース、`q` キーワード（スペース区切りはすべてを含む、二重引用符でフレーズ、先頭の `-` で除外）、`ip` クライアントアドレス（完全なアドレス、CIDR またはアドレスの一部、複数はカンマ区切り）、`host` サイト名またはドメイン、`status` ステータスコード（`404`、`4xx`、`500-599` など）、`from`・`to` 時間範囲（RFC 3339 またはミリ秒タイムスタンプ）。\n\n必要な権限: `tailscale:read`。",
         "parameters": [
           {
             "description": "増分取得：このシーケンス番号より大きいログのみ返します",
@@ -18358,6 +19318,70 @@
             "name": "limit",
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "description": "最低レベル：debug、info、warn、error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "ソースラベル（大文字小文字を区別しない完全一致）",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "キーワード：スペース区切りはすべてを含む、二重引用符でフレーズ、先頭の - で除外",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "クライアントアドレス：完全なアドレス、CIDR またはアドレスの一部、複数はカンマ区切り",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "サイト名またはドメインの一部",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "ステータスコード（404、4xx、500-599 など、複数はカンマ区切り）",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "開始時刻（RFC 3339 またはミリ秒タイムスタンプ）",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "終了時刻（RFC 3339 またはミリ秒タイムスタンプ）",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -19495,7 +20519,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "`since` パラメーターによる差分取得に対応し、シーケンス番号がこの値より大きいログを返します。`before` はシーケンス番号がこの値より小さいログを返し、過去の記録の読み込みに使います。`limit` はその中の最新の数件のみを返します。\n\n必要な権限: `waf:read`。",
+        "description": "`since` パラメーターで増分取得でき、シーケンス番号がこの値より大きいログを返します。`before` はシーケンス番号がこの値より小さいログを返し、古い記録の読み込みに使います。`limit` はそのうち最新の指定件数だけを返し、メモリ内で足りない場合はログファイルに残っている履歴も検索します。フィルターパラメーター：`level` 最低レベル、`source` ソース、`q` キーワード（スペース区切りはすべてを含む、二重引用符でフレーズ、先頭の `-` で除外）、`ip` クライアントアドレス（完全なアドレス、CIDR またはアドレスの一部、複数はカンマ区切り）、`host` サイト名またはドメイン、`status` ステータスコード（`404`、`4xx`、`500-599` など）、`from`・`to` 時間範囲（RFC 3339 またはミリ秒タイムスタンプ）。\n\n必要な権限: `waf:read`。",
         "parameters": [
           {
             "description": "増分取得：このシーケンス番号より大きいログのみ返します",
@@ -19519,6 +20543,70 @@
             "name": "limit",
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "description": "最低レベル：debug、info、warn、error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "ソースラベル（大文字小文字を区別しない完全一致）",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "キーワード：スペース区切りはすべてを含む、二重引用符でフレーズ、先頭の - で除外",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "クライアントアドレス：完全なアドレス、CIDR またはアドレスの一部、複数はカンマ区切り",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "サイト名またはドメインの一部",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "ステータスコード（404、4xx、500-599 など、複数はカンマ区切り）",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "開始時刻（RFC 3339 またはミリ秒タイムスタンプ）",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "終了時刻（RFC 3339 またはミリ秒タイムスタンプ）",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -19621,7 +20709,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "`since` パラメーターによる差分取得に対応し、シーケンス番号がこの値より大きいログを返します。`before` はシーケンス番号がこの値より小さいログを返し、過去の記録の読み込みに使います。`limit` はその中の最新の数件のみを返します。\n\n必要な権限: `webdav:read`。",
+        "description": "`since` パラメーターで増分取得でき、シーケンス番号がこの値より大きいログを返します。`before` はシーケンス番号がこの値より小さいログを返し、古い記録の読み込みに使います。`limit` はそのうち最新の指定件数だけを返し、メモリ内で足りない場合はログファイルに残っている履歴も検索します。フィルターパラメーター：`level` 最低レベル、`source` ソース、`q` キーワード（スペース区切りはすべてを含む、二重引用符でフレーズ、先頭の `-` で除外）、`ip` クライアントアドレス（完全なアドレス、CIDR またはアドレスの一部、複数はカンマ区切り）、`host` サイト名またはドメイン、`status` ステータスコード（`404`、`4xx`、`500-599` など）、`from`・`to` 時間範囲（RFC 3339 またはミリ秒タイムスタンプ）。\n\n必要な権限: `webdav:read`。",
         "parameters": [
           {
             "description": "増分取得：このシーケンス番号より大きいログのみ返します",
@@ -19645,6 +20733,70 @@
             "name": "limit",
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "description": "最低レベル：debug、info、warn、error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "ソースラベル（大文字小文字を区別しない完全一致）",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "キーワード：スペース区切りはすべてを含む、二重引用符でフレーズ、先頭の - で除外",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "クライアントアドレス：完全なアドレス、CIDR またはアドレスの一部、複数はカンマ区切り",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "サイト名またはドメインの一部",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "ステータスコード（404、4xx、500-599 など、複数はカンマ区切り）",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "開始時刻（RFC 3339 またはミリ秒タイムスタンプ）",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "終了時刻（RFC 3339 またはミリ秒タイムスタンプ）",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -21163,7 +22315,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "`since` パラメーターによる差分取得に対応し、シーケンス番号がこの値より大きいログを返します。`before` はシーケンス番号がこの値より小さいログを返し、過去の記録の読み込みに使います。`limit` はその中の最新の数件のみを返します。\n\n必要な権限: `webservice:read`。",
+        "description": "`since` パラメーターで増分取得でき、シーケンス番号がこの値より大きいログを返します。`before` はシーケンス番号がこの値より小さいログを返し、古い記録の読み込みに使います。`limit` はそのうち最新の指定件数だけを返し、メモリ内で足りない場合はログファイルに残っている履歴も検索します。フィルターパラメーター：`level` 最低レベル、`source` ソース、`q` キーワード（スペース区切りはすべてを含む、二重引用符でフレーズ、先頭の `-` で除外）、`ip` クライアントアドレス（完全なアドレス、CIDR またはアドレスの一部、複数はカンマ区切り）、`host` サイト名またはドメイン、`status` ステータスコード（`404`、`4xx`、`500-599` など）、`from`・`to` 時間範囲（RFC 3339 またはミリ秒タイムスタンプ）。\n\n必要な権限: `webservice:read`。",
         "parameters": [
           {
             "description": "増分取得：このシーケンス番号より大きいログのみ返します",
@@ -21187,6 +22339,70 @@
             "name": "limit",
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "description": "最低レベル：debug、info、warn、error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "ソースラベル（大文字小文字を区別しない完全一致）",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "キーワード：スペース区切りはすべてを含む、二重引用符でフレーズ、先頭の - で除外",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "クライアントアドレス：完全なアドレス、CIDR またはアドレスの一部、複数はカンマ区切り",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "サイト名またはドメインの一部",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "ステータスコード（404、4xx、500-599 など、複数はカンマ区切り）",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "開始時刻（RFC 3339 またはミリ秒タイムスタンプ）",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "終了時刻（RFC 3339 またはミリ秒タイムスタンプ）",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -22780,7 +23996,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "`since` パラメーターによる差分取得に対応し、シーケンス番号がこの値より大きいログを返します。`before` はシーケンス番号がこの値より小さいログを返し、過去の記録の読み込みに使います。`limit` はその中の最新の数件のみを返します。\n\n必要な権限: `webterminal:read`。",
+        "description": "`since` パラメーターで増分取得でき、シーケンス番号がこの値より大きいログを返します。`before` はシーケンス番号がこの値より小さいログを返し、古い記録の読み込みに使います。`limit` はそのうち最新の指定件数だけを返し、メモリ内で足りない場合はログファイルに残っている履歴も検索します。フィルターパラメーター：`level` 最低レベル、`source` ソース、`q` キーワード（スペース区切りはすべてを含む、二重引用符でフレーズ、先頭の `-` で除外）、`ip` クライアントアドレス（完全なアドレス、CIDR またはアドレスの一部、複数はカンマ区切り）、`host` サイト名またはドメイン、`status` ステータスコード（`404`、`4xx`、`500-599` など）、`from`・`to` 時間範囲（RFC 3339 またはミリ秒タイムスタンプ）。\n\n必要な権限: `webterminal:read`。",
         "parameters": [
           {
             "description": "増分取得：このシーケンス番号より大きいログのみ返します",
@@ -22804,6 +24020,70 @@
             "name": "limit",
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "description": "最低レベル：debug、info、warn、error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "ソースラベル（大文字小文字を区別しない完全一致）",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "キーワード：スペース区切りはすべてを含む、二重引用符でフレーズ、先頭の - で除外",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "クライアントアドレス：完全なアドレス、CIDR またはアドレスの一部、複数はカンマ区切り",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "サイト名またはドメインの一部",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "ステータスコード（404、4xx、500-599 など、複数はカンマ区切り）",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "開始時刻（RFC 3339 またはミリ秒タイムスタンプ）",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "終了時刻（RFC 3339 またはミリ秒タイムスタンプ）",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -25263,7 +26543,7 @@
         "x-token-allowed": true
       },
       "get": {
-        "description": "`since` パラメーターによる差分取得に対応し、シーケンス番号がこの値より大きいログを返します。`before` はシーケンス番号がこの値より小さいログを返し、過去の記録の読み込みに使います。`limit` はその中の最新の数件のみを返します。\n\n必要な権限: `wol:read`。",
+        "description": "`since` パラメーターで増分取得でき、シーケンス番号がこの値より大きいログを返します。`before` はシーケンス番号がこの値より小さいログを返し、古い記録の読み込みに使います。`limit` はそのうち最新の指定件数だけを返し、メモリ内で足りない場合はログファイルに残っている履歴も検索します。フィルターパラメーター：`level` 最低レベル、`source` ソース、`q` キーワード（スペース区切りはすべてを含む、二重引用符でフレーズ、先頭の `-` で除外）、`ip` クライアントアドレス（完全なアドレス、CIDR またはアドレスの一部、複数はカンマ区切り）、`host` サイト名またはドメイン、`status` ステータスコード（`404`、`4xx`、`500-599` など）、`from`・`to` 時間範囲（RFC 3339 またはミリ秒タイムスタンプ）。\n\n必要な権限: `wol:read`。",
         "parameters": [
           {
             "description": "増分取得：このシーケンス番号より大きいログのみ返します",
@@ -25287,6 +26567,70 @@
             "name": "limit",
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "description": "最低レベル：debug、info、warn、error",
+            "in": "query",
+            "name": "level",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "ソースラベル（大文字小文字を区別しない完全一致）",
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "キーワード：スペース区切りはすべてを含む、二重引用符でフレーズ、先頭の - で除外",
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "クライアントアドレス：完全なアドレス、CIDR またはアドレスの一部、複数はカンマ区切り",
+            "in": "query",
+            "name": "ip",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "サイト名またはドメインの一部",
+            "in": "query",
+            "name": "host",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "ステータスコード（404、4xx、500-599 など、複数はカンマ区切り）",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "開始時刻（RFC 3339 またはミリ秒タイムスタンプ）",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "終了時刻（RFC 3339 またはミリ秒タイムスタンプ）",
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string"
             }
           }
         ],

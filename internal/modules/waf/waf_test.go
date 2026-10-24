@@ -70,6 +70,16 @@ func TestCRSBlocksAttacks(t *testing.T) {
 	if len(logs) == 0 || !strings.Contains(logs[0].Message, "203.0.113.7") {
 		t.Fatalf("应记录命中日志并包含客户端 IP: %v", logs)
 	}
+	// 命中日志带有结构化字段：Coraza 的命中信息里没有域名，要从登记的请求信息中补上
+	f := logs[0].Fields
+	if f[logbuf.FieldIP] != "203.0.113.7" || f[logbuf.FieldHost] == "" || f[logbuf.FieldRule] == "" || f[logbuf.FieldPath] == "" {
+		t.Fatalf("命中日志字段不完整: %+v", f)
+	}
+	n := 0
+	pending.Range(func(any, any) bool { n++; return true })
+	if n != 0 {
+		t.Fatalf("请求结束后应清理登记的请求信息，剩余 %d 条", n)
+	}
 }
 
 func TestLuckyStyleSubset(t *testing.T) {
