@@ -20,3 +20,6 @@ func startServer(Settings, *logbuf.Buffer) (*server, error) {
 func (s *server) Addr() string { return "" }
 
 func (s *server) Close() {}
+
+// Status 在不支持的系统上恒为未运行。
+func (s *server) Status() (bool, error) { return false, nil }

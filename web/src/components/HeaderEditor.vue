@@ -50,7 +50,7 @@
       <el-button v-if="direction === 'response'" size="small" :icon="ShieldCheck" @click="addSecurity">
         {{ t('headerEditor.addSecurity') }}
       </el-button>
-      <el-button size="small" text type="primary" @click="textMode = !textMode">
+      <el-button size="small" text type="primary" @click="toggleMode">
         {{ textMode ? t('headerEditor.rowMode') : t('headerEditor.textMode') }}
       </el-button>
     </div>
@@ -61,6 +61,7 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { ElMessage } from 'element-plus'
 import { Plus, ShieldCheck, Trash2 } from 'lucide-vue-next'
 import {
   checkHeader,
@@ -124,12 +125,23 @@ watch(
   },
   { deep: true },
 )
-// 切回逐行编辑时按行规范化一次（缺冒号的行按"删除该头"处理，界面上会明确提示）
+// 切回逐行编辑时按行规范化一次
 watch(textMode, (on) => {
   if (!on) {
     emitRows()
   }
 })
+// 文本模式里有缺冒号的行时不切回逐行模式：逐行模式会把它当成"删除该头"，悄悄改变配置含义
+function toggleMode() {
+  if (textMode.value) {
+    const bad = textIssues.value.find((it) => it.msg === 'noColon')
+    if (bad) {
+      ElMessage.warning(t('headerEditor.lineN', { n: bad.line }) + issueText(bad))
+      return
+    }
+  }
+  textMode.value = !textMode.value
+}
 
 // 文本模式：保留原始文本，按行解析写回
 const text = useListText(
@@ -139,20 +151,28 @@ const text = useListText(
 )
 
 const rowIssues = computed(() => rows.value.map((_, i) => checkHeader(props.direction, rows.value, i)))
-// 文本模式只列出错误和警告，并标注行号
+// 文本模式只列出错误和警告，行号与文本框中的实际行号一致（空行也计数）
 const textIssues = computed(() => {
-  const list = props.modelValue ?? []
-  const parsed = list.map(parseHeaderLine)
+  const lines: { no: number; raw: string }[] = []
+  text.value.split('\n').forEach((raw, i) => {
+    if (raw.trim()) {
+      lines.push({ no: i + 1, raw: raw.trim() })
+    }
+  })
+  const parsed = lines.map((l) => parseHeaderLine(l.raw))
   const out: (Issue & { line: number })[] = []
-  list.forEach((line, i) => {
-    if (!line.includes(':')) {
-      out.push({ level: 'error', msg: 'noColon', line: i + 1 })
+  lines.forEach((l, i) => {
+    if (!l.raw.includes(':')) {
+      out.push({ level: 'error', msg: 'noColon', line: l.no })
       return
     }
     for (const it of checkHeader(props.direction, parsed, i)) {
-      if (it.level !== 'info') {
-        out.push({ ...it, line: i + 1 })
+      if (it.level === 'info') {
+        continue
       }
+      // duplicate 的参数是行序号，换算成文本框中的行号
+      const params = it.msg === 'duplicate' && it.params ? { ...it.params, line: lines[Number(it.params.line) - 1]?.no ?? it.params.line } : it.params
+      out.push({ ...it, params, line: l.no })
     }
   })
   return out

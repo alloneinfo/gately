@@ -124,6 +124,11 @@ func (s *fileSink) close() {
 func (s *fileSink) flush() {
 	s.ioMu.Lock()
 	defer s.ioMu.Unlock()
+	s.flushLocked()
+}
+
+// flushLocked 是 flush 的实际实现，调用方需持有 ioMu。
+func (s *fileSink) flushLocked() {
 	s.mu.Lock()
 	data := s.pending
 	s.pending = nil

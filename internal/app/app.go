@@ -781,7 +781,7 @@ func (a *App) logsHandler(buf *logbuf.Buffer) http.HandlerFunc {
 		if lang := i18n.RequestLang(r); f != nil && lang != i18n.SourceLang {
 			f.Translate = func(s string) string { return i18n.Tr(lang, s) }
 		}
-		httpx.OK(w, buf.Query(since, before, limit, f))
+		httpx.OK(w, buf.QueryContext(r.Context(), since, before, limit, f))
 	}
 }
 

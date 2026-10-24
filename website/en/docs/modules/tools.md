@@ -44,7 +44,7 @@ Configure it under "SMB Service" in the "File Services" group to share local dir
 | `listenIp` | Empty | Listen address; leave empty to listen on all addresses |
 | `port` | 445 | Listen port. Windows only connects to 445; when the Samba that ships with a NAS such as fnOS or Synology already uses 445, choose another port, which macOS, Linux and most media players can put in the address |
 | `requireEncryption` | Off | Require SMB 3 encryption on every connection; older devices and some TVs that only speak SMB 2 will not be able to connect |
-| `mdns` | Off | Advertise the service over Bonjour so it shows up under Network in the macOS Finder |
+| `mdns` | Off | Advertise the service over Bonjour so it shows up under Network in the macOS Finder; in Docker it only works with host networking |
 | `users` | None | Multiple users with the same fields as WebDAV: `name`, `password`, `root`, `readOnly` or `mounts`; user names are case-insensitive and must be unique |
 
 Shares belong to users, and a signed-in user only sees and connects to their own shares:
@@ -59,6 +59,8 @@ User and share names cannot contain `" / \ [ ] : ; | = , + * ? < >` and cannot s
 - Windows: enter `\\host\share` in the Explorer address bar, or run `net use Z: \\host\share /user:username`
 - macOS: in the Finder choose Go → Connect to Server and enter `smb://host:port/share` (the port can be left out for 445)
 - Linux: `mount -t cifs //host/share /mnt -o username=username,port=port`
+
+To troubleshoot clients that cannot connect or fail to authenticate, set the environment variable `GATELY_SMB_DEBUG=1` and restart Gately; protocol debug logs are written to the runtime log. Remove the variable when done.
 
 ## Storage Mounts
 

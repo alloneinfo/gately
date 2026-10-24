@@ -23,7 +23,7 @@
 
 所有类型的站点均可设置访问日志、跨域（CORS）、自定义请求头与响应头（每行 `Key: Value`，Value 留空表示删除该头），并可引用一个 [WAF 防火墙](/docs/modules/waf) 实例（实例不存在或停用时放行）。请求头、响应头与 Content-Type 的编辑方式见 [请求头与响应头](#headers)。
 
-访问日志会记录客户端 IP、域名、站点名称与状态码，可在日志中按站点、状态码、来源 IP 等条件筛选，见 [运行日志的查看与筛选](/docs/guide/configuration)。
+访问日志会记录客户端 IP、域名、站点名称与状态码，可在日志中按站点、状态码、来源 IP 等条件筛选，见 [运行日志的查看与筛选](/docs/guide/configuration#log-filter)。
 
 ### 反向代理选项 {#proxy-options}
 
@@ -35,7 +35,7 @@
 | Host 使用后端地址 | 发往后端的 Host 头改为后端地址；关闭时（默认）保留访客请求的 Host | 后端只认自己的地址，例如返回 400 / 403、跳转到错误地址或提示 Host 不匹配；反代到公网网站或 CDN 时通常需要。后端按域名区分站点，或需要用访问域名生成链接时保持关闭 |
 | 禁用连接复用 | 每个请求都新建到后端的连接（关闭 Keep-Alive） | 后端偶尔出现连接被重置、请求卡住，或不支持长连接。会增加一些延迟，正常情况保持关闭 |
 | 添加 X-Forwarded-* | 写入 `X-Forwarded-For` / `X-Forwarded-Proto` / `X-Forwarded-Host` / `X-Forwarded-Port` 与 `X-Real-IP`，告诉后端访客的真实 IP、原始协议、域名和端口 | 后端需要记录真实 IP，或要知道外部是 HTTPS 才能生成正确链接（否则可能跳回 http 或登录后循环跳转）。多数应用建议开启 |
-| 向后端发送 PROXY v2 | 在 TCP 连接开头附加 PROXY 协议 v2 头，传递真实客户端 IP | 后端不读 HTTP 头但支持 PROXY 协议，如另一层 Gately、haproxy、开启 `proxy_protocol` 的 nginx。后端未配置接收时所有请求都会失败，不确定时保持关闭 |
+| 向后端发送 PROXY v2 | 在 TCP 连接开头附加 PROXY 协议 v2 头，传递真实客户端 IP。开启后每个请求都新建连接，也不再用 HTTP/2 连接后端。后端是 Gately 时，需在其监听上开启接收 PROXY 协议，并把本机加入可信 PROXY 来源。 | 后端不读 HTTP 头但支持 PROXY 协议，如另一层 Gately、haproxy、开启 `proxy_protocol` 的 nginx。后端未配置接收时所有请求都会失败，不确定时保持关闭 |
 | 使用访问域名作为 SNI | 仅 HTTPS 后端：握手时发送访客使用的域名并按它校验证书，相当于 nginx 的 `proxy_ssl_server_name on; proxy_ssl_name $host` | 后端在同一端口按域名选择证书或分流，如 frp 的 `vhost_https`、托管多个 HTTPS 站点的 nginx。每个后端使用独立的连接池，不同域名的连接不会互相复用 |
 
 常见组合：

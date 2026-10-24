@@ -13,6 +13,10 @@ Gately 的改动（改动过的文件开头有注明）：
 - `parent/session.go`：SESSION_SETUP 按客户端请求的格式回复。Linux 内核 cifs 客户端默认发送不带 SPNEGO 的裸 NTLMSSP 消息，上游一律回复 SPNEGO，内核报 `blob signature incorrect` 无法挂载
 - 签名密钥（`parent/session.go`、`parent/dispatch.go`、`parent/compound.go`、`parent/gately.go`）：SMB 3.1.1 协商出 AES-256 加密算法时，macOS 派生签名密钥用 L=128，Linux 内核 cifs 用 L=256 再取前 16 字节。上游只按 L=128 派生，内核挂载时签名校验失败。现在两种都备好，按客户端第一个签名请求锁定会话使用的密钥
 - `discovery/mdns.go`：每个网卡只通告该网卡自己的 IPv4 地址。上游在所有网卡上通告本机全部地址，局域网客户端可能拿到 Docker 网桥等不可达的地址
+- 签名密钥加锁：会话签名密钥的写入（`parent/session.go` 经 `setSigningKeys`）与读取（`parent/dispatch.go`、`parent/compound.go`、`parent/session.go` 经 `signingKey()`）都经过 `signingMu`，修复数据竞争
+- `parent/gately.go`：新增 `DurableTable.CloseAll`，服务重启时关闭旧句柄表中为断线续用保留的句柄；导出 `IsTemporaryAcceptError` 供判断监听是否不可恢复地失败
+- `vfs/path.go`：共享根目录为 `/` 时前缀判断不再拼成 `//`，根目录为 `/` 的共享可以正常使用
+- 构建约束：`parent` 包的源文件（含测试）加上 `//go:build linux || darwin`，另有不带约束的 `parent/doc.go`，其他系统上 `go build/vet ./...` 可以通过
 
 上游只支持 Linux 与 macOS 作为服务端，Gately 在其他系统上不编译这些包（见 `internal/modules/smb/server_other.go`）。
 

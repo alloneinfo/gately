@@ -182,7 +182,7 @@
               </el-form-item>
               <el-form-item :label="t('web.locations')">
                 <div class="locations">
-                  <div v-for="(loc, i) in site.locations" :key="i" class="location">
+                  <div v-for="(loc, i) in site.locations" :key="locKey(loc)" class="location">
                     <div class="location-row">
                       <el-input v-model="loc.prefix" class="mono location-prefix" placeholder="/api/" />
                       <ListInput
@@ -507,6 +507,18 @@ const settings = ref<WebSettings>()
 const polling = usePolling(load, 5000)
 
 // 按逗号（含中文逗号）或空白拆分
+// 分路径后端没有自己的 ID：按对象分配稳定的 key，删除前面的路径时，后面路径的输入框状态（如文本模式）不会串位
+const locKeys = new WeakMap<object, number>()
+let locSeq = 0
+function locKey(loc: object) {
+  let k = locKeys.get(loc)
+  if (k === undefined) {
+    k = ++locSeq
+    locKeys.set(loc, k)
+  }
+  return k
+}
+
 const splitCsv = (v: string) =>
   v
     .split(/[\s,，]+/)

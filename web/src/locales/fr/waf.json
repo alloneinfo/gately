@@ -44,7 +44,7 @@
   "deleteRuleSet": "Supprimer le jeu de règles",
   "moveUp": "Monter",
   "moveDown": "Descendre",
-  "customHelp": "Les groupes de règles sont chargés de haut en bas ; dans une même phase, les règles du haut s'exécutent en premier. Les règles de blocage fonctionnent à n'importe quelle position ; les règles d'autorisation ou d'exclusion (allow, ctl:ruleRemoveById, etc.) doivent être placées au-dessus du groupe OWASP CRS, sinon CRS peut bloquer la requête avant",
+  "customHelp": "Les groupes de règles se chargent de haut en bas et, dans une même phase, les règles placées avant s'exécutent d'abord. Les règles de blocage fonctionnent à n'importe quelle position ; les règles d'autorisation à l'exécution (allow, ctl:ruleRemoveById, etc.) doivent être placées au-dessus du groupe OWASP CRS, sinon CRS peut bloquer la requête avant ; les directives de configuration comme SecRuleRemoveById et SecRuleUpdateTargetById n'agissent que sur les règles déjà chargées, placez-les donc sous le groupe CRS",
   "crsPlaceholder": "Laisser vide pour activer tous les fichiers de règles",
   "addRuleSet": "Ajouter un jeu de règles",
   "defaultRuleSetRemark": "OWASP Core Rules",

@@ -1,4 +1,6 @@
-//go:build smbclient_e2e
+// Gately 修改：仅在 Linux 与 macOS 编译（构建约束）。
+
+//go:build smbclient_e2e && (linux || darwin)
 
 // Package parent — credit window E2E tests.
 //

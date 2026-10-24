@@ -4,6 +4,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/wangwanjie/gately/internal/crud"
 	"github.com/wangwanjie/gately/internal/mountfs"
 )
 
@@ -72,5 +73,46 @@ func TestValidName(t *testing.T) {
 		if validName(n) {
 			t.Errorf("%q 应非法", n)
 		}
+	}
+}
+
+// TestKeepPasswords 验证提交占位符密码时恢复原密码：按去空白后的用户名匹配，改名时按位置匹配。
+func TestKeepPasswords(t *testing.T) {
+	old := []User{{Name: "alice", Password: "pa"}, {Name: "bob", Password: "pb"}}
+	mask := crud.SecretMask
+
+	// 用户名带空白也能匹配
+	got := []User{{Name: " alice ", Password: mask}, {Name: "bob", Password: "new"}}
+	keepPasswords(old, got)
+	if got[0].Password != "pa" || got[1].Password != "new" {
+		t.Fatalf("按名称恢复失败: %+v", got)
+	}
+
+	// 改名：同一位置的原用户已不在新列表中，沿用其密码
+	got = []User{{Name: "alice", Password: mask}, {Name: "carol", Password: mask}}
+	keepPasswords(old, got)
+	if got[0].Password != "pa" || got[1].Password != "pb" {
+		t.Fatalf("改名后应保留原密码: %+v", got)
+	}
+
+	// 调换顺序：按名称匹配，不按位置
+	got = []User{{Name: "bob", Password: mask}, {Name: "alice", Password: mask}}
+	keepPasswords(old, got)
+	if got[0].Password != "pb" || got[1].Password != "pa" {
+		t.Fatalf("调换顺序后密码错位: %+v", got)
+	}
+
+	// 删除一个用户后另一个改名：位置已错开，不能拿到被删用户的密码，清空后由校验报错
+	got = []User{{Name: "dave", Password: mask}}
+	keepPasswords(old, got)
+	if got[0].Password != "" {
+		t.Fatalf("无法确定原用户时不应沿用其他用户的密码: %+v", got)
+	}
+
+	// 新增用户提交占位符：没有原密码，清空
+	got = []User{{Name: "alice", Password: mask}, {Name: "bob", Password: mask}, {Name: "eve", Password: mask}}
+	keepPasswords(old, got)
+	if got[2].Password != "" {
+		t.Fatalf("新用户不应得到占位符密码: %+v", got)
 	}
 }

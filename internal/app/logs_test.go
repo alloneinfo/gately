@@ -118,7 +118,14 @@ func TestLogsFilterAPI(t *testing.T) {
 			t.Errorf("%s = %s，期望 %s", cs.query, got, cs.want)
 		}
 	}
-	for _, q := range []string{"status=abc", "level=fatal", "from=yesterday", "to=x"} {
+	// 毫秒时间戳可以直接作为 from/to
+	if code, es := get(fmt.Sprintf("from=%d", time.Now().Add(-time.Hour).UnixMilli()), "zh-CN"); code != http.StatusOK || len(msgs(es)) != 3 {
+		t.Errorf("毫秒时间戳 from：状态码 %d，%d 条", code, len(msgs(es)))
+	}
+	now := time.Now()
+	reversed := "from=" + url.QueryEscape(now.Format(time.RFC3339)) + "&to=" + url.QueryEscape(now.Add(-time.Hour).Format(time.RFC3339))
+	// 位数不足的纯数字（只填了年份）、from 晚于 to 都是无效参数
+	for _, q := range []string{"status=abc", "level=fatal", "from=yesterday", "to=x", "from=2026", "to=17000000000", reversed} {
 		if code, _ := get(q, ""); code != http.StatusBadRequest {
 			t.Errorf("%s 应返回 400，得到 %d", q, code)
 		}

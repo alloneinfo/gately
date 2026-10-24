@@ -31,7 +31,7 @@
     "authorization": "Acessar o backend com credenciais fixas",
     "xApiKey": "Acessar o backend com uma chave de API fixa",
     "userAgent": "Substituir o User-Agent do cliente",
-    "acceptEncoding": "Remova ou use identity para receber respostas sem compressão",
+    "acceptEncoding": "Use identity para receber respostas sem compressão; removê-lo não adianta, o gzip é adicionado automaticamente",
     "origin": "Remova para evitar que o backend rejeite requisições de outra origem (ex.: WebSocket)",
     "referer": "Não revelar a página de origem ao backend",
     "cookie": "Não enviar os cookies do cliente ao backend",

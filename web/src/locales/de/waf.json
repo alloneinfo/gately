@@ -44,7 +44,7 @@
   "deleteRuleSet": "Regelsatz löschen",
   "moveUp": "Nach oben",
   "moveDown": "Nach unten",
-  "customHelp": "Regelgruppen werden von oben nach unten geladen; innerhalb derselben Phase laufen weiter oben stehende Regeln zuerst. Blockierregeln wirken an jeder Position; Freigabe- oder Ausnahmeregeln (allow, ctl:ruleRemoveById usw.) müssen über der OWASP-CRS-Gruppe stehen, sonst kann CRS die Anfrage bereits blockieren",
+  "customHelp": "Regelgruppen werden von oben nach unten geladen; innerhalb derselben Phase laufen frühere Regeln zuerst. Sperrregeln wirken an jeder Position; Laufzeit-Freigaben (allow, ctl:ruleRemoveById usw.) müssen über der OWASP-CRS-Gruppe stehen, sonst kann CRS die Anfrage vorher sperren; Konfigurationsdirektiven wie SecRuleRemoveById und SecRuleUpdateTargetById wirken nur auf bereits geladene Regeln und gehören daher unter die CRS-Gruppe",
   "crsPlaceholder": "Leer lassen, um alle Regeldateien zu aktivieren",
   "addRuleSet": "Regelsatz hinzufügen",
   "defaultRuleSetRemark": "OWASP Core Rules",

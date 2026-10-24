@@ -44,7 +44,7 @@
 | `listenIp` | 空 | 监听地址，留空监听所有地址 |
 | `port` | 445 | 监听端口。Windows 只能连接 445；飞牛、群晖等 NAS 自带的 Samba 已占用 445 时需改用其他端口，macOS、Linux 与多数播放器可以在地址中指定端口 |
 | `requireEncryption` | 关闭 | 要求所有连接使用 SMB 3 加密，只支持 SMB 2 的旧设备与部分电视将无法连接 |
-| `mdns` | 关闭 | 通过 Bonjour 广播服务，macOS 访达的「网络」中可以直接看到 |
+| `mdns` | 关闭 | 通过 Bonjour 广播服务，macOS 访达的「网络」中可以直接看到；Docker 部署需使用 host 网络才能广播 |
 | `users` | 无 | 多用户，字段同 WebDAV：`name`、`password`、`root`、`readOnly` 或 `mounts`，用户名不区分大小写且不可重复 |
 
 共享按用户划分，用户登录后只能看到并连接自己的共享：
@@ -59,6 +59,8 @@
 - Windows：资源管理器地址栏输入 `\\主机\共享名`，或执行 `net use Z: \\主机\共享名 /user:用户名`
 - macOS：访达「前往 → 连接服务器」，输入 `smb://主机:端口/共享名`（445 端口可省略）
 - Linux：`mount -t cifs //主机/共享名 /mnt -o username=用户名,port=端口`
+
+排查客户端连不上或认证失败时，可以设置环境变量 `GATELY_SMB_DEBUG=1` 后重启 Gately，协议调试日志会写入运行日志；排查完成后去掉该变量。
 
 ## 存储挂载
 

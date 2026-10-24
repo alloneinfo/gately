@@ -28,7 +28,7 @@
     "trapHits": "Trap port hits",
     "scanHits": "Scan detections",
     "disabledTitle": "Firewall sync is off",
-    "disabledHint": "Bans only apply to Gately's own services (port forwarding, web service, STUN, WebDAV, FTP and the admin console). Trap ports are served by Gately itself and port-scan detection is unavailable. Turn it on under Settings.",
+    "disabledHint": "Bans only apply to Gately's own services (port forwarding, web service, STUN, WebDAV, FTP, SMB and the admin console). Trap ports are served by Gately itself and port-scan detection is unavailable. Turn it on under Settings.",
     "reasonOS": "This system has no nftables",
     "hintOS": "Firewall sync is Linux only. Bans still apply to Gately's own services, trap ports are served by Gately itself and port-scan detection is unavailable.",
     "reasonMissing": "The nft command was not found",

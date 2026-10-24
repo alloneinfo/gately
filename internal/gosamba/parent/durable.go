@@ -1,3 +1,7 @@
+// Gately 修改：仅在 Linux 与 macOS 编译（构建约束）。
+
+//go:build linux || darwin
+
 // Package parent durable-handle implementation.
 //
 // Limitation — per-user-privdrop: when --per-user-privdrop is enabled, each

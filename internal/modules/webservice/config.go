@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/wangwanjie/gately/internal/thirdauth"
+	"golang.org/x/net/http/httpguts"
 )
 
 // 站点类型
@@ -366,15 +367,32 @@ func (s *Site) validate(isDefault bool) error {
 		return err
 	}
 	s.IPSets = uniqueList(s.IPSets)
-	for _, h := range append(append([]string{}, s.RequestHeaders...), s.ResponseHeaders...) {
-		if k, _, ok := strings.Cut(h, ":"); !ok || strings.TrimSpace(k) == "" {
-			return fmt.Errorf("请求头格式应为 Key: Value，实际 %q", h)
-		}
+	if err := validateHeaderLines(append(append([]string{}, s.RequestHeaders...), s.ResponseHeaders...)); err != nil {
+		return err
 	}
 	if err := s.validateProxyExtras(); err != nil {
 		return err
 	}
 	return s.validateAccess()
+}
+
+// validateHeaderLines 校验 "Key: Value" 形式的请求头 / 响应头。
+// 名称或值含非法字符时 Go 的 Transport 会拒绝整个请求（站点每次都返回 502），所以保存时就要拦下。
+func validateHeaderLines(list []string) error {
+	for _, h := range list {
+		k, v, ok := strings.Cut(h, ":")
+		k, v = strings.TrimSpace(k), strings.TrimSpace(v)
+		if !ok || k == "" {
+			return fmt.Errorf("请求头格式应为 Key: Value，实际 %q", h)
+		}
+		if !httpguts.ValidHeaderFieldName(k) {
+			return fmt.Errorf("请求头名称 %q 含有非法字符", k)
+		}
+		if !httpguts.ValidHeaderFieldValue(v) {
+			return fmt.Errorf("请求头 %s 的值含有非法字符", k)
+		}
+	}
+	return nil
 }
 
 // matchDomain 判断 host 是否匹配规则。返回匹配优先级：精确 3、通配 2、全部 1，不匹配 0。

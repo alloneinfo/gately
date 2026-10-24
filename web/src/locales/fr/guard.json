@@ -28,7 +28,7 @@
     "trapHits": "Déclenchements de ports pièges",
     "scanHits": "Scans détectés",
     "disabledTitle": "La synchronisation du pare-feu est désactivée",
-    "disabledHint": "Les bannissements ne s'appliquent qu'aux services de Gately (redirection de ports, service web, STUN, WebDAV, FTP et console d'administration). Gately écoute lui-même sur les ports pièges et la détection de scan est indisponible. Activez-la dans Paramètres.",
+    "disabledHint": "Les bannissements ne s'appliquent qu'aux services de Gately (redirection de ports, service web, STUN, WebDAV, FTP, SMB et console d'administration). Gately écoute lui-même sur les ports pièges et la détection de scan est indisponible. Activez-la dans Paramètres.",
     "reasonOS": "Ce système n'a pas nftables",
     "hintOS": "La synchronisation du pare-feu ne fonctionne que sous Linux. Les bannissements s'appliquent toujours aux services de Gately, Gately écoute lui-même sur les ports pièges et la détection de scan est indisponible.",
     "reasonMissing": "Commande nft introuvable",

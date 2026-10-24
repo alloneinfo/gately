@@ -734,3 +734,31 @@ func TestPutSettingsKeepsConnections(t *testing.T) {
 		t.Fatalf("保存设置后连接被断开，共拨号 %d 次", n)
 	}
 }
+
+// 名称或值含非法字符的请求头会让 Transport 拒绝每个请求（站点整体 502），保存时就要拒绝；
+// 带冒号的值、空值（删除该头）和 CSP 这类长值应当通过。
+func TestValidateHeaderLines(t *testing.T) {
+	good := []string{
+		"X-Custom: yes",
+		"Server:",
+		"Content-Security-Policy: default-src 'self'; img-src https://cdn.example.com:8443",
+		"Link: <https://x.example/a.css>; rel=preload",
+	}
+	if err := validateHeaderLines(good); err != nil {
+		t.Fatal(err)
+	}
+	for _, h := range []string{"NoColon", ": v", "Bad Name: x", "X-中文: 1", "X-A(b): 1", "X-Ctl: a\x01b"} {
+		if err := validateHeaderLines([]string{h}); err == nil {
+			t.Errorf("%q 应当校验失败", h)
+		}
+	}
+	site := Listener{Port: 80, Sites: []Site{{Domains: []string{"a.com"}, Targets: []string{"http://x"}, ResponseHeaders: []string{"Bad Name: x"}}}}
+	if err := site.Validate(); err == nil {
+		t.Error("站点响应头名称非法时应拒绝保存")
+	}
+	loc := Listener{Port: 80, Sites: []Site{{Domains: []string{"a.com"}, Targets: []string{"http://x"},
+		Locations: []Location{{Prefix: "/api/", RequestHeaders: []string{"Bad Name: x"}}}}}}
+	if err := loc.Validate(); err == nil {
+		t.Error("分路径后端请求头名称非法时应拒绝保存")
+	}
+}

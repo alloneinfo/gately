@@ -53,7 +53,7 @@ Los registros de ejecución del sistema y de cada módulo se escriben por defect
 - Borrar los registros de un módulo en la interfaz también elimina sus archivos;
 - Las copias de seguridad de la configuración no incluyen `logs/` ni el registro de auditoría `audit.log`.
 
-### Ver y filtrar
+### Ver y filtrar {#log-filter}
 
 La página Registros del sistema y la tarjeta de registros al final de cada página de módulo usan el mismo visor. Las siguientes condiciones se pueden combinar; los cambios se aplican al instante y solo se añaden las entradas nuevas que coinciden:
 

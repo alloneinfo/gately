@@ -28,7 +28,7 @@
     "trapHits": "Köderport-Treffer",
     "scanHits": "Erkannte Scans",
     "disabledTitle": "Firewall-Synchronisierung ist aus",
-    "disabledHint": "Sperren gelten nur für Gatelys eigene Dienste (Portweiterleitung, Webdienst, STUN, WebDAV, FTP und Verwaltungsoberfläche). Köderports bedient Gately selbst, die Portscan-Erkennung ist nicht verfügbar. In den Einstellungen einschalten.",
+    "disabledHint": "Sperren gelten nur für Gatelys eigene Dienste (Portweiterleitung, Webdienst, STUN, WebDAV, FTP, SMB und Verwaltungsoberfläche). Köderports bedient Gately selbst, die Portscan-Erkennung ist nicht verfügbar. In den Einstellungen einschalten.",
     "reasonOS": "Dieses System hat kein nftables",
     "hintOS": "Die Firewall-Synchronisierung gibt es nur unter Linux. Sperren gelten weiterhin für Gatelys eigene Dienste, Köderports bedient Gately selbst, die Portscan-Erkennung ist nicht verfügbar.",
     "reasonMissing": "Befehl nft nicht gefunden",

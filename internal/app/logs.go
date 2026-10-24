@@ -103,19 +103,29 @@ func parseLogFilter(q url.Values) (*logbuf.Filter, string) {
 	if f.To, ok = parseLogTime(q.Get("to")); !ok {
 		return nil, "to 参数无效"
 	}
+	if !f.From.IsZero() && !f.To.IsZero() && f.From.After(f.To) {
+		return nil, "from 不能晚于 to"
+	}
 	if f.Empty() {
 		return nil, ""
 	}
 	return f, ""
 }
 
-// parseLogTime 解析 RFC 3339 时间或毫秒时间戳，空串返回零值。
+// minLogTimeMsDigits 为毫秒时间戳的最少位数：12 位对应 1973 年起的时间，
+// 更短的纯数字（例如 2026）多半是只填了年份，按时间戳解析会变成 1970 年，直接视为无效
+const minLogTimeMsDigits = 12
+
+// parseLogTime 解析 RFC 3339 时间或毫秒时间戳（至少 12 位数字），空串返回零值。
 func parseLogTime(s string) (time.Time, bool) {
 	s = strings.TrimSpace(s)
 	if s == "" {
 		return time.Time{}, true
 	}
 	if ms, err := strconv.ParseInt(s, 10, 64); err == nil {
+		if len(strings.TrimLeft(s, "+-")) < minLogTimeMsDigits {
+			return time.Time{}, false
+		}
 		return time.UnixMilli(ms), true
 	}
 	t, err := time.Parse(time.RFC3339, s)

@@ -23,7 +23,7 @@ Saving a change to a site or to the default site swaps the site list in place: t
 
 Sites of every type can set an access log, cross-origin (CORS), custom request and response headers (one `Key: Value` per line; an empty Value removes that header), and can reference a [WAF Firewall](/en/docs/modules/waf) instance (if the instance does not exist or is disabled, requests pass through). See [Request and response headers](#headers) for how request headers, response headers and Content-Type are edited.
 
-Access log entries record the client IP, domain, site name and status code, so the log can be filtered by site, status code, client IP and more; see [viewing and filtering runtime logs](/en/docs/guide/configuration).
+Access log entries record the client IP, domain, site name and status code, so the log can be filtered by site, status code, client IP and more; see [viewing and filtering runtime logs](/en/docs/guide/configuration#log-filter).
 
 ### Reverse proxy options {#proxy-options}
 
@@ -35,7 +35,7 @@ These are the "Options" on the "Basic" tab of the site editor. The question mark
 | Use backend address as Host | Sets the Host header sent to the backend to the backend address; when off (default) the Host from the visitor request is kept | The backend only accepts its own address, e.g. it returns 400 / 403, redirects to the wrong address or reports a Host mismatch; usually needed when proxying to public websites or CDNs. Keep it off when the backend separates sites by domain or builds links with the visited domain |
 | Disable connection reuse | Opens a new backend connection for every request (Keep-Alive off) | The backend sometimes resets connections, requests hang, or it does not support persistent connections. Adds some latency, so keep it off normally |
 | Add X-Forwarded-* | Writes `X-Forwarded-For` / `X-Forwarded-Proto` / `X-Forwarded-Host` / `X-Forwarded-Port` and `X-Real-IP`, telling the backend the visitor's real IP, original protocol, domain and port | The backend logs real IPs or must know the outside is HTTPS to build correct links (otherwise it may bounce back to http or loop after login). Recommended for most apps |
-| Send PROXY v2 to the backend | Prepends a PROXY protocol v2 header to the TCP connection to pass the real client IP | The backend does not read HTTP headers but supports the PROXY protocol, such as another Gately, haproxy or nginx with `proxy_protocol`. If the backend is not configured to accept it, every request fails, so leave it off if unsure |
+| Send PROXY v2 to the backend | Prepends a PROXY protocol v2 header to the TCP connection to pass the real client IP. When on, every request opens a new connection and HTTP/2 to the backend is not used. If the backend is Gately, turn on accepting the PROXY protocol on its listener and add this host to its trusted PROXY sources. | The backend does not read HTTP headers but supports the PROXY protocol, such as another Gately, haproxy or nginx with `proxy_protocol`. If the backend is not configured to accept it, every request fails, so leave it off if unsure |
 | Use the visited domain as SNI | HTTPS backends only: sends the domain the visitor used during the handshake and verifies the certificate against it, like nginx `proxy_ssl_server_name on; proxy_ssl_name $host` | The backend selects certificates or routes by domain on one port, such as frp `vhost_https` or an nginx hosting several HTTPS sites. Every backend has its own connection pool, so connections are never reused across domains |
 
 Common combinations:

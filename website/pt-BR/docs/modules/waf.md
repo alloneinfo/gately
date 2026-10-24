@@ -6,6 +6,7 @@ Um firewall de aplicações web baseado no [Coraza](https://coraza.io/) e no OWA
 
 - Conjunto de regras OWASP CRS v4 embutido, com arquivos de regras que podem ser ativados individualmente;
 - Regras SecLang personalizadas;
+- Os grupos de regras podem ser reordenados; os logs de detecção registram IP do cliente, domínio, caminho e ID da regra, e podem ser filtrados por domínio, IP ou palavras-chave;
 - Modo de bloqueio e modo apenas de detecção;
 - Limite de inspeção do corpo da requisição ajustável: acima do limite, a requisição é rejeitada ou só a parte inicial é inspecionada; a inspeção do corpo pode ser pulada por caminho;
 - Modo de compatibilidade com WebDAV: libera os métodos, os cabeçalhos e qualquer tipo de conteúdo de upload usados por nuvens pessoais e WebDAV;
@@ -16,6 +17,14 @@ Um firewall de aplicações web baseado no [Coraza](https://coraza.io/) e no OWA
 1. Em um site novo, comece com "Apenas detectar" e acompanhe os logs por algum tempo para confirmar que não há falsos positivos;
 2. Ajuste os arquivos de regras ou adicione exceções personalizadas para os falsos positivos;
 3. Depois mude para "Bloquear".
+
+## Ordem dos grupos de regras
+
+Os grupos de regras de uma instância são carregados de cima para baixo; use os botões mover para cima e para baixo para reordená-los. Na mesma fase, as regras anteriores executam primeiro:
+
+- Regras de bloqueio (deny e afins) funcionam em qualquer posição;
+- Regras de liberação ou exclusão em tempo de execução (`allow`, `ctl:ruleRemoveById`, `ctl:ruleRemoveTargetById` etc.) devem ficar acima do grupo OWASP CRS, senão o CRS pode bloquear a requisição antes;
+- Diretivas de configuração como `SecRuleRemoveById` e `SecRuleUpdateTargetById` só afetam regras já carregadas, então devem ficar abaixo do grupo CRS; acima delas não têm efeito.
 
 ## Sites com upload de arquivos grandes
 

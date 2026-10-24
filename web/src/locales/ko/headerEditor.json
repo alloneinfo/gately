@@ -31,7 +31,7 @@
     "authorization": "고정 자격 증명으로 백엔드에 접속",
     "xApiKey": "고정 API 키로 백엔드에 접속",
     "userAgent": "클라이언트의 User-Agent를 대체",
-    "acceptEncoding": "삭제하거나 identity로 두면 백엔드가 압축하지 않은 응답을 반환",
+    "acceptEncoding": "identity로 두면 백엔드가 압축하지 않은 응답을 반환. 비워서 삭제하면 gzip이 자동으로 다시 붙어 압축은 계속됨",
     "origin": "삭제하면 출처가 달라 백엔드가 요청을 거부하는 문제를 피할 수 있음(WebSocket 등)",
     "referer": "참조 페이지를 백엔드에 알리지 않음",
     "cookie": "클라이언트 쿠키를 백엔드로 보내지 않음",

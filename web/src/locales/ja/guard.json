@@ -28,7 +28,7 @@
     "trapHits": "おとりポートの検出",
     "scanHits": "スキャンの検出",
     "disabledTitle": "ファイアウォール同期がオフです",
-    "disabledHint": "ブロックは Gately 自身のサービス（ポート転送、Web サービス、STUN、WebDAV、FTP、管理画面）にだけ適用され、おとりポートは Gately が待ち受け、ポートスキャン検出は利用できません。「設定」でオンにできます。",
+    "disabledHint": "ブロックは Gately 自身のサービス（ポート転送、Web サービス、STUN、WebDAV、FTP、SMB、管理画面）にだけ適用され、おとりポートは Gately が待ち受け、ポートスキャン検出は利用できません。「設定」でオンにできます。",
     "reasonOS": "このシステムには nftables がありません",
     "hintOS": "ファイアウォール同期は Linux のみ対応です。ブロックは Gately 自身のサービスには適用され、おとりポートは Gately が待ち受け、ポートスキャン検出は利用できません。",
     "reasonMissing": "nft コマンドが見つかりません",

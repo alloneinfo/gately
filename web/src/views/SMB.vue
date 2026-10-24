@@ -93,6 +93,8 @@ const settings = ref<Settings>()
 // savedEnable 为已保存的启用状态，状态徽标以它为准
 const savedEnable = ref(false)
 const savedPort = ref(445)
+// savedListenIp 为已保存的监听地址，连接地址以它为准，不随表单中未保存的修改变化
+const savedListenIp = ref('')
 // savedShares 为已保存配置中的全部共享，用于展示连接地址
 const savedShares = ref<ShareRow[]>([])
 const running = ref(false)
@@ -113,21 +115,33 @@ const svcStatus = computed((): { type: StatusType; text: string; title?: string 
   return { type: 'warn', text: t('smb.statusNotRunning') }
 })
 
-// host 为连接地址中的主机：监听具体地址时用该地址，否则用当前访问管理界面的主机名
-function host(): string {
-  const ip = settings.value?.listenIp
+// hostName 为连接地址中的主机（IPv6 不带方括号）：监听具体地址时用已保存的该地址，
+// 否则用当前访问管理界面的主机名。不读表单中未保存的监听地址，避免显示尚未生效的地址
+function hostName(): string {
+  const ip = savedListenIp.value
   const h = ip && ip !== '0.0.0.0' && ip !== '::' ? ip : window.location.hostname
-  return h.includes(':') ? `[${h}]` : h
+  return h.replace(/^\[|\]$/g, '')
 }
 
+// uncPath 为 Windows 资源管理器使用的 UNC 路径。UNC 不接受 IPv6 字面量，
+// 需改写为 ipv6-literal.net 形式：冒号换成连字符，区域标识前的 % 换成 s
 function uncPath(share: string): string {
-  return `\\\\${host().replace(/^\[|\]$/g, '')}\\${share}`
+  let h = hostName()
+  if (h.includes(':')) {
+    h = `${h.replace(/:/g, '-').replace(/%/g, 's')}.ipv6-literal.net`
+  }
+  return `\\\\${h}\\${share}`
 }
 
+// smbURL 为 macOS 访达与 Linux 使用的 smb:// 地址，共享名中的 # ? % 等字符会被转义，不会被误解析
 function smbURL(share: string): string {
   const port = savedPort.value === 445 ? '' : `:${savedPort.value}`
-  // 只转义空格：中文等字符原样显示更易读，访达与 Linux 客户端都能识别
-  return `smb://${host()}${port}/${share.replace(/ /g, "%20")}`
+  const h = hostName()
+  // URL 中的 IPv6 需要方括号，区域标识的 % 需要转义为 %25
+  const host = h.includes(':') ? `[${h.replace(/%/g, '%25')}]` : h
+  // 只转义会破坏 URL 的字符（%、#、?、空白等），中文等非 ASCII 字符保持原样便于阅读，访达与各客户端都能识别
+  const path = share.replace(/[%#?&\s]/g, (c) => encodeURIComponent(c))
+  return `smb://${host}${port}/${path}`
 }
 
 // sharesOf 与后端 User.Shares 一致：单目录用户的共享名为用户名，多目录用户每个目录一个共享
@@ -150,6 +164,7 @@ async function load() {
   settings.value = { ...r.settings, users: r.settings.users ?? [] }
   savedEnable.value = r.settings.enable
   savedPort.value = r.settings.port
+  savedListenIp.value = r.settings.listenIp
   savedShares.value = r.settings.enable ? sharesOf(settings.value.users) : []
   running.value = r.running
   error.value = r.error

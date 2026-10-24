@@ -1,4 +1,6 @@
-//go:build !linux
+// Gately 修改：仅在 Linux 与 macOS 编译（构建约束）。
+
+//go:build darwin
 
 package parent
 

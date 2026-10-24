@@ -44,7 +44,7 @@ Konfiguration unter „SMB-Dienst“ in der Gruppe „Dateidienste“; damit wer
 | `listenIp` | Leer | Listen-Adresse; leer lassen, um auf allen Adressen zu lauschen |
 | `port` | 445 | Listen-Port. Windows verbindet sich nur mit 445; belegt das mitgelieferte Samba eines NAS wie fnOS oder Synology bereits 445, wählen Sie einen anderen Port, den macOS, Linux und die meisten Player in der Adresse angeben können |
 | `requireEncryption` | Aus | Verlangt SMB-3-Verschlüsselung für jede Verbindung; ältere Geräte und manche Fernseher, die nur SMB 2 beherrschen, können sich dann nicht verbinden |
-| `mdns` | Aus | Kündigt den Dienst per Bonjour an, sodass er im macOS-Finder unter Netzwerk erscheint |
+| `mdns` | Aus | Kündigt den Dienst per Bonjour an, sodass er im macOS-Finder unter Netzwerk erscheint; unter Docker nur mit Host-Netzwerk |
 | `users` | Keine | Mehrere Benutzer mit denselben Feldern wie WebDAV: `name`, `password`, `root`, `readOnly` oder `mounts`; Benutzernamen sind unabhängig von Groß-/Kleinschreibung eindeutig |
 
 Freigaben gehören zu Benutzern; ein angemeldeter Benutzer sieht und verbindet nur seine eigenen Freigaben:
@@ -59,6 +59,8 @@ Benutzer- und Freigabenamen dürfen `" / \ [ ] : ; | = , + * ? < >` nicht enthal
 - Windows: `\\Host\Freigabe` in die Adressleiste des Explorers eingeben oder `net use Z: \\Host\Freigabe /user:Benutzer` ausführen
 - macOS: im Finder Gehe zu → Mit Server verbinden wählen und `smb://Host:Port/Freigabe` eingeben (bei 445 kann der Port entfallen)
 - Linux: `mount -t cifs //Host/Freigabe /mnt -o username=Benutzer,port=Port`
+
+Wenn Clients keine Verbindung bekommen oder die Anmeldung scheitert, die Umgebungsvariable `GATELY_SMB_DEBUG=1` setzen und Gately neu starten; Protokoll-Debug-Logs landen im Laufzeitlog. Danach die Variable wieder entfernen.
 
 ## Speicher-Einbindungen
 

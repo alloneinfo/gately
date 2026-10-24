@@ -12,6 +12,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync/atomic"
 	"time"
 	"unicode/utf8"
 
@@ -34,7 +35,41 @@ const durableTimeout = 60 * time.Second
 type server struct {
 	ln     net.Listener
 	cancel context.CancelFunc
-	done   chan struct{}
+	// done 在服务循环（含全部连接）结束后关闭
+	done chan struct{}
+	// durable 为断线续用的句柄表，服务结束后需要主动关闭其中保留的句柄
+	durable *parent.DurableTable
+	// serveErr 为服务循环异常退出的错误，只在 done 关闭前写入一次，done 关闭后可以无锁读取
+	serveErr error
+	// watcher 记录监听的不可恢复错误，出错后服务立即视为停止
+	watcher *acceptWatcher
+}
+
+// acceptWatcher 包装监听，Accept 出现不可恢复的错误时记录错误并取消服务上下文。
+// gosamba 的 Serve 遇到这种错误后会等全部连接结束才返回，期间状态仍会显示为运行中；
+// 取消上下文让现有连接随之断开，Serve 尽快返回，状态也能立即反映服务已停止。
+type acceptWatcher struct {
+	net.Listener
+	ctx    context.Context
+	cancel context.CancelFunc
+	failed atomic.Pointer[error]
+}
+
+func (w *acceptWatcher) Accept() (net.Conn, error) {
+	c, err := w.Listener.Accept()
+	if err != nil && w.ctx.Err() == nil && !parent.IsTemporaryAcceptError(err) {
+		w.failed.CompareAndSwap(nil, &err)
+		w.cancel()
+	}
+	return c, err
+}
+
+// failure 返回记录的不可恢复错误，没有时返回 nil。
+func (w *acceptWatcher) failure() error {
+	if p := w.failed.Load(); p != nil {
+		return *p
+	}
+	return nil
 }
 
 // startServer 按配置快照监听并开始服务。
@@ -76,10 +111,10 @@ func startServer(s Settings, logs *logbuf.Buffer) (*server, error) {
 		return nil, err
 	}
 	ctx, cancel := context.WithCancel(context.Background())
-	srv := &server{ln: ln, cancel: cancel, done: make(chan struct{})}
-
 	// 断线续用的句柄表与会话索引在整个服务内共享，客户端换新连接后仍能找回原来的句柄与会话
 	durable := parent.NewDurableTable()
+	watcher := &acceptWatcher{Listener: banlist.Default.Listener(ln), ctx: ctx, cancel: cancel}
+	srv := &server{ln: ln, cancel: cancel, done: make(chan struct{}), durable: durable, watcher: watcher}
 	durable.StartSweeper(ctx, 30*time.Second)
 	sessions := parent.NewSessionIndex()
 	l := &parent.Listener{
@@ -98,7 +133,13 @@ func startServer(s Settings, logs *logbuf.Buffer) (*server, error) {
 	go func() {
 		defer close(srv.done)
 		// 被封禁的地址在 Accept 时直接断开
-		if err := l.Serve(ctx, banlist.Default.Listener(ln)); err != nil && !errors.Is(err, net.ErrClosed) {
+		err := l.Serve(ctx, watcher)
+		if err == nil {
+			// 监听失败时 watcher 已取消上下文，Serve 会按正常停止返回 nil，错误以 watcher 记录的为准
+			err = watcher.failure()
+		}
+		if err != nil && !errors.Is(err, net.ErrClosed) {
+			srv.serveErr = err
 			logs.Add(logbuf.LevelWarn, "", "SMB 服务退出: "+err.Error())
 		}
 	}()
@@ -147,11 +188,32 @@ func truncateBytes(s string, n int) string {
 func (s *server) Addr() string { return s.ln.Addr().String() }
 
 // Close 关闭监听与全部连接，最多等待 5 秒让连接收尾。
+// 连接全部结束后再关闭为断线续用保留的句柄：旧服务的句柄表不会再被使用，不关闭的话文件与锁要等 GC 才释放。
+// 5 秒内没有收尾完的连接仍可能在使用这些句柄，此时改为在后台等它们结束后再关闭。
 func (s *server) Close() {
 	s.cancel()
 	select {
 	case <-s.done:
+		s.durable.CloseAll()
 	case <-time.After(5 * time.Second):
+		go func() {
+			<-s.done
+			s.durable.CloseAll()
+		}()
+	}
+}
+
+// Status 返回服务循环是否仍在运行，以及异常退出时的错误。
+// 监听出现不可恢复的错误后服务循环会退出，此时不应再显示为运行中。
+func (s *server) Status() (running bool, err error) {
+	if err := s.watcher.failure(); err != nil {
+		return false, err
+	}
+	select {
+	case <-s.done:
+		return false, s.serveErr
+	default:
+		return true, nil
 	}
 }
 

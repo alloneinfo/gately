@@ -1,7 +1,10 @@
 package logbuf
 
 import (
+	"context"
+	"errors"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -20,6 +23,10 @@ func TestParseKeywords(t *testing.T) {
 		{`-"a b" c`, "[c]", "[a b]"},
 		{"- x", "[x]", "[]"},
 		{"a-b　c", "[a-b c]", "[]"},
+		// 以下边界情况前端高亮（LogViewer.vue 的 highlightTerms）逐字符照搬，修改时两边同步
+		{`foo"bar baz" x`, "[foobar baz x]", "[]"},
+		{`"abc d`, "[abc d]", "[]"},
+		{"-", "[]", "[]"},
 	}
 	for _, c := range cases {
 		terms, ex := ParseKeywords(c.in)
@@ -71,6 +78,13 @@ func TestIPMatcher(t *testing.T) {
 	}
 	if ParseIP(" , ") != nil {
 		t.Error("没有有效项时应返回 nil")
+	}
+	// IPv4 映射网段要转换成 IPv4 网段，日志中的地址都已 Unmap
+	mapped := ParseIP("::ffff:1.2.3.0/120")
+	for in, want := range map[string]bool{"1.2.3.9": true, "::ffff:1.2.3.9": true, "1.2.4.1": false} {
+		if got := mapped.match(in); got != want {
+			t.Errorf("映射网段 match(%q) = %v，期望 %v", in, got, want)
+		}
 	}
 }
 
@@ -250,8 +264,15 @@ func TestScanBackward(t *testing.T) {
 	if err := os.WriteFile(path, []byte(sb.String()), 0o600); err != nil {
 		t.Fatal(err)
 	}
+	file, err := os.Open(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer file.Close()
+	size := int64(sb.Len())
+	ctx := context.Background()
 	var got []uint64
-	done := scanBackward(path, func(line []byte) bool {
+	done, err := scanBackward(ctx, file, size, func(line []byte) bool {
 		s, ok := lineSeq(line)
 		if !ok {
 			t.Fatalf("无法解析行 %q", line)
@@ -259,7 +280,7 @@ func TestScanBackward(t *testing.T) {
 		got = append(got, s)
 		return true
 	})
-	if !done || len(got) != n || got[0] != uint64(n) || got[n-1] != 1 {
+	if err != nil || !done || len(got) != n || got[0] != uint64(n) || got[n-1] != 1 {
 		t.Fatalf("倒序读取结果不对: done=%v 共 %d 条", done, len(got))
 	}
 	for i := 1; i < n; i++ {
@@ -269,7 +290,88 @@ func TestScanBackward(t *testing.T) {
 	}
 	// 提前停止
 	count := 0
-	if scanBackward(path, func([]byte) bool { count++; return count < 3 }) || count != 3 {
+	if done, err := scanBackward(ctx, file, size, func([]byte) bool { count++; return count < 3 }); done || err != nil || count != 3 {
 		t.Errorf("提前停止失败，count=%d", count)
+	}
+	// 文件比记下的大小短（读不满）时返回错误，调用方不会跳过这一段继续读更早的文件
+	if done, err := scanBackward(ctx, file, size+10, func([]byte) bool { return true }); done || !errors.Is(err, io.EOF) {
+		t.Errorf("读取不完整时应返回错误: done=%v err=%v", done, err)
+	}
+	// 已取消的 ctx 立即停止
+	canceled, cancel := context.WithCancel(ctx)
+	cancel()
+	if done, err := scanBackward(canceled, file, size, func([]byte) bool { return true }); done || !errors.Is(err, context.Canceled) {
+		t.Errorf("取消后应停止: done=%v err=%v", done, err)
+	}
+}
+
+// TestQueryPending 验证刚被挤出内存缓冲、尚未批量写盘的日志也能立即查到。
+func TestQueryPending(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "p.log")
+	b := New(10, nil)
+	if err := b.Persist(path, 0); err != nil {
+		t.Fatal(err)
+	}
+	defer b.ClosePersist()
+	for i := 1; i <= 30; i++ {
+		b.Add(LevelInfo, "", fmt.Sprintf("第 %d 条", i))
+	}
+	// 不等待延迟写盘，前 20 条此时还在 pending 中
+	got := seqs(b.Query(0, 0, 100, nil))
+	if len(got) != 30 || got[0] != 1 || got[29] != 30 {
+		t.Fatalf("应返回全部 30 条，得到 %v", got)
+	}
+	// 带过滤条件时同样覆盖
+	if got := fmt.Sprint(seqs(b.Query(0, 0, 100, &Filter{Terms: []string{"第 5 条"}}))); got != "[5]" {
+		t.Errorf("按关键词查找 pending 中的日志 = %s", got)
+	}
+}
+
+// TestSearchStopsOnError 验证当前文件读取出错时不再继续读 .1，避免结果中间缺一段。
+func TestSearchStopsOnError(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "e.log")
+	b := New(2, nil)
+	if err := b.Persist(path, 0); err != nil {
+		t.Fatal(err)
+	}
+	defer b.ClosePersist()
+	for i := 1; i <= 6; i++ {
+		b.Add(LevelInfo, "", fmt.Sprintf("第 %d 条", i))
+	}
+	b.sink.flush()
+	// 手动轮转：前 6 条进入 .1；再写 4 条到当前文件
+	if err := os.Rename(path, path+".1"); err != nil {
+		t.Fatal(err)
+	}
+	b.sink.size = 0
+	for i := 7; i <= 10; i++ {
+		b.Add(LevelInfo, "", fmt.Sprintf("第 %d 条", i))
+	}
+	b.sink.flush()
+	if got := fmt.Sprint(seqs(b.Query(0, 0, 100, nil))); got != "[1 2 3 4 5 6 7 8 9 10]" {
+		t.Fatalf("正常情况应跨两个文件，得到 %s", got)
+	}
+	// 当前文件比快照记下的大小短：模拟读取出错，此时不应继续读 .1 的 1..6
+	files := b.sink.snapshot()
+	defer func() {
+		for _, sf := range files {
+			_ = sf.file.Close()
+		}
+	}()
+	if len(files) != 2 {
+		t.Fatalf("应打开两个文件，实际 %d", len(files))
+	}
+	if got := searchFiles(context.Background(), files, 0, 100, 100, nil); len(got) != 10 {
+		t.Fatalf("快照正常时应读到 10 条，得到 %d", len(got))
+	}
+	files[0].size++
+	if got := searchFiles(context.Background(), files, 0, 100, 100, nil); len(got) != 0 {
+		t.Errorf("当前文件读取出错后不应继续读 .1，得到 %v", seqs(got))
+	}
+	// 已取消的查询不读文件，只返回缓冲内的结果
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	if got := fmt.Sprint(seqs(b.QueryContext(ctx, 0, 0, 100, nil))); got != "[9 10]" {
+		t.Errorf("取消后应只返回缓冲内容，得到 %s", got)
 	}
 }

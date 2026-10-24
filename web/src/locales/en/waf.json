@@ -44,7 +44,7 @@
   "deleteRuleSet": "Delete rule set",
   "moveUp": "Move up",
   "moveDown": "Move down",
-  "customHelp": "Rule groups load from top to bottom, and within the same phase earlier rules run first. Blocking rules work in any position; allow or exclusion rules (allow, ctl:ruleRemoveById, etc.) must be placed above the OWASP CRS group, or CRS may block the request first",
+  "customHelp": "Rule groups load from top to bottom, and within the same phase earlier rules run first. Blocking rules work in any position; runtime allow rules (allow, ctl:ruleRemoveById, etc.) must be placed above the OWASP CRS group, or CRS may block the request first; configuration-time directives such as SecRuleRemoveById and SecRuleUpdateTargetById only affect rules already loaded, so place them below the CRS group",
   "crsPlaceholder": "Leave empty to enable all rule files",
   "addRuleSet": "Add rule set",
   "defaultRuleSetRemark": "OWASP Core Rules",

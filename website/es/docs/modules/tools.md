@@ -44,7 +44,7 @@ Se configura en «Servicio SMB», dentro del grupo «Servicios de archivos», y 
 | `listenIp` | Vacío | Dirección de escucha; déjalo vacío para escuchar en todas las direcciones |
 | `port` | 445 | Puerto de escucha. Windows solo se conecta al 445; si el Samba incluido en un NAS como fnOS o Synology ya usa el 445, elige otro puerto, que macOS, Linux y la mayoría de reproductores pueden indicar en la dirección |
 | `requireEncryption` | Desactivado | Exige cifrado SMB 3 en todas las conexiones; los dispositivos antiguos y algunos televisores que solo admiten SMB 2 no podrán conectarse |
-| `mdns` | Desactivado | Anuncia el servicio por Bonjour para que aparezca en Red del Finder de macOS |
+| `mdns` | Desactivado | Anuncia el servicio por Bonjour para que aparezca en Red del Finder de macOS; en Docker solo funciona con red host |
 | `users` | Ninguno | Varios usuarios con los mismos campos que WebDAV: `name`, `password`, `root`, `readOnly` o `mounts`; los nombres de usuario no distinguen mayúsculas y no pueden repetirse |
 
 Los recursos compartidos pertenecen a cada usuario, y un usuario conectado solo ve y abre los suyos:
@@ -59,6 +59,8 @@ Los nombres de usuario y de recurso no pueden contener `" / \ [ ] : ; | = , + * 
 - Windows: escribe `\\host\recurso` en la barra de direcciones del Explorador o ejecuta `net use Z: \\host\recurso /user:usuario`
 - macOS: en el Finder elige Ir → Conectarse al servidor e introduce `smb://host:puerto/recurso` (el puerto 445 puede omitirse)
 - Linux: `mount -t cifs //host/recurso /mnt -o username=usuario,port=puerto`
+
+Para diagnosticar clientes que no conectan o fallan al autenticarse, define la variable de entorno `GATELY_SMB_DEBUG=1` y reinicia Gately; los registros de depuración del protocolo se escriben en el registro de ejecución. Quita la variable al terminar.
 
 ## Montajes de almacenamiento
 

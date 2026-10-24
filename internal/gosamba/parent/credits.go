@@ -1,3 +1,7 @@
+// Gately 修改：仅在 Linux 与 macOS 编译（构建约束）。
+
+//go:build linux || darwin
+
 package parent
 
 // creditWindow is the maximum number of credits the server will grant to a

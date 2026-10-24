@@ -28,7 +28,7 @@
     "trapHits": "미끼 포트 감지",
     "scanHits": "스캔 탐지",
     "disabledTitle": "방화벽 동기화가 꺼져 있습니다",
-    "disabledHint": "차단은 Gately 자체 서비스(포트 포워딩, 웹 서비스, STUN, WebDAV, FTP, 관리 콘솔)에만 적용되고, 미끼 포트는 Gately가 직접 수신하며 포트 스캔 탐지는 사용할 수 없습니다. '설정'에서 켤 수 있습니다.",
+    "disabledHint": "차단은 Gately 자체 서비스(포트 포워딩, 웹 서비스, STUN, WebDAV, FTP, SMB, 관리 콘솔)에만 적용되고, 미끼 포트는 Gately가 직접 수신하며 포트 스캔 탐지는 사용할 수 없습니다. '설정'에서 켤 수 있습니다.",
     "reasonOS": "이 시스템에는 nftables가 없습니다",
     "hintOS": "방화벽 동기화는 Linux만 지원합니다. 차단은 Gately 자체 서비스에 계속 적용되고, 미끼 포트는 Gately가 직접 수신하며 포트 스캔 탐지는 사용할 수 없습니다.",
     "reasonMissing": "nft 명령을 찾을 수 없습니다",

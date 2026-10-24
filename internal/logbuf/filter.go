@@ -197,7 +197,7 @@ func ParseIP(s string) *IPMatcher {
 	m := &IPMatcher{}
 	for _, item := range splitList(s) {
 		if p, err := netip.ParsePrefix(item); err == nil {
-			m.prefixes = append(m.prefixes, p.Masked())
+			m.prefixes = append(m.prefixes, unmapPrefix(p).Masked())
 		} else if a, err := netip.ParseAddr(item); err == nil {
 			a = a.Unmap()
 			m.prefixes = append(m.prefixes, netip.PrefixFrom(a, a.BitLen()))
@@ -209,6 +209,15 @@ func ParseIP(s string) *IPMatcher {
 		return nil
 	}
 	return m
+}
+
+// unmapPrefix 把 ::ffff:1.2.3.0/120 这类 IPv4 映射网段转换成等价的 IPv4 网段（1.2.3.0/24）。
+// 日志中的地址比较前都会 Unmap，网段不转换就永远匹配不上；位数不足 96 的网段超出了映射范围，保持原样。
+func unmapPrefix(p netip.Prefix) netip.Prefix {
+	if !p.Addr().Is4In6() || p.Bits() < 96 {
+		return p
+	}
+	return netip.PrefixFrom(p.Addr().Unmap(), p.Bits()-96)
 }
 
 // matchEntry 优先使用 ip 字段；日志没有该字段时，从消息中提取所有像地址的片段逐个比较。

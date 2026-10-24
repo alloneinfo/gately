@@ -19,7 +19,7 @@ export const requestPresets: HeaderPreset[] = [
   { key: 'Authorization', values: ['Bearer <token>', 'Basic <base64>'], id: 'authorization' },
   { key: 'X-Api-Key', values: ['<key>'], id: 'xApiKey' },
   { key: 'User-Agent', values: ['Gately'], id: 'userAgent' },
-  { key: 'Accept-Encoding', values: ['', 'identity'], id: 'acceptEncoding' },
+  { key: 'Accept-Encoding', values: ['identity'], id: 'acceptEncoding' },
   { key: 'Origin', values: [''], id: 'origin' },
   { key: 'Referer', values: [''], id: 'referer' },
   { key: 'Cookie', values: [''], id: 'cookie' },
@@ -124,7 +124,7 @@ export function checkHeader(dir: HeaderDirection, rows: HeaderRow[], index: numb
   }
   if (/\$[a-z_]\w*/i.test(value)) {
     issues.push({ level: 'warning', msg: 'variable' })
-  } else if (/<[^<>]+>/.test(value)) {
+  } else if (/<(?!https?:\/\/|\/)[^<>]+>/.test(value)) {
     issues.push({ level: 'warning', msg: 'placeholder' })
   }
   // 同名头按顺序依次设置，后面的覆盖前面的

@@ -1,3 +1,5 @@
+// Gately 修改：根目录为 "/" 时前缀判断改用 underRoot，避免拼成 "//" 而拒绝所有子路径。
+
 // Package vfs handles share-relative path resolution and filesystem-info
 // helpers for the SMB protocol.
 package vfs
@@ -42,10 +44,21 @@ func Resolve(root, smbPath string) (string, error) {
 	full := filepath.Join(root, p)
 	full = filepath.Clean(full)
 	// Verify still under root.
-	if full != root && !strings.HasPrefix(full, root+string(filepath.Separator)) {
+	if !underRoot(root, full) {
 		return "", ErrTraversal
 	}
 	return full, nil
+}
+
+// underRoot 判断已清理的绝对路径 p 是否就是 root 或位于 root 之下。
+// root 为 "/" 时直接拼分隔符会得到 "//"，所有子路径都会被误判为越界，
+// 所以先去掉 root 末尾的分隔符再拼接，前缀仍以分隔符结尾，"/srv2" 不会匹配 "/srv"。
+func underRoot(root, p string) bool {
+	if p == root {
+		return true
+	}
+	prefix := strings.TrimSuffix(root, string(filepath.Separator)) + string(filepath.Separator)
+	return strings.HasPrefix(p, prefix)
 }
 
 // ResolveSecure is like Resolve but additionally enforces that no symlink in
@@ -144,7 +157,7 @@ func ResolveSecure(root, smbPath string) (string, error) {
 // contained reports whether p is canonRoot itself or lies beneath it. Both must
 // already be cleaned and free of symlinks, which is what EvalSymlinks gives.
 func contained(canonRoot, p string) bool {
-	return p == canonRoot || strings.HasPrefix(p, canonRoot+string(filepath.Separator))
+	return underRoot(canonRoot, p)
 }
 
 // ResolveLink follows a symlink that lives inside the share and returns the

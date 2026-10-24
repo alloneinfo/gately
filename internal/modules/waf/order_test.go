@@ -65,3 +65,16 @@ func TestDenyRuleWorksInAnyPosition(t *testing.T) {
 		}
 	}
 }
+
+// SecRuleRemoveById 等配置期指令只作用于已加载的规则：排在 CRS 之后才能移除 CRS 规则，排在之前不起作用。
+// 与界面提示一致：运行期的 allow、ctl: 放在 CRS 之前，配置期的移除/改目标指令放在 CRS 之后。
+func TestRemoveByIDMustFollowCRS(t *testing.T) {
+	rule := `SecRuleRemoveById 949110`
+	m := newModule(t, orderedInstance("before", rule, true), orderedInstance("after", rule, false))
+	if c := status(t, m.Middleware("before", ok), sqliTarget); c != 403 {
+		t.Fatalf("移除指令在 CRS 之前不应生效: %d", c)
+	}
+	if c := status(t, m.Middleware("after", ok), sqliTarget); c != 200 {
+		t.Fatalf("移除指令在 CRS 之后应生效: %d", c)
+	}
+}

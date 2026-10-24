@@ -53,7 +53,7 @@ Die Laufzeitprotokolle des Systems und aller Module werden standardmäßig nach 
 - Werden die Protokolle eines Moduls in der Oberfläche geleert, werden auch seine Dateien gelöscht;
 - Konfigurationssicherungen enthalten weder `logs/` noch das Audit-Protokoll `audit.log`.
 
-### Anzeigen und filtern
+### Anzeigen und filtern {#log-filter}
 
 Die Seite Systemprotokolle und die Protokollkarte unten auf jeder Modulseite verwenden denselben Protokollbetrachter. Die folgenden Bedingungen lassen sich kombinieren; Änderungen wirken sofort, und neue Einträge werden nur angehängt, wenn sie zutreffen:
 

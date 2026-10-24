@@ -28,7 +28,7 @@
     "trapHits": "Activaciones de puertos trampa",
     "scanHits": "Escaneos detectados",
     "disabledTitle": "La sincronización con el cortafuegos está desactivada",
-    "disabledHint": "Los bloqueos solo afectan a los servicios de Gately (reenvío de puertos, servicio web, STUN, WebDAV, FTP y el panel de administración). Gately escucha él mismo en los puertos trampa y la detección de escaneos no está disponible. Actívala en Configuración.",
+    "disabledHint": "Los bloqueos solo afectan a los servicios de Gately (reenvío de puertos, servicio web, STUN, WebDAV, FTP, SMB y el panel de administración). Gately escucha él mismo en los puertos trampa y la detección de escaneos no está disponible. Actívala en Configuración.",
     "reasonOS": "Este sistema no tiene nftables",
     "hintOS": "La sincronización con el cortafuegos solo funciona en Linux. Los bloqueos siguen afectando a los servicios de Gately, Gately escucha él mismo en los puertos trampa y la detección de escaneos no está disponible.",
     "reasonMissing": "No se encuentra el comando nft",

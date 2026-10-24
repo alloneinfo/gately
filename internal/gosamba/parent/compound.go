@@ -1,4 +1,6 @@
-// Gately 修改：签名改用 Session.signingKey()（见 parent/gately.go 的 verifySigned）。
+// Gately 修改：签名改用 Session.signingKey()（见 parent/gately.go 的 verifySigned）；仅在 Linux 与 macOS 编译（构建约束）。
+
+//go:build linux || darwin
 
 package parent
 
@@ -160,10 +162,15 @@ func (d *Dispatcher) sealAndSend(rw io.Writer, sess *Session, buf []byte, encryp
 // message going out under a transform header is never signed: the AEAD already
 // authenticates it (MS-SMB2 §3.3.4.1.4).
 func (d *Dispatcher) signResponse(sess *Session, msg []byte) {
-	if sess == nil || len(sess.SigningKey) == 0 || d.Conn == nil {
+	if sess == nil || d.Conn == nil {
 		return
 	}
-	smb3.SignMessage(uint16(d.Conn.Selection.SigningAlgo), sess.signingKey(), msg)
+	// 只读取一次密钥：判断与签名用同一份，且读取经过 signingMu
+	key := sess.signingKey()
+	if len(key) == 0 {
+		return
+	}
+	smb3.SignMessage(uint16(d.Conn.Selection.SigningAlgo), key, msg)
 }
 
 // sendEncrypted wraps msg — which may be a whole compounded frame — in one SMB3

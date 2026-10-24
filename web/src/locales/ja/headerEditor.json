@@ -31,7 +31,7 @@
     "authorization": "固定の認証情報でバックエンドにアクセス",
     "xApiKey": "固定の API キーでバックエンドにアクセス",
     "userAgent": "クライアントの User-Agent を置き換える",
-    "acceptEncoding": "削除または identity にすると、バックエンドは非圧縮で応答する",
+    "acceptEncoding": "identity にするとバックエンドは非圧縮で応答する。空にして削除しても gzip が自動で付き、圧縮は止まらない",
     "origin": "削除すると、オリジン違いによるバックエンドの拒否を回避できる（WebSocket など）",
     "referer": "参照元ページをバックエンドに伝えない",
     "cookie": "クライアントの Cookie をバックエンドに送らない",

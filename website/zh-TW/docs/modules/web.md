@@ -23,7 +23,7 @@
 
 所有類型的站台都可設定存取日誌、跨來源（CORS）、自訂請求標頭與回應標頭（每行 `Key: Value`，Value 留空表示刪除該標頭），並可引用一個 [WAF 防火牆](/zh-TW/docs/modules/waf) 實例（實例不存在或停用時放行）。請求標頭、回應標頭與 Content-Type 的編輯方式見 [請求標頭與回應標頭](#headers)。
 
-存取日誌會記錄用戶端 IP、網域、站點名稱與狀態碼，可在日誌中依站點、狀態碼、來源 IP 等條件篩選，見 [執行日誌的檢視與篩選](/zh-TW/docs/guide/configuration)。
+存取日誌會記錄用戶端 IP、網域、站點名稱與狀態碼，可在日誌中依站點、狀態碼、來源 IP 等條件篩選，見 [執行日誌的檢視與篩選](/zh-TW/docs/guide/configuration#log-filter)。
 
 ### 反向代理選項 {#proxy-options}
 
@@ -35,7 +35,7 @@
 | Host 使用後端位址 | 送往後端的 Host 標頭改為後端位址；關閉時（預設）保留訪客請求的 Host | 後端只認自己的位址，例如回傳 400 / 403、跳到錯誤位址或提示 Host 不符；反向代理到公網網站或 CDN 時通常需要。後端按網域區分站點，或需要用造訪網域產生連結時保持關閉 |
 | 停用連線重用 | 每個請求都建立新的後端連線（關閉 Keep-Alive） | 後端偶爾出現連線被重設、請求卡住，或不支援長連線。會增加一些延遲，正常情況保持關閉 |
 | 新增 X-Forwarded-* | 寫入 `X-Forwarded-For` / `X-Forwarded-Proto` / `X-Forwarded-Host` / `X-Forwarded-Port` 與 `X-Real-IP`，告訴後端訪客的真實 IP、原始協定、網域和連接埠 | 後端需要記錄真實 IP，或要知道外部是 HTTPS 才能產生正確連結（否則可能跳回 http 或登入後循環跳轉）。多數應用建議開啟 |
-| 向後端傳送 PROXY v2 | 在 TCP 連線開頭附加 PROXY 協定 v2 標頭，傳遞真實用戶端 IP | 後端不讀 HTTP 標頭但支援 PROXY 協定，如另一層 Gately、haproxy、開啟 `proxy_protocol` 的 nginx。後端未設定接收時所有請求都會失敗，不確定時保持關閉 |
+| 向後端傳送 PROXY v2 | 在 TCP 連線開頭附加 PROXY 協定 v2 標頭，傳遞真實用戶端 IP。開啟後每個請求都新建連線，也不再用 HTTP/2 連線後端。後端是 Gately 時，需在其監聽上開啟接收 PROXY 協定，並把本機加入可信 PROXY 來源。 | 後端不讀 HTTP 標頭但支援 PROXY 協定，如另一層 Gately、haproxy、開啟 `proxy_protocol` 的 nginx。後端未設定接收時所有請求都會失敗，不確定時保持關閉 |
 | 使用造訪網域作為 SNI | 僅 HTTPS 後端：交握時傳送訪客使用的網域並據此驗證憑證，相當於 nginx 的 `proxy_ssl_server_name on; proxy_ssl_name $host` | 後端在同一連接埠按網域選擇憑證或分流，如 frp 的 `vhost_https`、託管多個 HTTPS 站點的 nginx。每個後端使用獨立的連線池，不同網域的連線不會互相重用 |
 
 常見組合：

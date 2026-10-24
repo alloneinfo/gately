@@ -28,7 +28,7 @@
     "trapHits": "Acionamentos de armadilha",
     "scanHits": "Varreduras detectadas",
     "disabledTitle": "A sincronização com o firewall está desligada",
-    "disabledHint": "Os bloqueios valem só para os serviços do Gately (encaminhamento de portas, serviço web, STUN, WebDAV, FTP e painel). O próprio Gately escuta nas portas armadilha e a detecção de varredura fica indisponível. Ative em Configurações.",
+    "disabledHint": "Os bloqueios valem só para os serviços do Gately (encaminhamento de portas, serviço web, STUN, WebDAV, FTP, SMB e painel). O próprio Gately escuta nas portas armadilha e a detecção de varredura fica indisponível. Ative em Configurações.",
     "reasonOS": "Este sistema não tem nftables",
     "hintOS": "A sincronização com o firewall só funciona no Linux. Os bloqueios continuam valendo para os serviços do Gately, o próprio Gately escuta nas portas armadilha e a detecção de varredura fica indisponível.",
     "reasonMissing": "Comando nft não encontrado",

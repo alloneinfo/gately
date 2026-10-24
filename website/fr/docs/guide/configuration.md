@@ -53,7 +53,7 @@ Les journaux d'exécution du système et de chaque module sont écrits par défa
 - Effacer les journaux d'un module dans l'interface supprime aussi ses fichiers ;
 - Les sauvegardes de configuration n'incluent ni `logs/` ni le journal d'audit `audit.log`.
 
-### Consulter et filtrer
+### Consulter et filtrer {#log-filter}
 
 La page Journaux système et la carte de journaux en bas de chaque page de module utilisent le même visionneur. Les conditions suivantes se combinent ; les modifications s'appliquent immédiatement et seules les nouvelles entrées correspondantes sont ajoutées :
 

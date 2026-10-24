@@ -44,7 +44,7 @@
 | `listenIp` | 비어 있음 | 수신 주소이며 비우면 모든 주소에서 수신합니다 |
 | `port` | 445 | 수신 포트. Windows 는 445 에만 연결합니다. fnOS, Synology 등 NAS 에 기본 탑재된 Samba 가 445 를 사용 중이면 다른 포트를 사용하세요. macOS, Linux 와 대부분의 플레이어는 주소에 포트를 지정할 수 있습니다 |
 | `requireEncryption` | 꺼짐 | 모든 연결에 SMB 3 암호화를 요구합니다. SMB 2 만 지원하는 오래된 기기와 일부 TV 는 연결할 수 없습니다 |
-| `mdns` | 꺼짐 | Bonjour 로 서비스를 알려 macOS Finder 의 '네트워크' 에 표시합니다 |
+| `mdns` | 꺼짐 | Bonjour 로 서비스를 알려 macOS Finder 의 '네트워크' 에 표시합니다. Docker에서는 host 네트워크일 때만 동작합니다 |
 | `users` | 없음 | 다중 사용자이며 필드는 WebDAV 와 같은 `name`, `password`, `root`, `readOnly` 또는 `mounts` 입니다. 사용자 이름은 대소문자를 구분하지 않으며 중복될 수 없습니다 |
 
 공유는 사용자별로 나뉘며, 로그인한 사용자는 자신의 공유만 보고 연결할 수 있습니다.
@@ -59,6 +59,8 @@
 - Windows: 파일 탐색기 주소 표시줄에 `\\호스트\공유이름` 을 입력하거나 `net use Z: \\호스트\공유이름 /user:사용자이름` 을 실행합니다
 - macOS: Finder 의 '이동 → 서버에 연결' 에서 `smb://호스트:포트/공유이름` 을 입력합니다(445 포트는 생략 가능)
 - Linux: `mount -t cifs //호스트/공유이름 /mnt -o username=사용자이름,port=포트`
+
+클라이언트가 연결되지 않거나 인증에 실패하면 환경 변수 `GATELY_SMB_DEBUG=1`을 설정하고 Gately를 다시 시작하세요. 프로토콜 디버그 로그가 실행 로그에 기록됩니다. 확인이 끝나면 변수를 제거하세요.
 
 ## 스토리지 마운트
 

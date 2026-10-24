@@ -44,7 +44,7 @@ Configurez-le dans « Service SMB » du groupe « Services de fichiers » pour p
 | `listenIp` | Vide | Adresse d'écoute ; laissez vide pour écouter sur toutes les adresses |
 | `port` | 445 | Port d'écoute. Windows se connecte uniquement au 445 ; si le Samba fourni avec un NAS comme fnOS ou Synology utilise déjà le 445, choisissez un autre port, que macOS, Linux et la plupart des lecteurs peuvent indiquer dans l’adresse |
 | `requireEncryption` | Désactivé | Exige le chiffrement SMB 3 pour chaque connexion ; les anciens appareils et certains téléviseurs limités à SMB 2 ne pourront plus se connecter |
-| `mdns` | Désactivé | Annonce le service via Bonjour pour qu’il apparaisse dans Réseau du Finder de macOS |
+| `mdns` | Désactivé | Annonce le service via Bonjour pour qu’il apparaisse dans Réseau du Finder de macOS ; sous Docker, cela ne fonctionne qu'en réseau host |
 | `users` | Aucun | Plusieurs utilisateurs avec les mêmes champs que WebDAV : `name`, `password`, `root`, `readOnly` ou `mounts` ; les noms d’utilisateur sont insensibles à la casse et uniques |
 
 Les partages appartiennent aux utilisateurs, et un utilisateur connecté ne voit et n’ouvre que les siens :
@@ -59,6 +59,8 @@ Les noms d’utilisateur et de partage ne peuvent pas contenir `" / \ [ ] : ; | 
 - Windows : saisissez `\\hôte\partage` dans la barre d’adresse de l’Explorateur, ou exécutez `net use Z: \\hôte\partage /user:utilisateur`
 - macOS : dans le Finder, choisissez Aller → Se connecter au serveur et saisissez `smb://hôte:port/partage` (le port peut être omis pour 445)
 - Linux : `mount -t cifs //hôte/partage /mnt -o username=utilisateur,port=port`
+
+Pour diagnostiquer un client qui n'arrive pas à se connecter ou à s'authentifier, définissez la variable d'environnement `GATELY_SMB_DEBUG=1` et redémarrez Gately : les journaux de débogage du protocole sont écrits dans le journal d'exécution. Retirez la variable une fois terminé.
 
 ## Montages de stockage
 

@@ -6,6 +6,7 @@ A web application firewall based on [Coraza](https://coraza.io/) and OWASP CRS v
 
 - Built-in OWASP CRS v4 rule set, with rule files that can be enabled individually;
 - Custom SecLang rules;
+- Rule groups can be reordered; match logs record the client IP, domain, path and rule ID, and can be filtered by domain, IP or keywords;
 - Blocking mode and detection-only mode;
 - Adjustable request body inspection limit: over the limit, reject the request or inspect only the first part; request body inspection can be skipped by path;
 - WebDAV compatibility mode: allows the methods, headers and any upload content type used by cloud drives and WebDAV;
@@ -16,6 +17,14 @@ A web application firewall based on [Coraza](https://coraza.io/) and OWASP CRS v
 1. For a new site, start with "Detect only" and watch the logs for a while to confirm there are no false positives;
 2. Adjust rule files or add custom exceptions for any false positives;
 3. Then switch to "Block".
+
+## Rule group order
+
+The rule groups of an instance load from top to bottom; use the move up and move down buttons to reorder them. Within the same phase, earlier rules run first:
+
+- Blocking rules (deny and the like) work in any position;
+- Runtime allow or exclusion rules (`allow`, `ctl:ruleRemoveById`, `ctl:ruleRemoveTargetById`, etc.) must sit above the OWASP CRS group, or CRS may block the request first;
+- Configuration-time directives such as `SecRuleRemoveById` and `SecRuleUpdateTargetById` only affect rules that are already loaded, so they must sit below the CRS group; above it they have no effect.
 
 ## Sites that take large uploads
 

@@ -53,7 +53,7 @@ Os logs de execução do sistema e de cada módulo são gravados por padrão em 
 - Limpar os logs de um módulo na interface também apaga os arquivos dele;
 - Os backups de configuração não incluem `logs/` nem o log de auditoria `audit.log`.
 
-### Visualizar e filtrar
+### Visualizar e filtrar {#log-filter}
 
 A página Logs do sistema e o cartão de logs no fim de cada página de módulo usam o mesmo visualizador. As condições abaixo podem ser combinadas; as mudanças valem na hora e só entram as novas entradas que correspondem:
 

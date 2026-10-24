@@ -52,10 +52,8 @@ func (s *Site) validateLocations() error {
 			}
 		}
 		l.RequestHeaders = cleanList(l.RequestHeaders)
-		for _, h := range l.RequestHeaders {
-			if k, _, ok := strings.Cut(h, ":"); !ok || strings.TrimSpace(k) == "" {
-				return fmt.Errorf("请求头格式应为 Key: Value，实际 %q", h)
-			}
+		if err := validateHeaderLines(l.RequestHeaders); err != nil {
+			return err
 		}
 		if len(l.Targets) == 0 && len(l.RequestHeaders) == 0 {
 			return fmt.Errorf("路径 %s 需要填写后端或请求头", l.Prefix)

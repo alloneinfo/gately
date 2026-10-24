@@ -44,7 +44,7 @@
   "deleteRuleSet": "删除规则组",
   "moveUp": "上移",
   "moveDown": "下移",
-  "customHelp": "规则组从上到下加载，同一阶段内排在前面的先执行。拦截规则放在哪里都会生效；放行或排除规则（allow、ctl:ruleRemoveById 等）需放在 OWASP CRS 规则组之前，否则请求可能已被 CRS 拦截",
+  "customHelp": "规则组从上到下加载，同一阶段内排在前面的先执行。拦截规则放在哪里都会生效；运行期的放行规则（allow、ctl:ruleRemoveById 等）需放在 OWASP CRS 规则组之前，否则请求可能已被 CRS 拦截；SecRuleRemoveById、SecRuleUpdateTargetById 等配置期指令只作用于已加载的规则，需放在 CRS 规则组之后",
   "crsPlaceholder": "留空表示启用全部规则文件",
   "addRuleSet": "添加规则组",
   "defaultRuleSetRemark": "OWASP 核心规则",

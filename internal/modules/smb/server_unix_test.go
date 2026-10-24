@@ -4,6 +4,7 @@ package smb
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"io"
 	"log"
@@ -22,6 +23,7 @@ import (
 
 	"github.com/wangwanjie/gately/internal/banlist"
 	"github.com/wangwanjie/gately/internal/config"
+	"github.com/wangwanjie/gately/internal/gosamba/parent"
 	"github.com/wangwanjie/gately/internal/logbuf"
 	"github.com/wangwanjie/gately/internal/module"
 	"github.com/wangwanjie/gately/internal/mountfs"
@@ -338,5 +340,99 @@ func TestMDNSNames(t *testing.T) {
 		if instance != c.instance || host != c.host || len(instance) > 63 || len(host) > 63 {
 			t.Errorf("mdnsNames(%q) = %q, %q", c.in, instance, host)
 		}
+	}
+}
+
+// TestCloseReleasesDurableHandles 验证服务关闭（保存配置时的重启）会关闭为断线续用保留的句柄，
+// 不必等到 GC 才释放文件描述符与锁。
+func TestCloseReleasesDurableHandles(t *testing.T) {
+	m, _ := startTestModule(t, Settings{Users: []User{{Name: "u", Password: "p", Root: t.TempDir()}}})
+	f, err := os.CreateTemp(t.TempDir(), "durable-*.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var cg, crg [16]byte
+	crg[0] = 1
+	m.mu.Lock()
+	srv := m.srv
+	srv.durable.Register(cg, crg, &parent.Open{File: f}, time.Minute, "u", "u")
+	srv.durable.Detach(cg, crg)
+	m.restartLocked()
+	m.mu.Unlock()
+	if err := f.Close(); err == nil {
+		t.Fatal("重启后旧服务保留的句柄应已关闭")
+	}
+}
+
+// TestStatusAfterListenerFailure 验证监听不可恢复地失败后状态不再显示为运行中，并带上错误。
+func TestStatusAfterListenerFailure(t *testing.T) {
+	m, _ := startTestModule(t, Settings{Users: []User{{Name: "u", Password: "p", Root: t.TempDir()}}})
+	m.mu.Lock()
+	running, msg := m.statusLocked()
+	m.mu.Unlock()
+	if !running || msg != "" {
+		t.Fatalf("刚启动应为运行中: %v %q", running, msg)
+	}
+	// 绕过服务直接关闭底层监听，模拟 Accept 永久失败
+	m.mu.Lock()
+	_ = m.srv.ln.Close()
+	m.mu.Unlock()
+	deadline := time.Now().Add(2 * time.Second)
+	for {
+		m.mu.Lock()
+		running, msg = m.statusLocked()
+		m.mu.Unlock()
+		if !running {
+			break
+		}
+		if time.Now().After(deadline) {
+			t.Fatal("监听失败后状态仍为运行中")
+		}
+		time.Sleep(10 * time.Millisecond)
+	}
+	if msg == "" {
+		t.Fatal("监听失败后应返回错误信息")
+	}
+	select {
+	case <-m.srv.done:
+	case <-time.After(2 * time.Second):
+		t.Fatal("监听失败后服务循环应退出")
+	}
+}
+
+// TestInitInvalidConfig 验证读取到无效配置时不启动服务，并报告校验错误；保存有效配置后恢复正常。
+func TestInitInvalidConfig(t *testing.T) {
+	st, _ := config.Open(t.TempDir())
+	if err := st.Save(ID, Settings{Enable: true, Port: 70000, Users: []User{{Name: "u", Password: "p", Root: t.TempDir()}}}); err != nil {
+		t.Fatal(err)
+	}
+	m := New()
+	if err := m.Init(module.Env{Store: st, Logs: logbuf.New(20, log.New(io.Discard, "", 0))}); err != nil {
+		t.Fatal(err)
+	}
+	_ = m.Start(context.Background())
+	defer m.Stop()
+	m.mu.Lock()
+	running, msg := m.statusLocked()
+	srv := m.srv
+	m.mu.Unlock()
+	if srv != nil || running || msg != "端口无效" {
+		t.Fatalf("无效配置不应启动服务: srv=%v running=%v err=%q", srv != nil, running, msg)
+	}
+	if !hasLog(m, "端口无效") {
+		t.Fatal("应记录配置校验错误")
+	}
+
+	// 有效配置加载时按保存规则规范化（去掉用户名首尾空白、补默认端口）
+	st2, _ := config.Open(t.TempDir())
+	if err := st2.Save(ID, Settings{Users: []User{{Name: " u ", Password: "p", Root: "/tmp"}}}); err != nil {
+		t.Fatal(err)
+	}
+	m2 := New()
+	if err := m2.Init(module.Env{Store: st2, Logs: logbuf.New(20, log.New(io.Discard, "", 0))}); err != nil {
+		t.Fatal(err)
+	}
+	if m2.loadErr != nil || m2.settings.Users[0].Name != "u" || m2.settings.Port != DefaultPort {
+		t.Fatalf("加载时应规范化配置: %+v %v", m2.settings, m2.loadErr)
 	}
 }

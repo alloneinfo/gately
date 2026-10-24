@@ -44,7 +44,7 @@
   "deleteRuleSet": "ルールセットを削除",
   "moveUp": "上へ移動",
   "moveDown": "下へ移動",
-  "customHelp": "ルールグループは上から順に読み込まれ、同じフェーズでは上にあるものが先に実行されます。ブロックルールはどの位置でも有効です。許可・除外ルール（allow、ctl:ruleRemoveById など）は OWASP CRS グループより上に置いてください。下に置くと CRS が先にリクエストをブロックすることがあります",
+  "customHelp": "ルールグループは上から順に読み込まれ、同じフェーズでは先にあるルールから実行されます。ブロックルールはどこに置いても有効です。実行時の許可ルール（allow、ctl:ruleRemoveById など）は OWASP CRS グループより上に置く必要があり、そうしないと先に CRS にブロックされることがあります。SecRuleRemoveById、SecRuleUpdateTargetById などの設定時ディレクティブは読み込み済みのルールにだけ作用するため、CRS グループより下に置きます",
   "crsPlaceholder": "空欄ですべてのルールファイルを有効化",
   "addRuleSet": "ルールセットを追加",
   "defaultRuleSetRemark": "OWASP コアルール",

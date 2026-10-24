@@ -44,7 +44,7 @@
   "deleteRuleSet": "Eliminar conjunto de reglas",
   "moveUp": "Subir",
   "moveDown": "Bajar",
-  "customHelp": "Los grupos de reglas se cargan de arriba abajo y, dentro de la misma fase, las reglas superiores se ejecutan primero. Las reglas de bloqueo funcionan en cualquier posición; las reglas de permiso o exclusión (allow, ctl:ruleRemoveById, etc.) deben ir encima del grupo OWASP CRS, o CRS puede bloquear la solicitud antes",
+  "customHelp": "Los grupos de reglas se cargan de arriba abajo y, dentro de la misma fase, las reglas anteriores se ejecutan primero. Las reglas de bloqueo funcionan en cualquier posición; las reglas de permiso en tiempo de ejecución (allow, ctl:ruleRemoveById, etc.) deben ir encima del grupo OWASP CRS o CRS puede bloquear la solicitud antes; las directivas de configuración como SecRuleRemoveById y SecRuleUpdateTargetById solo afectan a reglas ya cargadas, así que van debajo del grupo CRS",
   "crsPlaceholder": "Déjalo vacío para activar todos los archivos de reglas",
   "addRuleSet": "Añadir conjunto de reglas",
   "defaultRuleSetRemark": "OWASP Core Rules",

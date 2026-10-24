@@ -31,7 +31,7 @@
     "authorization": "Access the backend with fixed credentials",
     "xApiKey": "Access the backend with a fixed API key",
     "userAgent": "Replace the client User-Agent",
-    "acceptEncoding": "Remove or set to identity to get uncompressed responses from the backend",
+    "acceptEncoding": "Set to identity to get uncompressed responses from the backend; removing it does not help, gzip is added back automatically",
     "origin": "Remove to stop backends rejecting requests from a different origin (e.g. WebSocket)",
     "referer": "Hide the referring page from the backend",
     "cookie": "Do not send client cookies to the backend",

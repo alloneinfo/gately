@@ -6,6 +6,7 @@ Un cortafuegos de aplicaciones web basado en [Coraza](https://coraza.io/) y OWAS
 
 - Conjunto de reglas OWASP CRS v4 integrado, con archivos de reglas que se pueden activar individualmente;
 - Reglas SecLang personalizadas;
+- Los grupos de reglas se pueden reordenar; los registros de coincidencias guardan la IP del cliente, el dominio, la ruta y el ID de regla, y se pueden filtrar por dominio, IP o palabras clave;
 - Modo de bloqueo y modo de solo detección;
 - Límite de inspección del cuerpo de la solicitud ajustable: al superarlo se rechaza la solicitud o se inspecciona solo la primera parte; también se puede omitir la inspección del cuerpo por ruta;
 - Modo de compatibilidad con WebDAV: permite los métodos, las cabeceras y cualquier tipo de contenido de subida que usan las nubes personales y WebDAV;
@@ -16,6 +17,14 @@ Un cortafuegos de aplicaciones web basado en [Coraza](https://coraza.io/) y OWAS
 1. En un sitio nuevo, empieza con «Solo detectar» y observa los registros durante un tiempo para confirmar que no hay falsos positivos;
 2. Ajusta los archivos de reglas o añade excepciones personalizadas para los falsos positivos;
 3. Después cambia a «Bloquear».
+
+## Orden de los grupos de reglas
+
+Los grupos de reglas de una instancia se cargan de arriba abajo; usa los botones subir y bajar para reordenarlos. Dentro de la misma fase, las reglas anteriores se ejecutan primero:
+
+- Las reglas de bloqueo (deny y similares) funcionan en cualquier posición;
+- Las reglas de permiso o exclusión en tiempo de ejecución (`allow`, `ctl:ruleRemoveById`, `ctl:ruleRemoveTargetById`, etc.) deben ir encima del grupo OWASP CRS, o CRS puede bloquear la solicitud antes;
+- Las directivas de configuración como `SecRuleRemoveById` y `SecRuleUpdateTargetById` solo afectan a reglas ya cargadas, así que deben ir debajo del grupo CRS; encima no tienen efecto.
 
 ## Sitios con subidas de archivos grandes
 

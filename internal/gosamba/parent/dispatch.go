@@ -1,4 +1,6 @@
-// Gately 修改：按用户解析共享、签名校验改用 Session.verifySigned（见 parent/gately.go）。
+// Gately 修改：按用户解析共享、签名校验改用 Session.verifySigned、签名密钥经 signingKey() 加锁读取（见 parent/gately.go）；仅在 Linux 与 macOS 编译（构建约束）。
+
+//go:build linux || darwin
 
 package parent
 
@@ -411,7 +413,8 @@ func (d *Dispatcher) Dispatch(rw io.ReadWriter, hdr smb2.Header, body, frame []b
 	// keys (they opted out of per-session crypto), so the requirements apply
 	// only to key-bearing (non-guest) sessions; a guest_ok share is an
 	// explicit decision to accept unauthenticated traffic.
-	if !sess.IsGuest && len(sess.SigningKey) > 0 {
+	// Gately：签名密钥可能被会话认证流程并发写入，经加锁的 signingKey() 读取
+	if !sess.IsGuest && len(sess.signingKey()) > 0 {
 		// Require encryption for every message that can carry share data. The
 		// no-data control commands are exempt: TREE_CONNECT must precede the
 		// client learning the share's encryption policy, and ECHO/LOGOFF/

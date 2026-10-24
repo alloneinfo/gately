@@ -1,3 +1,7 @@
+// Gately 修改：仅在 Linux 与 macOS 编译（构建约束）。
+
+//go:build linux || darwin
+
 package parent
 
 // sharedLockManager is the process-global byte-range lock manager. On darwin it

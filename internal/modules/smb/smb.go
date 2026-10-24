@@ -154,6 +154,8 @@ type Module struct {
 	settings Settings
 	srv      *server
 	err      string
+	// loadErr 为启动时读取到的配置未通过校验的错误，此时不启动服务，直到保存一份有效配置
+	loadErr error
 }
 
 // New 创建模块。
@@ -169,8 +171,20 @@ func (m *Module) Title() string { return "SMB 服务" }
 func (m *Module) Init(env module.Env) error {
 	m.store, m.logs = env.Store, env.Logs
 	m.settings.Port = DefaultPort
-	_, err := m.store.Load(ID, &m.settings)
-	return err
+	if _, err := m.store.Load(ID, &m.settings); err != nil {
+		return err
+	}
+	// 配置文件可能被手工修改或来自旧版本，按保存时同样的规则校验并规范化；
+	// 校验在副本上进行，失败时保留原配置供界面展示与修改，但不启动服务，避免监听到意外的端口或地址
+	s := m.settings
+	s.Users = append([]User(nil), m.settings.Users...)
+	if err := s.Validate(); err != nil {
+		m.loadErr = err
+		m.logs.Add(logbuf.LevelWarn, "", err.Error())
+		return nil
+	}
+	m.settings = s
+	return nil
 }
 
 // Start 实现 module.Module。
@@ -202,6 +216,10 @@ func (m *Module) restartLocked() {
 	if !m.settings.Enable {
 		return
 	}
+	if m.loadErr != nil {
+		m.err = m.loadErr.Error()
+		return
+	}
 	srv, err := startServer(m.settings, m.logs)
 	if err != nil {
 		m.err = err.Error()
@@ -222,7 +240,8 @@ func (m *Module) Routes(r module.Router) {
 		for i := range s.Users {
 			s.Users[i].Password = crud.Mask(s.Users[i].Password)
 		}
-		httpx.OK(w, map[string]any{"settings": s, "running": m.srv != nil, "error": m.err, "supported": supported})
+		running, errMsg := m.statusLocked()
+		httpx.OK(w, map[string]any{"settings": s, "running": running, "error": errMsg, "supported": supported})
 	})
 	r.HandleFunc("PUT /settings", func(w http.ResponseWriter, req *http.Request) {
 		var s Settings
@@ -232,13 +251,7 @@ func (m *Module) Routes(r module.Router) {
 		}
 		m.mu.Lock()
 		defer m.mu.Unlock()
-		old := map[string]string{}
-		for _, u := range m.settings.Users {
-			old[u.Name] = u.Password
-		}
-		for i := range s.Users {
-			crud.KeepSecret(old[s.Users[i].Name], &s.Users[i].Password)
-		}
+		keepPasswords(m.settings.Users, s.Users)
 		if err := s.Validate(); err != nil {
 			httpx.Error(w, http.StatusBadRequest, "%v", err)
 			return
@@ -248,7 +261,27 @@ func (m *Module) Routes(r module.Router) {
 			return
 		}
 		m.settings = s
+		m.loadErr = nil
 		m.restartLocked()
-		httpx.OK(w, map[string]any{"running": m.srv != nil, "error": m.err})
+		running, errMsg := m.statusLocked()
+		httpx.OK(w, map[string]any{"running": running, "error": errMsg})
 	})
+}
+
+// statusLocked 返回服务是否在运行与错误信息。服务启动后监听可能不可恢复地失败，
+// 因此以服务循环是否存活为准，而不仅仅是 m.srv 是否存在。
+func (m *Module) statusLocked() (bool, string) {
+	if m.srv == nil {
+		return false, m.err
+	}
+	running, err := m.srv.Status()
+	if !running && err != nil && m.err == "" {
+		return false, err.Error()
+	}
+	return running, m.err
+}
+
+// keepPasswords 把提交中仍为占位符的密码恢复为原密码；用户没有固定 ID，改名时的匹配规则见 crud.KeepSecrets。
+func keepPasswords(old, updated []User) {
+	crud.KeepSecrets(old, updated, func(u *User) string { return u.Name }, func(u *User) *string { return &u.Password })
 }

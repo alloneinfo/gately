@@ -6,6 +6,7 @@ Eine Web Application Firewall auf Basis von [Coraza](https://coraza.io/) und OWA
 
 - Integriertes OWASP-CRS-v4-Regelwerk, dessen Regeldateien einzeln aktiviert werden können;
 - Eigene SecLang-Regeln;
+- Regelgruppen lassen sich umsortieren; Treffer-Logs enthalten Client-IP, Domain, Pfad und Regel-ID und lassen sich nach Domain, IP oder Stichwörtern filtern;
 - Blockiermodus und reiner Erkennungsmodus;
 - Einstellbares Prüflimit für den Request-Body: Größere Anfragen werden abgelehnt oder nur im vorderen Teil geprüft; die Body-Prüfung lässt sich pro Pfad überspringen;
 - WebDAV-Kompatibilitätsmodus: erlaubt die Methoden, Header und beliebigen Upload-Inhaltstypen, die Cloud-Speicher und WebDAV verwenden;
@@ -16,6 +17,14 @@ Eine Web Application Firewall auf Basis von [Coraza](https://coraza.io/) und OWA
 1. Starten Sie bei einer neuen Site mit „Nur erkennen“ und beobachten Sie die Logs eine Weile, um Fehlalarme auszuschließen;
 2. Passen Sie bei Fehlalarmen die Regeldateien an oder fügen Sie eigene Ausnahmen hinzu;
 3. Wechseln Sie danach auf „Blockieren“.
+
+## Reihenfolge der Regelgruppen
+
+Die Regelgruppen einer Instanz werden von oben nach unten geladen; mit den Schaltflächen nach oben und nach unten lässt sich die Reihenfolge ändern. Innerhalb derselben Phase laufen frühere Regeln zuerst:
+
+- Sperrregeln (deny usw.) wirken an jeder Position;
+- Laufzeit-Freigaben oder -Ausnahmen (`allow`, `ctl:ruleRemoveById`, `ctl:ruleRemoveTargetById` usw.) müssen über der OWASP-CRS-Gruppe stehen, sonst kann CRS die Anfrage vorher sperren;
+- Konfigurationsdirektiven wie `SecRuleRemoveById` und `SecRuleUpdateTargetById` wirken nur auf bereits geladene Regeln und müssen daher unter der CRS-Gruppe stehen; darüber bleiben sie wirkungslos.
 
 ## Sites mit großen Uploads
 

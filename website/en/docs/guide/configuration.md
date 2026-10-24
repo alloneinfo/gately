@@ -53,7 +53,7 @@ System and module runtime logs are written to `logs/` in the configuration direc
 - Clearing a module's logs in the UI also deletes its files;
 - Configuration backups do not include `logs/` or the audit log `audit.log`.
 
-### Viewing and filtering
+### Viewing and filtering {#log-filter}
 
 The System Logs page and the log card at the bottom of each module page use the same log viewer. The following conditions can be combined; changes apply immediately, and new entries are appended only when they match:
 

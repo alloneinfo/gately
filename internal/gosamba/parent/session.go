@@ -1,4 +1,6 @@
-// Gately 修改：按客户端请求的格式回复裸 NTLMSSP 或 SPNEGO；AES-256 时另备 L=256 的签名密钥（见 parent/gately.go）。
+// Gately 修改：按客户端请求的格式回复裸 NTLMSSP 或 SPNEGO；AES-256 时另备 L=256 的签名密钥，签名密钥的读写都经过 signingMu（见 parent/gately.go）；仅在 Linux 与 macOS 编译（构建约束）。
+
+//go:build linux || darwin
 
 package parent
 
@@ -752,6 +754,8 @@ func (h *SessionSetupHandler) handleType3(rw io.ReadWriter, hdr smb2.Header, typ
 			return nil, h.failAuth(rw, hdr, fmt.Errorf("user %q: %w", auth.UserName, err))
 		}
 
+		// 签名密钥先算到局部变量，最后在锁内一次写入：同一会话可能被其他连接（会话绑定、断线重连）并发读取
+		var signKey, signKeyAlt []byte
 		switch dialect {
 		case smb2.Dialect311:
 			preauth := sess.preauth.Sum()
@@ -764,12 +768,12 @@ func (h *SessionSetupHandler) handleType3(rw io.ReadWriter, hdr smb2.Header, typ
 			// signing and application keys stay at 128 bits for every cipher:
 			// SMB3 signing is always AES-128-CMAC/GMAC.
 			cipherBits := smb3.CipherKeyBits(uint16(h.Conn.Selection.Cipher))
-			sess.SigningKey = smb3.KDF(sessionKey, []byte("SMBSigningKey\x00"), preauth[:], 128)
+			signKey = smb3.KDF(sessionKey, []byte("SMBSigningKey\x00"), preauth[:], 128)
 			sess.S2CCipherKey = smb3.KDF(sessionKey, []byte("SMBS2CCipherKey\x00"), preauth[:], cipherBits)
 			sess.C2SCipherKey = smb3.KDF(sessionKey, []byte("SMBC2SCipherKey\x00"), preauth[:], cipherBits)
 			sess.ApplicationKey = smb3.KDF(sessionKey, []byte("SMBAppKey\x00"), preauth[:], 128)
 			if cipherBits == 256 {
-				sess.signingKeyAlt = smb3.KDF(sessionKey, []byte("SMBSigningKey\x00"), preauth[:], 256)[:16]
+				signKeyAlt = smb3.KDF(sessionKey, []byte("SMBSigningKey\x00"), preauth[:], 256)[:16]
 			}
 		case smb2.Dialect300, smb2.Dialect302:
 			// 3.0 / 3.0.2 use fixed context strings instead of preauth. 128 bits
@@ -777,15 +781,16 @@ func (h *SessionSetupHandler) handleType3(rw io.ReadWriter, hdr smb2.Header, typ
 			// the AES-256 ciphers are negotiated through a 3.1.1 negotiate
 			// context, so these dialects only ever run AES-128-CCM (which is
 			// also all Select() will choose for them).
-			sess.SigningKey = smb3.KDF(sessionKey, []byte("SMB2AESCMAC\x00"), []byte("SmbSign\x00"), 128)
+			signKey = smb3.KDF(sessionKey, []byte("SMB2AESCMAC\x00"), []byte("SmbSign\x00"), 128)
 			sess.S2CCipherKey = smb3.KDF(sessionKey, []byte("SMB2AESCCM\x00"), []byte("ServerOut\x00"), 128)
 			sess.C2SCipherKey = smb3.KDF(sessionKey, []byte("SMB2AESCCM\x00"), []byte("ServerIn \x00"), 128)
 			sess.ApplicationKey = smb3.KDF(sessionKey, []byte("SMB2APP\x00"), []byte("SmbRpc\x00"), 128)
 		default:
 			// 2.0.2 / 2.1: Session.SigningKey = SessionKey (HMAC-SHA256 signing,
 			// no SMB3 KDF). We store the 16-byte session key directly.
-			sess.SigningKey = append([]byte(nil), sessionKey...)
+			signKey = append([]byte(nil), sessionKey...)
 		}
+		sess.setSigningKeys(signKey, signKeyAlt)
 	}
 	sess.User = *user
 	sess.IsGuest = isGuest
@@ -847,7 +852,7 @@ func (h *SessionSetupHandler) handleType3(rw io.ReadWriter, hdr smb2.Header, typ
 	_ = smb2.EncodeHeader(full[:smb2.HeaderSize], respHdr)
 	copy(full[smb2.HeaderSize:], respBody)
 	if !isGuest {
-		smb3.SignMessage(uint16(h.Conn.Selection.SigningAlgo), sess.SigningKey, full)
+		smb3.SignMessage(uint16(h.Conn.Selection.SigningAlgo), sess.signingKey(), full)
 	}
 
 	if err := transport.WriteFrame(rw, full); err != nil {

@@ -15,6 +15,7 @@ import (
 	"encoding/hex"
 	"net/http"
 	"slices"
+	"strings"
 	"sync"
 
 	"github.com/wangwanjie/gately/internal/httpx"
@@ -273,5 +274,30 @@ func Mask(s string) string {
 func KeepSecret(old string, updated *string) {
 	if *updated == SecretMask {
 		*updated = old
+	}
+}
+
+// KeepSecrets 把列表中仍为占位符的密钥恢复为原值，用于按名称区分、没有独立 ID 的用户列表。
+// 先按去空白后的名称匹配；找不到时视为改名，取同一位置的原条目，但要求条目数量不变且该原条目的名称
+// 不在新列表中，避免调换顺序或删除条目时取错。仍匹配不上的占位符被清空，交由校验报错。
+func KeepSecrets[T any](old, updated []T, name func(*T) string, secret func(*T) *string) {
+	byName := map[string]string{}
+	for i := range old {
+		byName[strings.TrimSpace(name(&old[i]))] = *secret(&old[i])
+	}
+	newNames := map[string]bool{}
+	for i := range updated {
+		newNames[strings.TrimSpace(name(&updated[i]))] = true
+	}
+	for i := range updated {
+		u := &updated[i]
+		if *secret(u) != SecretMask {
+			continue
+		}
+		prev, ok := byName[strings.TrimSpace(name(u))]
+		if !ok && len(old) == len(updated) && !newNames[strings.TrimSpace(name(&old[i]))] {
+			prev = *secret(&old[i])
+		}
+		KeepSecret(prev, secret(u))
 	}
 }

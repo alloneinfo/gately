@@ -28,7 +28,7 @@
     "trapHits": "诱饵端口触发",
     "scanHits": "扫描检测触发",
     "disabledTitle": "未开启防火墙同步",
-    "disabledHint": "封禁只对 Gately 自身的服务（端口转发、Web 服务、STUN、WebDAV、FTP、管理后台）生效，诱饵端口改由 Gately 监听，端口扫描检测不可用。可在“设置”中开启。",
+    "disabledHint": "封禁只对 Gately 自身的服务（端口转发、Web 服务、STUN、WebDAV、FTP、SMB、管理后台）生效，诱饵端口改由 Gately 监听，端口扫描检测不可用。可在“设置”中开启。",
     "reasonOS": "当前系统没有 nftables",
     "hintOS": "防火墙同步只支持 Linux。封禁仍对 Gately 自身的服务生效，诱饵端口改由 Gately 监听，端口扫描检测不可用。",
     "reasonMissing": "找不到 nft 命令",

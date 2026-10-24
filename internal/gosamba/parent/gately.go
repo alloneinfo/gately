@@ -1,3 +1,5 @@
+//go:build linux || darwin
+
 package parent
 
 import (
@@ -51,4 +53,39 @@ func (s *Session) signingKey() []byte {
 	s.signingMu.Lock()
 	defer s.signingMu.Unlock()
 	return s.SigningKey
+}
+
+// setSigningKeys 在锁内写入会话签名密钥与 AES-256 时的备用密钥。
+// 会话可能已登记到跨连接共享的会话索引，读取方（签名、校验）都经 signingMu，写入也必须加锁。
+func (s *Session) setSigningKeys(key, alt []byte) {
+	s.signingMu.Lock()
+	defer s.signingMu.Unlock()
+	s.SigningKey, s.signingKeyAlt = key, alt
+}
+
+// CloseAll 关闭表中所有为断线续用保留的句柄：释放字节范围锁与共享模式占用并关闭文件，返回关闭的数量。
+// Gately 每次保存配置都会重启 SMB 服务，旧服务的句柄表不会再被任何连接使用，
+// 不主动关闭的话文件描述符与锁要等到 GC 才释放。调用方须保证使用该表的连接都已结束。
+func (t *DurableTable) CloseAll() int {
+	if t == nil {
+		return 0
+	}
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	n := 0
+	for k, e := range t.entries {
+		// 与连接收尾一致：持有句柄锁再释放，避免与仍在收尾的异步操作并发
+		unlock := lockOpenForRelease(e.open)
+		releaseOpen(e.open)
+		unlock()
+		delete(t.entries, k)
+		n++
+	}
+	return n
+}
+
+// IsTemporaryAcceptError 导出 isTemporaryAcceptError，供 Gately 判断监听是否已不可恢复地失败：
+// Serve 遇到不可恢复的 Accept 错误后要等全部连接结束才返回，调用方需要更早知道服务已停止接受连接。
+func IsTemporaryAcceptError(err error) bool {
+	return isTemporaryAcceptError(err)
 }

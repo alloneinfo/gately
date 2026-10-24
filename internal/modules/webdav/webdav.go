@@ -243,13 +243,8 @@ func (m *Module) Routes(r module.Router) {
 		}
 		m.mu.Lock()
 		defer m.mu.Unlock()
-		old := map[string]string{}
-		for _, u := range m.settings.Users {
-			old[u.Name] = u.Password
-		}
-		for i := range s.Users {
-			crud.KeepSecret(old[s.Users[i].Name], &s.Users[i].Password)
-		}
+		// 用户没有固定 ID，改名后仍按位置保留原密码，见 crud.KeepSecrets
+		crud.KeepSecrets(m.settings.Users, s.Users, func(u *User) string { return u.Name }, func(u *User) *string { return &u.Password })
 		if err := s.Validate(); err != nil {
 			httpx.Error(w, http.StatusBadRequest, "%v", err)
 			return

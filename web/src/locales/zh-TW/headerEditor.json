@@ -31,7 +31,7 @@
     "authorization": "以固定憑證存取後端",
     "xApiKey": "以固定 API 金鑰存取後端",
     "userAgent": "取代用戶端的 User-Agent",
-    "acceptEncoding": "刪除或設為 identity 時後端回傳未壓縮內容",
+    "acceptEncoding": "設為 identity 時後端回傳未壓縮內容；留空刪除時系統會自動補上 gzip，後端仍會壓縮",
     "origin": "刪除後可避免後端因來源網域不同而拒絕請求（如 WebSocket）",
     "referer": "不向後端透露來源頁面",
     "cookie": "不向後端傳送用戶端 Cookie",

@@ -72,8 +72,13 @@ func clientAddr(r *http.Request) netip.AddrPort {
 
 // reqLog 返回附带本次请求结构化字段（客户端 IP、域名、站点、方法、路径）的写入器，日志页可按这些字段过滤。
 func (h *siteHandler) reqLog(r *http.Request) *logbuf.Logger {
+	// 地址无效（例如经 unix socket 进入）时 String() 会得到 "invalid IP"，留空让 With 忽略该字段
+	ip := ""
+	if a := clientAddr(r).Addr(); a.IsValid() {
+		ip = a.String()
+	}
 	return h.log.With(logbuf.Fields{
-		logbuf.FieldIP:     clientAddr(r).Addr().String(),
+		logbuf.FieldIP:     ip,
 		logbuf.FieldHost:   hostOnly(r.Host),
 		logbuf.FieldSite:   h.site.Name,
 		logbuf.FieldMethod: r.Method,

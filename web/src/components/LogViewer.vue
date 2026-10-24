@@ -132,6 +132,9 @@ let loaded = false
 let keep = MAX
 // 清空或修改过滤条件时递增，丢弃之前发出、之后才返回的请求结果
 let generation = 0
+// 正在进行首次拉取的 generation，-1 表示没有。reload 直接调用 poll，绕过了 usePolling 的防重入，
+// 首次拉取未返回时轮询触发的 poll 据此跳过，避免同一组条件重复发出首次查询
+let initialGen = -1
 
 const sourceOptions = computed(() => {
   const list = [...seenSources.value]
@@ -141,8 +144,9 @@ const sourceOptions = computed(() => {
   return list
 })
 
-// 高级过滤项中已填写的数量，显示在按钮上
-const advancedCount = computed(() => [filters.ip, kinds.value.host && filters.host, kinds.value.status && filters.status, filters.range !== 'all'].filter(Boolean).length)
+// 高级过滤项中已填写的数量，显示在按钮上；自定义时间范围清空了日期时不会发出时间条件，不计入
+const rangeActive = computed(() => (filters.range === 'custom' ? !!filters.custom?.[0] : filters.range !== 'all'))
+const advancedCount = computed(() => [filters.ip, kinds.value.host && filters.host, kinds.value.status && filters.status, rangeActive.value].filter(Boolean).length)
 const active = computed(() => filters.level !== 'all' || !!filters.source || !!filters.q.trim() || advancedCount.value > 0)
 
 // filterQuery 把过滤条件拼成查询参数（不含 since/before/limit）
@@ -177,16 +181,44 @@ function filterQuery(): string {
   return s ? `&${s}` : ''
 }
 
-// 与后端一致的关键词拆分：空格分隔，双引号包住短语，前缀 - 为排除词（排除词不高亮）
+// 关键词拆分，逐字符照搬后端 logbuf.ParseKeywords，保证高亮的词与实际过滤的词一致：
+// 空格、制表符与全角空格分隔；双引号开始短语（可以出现在词中间），再遇到双引号时结束当前词，未闭合时到末尾为止；
+// 词首的 - 表示排除（排除词不高亮），单独一个 - 不构成词
 function highlightTerms(): string[] {
   const out: string[] = []
-  for (const m of filters.q.matchAll(/(-?)"([^"]+)"|(-?)(\S+)/g)) {
-    const neg = m[1] || m[3]
-    const word = m[2] ?? m[4]
-    if (!neg && word) {
-      out.push(word.toLowerCase())
+  let cur = ''
+  let quoted = false
+  let neg = false
+  let has = false
+  const emit = () => {
+    if (has && cur && !neg) {
+      out.push(cur.toLowerCase())
+    }
+    cur = ''
+    quoted = false
+    neg = false
+    has = false
+  }
+  // for...of 按码点遍历，与 Go 的 range 字符串一致
+  for (const r of filters.q) {
+    if (r === '"') {
+      if (quoted) {
+        emit()
+      } else {
+        quoted = true
+        has = true
+      }
+    } else if (!quoted && (r === ' ' || r === '\t' || r === '\u3000')) {
+      emit()
+    } else if (r === '-' && !quoted && !has) {
+      neg = true
+      has = true
+    } else {
+      cur += r
+      has = true
     }
   }
+  emit()
   return out
 }
 
@@ -275,8 +307,12 @@ async function scrollToEnd() {
 async function poll() {
   const gen = generation
   const fq = filterQuery()
+  if (!loaded && initialGen === gen) {
+    return
+  }
   try {
     if (!loaded) {
+      initialGen = gen
       const list = await api.get<LogEntry[]>(`${props.url}?since=0&limit=${PAGE}${fq}`)
       if (gen !== generation) {
         return
@@ -311,6 +347,11 @@ async function poll() {
       error.value = (e as Error).message
       entries.value = []
       hasMore.value = false
+    }
+  } finally {
+    // 只清除自己设置的标记；条件已变化时新的首次拉取会设置新的 generation
+    if (initialGen === gen) {
+      initialGen = -1
     }
   }
 }
