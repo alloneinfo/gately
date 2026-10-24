@@ -29,9 +29,28 @@ Outras opções dos sites de proxy reverso:
 - Adicionar `X-Forwarded-For` / `X-Forwarded-Proto` / `X-Forwarded-Host` / `X-Forwarded-Port` e `X-Real-IP`;
 - Usar o domínio acessado como SNI (somente backends HTTPS): o handshake leva o domínio que o visitante usou e o certificado é validado com ele, como o `proxy_ssl_server_name on; proxy_ssl_name $host` do nginx. Ative quando o backend roteia por SNI, por exemplo o `vhost_https` do frp. Cada backend tem seu próprio pool de conexões, então as conexões nunca são reutilizadas entre domínios.
 
-Sites de qualquer tipo podem definir um log de acesso, cross-origin (CORS), cabeçalhos personalizados de requisição e resposta (um `Key: Value` por linha; um Value vazio remove aquele cabeçalho) e podem referenciar uma instância do [Firewall WAF](/pt-BR/docs/modules/waf) (se a instância não existir ou estiver desativada, as requisições passam direto).
+Sites de qualquer tipo podem definir um log de acesso, cross-origin (CORS), cabeçalhos personalizados de requisição e resposta (um `Key: Value` por linha; um Value vazio remove aquele cabeçalho) e podem referenciar uma instância do [Firewall WAF](/pt-BR/docs/modules/waf) (se a instância não existir ou estiver desativada, as requisições passam direto). Veja [Cabeçalhos de requisição e de resposta](#headers) para saber como editar cabeçalhos de requisição, de resposta e o Content-Type.
 
 As entradas do log de acesso registram o IP do cliente, o domínio, o nome do site e o código de status, então o log pode ser filtrado por site, código de status, IP de origem e mais; veja [visualizar e filtrar logs de execução](/pt-BR/docs/guide/configuration).
+
+### Cabeçalhos de requisição e de resposta {#headers}
+
+Configurados na aba "Cabeçalhos" do editor de sites. Cabeçalhos de requisição vão para o backend e só valem para sites de proxy reverso; cabeçalhos de resposta voltam ao cliente e valem para sites de qualquer tipo.
+
+- Edição por linha: clicar no campo do nome lista os cabeçalhos comuns e para que servem; escolher um preenche um valor comum, e o campo de valor oferece outros valores comuns. Os dois campos também aceitam texto livre. Valor vazio remove o cabeçalho, e uma linha `Key: Value` colada no campo do nome é dividida automaticamente;
+- "Adicionar cabeçalhos de segurança comuns" adiciona `X-Content-Type-Options: nosniff`, `X-Frame-Options: SAMEORIGIN` e `Referrer-Policy: strict-origin-when-cross-origin`, sem duplicar os que já existem;
+- O "Modo texto" permite colar várias linhas `Key: Value` de uma vez; o conteúdo é mantido ao voltar para a edição por linha;
+- Os cabeçalhos de requisição extras de cada caminho em "Backends por caminho" são editados da mesma forma e aplicados depois dos do site; com o mesmo nome, vale o do caminho.
+
+Cada linha recebe retorno imediato. Vermelho indica que salvar vai falhar ou o cabeçalho não terá efeito, como nome ausente, nome com espaços, dois-pontos ou outros caracteres inválidos, ou falta de dois-pontos no modo texto. Laranja indica que dá para salvar, mas o resultado pode não ser o esperado:
+
+- `Host` definido como cabeçalho de requisição não tem efeito; para reescrevê-lo, ative "Usar o endereço do backend como Host";
+- Um valor fixo em `X-Forwarded-For` ou `X-Real-IP` sobrescreve o IP real do cliente; para repassá-lo, ative "Adicionar X-Forwarded-*";
+- `Content-Length`, `Connection`, `Transfer-Encoding` e similares são gerenciados pela conexão; defini-los manualmente é ignorado ou quebra a transferência;
+- Os valores são enviados como estão, sem suporte a variáveis do nginx como `$host`; marcadores como `<token>` nos valores sugeridos precisam ser substituídos;
+- Cabeçalhos com o mesmo nome são aplicados em ordem, e vale o último.
+
+Em sites de "Texto fixo", o `Content-Type` pode ser escolhido entre os tipos comuns ou digitado. A interface verifica o formato `tipo/subtipo; parâmetro=valor`, avisa que `text/*` sem `charset` pode corromper texto não inglês e usa `text/plain; charset=utf-8` quando vazio.
 
 ## Transporte e protocolos
 

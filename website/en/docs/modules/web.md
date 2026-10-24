@@ -29,9 +29,28 @@ Other options for reverse proxy sites:
 - Add `X-Forwarded-For` / `X-Forwarded-Proto` / `X-Forwarded-Host` / `X-Forwarded-Port` and `X-Real-IP`;
 - Use the visited domain as SNI (HTTPS backends only): the handshake carries the domain the visitor used and the certificate is checked against it, like nginx `proxy_ssl_server_name on; proxy_ssl_name $host`. Turn it on when the backend routes by SNI, for example frp's `vhost_https`. Every backend has its own connection pool, so connections are never reused across domains.
 
-Sites of every type can set an access log, cross-origin (CORS), custom request and response headers (one `Key: Value` per line; an empty Value removes that header), and can reference a [WAF Firewall](/en/docs/modules/waf) instance (if the instance does not exist or is disabled, requests pass through).
+Sites of every type can set an access log, cross-origin (CORS), custom request and response headers (one `Key: Value` per line; an empty Value removes that header), and can reference a [WAF Firewall](/en/docs/modules/waf) instance (if the instance does not exist or is disabled, requests pass through). See [Request and response headers](#headers) for how request headers, response headers and Content-Type are edited.
 
 Access log entries record the client IP, domain, site name and status code, so the log can be filtered by site, status code, client IP and more; see [viewing and filtering runtime logs](/en/docs/guide/configuration).
+
+### Request and response headers {#headers}
+
+Configured on the "Headers" tab of the site editor. Request headers are sent to the backend and only apply to reverse proxy sites; response headers are returned to the client and apply to sites of every type.
+
+- Row editor: clicking the name field lists common headers and what they are for; picking one fills in a common value, and the value field offers other common values. Both fields also accept free text. An empty value removes the header, and pasting a whole `Key: Value` line into the name field splits it automatically;
+- "Add common security headers" adds `X-Content-Type-Options: nosniff`, `X-Frame-Options: SAMEORIGIN` and `Referrer-Policy: strict-origin-when-cross-origin`, skipping headers that already exist;
+- "Text mode" lets you paste several `Key: Value` lines at once; the content is kept when switching back to the row editor;
+- The extra request headers of each path in "Path backends" use the same editor and are applied after the site request headers; on a name clash the path wins.
+
+Each row gets live feedback. Red means saving fails or the header cannot take effect, such as a missing name, a name with spaces, colons or other illegal characters, or a missing colon in text mode. Orange means it can be saved but may not do what you expect:
+
+- `Host` set as a request header has no effect; to rewrite it, turn on "Use backend address as Host";
+- A fixed `X-Forwarded-For` or `X-Real-IP` overrides the real client IP; to pass the client IP, turn on "Add X-Forwarded-*";
+- `Content-Length`, `Connection`, `Transfer-Encoding` and similar headers are managed by the connection; setting them manually is ignored or breaks the transfer;
+- Values are sent as is, and nginx variables such as `$host` are not supported; placeholders such as `<token>` in preset values must be replaced;
+- Headers with the same name are applied in order, and the later one wins.
+
+For "Fixed text" sites, `Content-Type` can be picked from common types or typed in. The interface checks the `type/subtype; param=value` format, warns that non-English text may be garbled when `text/*` declares no `charset`, and uses `text/plain; charset=utf-8` when empty.
 
 ## Transport and protocols
 

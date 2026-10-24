@@ -29,9 +29,28 @@
 - 添加 `X-Forwarded-For` / `X-Forwarded-Proto` / `X-Forwarded-Host` / `X-Forwarded-Port` 与 `X-Real-IP`；
 - 使用访问域名作为 SNI（仅 HTTPS 后端）：握手时发送访客使用的域名，并按它校验证书，相当于 nginx 的 `proxy_ssl_server_name on; proxy_ssl_name $host`。后端按 SNI 分流时（例如 frp 的 `vhost_https`）需要开启。每个后端使用独立的连接池，不同域名的连接不会互相复用。
 
-所有类型的站点均可设置访问日志、跨域（CORS）、自定义请求头与响应头（每行 `Key: Value`，Value 留空表示删除该头），并可引用一个 [WAF 防火墙](/docs/modules/waf) 实例（实例不存在或停用时放行）。
+所有类型的站点均可设置访问日志、跨域（CORS）、自定义请求头与响应头（每行 `Key: Value`，Value 留空表示删除该头），并可引用一个 [WAF 防火墙](/docs/modules/waf) 实例（实例不存在或停用时放行）。请求头、响应头与 Content-Type 的编辑方式见 [请求头与响应头](#headers)。
 
 访问日志会记录客户端 IP、域名、站点名称与状态码，可在日志中按站点、状态码、来源 IP 等条件筛选，见 [运行日志的查看与筛选](/docs/guide/configuration)。
+
+### 请求头与响应头 {#headers}
+
+在站点编辑框的「请求头」页配置。请求头发往后端，只对反向代理站点生效；响应头返回给客户端，对所有类型的站点生效。
+
+- 逐行编辑：点击名称框会列出常用头及其用途，选中后自动填入常用值，值框也可以改选其他常用值；两者都可以直接手输。值留空表示删除该头，在名称框粘贴整行 `Key: Value` 会自动拆开；
+- 「添加常用安全头」补齐 `X-Content-Type-Options: nosniff`、`X-Frame-Options: SAMEORIGIN` 与 `Referrer-Policy: strict-origin-when-cross-origin`，已有的头不会重复添加；
+- 「文本模式」可一次粘贴多行 `Key: Value`，切回逐行编辑时保留内容；
+- 「分路径后端」中每个路径的附加请求头使用同样的编辑方式，在站点请求头之后应用，同名时以路径的为准。
+
+每一行下方会实时给出反馈。红色表示保存会失败或该头无法生效，如缺少名称、名称含空格或冒号等非法字符、文本模式中缺少冒号；橙色表示可以保存但结果可能不符合预期：
+
+- 请求头里设置 `Host` 不会生效，需要改写时开启「Host 使用后端地址」；
+- `X-Forwarded-For`、`X-Real-IP` 写固定值会覆盖真实客户端 IP，传递客户端 IP 请开启「添加 X-Forwarded-*」；
+- `Content-Length`、`Connection`、`Transfer-Encoding` 等由连接自动管理，手动设置会被忽略或导致传输异常；
+- 值按原样发送，不支持 nginx 的 `$host` 等变量；预设值中的 `<token>` 等占位内容需要替换；
+- 同名头按顺序设置，后面的覆盖前面的。
+
+「固定文本」站点的 `Content-Type` 可从常用类型中选择或手输，界面会检查 `类型/子类型; 参数=值` 格式；`text/*` 未声明 `charset` 时提示中文等内容可能乱码，留空时使用 `text/plain; charset=utf-8`。
 
 ## 传输与协议
 

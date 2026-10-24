@@ -29,9 +29,28 @@ Otras opciones de los sitios de proxy inverso:
 - Añadir `X-Forwarded-For` / `X-Forwarded-Proto` / `X-Forwarded-Host` / `X-Forwarded-Port` y `X-Real-IP`;
 - Usar el dominio visitado como SNI (solo backends HTTPS): el handshake lleva el dominio que usó el visitante y el certificado se verifica con él, como `proxy_ssl_server_name on; proxy_ssl_name $host` de nginx. Actívalo cuando el backend enrute por SNI, por ejemplo `vhost_https` de frp. Cada backend tiene su propio pool de conexiones, así que las conexiones nunca se reutilizan entre dominios.
 
-Los sitios de cualquier tipo pueden definir un registro de acceso, orígenes cruzados (CORS), cabeceras de petición y respuesta personalizadas (un `Clave: Valor` por línea; un Valor vacío elimina esa cabecera) y pueden hacer referencia a una instancia de [Cortafuegos WAF](/es/docs/modules/waf) (si la instancia no existe o está desactivada, las peticiones pasan sin filtrar).
+Los sitios de cualquier tipo pueden definir un registro de acceso, orígenes cruzados (CORS), cabeceras de petición y respuesta personalizadas (un `Clave: Valor` por línea; un Valor vacío elimina esa cabecera) y pueden hacer referencia a una instancia de [Cortafuegos WAF](/es/docs/modules/waf) (si la instancia no existe o está desactivada, las peticiones pasan sin filtrar). Consulta [Cabeceras de petición y de respuesta](#headers) para ver cómo se editan las cabeceras de petición, las de respuesta y el Content-Type.
 
 Las entradas del registro de acceso guardan la IP del cliente, el dominio, el nombre del sitio y el código de estado, de modo que el registro se puede filtrar por sitio, código de estado, IP de origen y más; consulte [ver y filtrar los registros de ejecución](/es/docs/guide/configuration).
+
+### Cabeceras de petición y de respuesta {#headers}
+
+Se configuran en la pestaña «Cabeceras» del editor de sitios. Las cabeceras de petición se envían al backend y solo se aplican a sitios de proxy inverso; las de respuesta se devuelven al cliente y se aplican a sitios de cualquier tipo.
+
+- Edición por filas: al hacer clic en el campo del nombre se listan las cabeceras habituales y su uso; al elegir una se rellena un valor habitual, y el campo de valor ofrece otros valores habituales. Ambos campos admiten también texto libre. Un valor vacío elimina la cabecera, y una línea `Key: Value` pegada en el campo del nombre se separa automáticamente;
+- «Añadir cabeceras de seguridad comunes» añade `X-Content-Type-Options: nosniff`, `X-Frame-Options: SAMEORIGIN` y `Referrer-Policy: strict-origin-when-cross-origin`, sin duplicar las que ya existen;
+- El «Modo texto» permite pegar varias líneas `Key: Value` de una vez; el contenido se conserva al volver a la edición por filas;
+- Las cabeceras de petición adicionales de cada ruta en «Backends por ruta» se editan igual y se aplican después de las del sitio; con el mismo nombre prevalece la de la ruta.
+
+Cada fila recibe información al instante. El rojo indica que el guardado fallará o la cabecera no surtirá efecto, como un nombre ausente, un nombre con espacios, dos puntos u otros caracteres no válidos, o la falta de dos puntos en el modo texto. El naranja indica que se puede guardar pero el resultado quizá no sea el esperado:
+
+- `Host` definido como cabecera de petición no tiene efecto; para reescribirlo, activa «Usar la dirección del backend como Host»;
+- Un valor fijo en `X-Forwarded-For` o `X-Real-IP` sobrescribe la IP real del cliente; para pasarla, activa «Añadir X-Forwarded-*»;
+- `Content-Length`, `Connection`, `Transfer-Encoding` y similares los gestiona la conexión; definirlos a mano se ignora o rompe la transferencia;
+- Los valores se envían tal cual y no se admiten variables de nginx como `$host`; los marcadores como `<token>` de los valores sugeridos deben sustituirse;
+- Las cabeceras con el mismo nombre se aplican en orden y prevalece la última.
+
+En los sitios de «Texto fijo», el `Content-Type` se elige entre los tipos habituales o se escribe a mano. La interfaz comprueba el formato `tipo/subtipo; parámetro=valor`, avisa de que un `text/*` sin `charset` puede mostrar mal el texto no inglés y usa `text/plain; charset=utf-8` si se deja vacío.
 
 ## Transporte y protocolos
 

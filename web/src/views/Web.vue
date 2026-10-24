@@ -178,23 +178,20 @@
               </el-form-item>
               <el-form-item :label="t('web.locations')">
                 <div class="locations">
-                  <div v-for="(loc, i) in site.locations" :key="i" class="location-row">
-                    <el-input v-model="loc.prefix" class="mono location-prefix" placeholder="/api/" />
-                    <ListInput
-                      v-model="loc.targets"
-                      :split="splitCsv"
-                      separator=", "
-                      class="mono location-targets"
-                      :placeholder="t('web.locationTargetsPlaceholder')"
-                    />
-                    <ListInput
-                      v-model="loc.requestHeaders"
-                      type="textarea"
-                      :autosize="{ minRows: 1, maxRows: 4 }"
-                      class="mono location-headers"
-                      :placeholder="t('web.locationHeadersPlaceholder')"
-                    />
-                    <el-button text type="danger" :icon="Trash2" @click="site.locations.splice(i, 1)" />
+                  <div v-for="(loc, i) in site.locations" :key="i" class="location">
+                    <div class="location-row">
+                      <el-input v-model="loc.prefix" class="mono location-prefix" placeholder="/api/" />
+                      <ListInput
+                        v-model="loc.targets"
+                        :split="splitCsv"
+                        separator=", "
+                        class="mono location-targets"
+                        :placeholder="t('web.locationTargetsPlaceholder')"
+                      />
+                      <el-button text type="danger" :icon="Trash2" @click="site.locations.splice(i, 1)" />
+                    </div>
+                    <!-- 该路径追加的请求头，与站点请求头共用预设和校验 -->
+                    <HeaderEditor v-model="loc.requestHeaders" direction="request" :placeholder="t('web.locationHeadersPlaceholder')" :show-help="false" />
                   </div>
                   <el-button size="small" :icon="Plus" @click="site.locations.push({ prefix: '', targets: [], requestHeaders: [] })">{{ t('web.addLocation') }}</el-button>
                   <div class="form-help">{{ t('web.locationsHelp') }}</div>
@@ -224,7 +221,7 @@
             </template>
             <template v-if="site.type === 'text'">
               <el-form-item :label="t('web.statusCode')"><el-input-number v-model="site.statusCode" :min="100" :max="599" /></el-form-item>
-              <el-form-item label="Content-Type"><el-input v-model="site.contentType" placeholder="text/plain; charset=utf-8" /></el-form-item>
+              <el-form-item label="Content-Type"><ContentTypeInput v-model="site.contentType" /></el-form-item>
               <el-form-item :label="t('web.content')"><el-input v-model="site.text" type="textarea" :rows="4" /></el-form-item>
             </template>
             <el-form-item :label="t('web.accessLog')"><el-switch v-model="site.accessLog" /></el-form-item>
@@ -293,10 +290,10 @@
           </el-tab-pane>
           <el-tab-pane :label="t('web.tabHeaders')" name="headers">
             <el-form-item :label="t('web.requestHeaders')">
-              <el-input v-model="reqHeadersText" type="textarea" :rows="3" class="mono" :placeholder="t('web.requestHeadersPlaceholder')" />
+              <HeaderEditor v-model="site.requestHeaders" direction="request" :placeholder="t('web.requestHeadersPlaceholder')" />
             </el-form-item>
             <el-form-item :label="t('web.responseHeaders')">
-              <el-input v-model="respHeadersText" type="textarea" :rows="3" class="mono" :placeholder="t('web.responseHeadersPlaceholder')" />
+              <HeaderEditor v-model="site.responseHeaders" direction="response" :placeholder="t('web.responseHeadersPlaceholder')" />
             </el-form-item>
           </el-tab-pane>
         </el-tabs>
@@ -366,6 +363,8 @@ import LogCard from '../components/LogCard.vue'
 import { useFormLayout } from '../composables/useIsMobile'
 import { useListText, splitLines } from '../composables/useListText'
 import ListInput from '../components/ListInput.vue'
+import HeaderEditor from '../components/HeaderEditor.vue'
+import ContentTypeInput from '../components/ContentTypeInput.vue'
 import { usePolling } from '../composables/usePolling'
 
 interface Site {
@@ -515,8 +514,6 @@ const targetsText = bind(() => site.value.targets, (v) => (site.value.targets = 
 const usersText = bind(() => site.value.users, (v) => (site.value.users = v))
 const oauthUsersText = bind(() => site.value.oauthUsers, (v) => (site.value.oauthUsers = v))
 const ipText = bind(() => site.value.ipList, (v) => (site.value.ipList = v))
-const reqHeadersText = bind(() => site.value.requestHeaders, (v) => (site.value.requestHeaders = v))
-const respHeadersText = bind(() => site.value.responseHeaders, (v) => (site.value.responseHeaders = v))
 const fwdHeadersText = useListText(() => site.value.forwardAuth?.copyHeaders, (v) => (site.value.forwardAuth.copyHeaders = v), {
   split: splitCsv,
   separator: ', ',
@@ -883,6 +880,14 @@ onMounted(async () => {
   gap: 8px;
   width: 100%;
 }
+.location {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--g-border);
+  border-radius: 6px;
+}
 .location-row {
   display: flex;
   gap: 6px;
@@ -892,8 +897,7 @@ onMounted(async () => {
   width: 120px;
   flex: none;
 }
-.location-targets,
-.location-headers {
+.location-targets {
   flex: 1;
   min-width: 0;
 }

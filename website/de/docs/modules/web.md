@@ -29,9 +29,28 @@ Weitere Optionen für Reverse-Proxy-Sites:
 - `X-Forwarded-For` / `X-Forwarded-Proto` / `X-Forwarded-Host` / `X-Forwarded-Port` und `X-Real-IP` hinzufügen;
 - Aufgerufene Domain als SNI verwenden (nur HTTPS-Backends): Der Handshake trägt die vom Besucher verwendete Domain, und das Zertifikat wird dagegen geprüft, wie bei nginx `proxy_ssl_server_name on; proxy_ssl_name $host`. Aktivieren Sie die Option, wenn das Backend nach SNI routet, zum Beispiel bei `vhost_https` von frp. Jedes Backend hat seinen eigenen Verbindungspool, daher werden Verbindungen nie domainübergreifend wiederverwendet.
 
-Sites jedes Typs können ein Zugriffslog, Cross-Origin (CORS) sowie eigene Request- und Response-Header festlegen (je Zeile ein `Key: Value`; ein leerer Value entfernt den Header) und auf eine Instanz der [WAF-Firewall](/de/docs/modules/waf) verweisen (existiert die Instanz nicht oder ist sie deaktiviert, werden Anfragen durchgelassen).
+Sites jedes Typs können ein Zugriffslog, Cross-Origin (CORS) sowie eigene Request- und Response-Header festlegen (je Zeile ein `Key: Value`; ein leerer Value entfernt den Header) und auf eine Instanz der [WAF-Firewall](/de/docs/modules/waf) verweisen (existiert die Instanz nicht oder ist sie deaktiviert, werden Anfragen durchgelassen). Wie Anfrage-Header, Antwort-Header und Content-Type bearbeitet werden, steht unter [Anfrage- und Antwort-Header](#headers).
 
 Einträge im Zugriffslog enthalten Client-IP, Domain, Site-Name und Statuscode, sodass sich das Protokoll nach Site, Statuscode, Quell-IP und mehr filtern lässt; siehe [Laufzeitprotokolle anzeigen und filtern](/de/docs/guide/configuration).
+
+### Anfrage- und Antwort-Header {#headers}
+
+Werden im Tab „Header“ des Site-Editors eingestellt. Anfrage-Header gehen an das Backend und wirken nur bei Reverse-Proxy-Sites; Antwort-Header gehen an den Client und wirken bei Sites jedes Typs.
+
+- Zeilenweise Bearbeitung: Ein Klick ins Namensfeld listet gängige Header mit ihrem Zweck; nach der Auswahl wird ein typischer Wert eingetragen, und das Wertfeld bietet weitere typische Werte an. Beide Felder erlauben auch freie Eingabe. Ein leerer Wert entfernt den Header, und eine ganze Zeile `Key: Value` im Namensfeld wird automatisch aufgeteilt;
+- „Gängige Sicherheits-Header hinzufügen“ ergänzt `X-Content-Type-Options: nosniff`, `X-Frame-Options: SAMEORIGIN` und `Referrer-Policy: strict-origin-when-cross-origin`; bereits vorhandene Header werden übersprungen;
+- Im „Textmodus“ lassen sich mehrere Zeilen `Key: Value` auf einmal einfügen; beim Zurückwechseln zur zeilenweisen Bearbeitung bleibt der Inhalt erhalten;
+- Die zusätzlichen Anfrage-Header der einzelnen Pfade unter „Backends pro Pfad“ werden genauso bearbeitet und nach den Anfrage-Headern der Site angewendet; bei gleichem Namen gilt der Pfad.
+
+Unter jeder Zeile erscheint sofort eine Rückmeldung. Rot heißt, dass das Speichern fehlschlägt oder der Header nicht wirken kann, etwa ein fehlender Name, ein Name mit Leerzeichen, Doppelpunkten oder anderen unzulässigen Zeichen oder ein fehlender Doppelpunkt im Textmodus. Orange heißt, dass gespeichert werden kann, das Ergebnis aber vielleicht nicht den Erwartungen entspricht:
+
+- `Host` als Anfrage-Header wirkt nicht; zum Umschreiben „Backend-Adresse als Host verwenden“ einschalten;
+- Ein fester `X-Forwarded-For`- oder `X-Real-IP`-Wert überschreibt die echte Client-IP; um sie weiterzugeben, „X-Forwarded-* hinzufügen“ einschalten;
+- `Content-Length`, `Connection`, `Transfer-Encoding` und ähnliche Header verwaltet die Verbindung; manuelles Setzen wird ignoriert oder stört die Übertragung;
+- Werte werden unverändert gesendet, nginx-Variablen wie `$host` werden nicht unterstützt; Platzhalter wie `<token>` in Vorgabewerten müssen ersetzt werden;
+- Gleichnamige Header werden der Reihe nach gesetzt, der spätere gilt.
+
+Bei „Fester Text“-Sites lässt sich `Content-Type` aus gängigen Typen wählen oder frei eingeben. Die Oberfläche prüft das Format `Typ/Subtyp; Parameter=Wert`, weist bei `text/*` ohne `charset` auf mögliche Darstellungsfehler nicht-englischer Texte hin und verwendet bei leerem Feld `text/plain; charset=utf-8`.
 
 ## Transport und Protokolle
 

@@ -29,9 +29,28 @@ Autres options des sites en proxy inverse :
 - Ajouter `X-Forwarded-For` / `X-Forwarded-Proto` / `X-Forwarded-Host` / `X-Forwarded-Port` et `X-Real-IP` ;
 - Utiliser le domaine visité comme SNI (backends HTTPS uniquement) : la poignée de main TLS porte le domaine utilisé par le visiteur et le certificat est vérifié par rapport à lui, comme avec `proxy_ssl_server_name on; proxy_ssl_name $host` de nginx. Activez-la lorsque le backend route selon le SNI, par exemple le `vhost_https` de frp. Chaque backend a son propre pool de connexions, les connexions ne sont donc jamais réutilisées d'un domaine à l'autre.
 
-Les sites de tous types peuvent définir un journal d'accès, le cross-origin (CORS), des en-têtes de requête et de réponse personnalisés (un `Key: Value` par ligne ; une Value vide supprime cet en-tête), et peuvent référencer une instance de [Pare-feu WAF](/fr/docs/modules/waf) (si l'instance n'existe pas ou est désactivée, les requêtes passent sans filtrage).
+Les sites de tous types peuvent définir un journal d'accès, le cross-origin (CORS), des en-têtes de requête et de réponse personnalisés (un `Key: Value` par ligne ; une Value vide supprime cet en-tête), et peuvent référencer une instance de [Pare-feu WAF](/fr/docs/modules/waf) (si l'instance n'existe pas ou est désactivée, les requêtes passent sans filtrage). Voir [En-têtes de requête et de réponse](#headers) pour la modification des en-têtes de requête, des en-têtes de réponse et du Content-Type.
 
 Les entrées du journal d'accès enregistrent l'IP du client, le domaine, le nom du site et le code d'état : le journal peut ainsi être filtré par site, code d'état, IP source, etc. Voir [consulter et filtrer les journaux d'exécution](/fr/docs/guide/configuration).
+
+### En-têtes de requête et de réponse {#headers}
+
+Se règlent dans l'onglet « En-têtes » de l'éditeur de site. Les en-têtes de requête sont envoyés au backend et ne s'appliquent qu'aux sites en proxy inverse ; les en-têtes de réponse sont renvoyés au client et s'appliquent à tous les types de site.
+
+- Édition par ligne : un clic dans le champ du nom liste les en-têtes courants et leur usage ; en choisir un remplit une valeur courante, et le champ valeur propose d'autres valeurs courantes. Les deux champs acceptent aussi la saisie libre. Une valeur vide supprime l'en-tête, et une ligne `Key: Value` collée dans le champ du nom est découpée automatiquement ;
+- « Ajouter les en-têtes de sécurité courants » ajoute `X-Content-Type-Options: nosniff`, `X-Frame-Options: SAMEORIGIN` et `Referrer-Policy: strict-origin-when-cross-origin`, sans doubler les en-têtes déjà présents ;
+- Le « Mode texte » permet de coller plusieurs lignes `Key: Value` d'un coup ; le contenu est conservé en revenant à l'édition par ligne ;
+- Les en-têtes de requête supplémentaires de chaque chemin dans « Backends par chemin » se modifient de la même façon et s'appliquent après ceux du site ; à nom égal, le chemin l'emporte.
+
+Chaque ligne reçoit un retour immédiat. Le rouge signale un enregistrement qui échouera ou un en-tête sans effet : nom manquant, nom contenant des espaces, deux-points ou autres caractères interdits, deux-points absent en mode texte. L'orange signale un réglage enregistrable mais au résultat peut-être inattendu :
+
+- `Host` défini comme en-tête de requête n'a aucun effet ; pour le réécrire, activez « Utiliser l'adresse du backend comme Host » ;
+- Une valeur fixe pour `X-Forwarded-For` ou `X-Real-IP` écrase l'IP réelle du client ; pour la transmettre, activez « Ajouter X-Forwarded-* » ;
+- `Content-Length`, `Connection`, `Transfer-Encoding` et en-têtes similaires sont gérés par la connexion ; les définir à la main est ignoré ou perturbe le transfert ;
+- Les valeurs sont envoyées telles quelles, les variables nginx comme `$host` ne sont pas prises en charge ; les espaces réservés comme `<token>` des valeurs proposées doivent être remplacés ;
+- Les en-têtes de même nom s'appliquent dans l'ordre, le dernier l'emporte.
+
+Pour les sites « Texte fixe », le `Content-Type` se choisit parmi les types courants ou se saisit librement. L'interface vérifie le format `type/sous-type; paramètre=valeur`, signale qu'un `text/*` sans `charset` peut mal afficher le texte non anglais, et utilise `text/plain; charset=utf-8` si le champ est vide.
 
 ## Transport et protocoles
 

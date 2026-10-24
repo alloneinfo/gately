@@ -29,9 +29,28 @@
 - 加入 `X-Forwarded-For` / `X-Forwarded-Proto` / `X-Forwarded-Host` / `X-Forwarded-Port` 與 `X-Real-IP`；
 - 使用造訪網域作為 SNI（僅 HTTPS 後端）：握手時傳送訪客使用的網域，並依它驗證憑證，相當於 nginx 的 `proxy_ssl_server_name on; proxy_ssl_name $host`。後端依 SNI 分流時（例如 frp 的 `vhost_https`）需要開啟。每個後端使用獨立的連線池，不同網域的連線不會互相重用。
 
-所有類型的站台都可設定存取日誌、跨來源（CORS）、自訂請求標頭與回應標頭（每行 `Key: Value`，Value 留空表示刪除該標頭），並可引用一個 [WAF 防火牆](/zh-TW/docs/modules/waf) 實例（實例不存在或停用時放行）。
+所有類型的站台都可設定存取日誌、跨來源（CORS）、自訂請求標頭與回應標頭（每行 `Key: Value`，Value 留空表示刪除該標頭），並可引用一個 [WAF 防火牆](/zh-TW/docs/modules/waf) 實例（實例不存在或停用時放行）。請求標頭、回應標頭與 Content-Type 的編輯方式見 [請求標頭與回應標頭](#headers)。
 
 存取日誌會記錄用戶端 IP、網域、站點名稱與狀態碼，可在日誌中依站點、狀態碼、來源 IP 等條件篩選，見 [執行日誌的檢視與篩選](/zh-TW/docs/guide/configuration)。
+
+### 請求標頭與回應標頭 {#headers}
+
+在站點編輯框的「請求標頭」頁設定。請求標頭送往後端，只對反向代理站點生效；回應標頭回傳給用戶端，對所有類型的站點生效。
+
+- 逐行編輯：點擊名稱框會列出常用標頭及其用途，選中後自動填入常用值，值框也可以改選其他常用值；兩者都可以直接手動輸入。值留空表示刪除該標頭，在名稱框貼上整行 `Key: Value` 會自動拆開；
+- 「新增常用安全標頭」補齊 `X-Content-Type-Options: nosniff`、`X-Frame-Options: SAMEORIGIN` 與 `Referrer-Policy: strict-origin-when-cross-origin`，已有的標頭不會重複新增；
+- 「文字模式」可一次貼上多行 `Key: Value`，切回逐行編輯時保留內容；
+- 「分路徑後端」中每個路徑的附加請求標頭使用同樣的編輯方式，在站點請求標頭之後套用，同名時以路徑的為準。
+
+每一行下方會即時給出回饋。紅色表示儲存會失敗或該標頭無法生效，如缺少名稱、名稱含空格或冒號等非法字元、文字模式中缺少冒號；橙色表示可以儲存但結果可能不符預期：
+
+- 請求標頭裡設定 `Host` 不會生效，需要改寫時開啟「Host 使用後端位址」；
+- `X-Forwarded-For`、`X-Real-IP` 寫固定值會覆蓋真實用戶端 IP，傳遞用戶端 IP 請開啟「新增 X-Forwarded-*」；
+- `Content-Length`、`Connection`、`Transfer-Encoding` 等由連線自動管理，手動設定會被忽略或導致傳輸異常；
+- 值按原樣送出，不支援 nginx 的 `$host` 等變數；預設值中的 `<token>` 等占位內容需要替換；
+- 同名標頭按順序設定，後面的覆蓋前面的。
+
+「固定文字」站點的 `Content-Type` 可從常用類型中選擇或手動輸入，介面會檢查 `類型/子類型; 參數=值` 格式；`text/*` 未宣告 `charset` 時提示中文等內容可能亂碼，留空時使用 `text/plain; charset=utf-8`。
 
 ## 傳輸與協定
 
