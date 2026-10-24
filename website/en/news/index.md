@@ -7,6 +7,10 @@ description: Release announcements and notes for each Gately version.
 
 Announcements for major releases are listed below. See [GitHub Releases](https://github.com/wangwanjie/gately/releases) for the full changes and downloads of every version.
 
+## [v0.5.8](/en/news/v0.5.8)
+
+October 25, 2026 · A built-in OIDC identity provider lets shared users sign in to Gitea, Grafana and other applications; new SMB Service; every log can be filtered; WAF rule groups can be reordered; site headers can be picked from common entries.
+
 ## [v0.5.7](/en/news/v0.5.7)
 
 October 24, 2026 · Storage Mounts can connect to SMB shares; themes become 15 palettes with light and dark, custom accent and corners; the management interface is compressed and the binary is about 11% smaller.

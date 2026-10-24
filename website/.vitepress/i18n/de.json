@@ -80,8 +80,8 @@
   "home": {
     "pill": "Open Source · Prüfbar · Einzelne Binärdatei",
     "announce": {
-      "text": "v0.5.7: SMB-Freigaben einbinden und neue Designs →",
-      "link": "/de/news/v0.5.7"
+      "text": "v0.5.8: OIDC-Single-Sign-on und SMB-Dienst →",
+      "link": "/de/news/v0.5.8"
     },
     "titleLine1": "Ein Toolkit für Netzwerk-Gateways,",
     "titleLine2": "das Sie durchschauen können",

@@ -7,6 +7,10 @@ description: Gately 各版本的发布公告与更新说明。
 
 重要版本的发布公告如下，每个版本的完整变更与下载文件见 [GitHub Releases](https://github.com/wangwanjie/gately/releases)。
 
+## [v0.5.8](/news/v0.5.8)
+
+2026 年 10 月 25 日 · 内置 OIDC 身份提供方，共享用户可登录 Gitea、Grafana 等应用；新增 SMB 服务；所有日志可筛选；WAF 规则组可排序；站点请求头可从常用项中选择。
+
 ## [v0.5.7](/news/v0.5.7)
 
 2026 年 10 月 24 日 · 存储挂载支持 SMB 共享；主题改为 15 个色系、各有亮暗两版，可自定义主色与圆角；管理界面压缩传输、程序缩小约 11%。

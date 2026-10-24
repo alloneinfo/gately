@@ -80,8 +80,8 @@
   "home": {
     "pill": "Open source · Auditable · Binaire unique",
     "announce": {
-      "text": "v0.5.7 : montages SMB et nouveaux thèmes →",
-      "link": "/fr/news/v0.5.7"
+      "text": "v0.5.8 : authentification unique OIDC et Service SMB →",
+      "link": "/fr/news/v0.5.8"
     },
     "titleLine1": "Une boîte à outils de passerelle réseau",
     "titleLine2": "où tout est visible",

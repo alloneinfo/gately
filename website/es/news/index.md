@@ -7,6 +7,10 @@ description: Anuncios y notas de cada versión de Gately.
 
 A continuación se listan los anuncios de las versiones principales. Consulta [GitHub Releases](https://github.com/wangwanjie/gately/releases) para ver todos los cambios y las descargas de cada versión.
 
+## [v0.5.8](/es/news/v0.5.8)
+
+25 de octubre de 2026 · Proveedor de identidad OIDC integrado para que los usuarios compartidos inicien sesión en Gitea, Grafana y otras aplicaciones; nuevo Servicio SMB; todos los registros se pueden filtrar; los grupos de reglas del WAF se pueden reordenar; las cabeceras de los sitios se pueden elegir entre entradas comunes.
+
 ## [v0.5.7](/es/news/v0.5.7)
 
 24 de octubre de 2026 · Montajes de almacenamiento se conecta a recursos compartidos SMB; los temas pasan a ser 15 paletas con claro y oscuro, acento y esquinas personalizables; la interfaz de administración se transfiere comprimida y el binario es un 11 % más pequeño.

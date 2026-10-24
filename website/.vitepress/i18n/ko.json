@@ -80,8 +80,8 @@
   "home": {
     "pill": "오픈소스 · 감사 가능 · 단일 파일",
     "announce": {
-      "text": "v0.5.7 출시: SMB 공유 마운트와 새 테마 →",
-      "link": "/ko/news/v0.5.7"
+      "text": "v0.5.8 출시: OIDC 통합 로그인과 SMB 서비스 →",
+      "link": "/ko/news/v0.5.8"
     },
     "titleLine1": "속까지 들여다볼 수 있는",
     "titleLine2": "네트워크 게이트웨이 도구 모음",

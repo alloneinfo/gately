@@ -80,8 +80,8 @@
   "home": {
     "pill": "开源 · 可审计 · 单文件部署",
     "announce": {
-      "text": "v0.5.7 发布：SMB 共享挂载与全新主题 →",
-      "link": "/news/v0.5.7"
+      "text": "v0.5.8 发布：OIDC 单点登录与 SMB 服务 →",
+      "link": "/news/v0.5.8"
     },
     "titleLine1": "看得见的",
     "titleLine2": "网络网关工具集",

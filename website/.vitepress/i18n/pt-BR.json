@@ -80,8 +80,8 @@
   "home": {
     "pill": "Código aberto · Auditável · Binário único",
     "announce": {
-      "text": "v0.5.7: montagens SMB e novos temas →",
-      "link": "/pt-BR/news/v0.5.7"
+      "text": "v0.5.8: login único OIDC e Serviço SMB →",
+      "link": "/pt-BR/news/v0.5.8"
     },
     "titleLine1": "Um kit de gateway de rede",
     "titleLine2": "que você enxerga por dentro",
