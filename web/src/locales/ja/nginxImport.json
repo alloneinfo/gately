@@ -15,6 +15,7 @@
   "typeStatic": "静的ファイル",
   "typeRedirect": "リダイレクト",
   "typeText": "固定テキスト",
+  "typeClose": "接続を切断",
   "skipped": "インポートしません：{reason}",
   "certMissing": "これらのドメインに対応する証明書がまだありません：{domains}",
   "certFiles": "（nginx は {files} を使用。証明書ページでファイルパスから追加できます）",

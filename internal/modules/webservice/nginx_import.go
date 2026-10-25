@@ -570,6 +570,8 @@ func (c *nginxConverter) summary() string {
 		return fmt.Sprintf("%d → %s", s.RedirectCode, s.RedirectTo)
 	case TypeText:
 		return fmt.Sprintf("%d %s", s.StatusCode, truncate(s.Text, 40))
+	case TypeClose:
+		return "444 断开连接"
 	}
 	return ""
 }
@@ -925,7 +927,7 @@ func (c *nginxConverter) redirectTarget(to string) (string, bool, bool) {
 	return to, keep, true
 }
 
-// applyText 识别 return 200 "内容" 这类固定内容，以及 return 403/404/444 拒绝访问。
+// applyText 识别 return 200 "内容" 这类固定内容、return 403/404 拒绝访问，以及 return 444 直接断开连接。
 func (c *nginxConverter) applyText(list []*ngDirective) bool {
 	contentType := ""
 	for _, d := range list {
@@ -942,8 +944,8 @@ func (c *nginxConverter) applyText(list []*ngDirective) bool {
 			continue
 		}
 		if code == 444 {
-			c.warn("return 444（直接断开连接）已改为返回 403")
-			code = http.StatusForbidden
+			c.site.Type = TypeClose
+			return true
 		}
 		text := d.arg(1)
 		if reNginxVar.MatchString(text) {

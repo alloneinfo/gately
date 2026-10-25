@@ -15,6 +15,7 @@
   "typeStatic": "Arquivos estáticos",
   "typeRedirect": "Redirecionamento",
   "typeText": "Texto fixo",
+  "typeClose": "Fechar conexão",
   "skipped": "Não importado: {reason}",
   "certMissing": "Ainda não há certificado para estes domínios: {domains}",
   "certFiles": " (o nginx usa {files}; adicione pelo caminho do arquivo na página de certificados)",

@@ -54,6 +54,8 @@
   "typeRedirect": "重定向",
   "typeStatic": "静态文件",
   "typeText": "固定文本",
+  "typeClose": "断开连接",
+  "typeCloseHelp": "不返回任何内容，直接断开连接（相当于 nginx 的 return 444）。适合放在默认站点，让扫描未知域名的请求得不到任何响应；访问日志里记为 444。",
   "targets": "后端地址",
   "targetsPlaceholder": "http://192.168.1.10:8080，多个时轮询",
   "options": "选项",

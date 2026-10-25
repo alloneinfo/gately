@@ -8,7 +8,7 @@ La configuración tiene tres niveles:
 
 1. Listener: un puerto de escucha. Sus campos incluyen la red (`tcp` doble pila, `tcp4`, `tcp6`), la dirección de escucha (vacía para todas las direcciones), el puerto, el interruptor de HTTPS, la versión mínima de TLS (1.0 / 1.1 / 1.2 / 1.3) y si acepta el protocolo PROXY.
 2. Sitio: un sitio dentro de un listener, que se selecciona por dominio. Los dominios pueden ser un dominio exacto, `*.example.com` (coincide con subdominios de cualquier profundidad) o `*` (coincide con todo). La prioridad de coincidencia es dominio exacto, comodín y después `*`.
-3. Sitio por defecto: se usa cuando ningún sitio coincide. Si no está activado, se devuelve un 404.
+3. Sitio por defecto: se usa cuando ningún sitio coincide. Si no está activado, se devuelve un 404. El sitio por defecto también puede ser de tipo «Cerrar conexión», para que las peticiones a dominios desconocidos no reciban ninguna respuesta.
 
 Al guardar un cambio en un sitio o en el sitio por defecto, la lista de sitios se sustituye en caliente: el listener sigue funcionando, las conexiones abiertas (incluido WebSocket) se mantienen y cada sitio conserva sus estadísticas. Si la nueva configuración no es válida, los sitios anteriores siguen sirviendo. Cambiar los ajustes propios del listener (red, dirección, puerto, HTTPS, TLS mínimo, HTTP/3, protocolo PROXY) reinicia ese listener.
 
@@ -20,10 +20,11 @@ Al guardar un cambio en un sitio o en el sitio por defecto, la lista de sitios s
 | Redirección | Redirige a una URL completa con código de estado 301 / 302 / 307 / 308 (por defecto 302), conservando opcionalmente la ruta y la cadena de consulta originales. La URL puede contener `{host}`, que se sustituye por el dominio que usó el visitante: `https://{host}` con «Conservar ruta y consulta» envía todas las peticiones HTTP a HTTPS en el mismo dominio |
 | Archivos estáticos | El directorio debe ser una ruta absoluta. Con «Listado de directorios» desactivado, una petición a un directorio solo devuelve respuesta si existe `index.html`. «URL sin extensión» prueba `ruta.html` y `ruta/index.html` cuando falta un archivo (para VitePress y generadores similares, como `try_files $uri $uri.html $uri/index.html` de nginx). «Página 404» es una ruta dentro del directorio, como `404.html`, que se devuelve con estado 404 |
 | Texto fijo | Contenido personalizado, `Content-Type` (por defecto `text/plain; charset=utf-8`) y código de estado (100-599, por defecto 200) |
+| Cerrar conexión | No envía nada y cierra la conexión, como `return 444` de nginx. Se usa sobre todo como sitio por defecto para que las peticiones que escanean dominios desconocidos no reciban respuesta; el registro de acceso las anota como 444 |
 
 Los sitios de cualquier tipo pueden definir un registro de acceso, orígenes cruzados (CORS), cabeceras de petición y respuesta personalizadas (un `Clave: Valor` por línea; un Valor vacío elimina esa cabecera) y pueden hacer referencia a una instancia de [Cortafuegos WAF](/es/docs/modules/waf) (si la instancia no existe o está desactivada, las peticiones pasan sin filtrar). Consulta [Cabeceras de petición y de respuesta](#headers) para ver cómo se editan las cabeceras de petición, las de respuesta y el Content-Type.
 
-Las entradas del registro de acceso guardan la IP del cliente, el dominio, el nombre del sitio y el código de estado, de modo que el registro se puede filtrar por sitio, código de estado, IP de origen y más; consulte [ver y filtrar los registros de ejecución](/es/docs/guide/configuration#log-filter).
+Las entradas del registro de acceso guardan la IP del cliente, el método, el dominio y la ruta, el código de estado, la duración y el nombre del sitio, seguidos del Referer y el User-Agent en formato nginx (`-` si faltan), de modo que los distintos dispositivos detrás de una misma IP pública se distinguen por el User-Agent. El registro se puede filtrar por sitio, código de estado, IP de origen y más; consulte [ver y filtrar los registros de ejecución](/es/docs/guide/configuration#log-filter).
 
 ### Opciones del proxy inverso {#proxy-options}
 
@@ -368,4 +369,5 @@ Conversión de ajustes de nginx:
 
 ## Consejo de despliegue
 
+| `return 444` | un sitio Cerrar conexión |
 Los servicios web necesitan escuchar en puertos del host como el 80 / 443. En despliegues con Docker se recomienda `--network host`.

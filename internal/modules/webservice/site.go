@@ -144,8 +144,15 @@ func newSiteHandler(s Site, log *logbuf.Logger, auth *authenticator, waf WAFProv
 			w.WriteHeader(s.StatusCode)
 			_, _ = w.Write([]byte(s.Text))
 		})
+	case TypeClose:
+		h.handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			markClosed(w)
+			// net/http 遇到 ErrAbortHandler 不写响应：HTTP/1.x 直接断开连接，HTTP/2、HTTP/3 重置这个请求流
+			panic(http.ErrAbortHandler)
+		})
 	}
-	if s.Compress && s.Type != TypeRedirect {
+	// 断开连接的站点不压缩：压缩器收尾时可能先写出响应头
+	if s.Compress && s.Type != TypeRedirect && s.Type != TypeClose {
 		h.handler = httpcompress.Handler(h.handler)
 	}
 	h.pipeline = http.HandlerFunc(h.serveInner)
@@ -439,6 +446,33 @@ func (s *statusRecorder) WriteHeader(code int) {
 	s.ResponseWriter.WriteHeader(code)
 }
 
+// orDash 把空的请求头记为 "-"，与 nginx 访问日志一致。
+func orDash(v string) string {
+	if v == "" {
+		return "-"
+	}
+	return v
+}
+
+// statusClosed 是断开连接时记入访问日志与统计的状态码，沿用 nginx 的 444。
+const statusClosed = 444
+
+// markClosed 把请求标记为已断开连接。w 可能被 WAF 等中间件包装过，逐层 Unwrap 找到 statusRecorder；
+// 只改记录的状态码，不调用 WriteHeader，避免真的写出响应。
+func markClosed(w http.ResponseWriter) {
+	for w != nil {
+		if rec, ok := w.(*statusRecorder); ok {
+			rec.status = statusClosed
+			return
+		}
+		u, ok := w.(interface{ Unwrap() http.ResponseWriter })
+		if !ok {
+			return
+		}
+		w = u.Unwrap()
+	}
+}
+
 // Unwrap 让 http.ResponseController 能访问底层连接（WebSocket 升级等需要）。
 func (s *statusRecorder) Unwrap() http.ResponseWriter {
 	return s.ResponseWriter
@@ -460,8 +494,11 @@ func (h *siteHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			if strings.HasPrefix(r.URL.Path, authPath) {
 				uri = r.URL.Path
 			}
+			// 末尾按 nginx combined 格式附上 Referer 与 User-Agent，便于区分同一出口 IP 后面的不同设备；
+			// %q 会转义换行等控制字符，防止伪造日志行
 			h.reqLog(r).With(logbuf.Fields{logbuf.FieldStatus: strconv.Itoa(rec.status)}).
-				Infof("%s %s %s%s %d %dms", client.Addr(), r.Method, r.Host, uri, rec.status, time.Since(start).Milliseconds())
+				Infof("%s %s %s%s %d %dms %q %q", client.Addr(), r.Method, r.Host, uri, rec.status, time.Since(start).Milliseconds(),
+					orDash(r.Referer()), orDash(r.UserAgent()))
 		}
 	}()
 

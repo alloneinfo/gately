@@ -8,7 +8,7 @@ The configuration has three layers:
 
 1. Listener: one listening port. Fields include network (`tcp` dual-stack, `tcp4`, `tcp6`), listen address (empty for all addresses), port, HTTPS switch, minimum TLS version (1.0 / 1.1 / 1.2 / 1.3), and whether to accept the PROXY protocol.
 2. Site: a site under a listener, matched by domain. Domains can be an exact domain, `*.example.com` (matches subdomains at any depth) or `*` (matches everything). Matching priority is exact domain, wildcard, then `*`.
-3. Default site: used when no site matches. When it is not enabled, a 404 is returned.
+3. Default site: used when no site matches. When it is not enabled, a 404 is returned. The default site can also be set to "Close connection" so requests for unknown domains get no response at all.
 
 Saving a change to a site or to the default site swaps the site list in place: the listener keeps running, open connections (WebSocket included) stay up, and each site keeps its statistics. If the new configuration is invalid, the previous sites keep serving. Changing the listener's own settings (network, address, port, HTTPS, minimum TLS, HTTP/3, PROXY protocol) restarts that listener.
 
@@ -20,10 +20,11 @@ Saving a change to a site or to the default site swaps the site list in place: t
 | Redirect | Redirects to a full URL with status code 301 / 302 / 307 / 308 (default 302), optionally keeping the original path and query string. The URL may contain `{host}`, which is replaced by the domain the visitor used: `https://{host}` with "Keep path" sends every HTTP request to HTTPS on the same domain |
 | Static files | The directory must be an absolute path. With "Directory listing" off, a directory request returns a response only when `index.html` exists. "Clean URLs" tries `path.html` and `path/index.html` when a file is missing (for VitePress and similar generators, like nginx `try_files $uri $uri.html $uri/index.html`). "404 page" is a path inside the directory, such as `404.html`, returned with status 404 |
 | Fixed text | Custom content, `Content-Type` (default `text/plain; charset=utf-8`) and status code (100-599, default 200) |
+| Close connection | Sends nothing and closes the connection, like nginx `return 444`. Typically used as the default site so requests scanning unknown domains get no response; the access log records them as 444 |
 
 Sites of every type can set an access log, cross-origin (CORS), custom request and response headers (one `Key: Value` per line; an empty Value removes that header), and can reference a [WAF Firewall](/en/docs/modules/waf) instance (if the instance does not exist or is disabled, requests pass through). See [Request and response headers](#headers) for how request headers, response headers and Content-Type are edited.
 
-Access log entries record the client IP, domain, site name and status code, so the log can be filtered by site, status code, client IP and more; see [viewing and filtering runtime logs](/en/docs/guide/configuration#log-filter).
+Access log entries record the client IP, method, domain and path, status code, duration and site name, followed by the Referer and User-Agent in nginx format (`-` when missing), so different devices behind the same public IP can be told apart by User-Agent. The log can be filtered by site, status code, client IP and more; see [viewing and filtering runtime logs](/en/docs/guide/configuration#log-filter).
 
 ### Reverse proxy options {#proxy-options}
 
@@ -368,4 +369,5 @@ Converting nginx settings:
 
 ## Deployment tip
 
+| `return 444` | a Close connection site |
 Web Services need to listen on host ports such as 80 / 443. For Docker deployments, `--network host` is recommended.

@@ -19,6 +19,8 @@ const (
 	TypeRedirect = "redirect"
 	TypeStatic   = "static"
 	TypeText     = "text"
+	// TypeClose 不返回任何响应，直接断开连接（相当于 nginx 的 return 444），常用于默认站点拒绝未知域名的扫描
+	TypeClose = "close"
 )
 
 // hostPlaceholder 在重定向地址中代表访客请求的域名。
@@ -344,6 +346,7 @@ func (s *Site) validate(isDefault bool) error {
 		if s.ContentType == "" {
 			s.ContentType = "text/plain; charset=utf-8"
 		}
+	case TypeClose:
 	default:
 		return fmt.Errorf("未知的站点类型 %q", s.Type)
 	}

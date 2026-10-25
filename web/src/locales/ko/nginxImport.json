@@ -15,6 +15,7 @@
   "typeStatic": "정적 파일",
   "typeRedirect": "리디렉션",
   "typeText": "고정 텍스트",
+  "typeClose": "연결 끊기",
   "skipped": "가져오지 않음: {reason}",
   "certMissing": "이 도메인을 포함하는 인증서가 아직 없습니다: {domains}",
   "certFiles": " (nginx는 {files} 사용, 인증서 페이지에서 파일 경로로 추가할 수 있습니다)",

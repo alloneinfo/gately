@@ -54,6 +54,8 @@
   "typeRedirect": "リダイレクト",
   "typeStatic": "静的ファイル",
   "typeText": "固定テキスト",
+  "typeClose": "接続を切断",
+  "typeCloseHelp": "何も返さずに接続を切断します（nginx の return 444 に相当）。デフォルトサイトに設定すると、未知のドメインをスキャンするリクエストに一切応答しません。アクセスログには 444 として記録されます。",
   "targets": "バックエンドアドレス",
   "targetsPlaceholder": "http://192.168.1.10:8080。複数の場合はラウンドロビン",
   "options": "オプション",

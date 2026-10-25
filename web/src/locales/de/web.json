@@ -54,6 +54,8 @@
   "typeRedirect": "Weiterleitung",
   "typeStatic": "Statische Dateien",
   "typeText": "Fester Text",
+  "typeClose": "Verbindung schließen",
+  "typeCloseHelp": "Sendet nichts und schließt die Verbindung (wie nginx return 444). Geeignet für die Standardseite, damit Anfragen, die unbekannte Domains abtasten, keine Antwort erhalten; im Zugriffsprotokoll erscheinen sie als 444.",
   "targets": "Backend-Adressen",
   "targetsPlaceholder": "http://192.168.1.10:8080; mehrere Backends werden reihum verwendet",
   "options": "Optionen",

@@ -118,7 +118,7 @@ function reset() {
 }
 
 function typeText(type: string) {
-  return ({ proxy: t('nginxImport.typeProxy'), static: t('nginxImport.typeStatic'), redirect: t('nginxImport.typeRedirect'), text: t('nginxImport.typeText') } as Record<string, string>)[type] ?? type
+  return ({ proxy: t('nginxImport.typeProxy'), static: t('nginxImport.typeStatic'), redirect: t('nginxImport.typeRedirect'), text: t('nginxImport.typeText'), close: t('nginxImport.typeClose') } as Record<string, string>)[type] ?? type
 }
 
 function readFile(e: Event) {

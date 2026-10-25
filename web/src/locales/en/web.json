@@ -54,6 +54,8 @@
   "typeRedirect": "Redirect",
   "typeStatic": "Static files",
   "typeText": "Fixed text",
+  "typeClose": "Close connection",
+  "typeCloseHelp": "Sends nothing and closes the connection (like nginx return 444). Useful for the default site so requests scanning unknown domains get no response; the access log records them as 444.",
   "targets": "Backend addresses",
   "targetsPlaceholder": "http://192.168.1.10:8080; multiple backends are used round-robin",
   "options": "Options",

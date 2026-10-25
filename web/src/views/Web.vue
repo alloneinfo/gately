@@ -161,7 +161,9 @@
                 <el-radio-button value="redirect">{{ t('web.typeRedirect') }}</el-radio-button>
                 <el-radio-button value="static">{{ t('web.typeStatic') }}</el-radio-button>
                 <el-radio-button value="text">{{ t('web.typeText') }}</el-radio-button>
+                <el-radio-button value="close">{{ t('web.typeClose') }}</el-radio-button>
               </el-radio-group>
+              <div v-if="site.type === 'close'" class="form-help">{{ t('web.typeCloseHelp') }}</div>
             </el-form-item>
             <template v-if="site.type === 'proxy'">
               <el-form-item :label="t('web.targets')" required>
@@ -645,7 +647,7 @@ function listenerStatus(l: ListenerView): { type: StatusType; text: string; titl
 }
 
 function typeText(ty: string) {
-  const map: Record<string, string> = { proxy: t('web.typeProxy'), redirect: t('web.typeRedirect'), static: t('web.typeStatic'), text: t('web.typeText') }
+  const map: Record<string, string> = { proxy: t('web.typeProxy'), redirect: t('web.typeRedirect'), static: t('web.typeStatic'), text: t('web.typeText'), close: t('web.typeClose') }
   return map[ty] ?? ty
 }
 
@@ -657,6 +659,8 @@ function summary(s: Site) {
       return `${s.redirectCode} → ${s.redirectTo}`
     case 'static':
       return s.root
+    case 'close':
+      return '444'
     default:
       return `${s.statusCode} ${s.text.slice(0, 30)}`
   }

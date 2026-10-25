@@ -54,6 +54,8 @@
   "typeRedirect": "Redirecionamento",
   "typeStatic": "Arquivos estáticos",
   "typeText": "Texto fixo",
+  "typeClose": "Fechar conexão",
+  "typeCloseHelp": "Não envia nada e fecha a conexão (como o return 444 do nginx). Útil no site padrão para que requisições que varrem domínios desconhecidos não recebam resposta; o log de acesso as registra como 444.",
   "targets": "Endereços de backend",
   "targetsPlaceholder": "http://192.168.1.10:8080; vários backends são usados em round robin",
   "options": "Opções",

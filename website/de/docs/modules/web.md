@@ -8,7 +8,7 @@ Die Konfiguration hat drei Ebenen:
 
 1. Listener: ein Listen-Port. Zu den Feldern gehören Netzwerk (`tcp` Dual-Stack, `tcp4`, `tcp6`), Listen-Adresse (leer für alle Adressen), Port, HTTPS-Schalter, minimale TLS-Version (1.0 / 1.1 / 1.2 / 1.3) und ob das PROXY-Protokoll akzeptiert wird.
 2. Site: eine Site unter einem Listener, die über die Domain zugeordnet wird. Domains können eine exakte Domain, `*.example.com` (trifft Subdomains beliebiger Tiefe) oder `*` (trifft alles) sein. Die Zuordnungspriorität lautet: exakte Domain, Wildcard, dann `*`.
-3. Standard-Site: wird verwendet, wenn keine Site passt. Ist sie nicht aktiviert, wird 404 zurückgegeben.
+3. Standard-Site: wird verwendet, wenn keine Site passt. Ist sie nicht aktiviert, wird 404 zurückgegeben. Die Standard-Site kann auch den Typ „Verbindung schließen“ haben, damit Anfragen an unbekannte Domains gar keine Antwort erhalten.
 
 Wird eine Site oder die Standard-Site gespeichert, wird die Site-Liste an Ort und Stelle ausgetauscht: Der Listener läuft weiter, offene Verbindungen (auch WebSocket) bleiben bestehen, und jede Site behält ihre Statistik. Ist die neue Konfiguration ungültig, bedienen weiterhin die bisherigen Sites. Eine Änderung der Einstellungen des Listeners selbst (Netzwerk, Adresse, Port, HTTPS, minimale TLS-Version, HTTP/3, PROXY-Protokoll) startet diesen Listener neu.
 
@@ -20,10 +20,11 @@ Wird eine Site oder die Standard-Site gespeichert, wird die Site-Liste an Ort un
 | Weiterleitung | Leitet mit Statuscode 301 / 302 / 307 / 308 (Standard 302) auf eine vollständige URL um, wahlweise unter Beibehaltung von ursprünglichem Pfad und Query-String. Die URL darf `{host}` enthalten, das durch die vom Besucher verwendete Domain ersetzt wird: `https://{host}` mit „Pfad und Query beibehalten“ leitet jede HTTP-Anfrage auf HTTPS derselben Domain um |
 | Statische Dateien | Das Verzeichnis muss ein absoluter Pfad sein. Ist „Verzeichnisauflistung“ aus, liefert eine Verzeichnisanfrage nur dann eine Antwort, wenn `index.html` existiert. „URLs ohne Endung“ probiert `path.html` und `path/index.html`, wenn eine Datei fehlt (für VitePress und ähnliche Generatoren, wie nginx `try_files $uri $uri.html $uri/index.html`). „404-Seite“ ist ein Pfad innerhalb des Verzeichnisses, etwa `404.html`, der mit Status 404 ausgeliefert wird |
 | Fester Text | Eigener Inhalt, `Content-Type` (Standard `text/plain; charset=utf-8`) und Statuscode (100-599, Standard 200) |
+| Verbindung schließen | Sendet nichts und schließt die Verbindung, wie nginx `return 444`. Meist als Standard-Site genutzt, damit Anfragen, die unbekannte Domains abtasten, keine Antwort erhalten; im Zugriffslog erscheinen sie als 444 |
 
 Sites jedes Typs können ein Zugriffslog, Cross-Origin (CORS) sowie eigene Request- und Response-Header festlegen (je Zeile ein `Key: Value`; ein leerer Value entfernt den Header) und auf eine Instanz der [WAF-Firewall](/de/docs/modules/waf) verweisen (existiert die Instanz nicht oder ist sie deaktiviert, werden Anfragen durchgelassen). Wie Anfrage-Header, Antwort-Header und Content-Type bearbeitet werden, steht unter [Anfrage- und Antwort-Header](#headers).
 
-Einträge im Zugriffslog enthalten Client-IP, Domain, Site-Name und Statuscode, sodass sich das Protokoll nach Site, Statuscode, Quell-IP und mehr filtern lässt; siehe [Laufzeitprotokolle anzeigen und filtern](/de/docs/guide/configuration#log-filter).
+Einträge im Zugriffslog enthalten Client-IP, Methode, Domain und Pfad, Statuscode, Dauer und Site-Name, gefolgt von Referer und User-Agent im nginx-Format (`-`, wenn sie fehlen); so lassen sich verschiedene Geräte hinter derselben öffentlichen IP am User-Agent unterscheiden. Das Protokoll lässt sich nach Site, Statuscode, Quell-IP und mehr filtern; siehe [Laufzeitprotokolle anzeigen und filtern](/de/docs/guide/configuration#log-filter).
 
 ### Reverse-Proxy-Optionen {#proxy-options}
 
@@ -368,4 +369,5 @@ nginx-Einstellungen umsetzen:
 
 ## Hinweis zur Bereitstellung
 
+| `return 444` | eine Site vom Typ Verbindung schließen |
 Web-Dienste müssen auf Ports des Hosts wie 80 / 443 lauschen. Bei Docker-Bereitstellungen empfehlen wir `--network host`.

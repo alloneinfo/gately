@@ -15,6 +15,7 @@
   "typeStatic": "静态文件",
   "typeRedirect": "重定向",
   "typeText": "固定内容",
+  "typeClose": "断开连接",
   "skipped": "不导入：{reason}",
   "certMissing": "还没有覆盖这些域名的证书：{domains}",
   "certFiles": "（nginx 使用 {files}，可在证书页按文件路径添加）",

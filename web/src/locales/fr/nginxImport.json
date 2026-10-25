@@ -15,6 +15,7 @@
   "typeStatic": "Fichiers statiques",
   "typeRedirect": "Redirection",
   "typeText": "Texte fixe",
+  "typeClose": "Fermer la connexion",
   "skipped": "Non importé : {reason}",
   "certMissing": "Aucun certificat ne couvre encore ces domaines : {domains}",
   "certFiles": " (nginx utilise {files} ; ajoutez-le par chemin de fichier dans la page des certificats)",

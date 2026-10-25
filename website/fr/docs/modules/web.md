@@ -8,7 +8,7 @@ La configuration comporte trois niveaux :
 
 1. Écouteur : un port d'écoute. Les champs comprennent le réseau (`tcp` double pile, `tcp4`, `tcp6`), l'adresse d'écoute (vide pour toutes les adresses), le port, l'interrupteur HTTPS, la version TLS minimale (1.0 / 1.1 / 1.2 / 1.3) et l'acceptation ou non du protocole PROXY.
 2. Site : un site rattaché à un écouteur, sélectionné par domaine. Un domaine peut être un domaine exact, `*.example.com` (correspond aux sous-domaines à n'importe quelle profondeur) ou `*` (correspond à tout). Priorité de correspondance : domaine exact, puis joker, puis `*`.
-3. Site par défaut : utilisé lorsqu'aucun site ne correspond. S'il n'est pas activé, une erreur 404 est renvoyée.
+3. Site par défaut : utilisé lorsqu'aucun site ne correspond. S'il n'est pas activé, une erreur 404 est renvoyée. Le site par défaut peut aussi être de type « Fermer la connexion », pour que les requêtes vers des domaines inconnus ne reçoivent aucune réponse.
 
 Enregistrer une modification d'un site ou du site par défaut remplace la liste des sites sur place : l'écouteur continue de tourner, les connexions ouvertes (WebSocket compris) restent actives et chaque site conserve ses statistiques. Si la nouvelle configuration est invalide, les sites précédents continuent de servir. Modifier les paramètres de l'écouteur lui-même (réseau, adresse, port, HTTPS, TLS minimal, HTTP/3, protocole PROXY) redémarre cet écouteur.
 
@@ -20,10 +20,11 @@ Enregistrer une modification d'un site ou du site par défaut remplace la liste 
 | Redirection | Redirige vers une URL complète avec le code de statut 301 / 302 / 307 / 308 (302 par défaut), en conservant éventuellement le chemin et la chaîne de requête d'origine. L'URL peut contenir `{host}`, remplacé par le domaine utilisé par le visiteur : `https://{host}` avec « Conserver le chemin et la requête » envoie chaque requête HTTP vers HTTPS sur le même domaine |
 | Fichiers statiques | Le répertoire doit être un chemin absolu. Avec « Liste du répertoire » désactivée, une requête sur un répertoire n'obtient de réponse que si `index.html` existe. « URL sans extension » essaie `path.html` et `path/index.html` lorsqu'un fichier est introuvable (pour VitePress et les générateurs similaires, comme `try_files $uri $uri.html $uri/index.html` de nginx). « Page 404 » est un chemin à l'intérieur du répertoire, comme `404.html`, renvoyé avec le statut 404 |
 | Texte fixe | Contenu personnalisé, `Content-Type` (`text/plain; charset=utf-8` par défaut) et code de statut (100-599, 200 par défaut) |
+| Fermer la connexion | N'envoie rien et ferme la connexion, comme `return 444` de nginx. Sert surtout de site par défaut pour que les requêtes qui sondent des domaines inconnus ne reçoivent aucune réponse ; le journal d'accès les enregistre avec le code 444 |
 
 Les sites de tous types peuvent définir un journal d'accès, le cross-origin (CORS), des en-têtes de requête et de réponse personnalisés (un `Key: Value` par ligne ; une Value vide supprime cet en-tête), et peuvent référencer une instance de [Pare-feu WAF](/fr/docs/modules/waf) (si l'instance n'existe pas ou est désactivée, les requêtes passent sans filtrage). Voir [En-têtes de requête et de réponse](#headers) pour la modification des en-têtes de requête, des en-têtes de réponse et du Content-Type.
 
-Les entrées du journal d'accès enregistrent l'IP du client, le domaine, le nom du site et le code d'état : le journal peut ainsi être filtré par site, code d'état, IP source, etc. Voir [consulter et filtrer les journaux d'exécution](/fr/docs/guide/configuration#log-filter).
+Les entrées du journal d'accès enregistrent l'IP du client, la méthode, le domaine et le chemin, le code d'état, la durée et le nom du site, suivis du Referer et du User-Agent au format nginx (`-` s'ils manquent) : les appareils situés derrière une même IP publique se distinguent ainsi par leur User-Agent. Le journal peut être filtré par site, code d'état, IP source, etc. Voir [consulter et filtrer les journaux d'exécution](/fr/docs/guide/configuration#log-filter).
 
 ### Options du proxy inverse {#proxy-options}
 
@@ -368,4 +369,5 @@ Conversion des réglages nginx :
 
 ## Conseil de déploiement
 
+| `return 444` | un site Fermer la connexion |
 Les Services Web doivent écouter sur des ports de l'hôte tels que 80 / 443. Pour un déploiement Docker, `--network host` est recommandé.
