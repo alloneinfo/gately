@@ -7,6 +7,10 @@ description: Gately 各版本的发布公告与更新说明。
 
 重要版本的发布公告如下，每个版本的完整变更与下载文件见 [GitHub Releases](https://github.com/wangwanjie/gately/releases)。
 
+## [v0.5.8.1](/news/v0.5.8.1)
+
+2026 年 10 月 26 日 · WebDAV、FTP、SMB 共用一份共享用户；Web 服务新增「断开连接」站点类型，访问日志记录 Referer 与 User-Agent；frps 可指定监听地址；HTTP 访问时复制按钮可用。
+
 ## [v0.5.8](/news/v0.5.8)
 
 2026 年 10 月 25 日 · 内置 OIDC 身份提供方，共享用户可登录 Gitea、Grafana 等应用；新增 SMB 服务；所有日志可筛选；WAF 规则组可排序；站点请求头可从常用项中选择。
