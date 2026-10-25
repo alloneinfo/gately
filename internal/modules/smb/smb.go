@@ -14,6 +14,7 @@ import (
 
 	"github.com/wangwanjie/gately/internal/config"
 	"github.com/wangwanjie/gately/internal/crud"
+	"github.com/wangwanjie/gately/internal/fileusers"
 	"github.com/wangwanjie/gately/internal/httpx"
 	"github.com/wangwanjie/gately/internal/logbuf"
 	"github.com/wangwanjie/gately/internal/module"
@@ -47,6 +48,8 @@ type Settings struct {
 	// MDNS 通过 Bonjour 广播服务，macOS 访达的「网络」中可以直接看到
 	MDNS  bool   `json:"mdns"`
 	Users []User `json:"users"`
+	// SharedUsers 为 true 时文件服务共享用户（见 fileusers 包）也可登录，与本地用户同名（不区分大小写）时只按本地用户校验
+	SharedUsers bool `json:"sharedUsers"`
 }
 
 // Share 是用户可见的一个共享。
@@ -140,7 +143,7 @@ func (s *Settings) Validate() error {
 			return fmt.Errorf("用户 %s 的目录需为绝对路径", u.Name)
 		}
 	}
-	if s.Enable && len(s.Users) == 0 {
+	if s.Enable && len(s.Users) == 0 && (!s.SharedUsers || len(fileusers.Default.List()) == 0) {
 		return errors.New("启用 SMB 时至少添加一个用户")
 	}
 	return nil
@@ -156,6 +159,8 @@ type Module struct {
 	err      string
 	// loadErr 为启动时读取到的配置未通过校验的错误，此时不启动服务，直到保存一份有效配置
 	loadErr error
+	// accountsKey 为当前服务使用的账号指纹，共享用户变化后据此判断是否需要重启
+	accountsKey string
 }
 
 // New 创建模块。
@@ -174,6 +179,11 @@ func (m *Module) Init(env module.Env) error {
 	if _, err := m.store.Load(ID, &m.settings); err != nil {
 		return err
 	}
+	if err := fileusers.Default.Init(env.Store); err != nil {
+		return err
+	}
+	// SMB 服务只在启动时读取账号，共享用户修改后按需重启
+	fileusers.Default.Subscribe(m.reloadShared)
 	// 配置文件可能被手工修改或来自旧版本，按保存时同样的规则校验并规范化；
 	// 校验在副本上进行，失败时保留原配置供界面展示与修改，但不启动服务，避免监听到意外的端口或地址
 	s := m.settings
@@ -185,6 +195,21 @@ func (m *Module) Init(env module.Env) error {
 	}
 	m.settings = s
 	return nil
+}
+
+// reloadShared 在共享用户修改后按需重启服务。重启会断开现有连接，因此只在本服务实际使用的账号变化时进行。
+func (m *Module) reloadShared() {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if !m.settings.Enable || !m.settings.SharedUsers || m.loadErr != nil || m.srv == nil {
+		return
+	}
+	accounts, _ := buildAccounts(m.settings, fileusers.Default.List())
+	if accountsKey(accounts) == m.accountsKey {
+		return
+	}
+	m.logs.Add(logbuf.LevelInfo, "", "共享用户已修改，重新加载 SMB 服务")
+	m.restartLocked()
 }
 
 // Start 实现 module.Module。
@@ -220,14 +245,23 @@ func (m *Module) restartLocked() {
 		m.err = m.loadErr.Error()
 		return
 	}
-	srv, err := startServer(m.settings, m.logs)
+	accounts, issues := buildAccounts(m.settings, fileusers.Default.List())
+	for _, is := range issues {
+		m.logs.Add(logbuf.LevelWarn, "", is.logText())
+	}
+	srv, err := startServer(m.settings, accounts, m.logs)
 	if err != nil {
 		m.err = err.Error()
 		m.logs.Add(logbuf.LevelError, "", "监听失败: "+err.Error())
 		return
 	}
 	m.srv = srv
-	m.logs.Add(logbuf.LevelInfo, "", fmt.Sprintf("SMB 监听 %s（%d 个用户）", srv.Addr(), len(m.settings.Users)))
+	m.accountsKey = accountsKey(accounts)
+	if m.settings.SharedUsers {
+		m.logs.Add(logbuf.LevelInfo, "", fmt.Sprintf("SMB 监听 %s（%d 个用户，其中 %d 个共享用户）", srv.Addr(), len(accounts), len(accounts)-len(m.settings.Users)))
+	} else {
+		m.logs.Add(logbuf.LevelInfo, "", fmt.Sprintf("SMB 监听 %s（%d 个用户）", srv.Addr(), len(m.settings.Users)))
+	}
 }
 
 // Routes 实现 module.Module。
@@ -242,6 +276,14 @@ func (m *Module) Routes(r module.Router) {
 		}
 		running, errMsg := m.statusLocked()
 		httpx.OK(w, map[string]any{"settings": s, "running": running, "error": errMsg, "supported": supported})
+	})
+	// 文件服务共享用户：WebDAV、FTP、SMB 共用同一份列表；SMB 额外返回无法用于 SMB 的共享用户
+	fileusers.Default.Routes(r, func(out map[string]any) {
+		_, issues := buildAccounts(Settings{SharedUsers: true}, fileusers.Default.List())
+		if issues == nil {
+			issues = []Issue{}
+		}
+		out["issues"] = issues
 	})
 	r.HandleFunc("PUT /settings", func(w http.ResponseWriter, req *http.Request) {
 		var s Settings

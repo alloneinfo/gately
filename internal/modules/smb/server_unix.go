@@ -73,11 +73,12 @@ func (w *acceptWatcher) failure() error {
 }
 
 // startServer 按配置快照监听并开始服务。
-func startServer(s Settings, logs *logbuf.Buffer) (*server, error) {
+// accounts 为本地用户与共享用户，见 buildAccounts。
+func startServer(s Settings, accounts []account, logs *logbuf.Buffer) (*server, error) {
 	log := slog.New(&logHandler{logs: logs, debug: os.Getenv(debugEnv) != ""})
 	uid, gid := os.Getuid(), os.Getgid()
-	users := make([]config.UserConfig, 0, len(s.Users))
-	for _, u := range s.Users {
+	users := make([]config.UserConfig, 0, len(accounts))
+	for _, u := range accounts {
 		shares := []config.ShareConfig{}
 		for _, sh := range u.Shares() {
 			// 目录不存在时只记录警告，不影响其他共享；客户端访问该共享时会收到错误

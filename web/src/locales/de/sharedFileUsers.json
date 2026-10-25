@@ -1,0 +1,14 @@
+{
+  "title": "Gemeinsame Benutzer",
+  "desc": "Von WebDAV, FTP und SMB gemeinsam genutzte Benutzer; Änderungen auf einer Dienstseite gelten für alle",
+  "enable": "In diesem Dienst verwenden",
+  "help": "Gemeinsame Benutzer haben wie lokale Benutzer ein Passwort und Verzeichnisse und werden an einer Stelle gepflegt. Ist der Schalter an, können sie sich bei diesem Dienst anmelden; hat ein lokaler Benutzer denselben Namen, wird nur der lokale Benutzer geprüft.",
+  "helpSmb": "Gemeinsame Benutzer haben wie lokale Benutzer ein Passwort und Verzeichnisse und werden an einer Stelle gepflegt. Ist der Schalter an, können sie sich bei diesem Dienst anmelden; hat ein lokaler Benutzer denselben Namen (ohne Groß-/Kleinschreibung), wird nur der lokale Benutzer geprüft. SMB braucht Klartextpasswörter, und Benutzer- und Freigabenamen dürfen keine Zeichen wie \" / \\ [ ] : ; {'|'} = , + * ? < > enthalten.",
+  "off": "Gemeinsame Benutzer sind für diesen Dienst aus, die Benutzer unten können sich hier nicht anmelden",
+  "shadowed": "Gleicher Name wie ein lokaler Benutzer, der lokale Benutzer wird geprüft: {names}",
+  "issue": {
+    "name": "{name}: der Benutzername kann nicht für SMB verwendet werden",
+    "bcrypt": "{name}: das Passwort ist ein bcrypt-Hash; SMB braucht das Klartextpasswort, bitte neu setzen",
+    "share": "{name}: ein Verzeichnisname ist als SMB-Freigabename ungültig oder doppelt"
+  }
+}

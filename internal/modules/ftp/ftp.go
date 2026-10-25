@@ -21,6 +21,7 @@ import (
 	"github.com/wangwanjie/gately/internal/banlist"
 	"github.com/wangwanjie/gately/internal/config"
 	"github.com/wangwanjie/gately/internal/crud"
+	"github.com/wangwanjie/gately/internal/fileusers"
 	"github.com/wangwanjie/gately/internal/httpx"
 	"github.com/wangwanjie/gately/internal/logbuf"
 	"github.com/wangwanjie/gately/internal/module"
@@ -65,6 +66,8 @@ type Settings struct {
 	ConnectionTimeout int    `json:"connectionTimeout"`
 	DisableActiveMode bool   `json:"disableActiveMode"`
 	Users             []User `json:"users"`
+	// SharedUsers 为 true 时文件服务共享用户（见 fileusers 包）也可登录，与本地用户同名时只按本地用户校验
+	SharedUsers bool `json:"sharedUsers"`
 }
 
 // CertSource 提供 FTPS 证书。
@@ -128,7 +131,7 @@ func (s *Settings) Validate() error {
 			return fmt.Errorf("用户 %s 的目录需为绝对路径", u.Name)
 		}
 	}
-	if s.Enable && len(s.Users) == 0 {
+	if s.Enable && len(s.Users) == 0 && (!s.SharedUsers || len(fileusers.Default.List()) == 0) {
 		return errors.New("启用 FTP 时至少添加一个用户")
 	}
 	return nil
@@ -177,8 +180,20 @@ func (d *driver) ClientDisconnected(cc ftpserver.ClientContext) {}
 
 func (d *driver) AuthUser(cc ftpserver.ClientContext, user, pass string) (ftpserver.ClientDriver, error) {
 	u, ok := d.users[user]
+	shared := false
+	// 没有同名本地用户且开启了共享用户时按共享用户校验；共享用户在登录时读取，修改后无需重启服务
+	if !ok && d.s.SharedUsers {
+		var su fileusers.User
+		if su, ok = fileusers.Default.Lookup(user); ok {
+			u, shared = User(su), true
+		}
+	}
 	if !ok || !checkPassword(u.Password, pass) {
-		d.logs.Add(logbuf.LevelWarn, "", fmt.Sprintf("%s 认证失败（用户 %q）", cc.RemoteAddr(), user))
+		if shared {
+			d.logs.Add(logbuf.LevelWarn, "", fmt.Sprintf("%s 认证失败（共享用户 %q）", cc.RemoteAddr(), user))
+		} else {
+			d.logs.Add(logbuf.LevelWarn, "", fmt.Sprintf("%s 认证失败（用户 %q）", cc.RemoteAddr(), user))
+		}
 		return nil, errors.New("用户名或密码错误")
 	}
 	var fs afero.Fs
@@ -190,7 +205,11 @@ func (d *driver) AuthUser(cc ftpserver.ClientContext, user, pass string) (ftpser
 			fs = afero.NewReadOnlyFs(fs)
 		}
 	}
-	d.logs.Add(logbuf.LevelInfo, "", fmt.Sprintf("%s 登录（用户 %q）", cc.RemoteAddr(), user))
+	if shared {
+		d.logs.Add(logbuf.LevelInfo, "", fmt.Sprintf("%s 登录（共享用户 %q）", cc.RemoteAddr(), user))
+	} else {
+		d.logs.Add(logbuf.LevelInfo, "", fmt.Sprintf("%s 登录（用户 %q）", cc.RemoteAddr(), user))
+	}
 	return fs, nil
 }
 
@@ -225,8 +244,21 @@ func (m *Module) Title() string { return "FTP 服务" }
 func (m *Module) Init(env module.Env) error {
 	m.store, m.logs = env.Store, env.Logs
 	m.settings.Port = 2121
-	_, err := m.store.Load(ID, &m.settings)
-	return err
+	if _, err := m.store.Load(ID, &m.settings); err != nil {
+		return err
+	}
+	if err := fileusers.Default.Init(env.Store); err != nil {
+		return err
+	}
+	// 共享用户修改后重启服务，断开已登录的连接，避免被删除或改了密码、目录的共享用户继续使用旧会话
+	fileusers.Default.Subscribe(func() {
+		m.mu.Lock()
+		defer m.mu.Unlock()
+		if m.settings.Enable && m.settings.SharedUsers && m.srv != nil {
+			m.restartLocked()
+		}
+	})
+	return nil
 }
 
 // Start 实现 module.Module。
@@ -294,6 +326,8 @@ func (m *Module) Routes(r module.Router) {
 		}
 		httpx.OK(w, map[string]any{"settings": s, "running": m.srv != nil, "error": m.err})
 	})
+	// 文件服务共享用户：WebDAV、FTP、SMB 共用同一份列表
+	fileusers.Default.Routes(r, nil)
 	r.HandleFunc("PUT /settings", func(w http.ResponseWriter, req *http.Request) {
 		var s Settings
 		if err := httpx.ReadJSON(req, &s); err != nil {

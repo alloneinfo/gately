@@ -411,6 +411,8 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | GET | `/api/webdav/logs` | `webdav:read` | View module runtime logs |
 | DELETE | `/api/webdav/logs` | `webdav:write` | Clear module runtime logs |
 | GET | `/api/webdav/settings` | `webdav:read` | Read WebDAV settings |
+| GET | `/api/webdav/shared-users` | `webdav:read` | Get file service shared users |
+| PUT | `/api/webdav/shared-users` | `webdav:write` | Save file service shared users |
 | PUT | `/api/webdav/settings` | `webdav:write` | Save WebDAV settings |
 
 ## FTP service
@@ -420,6 +422,8 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | GET | `/api/ftp/logs` | `ftp:read` | View module runtime logs |
 | DELETE | `/api/ftp/logs` | `ftp:write` | Clear module runtime logs |
 | GET | `/api/ftp/settings` | `ftp:read` | Read FTP settings |
+| GET | `/api/ftp/shared-users` | `ftp:read` | Get file service shared users |
+| PUT | `/api/ftp/shared-users` | `ftp:write` | Save file service shared users |
 | PUT | `/api/ftp/settings` | `ftp:write` | Save FTP settings |
 
 ## SMB Service
@@ -429,6 +433,8 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | GET | `/api/smb/logs` | `smb:read` | View module runtime logs |
 | DELETE | `/api/smb/logs` | `smb:write` | Clear module runtime logs |
 | GET | `/api/smb/settings` | `smb:read` | Get SMB settings |
+| GET | `/api/smb/shared-users` | `smb:read` | Get file service shared users |
+| PUT | `/api/smb/shared-users` | `smb:write` | Save file service shared users |
 | PUT | `/api/smb/settings` | `smb:write` | Save SMB settings |
 
 ## Storage Mounts

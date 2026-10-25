@@ -21,6 +21,7 @@ import (
 	"github.com/wangwanjie/gately/internal/banlist"
 	"github.com/wangwanjie/gately/internal/config"
 	"github.com/wangwanjie/gately/internal/crud"
+	"github.com/wangwanjie/gately/internal/fileusers"
 	"github.com/wangwanjie/gately/internal/httpx"
 	"github.com/wangwanjie/gately/internal/logbuf"
 	"github.com/wangwanjie/gately/internal/module"
@@ -49,6 +50,8 @@ type Settings struct {
 	// TLS 时证书由证书模块按 SNI 提供
 	TLS   bool   `json:"tls"`
 	Users []User `json:"users"`
+	// SharedUsers 为 true 时文件服务共享用户（见 fileusers 包）也可登录，与本地用户同名时只按本地用户校验
+	SharedUsers bool `json:"sharedUsers"`
 }
 
 // CertSource 提供 HTTPS 证书。
@@ -91,7 +94,7 @@ func (s *Settings) Validate() error {
 			return fmt.Errorf("用户 %s 的目录需为绝对路径", u.Name)
 		}
 	}
-	if s.Enable && len(s.Users) == 0 {
+	if s.Enable && len(s.Users) == 0 && (!s.SharedUsers || len(fileusers.Default.List()) == 0) {
 		return errors.New("启用 WebDAV 时至少添加一个用户")
 	}
 	return nil
@@ -112,6 +115,8 @@ type Module struct {
 	srv      *http.Server
 	err      string
 	handlers map[string]*userHandler
+	// shared 为共享用户的处理器，按用户名缓存；共享用户被修改后清空，下次请求按新的目录配置重建
+	shared map[string]*userHandler
 }
 
 // New 创建模块。
@@ -127,8 +132,19 @@ func (m *Module) Title() string { return "WebDAV 服务" }
 func (m *Module) Init(env module.Env) error {
 	m.store, m.logs = env.Store, env.Logs
 	m.settings.Port = 18800
-	_, err := m.store.Load(ID, &m.settings)
-	return err
+	if _, err := m.store.Load(ID, &m.settings); err != nil {
+		return err
+	}
+	if err := fileusers.Default.Init(env.Store); err != nil {
+		return err
+	}
+	// 共享用户修改后丢弃缓存的处理器，已登录的客户端下次请求即按新的密码与目录校验
+	fileusers.Default.Subscribe(func() {
+		m.mu.Lock()
+		m.shared = map[string]*userHandler{}
+		m.mu.Unlock()
+	})
+	return nil
 }
 
 // Start 实现 module.Module。
@@ -163,17 +179,9 @@ func (m *Module) restartLocked() {
 		return
 	}
 	m.handlers = map[string]*userHandler{}
+	m.shared = map[string]*userHandler{}
 	for _, u := range m.settings.Users {
-		var fs xwebdav.FileSystem
-		if len(u.Mounts) > 0 {
-			fs = mountfs.WebDAV(u.Mounts)
-		} else {
-			fs = xwebdav.Dir(u.Root)
-			if u.ReadOnly {
-				fs = mountfs.ReadOnlyDAV{FileSystem: fs}
-			}
-		}
-		m.handlers[u.Name] = &userHandler{user: u, handler: &xwebdav.Handler{FileSystem: fs, LockSystem: xwebdav.NewMemLS()}}
+		m.handlers[u.Name] = newUserHandler(u)
 	}
 	addr := net.JoinHostPort(m.settings.ListenIP, strconv.Itoa(m.settings.Port))
 	ln, err := net.Listen("tcp", addr)
@@ -200,6 +208,40 @@ func (m *Module) restartLocked() {
 	m.logs.Add(logbuf.LevelInfo, "", fmt.Sprintf("WebDAV 监听 %s（%d 个用户）", addr, len(m.handlers)))
 }
 
+// newUserHandler 按用户的目录配置创建 WebDAV 处理器：Mounts 非空时为多目录，否则为单个目录。
+func newUserHandler(u User) *userHandler {
+	var fs xwebdav.FileSystem
+	if len(u.Mounts) > 0 {
+		fs = mountfs.WebDAV(u.Mounts)
+	} else {
+		fs = xwebdav.Dir(u.Root)
+		if u.ReadOnly {
+			fs = mountfs.ReadOnlyDAV{FileSystem: fs}
+		}
+	}
+	return &userHandler{user: u, handler: &xwebdav.Handler{FileSystem: fs, LockSystem: xwebdav.NewMemLS()}}
+}
+
+// lookupLocked 按用户名查找处理器：先找本地用户，没有同名本地用户且开启了共享用户时再找共享用户。调用方需持有 m.mu。
+func (m *Module) lookupLocked(name string) (uh *userHandler, shared bool) {
+	if uh := m.handlers[name]; uh != nil {
+		return uh, false
+	}
+	if !m.settings.SharedUsers || m.shared == nil {
+		return nil, false
+	}
+	if uh := m.shared[name]; uh != nil {
+		return uh, true
+	}
+	u, ok := fileusers.Default.Lookup(name)
+	if !ok {
+		return nil, false
+	}
+	uh = newUserHandler(User(u))
+	m.shared[name] = uh
+	return uh, true
+}
+
 func checkPassword(stored, given string) bool {
 	if strings.HasPrefix(stored, "$2") {
 		return bcrypt.CompareHashAndPassword([]byte(stored), []byte(given)) == nil
@@ -210,10 +252,12 @@ func checkPassword(stored, given string) bool {
 func (m *Module) serve(w http.ResponseWriter, r *http.Request) {
 	name, pass, ok := r.BasicAuth()
 	m.mu.Lock()
-	uh := m.handlers[name]
+	uh, shared := m.lookupLocked(name)
 	m.mu.Unlock()
 	if !ok || uh == nil || !checkPassword(uh.user.Password, pass) {
-		if ok {
+		if ok && shared {
+			m.logs.Add(logbuf.LevelWarn, "", fmt.Sprintf("%s 认证失败（共享用户 %q）", r.RemoteAddr, name))
+		} else if ok {
 			m.logs.Add(logbuf.LevelWarn, "", fmt.Sprintf("%s 认证失败（用户 %q）", r.RemoteAddr, name))
 		}
 		w.Header().Set("WWW-Authenticate", `Basic realm="Gately WebDAV"`)
@@ -235,6 +279,8 @@ func (m *Module) Routes(r module.Router) {
 		}
 		httpx.OK(w, map[string]any{"settings": s, "running": m.srv != nil, "error": m.err})
 	})
+	// 文件服务共享用户：WebDAV、FTP、SMB 共用同一份列表
+	fileusers.Default.Routes(r, nil)
 	r.HandleFunc("PUT /settings", func(w http.ResponseWriter, req *http.Request) {
 		var s Settings
 		if err := httpx.ReadJSON(req, &s); err != nil {

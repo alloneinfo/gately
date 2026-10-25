@@ -411,6 +411,8 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | GET | `/api/webdav/logs` | `webdav:read` | 檢視模組執行日誌 |
 | DELETE | `/api/webdav/logs` | `webdav:write` | 清空模組執行日誌 |
 | GET | `/api/webdav/settings` | `webdav:read` | 讀取 WebDAV 設定 |
+| GET | `/api/webdav/shared-users` | `webdav:read` | 讀取檔案服務共用使用者 |
+| PUT | `/api/webdav/shared-users` | `webdav:write` | 儲存檔案服務共用使用者 |
 | PUT | `/api/webdav/settings` | `webdav:write` | 儲存 WebDAV 設定 |
 
 ## FTP 服務
@@ -420,6 +422,8 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | GET | `/api/ftp/logs` | `ftp:read` | 檢視模組執行日誌 |
 | DELETE | `/api/ftp/logs` | `ftp:write` | 清空模組執行日誌 |
 | GET | `/api/ftp/settings` | `ftp:read` | 讀取 FTP 設定 |
+| GET | `/api/ftp/shared-users` | `ftp:read` | 讀取檔案服務共用使用者 |
+| PUT | `/api/ftp/shared-users` | `ftp:write` | 儲存檔案服務共用使用者 |
 | PUT | `/api/ftp/settings` | `ftp:write` | 儲存 FTP 設定 |
 
 ## SMB 服務
@@ -429,6 +433,8 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | GET | `/api/smb/logs` | `smb:read` | 檢視模組執行日誌 |
 | DELETE | `/api/smb/logs` | `smb:write` | 清空模組執行日誌 |
 | GET | `/api/smb/settings` | `smb:read` | 讀取 SMB 設定 |
+| GET | `/api/smb/shared-users` | `smb:read` | 讀取檔案服務共用使用者 |
+| PUT | `/api/smb/shared-users` | `smb:write` | 儲存檔案服務共用使用者 |
 | PUT | `/api/smb/settings` | `smb:write` | 儲存 SMB 設定 |
 
 ## 儲存掛載

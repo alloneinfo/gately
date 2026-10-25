@@ -1,10 +1,14 @@
 <template>
   <div class="g-card">
     <div class="g-card-head">
-      <div class="g-card-title"><Users :size="16" />{{ t('fileUsers.title') }} <span class="g-card-desc">{{ desc || t('fileUsers.desc') }}</span></div>
-      <el-button size="small" :icon="UserPlus" @click="users.push({ name: '', password: '', root: '', readOnly: false })">{{ t('fileUsers.addUser') }}</el-button>
+      <div class="g-card-title"><Users :size="16" />{{ title || t('fileUsers.title') }} <span class="g-card-desc">{{ desc || t('fileUsers.desc') }}</span></div>
+      <div class="u-actions">
+        <slot name="head" />
+        <el-button size="small" :icon="UserPlus" @click="users.push({ name: '', password: '', root: '', readOnly: false })">{{ t('fileUsers.addUser') }}</el-button>
+      </div>
     </div>
     <div class="g-card-body">
+      <slot name="notice" />
       <div v-if="users.length" class="u-head">
         <span>{{ t('fileUsers.username') }}</span><span>{{ t('fileUsers.password') }}</span><span>{{ t('fileUsers.directory') }}</span><span>{{ t('fileUsers.readOnly') }}</span><span />
       </div>
@@ -63,7 +67,8 @@ export interface FileUser {
 const { t } = useI18n()
 const users = defineModel<FileUser[]>({ required: true })
 // 以下文案可由使用方覆盖：SMB 中每个目录是一个共享，说明与占位提示不同于 FTP / WebDAV
-defineProps<{ desc?: string; mountSummaryKey?: string; mountNamePlaceholder?: string }>()
+// title 与插槽供共享用户卡片使用：head 放在标题栏右侧，notice 放在用户列表上方
+defineProps<{ title?: string; desc?: string; mountSummaryKey?: string; mountNamePlaceholder?: string }>()
 
 // toMulti 把单目录用户转换为多目录：已填写的目录成为第一个挂载
 function toMulti(u: FileUser) {
@@ -87,6 +92,11 @@ function removeMount(u: FileUser, j: number) {
 </script>
 
 <style scoped>
+.u-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
 .u-head,
 .u-row {
   display: grid;

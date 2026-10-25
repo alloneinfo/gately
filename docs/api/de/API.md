@@ -411,6 +411,8 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | GET | `/api/webdav/logs` | `webdav:read` | Laufzeitprotokolle eines Moduls anzeigen |
 | DELETE | `/api/webdav/logs` | `webdav:write` | Modulprotokolle leeren |
 | GET | `/api/webdav/settings` | `webdav:read` | WebDAV-Einstellungen lesen |
+| GET | `/api/webdav/shared-users` | `webdav:read` | Gemeinsame Benutzer der Dateidienste lesen |
+| PUT | `/api/webdav/shared-users` | `webdav:write` | Gemeinsame Benutzer der Dateidienste speichern |
 | PUT | `/api/webdav/settings` | `webdav:write` | WebDAV-Einstellungen speichern |
 
 ## FTP-Dienst
@@ -420,6 +422,8 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | GET | `/api/ftp/logs` | `ftp:read` | Laufzeitprotokolle eines Moduls anzeigen |
 | DELETE | `/api/ftp/logs` | `ftp:write` | Modulprotokolle leeren |
 | GET | `/api/ftp/settings` | `ftp:read` | FTP-Einstellungen lesen |
+| GET | `/api/ftp/shared-users` | `ftp:read` | Gemeinsame Benutzer der Dateidienste lesen |
+| PUT | `/api/ftp/shared-users` | `ftp:write` | Gemeinsame Benutzer der Dateidienste speichern |
 | PUT | `/api/ftp/settings` | `ftp:write` | FTP-Einstellungen speichern |
 
 ## SMB-Dienst
@@ -429,6 +433,8 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | GET | `/api/smb/logs` | `smb:read` | Laufzeitprotokolle eines Moduls anzeigen |
 | DELETE | `/api/smb/logs` | `smb:write` | Modulprotokolle leeren |
 | GET | `/api/smb/settings` | `smb:read` | SMB-Einstellungen abrufen |
+| GET | `/api/smb/shared-users` | `smb:read` | Gemeinsame Benutzer der Dateidienste lesen |
+| PUT | `/api/smb/shared-users` | `smb:write` | Gemeinsame Benutzer der Dateidienste speichern |
 | PUT | `/api/smb/settings` | `smb:write` | SMB-Einstellungen speichern |
 
 ## Speicher-Einbindungen

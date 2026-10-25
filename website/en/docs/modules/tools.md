@@ -11,6 +11,7 @@ Configure it under "WebDAV Service" in the sidebar "File Services" group.
 | `port` | 18800 | Listen port |
 | `tls` | Off | Enable HTTPS; the certificate is provided per SNI by the [SSL Certificates](/en/docs/modules/ssl) module |
 | `users` | None | Multiple users. Each has `name`, `password`, `root` (an absolute directory path) and `readOnly`, or uses `mounts` to mount several directories |
+| `sharedUsers` | Off | Allow [shared users](#shared-users) to sign in to this service |
 
 Each user can map to one directory, or mount several directories:
 
@@ -33,6 +34,7 @@ Configure it under "FTP Service" in the "File Services" group. FTP and FTPS are 
 | `connectionTimeout` | 30 | Timeout in seconds for establishing a data connection |
 | `disableActiveMode` | Off | Use passive mode only, which suits NAT environments better |
 | `users` | None | Multiple users, with the same fields as WebDAV: `name`, `password`, `root`, `readOnly` or `mounts`; user names must be unique |
+| `sharedUsers` | Off | Allow [shared users](#shared-users) to sign in to this service |
 
 ## SMB
 
@@ -46,6 +48,7 @@ Configure it under "SMB Service" in the "File Services" group to share local dir
 | `requireEncryption` | Off | Require SMB 3 encryption on every connection; older devices and some TVs that only speak SMB 2 will not be able to connect |
 | `mdns` | Off | Advertise the service over Bonjour so it shows up under Network in the macOS Finder; in Docker it only works with host networking |
 | `users` | None | Multiple users with the same fields as WebDAV: `name`, `password`, `root`, `readOnly` or `mounts`; user names are case-insensitive and must be unique |
+| `sharedUsers` | Off | Allow [shared users](#shared-users) to sign in to this service |
 
 Shares belong to users, and a signed-in user only sees and connects to their own shares:
 
@@ -61,6 +64,19 @@ User and share names cannot contain `" / \ [ ] : ; | = , + * ? < >` and cannot s
 - Linux: `mount -t cifs //host/share /mnt -o username=username,port=port`
 
 To troubleshoot clients that cannot connect or fail to authenticate, set the environment variable `GATELY_SMB_DEBUG=1` and restart Gately; protocol debug logs are written to the runtime log. Remove the variable when done.
+
+## Shared users {#shared-users}
+
+WebDAV, FTP and SMB share one list of "shared users" with the same fields as each service's local users (name, password, `root` and `readOnly`, or `mounts`), stored in `fileusers.json` in the configuration directory. Editing them in the "Shared users" card of any of these service pages applies to all three; the local users of each service are unchanged.
+
+- Each service decides on its own whether to accept shared users: turn on "Use in this service" at the top right of the card (field `sharedUsers`) and save, and shared users can sign in to that service;
+- When a local user has the same name, only the local user is checked (case-insensitive for SMB);
+- Shared user names must be unique regardless of case and cannot contain a colon;
+- Changes to shared users take effect at once: WebDAV checks the new settings on the next request, FTP and SMB restart, and connected clients need to reconnect;
+- With the switch on and at least one shared user, the service can be enabled without any local user;
+- SMB only accepts plain passwords, and user and share names must follow SMB's character rules; shared users that do not are reported on the SMB page and in the runtime log and skipped, while WebDAV and FTP can still use them.
+
+The API is `GET` / `PUT /api/<service>/shared-users` of each service (for example `/api/webdav/shared-users`); they read and write the same list, with the permissions of that service.
 
 ## Storage Mounts
 

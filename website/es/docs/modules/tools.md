@@ -11,6 +11,7 @@ Se configura en «Servicio WebDAV», dentro del grupo «Servicios de archivos» 
 | `port` | 18800 | Puerto de escucha |
 | `tls` | Desactivado | Activa HTTPS; el certificado lo proporciona por SNI el módulo [Certificados SSL](/es/docs/modules/ssl) |
 | `users` | Ninguno | Varios usuarios. Cada uno tiene `name`, `password`, `root` (una ruta de directorio absoluta) y `readOnly`, o usa `mounts` para montar varios directorios |
+| `sharedUsers` | Desactivado | Permite que los [usuarios compartidos](#shared-users) inicien sesión en este servicio |
 
 Cada usuario puede apuntar a un directorio o montar varios directorios:
 
@@ -33,6 +34,7 @@ Se configura en «Servicio FTP», dentro del grupo «Servicios de archivos». Se
 | `connectionTimeout` | 30 | Tiempo de espera, en segundos, para establecer una conexión de datos |
 | `disableActiveMode` | Desactivado | Usa solo el modo pasivo, más adecuado para entornos con NAT |
 | `users` | Ninguno | Varios usuarios, con los mismos campos que WebDAV: `name`, `password`, `root`, `readOnly` o `mounts`; los nombres de usuario deben ser únicos |
+| `sharedUsers` | Desactivado | Permite que los [usuarios compartidos](#shared-users) inicien sesión en este servicio |
 
 ## SMB
 
@@ -46,6 +48,7 @@ Se configura en «Servicio SMB», dentro del grupo «Servicios de archivos», y 
 | `requireEncryption` | Desactivado | Exige cifrado SMB 3 en todas las conexiones; los dispositivos antiguos y algunos televisores que solo admiten SMB 2 no podrán conectarse |
 | `mdns` | Desactivado | Anuncia el servicio por Bonjour para que aparezca en Red del Finder de macOS; en Docker solo funciona con red host |
 | `users` | Ninguno | Varios usuarios con los mismos campos que WebDAV: `name`, `password`, `root`, `readOnly` o `mounts`; los nombres de usuario no distinguen mayúsculas y no pueden repetirse |
+| `sharedUsers` | Desactivado | Permite que los [usuarios compartidos](#shared-users) inicien sesión en este servicio |
 
 Los recursos compartidos pertenecen a cada usuario, y un usuario conectado solo ve y abre los suyos:
 
@@ -61,6 +64,19 @@ Los nombres de usuario y de recurso no pueden contener `" / \ [ ] : ; | = , + * 
 - Linux: `mount -t cifs //host/recurso /mnt -o username=usuario,port=puerto`
 
 Para diagnosticar clientes que no conectan o fallan al autenticarse, define la variable de entorno `GATELY_SMB_DEBUG=1` y reinicia Gately; los registros de depuración del protocolo se escriben en el registro de ejecución. Quita la variable al terminar.
+
+## Usuarios compartidos {#shared-users}
+
+WebDAV, FTP y SMB comparten una lista de «usuarios compartidos» con los mismos campos que los usuarios locales de cada servicio (nombre, contraseña, `root` y `readOnly`, o `mounts`), guardada en `fileusers.json` del directorio de configuración. Editarla en la tarjeta «Usuarios compartidos» de cualquiera de estas páginas se aplica a los tres servicios; los usuarios locales de cada servicio no cambian.
+
+- Cada servicio decide si acepta usuarios compartidos: activa «Usar en este servicio» arriba a la derecha de la tarjeta (campo `sharedUsers`) y guarda, y los usuarios compartidos podrán iniciar sesión en ese servicio;
+- Si un usuario local tiene el mismo nombre, solo se comprueba el usuario local (sin distinguir mayúsculas en SMB);
+- Los nombres de usuarios compartidos no se pueden repetir aunque cambien las mayúsculas y no pueden contener dos puntos;
+- Los cambios se aplican al momento: WebDAV usa la nueva configuración en la siguiente petición, FTP y SMB se reinician y los clientes conectados deben volver a conectarse;
+- Con el interruptor activado y al menos un usuario compartido, el servicio se puede activar sin usuarios locales;
+- SMB solo acepta contraseñas en claro y los nombres de usuario y de recurso deben cumplir sus reglas de caracteres; los usuarios compartidos que no las cumplen se indican en la página de SMB y en el registro y se omiten, pero WebDAV y FTP pueden seguir usándolos.
+
+La API es `GET` / `PUT /api/<servicio>/shared-users` de cada servicio (por ejemplo `/api/webdav/shared-users`); todas leen y escriben la misma lista con los permisos de ese servicio.
 
 ## Montajes de almacenamiento
 

@@ -40,13 +40,24 @@
       :mount-name-placeholder="t('smb.shareName')"
     />
 
+    <SharedFileUsers
+      v-if="settings"
+      v-model="shared.users.value"
+      v-model:enabled="settings.sharedUsers"
+      :local-names="settings.users.map((u) => u.name)"
+      :issues="shared.issues.value"
+      smb
+      mount-summary-key="smb.mountSummary"
+      :mount-name-placeholder="t('smb.shareName')"
+    />
+
     <div v-if="settings && savedShares.length" class="g-card">
       <div class="g-card-head">
         <div class="g-card-title"><Link2 :size="16" />{{ t('smb.connect') }} <span class="g-card-desc">{{ t('smb.connectDesc') }}</span></div>
       </div>
       <div class="g-card-body">
         <div class="c-head"><span>{{ t('smb.user') }}</span><span>{{ t('smb.shareName') }}</span><span>Windows</span><span>macOS / Linux</span></div>
-        <div v-for="s in savedShares" :key="s.user + '/' + s.name" class="c-row">
+        <div v-for="(s, i) in savedShares" :key="i" class="c-row">
           <span>{{ s.user }}</span>
           <span>{{ s.name }}<el-tag v-if="s.readOnly" size="small" type="info" class="ro-tag">{{ t('fileUsers.readOnly') }}</el-tag></span>
           <code v-if="savedPort === 445" class="mono">{{ uncPath(s.name) }}</code>
@@ -70,6 +81,8 @@ import PageHeader from '../components/PageHeader.vue'
 import StatusBadge, { type StatusType } from '../components/StatusBadge.vue'
 import LogCard from '../components/LogCard.vue'
 import FileUsers, { type FileUser } from '../components/FileUsers.vue'
+import SharedFileUsers from '../components/SharedFileUsers.vue'
+import { useSharedFileUsers } from '../composables/useSharedFileUsers'
 import { useFormLayout } from '../composables/useIsMobile'
 
 interface Settings {
@@ -79,6 +92,8 @@ interface Settings {
   requireEncryption: boolean
   mdns: boolean
   users: FileUser[]
+  // sharedUsers 为 true 时文件服务共享用户也可登录本服务
+  sharedUsers: boolean
 }
 
 interface ShareRow {
@@ -88,6 +103,8 @@ interface ShareRow {
 }
 
 const { t } = useI18n()
+// 文件服务共享用户：WebDAV、FTP、SMB 共用同一份列表
+const shared = useSharedFileUsers('/api/smb')
 const { labelPosition } = useFormLayout()
 const settings = ref<Settings>()
 // savedEnable 为已保存的启用状态，状态徽标以它为准
@@ -95,8 +112,23 @@ const savedEnable = ref(false)
 const savedPort = ref(445)
 // savedListenIp 为已保存的监听地址，连接地址以它为准，不随表单中未保存的修改变化
 const savedListenIp = ref('')
-// savedShares 为已保存配置中的全部共享，用于展示连接地址
-const savedShares = ref<ShareRow[]>([])
+// savedLocalShares 为已保存配置中本地用户的共享；savedSharedUsers 为已保存的共享用户开关
+const savedLocalShares = ref<ShareRow[]>([])
+const savedSharedUsers = ref(false)
+// savedShares 为已保存配置中的全部共享，用于展示连接地址：开启共享用户时加入可用于 SMB 的共享用户
+// （与后端 buildAccounts 一致，排除与本地用户同名或无法用于 SMB 的共享用户）
+const savedShares = computed((): ShareRow[] => {
+  if (!savedEnable.value) {
+    return []
+  }
+  if (!savedSharedUsers.value) {
+    return savedLocalShares.value
+  }
+  const local = new Set(savedLocalShares.value.map((s) => s.user.toLowerCase()))
+  const bad = new Set(shared.issues.value.map((i) => i.name))
+  const usable = shared.savedUsers.value.filter((u) => !local.has(u.name.toLowerCase()) && !bad.has(u.name))
+  return [...savedLocalShares.value, ...sharesOf(usable)]
+})
 const running = ref(false)
 const error = ref('')
 const supported = ref(true)
@@ -161,11 +193,12 @@ function sharesOf(users: FileUser[]): ShareRow[] {
 
 async function load() {
   const r = await api.get<{ settings: Settings & { users: FileUser[] | null }; running: boolean; error: string; supported: boolean }>('/api/smb/settings')
-  settings.value = { ...r.settings, users: r.settings.users ?? [] }
+  settings.value = { ...r.settings, users: r.settings.users ?? [], sharedUsers: !!r.settings.sharedUsers }
   savedEnable.value = r.settings.enable
   savedPort.value = r.settings.port
   savedListenIp.value = r.settings.listenIp
-  savedShares.value = r.settings.enable ? sharesOf(settings.value.users) : []
+  savedLocalShares.value = sharesOf(settings.value.users)
+  savedSharedUsers.value = !!r.settings.sharedUsers
   running.value = r.running
   error.value = r.error
   supported.value = r.supported
@@ -174,11 +207,13 @@ async function load() {
 async function save() {
   saving.value = true
   try {
+    // 先保存共享用户：只用共享用户启用服务时，服务设置的校验需要看到已保存的共享用户
+    await shared.save()
     const r = await api.put<{ running: boolean; error: string }>('/api/smb/settings', settings.value)
     running.value = r.running
     error.value = r.error
     ElMessage.success(t('common.saved'))
-    await load()
+    await Promise.all([load(), shared.load()])
   } catch (e) {
     ElMessage.error((e as Error).message)
   } finally {
@@ -186,7 +221,7 @@ async function save() {
   }
 }
 
-onMounted(load)
+onMounted(() => Promise.all([load(), shared.load()]))
 </script>
 
 <style scoped>

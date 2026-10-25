@@ -411,6 +411,8 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | GET | `/api/webdav/logs` | `webdav:read` | Ver logs de execução do módulo |
 | DELETE | `/api/webdav/logs` | `webdav:write` | Limpar logs de execução do módulo |
 | GET | `/api/webdav/settings` | `webdav:read` | Ler configurações do WebDAV |
+| GET | `/api/webdav/shared-users` | `webdav:read` | Ler os usuários compartilhados dos serviços de arquivos |
+| PUT | `/api/webdav/shared-users` | `webdav:write` | Salvar os usuários compartilhados dos serviços de arquivos |
 | PUT | `/api/webdav/settings` | `webdav:write` | Salvar configurações do WebDAV |
 
 ## Serviço FTP
@@ -420,6 +422,8 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | GET | `/api/ftp/logs` | `ftp:read` | Ver logs de execução do módulo |
 | DELETE | `/api/ftp/logs` | `ftp:write` | Limpar logs de execução do módulo |
 | GET | `/api/ftp/settings` | `ftp:read` | Ler configurações do FTP |
+| GET | `/api/ftp/shared-users` | `ftp:read` | Ler os usuários compartilhados dos serviços de arquivos |
+| PUT | `/api/ftp/shared-users` | `ftp:write` | Salvar os usuários compartilhados dos serviços de arquivos |
 | PUT | `/api/ftp/settings` | `ftp:write` | Salvar configurações do FTP |
 
 ## Serviço SMB
@@ -429,6 +433,8 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | GET | `/api/smb/logs` | `smb:read` | Ver logs de execução do módulo |
 | DELETE | `/api/smb/logs` | `smb:write` | Limpar logs de execução do módulo |
 | GET | `/api/smb/settings` | `smb:read` | Obter configurações do SMB |
+| GET | `/api/smb/shared-users` | `smb:read` | Ler os usuários compartilhados dos serviços de arquivos |
+| PUT | `/api/smb/shared-users` | `smb:write` | Salvar os usuários compartilhados dos serviços de arquivos |
 | PUT | `/api/smb/settings` | `smb:write` | Salvar configurações do SMB |
 
 ## Montagens de armazenamento

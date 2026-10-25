@@ -411,6 +411,8 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | GET | `/api/webdav/logs` | `webdav:read` | モジュールの実行ログを表示 |
 | DELETE | `/api/webdav/logs` | `webdav:write` | モジュールの実行ログを消去 |
 | GET | `/api/webdav/settings` | `webdav:read` | WebDAV 設定を読み取り |
+| GET | `/api/webdav/shared-users` | `webdav:read` | ファイルサービスの共有ユーザーを取得 |
+| PUT | `/api/webdav/shared-users` | `webdav:write` | ファイルサービスの共有ユーザーを保存 |
 | PUT | `/api/webdav/settings` | `webdav:write` | WebDAV 設定を保存 |
 
 ## FTP サービス
@@ -420,6 +422,8 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | GET | `/api/ftp/logs` | `ftp:read` | モジュールの実行ログを表示 |
 | DELETE | `/api/ftp/logs` | `ftp:write` | モジュールの実行ログを消去 |
 | GET | `/api/ftp/settings` | `ftp:read` | FTP 設定を読み取り |
+| GET | `/api/ftp/shared-users` | `ftp:read` | ファイルサービスの共有ユーザーを取得 |
+| PUT | `/api/ftp/shared-users` | `ftp:write` | ファイルサービスの共有ユーザーを保存 |
 | PUT | `/api/ftp/settings` | `ftp:write` | FTP 設定を保存 |
 
 ## SMB サービス
@@ -429,6 +433,8 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | GET | `/api/smb/logs` | `smb:read` | モジュールの実行ログを表示 |
 | DELETE | `/api/smb/logs` | `smb:write` | モジュールの実行ログを消去 |
 | GET | `/api/smb/settings` | `smb:read` | SMB 設定を取得 |
+| GET | `/api/smb/shared-users` | `smb:read` | ファイルサービスの共有ユーザーを取得 |
+| PUT | `/api/smb/shared-users` | `smb:write` | ファイルサービスの共有ユーザーを保存 |
 | PUT | `/api/smb/settings` | `smb:write` | SMB 設定を保存 |
 
 ## ストレージマウント

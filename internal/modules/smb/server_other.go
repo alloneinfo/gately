@@ -13,7 +13,7 @@ const supported = false
 
 type server struct{}
 
-func startServer(Settings, *logbuf.Buffer) (*server, error) {
+func startServer(Settings, []account, *logbuf.Buffer) (*server, error) {
 	return nil, errors.New("当前系统不支持 SMB 服务，仅支持 Linux 与 macOS")
 }
 

@@ -11,6 +11,7 @@ Configurez-le dans « Service WebDAV » du groupe « Services de fichiers » de 
 | `port` | 18800 | Port d'écoute |
 | `tls` | Désactivé | Active HTTPS ; le certificat est fourni par SNI par le module [Certificats SSL](/fr/docs/modules/ssl) |
 | `users` | Aucun | Plusieurs utilisateurs. Chacun possède `name`, `password`, `root` (un chemin de répertoire absolu) et `readOnly`, ou utilise `mounts` pour monter plusieurs répertoires |
+| `sharedUsers` | Désactivé | Autorise les [utilisateurs partagés](#shared-users) à se connecter à ce service |
 
 Chaque utilisateur peut être associé à un seul répertoire, ou monter plusieurs répertoires :
 
@@ -33,6 +34,7 @@ Configurez-le dans « Service FTP » du groupe « Services de fichiers ». FTP e
 | `connectionTimeout` | 30 | Délai en secondes pour établir une connexion de données |
 | `disableActiveMode` | Désactivé | Utilise uniquement le mode passif, mieux adapté aux environnements NAT |
 | `users` | Aucun | Plusieurs utilisateurs, avec les mêmes champs que WebDAV : `name`, `password`, `root`, `readOnly` ou `mounts` ; les noms d'utilisateur doivent être uniques |
+| `sharedUsers` | Désactivé | Autorise les [utilisateurs partagés](#shared-users) à se connecter à ce service |
 
 ## SMB
 
@@ -46,6 +48,7 @@ Configurez-le dans « Service SMB » du groupe « Services de fichiers » pour p
 | `requireEncryption` | Désactivé | Exige le chiffrement SMB 3 pour chaque connexion ; les anciens appareils et certains téléviseurs limités à SMB 2 ne pourront plus se connecter |
 | `mdns` | Désactivé | Annonce le service via Bonjour pour qu’il apparaisse dans Réseau du Finder de macOS ; sous Docker, cela ne fonctionne qu'en réseau host |
 | `users` | Aucun | Plusieurs utilisateurs avec les mêmes champs que WebDAV : `name`, `password`, `root`, `readOnly` ou `mounts` ; les noms d’utilisateur sont insensibles à la casse et uniques |
+| `sharedUsers` | Désactivé | Autorise les [utilisateurs partagés](#shared-users) à se connecter à ce service |
 
 Les partages appartiennent aux utilisateurs, et un utilisateur connecté ne voit et n’ouvre que les siens :
 
@@ -61,6 +64,19 @@ Les noms d’utilisateur et de partage ne peuvent pas contenir `" / \ [ ] : ; | 
 - Linux : `mount -t cifs //hôte/partage /mnt -o username=utilisateur,port=port`
 
 Pour diagnostiquer un client qui n'arrive pas à se connecter ou à s'authentifier, définissez la variable d'environnement `GATELY_SMB_DEBUG=1` et redémarrez Gately : les journaux de débogage du protocole sont écrits dans le journal d'exécution. Retirez la variable une fois terminé.
+
+## Utilisateurs partagés {#shared-users}
+
+WebDAV, FTP et SMB partagent une liste d'« utilisateurs partagés » avec les mêmes champs que les utilisateurs locaux de chaque service (nom, mot de passe, `root` et `readOnly`, ou `mounts`), enregistrée dans `fileusers.json` du répertoire de configuration. La modifier dans la carte « Utilisateurs partagés » de l'une de ces pages s'applique aux trois services ; les utilisateurs locaux de chaque service ne changent pas.
+
+- Chaque service décide s'il accepte les utilisateurs partagés : activez « Utiliser dans ce service » en haut à droite de la carte (champ `sharedUsers`) et enregistrez pour qu'ils puissent s'y connecter ;
+- Si un utilisateur local porte le même nom, seul l'utilisateur local est vérifié (sans distinction de casse pour SMB) ;
+- Les noms d'utilisateurs partagés doivent être uniques sans distinction de casse et ne peuvent pas contenir de deux-points ;
+- Les modifications s'appliquent immédiatement : WebDAV utilise les nouveaux paramètres à la requête suivante, FTP et SMB redémarrent et les clients connectés doivent se reconnecter ;
+- Interrupteur activé et avec au moins un utilisateur partagé, le service peut être activé sans utilisateur local ;
+- SMB n'accepte que les mots de passe en clair et les noms d'utilisateur et de partage doivent respecter ses règles de caractères ; les utilisateurs partagés qui ne les respectent pas sont signalés sur la page SMB et dans le journal puis ignorés, WebDAV et FTP pouvant toujours les utiliser.
+
+L'API est `GET` / `PUT /api/<service>/shared-users` de chaque service (par exemple `/api/webdav/shared-users`) ; elles lisent et écrivent la même liste avec les permissions de ce service.
 
 ## Montages de stockage
 

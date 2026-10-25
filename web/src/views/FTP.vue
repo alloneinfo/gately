@@ -40,6 +40,7 @@
     </div>
 
     <FileUsers v-if="settings" v-model="settings.users" />
+    <SharedFileUsers v-if="settings" v-model="shared.users.value" v-model:enabled="settings.sharedUsers" :local-names="settings.users.map((u) => u.name)" />
 
     <LogCard url="/api/ftp/logs" clearable />
   </div>
@@ -55,6 +56,8 @@ import PageHeader from '../components/PageHeader.vue'
 import StatusBadge, { type StatusType } from '../components/StatusBadge.vue'
 import LogCard from '../components/LogCard.vue'
 import FileUsers, { type FileUser } from '../components/FileUsers.vue'
+import SharedFileUsers from '../components/SharedFileUsers.vue'
+import { useSharedFileUsers } from '../composables/useSharedFileUsers'
 import { useFormLayout } from '../composables/useIsMobile'
 
 interface Settings {
@@ -69,9 +72,13 @@ interface Settings {
   connectionTimeout: number
   disableActiveMode: boolean
   users: FileUser[]
+  // sharedUsers 为 true 时文件服务共享用户也可登录本服务
+  sharedUsers: boolean
 }
 
 const { t } = useI18n()
+// 文件服务共享用户：WebDAV、FTP、SMB 共用同一份列表
+const shared = useSharedFileUsers('/api/ftp')
 const { labelPosition } = useFormLayout()
 const settings = ref<Settings>()
 // savedEnable 为已保存的启用状态，状态徽标以它为准
@@ -95,7 +102,7 @@ const svcStatus = computed((): { type: StatusType; text: string; title?: string 
 
 async function load() {
   const r = await api.get<{ settings: Settings & { users: FileUser[] | null }; running: boolean; error: string }>('/api/ftp/settings')
-  settings.value = { ...r.settings, users: r.settings.users ?? [] }
+  settings.value = { ...r.settings, users: r.settings.users ?? [], sharedUsers: !!r.settings.sharedUsers }
   savedEnable.value = r.settings.enable
   running.value = r.running
   error.value = r.error
@@ -104,11 +111,13 @@ async function load() {
 async function save() {
   saving.value = true
   try {
+    // 先保存共享用户：只用共享用户启用服务时，服务设置的校验需要看到已保存的共享用户
+    await shared.save()
     const r = await api.put<{ running: boolean; error: string }>('/api/ftp/settings', settings.value)
     running.value = r.running
     error.value = r.error
     ElMessage.success(t('common.saved'))
-    await load()
+    await Promise.all([load(), shared.load()])
   } catch (e) {
     ElMessage.error((e as Error).message)
   } finally {
@@ -116,7 +125,7 @@ async function save() {
   }
 }
 
-onMounted(load)
+onMounted(() => Promise.all([load(), shared.load()]))
 </script>
 
 <style scoped>

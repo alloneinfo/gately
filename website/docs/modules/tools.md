@@ -11,6 +11,7 @@
 | `port` | 18800 | 监听端口 |
 | `tls` | 关闭 | 启用 HTTPS，证书由 [SSL 证书](/docs/modules/ssl) 模块按 SNI 提供 |
 | `users` | 无 | 多用户，每个用户包含 `name`、`password`、`root`（绝对路径目录）与 `readOnly`，或使用 `mounts` 挂载多个目录 |
+| `sharedUsers` | 关闭 | 允许[共享用户](#shared-users)登录本服务 |
 
 每个用户可以映射到一个目录，也可以挂载多个目录：
 
@@ -33,6 +34,7 @@
 | `connectionTimeout` | 30 | 建立数据连接的超时秒数 |
 | `disableActiveMode` | 关闭 | 仅使用被动模式，更适合 NAT 环境 |
 | `users` | 无 | 多用户，字段同 WebDAV：`name`、`password`、`root`、`readOnly` 或 `mounts`，用户名不可重复 |
+| `sharedUsers` | 关闭 | 允许[共享用户](#shared-users)登录本服务 |
 
 ## SMB
 
@@ -46,6 +48,7 @@
 | `requireEncryption` | 关闭 | 要求所有连接使用 SMB 3 加密，只支持 SMB 2 的旧设备与部分电视将无法连接 |
 | `mdns` | 关闭 | 通过 Bonjour 广播服务，macOS 访达的「网络」中可以直接看到；Docker 部署需使用 host 网络才能广播 |
 | `users` | 无 | 多用户，字段同 WebDAV：`name`、`password`、`root`、`readOnly` 或 `mounts`，用户名不区分大小写且不可重复 |
+| `sharedUsers` | 关闭 | 允许[共享用户](#shared-users)登录本服务 |
 
 共享按用户划分，用户登录后只能看到并连接自己的共享：
 
@@ -61,6 +64,19 @@
 - Linux：`mount -t cifs //主机/共享名 /mnt -o username=用户名,port=端口`
 
 排查客户端连不上或认证失败时，可以设置环境变量 `GATELY_SMB_DEBUG=1` 后重启 Gately，协议调试日志会写入运行日志；排查完成后去掉该变量。
+
+## 共享用户 {#shared-users}
+
+WebDAV、FTP 与 SMB 共用一份「共享用户」，字段与各服务的本地用户相同（用户名、密码、`root` 与 `readOnly` 或 `mounts`），保存在配置目录的 `fileusers.json`。在任一服务页面的「共享用户」卡片中修改，三个服务同时生效；各服务原有的本地用户不受影响。
+
+- 每个服务单独决定是否接受共享用户：打开卡片右上角的「本服务启用」（字段 `sharedUsers`）并保存后，共享用户即可登录该服务；
+- 与本地用户同名时只按本地用户校验（SMB 不区分大小写）；
+- 共享用户名不区分大小写不可重复，也不能包含冒号；
+- 修改共享用户立即生效：WebDAV 在下一个请求按新设置校验，FTP 与 SMB 会重启服务，已连接的客户端需要重新连接；
+- 打开开关且至少有一个共享用户时，没有本地用户也可以启用服务；
+- SMB 只接受明文密码，用户名与共享名还要满足 SMB 的字符限制，不满足的共享用户会在 SMB 页面与运行日志中提示并跳过，WebDAV 与 FTP 仍可使用。
+
+接口为各服务的 `GET` / `PUT /api/<服务>/shared-users`（如 `/api/webdav/shared-users`），读写的是同一份列表，权限沿用所在服务。
 
 ## 存储挂载
 

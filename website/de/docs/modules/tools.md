@@ -11,6 +11,7 @@ Konfiguration unter „WebDAV-Dienst“ in der Seitenleistengruppe „Dateidiens
 | `port` | 18800 | Listen-Port |
 | `tls` | Aus | HTTPS aktivieren; das Zertifikat liefert das Modul [SSL-Zertifikate](/de/docs/modules/ssl) per SNI |
 | `users` | Keine | Mehrere Benutzer. Jeder hat `name`, `password`, `root` (ein absoluter Verzeichnispfad) und `readOnly` oder bindet über `mounts` mehrere Verzeichnisse ein |
+| `sharedUsers` | Aus | Erlaubt [gemeinsamen Benutzern](#shared-users) die Anmeldung bei diesem Dienst |
 
 Jeder Benutzer kann auf ein Verzeichnis abgebildet werden oder mehrere Verzeichnisse einbinden:
 
@@ -33,6 +34,7 @@ Konfiguration unter „FTP-Dienst“ in der Gruppe „Dateidienste“. FTP und F
 | `connectionTimeout` | 30 | Timeout in Sekunden für den Aufbau einer Datenverbindung |
 | `disableActiveMode` | Aus | Nur passiven Modus verwenden, was für NAT-Umgebungen besser geeignet ist |
 | `users` | Keine | Mehrere Benutzer mit denselben Feldern wie bei WebDAV: `name`, `password`, `root`, `readOnly` oder `mounts`; Benutzernamen müssen eindeutig sein |
+| `sharedUsers` | Aus | Erlaubt [gemeinsamen Benutzern](#shared-users) die Anmeldung bei diesem Dienst |
 
 ## SMB
 
@@ -46,6 +48,7 @@ Konfiguration unter „SMB-Dienst“ in der Gruppe „Dateidienste“; damit wer
 | `requireEncryption` | Aus | Verlangt SMB-3-Verschlüsselung für jede Verbindung; ältere Geräte und manche Fernseher, die nur SMB 2 beherrschen, können sich dann nicht verbinden |
 | `mdns` | Aus | Kündigt den Dienst per Bonjour an, sodass er im macOS-Finder unter Netzwerk erscheint; unter Docker nur mit Host-Netzwerk |
 | `users` | Keine | Mehrere Benutzer mit denselben Feldern wie WebDAV: `name`, `password`, `root`, `readOnly` oder `mounts`; Benutzernamen sind unabhängig von Groß-/Kleinschreibung eindeutig |
+| `sharedUsers` | Aus | Erlaubt [gemeinsamen Benutzern](#shared-users) die Anmeldung bei diesem Dienst |
 
 Freigaben gehören zu Benutzern; ein angemeldeter Benutzer sieht und verbindet nur seine eigenen Freigaben:
 
@@ -61,6 +64,19 @@ Benutzer- und Freigabenamen dürfen `" / \ [ ] : ; | = , + * ? < >` nicht enthal
 - Linux: `mount -t cifs //Host/Freigabe /mnt -o username=Benutzer,port=Port`
 
 Wenn Clients keine Verbindung bekommen oder die Anmeldung scheitert, die Umgebungsvariable `GATELY_SMB_DEBUG=1` setzen und Gately neu starten; Protokoll-Debug-Logs landen im Laufzeitlog. Danach die Variable wieder entfernen.
+
+## Gemeinsame Benutzer {#shared-users}
+
+WebDAV, FTP und SMB teilen sich eine Liste „gemeinsamer Benutzer“ mit denselben Feldern wie die lokalen Benutzer der Dienste (Name, Passwort, `root` und `readOnly` oder `mounts`), gespeichert in `fileusers.json` im Konfigurationsverzeichnis. Änderungen in der Karte „Gemeinsame Benutzer“ auf einer dieser Seiten gelten für alle drei Dienste; die lokalen Benutzer der Dienste bleiben unverändert.
+
+- Jeder Dienst entscheidet selbst, ob er gemeinsame Benutzer annimmt: „In diesem Dienst verwenden“ oben rechts in der Karte (Feld `sharedUsers`) einschalten und speichern, dann können sie sich anmelden;
+- Hat ein lokaler Benutzer denselben Namen, wird nur der lokale Benutzer geprüft (bei SMB ohne Groß-/Kleinschreibung);
+- Namen gemeinsamer Benutzer müssen unabhängig von Groß-/Kleinschreibung eindeutig sein und dürfen keinen Doppelpunkt enthalten;
+- Änderungen gelten sofort: WebDAV prüft ab der nächsten Anfrage mit den neuen Einstellungen, FTP und SMB starten neu, und verbundene Clients müssen sich neu verbinden;
+- Mit eingeschaltetem Schalter und mindestens einem gemeinsamen Benutzer lässt sich der Dienst ohne lokale Benutzer aktivieren;
+- SMB akzeptiert nur Klartextpasswörter, und Benutzer- und Freigabenamen müssen den SMB-Zeichenregeln folgen; gemeinsame Benutzer, die das nicht tun, werden auf der SMB-Seite und im Laufzeitprotokoll gemeldet und übersprungen, WebDAV und FTP können sie weiter nutzen.
+
+Die API ist `GET` / `PUT /api/<Dienst>/shared-users` des jeweiligen Dienstes (z. B. `/api/webdav/shared-users`); alle lesen und schreiben dieselbe Liste mit den Berechtigungen des Dienstes.
 
 ## Speicher-Einbindungen
 

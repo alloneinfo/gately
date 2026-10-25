@@ -11,6 +11,7 @@
 | `port` | 18800 | 監聽連接埠 |
 | `tls` | 關閉 | 啟用 HTTPS，憑證由 [SSL 憑證](/zh-TW/docs/modules/ssl) 模組依 SNI 提供 |
 | `users` | 無 | 多使用者，每位使用者包含 `name`、`password`、`root`（絕對路徑目錄）與 `readOnly`，或使用 `mounts` 掛載多個目錄 |
+| `sharedUsers` | 關閉 | 允許[共用使用者](#shared-users)登入本服務 |
 
 每位使用者可以對應到一個目錄，也可以掛載多個目錄：
 
@@ -33,6 +34,7 @@
 | `connectionTimeout` | 30 | 建立資料連線的逾時秒數 |
 | `disableActiveMode` | 關閉 | 僅使用被動模式，更適合 NAT 環境 |
 | `users` | 無 | 多使用者，欄位同 WebDAV：`name`、`password`、`root`、`readOnly` 或 `mounts`，使用者名稱不可重複 |
+| `sharedUsers` | 關閉 | 允許[共用使用者](#shared-users)登入本服務 |
 
 ## SMB
 
@@ -46,6 +48,7 @@
 | `requireEncryption` | 關閉 | 要求所有連線使用 SMB 3 加密，只支援 SMB 2 的舊裝置與部分電視將無法連線 |
 | `mdns` | 關閉 | 透過 Bonjour 廣播服務，macOS Finder 的「網路」中可以直接看到；Docker 部署需使用 host 網路才能廣播 |
 | `users` | 無 | 多使用者，欄位同 WebDAV：`name`、`password`、`root`、`readOnly` 或 `mounts`，使用者名稱不區分大小寫且不可重複 |
+| `sharedUsers` | 關閉 | 允許[共用使用者](#shared-users)登入本服務 |
 
 共享依使用者劃分，使用者登入後只能看到並連線自己的共享：
 
@@ -61,6 +64,19 @@
 - Linux：`mount -t cifs //主機/共享名稱 /mnt -o username=使用者名稱,port=連接埠`
 
 排查用戶端連不上或認證失敗時，可以設定環境變數 `GATELY_SMB_DEBUG=1` 後重新啟動 Gately，協定除錯日誌會寫入執行日誌；排查完成後移除該變數。
+
+## 共用使用者 {#shared-users}
+
+WebDAV、FTP 與 SMB 共用一份「共用使用者」，欄位與各服務的本機使用者相同（使用者名稱、密碼、`root` 與 `readOnly` 或 `mounts`），儲存在設定目錄的 `fileusers.json`。在任一服務頁面的「共用使用者」卡片中修改，三個服務同時生效；各服務原有的本機使用者不受影響。
+
+- 每個服務單獨決定是否接受共用使用者：開啟卡片右上角的「本服務啟用」（欄位 `sharedUsers`）並儲存後，共用使用者即可登入該服務；
+- 與本機使用者同名時只按本機使用者驗證（SMB 不區分大小寫）；
+- 共用使用者名稱不區分大小寫不可重複，也不能包含冒號；
+- 修改共用使用者立即生效：WebDAV 在下一個請求按新設定驗證，FTP 與 SMB 會重新啟動服務，已連線的用戶端需要重新連線；
+- 開啟開關且至少有一個共用使用者時，沒有本機使用者也可以啟用服務；
+- SMB 只接受明文密碼，使用者名稱與共用名稱還要符合 SMB 的字元限制，不符合的共用使用者會在 SMB 頁面與執行記錄中提示並略過，WebDAV 與 FTP 仍可使用。
+
+介面為各服務的 `GET` / `PUT /api/<服務>/shared-users`（如 `/api/webdav/shared-users`），讀寫的是同一份清單，權限沿用所在服務。
 
 ## 儲存掛載
 

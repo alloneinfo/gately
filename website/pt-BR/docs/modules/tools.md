@@ -11,6 +11,7 @@ Configure em "Serviço WebDAV", no grupo "Serviços de arquivos" da barra latera
 | `port` | 18800 | Porta de escuta |
 | `tls` | Desativado | Ativa o HTTPS; o certificado é fornecido por SNI pelo módulo de [Certificados SSL](/pt-BR/docs/modules/ssl) |
 | `users` | Nenhum | Vários usuários. Cada um tem `name`, `password`, `root` (um caminho absoluto de diretório) e `readOnly`, ou usa `mounts` para montar vários diretórios |
+| `sharedUsers` | Desativado | Permite que os [usuários compartilhados](#shared-users) entrem neste serviço |
 
 Cada usuário pode ser mapeado para um diretório ou montar vários diretórios:
 
@@ -33,6 +34,7 @@ Configure em "Serviço FTP", no grupo "Serviços de arquivos". FTP e FTPS são c
 | `connectionTimeout` | 30 | Timeout em segundos para estabelecer uma conexão de dados |
 | `disableActiveMode` | Desativado | Usa apenas o modo passivo, mais adequado a ambientes com NAT |
 | `users` | Nenhum | Vários usuários, com os mesmos campos do WebDAV: `name`, `password`, `root`, `readOnly` ou `mounts`; os nomes de usuário devem ser únicos |
+| `sharedUsers` | Desativado | Permite que os [usuários compartilhados](#shared-users) entrem neste serviço |
 
 ## SMB
 
@@ -46,6 +48,7 @@ Configure em "Serviço SMB", no grupo "Serviços de arquivos", para compartilhar
 | `requireEncryption` | Desativado | Exige criptografia SMB 3 em todas as conexões; dispositivos antigos e algumas TVs que só suportam SMB 2 não conseguirão se conectar |
 | `mdns` | Desativado | Anuncia o serviço via Bonjour para que apareça em Rede no Finder do macOS; no Docker só funciona com rede host |
 | `users` | Nenhum | Vários usuários com os mesmos campos do WebDAV: `name`, `password`, `root`, `readOnly` ou `mounts`; nomes de usuário não diferenciam maiúsculas e não podem se repetir |
+| `sharedUsers` | Desativado | Permite que os [usuários compartilhados](#shared-users) entrem neste serviço |
 
 Os compartilhamentos pertencem aos usuários, e um usuário conectado só vê e acessa os seus:
 
@@ -61,6 +64,19 @@ Nomes de usuário e de compartilhamento não podem conter `" / \ [ ] : ; | = , +
 - Linux: `mount -t cifs //host/compartilhamento /mnt -o username=usuário,port=porta`
 
 Para diagnosticar clientes que não conectam ou falham na autenticação, defina a variável de ambiente `GATELY_SMB_DEBUG=1` e reinicie o Gately; os logs de depuração do protocolo vão para o log de execução. Remova a variável ao terminar.
+
+## Usuários compartilhados {#shared-users}
+
+WebDAV, FTP e SMB compartilham uma lista de "usuários compartilhados" com os mesmos campos dos usuários locais de cada serviço (nome, senha, `root` e `readOnly`, ou `mounts`), salva em `fileusers.json` no diretório de configuração. Editá-la no cartão "Usuários compartilhados" de qualquer uma dessas páginas vale para os três serviços; os usuários locais de cada serviço não mudam.
+
+- Cada serviço decide se aceita usuários compartilhados: ligue "Usar neste serviço" no canto superior direito do cartão (campo `sharedUsers`) e salve, e os usuários compartilhados poderão entrar nesse serviço;
+- Se um usuário local tiver o mesmo nome, só o usuário local é verificado (sem diferenciar maiúsculas no SMB);
+- Nomes de usuários compartilhados não podem se repetir, mesmo com maiúsculas diferentes, e não podem conter dois-pontos;
+- As alterações valem na hora: o WebDAV usa as novas configurações na próxima requisição, FTP e SMB reiniciam e os clientes conectados precisam se reconectar;
+- Com a chave ligada e pelo menos um usuário compartilhado, o serviço pode ser ativado sem usuários locais;
+- O SMB só aceita senhas em texto puro, e nomes de usuário e de compartilhamento precisam seguir as regras de caracteres do SMB; usuários compartilhados que não seguem são indicados na página do SMB e no log e ignorados, mas o WebDAV e o FTP ainda podem usá-los.
+
+A API é `GET` / `PUT /api/<serviço>/shared-users` de cada serviço (por exemplo `/api/webdav/shared-users`); todas leem e gravam a mesma lista com as permissões daquele serviço.
 
 ## Montagens de armazenamento
 
