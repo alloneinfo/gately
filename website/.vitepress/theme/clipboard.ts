@@ -1,6 +1,7 @@
 // 剪贴板辅助：优先使用 Clipboard API；非安全上下文（HTTP 预览等）下浏览器不提供该接口，
 // 或权限被拒绝时，降级为临时 textarea + execCommand('copy')；仍失败时选中页面上的文本供手动复制。
-// 逻辑与管理界面 web/src/composables/useClipboard.ts 一致，官网是独立工程，无法直接引用。
+// 是管理界面 web/src/composables/useClipboard.ts 的简化版：官网没有对话框，不需要把 textarea 挂进对话框，
+// 也不还原原来的选区；官网是独立工程，无法直接引用。
 
 function execCopy(text: string): boolean {
   const active = document.activeElement as HTMLElement | null

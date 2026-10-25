@@ -20,7 +20,7 @@ Wird eine Site oder die Standard-Site gespeichert, wird die Site-Liste an Ort un
 | Weiterleitung | Leitet mit Statuscode 301 / 302 / 307 / 308 (Standard 302) auf eine vollständige URL um, wahlweise unter Beibehaltung von ursprünglichem Pfad und Query-String. Die URL darf `{host}` enthalten, das durch die vom Besucher verwendete Domain ersetzt wird: `https://{host}` mit „Pfad und Query beibehalten“ leitet jede HTTP-Anfrage auf HTTPS derselben Domain um |
 | Statische Dateien | Das Verzeichnis muss ein absoluter Pfad sein. Ist „Verzeichnisauflistung“ aus, liefert eine Verzeichnisanfrage nur dann eine Antwort, wenn `index.html` existiert. „URLs ohne Endung“ probiert `path.html` und `path/index.html`, wenn eine Datei fehlt (für VitePress und ähnliche Generatoren, wie nginx `try_files $uri $uri.html $uri/index.html`). „404-Seite“ ist ein Pfad innerhalb des Verzeichnisses, etwa `404.html`, der mit Status 404 ausgeliefert wird |
 | Fester Text | Eigener Inhalt, `Content-Type` (Standard `text/plain; charset=utf-8`) und Statuscode (100-599, Standard 200) |
-| Verbindung schließen | Sendet nichts und schließt die Verbindung, wie nginx `return 444`. Meist als Standard-Site genutzt, damit Anfragen, die unbekannte Domains abtasten, keine Antwort erhalten; im Zugriffslog erscheinen sie als 444 |
+| Verbindung schließen | Sendet nichts und schließt die Verbindung, wie nginx `return 444`. Meist als Standard-Site genutzt, damit Anfragen, die unbekannte Domains abtasten, keine Antwort erhalten; im Zugriffslog erscheinen sie als 444; Authentifizierung, Zugriffskontrolle, WAF und Umschreibungen werden übersprungen, die übrigen Site-Einstellungen wirken nicht |
 
 Sites jedes Typs können ein Zugriffslog, Cross-Origin (CORS) sowie eigene Request- und Response-Header festlegen (je Zeile ein `Key: Value`; ein leerer Value entfernt den Header) und auf eine Instanz der [WAF-Firewall](/de/docs/modules/waf) verweisen (existiert die Instanz nicht oder ist sie deaktiviert, werden Anfragen durchgelassen). Wie Anfrage-Header, Antwort-Header und Content-Type bearbeitet werden, steht unter [Anfrage- und Antwort-Header](#headers).
 
@@ -366,8 +366,8 @@ nginx-Einstellungen umsetzen:
 | `return 302 /admin` in `location = /` | ein Umschreiben mit aktivierter „Weiterleitung“, Muster `^/$` |
 | `try_files $uri $uri.html $uri/index.html` und `error_page 404` | statische Dateien mit „URLs ohne Endung“ und „404-Seite“ |
 | `add_header` | Antwort-Header |
+| `return 444` | eine Site vom Typ Verbindung schließen |
 
 ## Hinweis zur Bereitstellung
 
-| `return 444` | eine Site vom Typ Verbindung schließen |
 Web-Dienste müssen auf Ports des Hosts wie 80 / 443 lauschen. Bei Docker-Bereitstellungen empfehlen wir `--network host`.

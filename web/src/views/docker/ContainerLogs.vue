@@ -10,7 +10,7 @@
       <div class="b-ops">
         <el-button :icon="RefreshCw" :loading="loading" @click="load">{{ t('common.refresh') }}</el-button>
         <el-button :icon="ArrowDownToLine" @click="toBottom">{{ t('docker.container.logs.toBottom') }}</el-button>
-        <el-button :icon="Copy" @click="copy">{{ t('common.copy') }}</el-button>
+        <el-button :icon="Copy" :disabled="!shown" @click="copy">{{ t('common.copy') }}</el-button>
       </div>
     </div>
     <pre ref="box" class="box mono">{{ shown || t('docker.container.logs.noLogs') }}</pre>

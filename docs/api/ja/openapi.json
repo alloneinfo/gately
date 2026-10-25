@@ -11743,7 +11743,7 @@
     },
     "/api/ftp/shared-users": {
       "get": {
-        "description": "WebDAV、FTP、SMB で共通のファイルサービス共有ユーザーを返します。パスワードはマスクされます。\n\n必要な権限: `ftp:read`。",
+        "description": "WebDAV、FTP、SMB で共通のファイルサービス共有ユーザーを返します。パスワードはマスクされます。fileusers.json が検証に失敗した場合は `error` を返し、有効な一覧を保存するまで共有ユーザーは誰もログインできません。\n\n必要な権限: `ftp:read`。",
         "responses": {
           "200": {
             "description": "成功"
@@ -11792,7 +11792,7 @@
         "x-token-allowed": true
       },
       "put": {
-        "description": "保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不。\n\n必要な権限: `ftp:write`。 を更新",
+        "description": "保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不。API トークン需要同时具备 `webdav:write`、`ftp:write`、`smb:write`。只靠共享用户启用的服务在后必须仍有可登录的共享用户，否则拒绝保存。\n\n必要な権限: `webdav:write,ftp:write,smb:write`。 を更新 を更新",
         "requestBody": {
           "content": {
             "application/json": {
@@ -11846,7 +11846,7 @@
         "tags": [
           "FTP サービス"
         ],
-        "x-required-scope": "ftp:write",
+        "x-required-scope": "webdav:write,ftp:write,smb:write",
         "x-token-allowed": true
       }
     },
@@ -16256,7 +16256,7 @@
     },
     "/api/smb/shared-users": {
       "get": {
-        "description": "WebDAV、FTP、SMB で共通のファイルサービス共有ユーザーを返します。パスワードはマスクされます。`issues` は SMB で使えない共有ユーザーとその理由を示します：`name`（ユーザー名に SMB で使えない文字がある）、`bcrypt`（パスワードが bcrypt ハッシュ）、`share`（ディレクトリ名が共有名として使えないか重複）。\n\n必要な権限: `smb:read`。",
+        "description": "WebDAV、FTP、SMB で共通のファイルサービス共有ユーザーを返します。パスワードはマスクされます。fileusers.json が検証に失敗した場合は `error` を返し、有効な一覧を保存するまで共有ユーザーは誰もログインできません。`issues` は SMB で使えない共有ユーザーとその理由を示します：`name`（ユーザー名に SMB で使えない文字がある）、`bcrypt`（パスワードが bcrypt ハッシュ）、`share`（ディレクトリ名が共有名として使えないか重複）。\n\n必要な権限: `smb:read`。",
         "responses": {
           "200": {
             "description": "成功"
@@ -16305,7 +16305,7 @@
         "x-token-allowed": true
       },
       "put": {
-        "description": "保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不。\n\n必要な権限: `smb:write`。 を更新",
+        "description": "保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不。API トークン需要同时具备 `webdav:write`、`ftp:write`、`smb:write`。只靠共享用户启用的服务在后必须仍有可登录的共享用户，否则拒绝保存。\n\n必要な権限: `webdav:write,ftp:write,smb:write`。 を更新 を更新",
         "requestBody": {
           "content": {
             "application/json": {
@@ -16359,7 +16359,7 @@
         "tags": [
           "SMB サービス"
         ],
-        "x-required-scope": "smb:write",
+        "x-required-scope": "webdav:write,ftp:write,smb:write",
         "x-token-allowed": true
       }
     },
@@ -21633,7 +21633,7 @@
     },
     "/api/webdav/shared-users": {
       "get": {
-        "description": "WebDAV、FTP、SMB で共通のファイルサービス共有ユーザーを返します。パスワードはマスクされます。\n\n必要な権限: `webdav:read`。",
+        "description": "WebDAV、FTP、SMB で共通のファイルサービス共有ユーザーを返します。パスワードはマスクされます。fileusers.json が検証に失敗した場合は `error` を返し、有効な一覧を保存するまで共有ユーザーは誰もログインできません。\n\n必要な権限: `webdav:read`。",
         "responses": {
           "200": {
             "description": "成功"
@@ -21682,7 +21682,7 @@
         "x-token-allowed": true
       },
       "put": {
-        "description": "保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不。\n\n必要な権限: `webdav:write`。 を更新",
+        "description": "保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不。API トークン需要同时具备 `webdav:write`、`ftp:write`、`smb:write`。只靠共享用户启用的服务在后必须仍有可登录的共享用户，否则拒绝保存。\n\n必要な権限: `webdav:write,ftp:write,smb:write`。 を更新 を更新",
         "requestBody": {
           "content": {
             "application/json": {
@@ -21736,7 +21736,7 @@
         "tags": [
           "WebDAV サービス"
         ],
-        "x-required-scope": "webdav:write",
+        "x-required-scope": "webdav:write,ftp:write,smb:write",
         "x-token-allowed": true
       }
     },

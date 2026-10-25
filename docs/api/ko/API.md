@@ -412,7 +412,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/webdav/logs` | `webdav:write` | 모듈 실행 로그 비우기 |
 | GET | `/api/webdav/settings` | `webdav:read` | WebDAV 설정 읽기 |
 | GET | `/api/webdav/shared-users` | `webdav:read` | 파일 서비스 공유 사용자 조회 |
-| PUT | `/api/webdav/shared-users` | `webdav:write` | 파일 서비스 공유 사용자 저장 |
+| PUT | `/api/webdav/shared-users` | `webdav:write,ftp:write,smb:write` | 파일 서비스 공유 사용자 저장 |
 | PUT | `/api/webdav/settings` | `webdav:write` | WebDAV 설정 저장 |
 
 ## FTP 서비스
@@ -423,7 +423,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/ftp/logs` | `ftp:write` | 모듈 실행 로그 비우기 |
 | GET | `/api/ftp/settings` | `ftp:read` | FTP 설정 읽기 |
 | GET | `/api/ftp/shared-users` | `ftp:read` | 파일 서비스 공유 사용자 조회 |
-| PUT | `/api/ftp/shared-users` | `ftp:write` | 파일 서비스 공유 사용자 저장 |
+| PUT | `/api/ftp/shared-users` | `webdav:write,ftp:write,smb:write` | 파일 서비스 공유 사용자 저장 |
 | PUT | `/api/ftp/settings` | `ftp:write` | FTP 설정 저장 |
 
 ## SMB 서비스
@@ -434,7 +434,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/smb/logs` | `smb:write` | 모듈 실행 로그 비우기 |
 | GET | `/api/smb/settings` | `smb:read` | SMB 설정 조회 |
 | GET | `/api/smb/shared-users` | `smb:read` | 파일 서비스 공유 사용자 조회 |
-| PUT | `/api/smb/shared-users` | `smb:write` | 파일 서비스 공유 사용자 저장 |
+| PUT | `/api/smb/shared-users` | `webdav:write,ftp:write,smb:write` | 파일 서비스 공유 사용자 저장 |
 | PUT | `/api/smb/settings` | `smb:write` | SMB 설정 저장 |
 
 ## 스토리지 마운트

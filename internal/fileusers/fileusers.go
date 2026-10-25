@@ -78,7 +78,11 @@ func Validate(users []User) error {
 }
 
 // CheckPassword 校验密码：stored 为 bcrypt 哈希时按哈希比较，否则按明文常量时间比较。
+// stored 为空（配置文件被手工改成空密码等）时一律拒绝，避免空密码即可登录。
 func CheckPassword(stored, given string) bool {
+	if stored == "" {
+		return false
+	}
 	if strings.HasPrefix(stored, "$2") {
 		return bcrypt.CompareHashAndPassword([]byte(stored), []byte(given)) == nil
 	}
@@ -90,21 +94,27 @@ type Registry struct {
 	mu    sync.RWMutex
 	store *config.Store
 	users []User
+	// loadErr 为读取到的 fileusers.json 未通过校验的错误；此时共享用户全部不能登录，直到保存一份有效的列表
+	loadErr error
 	// saveMu 串行化保存，保证写文件与内存列表的顺序一致
 	saveMu sync.Mutex
 
 	subMu  sync.Mutex
 	subs   map[int]func()
+	checks map[int]func([]User) error
 	nextID int
 }
 
 // New 创建空的注册表。
-func New() *Registry { return &Registry{subs: map[int]func(){}} }
+func New() *Registry { return &Registry{subs: map[int]func(){}, checks: map[int]func([]User) error{}} }
 
 // Default 是进程内唯一的注册表，由各文件服务在 Init 时以同一个配置目录初始化。
 var Default = New()
 
-// Init 从配置目录读取共享用户。多个模块以同一个配置目录调用时只读取一次；换了配置目录（测试中）时重新读取。
+// Init 从配置目录读取共享用户。多个模块以同一个配置目录调用时只读取一次；
+// 换了配置目录（测试中）时重新读取，并清空旧模块注册的订阅与检查，避免它们按旧配置拦截新的保存。
+// 文件可能被手工修改、从备份恢复或回滚到历史版本，按保存时的规则在副本上校验：
+// 失败时保留原列表供界面展示与修改，但共享用户全部不能登录（见 List、Lookup），错误见 LoadErr。
 func (r *Registry) Init(store *config.Store) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -115,21 +125,42 @@ func (r *Registry) Init(store *config.Store) error {
 	if _, err := store.Load(ID, &f); err != nil {
 		return err
 	}
+	users := clone(f.Users)
+	r.loadErr = Validate(users)
+	if r.loadErr == nil {
+		f.Users = users
+	}
 	r.store, r.users = store, f.Users
+	r.subMu.Lock()
+	r.subs, r.checks = map[int]func(){}, map[int]func([]User) error{}
+	r.subMu.Unlock()
 	return nil
 }
 
-// List 返回全部共享用户的副本。
+// LoadErr 返回读取 fileusers.json 时的校验错误，为 nil 表示列表有效。
+func (r *Registry) LoadErr() error {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	return r.loadErr
+}
+
+// List 返回可以登录的共享用户的副本；读取到的列表未通过校验时返回空。
 func (r *Registry) List() []User {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
+	if r.loadErr != nil {
+		return nil
+	}
 	return clone(r.users)
 }
 
-// Lookup 按用户名（区分大小写）查找共享用户。
+// Lookup 按用户名（区分大小写）查找可以登录的共享用户。
 func (r *Registry) Lookup(name string) (User, bool) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
+	if r.loadErr != nil {
+		return User{}, false
+	}
 	for _, u := range r.users {
 		if u.Name == name {
 			u.Mounts = slices.Clone(u.Mounts)
@@ -139,7 +170,7 @@ func (r *Registry) Lookup(name string) (User, bool) {
 	return User{}, false
 }
 
-// Save 校验并保存共享用户，仍为脱敏占位符的密码沿用原值，保存后同步通知订阅者。
+// Save 校验并保存共享用户，仍为脱敏占位符的密码沿用原值，经各服务的检查（见 AddCheck）后保存并同步通知订阅者。
 func (r *Registry) Save(users []User) error {
 	r.saveMu.Lock()
 	defer r.saveMu.Unlock()
@@ -155,11 +186,14 @@ func (r *Registry) Save(users []User) error {
 	if err := Validate(users); err != nil {
 		return err
 	}
+	if err := r.check(users); err != nil {
+		return err
+	}
 	if err := store.Save(ID, file{Users: users}); err != nil {
 		return err
 	}
 	r.mu.Lock()
-	r.users = users
+	r.users, r.loadErr = users, nil
 	r.mu.Unlock()
 	r.notify()
 	return nil
@@ -179,6 +213,36 @@ func (r *Registry) Subscribe(fn func()) (cancel func()) {
 	}
 }
 
+// AddCheck 注册保存前的检查，返回错误时拒绝保存，返回取消函数。
+// 各文件服务用它保证只靠共享用户启用的服务在修改后仍有可登录的用户；检查在保存请求中同步执行，不能持有调用方的锁。
+func (r *Registry) AddCheck(fn func([]User) error) (cancel func()) {
+	r.subMu.Lock()
+	id := r.nextID
+	r.nextID++
+	r.checks[id] = fn
+	r.subMu.Unlock()
+	return func() {
+		r.subMu.Lock()
+		delete(r.checks, id)
+		r.subMu.Unlock()
+	}
+}
+
+func (r *Registry) check(users []User) error {
+	r.subMu.Lock()
+	checks := make([]func([]User) error, 0, len(r.checks))
+	for _, fn := range r.checks {
+		checks = append(checks, fn)
+	}
+	r.subMu.Unlock()
+	for _, fn := range checks {
+		if err := fn(clone(users)); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (r *Registry) notify() {
 	r.subMu.Lock()
 	subs := make([]func(), 0, len(r.subs))
@@ -191,9 +255,11 @@ func (r *Registry) notify() {
 	}
 }
 
-// Masked 返回密码脱敏后的共享用户，供接口返回。
+// Masked 返回密码脱敏后的共享用户，供接口返回；读取到的列表未通过校验时也照常返回，便于在界面上修改。
 func (r *Registry) Masked() []User {
-	users := r.List()
+	r.mu.RLock()
+	users := clone(r.users)
+	r.mu.RUnlock()
 	for i := range users {
 		users[i].Password = crud.Mask(users[i].Password)
 	}
@@ -204,6 +270,9 @@ func (r *Registry) Masked() []User {
 func (r *Registry) Routes(rt module.Router, extra func(map[string]any)) {
 	reply := func(w http.ResponseWriter) {
 		out := map[string]any{"users": r.Masked()}
+		if err := r.LoadErr(); err != nil {
+			out["error"] = err.Error()
+		}
 		if extra != nil {
 			extra(out)
 		}

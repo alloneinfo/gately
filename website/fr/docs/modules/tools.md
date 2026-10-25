@@ -74,9 +74,11 @@ WebDAV, FTP et SMB partagent une liste d'« utilisateurs partagés » avec les m
 - Les noms d'utilisateurs partagés doivent être uniques sans distinction de casse et ne peuvent pas contenir de deux-points ;
 - Les modifications s'appliquent immédiatement : WebDAV utilise les nouveaux paramètres à la requête suivante, FTP et SMB redémarrent et les clients connectés doivent se reconnecter ;
 - Interrupteur activé et avec au moins un utilisateur partagé, le service peut être activé sans utilisateur local ;
+- Un service activé uniquement avec des utilisateurs partagés doit garder après une modification un utilisateur partagé capable de se connecter (pour SMB, un utilisateur utilisable par SMB), sinon la modification est refusée ;
+- Si `fileusers.json` est cassé à la main (mot de passe vide, répertoire qui n'est pas un chemin absolu…), aucun utilisateur partagé ne peut se connecter et la page l'indique ; corrigez puis enregistrez pour les rétablir ;
 - SMB n'accepte que les mots de passe en clair et les noms d'utilisateur et de partage doivent respecter ses règles de caractères ; les utilisateurs partagés qui ne les respectent pas sont signalés sur la page SMB et dans le journal puis ignorés, WebDAV et FTP pouvant toujours les utiliser.
 
-L'API est `GET` / `PUT /api/<service>/shared-users` de chaque service (par exemple `/api/webdav/shared-users`) ; elles lisent et écrivent la même liste avec les permissions de ce service.
+L'API est `GET` / `PUT /api/<service>/shared-users` de chaque service (par exemple `/api/webdav/shared-users`) ; elles lisent et écrivent la même liste. La lecture utilise la permission de lecture de ce service ; une modification touche les comptes des trois services, un jeton d'API doit donc avoir à la fois `webdav:write`, `ftp:write` et `smb:write`.
 
 ## Montages de stockage
 

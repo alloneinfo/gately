@@ -5,6 +5,7 @@
   "help": "Les utilisateurs partagés ont un mot de passe et des répertoires comme les utilisateurs locaux, gérés en un seul endroit. Interrupteur activé, ils peuvent se connecter à ce service ; si un utilisateur local porte le même nom, seul l'utilisateur local est vérifié.",
   "helpSmb": "Les utilisateurs partagés ont un mot de passe et des répertoires comme les utilisateurs locaux, gérés en un seul endroit. Interrupteur activé, ils peuvent se connecter à ce service ; si un utilisateur local porte le même nom (sans distinction de casse), seul l'utilisateur local est vérifié. SMB a besoin de mots de passe en clair, et les noms d'utilisateur et de partage ne peuvent pas contenir de caractères comme \" / \\ [ ] : ; {'|'} = , + * ? < >.",
   "off": "Les utilisateurs partagés sont désactivés pour ce service, les utilisateurs ci-dessous ne peuvent pas s'y connecter",
+  "loadError": "La configuration des utilisateurs partagés n'est pas valide et ils ne peuvent pas se connecter ; corrigez-la et enregistrez pour les rétablir : {error}",
   "shadowed": "Même nom qu'un utilisateur local, l'utilisateur local est vérifié : {names}",
   "issue": {
     "name": "{name} : ce nom d'utilisateur ne peut pas être utilisé pour SMB",

@@ -86,3 +86,39 @@ func TestImportLuckyFRP(t *testing.T) {
 		t.Fatal("cloudflared 配置不应被 frp 认领")
 	}
 }
+
+// TestImportLuckyFRPBindAddr 验证 Lucky 的 frps 监听地址：IP 同时用作连接与代理监听地址，
+// 0.0.0.0 与 :: 视为所有地址，不是 IP 的地址只提示、改为所有地址，不会跳过整个实例。
+func TestImportLuckyFRPBindAddr(t *testing.T) {
+	cases := []struct{ in, want, warn string }{
+		{"192.168.1.2", "192.168.1.2", ""},
+		{"[::1]", "::1", ""},
+		{"::", "", ""},
+		{"0.0.0.0", "", ""},
+		{"localhost", "", "不是 IP 地址"},
+	}
+	for _, c := range cases {
+		st, _ := config.Open(t.TempDir())
+		m := New()
+		if err := m.Init(module.Env{Store: st, Logs: logbuf.New(20, log.New(io.Discard, "", 0))}); err != nil {
+			t.Fatal(err)
+		}
+		raw := `{"List":[{"Key":"s1","Remark":"srv","Enable":false,"Type":"server","Params":{"BindAddr":"` + c.in + `","BindPort":7100}}]}`
+		var doc luckyimport.Document
+		if err := json.Unmarshal([]byte(raw), &doc); err != nil {
+			t.Fatal(err)
+		}
+		rep, err := m.ImportLucky(doc, luckyimport.Options{})
+		if err != nil || rep == nil {
+			t.Fatalf("%s: 导入失败: %v %v", c.in, rep, err)
+		}
+		s := m.cfg.Server
+		if s.BindPort != 7100 || s.BindAddr != c.want || s.ProxyBindAddr != c.want {
+			t.Errorf("%s: 监听地址应为 %q: %+v %v", c.in, c.want, s, rep.Warnings)
+		}
+		joined := strings.Join(rep.Warnings, "\n")
+		if c.warn != "" && !strings.Contains(joined, c.warn) || strings.Contains(joined, "跳过") {
+			t.Errorf("%s: 提示不符: %s", c.in, joined)
+		}
+	}
+}

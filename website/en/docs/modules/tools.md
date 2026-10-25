@@ -74,9 +74,11 @@ WebDAV, FTP and SMB share one list of "shared users" with the same fields as eac
 - Shared user names must be unique regardless of case and cannot contain a colon;
 - Changes to shared users take effect at once: WebDAV checks the new settings on the next request, FTP and SMB restart, and connected clients need to reconnect;
 - With the switch on and at least one shared user, the service can be enabled without any local user;
+- A service enabled with shared users only must still have a shared user that can sign in after a change (for SMB, one usable by SMB), otherwise the change is rejected;
+- If `fileusers.json` is broken by hand (for example an empty password or a directory that is not an absolute path), no shared user can sign in and the page shows a warning; fix it and save to restore them;
 - SMB only accepts plain passwords, and user and share names must follow SMB's character rules; shared users that do not are reported on the SMB page and in the runtime log and skipped, while WebDAV and FTP can still use them.
 
-The API is `GET` / `PUT /api/<service>/shared-users` of each service (for example `/api/webdav/shared-users`); they read and write the same list, with the permissions of that service.
+The API is `GET` / `PUT /api/<service>/shared-users` of each service (for example `/api/webdav/shared-users`); they read and write the same list. Reading uses the read permission of that service; a change affects the sign-in accounts of all three services, so an API token needs `webdav:write`, `ftp:write` and `smb:write` together.
 
 ## Storage Mounts
 

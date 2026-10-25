@@ -111,8 +111,15 @@ defineExpose({ focus, shake })
 }
 /* 浏览器原生自动填充会强制加底色和文字颜色（!important 无法覆盖），
    用超长的 transition 延迟让它们一直不生效，否则会在格子上盖出一块色块和重叠的数字。
-   :autofill 在 Chrome 110+、Safari 15+、Firefox 86+ 可用 */
+   :autofill 在 Chrome 110+、Safari 15+、Firefox 86+ 可用，更早的 Chrome 只认 :-webkit-autofill；
+   两条规则分开写，合并成一个选择器时不认识其中一个的浏览器会丢弃整条规则 */
 .otp-native:autofill {
+  -webkit-text-fill-color: transparent;
+  transition:
+    background-color 0s 600000s,
+    color 0s 600000s;
+}
+.otp-native:-webkit-autofill {
   -webkit-text-fill-color: transparent;
   transition:
     background-color 0s 600000s,

@@ -39,6 +39,10 @@ func TestRequiredAndMatch(t *testing.T) {
 		{"GET", "/api/webterminal/connections/abc/ws", "webterminal:write"},
 		{"GET", "/api/docker/containers/abc/files/read", "docker:write"},
 		{"GET", "/api/docker/containers/abc/logs", "docker:read"},
+		// 文件服务共享用户由三个服务共用：读取沿用所在服务的读权限，修改需要三个服务的写权限
+		{"GET", "/api/ftp/shared-users", "ftp:read"},
+		{"PUT", "/api/webdav/shared-users", "webdav:write,ftp:write,smb:write"},
+		{"PUT", "/api/smb/shared-users", "webdav:write,ftp:write,smb:write"},
 		// 账号与系统级接口永远拒绝令牌
 		{"GET", "/api/tokens", Denied},
 		{"POST", "/api/tokens/abc/regenerate", Denied},
@@ -74,6 +78,10 @@ func TestRequiredAndMatch(t *testing.T) {
 		{[]string{"ddns:read"}, Any, true},
 		{[]string{"*"}, Denied, false},
 		{nil, "ddns:read", false},
+		{[]string{"webdav:write"}, "webdav:write,ftp:write,smb:write", false},
+		{[]string{"webdav:write", "ftp:write", "smb:read"}, "webdav:write,ftp:write,smb:write", false},
+		{[]string{"webdav:write", "ftp:write", "smb:write"}, "webdav:write,ftp:write,smb:write", true},
+		{[]string{"*:write"}, "webdav:write,ftp:write,smb:write", true},
 	}
 	for _, c := range match {
 		if got := Match(c.scopes, c.need); got != c.want {

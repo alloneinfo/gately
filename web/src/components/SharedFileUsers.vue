@@ -14,6 +14,9 @@
       <div class="notice">
         <div>{{ smb ? t('sharedFileUsers.helpSmb') : t('sharedFileUsers.help') }}</div>
         <el-tag v-if="!enabled" size="small" type="info">{{ t('sharedFileUsers.off') }}</el-tag>
+        <div v-if="loadError" class="tags">
+          <el-tag size="small" type="danger">{{ t('sharedFileUsers.loadError', { error: loadError }) }}</el-tag>
+        </div>
         <div v-if="enabled && shadowed.length" class="tags">
           <el-tag size="small" type="warning">{{ t('sharedFileUsers.shadowed', { names: shadowed.join(', ') }) }}</el-tag>
         </div>
@@ -38,6 +41,8 @@ const props = defineProps<{
   smb?: boolean
   // issues 为无法用于 SMB 的共享用户（已保存的内容），只有 SMB 页面传入
   issues?: SMBIssue[]
+  // loadError 为服务端读取到的共享用户配置未通过校验的错误
+  loadError?: string
   mountSummaryKey?: string
   mountNamePlaceholder?: string
 }>()

@@ -25,7 +25,7 @@
     </div>
 
     <FileUsers v-if="settings" v-model="settings.users" />
-    <SharedFileUsers v-if="settings" v-model="shared.users.value" v-model:enabled="settings.sharedUsers" :local-names="settings.users.map((u) => u.name)" />
+    <SharedFileUsers v-if="settings" v-model="shared.users.value" v-model:enabled="settings.sharedUsers" :load-error="shared.loadError.value" :local-names="settings.users.map((u) => u.name)" />
 
     <LogCard url="/api/webdav/logs" clearable />
   </div>
@@ -90,9 +90,9 @@ async function load() {
 async function save() {
   saving.value = true
   try {
-    // 先保存共享用户：只用共享用户启用服务时，服务设置的校验需要看到已保存的共享用户
-    await shared.save()
-    const r = await api.put<{ running: boolean; error: string }>('/api/webdav/settings', settings.value)
+    // 共享用户与服务设置的保存顺序见 saveWith
+    const s = settings.value!
+    const r = await shared.saveWith(s, () => api.put<{ running: boolean; error: string }>('/api/webdav/settings', s))
     running.value = r.running
     error.value = r.error
     ElMessage.success(t('common.saved'))

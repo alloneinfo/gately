@@ -3,7 +3,6 @@ package webdav
 
 import (
 	"context"
-	"crypto/subtle"
 	"crypto/tls"
 	"errors"
 	"fmt"
@@ -15,7 +14,6 @@ import (
 	"sync"
 	"time"
 
-	"golang.org/x/crypto/bcrypt"
 	xwebdav "golang.org/x/net/webdav"
 
 	"github.com/wangwanjie/gately/internal/banlist"
@@ -144,6 +142,19 @@ func (m *Module) Init(env module.Env) error {
 		m.shared = map[string]*userHandler{}
 		m.mu.Unlock()
 	})
+	// 只靠共享用户启用时，不允许把共享用户删光
+	fileusers.Default.AddCheck(func(users []fileusers.User) error {
+		m.mu.Lock()
+		s := m.settings
+		m.mu.Unlock()
+		if s.Enable && len(s.Users) == 0 && s.SharedUsers && len(users) == 0 {
+			return errors.New("WebDAV 已启用且只使用共享用户，至少保留一个共享用户")
+		}
+		return nil
+	})
+	if err := fileusers.Default.LoadErr(); err != nil {
+		m.logs.Add(logbuf.LevelWarn, "", "共享用户配置无效，共享用户暂不能登录: "+err.Error())
+	}
 	return nil
 }
 
@@ -242,19 +253,12 @@ func (m *Module) lookupLocked(name string) (uh *userHandler, shared bool) {
 	return uh, true
 }
 
-func checkPassword(stored, given string) bool {
-	if strings.HasPrefix(stored, "$2") {
-		return bcrypt.CompareHashAndPassword([]byte(stored), []byte(given)) == nil
-	}
-	return subtle.ConstantTimeCompare([]byte(stored), []byte(given)) == 1
-}
-
 func (m *Module) serve(w http.ResponseWriter, r *http.Request) {
 	name, pass, ok := r.BasicAuth()
 	m.mu.Lock()
 	uh, shared := m.lookupLocked(name)
 	m.mu.Unlock()
-	if !ok || uh == nil || !checkPassword(uh.user.Password, pass) {
+	if !ok || uh == nil || !fileusers.CheckPassword(uh.user.Password, pass) {
 		if ok && shared {
 			m.logs.Add(logbuf.LevelWarn, "", fmt.Sprintf("%s 认证失败（共享用户 %q）", r.RemoteAddr, name))
 		} else if ok {

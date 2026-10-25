@@ -20,7 +20,7 @@ Al guardar un cambio en un sitio o en el sitio por defecto, la lista de sitios s
 | Redirección | Redirige a una URL completa con código de estado 301 / 302 / 307 / 308 (por defecto 302), conservando opcionalmente la ruta y la cadena de consulta originales. La URL puede contener `{host}`, que se sustituye por el dominio que usó el visitante: `https://{host}` con «Conservar ruta y consulta» envía todas las peticiones HTTP a HTTPS en el mismo dominio |
 | Archivos estáticos | El directorio debe ser una ruta absoluta. Con «Listado de directorios» desactivado, una petición a un directorio solo devuelve respuesta si existe `index.html`. «URL sin extensión» prueba `ruta.html` y `ruta/index.html` cuando falta un archivo (para VitePress y generadores similares, como `try_files $uri $uri.html $uri/index.html` de nginx). «Página 404» es una ruta dentro del directorio, como `404.html`, que se devuelve con estado 404 |
 | Texto fijo | Contenido personalizado, `Content-Type` (por defecto `text/plain; charset=utf-8`) y código de estado (100-599, por defecto 200) |
-| Cerrar conexión | No envía nada y cierra la conexión, como `return 444` de nginx. Se usa sobre todo como sitio por defecto para que las peticiones que escanean dominios desconocidos no reciban respuesta; el registro de acceso las anota como 444 |
+| Cerrar conexión | No envía nada y cierra la conexión, como `return 444` de nginx. Se usa sobre todo como sitio por defecto para que las peticiones que escanean dominios desconocidos no reciban respuesta; el registro de acceso las anota como 444; no pasa por la autenticación, el control de acceso, el WAF ni las reescrituras, así que el resto de ajustes del sitio no tiene efecto |
 
 Los sitios de cualquier tipo pueden definir un registro de acceso, orígenes cruzados (CORS), cabeceras de petición y respuesta personalizadas (un `Clave: Valor` por línea; un Valor vacío elimina esa cabecera) y pueden hacer referencia a una instancia de [Cortafuegos WAF](/es/docs/modules/waf) (si la instancia no existe o está desactivada, las peticiones pasan sin filtrar). Consulta [Cabeceras de petición y de respuesta](#headers) para ver cómo se editan las cabeceras de petición, las de respuesta y el Content-Type.
 
@@ -366,8 +366,8 @@ Conversión de ajustes de nginx:
 | `return 302 /admin` en `location = /` | una reescritura con «Redirección» activada y patrón `^/$` |
 | `try_files $uri $uri.html $uri/index.html` y `error_page 404` | archivos estáticos con URL sin extensión y página 404 |
 | `add_header` | cabeceras de respuesta |
+| `return 444` | un sitio Cerrar conexión |
 
 ## Consejo de despliegue
 
-| `return 444` | un sitio Cerrar conexión |
 Los servicios web necesitan escuchar en puertos del host como el 80 / 443. En despliegues con Docker se recomienda `--network host`.

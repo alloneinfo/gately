@@ -347,6 +347,9 @@ func (s *Site) validate(isDefault bool) error {
 			s.ContentType = "text/plain; charset=utf-8"
 		}
 	case TypeClose:
+		// 断开连接的站点不经过认证、访问控制、重写与请求头等处理，其余设置都不生效，不再校验，
+		// 以免从其他类型切换过来时被已不显示的设置拦住
+		return nil
 	default:
 		return fmt.Errorf("未知的站点类型 %q", s.Type)
 	}

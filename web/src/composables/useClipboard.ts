@@ -18,9 +18,18 @@ export function selectNode(el?: HTMLElement | null) {
 // execCopy 借助临时 textarea 执行同步复制命令，HTTP 页面也可用。
 function execCopy(text: string): boolean {
   const active = document.activeElement as HTMLElement | null
+  // 焦点在输入框里（如终端的隐藏 textarea）时，光标与选区属于输入框自身，单独保存和还原
+  const field = active instanceof HTMLInputElement || active instanceof HTMLTextAreaElement ? active : null
+  let fieldSel: [number | null, number | null, 'forward' | 'backward' | 'none' | null] | null = null
+  try {
+    fieldSel = field ? [field.selectionStart, field.selectionEnd, field.selectionDirection] : null
+  } catch {
+    // 部分类型的 input（如 number、email）不支持读取选区
+    fieldSel = null
+  }
   const sel = window.getSelection()
   const ranges: Range[] = []
-  if (sel) {
+  if (sel && !field) {
     for (let i = 0; i < sel.rangeCount; i++) {
       ranges.push(sel.getRangeAt(i))
     }
@@ -46,7 +55,15 @@ function execCopy(text: string): boolean {
   ta.remove()
   // 还原原来的焦点和选区，避免打断用户正在进行的操作
   active?.focus?.({ preventScroll: true })
-  if (sel) {
+  if (field) {
+    if (fieldSel && fieldSel[0] !== null && fieldSel[1] !== null) {
+      try {
+        field.setSelectionRange(fieldSel[0], fieldSel[1], fieldSel[2] ?? undefined)
+      } catch {
+        // 不支持选区的输入框忽略
+      }
+    }
+  } else if (sel) {
     sel.removeAllRanges()
     for (const r of ranges) {
       sel.addRange(r)

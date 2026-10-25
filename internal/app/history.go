@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/wangwanjie/gately/internal/config"
+	"github.com/wangwanjie/gately/internal/fileusers"
 	"github.com/wangwanjie/gately/internal/httpx"
 	"github.com/wangwanjie/gately/internal/logbuf"
 )
@@ -28,6 +29,8 @@ func (a *App) handleHistoryList(w http.ResponseWriter, r *http.Request) {
 	for _, e := range a.modules {
 		titles[e.mod.ID()] = e.mod.Title()
 	}
+	// 文件服务共享用户不属于某个模块，由 WebDAV、FTP、SMB 共用
+	titles[fileusers.ID] = "文件服务共享用户"
 	out := []historyFile{}
 	for _, name := range a.store.HistoryNames() {
 		vs, err := a.store.Versions(name)

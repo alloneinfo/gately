@@ -74,9 +74,11 @@ WebDAV, FTP und SMB teilen sich eine Liste „gemeinsamer Benutzer“ mit densel
 - Namen gemeinsamer Benutzer müssen unabhängig von Groß-/Kleinschreibung eindeutig sein und dürfen keinen Doppelpunkt enthalten;
 - Änderungen gelten sofort: WebDAV prüft ab der nächsten Anfrage mit den neuen Einstellungen, FTP und SMB starten neu, und verbundene Clients müssen sich neu verbinden;
 - Mit eingeschaltetem Schalter und mindestens einem gemeinsamen Benutzer lässt sich der Dienst ohne lokale Benutzer aktivieren;
+- Ein Dienst, der nur mit gemeinsamen Benutzern aktiviert ist, muss nach einer Änderung noch einen gemeinsamen Benutzer haben, der sich anmelden kann (bei SMB einen für SMB nutzbaren), sonst wird die Änderung abgelehnt;
+- Wird `fileusers.json` von Hand beschädigt (etwa ein leeres Passwort oder ein Verzeichnis ohne absoluten Pfad), kann sich kein gemeinsamer Benutzer anmelden und die Seite zeigt einen Hinweis; korrigieren und speichern stellt sie wieder her;
 - SMB akzeptiert nur Klartextpasswörter, und Benutzer- und Freigabenamen müssen den SMB-Zeichenregeln folgen; gemeinsame Benutzer, die das nicht tun, werden auf der SMB-Seite und im Laufzeitprotokoll gemeldet und übersprungen, WebDAV und FTP können sie weiter nutzen.
 
-Die API ist `GET` / `PUT /api/<Dienst>/shared-users` des jeweiligen Dienstes (z. B. `/api/webdav/shared-users`); alle lesen und schreiben dieselbe Liste mit den Berechtigungen des Dienstes.
+Die API ist `GET` / `PUT /api/<Dienst>/shared-users` des jeweiligen Dienstes (z. B. `/api/webdav/shared-users`); alle lesen und schreiben dieselbe Liste. Lesen nutzt die Leseberechtigung des Dienstes; eine Änderung betrifft die Anmeldekonten aller drei Dienste, daher braucht ein API-Token `webdav:write`, `ftp:write` und `smb:write` zusammen.
 
 ## Speicher-Einbindungen
 

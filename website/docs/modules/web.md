@@ -20,7 +20,7 @@
 | 重定向 | 跳转到完整 URL，状态码 301 / 302 / 307 / 308（默认 302），可选保留原路径与查询串。URL 中可以写 `{host}`，会替换为访客使用的域名：`https://{host}` 加上「保留路径」，就能把所有 HTTP 请求跳到同一域名的 HTTPS |
 | 静态文件 | 目录需为绝对路径；关闭「目录列表」时，目录请求只在存在 `index.html` 时返回。「无扩展名地址」在文件不存在时再尝试 `路径.html` 与 `路径/index.html`（适用于 VitePress 等生成器，相当于 nginx 的 `try_files $uri $uri.html $uri/index.html`）；「404 页面」填写目录内的路径，如 `404.html`，以 404 状态返回 |
 | 固定文本 | 自定义内容、`Content-Type`（默认 `text/plain; charset=utf-8`）与状态码（100-599，默认 200） |
-| 断开连接 | 不返回任何内容，直接断开连接，相当于 nginx 的 `return 444`。常用作默认站点，让扫描未知域名的请求得不到响应；访问日志记为 444 |
+| 断开连接 | 不返回任何内容，直接断开连接，相当于 nginx 的 `return 444`。常用作默认站点，让扫描未知域名的请求得不到响应；访问日志记为 444；不经过认证、访问控制、WAF 与重写，站点的其他设置都不生效 |
 
 所有类型的站点均可设置访问日志、跨域（CORS）、自定义请求头与响应头（每行 `Key: Value`，Value 留空表示删除该头），并可引用一个 [WAF 防火墙](/docs/modules/waf) 实例（实例不存在或停用时放行）。请求头、响应头与 Content-Type 的编辑方式见 [请求头与响应头](#headers)。
 
@@ -366,8 +366,8 @@ nginx 配置的对应关系：
 | `location = /` 里的 `return 302 /admin` | 重写规则，开启「重定向」，pattern 为 `^/$` |
 | `try_files $uri $uri.html $uri/index.html` 与 `error_page 404` | 静态文件的无扩展名地址与 404 页面 |
 | `add_header` | 响应头 |
+| `return 444` | 断开连接站点 |
 
 ## 部署提示
 
-| `return 444` | 断开连接站点 |
 Web 服务需要监听宿主机的 80 / 443 等端口，Docker 部署推荐使用 `--network host`。

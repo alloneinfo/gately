@@ -11743,7 +11743,7 @@
     },
     "/api/ftp/shared-users": {
       "get": {
-        "description": "Возвращает общих пользователей файловых служб, общих для WebDAV, FTP и SMB, пароли скрыты.\n\nТребуемое разрешение: `ftp:read`.",
+        "description": "Возвращает общих пользователей файловых служб, общих для WebDAV, FTP и SMB, пароли скрыты. Если fileusers.json не проходит проверку, возвращается `error`, и ни один общий пользователь не может войти, пока не будет сохранён корректный список.\n\nТребуемое разрешение: `ftp:read`.",
         "responses": {
           "200": {
             "description": "Успешно"
@@ -11792,7 +11792,7 @@
         "x-token-allowed": true
       },
       "put": {
-        "description": "保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不Изменить: 。\n\nТребуемое разрешение: `ftp:write`.",
+        "description": "保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不Изменить: 。API-токен需要同时具备 `webdav:write`、`ftp:write`、`smb:write`。只靠共享用户启用的服务在Изменить: 后必须仍有可登录的共享用户，否则拒绝保存。\n\nТребуемое разрешение: `webdav:write,ftp:write,smb:write`.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -11846,7 +11846,7 @@
         "tags": [
           "Служба FTP"
         ],
-        "x-required-scope": "ftp:write",
+        "x-required-scope": "webdav:write,ftp:write,smb:write",
         "x-token-allowed": true
       }
     },
@@ -16256,7 +16256,7 @@
     },
     "/api/smb/shared-users": {
       "get": {
-        "description": "Возвращает общих пользователей файловых служб, общих для WebDAV, FTP и SMB, пароли скрыты. `issues` перечисляет общих пользователей, которых нельзя использовать для SMB, и причину: `name` (в имени есть недопустимые для SMB символы), `bcrypt` (пароль хранится как хеш bcrypt), `share` (имя каталога нельзя использовать как имя ресурса или оно повторяется).\n\nТребуемое разрешение: `smb:read`.",
+        "description": "Возвращает общих пользователей файловых служб, общих для WebDAV, FTP и SMB, пароли скрыты. Если fileusers.json не проходит проверку, возвращается `error`, и ни один общий пользователь не может войти, пока не будет сохранён корректный список. `issues` перечисляет общих пользователей, которых нельзя использовать для SMB, и причину: `name` (в имени есть недопустимые для SMB символы), `bcrypt` (пароль хранится как хеш bcrypt), `share` (имя каталога нельзя использовать как имя ресурса или оно повторяется).\n\nТребуемое разрешение: `smb:read`.",
         "responses": {
           "200": {
             "description": "Успешно"
@@ -16305,7 +16305,7 @@
         "x-token-allowed": true
       },
       "put": {
-        "description": "保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不Изменить: 。\n\nТребуемое разрешение: `smb:write`.",
+        "description": "保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不Изменить: 。API-токен需要同时具备 `webdav:write`、`ftp:write`、`smb:write`。只靠共享用户启用的服务在Изменить: 后必须仍有可登录的共享用户，否则拒绝保存。\n\nТребуемое разрешение: `webdav:write,ftp:write,smb:write`.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -16359,7 +16359,7 @@
         "tags": [
           "Служба SMB"
         ],
-        "x-required-scope": "smb:write",
+        "x-required-scope": "webdav:write,ftp:write,smb:write",
         "x-token-allowed": true
       }
     },
@@ -21633,7 +21633,7 @@
     },
     "/api/webdav/shared-users": {
       "get": {
-        "description": "Возвращает общих пользователей файловых служб, общих для WebDAV, FTP и SMB, пароли скрыты.\n\nТребуемое разрешение: `webdav:read`.",
+        "description": "Возвращает общих пользователей файловых служб, общих для WebDAV, FTP и SMB, пароли скрыты. Если fileusers.json не проходит проверку, возвращается `error`, и ни один общий пользователь не может войти, пока не будет сохранён корректный список.\n\nТребуемое разрешение: `webdav:read`.",
         "responses": {
           "200": {
             "description": "Успешно"
@@ -21682,7 +21682,7 @@
         "x-token-allowed": true
       },
       "put": {
-        "description": "保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不Изменить: 。\n\nТребуемое разрешение: `webdav:write`.",
+        "description": "保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不Изменить: 。API-токен需要同时具备 `webdav:write`、`ftp:write`、`smb:write`。只靠共享用户启用的服务在Изменить: 后必须仍有可登录的共享用户，否则拒绝保存。\n\nТребуемое разрешение: `webdav:write,ftp:write,smb:write`.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -21736,7 +21736,7 @@
         "tags": [
           "WebDAV-сервер"
         ],
-        "x-required-scope": "webdav:write",
+        "x-required-scope": "webdav:write,ftp:write,smb:write",
         "x-token-allowed": true
       }
     },

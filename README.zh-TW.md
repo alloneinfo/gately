@@ -42,7 +42,7 @@ Gately 完全開源，使用者和社群可以直接檢視原始碼與設定。�
 | Tailscale | 託管 tailscaled（使用者空間網路，容器友善）或接入系統既有的常駐程式；驗證金鑰／登入連結、Headscale、子網路由、出口節點、節點清單與 SOCKS5 代理、固定連接埠、tailscaled 額外參數與環境變數 |
 | frp | frpc 用戶端（tcp/udp/http/https/stcp/xtcp 代理，新增刪除即時生效）與 frps 伺服器端（連接埠白名單、子網域、主控台），可一鍵匯入舊版 ini／新版 toml 設定 |
 | Cloudflare 通道 | cloudflared 權杖通道與 trycloudflare 臨時通道，多通道、自動重啟、公開位址顯示 |
-| Web 服務 | 依網域反向代理／重新導向／靜態檔案／固定文字；HTTPS 與 HTTP/3（QUIC）；WebSocket；PROXY 協定收發；基本驗證、網頁驗證、GitHub/Google/QQ/OIDC 登入、支援 TOTP 二次驗證並可跨子網域單一登入的共用使用者、內建 OIDC 身分提供者（讓 Gitea、Grafana 等應用程式以共用使用者登入）、轉發認證到 Authelia 等外部服務；IP 黑白名單與定時重新整理的訂閱 IP 清單（如省市 IP 段）、路徑規則、臨時分享連結、驗證失敗自動封鎖、GeoIP 國家過濾；依路徑分流後端、HTTPS 後端依造訪網域傳送 SNI、後端權重／備援／負載平衡策略、主動與被動健康檢查、壓縮、限流、回應快取、路徑改寫；靜態站台支援無副檔名網址與自訂 404 頁面；修改站台不會中斷既有連線；分鐘級存取統計與 Prometheus 指標 |
+| Web 服務 | 依網域反向代理／重新導向／靜態檔案／固定文字／中斷連線（相當於 nginx return 444）；HTTPS 與 HTTP/3（QUIC）；WebSocket；PROXY 協定收發；基本驗證、網頁驗證、GitHub/Google/QQ/OIDC 登入、支援 TOTP 二次驗證並可跨子網域單一登入的共用使用者、內建 OIDC 身分提供者（讓 Gitea、Grafana 等應用程式以共用使用者登入）、轉發認證到 Authelia 等外部服務；IP 黑白名單與定時重新整理的訂閱 IP 清單（如省市 IP 段）、路徑規則、臨時分享連結、驗證失敗自動封鎖、GeoIP 國家過濾；依路徑分流後端、HTTPS 後端依造訪網域傳送 SNI、後端權重／備援／負載平衡策略、主動與被動健康檢查、壓縮、限流、回應快取、路徑改寫；靜態站台支援無副檔名網址與自訂 404 頁面；修改站台不會中斷既有連線；分鐘級存取統計與 Prometheus 指標 |
 | WAF 防火牆 | Coraza + OWASP CRS v4，可依檔案啟用規則、自訂 SecLang、攔截／僅偵測；請求內容檢查上限可調，超過上限時只檢查前段或依路徑略過，網盤、WebDAV 等上傳站台也能掛上 WAF |
 | 入侵防護 | 類 fail2ban 的日誌規則（日誌檔案、systemd 日誌、命令輸出、Docker 容器日誌、管理後台登入失敗、WAF 攔截），內建 SSH、Nginx、Vaultwarden 等範本；誘餌連接埠與連接埠掃描偵測；統一封鎖清單，支援手動網段與永久封鎖、遞增時長與白名單；封鎖同步到系統防火牆（nftables）在核心層丟棄，沒有 nftables 的平台對 Gately 自身的服務生效 |
 | Docker 管理 | 容器建立與編輯、日誌與終端機、Compose、映像檔更新檢查與一鍵升級（失敗自動還原）、網路與磁碟區 |
@@ -52,9 +52,9 @@ Gately 完全開源，使用者和社群可以直接檢視原始碼與設定。�
 | 設定備份 | 加密備份（scrypt + AES-GCM）、保留策略、定時備份到本機目錄或儲存掛載點 |
 | 命令列與 MCP | `gately ctl` 呼叫執行中的實例，`gately mcp` 以 stdio 提供 MCP 服務（預設唯讀） |
 | 網路喚醒 | 魔術封包廣播、上線探測 |
-| WebDAV | 多使用者、獨立目錄、唯讀 |
-| FTP | 多使用者、獨立目錄、唯讀，支援 FTPS 與被動連接埠範圍 |
-| SMB | 多使用者、依使用者分享多個目錄、唯讀，支援 SMB 2/3、加密與 Bonjour 探索 |
+| WebDAV | 多使用者、獨立目錄、唯讀；WebDAV、FTP、SMB 共用一份共享使用者 |
+| FTP | 多使用者、獨立目錄、唯讀，支援 FTPS 與被動連接埠範圍；WebDAV、FTP、SMB 共用一份共享使用者 |
+| SMB | 多使用者、依使用者分享多個目錄、唯讀，支援 SMB 2/3、加密與 Bonjour 探索；WebDAV、FTP、SMB 共用一份共享使用者 |
 | 儲存掛載 | 本機目錄、遠端 WebDAV 與 SMB 共用掛載，線上檔案管理 |
 | 排程工作 | cron 運算式，指令或 HTTP 請求，執行記錄 |
 | 安全與設定 | Passkey（WebAuthn）登入、兩步驟驗證（TOTP）、唯讀帳號、登入失敗限流、安全入口、僅內網存取、管理介面 HTTPS、多組 API 權杖（依模組讀寫授權）、自訂 DNS（支援 DoH）、時區、設定備份與還原、信任本機反向代理傳來的真實用戶端位址、依需求開關功能模組（關閉的模組不啟動服務、不提供介面） |

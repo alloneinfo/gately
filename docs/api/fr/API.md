@@ -412,7 +412,7 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | DELETE | `/api/webdav/logs` | `webdav:write` | Vider les journaux d'exécution d'un module |
 | GET | `/api/webdav/settings` | `webdav:read` | Lire les paramètres WebDAV |
 | GET | `/api/webdav/shared-users` | `webdav:read` | Lire les utilisateurs partagés des services de fichiers |
-| PUT | `/api/webdav/shared-users` | `webdav:write` | Enregistrer les utilisateurs partagés des services de fichiers |
+| PUT | `/api/webdav/shared-users` | `webdav:write,ftp:write,smb:write` | Enregistrer les utilisateurs partagés des services de fichiers |
 | PUT | `/api/webdav/settings` | `webdav:write` | Enregistrer les paramètres WebDAV |
 
 ## Service FTP
@@ -423,7 +423,7 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | DELETE | `/api/ftp/logs` | `ftp:write` | Vider les journaux d'exécution d'un module |
 | GET | `/api/ftp/settings` | `ftp:read` | Lire les paramètres FTP |
 | GET | `/api/ftp/shared-users` | `ftp:read` | Lire les utilisateurs partagés des services de fichiers |
-| PUT | `/api/ftp/shared-users` | `ftp:write` | Enregistrer les utilisateurs partagés des services de fichiers |
+| PUT | `/api/ftp/shared-users` | `webdav:write,ftp:write,smb:write` | Enregistrer les utilisateurs partagés des services de fichiers |
 | PUT | `/api/ftp/settings` | `ftp:write` | Enregistrer les paramètres FTP |
 
 ## Service SMB
@@ -434,7 +434,7 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | DELETE | `/api/smb/logs` | `smb:write` | Vider les journaux d'exécution d'un module |
 | GET | `/api/smb/settings` | `smb:read` | Lire les paramètres SMB |
 | GET | `/api/smb/shared-users` | `smb:read` | Lire les utilisateurs partagés des services de fichiers |
-| PUT | `/api/smb/shared-users` | `smb:write` | Enregistrer les utilisateurs partagés des services de fichiers |
+| PUT | `/api/smb/shared-users` | `webdav:write,ftp:write,smb:write` | Enregistrer les utilisateurs partagés des services de fichiers |
 | PUT | `/api/smb/settings` | `smb:write` | Enregistrer les paramètres SMB |
 
 ## Montages de stockage

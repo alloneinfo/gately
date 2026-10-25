@@ -20,7 +20,7 @@ Saving a change to a site or to the default site swaps the site list in place: t
 | Redirect | Redirects to a full URL with status code 301 / 302 / 307 / 308 (default 302), optionally keeping the original path and query string. The URL may contain `{host}`, which is replaced by the domain the visitor used: `https://{host}` with "Keep path" sends every HTTP request to HTTPS on the same domain |
 | Static files | The directory must be an absolute path. With "Directory listing" off, a directory request returns a response only when `index.html` exists. "Clean URLs" tries `path.html` and `path/index.html` when a file is missing (for VitePress and similar generators, like nginx `try_files $uri $uri.html $uri/index.html`). "404 page" is a path inside the directory, such as `404.html`, returned with status 404 |
 | Fixed text | Custom content, `Content-Type` (default `text/plain; charset=utf-8`) and status code (100-599, default 200) |
-| Close connection | Sends nothing and closes the connection, like nginx `return 444`. Typically used as the default site so requests scanning unknown domains get no response; the access log records them as 444 |
+| Close connection | Sends nothing and closes the connection, like nginx `return 444`. Typically used as the default site so requests scanning unknown domains get no response; the access log records them as 444; it skips authentication, access control, the WAF and rewrites, so the other site settings have no effect |
 
 Sites of every type can set an access log, cross-origin (CORS), custom request and response headers (one `Key: Value` per line; an empty Value removes that header), and can reference a [WAF Firewall](/en/docs/modules/waf) instance (if the instance does not exist or is disabled, requests pass through). See [Request and response headers](#headers) for how request headers, response headers and Content-Type are edited.
 
@@ -366,8 +366,8 @@ Converting nginx settings:
 | `return 302 /admin` on `location = /` | a rewrite with "Redirect" on, pattern `^/$` |
 | `try_files $uri $uri.html $uri/index.html` and `error_page 404` | static files with clean URLs and a 404 page |
 | `add_header` | response headers |
+| `return 444` | a Close connection site |
 
 ## Deployment tip
 
-| `return 444` | a Close connection site |
 Web Services need to listen on host ports such as 80 / 443. For Docker deployments, `--network host` is recommended.

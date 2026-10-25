@@ -5,6 +5,7 @@
   "help": "Gemeinsame Benutzer haben wie lokale Benutzer ein Passwort und Verzeichnisse und werden an einer Stelle gepflegt. Ist der Schalter an, können sie sich bei diesem Dienst anmelden; hat ein lokaler Benutzer denselben Namen, wird nur der lokale Benutzer geprüft.",
   "helpSmb": "Gemeinsame Benutzer haben wie lokale Benutzer ein Passwort und Verzeichnisse und werden an einer Stelle gepflegt. Ist der Schalter an, können sie sich bei diesem Dienst anmelden; hat ein lokaler Benutzer denselben Namen (ohne Groß-/Kleinschreibung), wird nur der lokale Benutzer geprüft. SMB braucht Klartextpasswörter, und Benutzer- und Freigabenamen dürfen keine Zeichen wie \" / \\ [ ] : ; {'|'} = , + * ? < > enthalten.",
   "off": "Gemeinsame Benutzer sind für diesen Dienst aus, die Benutzer unten können sich hier nicht anmelden",
+  "loadError": "Die Konfiguration der gemeinsamen Benutzer ist ungültig, sie können sich nicht anmelden; korrigieren und speichern, um sie wiederherzustellen: {error}",
   "shadowed": "Gleicher Name wie ein lokaler Benutzer, der lokale Benutzer wird geprüft: {names}",
   "issue": {
     "name": "{name}: der Benutzername kann nicht für SMB verwendet werden",

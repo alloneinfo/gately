@@ -5,6 +5,7 @@
   "help": "Shared users have a password and directories just like local users and are kept in one place. With the switch on they can sign in to this service; when a local user has the same name, only the local user is checked.",
   "helpSmb": "Shared users have a password and directories just like local users and are kept in one place. With the switch on they can sign in to this service; when a local user has the same name (case-insensitive), only the local user is checked. SMB needs plain passwords, and user and share names cannot contain characters such as \" / \\ [ ] : ; {'|'} = , + * ? < >.",
   "off": "Shared users are off for this service, the users below cannot sign in to it",
+  "loadError": "The shared user configuration is invalid and shared users cannot sign in; fix it and save to restore them: {error}",
   "shadowed": "Same name as a local user, the local user is checked: {names}",
   "issue": {
     "name": "{name}: the user name cannot be used for SMB",

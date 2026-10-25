@@ -138,7 +138,7 @@
           <template v-if="importPreview.client.token"> · {{ t('frp.hasToken') }}</template>
         </div>
         <div v-if="importPreview.server" class="preview-line mono">
-          bind {{ importPreview.server.bindAddr ? importPreview.server.bindAddr + ':' : '' }}{{ importPreview.server.bindPort }}
+          bind {{ hostPort(importPreview.server.bindAddr, importPreview.server.bindPort) }}
           <template v-if="importPreview.server.proxyBindAddr"> · proxy {{ importPreview.server.proxyBindAddr }}</template>
           <template v-if="importPreview.server.vhostHttpPort"> · http {{ importPreview.server.vhostHttpPort }}</template>
           <template v-if="importPreview.server.vhostHttpsPort"> · https {{ importPreview.server.vhostHttpsPort }}</template>
@@ -259,6 +259,14 @@ interface Proxy {
 }
 
 const { t } = useI18n()
+
+// hostPort 拼接预览中的监听地址与端口，IPv6 地址加方括号；地址为空时只显示端口
+function hostPort(addr: string, port: number): string {
+  if (!addr) {
+    return String(port)
+  }
+  return addr.includes(':') ? `[${addr}]:${port}` : `${addr}:${port}`
+}
 const { isMobile, labelPosition } = useFormLayout()
 const tab = ref('client')
 const client = ref<RoleView<ClientSettings>>()

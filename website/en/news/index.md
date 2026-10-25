@@ -7,6 +7,10 @@ description: Release announcements and notes for each Gately version.
 
 Announcements for major releases are listed below. See [GitHub Releases](https://github.com/wangwanjie/gately/releases) for the full changes and downloads of every version.
 
+## [v0.5.8.1](/en/news/v0.5.8.1)
+
+October 26, 2026 · WebDAV, FTP and SMB share one list of shared users; the Web Service gains a Close connection site type and logs the Referer and User-Agent; frps can listen on chosen addresses; copy buttons work over HTTP.
+
 ## [v0.5.8](/en/news/v0.5.8)
 
 October 25, 2026 · A built-in OIDC identity provider lets shared users sign in to Gitea, Grafana and other applications; new SMB Service; every log can be filtered; WAF rule groups can be reordered; site headers can be picked from common entries.

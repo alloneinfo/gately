@@ -11743,7 +11743,7 @@
     },
     "/api/ftp/shared-users": {
       "get": {
-        "description": "WebDAV, FTP, SMB가 함께 쓰는 파일 서비스 공유 사용자를 반환하며 비밀번호는 마스킹됩니다.\n\n필요한 권한: `ftp:read`.",
+        "description": "WebDAV, FTP, SMB가 함께 쓰는 파일 서비스 공유 사용자를 반환하며 비밀번호는 마스킹됩니다. fileusers.json이 검증을 통과하지 못하면 `error`를 반환하며, 유효한 목록을 저장할 때까지 공유 사용자는 모두 로그인할 수 없습니다.\n\n필요한 권한: `ftp:read`.",
         "responses": {
           "200": {
             "description": "성공"
@@ -11792,7 +11792,7 @@
         "x-token-allowed": true
       },
       "put": {
-        "description": "保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不。\n\n필요한 권한: `ftp:write`. 수정",
+        "description": "保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不。API 토큰需要同时具备 `webdav:write`、`ftp:write`、`smb:write`。只靠共享用户启用的服务在后必须仍有可登录的共享用户，否则拒绝保存。\n\n필요한 권한: `webdav:write,ftp:write,smb:write`. 수정 수정",
         "requestBody": {
           "content": {
             "application/json": {
@@ -11846,7 +11846,7 @@
         "tags": [
           "FTP 서비스"
         ],
-        "x-required-scope": "ftp:write",
+        "x-required-scope": "webdav:write,ftp:write,smb:write",
         "x-token-allowed": true
       }
     },
@@ -16256,7 +16256,7 @@
     },
     "/api/smb/shared-users": {
       "get": {
-        "description": "WebDAV, FTP, SMB가 함께 쓰는 파일 서비스 공유 사용자를 반환하며 비밀번호는 마스킹됩니다. `issues`는 SMB에 사용할 수 없는 공유 사용자와 이유를 나열합니다: `name`(사용자 이름에 SMB가 허용하지 않는 문자), `bcrypt`(비밀번호가 bcrypt 해시), `share`(디렉터리 이름을 공유 이름으로 쓸 수 없거나 중복).\n\n필요한 권한: `smb:read`.",
+        "description": "WebDAV, FTP, SMB가 함께 쓰는 파일 서비스 공유 사용자를 반환하며 비밀번호는 마스킹됩니다. fileusers.json이 검증을 통과하지 못하면 `error`를 반환하며, 유효한 목록을 저장할 때까지 공유 사용자는 모두 로그인할 수 없습니다. `issues`는 SMB에 사용할 수 없는 공유 사용자와 이유를 나열합니다: `name`(사용자 이름에 SMB가 허용하지 않는 문자), `bcrypt`(비밀번호가 bcrypt 해시), `share`(디렉터리 이름을 공유 이름으로 쓸 수 없거나 중복).\n\n필요한 권한: `smb:read`.",
         "responses": {
           "200": {
             "description": "성공"
@@ -16305,7 +16305,7 @@
         "x-token-allowed": true
       },
       "put": {
-        "description": "保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不。\n\n필요한 권한: `smb:write`. 수정",
+        "description": "保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不。API 토큰需要同时具备 `webdav:write`、`ftp:write`、`smb:write`。只靠共享用户启用的服务在后必须仍有可登录的共享用户，否则拒绝保存。\n\n필요한 권한: `webdav:write,ftp:write,smb:write`. 수정 수정",
         "requestBody": {
           "content": {
             "application/json": {
@@ -16359,7 +16359,7 @@
         "tags": [
           "SMB 서비스"
         ],
-        "x-required-scope": "smb:write",
+        "x-required-scope": "webdav:write,ftp:write,smb:write",
         "x-token-allowed": true
       }
     },
@@ -21633,7 +21633,7 @@
     },
     "/api/webdav/shared-users": {
       "get": {
-        "description": "WebDAV, FTP, SMB가 함께 쓰는 파일 서비스 공유 사용자를 반환하며 비밀번호는 마스킹됩니다.\n\n필요한 권한: `webdav:read`.",
+        "description": "WebDAV, FTP, SMB가 함께 쓰는 파일 서비스 공유 사용자를 반환하며 비밀번호는 마스킹됩니다. fileusers.json이 검증을 통과하지 못하면 `error`를 반환하며, 유효한 목록을 저장할 때까지 공유 사용자는 모두 로그인할 수 없습니다.\n\n필요한 권한: `webdav:read`.",
         "responses": {
           "200": {
             "description": "성공"
@@ -21682,7 +21682,7 @@
         "x-token-allowed": true
       },
       "put": {
-        "description": "保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不。\n\n필요한 권한: `webdav:write`. 수정",
+        "description": "保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不。API 토큰需要同时具备 `webdav:write`、`ftp:write`、`smb:write`。只靠共享用户启用的服务在后必须仍有可登录的共享用户，否则拒绝保存。\n\n필요한 권한: `webdav:write,ftp:write,smb:write`. 수정 수정",
         "requestBody": {
           "content": {
             "application/json": {
@@ -21736,7 +21736,7 @@
         "tags": [
           "WebDAV 서비스"
         ],
-        "x-required-scope": "webdav:write",
+        "x-required-scope": "webdav:write,ftp:write,smb:write",
         "x-token-allowed": true
       }
     },

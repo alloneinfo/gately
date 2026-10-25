@@ -20,7 +20,7 @@ Ao salvar uma alteração em um site ou no site padrão, a lista de sites é tro
 | Redirecionamento | Redireciona para uma URL completa com código de status 301 / 302 / 307 / 308 (padrão 302), opcionalmente mantendo o caminho e a query string originais. A URL pode conter `{host}`, que é substituído pelo domínio que o visitante usou: `https://{host}` com "Manter caminho e query" envia todas as requisições HTTP para HTTPS no mesmo domínio |
 | Arquivos estáticos | O diretório deve ser um caminho absoluto. Com a "Listagem de diretório" desativada, uma requisição a um diretório só retorna resposta se existir um `index.html`. "URLs sem extensão" tenta `caminho.html` e `caminho/index.html` quando o arquivo não existe (para VitePress e geradores parecidos, como o `try_files $uri $uri.html $uri/index.html` do nginx). "Página 404" é um caminho dentro do diretório, como `404.html`, retornado com status 404 |
 | Texto fixo | Conteúdo personalizado, `Content-Type` (padrão `text/plain; charset=utf-8`) e código de status (100-599, padrão 200) |
-| Fechar conexão | Não envia nada e fecha a conexão, como o `return 444` do nginx. Usado principalmente como site padrão para que requisições que varrem domínios desconhecidos não recebam resposta; o log de acesso as registra como 444 |
+| Fechar conexão | Não envia nada e fecha a conexão, como o `return 444` do nginx. Usado principalmente como site padrão para que requisições que varrem domínios desconhecidos não recebam resposta; o log de acesso as registra como 444; não passa por autenticação, controle de acesso, WAF nem reescritas, então as demais configurações do site não têm efeito |
 
 Sites de qualquer tipo podem definir um log de acesso, cross-origin (CORS), cabeçalhos personalizados de requisição e resposta (um `Key: Value` por linha; um Value vazio remove aquele cabeçalho) e podem referenciar uma instância do [Firewall WAF](/pt-BR/docs/modules/waf) (se a instância não existir ou estiver desativada, as requisições passam direto). Veja [Cabeçalhos de requisição e de resposta](#headers) para saber como editar cabeçalhos de requisição, de resposta e o Content-Type.
 
@@ -366,8 +366,8 @@ Conversão das configurações do nginx:
 | `return 302 /admin` em `location = /` | uma reescrita com "Redirecionamento" ativado e padrão `^/$` |
 | `try_files $uri $uri.html $uri/index.html` e `error_page 404` | arquivos estáticos com URLs sem extensão e página 404 |
 | `add_header` | cabeçalhos de resposta |
+| `return 444` | um site Fechar conexão |
 
 ## Dica de implantação
 
-| `return 444` | um site Fechar conexão |
 Os Serviços Web precisam escutar em portas do host como 80 / 443. Em implantações com Docker, recomendamos `--network host`.

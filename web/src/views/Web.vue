@@ -233,7 +233,8 @@
             <el-form-item :label="t('web.accessLog')"><el-switch v-model="site.accessLog" /></el-form-item>
             <el-form-item :label="t('common.enable')"><el-switch v-model="site.enable" /></el-form-item>
           </el-tab-pane>
-          <el-tab-pane :label="t('web.tabSecurity')" name="security">
+          <!-- 断开连接的站点不经过认证、访问控制、流量与请求头处理，只保留基本设置 -->
+          <el-tab-pane v-if="site.type !== 'close'" :label="t('web.tabSecurity')" name="security">
             <el-form-item :label="t('web.auth')">
               <el-checkbox v-model="site.webAuth" :disabled="forwardAuthOn">{{ t('web.webAuth') }}</el-checkbox>
               <el-checkbox v-model="site.basicAuth" :disabled="forwardAuthOn">{{ t('web.basicAuth') }}</el-checkbox>
@@ -291,10 +292,10 @@
             </el-form-item>
             <el-form-item :label="t('web.cors')"><el-switch v-model="site.cors" /></el-form-item>
           </el-tab-pane>
-          <el-tab-pane :label="t('web.tabTraffic')" name="traffic">
+          <el-tab-pane v-if="site.type !== 'close'" :label="t('web.tabTraffic')" name="traffic">
             <SiteTraffic v-model:site="site" />
           </el-tab-pane>
-          <el-tab-pane :label="t('web.tabHeaders')" name="headers">
+          <el-tab-pane v-if="site.type !== 'close'" :label="t('web.tabHeaders')" name="headers">
             <el-form-item :label="t('web.requestHeaders')">
               <HeaderEditor v-model="site.requestHeaders" direction="request" :placeholder="t('web.requestHeadersPlaceholder')" />
             </el-form-item>

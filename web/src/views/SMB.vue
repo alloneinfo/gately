@@ -46,6 +46,7 @@
       v-model:enabled="settings.sharedUsers"
       :local-names="settings.users.map((u) => u.name)"
       :issues="shared.issues.value"
+      :load-error="shared.loadError.value"
       smb
       mount-summary-key="smb.mountSummary"
       :mount-name-placeholder="t('smb.shareName')"
@@ -207,9 +208,9 @@ async function load() {
 async function save() {
   saving.value = true
   try {
-    // 先保存共享用户：只用共享用户启用服务时，服务设置的校验需要看到已保存的共享用户
-    await shared.save()
-    const r = await api.put<{ running: boolean; error: string }>('/api/smb/settings', settings.value)
+    // 共享用户与服务设置的保存顺序见 saveWith
+    const s = settings.value!
+    const r = await shared.saveWith(s, () => api.put<{ running: boolean; error: string }>('/api/smb/settings', s))
     running.value = r.running
     error.value = r.error
     ElMessage.success(t('common.saved'))

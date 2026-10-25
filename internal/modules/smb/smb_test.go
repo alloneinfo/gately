@@ -1,10 +1,19 @@
 package smb
 
 import (
+	"encoding/json"
+	"io"
+	"log"
+	"net/http"
+	"net/http/httptest"
 	"strings"
 	"testing"
 
+	"github.com/wangwanjie/gately/internal/config"
 	"github.com/wangwanjie/gately/internal/crud"
+	"github.com/wangwanjie/gately/internal/fileusers"
+	"github.com/wangwanjie/gately/internal/logbuf"
+	"github.com/wangwanjie/gately/internal/module"
 	"github.com/wangwanjie/gately/internal/mountfs"
 )
 
@@ -114,5 +123,59 @@ func TestKeepPasswords(t *testing.T) {
 	keepPasswords(old, got)
 	if got[2].Password != "" {
 		t.Fatalf("新用户不应得到占位符密码: %+v", got)
+	}
+}
+
+type muxRouter struct{ *http.ServeMux }
+
+func (r muxRouter) HandleFunc(p string, h http.HandlerFunc) { r.ServeMux.HandleFunc(p, h) }
+
+// TestSharedUsersUsable 验证只靠共享用户启用 SMB 时按实际能用于 SMB 的账号计算：
+// 共享用户全部不能用于 SMB 时不能启用，也不能把共享用户改成全部不可用；与本地用户同名的共享用户不列为问题。
+func TestSharedUsersUsable(t *testing.T) {
+	st, _ := config.Open(t.TempDir())
+	m := New()
+	if err := m.Init(module.Env{Store: st, Logs: logbuf.New(20, log.New(io.Discard, "", 0))}); err != nil {
+		t.Fatal(err)
+	}
+	if err := fileusers.Default.Save([]fileusers.User{{Name: "bad*name", Password: "p", Root: "/a"}}); err != nil {
+		t.Fatal(err)
+	}
+	s := Settings{Enable: true, SharedUsers: true}
+	if err := s.Validate(); err == nil {
+		t.Fatal("共享用户都不能用于 SMB 时不应允许启用")
+	}
+	if err := fileusers.Default.Save([]fileusers.User{{Name: "alice", Password: "p", Root: "/a"}, {Name: "Local", Password: "p", Root: "/a"}}); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.Validate(); err != nil {
+		t.Fatal(err)
+	}
+	// 不启动服务，只设置配置，验证保存前的检查
+	m.mu.Lock()
+	m.settings = s
+	m.mu.Unlock()
+	if err := fileusers.Default.Save([]fileusers.User{{Name: "bad*name", Password: "p", Root: "/a"}}); err == nil {
+		t.Fatal("只靠共享用户启用 SMB 时不应允许把共享用户改成都不可用")
+	}
+
+	m.mu.Lock()
+	m.settings = Settings{Users: []User{{Name: "local", Password: "lp", Root: "/l"}}}
+	m.mu.Unlock()
+	if err := fileusers.Default.Save([]fileusers.User{{Name: "bad*name", Password: "p", Root: "/a"}, {Name: "LOCAL", Password: "p", Root: "/a"}}); err != nil {
+		t.Fatal(err)
+	}
+	mux := http.NewServeMux()
+	m.Routes(muxRouter{mux})
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, httptest.NewRequest("GET", "/shared-users", nil))
+	var out struct {
+		Issues []Issue `json:"issues"`
+	}
+	if err := json.Unmarshal(rec.Body.Bytes(), &out); err != nil {
+		t.Fatal(err)
+	}
+	if len(out.Issues) != 1 || out.Issues[0].Name != "bad*name" {
+		t.Fatalf("只应列出不能用于 SMB 的共享用户，与本地用户同名的不列出: %s", rec.Body.String())
 	}
 }

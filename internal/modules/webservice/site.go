@@ -14,6 +14,7 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+	"unicode/utf8"
 
 	proxyproto "github.com/pires/go-proxyproto"
 
@@ -88,6 +89,15 @@ func (h *siteHandler) reqLog(r *http.Request) *logbuf.Logger {
 
 func newSiteHandler(s Site, log *logbuf.Logger, auth *authenticator, waf WAFProvider) (*siteHandler, error) {
 	h := &siteHandler{site: s, stats: &SiteStats{}, log: log, auth: auth, metrics: newSiteMetrics()}
+	// 断开连接的站点在 ServeHTTP 中直接断开，其余设置都不生效（保存时也不校验），不再编译重写、名单等规则；
+	// 保留一个只会断开的处理器，以防其他调用路径意外写出响应
+	if s.Type == TypeClose {
+		h.handler = http.HandlerFunc(func(http.ResponseWriter, *http.Request) {
+			panic(http.ErrAbortHandler)
+		})
+		h.pipeline = h.handler
+		return h, nil
+	}
 	var err error
 	if h.rewrites, err = compileRewrites(s.Rewrites); err != nil {
 		return nil, err
@@ -144,15 +154,8 @@ func newSiteHandler(s Site, log *logbuf.Logger, auth *authenticator, waf WAFProv
 			w.WriteHeader(s.StatusCode)
 			_, _ = w.Write([]byte(s.Text))
 		})
-	case TypeClose:
-		h.handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			markClosed(w)
-			// net/http 遇到 ErrAbortHandler 不写响应：HTTP/1.x 直接断开连接，HTTP/2、HTTP/3 重置这个请求流
-			panic(http.ErrAbortHandler)
-		})
 	}
-	// 断开连接的站点不压缩：压缩器收尾时可能先写出响应头
-	if s.Compress && s.Type != TypeRedirect && s.Type != TypeClose {
+	if s.Compress && s.Type != TypeRedirect {
 		h.handler = httpcompress.Handler(h.handler)
 	}
 	h.pipeline = http.HandlerFunc(h.serveInner)
@@ -457,20 +460,23 @@ func orDash(v string) string {
 // statusClosed 是断开连接时记入访问日志与统计的状态码，沿用 nginx 的 444。
 const statusClosed = 444
 
-// markClosed 把请求标记为已断开连接。w 可能被 WAF 等中间件包装过，逐层 Unwrap 找到 statusRecorder；
-// 只改记录的状态码，不调用 WriteHeader，避免真的写出响应。
-func markClosed(w http.ResponseWriter) {
-	for w != nil {
-		if rec, ok := w.(*statusRecorder); ok {
-			rec.status = statusClosed
-			return
-		}
-		u, ok := w.(interface{ Unwrap() http.ResponseWriter })
-		if !ok {
-			return
-		}
-		w = u.Unwrap()
+// 访问日志中 URI、Referer、User-Agent 的最大字节数。请求头最长可达 1 MB，%q 转义后还会变长，
+// 不截断时一条日志就可能有数 MB，同时写入内存日志、落盘文件与标准输出。
+const (
+	maxLogURI    = 2048
+	maxLogHeader = 512
+)
+
+// clip 把 s 截断到最多 n 字节（不截断多字节字符），截断时末尾加 "…"。
+func clip(s string, n int) string {
+	if len(s) <= n {
+		return s
 	}
+	cut := n
+	for cut > 0 && !utf8.RuneStart(s[cut]) {
+		cut--
+	}
+	return s[:cut] + "…"
 }
 
 // Unwrap 让 http.ResponseController 能访问底层连接（WebSocket 升级等需要）。
@@ -495,12 +501,20 @@ func (h *siteHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				uri = r.URL.Path
 			}
 			// 末尾按 nginx combined 格式附上 Referer 与 User-Agent，便于区分同一出口 IP 后面的不同设备；
-			// %q 会转义换行等控制字符，防止伪造日志行
+			// %q 会转义换行等控制字符，防止伪造日志行；三者都由访客控制，先截断再写入
 			h.reqLog(r).With(logbuf.Fields{logbuf.FieldStatus: strconv.Itoa(rec.status)}).
-				Infof("%s %s %s%s %d %dms %q %q", client.Addr(), r.Method, r.Host, uri, rec.status, time.Since(start).Milliseconds(),
-					orDash(r.Referer()), orDash(r.UserAgent()))
+				Infof("%s %s %s%s %d %dms %q %q", client.Addr(), r.Method, r.Host, clip(uri, maxLogURI), rec.status, time.Since(start).Milliseconds(),
+					orDash(clip(r.Referer(), maxLogHeader)), orDash(clip(r.UserAgent(), maxLogHeader)))
 		}
 	}()
+
+	// 断开连接的站点不经过访问控制、WAF、跨域、认证与重写，直接断开，与 nginx server 级 return 444 在 rewrite 阶段生效一致。
+	// 只改记录的状态码、不写出响应；net/http 遇到 ErrAbortHandler 不写响应：HTTP/1.x 直接断开连接，HTTP/2、HTTP/3 重置这个请求流。
+	// 访问日志与统计在上面的 defer 中照常记录为 444
+	if h.site.Type == TypeClose {
+		rec.status = statusClosed
+		panic(http.ErrAbortHandler)
+	}
 
 	release, ok := h.accessCheck(rec, r)
 	if !ok {

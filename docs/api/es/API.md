@@ -412,7 +412,7 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | DELETE | `/api/webdav/logs` | `webdav:write` | Vaciar los registros de ejecución del módulo |
 | GET | `/api/webdav/settings` | `webdav:read` | Leer los ajustes de WebDAV |
 | GET | `/api/webdav/shared-users` | `webdav:read` | Leer los usuarios compartidos de los servicios de archivos |
-| PUT | `/api/webdav/shared-users` | `webdav:write` | Guardar los usuarios compartidos de los servicios de archivos |
+| PUT | `/api/webdav/shared-users` | `webdav:write,ftp:write,smb:write` | Guardar los usuarios compartidos de los servicios de archivos |
 | PUT | `/api/webdav/settings` | `webdav:write` | Guardar los ajustes de WebDAV |
 
 ## Servicio FTP
@@ -423,7 +423,7 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | DELETE | `/api/ftp/logs` | `ftp:write` | Vaciar los registros de ejecución del módulo |
 | GET | `/api/ftp/settings` | `ftp:read` | Leer los ajustes de FTP |
 | GET | `/api/ftp/shared-users` | `ftp:read` | Leer los usuarios compartidos de los servicios de archivos |
-| PUT | `/api/ftp/shared-users` | `ftp:write` | Guardar los usuarios compartidos de los servicios de archivos |
+| PUT | `/api/ftp/shared-users` | `webdav:write,ftp:write,smb:write` | Guardar los usuarios compartidos de los servicios de archivos |
 | PUT | `/api/ftp/settings` | `ftp:write` | Guardar los ajustes de FTP |
 
 ## Servicio SMB
@@ -434,7 +434,7 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | DELETE | `/api/smb/logs` | `smb:write` | Vaciar los registros de ejecución del módulo |
 | GET | `/api/smb/settings` | `smb:read` | Obtener la configuración de SMB |
 | GET | `/api/smb/shared-users` | `smb:read` | Leer los usuarios compartidos de los servicios de archivos |
-| PUT | `/api/smb/shared-users` | `smb:write` | Guardar los usuarios compartidos de los servicios de archivos |
+| PUT | `/api/smb/shared-users` | `webdav:write,ftp:write,smb:write` | Guardar los usuarios compartidos de los servicios de archivos |
 | PUT | `/api/smb/settings` | `smb:write` | Guardar la configuración de SMB |
 
 ## Montajes de almacenamiento

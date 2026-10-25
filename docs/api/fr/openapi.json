@@ -11743,7 +11743,7 @@
     },
     "/api/ftp/shared-users": {
       "get": {
-        "description": "Renvoie les utilisateurs partagés des services de fichiers communs à WebDAV, FTP et SMB, mots de passe masqués.\n\nPermission requise : `ftp:read`.",
+        "description": "Renvoie les utilisateurs partagés des services de fichiers communs à WebDAV, FTP et SMB, mots de passe masqués. Si fileusers.json ne passe pas la validation, `error` est renvoyé et aucun utilisateur partagé ne peut se connecter tant qu'une liste valide n'est pas enregistrée.\n\nPermission requise : `ftp:read`.",
         "responses": {
           "200": {
             "description": "Succès"
@@ -11792,7 +11792,7 @@
         "x-token-allowed": true
       },
       "put": {
-        "description": "保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不Modifier 。\n\nPermission requise : `ftp:write`.",
+        "description": "保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不Modifier 。Jeton API需要同时具备 `webdav:write`、`ftp:write`、`smb:write`。只靠共享用户启用的服务在Modifier 后必须仍有可登录的共享用户，否则拒绝保存。\n\nPermission requise : `webdav:write,ftp:write,smb:write`.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -11846,7 +11846,7 @@
         "tags": [
           "Service FTP"
         ],
-        "x-required-scope": "ftp:write",
+        "x-required-scope": "webdav:write,ftp:write,smb:write",
         "x-token-allowed": true
       }
     },
@@ -16256,7 +16256,7 @@
     },
     "/api/smb/shared-users": {
       "get": {
-        "description": "Renvoie les utilisateurs partagés des services de fichiers communs à WebDAV, FTP et SMB, mots de passe masqués. `issues` liste les utilisateurs partagés inutilisables pour SMB et la raison : `name` (le nom contient des caractères refusés par SMB), `bcrypt` (le mot de passe est un hachage bcrypt), `share` (un nom de répertoire ne peut pas servir de nom de partage ou est en double).\n\nPermission requise : `smb:read`.",
+        "description": "Renvoie les utilisateurs partagés des services de fichiers communs à WebDAV, FTP et SMB, mots de passe masqués. Si fileusers.json ne passe pas la validation, `error` est renvoyé et aucun utilisateur partagé ne peut se connecter tant qu'une liste valide n'est pas enregistrée. `issues` liste les utilisateurs partagés inutilisables pour SMB et la raison : `name` (le nom contient des caractères refusés par SMB), `bcrypt` (le mot de passe est un hachage bcrypt), `share` (un nom de répertoire ne peut pas servir de nom de partage ou est en double).\n\nPermission requise : `smb:read`.",
         "responses": {
           "200": {
             "description": "Succès"
@@ -16305,7 +16305,7 @@
         "x-token-allowed": true
       },
       "put": {
-        "description": "保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不Modifier 。\n\nPermission requise : `smb:write`.",
+        "description": "保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不Modifier 。Jeton API需要同时具备 `webdav:write`、`ftp:write`、`smb:write`。只靠共享用户启用的服务在Modifier 后必须仍有可登录的共享用户，否则拒绝保存。\n\nPermission requise : `webdav:write,ftp:write,smb:write`.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -16359,7 +16359,7 @@
         "tags": [
           "Service SMB"
         ],
-        "x-required-scope": "smb:write",
+        "x-required-scope": "webdav:write,ftp:write,smb:write",
         "x-token-allowed": true
       }
     },
@@ -21633,7 +21633,7 @@
     },
     "/api/webdav/shared-users": {
       "get": {
-        "description": "Renvoie les utilisateurs partagés des services de fichiers communs à WebDAV, FTP et SMB, mots de passe masqués.\n\nPermission requise : `webdav:read`.",
+        "description": "Renvoie les utilisateurs partagés des services de fichiers communs à WebDAV, FTP et SMB, mots de passe masqués. Si fileusers.json ne passe pas la validation, `error` est renvoyé et aucun utilisateur partagé ne peut se connecter tant qu'une liste valide n'est pas enregistrée.\n\nPermission requise : `webdav:read`.",
         "responses": {
           "200": {
             "description": "Succès"
@@ -21682,7 +21682,7 @@
         "x-token-allowed": true
       },
       "put": {
-        "description": "保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不Modifier 。\n\nPermission requise : `webdav:write`.",
+        "description": "保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不Modifier 。Jeton API需要同时具备 `webdav:write`、`ftp:write`、`smb:write`。只靠共享用户启用的服务在Modifier 后必须仍有可登录的共享用户，否则拒绝保存。\n\nPermission requise : `webdav:write,ftp:write,smb:write`.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -21736,7 +21736,7 @@
         "tags": [
           "Service WebDAV"
         ],
-        "x-required-scope": "webdav:write",
+        "x-required-scope": "webdav:write,ftp:write,smb:write",
         "x-token-allowed": true
       }
     },

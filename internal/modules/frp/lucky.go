@@ -3,6 +3,7 @@ package frp
 import (
 	"encoding/json"
 	"fmt"
+	"net"
 	"sort"
 	"strings"
 
@@ -323,8 +324,13 @@ func importLuckyServer(cfg *fileConfig, li *luckyInstance, opts luckyimport.Opti
 		rep.Warnings = append(rep.Warnings, fmt.Sprintf("%s: %v，已改为不限制", name, err))
 		s.AllowPorts = ""
 	}
-	if addr := strings.TrimSpace(p.BindAddr); addr != "" && addr != "0.0.0.0" {
-		// Lucky 的 frps 代理端口与连接端口监听同一地址
+	// Lucky 的 frps 代理端口与连接端口监听同一地址；0.0.0.0 与 :: 即所有地址，与 Gately 留空一致。
+	// 不是 IP 的地址（如主机名）frps 校验不通过，只提示并改为监听所有地址，避免整个实例被跳过
+	switch addr := strings.Trim(strings.TrimSpace(p.BindAddr), "[]"); {
+	case addr == "" || addr == "0.0.0.0" || addr == "::":
+	case net.ParseIP(addr) == nil:
+		rep.Warnings = append(rep.Warnings, fmt.Sprintf("%s: 监听地址 %s 不是 IP 地址，frps 将监听所有地址", name, p.BindAddr))
+	default:
 		s.BindAddr, s.ProxyBindAddr = addr, addr
 	}
 	if p.KCPBindPort != 0 || p.QUICBindPort != 0 {

@@ -61,7 +61,11 @@ var sensitiveGetSegments = map[string]bool{
 	"preview-archive": true, // 读取压缩包内文件
 }
 
-// Required 返回访问 method+path 所需的权限（如 "ddns:read"）。
+// sharedFileUserScope 是修改文件服务共享用户所需的权限：WebDAV、FTP、SMB 共用同一份共享用户，
+// 修改会改变三个服务的登录账号，因此三个服务的写权限缺一不可。
+const sharedFileUserScope = "webdav:write,ftp:write,smb:write"
+
+// Required 返回访问 method+path 所需的权限（如 "ddns:read"），需要多个权限时以逗号分隔、须全部具备。
 // 返回 Any 表示任何有效令牌均可访问，返回 Denied 表示令牌不可访问。
 func Required(method, path string) string {
 	if !strings.HasPrefix(path, "/api/") {
@@ -91,6 +95,9 @@ func Required(method, path string) string {
 	if mod == "" {
 		return Denied
 	}
+	if level == LevelWrite && tail == "shared-users" && (mod == "webdav" || mod == "ftp" || mod == "smb") {
+		return sharedFileUserScope
+	}
 	// 模块日志属于只读信息，清空日志属于写操作
 	if level == LevelRead {
 		for _, seg := range strings.Split(tail, "/") {
@@ -110,6 +117,14 @@ func Match(scopes []string, need string) bool {
 	}
 	if need == Denied {
 		return false
+	}
+	if strings.Contains(need, ",") {
+		for _, one := range strings.Split(need, ",") {
+			if !Match(scopes, one) {
+				return false
+			}
+		}
+		return true
 	}
 	mod, level, _ := strings.Cut(need, ":")
 	for _, s := range scopes {

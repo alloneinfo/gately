@@ -11743,7 +11743,7 @@
     },
     "/api/ftp/shared-users": {
       "get": {
-        "description": "Retorna os usuários compartilhados dos serviços de arquivos usados por WebDAV, FTP e SMB, com as senhas mascaradas.\n\nPermissão necessária: `ftp:read`.",
+        "description": "Retorna os usuários compartilhados dos serviços de arquivos usados por WebDAV, FTP e SMB, com as senhas mascaradas. Se o fileusers.json não passar na validação, `error` é retornado e nenhum usuário compartilhado consegue entrar até que uma lista válida seja salva.\n\nPermissão necessária: `ftp:read`.",
         "responses": {
           "200": {
             "description": "Sucesso"
@@ -11792,7 +11792,7 @@
         "x-token-allowed": true
       },
       "put": {
-        "description": "保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不Modificar 。\n\nPermissão necessária: `ftp:write`.",
+        "description": "保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不Modificar 。Token de API需要同时具备 `webdav:write`、`ftp:write`、`smb:write`。只靠共享用户启用的服务在Modificar 后必须仍有可登录的共享用户，否则拒绝保存。\n\nPermissão necessária: `webdav:write,ftp:write,smb:write`.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -11846,7 +11846,7 @@
         "tags": [
           "Serviço FTP"
         ],
-        "x-required-scope": "ftp:write",
+        "x-required-scope": "webdav:write,ftp:write,smb:write",
         "x-token-allowed": true
       }
     },
@@ -16256,7 +16256,7 @@
     },
     "/api/smb/shared-users": {
       "get": {
-        "description": "Retorna os usuários compartilhados dos serviços de arquivos usados por WebDAV, FTP e SMB, com as senhas mascaradas. `issues` lista os usuários compartilhados que não podem ser usados no SMB e o motivo: `name` (o nome tem caracteres que o SMB não aceita), `bcrypt` (a senha é um hash bcrypt), `share` (um nome de diretório não serve como compartilhamento ou está duplicado).\n\nPermissão necessária: `smb:read`.",
+        "description": "Retorna os usuários compartilhados dos serviços de arquivos usados por WebDAV, FTP e SMB, com as senhas mascaradas. Se o fileusers.json não passar na validação, `error` é retornado e nenhum usuário compartilhado consegue entrar até que uma lista válida seja salva. `issues` lista os usuários compartilhados que não podem ser usados no SMB e o motivo: `name` (o nome tem caracteres que o SMB não aceita), `bcrypt` (a senha é um hash bcrypt), `share` (um nome de diretório não serve como compartilhamento ou está duplicado).\n\nPermissão necessária: `smb:read`.",
         "responses": {
           "200": {
             "description": "Sucesso"
@@ -16305,7 +16305,7 @@
         "x-token-allowed": true
       },
       "put": {
-        "description": "保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不Modificar 。\n\nPermissão necessária: `smb:write`.",
+        "description": "保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不Modificar 。Token de API需要同时具备 `webdav:write`、`ftp:write`、`smb:write`。只靠共享用户启用的服务在Modificar 后必须仍有可登录的共享用户，否则拒绝保存。\n\nPermissão necessária: `webdav:write,ftp:write,smb:write`.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -16359,7 +16359,7 @@
         "tags": [
           "Serviço SMB"
         ],
-        "x-required-scope": "smb:write",
+        "x-required-scope": "webdav:write,ftp:write,smb:write",
         "x-token-allowed": true
       }
     },
@@ -21633,7 +21633,7 @@
     },
     "/api/webdav/shared-users": {
       "get": {
-        "description": "Retorna os usuários compartilhados dos serviços de arquivos usados por WebDAV, FTP e SMB, com as senhas mascaradas.\n\nPermissão necessária: `webdav:read`.",
+        "description": "Retorna os usuários compartilhados dos serviços de arquivos usados por WebDAV, FTP e SMB, com as senhas mascaradas. Se o fileusers.json não passar na validação, `error` é retornado e nenhum usuário compartilhado consegue entrar até que uma lista válida seja salva.\n\nPermissão necessária: `webdav:read`.",
         "responses": {
           "200": {
             "description": "Sucesso"
@@ -21682,7 +21682,7 @@
         "x-token-allowed": true
       },
       "put": {
-        "description": "保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不Modificar 。\n\nPermissão necessária: `webdav:write`.",
+        "description": "保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不Modificar 。Token de API需要同时具备 `webdav:write`、`ftp:write`、`smb:write`。只靠共享用户启用的服务在Modificar 后必须仍有可登录的共享用户，否则拒绝保存。\n\nPermissão necessária: `webdav:write,ftp:write,smb:write`.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -21736,7 +21736,7 @@
         "tags": [
           "Serviço WebDAV"
         ],
-        "x-required-scope": "webdav:write",
+        "x-required-scope": "webdav:write,ftp:write,smb:write",
         "x-token-allowed": true
       }
     },

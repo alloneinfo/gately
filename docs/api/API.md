@@ -412,7 +412,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/webdav/logs` | `webdav:write` | 清空模块运行日志 |
 | GET | `/api/webdav/settings` | `webdav:read` | 读取 WebDAV 设置 |
 | GET | `/api/webdav/shared-users` | `webdav:read` | 读取文件服务共享用户 |
-| PUT | `/api/webdav/shared-users` | `webdav:write` | 保存文件服务共享用户 |
+| PUT | `/api/webdav/shared-users` | `webdav:write,ftp:write,smb:write` | 保存文件服务共享用户 |
 | PUT | `/api/webdav/settings` | `webdav:write` | 保存 WebDAV 设置 |
 
 ## FTP 服务
@@ -423,7 +423,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/ftp/logs` | `ftp:write` | 清空模块运行日志 |
 | GET | `/api/ftp/settings` | `ftp:read` | 读取 FTP 设置 |
 | GET | `/api/ftp/shared-users` | `ftp:read` | 读取文件服务共享用户 |
-| PUT | `/api/ftp/shared-users` | `ftp:write` | 保存文件服务共享用户 |
+| PUT | `/api/ftp/shared-users` | `webdav:write,ftp:write,smb:write` | 保存文件服务共享用户 |
 | PUT | `/api/ftp/settings` | `ftp:write` | 保存 FTP 设置 |
 
 ## SMB 服务
@@ -434,7 +434,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/smb/logs` | `smb:write` | 清空模块运行日志 |
 | GET | `/api/smb/settings` | `smb:read` | 读取 SMB 设置 |
 | GET | `/api/smb/shared-users` | `smb:read` | 读取文件服务共享用户 |
-| PUT | `/api/smb/shared-users` | `smb:write` | 保存文件服务共享用户 |
+| PUT | `/api/smb/shared-users` | `webdav:write,ftp:write,smb:write` | 保存文件服务共享用户 |
 | PUT | `/api/smb/settings` | `smb:write` | 保存 SMB 设置 |
 
 ## 存储挂载

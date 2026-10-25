@@ -20,7 +20,7 @@ Enregistrer une modification d'un site ou du site par défaut remplace la liste 
 | Redirection | Redirige vers une URL complète avec le code de statut 301 / 302 / 307 / 308 (302 par défaut), en conservant éventuellement le chemin et la chaîne de requête d'origine. L'URL peut contenir `{host}`, remplacé par le domaine utilisé par le visiteur : `https://{host}` avec « Conserver le chemin et la requête » envoie chaque requête HTTP vers HTTPS sur le même domaine |
 | Fichiers statiques | Le répertoire doit être un chemin absolu. Avec « Liste du répertoire » désactivée, une requête sur un répertoire n'obtient de réponse que si `index.html` existe. « URL sans extension » essaie `path.html` et `path/index.html` lorsqu'un fichier est introuvable (pour VitePress et les générateurs similaires, comme `try_files $uri $uri.html $uri/index.html` de nginx). « Page 404 » est un chemin à l'intérieur du répertoire, comme `404.html`, renvoyé avec le statut 404 |
 | Texte fixe | Contenu personnalisé, `Content-Type` (`text/plain; charset=utf-8` par défaut) et code de statut (100-599, 200 par défaut) |
-| Fermer la connexion | N'envoie rien et ferme la connexion, comme `return 444` de nginx. Sert surtout de site par défaut pour que les requêtes qui sondent des domaines inconnus ne reçoivent aucune réponse ; le journal d'accès les enregistre avec le code 444 |
+| Fermer la connexion | N'envoie rien et ferme la connexion, comme `return 444` de nginx. Sert surtout de site par défaut pour que les requêtes qui sondent des domaines inconnus ne reçoivent aucune réponse ; le journal d'accès les enregistre avec le code 444 ; ne passe ni par l'authentification, ni par le contrôle d'accès, ni par le WAF, ni par les réécritures : les autres réglages du site sont sans effet |
 
 Les sites de tous types peuvent définir un journal d'accès, le cross-origin (CORS), des en-têtes de requête et de réponse personnalisés (un `Key: Value` par ligne ; une Value vide supprime cet en-tête), et peuvent référencer une instance de [Pare-feu WAF](/fr/docs/modules/waf) (si l'instance n'existe pas ou est désactivée, les requêtes passent sans filtrage). Voir [En-têtes de requête et de réponse](#headers) pour la modification des en-têtes de requête, des en-têtes de réponse et du Content-Type.
 
@@ -366,8 +366,8 @@ Conversion des réglages nginx :
 | `return 302 /admin` dans `location = /` | une réécriture avec « Redirection » activée, motif `^/$` |
 | `try_files $uri $uri.html $uri/index.html` et `error_page 404` | fichiers statiques avec « URL sans extension » et « Page 404 » |
 | `add_header` | en-têtes de réponse |
+| `return 444` | un site Fermer la connexion |
 
 ## Conseil de déploiement
 
-| `return 444` | un site Fermer la connexion |
 Les Services Web doivent écouter sur des ports de l'hôte tels que 80 / 443. Pour un déploiement Docker, `--network host` est recommandé.

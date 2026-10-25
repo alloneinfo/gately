@@ -11743,7 +11743,7 @@
     },
     "/api/ftp/shared-users": {
       "get": {
-        "description": "Returns the file service shared users used by WebDAV, FTP and SMB, with passwords masked.\n\nRequired permission: `ftp:read`.",
+        "description": "Returns the file service shared users used by WebDAV, FTP and SMB, with passwords masked. If fileusers.json fails validation, `error` is returned and no shared user can sign in until a valid list is saved.\n\nRequired permission: `ftp:read`.",
         "responses": {
           "200": {
             "description": "Success"
@@ -11792,7 +11792,7 @@
         "x-token-allowed": true
       },
       "put": {
-        "description": "保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不Update 。\n\nRequired permission: `ftp:write`.",
+        "description": "保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不Update 。API token需要同时具备 `webdav:write`、`ftp:write`、`smb:write`。只靠共享用户启用的服务在Update 后必须仍有可登录的共享用户，否则拒绝保存。\n\nRequired permission: `webdav:write,ftp:write,smb:write`.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -11846,7 +11846,7 @@
         "tags": [
           "FTP service"
         ],
-        "x-required-scope": "ftp:write",
+        "x-required-scope": "webdav:write,ftp:write,smb:write",
         "x-token-allowed": true
       }
     },
@@ -16256,7 +16256,7 @@
     },
     "/api/smb/shared-users": {
       "get": {
-        "description": "Returns the file service shared users used by WebDAV, FTP and SMB, with passwords masked. `issues` lists shared users that cannot be used for SMB and why: `name` (the user name has characters SMB does not allow), `bcrypt` (the password is a bcrypt hash), `share` (a directory name cannot be a share name or is duplicated).\n\nRequired permission: `smb:read`.",
+        "description": "Returns the file service shared users used by WebDAV, FTP and SMB, with passwords masked. If fileusers.json fails validation, `error` is returned and no shared user can sign in until a valid list is saved. `issues` lists shared users that cannot be used for SMB and why: `name` (the user name has characters SMB does not allow), `bcrypt` (the password is a bcrypt hash), `share` (a directory name cannot be a share name or is duplicated).\n\nRequired permission: `smb:read`.",
         "responses": {
           "200": {
             "description": "Success"
@@ -16305,7 +16305,7 @@
         "x-token-allowed": true
       },
       "put": {
-        "description": "保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不Update 。\n\nRequired permission: `smb:write`.",
+        "description": "保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不Update 。API token需要同时具备 `webdav:write`、`ftp:write`、`smb:write`。只靠共享用户启用的服务在Update 后必须仍有可登录的共享用户，否则拒绝保存。\n\nRequired permission: `webdav:write,ftp:write,smb:write`.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -16359,7 +16359,7 @@
         "tags": [
           "SMB Service"
         ],
-        "x-required-scope": "smb:write",
+        "x-required-scope": "webdav:write,ftp:write,smb:write",
         "x-token-allowed": true
       }
     },
@@ -21633,7 +21633,7 @@
     },
     "/api/webdav/shared-users": {
       "get": {
-        "description": "Returns the file service shared users used by WebDAV, FTP and SMB, with passwords masked.\n\nRequired permission: `webdav:read`.",
+        "description": "Returns the file service shared users used by WebDAV, FTP and SMB, with passwords masked. If fileusers.json fails validation, `error` is returned and no shared user can sign in until a valid list is saved.\n\nRequired permission: `webdav:read`.",
         "responses": {
           "200": {
             "description": "Success"
@@ -21682,7 +21682,7 @@
         "x-token-allowed": true
       },
       "put": {
-        "description": "保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不Update 。\n\nRequired permission: `webdav:write`.",
+        "description": "保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不Update 。API token需要同时具备 `webdav:write`、`ftp:write`、`smb:write`。只靠共享用户启用的服务在Update 后必须仍有可登录的共享用户，否则拒绝保存。\n\nRequired permission: `webdav:write,ftp:write,smb:write`.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -21736,7 +21736,7 @@
         "tags": [
           "WebDAV Service"
         ],
-        "x-required-scope": "webdav:write",
+        "x-required-scope": "webdav:write,ftp:write,smb:write",
         "x-token-allowed": true
       }
     },

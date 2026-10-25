@@ -7,6 +7,10 @@ description: Gately 各版本的發布公告與更新說明。
 
 重要版本的發布公告如下，每個版本的完整變更與下載檔案見 [GitHub Releases](https://github.com/wangwanjie/gately/releases)。
 
+## [v0.5.8.1](/zh-TW/news/v0.5.8.1)
+
+2026 年 10 月 26 日 · WebDAV、FTP、SMB 共用一份共用使用者；Web 服務新增「中斷連線」站台類型，存取日誌記錄 Referer 與 User-Agent；frps 可指定監聽位址；HTTP 存取時複製按鈕可用。
+
 ## [v0.5.8](/zh-TW/news/v0.5.8)
 
 2026 年 10 月 25 日 · 內建 OIDC 身分提供者，共用使用者可登入 Gitea、Grafana 等應用程式；新增 SMB 服務；所有日誌可篩選；WAF 規則組可排序；站台請求標頭可從常用項目中選擇。

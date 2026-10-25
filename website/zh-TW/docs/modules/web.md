@@ -20,7 +20,7 @@
 | 重新導向 | 跳轉到完整 URL，狀態碼 301 / 302 / 307 / 308（預設 302），可選保留原路徑與查詢字串。URL 中可以寫 `{host}`，會替換為訪客使用的網域：`https://{host}` 加上「保留路徑」，就能把所有 HTTP 請求跳轉到同一網域的 HTTPS |
 | 靜態檔案 | 目錄需為絕對路徑；關閉「目錄列表」時，目錄請求只在存在 `index.html` 時回傳。「無副檔名網址」在檔案不存在時再嘗試 `路徑.html` 與 `路徑/index.html`（適用於 VitePress 等產生器，相當於 nginx 的 `try_files $uri $uri.html $uri/index.html`）；「404 頁面」填寫目錄內的路徑，如 `404.html`，以 404 狀態回傳 |
 | 固定文字 | 自訂內容、`Content-Type`（預設 `text/plain; charset=utf-8`）與狀態碼（100-599，預設 200） |
-| 中斷連線 | 不回傳任何內容，直接中斷連線，相當於 nginx 的 `return 444`。常用作預設站台，讓掃描未知網域的請求得不到回應；存取日誌記為 444 |
+| 中斷連線 | 不回傳任何內容，直接中斷連線，相當於 nginx 的 `return 444`。常用作預設站台，讓掃描未知網域的請求得不到回應；存取日誌記為 444；不經過認證、存取控制、WAF 與重寫，站台的其他設定都不生效 |
 
 所有類型的站台都可設定存取日誌、跨來源（CORS）、自訂請求標頭與回應標頭（每行 `Key: Value`，Value 留空表示刪除該標頭），並可引用一個 [WAF 防火牆](/zh-TW/docs/modules/waf) 實例（實例不存在或停用時放行）。請求標頭、回應標頭與 Content-Type 的編輯方式見 [請求標頭與回應標頭](#headers)。
 
@@ -366,8 +366,8 @@ nginx 設定的對應關係：
 | `location = /` 裡的 `return 302 /admin` | 改寫規則，開啟「重新導向」，pattern 為 `^/$` |
 | `try_files $uri $uri.html $uri/index.html` 與 `error_page 404` | 靜態檔案的無副檔名網址與 404 頁面 |
 | `add_header` | 回應標頭 |
+| `return 444` | 中斷連線站台 |
 
 ## 部署提示
 
-| `return 444` | 中斷連線站台 |
 Web 服務需要監聽主機的 80 / 443 等連接埠，Docker 部署建議使用 `--network host`。

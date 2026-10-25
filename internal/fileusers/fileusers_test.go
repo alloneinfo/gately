@@ -1,6 +1,7 @@
 package fileusers
 
 import (
+	"errors"
 	"testing"
 
 	"golang.org/x/crypto/bcrypt"
@@ -97,5 +98,76 @@ func TestSaveAndReload(t *testing.T) {
 	other, _ := config.Open(t.TempDir())
 	if err := r2.Init(other); err != nil || len(r2.List()) != 0 {
 		t.Fatal("换配置目录后应重新读取")
+	}
+}
+
+// TestCheckPasswordEmpty 验证保存的密码为空时任何密码（包括空密码）都不能通过。
+func TestCheckPasswordEmpty(t *testing.T) {
+	if CheckPassword("", "") || CheckPassword("", "x") {
+		t.Fatal("空密码不应通过校验")
+	}
+}
+
+// TestLoadInvalid 验证 fileusers.json 未通过校验（如被手工改成空密码）时共享用户都不能登录，
+// 但列表仍可读取用于修改，保存一份有效的列表后恢复。
+func TestLoadInvalid(t *testing.T) {
+	dir := t.TempDir()
+	st, _ := config.Open(dir)
+	if err := st.Save(ID, file{Users: []User{{Name: "alice", Password: "", Root: "/a"}, {Name: "bob", Password: "pb", Root: "/b"}}}); err != nil {
+		t.Fatal(err)
+	}
+	r := New()
+	if err := r.Init(st); err != nil {
+		t.Fatal(err)
+	}
+	if r.LoadErr() == nil || len(r.List()) != 0 {
+		t.Fatalf("无效的列表不应可用: %v %v", r.LoadErr(), r.List())
+	}
+	if _, ok := r.Lookup("bob"); ok {
+		t.Fatal("无效的列表中的用户不应能登录")
+	}
+	if len(r.Masked()) != 2 {
+		t.Fatal("无效的列表仍应可读取")
+	}
+	if err := r.Save([]User{{Name: "bob", Password: crud.SecretMask, Root: "/b"}}); err != nil {
+		t.Fatal(err)
+	}
+	if u, ok := r.Lookup("bob"); r.LoadErr() != nil || !ok || u.Password != "pb" {
+		t.Fatalf("保存有效的列表后应恢复: %v %+v", r.LoadErr(), u)
+	}
+}
+
+// TestAddCheck 验证保存前的检查可以拒绝保存，取消后不再检查；换配置目录时清空旧的检查与订阅。
+func TestAddCheck(t *testing.T) {
+	st, _ := config.Open(t.TempDir())
+	r := New()
+	if err := r.Init(st); err != nil {
+		t.Fatal(err)
+	}
+	notified := 0
+	r.Subscribe(func() { notified++ })
+	cancel := r.AddCheck(func(users []User) error {
+		if len(users) == 0 {
+			return errors.New("至少保留一个")
+		}
+		return nil
+	})
+	if err := r.Save([]User{{Name: "a", Password: "p", Root: "/a"}}); err != nil {
+		t.Fatal(err)
+	}
+	if err := r.Save(nil); err == nil || len(r.List()) != 1 || notified != 1 {
+		t.Fatalf("检查不通过时不应保存: %v %d", err, notified)
+	}
+	cancel()
+	if err := r.Save(nil); err != nil || notified != 2 {
+		t.Fatalf("取消检查后应可保存: %v", err)
+	}
+	r.AddCheck(func([]User) error { return errors.New("拒绝") })
+	other, _ := config.Open(t.TempDir())
+	if err := r.Init(other); err != nil {
+		t.Fatal(err)
+	}
+	if err := r.Save(nil); err != nil || notified != 2 {
+		t.Fatalf("换配置目录后旧的检查与订阅应清空: %v %d", err, notified)
 	}
 }

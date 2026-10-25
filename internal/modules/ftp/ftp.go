@@ -3,7 +3,6 @@ package ftp
 
 import (
 	"context"
-	"crypto/subtle"
 	"crypto/tls"
 	"errors"
 	"fmt"
@@ -16,7 +15,6 @@ import (
 
 	ftpserver "github.com/fclairamb/ftpserverlib"
 	"github.com/spf13/afero"
-	"golang.org/x/crypto/bcrypt"
 
 	"github.com/wangwanjie/gately/internal/banlist"
 	"github.com/wangwanjie/gately/internal/config"
@@ -137,19 +135,31 @@ func (s *Settings) Validate() error {
 	return nil
 }
 
-func checkPassword(stored, given string) bool {
-	if strings.HasPrefix(stored, "$2") {
-		return bcrypt.CompareHashAndPassword([]byte(stored), []byte(given)) == nil
-	}
-	return subtle.ConstantTimeCompare([]byte(stored), []byte(given)) == 1
-}
-
 // driver 实现 ftpserver.MainDriver，每次启动持有一份配置快照。
 type driver struct {
 	s     Settings
 	users map[string]User
 	certs CertSource
 	logs  *logbuf.Buffer
+
+	// clients 为已连接的客户端。ftpserverlib 的 Stop 只关闭监听，已登录的会话会继续使用旧的目录与权限，
+	// 因此停止或重启服务时由 closeClients 逐个断开
+	clientsMu sync.Mutex
+	clients   map[uint32]ftpserver.ClientContext
+}
+
+// closeClients 断开全部已连接的客户端。
+func (d *driver) closeClients() {
+	d.clientsMu.Lock()
+	list := make([]ftpserver.ClientContext, 0, len(d.clients))
+	for _, cc := range d.clients {
+		list = append(list, cc)
+	}
+	d.clients = map[uint32]ftpserver.ClientContext{}
+	d.clientsMu.Unlock()
+	for _, cc := range list {
+		_ = cc.Close()
+	}
 }
 
 func (d *driver) GetSettings() (*ftpserver.Settings, error) {
@@ -173,10 +183,20 @@ func (d *driver) ClientConnected(cc ftpserver.ClientContext) (string, error) {
 	if banlist.Default.BannedAddr(cc.RemoteAddr()) {
 		return "", errors.New("Access denied")
 	}
+	d.clientsMu.Lock()
+	if d.clients == nil {
+		d.clients = map[uint32]ftpserver.ClientContext{}
+	}
+	d.clients[cc.ID()] = cc
+	d.clientsMu.Unlock()
 	return "Gately FTP", nil
 }
 
-func (d *driver) ClientDisconnected(cc ftpserver.ClientContext) {}
+func (d *driver) ClientDisconnected(cc ftpserver.ClientContext) {
+	d.clientsMu.Lock()
+	delete(d.clients, cc.ID())
+	d.clientsMu.Unlock()
+}
 
 func (d *driver) AuthUser(cc ftpserver.ClientContext, user, pass string) (ftpserver.ClientDriver, error) {
 	u, ok := d.users[user]
@@ -188,7 +208,7 @@ func (d *driver) AuthUser(cc ftpserver.ClientContext, user, pass string) (ftpser
 			u, shared = User(su), true
 		}
 	}
-	if !ok || !checkPassword(u.Password, pass) {
+	if !ok || !fileusers.CheckPassword(u.Password, pass) {
 		if shared {
 			d.logs.Add(logbuf.LevelWarn, "", fmt.Sprintf("%s 认证失败（共享用户 %q）", cc.RemoteAddr(), user))
 		} else {
@@ -228,6 +248,7 @@ type Module struct {
 	certs    CertSource
 	settings Settings
 	srv      *ftpserver.FtpServer
+	drv      *driver
 	err      string
 }
 
@@ -258,6 +279,19 @@ func (m *Module) Init(env module.Env) error {
 			m.restartLocked()
 		}
 	})
+	// 只靠共享用户启用时，不允许把共享用户删光
+	fileusers.Default.AddCheck(func(users []fileusers.User) error {
+		m.mu.Lock()
+		s := m.settings
+		m.mu.Unlock()
+		if s.Enable && len(s.Users) == 0 && s.SharedUsers && len(users) == 0 {
+			return errors.New("FTP 已启用且只使用共享用户，至少保留一个共享用户")
+		}
+		return nil
+	})
+	if err := fileusers.Default.LoadErr(); err != nil {
+		m.logs.Add(logbuf.LevelWarn, "", "共享用户配置无效，共享用户暂不能登录: "+err.Error())
+	}
 	return nil
 }
 
@@ -282,6 +316,10 @@ func (m *Module) stopLocked() {
 		_ = m.srv.Stop()
 		m.srv = nil
 	}
+	if m.drv != nil {
+		m.drv.closeClients()
+		m.drv = nil
+	}
 }
 
 func (m *Module) restartLocked() {
@@ -304,7 +342,7 @@ func (m *Module) restartLocked() {
 		m.logs.Add(logbuf.LevelError, "", "监听失败: "+err.Error())
 		return
 	}
-	m.srv = srv
+	m.srv, m.drv = srv, d
 	go func() {
 		// Serve 在 Stop 后返回，其他错误写入运行日志
 		if err := srv.Serve(); err != nil {

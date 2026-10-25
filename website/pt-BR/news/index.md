@@ -7,6 +7,10 @@ description: Anúncios e notas de cada versão do Gately.
 
 Abaixo estão os anúncios das versões principais. Veja as [GitHub Releases](https://github.com/wangwanjie/gately/releases) para as mudanças completas e os downloads de cada versão.
 
+## [v0.5.8.1](/pt-BR/news/v0.5.8.1)
+
+26 de outubro de 2026 · WebDAV, FTP e SMB compartilham uma lista de usuários compartilhados; o Serviço Web ganha o tipo de site Fechar conexão e registra Referer e User-Agent; o frps pode escutar em endereços escolhidos; os botões de copiar funcionam via HTTP.
+
 ## [v0.5.8](/pt-BR/news/v0.5.8)
 
 25 de outubro de 2026 · Provedor de identidade OIDC embutido para que usuários compartilhados entrem no Gitea, no Grafana e em outros aplicativos; novo Serviço SMB; todos os logs podem ser filtrados; os grupos de regras do WAF podem ser reordenados; os cabeçalhos dos sites podem ser escolhidos entre entradas comuns.

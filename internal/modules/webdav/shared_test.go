@@ -126,3 +126,27 @@ func TestSharedUsersEnableValidate(t *testing.T) {
 		t.Fatal("关闭共享用户且没有本地用户时应报错")
 	}
 }
+
+// TestWebDAVSharedUsersKeepOne 验证只靠共享用户启用 WebDAV 时不允许删光共享用户，有本地用户时可以。
+func TestWebDAVSharedUsersKeepOne(t *testing.T) {
+	st, _ := config.Open(t.TempDir())
+	m := New(nil)
+	if err := m.Init(module.Env{Store: st, Logs: logbuf.New(50, log.New(io.Discard, "", 0))}); err != nil {
+		t.Fatal(err)
+	}
+	if err := fileusers.Default.Save([]fileusers.User{{Name: "alice", Password: "pa", Root: t.TempDir()}}); err != nil {
+		t.Fatal(err)
+	}
+	m.mu.Lock()
+	m.settings = Settings{Enable: true, SharedUsers: true}
+	m.mu.Unlock()
+	if err := fileusers.Default.Save(nil); err == nil {
+		t.Fatal("只靠共享用户启用时不应允许删光共享用户")
+	}
+	m.mu.Lock()
+	m.settings.Users = []User{{Name: "local", Password: "lp", Root: t.TempDir()}}
+	m.mu.Unlock()
+	if err := fileusers.Default.Save(nil); err != nil {
+		t.Fatalf("有本地用户时应允许删光共享用户: %v", err)
+	}
+}

@@ -143,7 +143,8 @@ func (s *Settings) Validate() error {
 			return fmt.Errorf("用户 %s 的目录需为绝对路径", u.Name)
 		}
 	}
-	if s.Enable && len(s.Users) == 0 && (!s.SharedUsers || len(fileusers.Default.List()) == 0) {
+	// 共享用户可能因用户名、bcrypt 密码或共享名不能用于 SMB 而被跳过，按实际可用的账号计算
+	if accounts, _ := buildAccounts(*s, fileusers.Default.List()); s.Enable && len(accounts) == 0 {
 		return errors.New("启用 SMB 时至少添加一个用户")
 	}
 	return nil
@@ -184,6 +185,23 @@ func (m *Module) Init(env module.Env) error {
 	}
 	// SMB 服务只在启动时读取账号，共享用户修改后按需重启
 	fileusers.Default.Subscribe(m.reloadShared)
+	// 只靠共享用户启用时，修改后至少要有一个能用于 SMB 的共享用户
+	fileusers.Default.AddCheck(func(users []fileusers.User) error {
+		m.mu.Lock()
+		s := m.settings
+		loadErr := m.loadErr
+		m.mu.Unlock()
+		if !s.Enable || len(s.Users) > 0 || !s.SharedUsers || loadErr != nil {
+			return nil
+		}
+		if accounts, _ := buildAccounts(s, users); len(accounts) == 0 {
+			return errors.New("SMB 已启用且只使用共享用户，至少保留一个能用于 SMB 的共享用户")
+		}
+		return nil
+	})
+	if err := fileusers.Default.LoadErr(); err != nil {
+		m.logs.Add(logbuf.LevelWarn, "", "共享用户配置无效，共享用户暂不能登录: "+err.Error())
+	}
 	// 配置文件可能被手工修改或来自旧版本，按保存时同样的规则校验并规范化；
 	// 校验在副本上进行，失败时保留原配置供界面展示与修改，但不启动服务，避免监听到意外的端口或地址
 	s := m.settings
@@ -279,7 +297,12 @@ func (m *Module) Routes(r module.Router) {
 	})
 	// 文件服务共享用户：WebDAV、FTP、SMB 共用同一份列表；SMB 额外返回无法用于 SMB 的共享用户
 	fileusers.Default.Routes(r, func(out map[string]any) {
-		_, issues := buildAccounts(Settings{SharedUsers: true}, fileusers.Default.List())
+		// 按当前的本地用户计算，与本地用户同名的共享用户只按本地用户校验，不列为问题
+		m.mu.Lock()
+		s := m.settings
+		m.mu.Unlock()
+		s.SharedUsers = true
+		_, issues := buildAccounts(s, fileusers.Default.List())
 		if issues == nil {
 			issues = []Issue{}
 		}

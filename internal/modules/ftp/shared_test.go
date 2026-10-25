@@ -125,3 +125,63 @@ func TestFTPSharedUsers(t *testing.T) {
 		t.Fatalf("关闭开关后应拒绝: %d", c)
 	}
 }
+
+// TestFTPSharedUsersDisconnect 验证修改共享用户后已登录的会话被断开，不能继续使用旧的目录与权限；
+// 只靠共享用户启用时不允许删光共享用户。
+func TestFTPSharedUsersDisconnect(t *testing.T) {
+	root := t.TempDir()
+	ln, _ := net.Listen("tcp4", "127.0.0.1:0")
+	port := ln.Addr().(*net.TCPAddr).Port
+	ln.Close()
+	st, _ := config.Open(t.TempDir())
+	m := New(nil)
+	if err := m.Init(module.Env{Store: st, Logs: logbuf.New(50, log.New(io.Discard, "", 0))}); err != nil {
+		t.Fatal(err)
+	}
+	if err := fileusers.Default.Save([]fileusers.User{{Name: "alice", Password: "pa", Root: root}}); err != nil {
+		t.Fatal(err)
+	}
+	m.mu.Lock()
+	m.settings = Settings{Enable: true, ListenIP: "127.0.0.1", Port: port, SharedUsers: true}
+	if err := m.settings.Validate(); err != nil {
+		m.mu.Unlock()
+		t.Fatal(err)
+	}
+	m.restartLocked()
+	m.mu.Unlock()
+	if m.err != "" {
+		t.Fatal(m.err)
+	}
+	defer m.Stop()
+
+	conn, err := net.DialTimeout("tcp", "127.0.0.1:"+strconv.Itoa(port), 3*time.Second)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer conn.Close()
+	_ = conn.SetDeadline(time.Now().Add(5 * time.Second))
+	tp := textproto.NewConn(conn)
+	if _, _, err := tp.ReadResponse(220); err != nil {
+		t.Fatal(err)
+	}
+	_ = tp.PrintfLine("USER alice")
+	if _, _, err := tp.ReadResponse(331); err != nil {
+		t.Fatal(err)
+	}
+	_ = tp.PrintfLine("PASS pa")
+	if _, _, err := tp.ReadResponse(230); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := fileusers.Default.Save(nil); err == nil {
+		t.Fatal("只靠共享用户启用 FTP 时不应允许删光共享用户")
+	}
+	// 改为只读后，已登录的会话应被断开，需要重新登录才按新设置访问
+	if err := fileusers.Default.Save([]fileusers.User{{Name: "alice", Password: "pa", Root: root, ReadOnly: true}}); err != nil {
+		t.Fatal(err)
+	}
+	_ = tp.PrintfLine("NOOP")
+	if code, msg, err := tp.ReadResponse(200); err == nil {
+		t.Fatalf("修改共享用户后旧会话应被断开，仍收到 %d %s", code, msg)
+	}
+}

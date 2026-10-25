@@ -617,6 +617,19 @@ func (c *nginxConverter) convert(srv *ngDirective) {
 		}
 		others = append(others, d)
 	}
+	// server 级的 return 444 先于 location 生效，整个站点直接断开连接
+	if hasReturn444(srv.Block) {
+		c.site.Type = TypeClose
+		c.collectCommon(srv.Block)
+		if rootLoc != nil {
+			others = append([]*ngDirective{rootLoc}, others...)
+		}
+		for _, o := range others {
+			_, p := locationMatch(o)
+			c.warn("站点直接断开连接，location %s 未导入", p)
+		}
+		return
+	}
 	// server 级的 return / rewrite 跳转先于 location 生效
 	if c.applyRedirect(srv.Block) {
 		c.collectCommon(srv.Block)
@@ -649,6 +662,12 @@ func (c *nginxConverter) convert(srv *ngDirective) {
 	}
 	for _, o := range others {
 		if isInternalLocation(o) {
+			continue
+		}
+		// 断开连接的站点不经过任何路径规则，其他 location 不导入
+		if c.site.Type == TypeClose {
+			_, p := locationMatch(o)
+			c.warn("站点直接断开连接，location %s 未导入", p)
 			continue
 		}
 		if _, p := locationMatch(o); c.authRequest != "" && p == c.authRequest {
@@ -925,6 +944,16 @@ func (c *nginxConverter) redirectTarget(to string) (string, bool, bool) {
 		return "", false, false
 	}
 	return to, keep, true
+}
+
+// hasReturn444 判断指令列表中是否有 return 444。
+func hasReturn444(list []*ngDirective) bool {
+	for _, d := range list {
+		if d.Name == "return" && d.arg(0) == "444" {
+			return true
+		}
+	}
+	return false
 }
 
 // applyText 识别 return 200 "内容" 这类固定内容、return 403/404 拒绝访问，以及 return 444 直接断开连接。

@@ -7,6 +7,10 @@ description: Gately 각 버전의 릴리스 공지와 변경 사항입니다.
 
 주요 버전의 릴리스 공지는 아래와 같습니다. 모든 버전의 전체 변경 사항과 다운로드 파일은 [GitHub Releases](https://github.com/wangwanjie/gately/releases)에서 확인하세요.
 
+## [v0.5.8.1](/ko/news/v0.5.8.1)
+
+2026년 10월 26일 · WebDAV, FTP, SMB가 공유 사용자 목록을 함께 씁니다. 웹 서비스에 연결 끊기 사이트 유형이 추가되고 접근 로그에 Referer와 User-Agent가 기록되며, frps 수신 대기 주소를 지정할 수 있고, HTTP에서도 복사 버튼이 동작합니다.
+
 ## [v0.5.8](/ko/news/v0.5.8)
 
 2026년 10월 25일 · OIDC ID 공급자를 내장해 공유 사용자로 Gitea, Grafana 등의 앱에 로그인할 수 있습니다. SMB 서비스가 추가되었고, 모든 로그를 필터링할 수 있으며, WAF 규칙 그룹의 순서를 바꿀 수 있고, 사이트 요청 헤더를 자주 쓰는 항목에서 고를 수 있습니다.
