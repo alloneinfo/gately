@@ -27,6 +27,7 @@ Docker 部署时把二进制放进挂载的配置目录即可，例如 `./gately
 
 - **frpc 客户端**：tcp / udp / http / https / stcp / xtcp 代理，增删即生效；
 - **frps 服务端**：端口白名单、子域名、控制台；
+- **frps 监听地址**：「监听地址」决定 frpc 连接端口监听在哪，「代理监听地址」决定 HTTP / HTTPS 端口和 tcp / udp 代理的远程端口监听在哪，留空都监听所有地址。frps 放在 Gately 等反向代理之后时，把监听地址填 `127.0.0.1`，在 Web 服务中把一个站点反代到 `127.0.0.1:<绑定端口>`，frpc 的传输协议选 websocket 或 wss 并连接该站点；代理监听地址保持留空，tcp 代理的远程端口照常对外开放。导入 frps 配置时，原配置未写 `proxyBindAddr` 会沿用 `bindAddr`，与 frps 的行为一致；
 - **导入已有配置**：页头的「导入配置」支持旧版 `frpc.ini` / `frps.ini`（含 `[common]` 段）和 frp 0.52+ 的 `toml`，可选择文件或粘贴内容。先预览解析结果与被忽略的字段，再确认导入；客户端可选择追加（同名代理保持不变）或替换全部代理。导入不会改变启用状态，也可通过接口 `POST /api/frp/import` 调用。
 
 ## Cloudflare 隧道

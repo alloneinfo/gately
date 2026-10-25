@@ -499,6 +499,7 @@
   "代理拒绝连接（错误码 %d）": "El proxy rechazó la conexión (código de error %d)",
   "代理用户名或密码过长": "El usuario o la contraseña del proxy son demasiado largos",
   "代理用户名或密码错误": "Usuario o contraseña del proxy incorrectos",
+  "代理监听地址无效": "Dirección de escucha de proxies no válida",
   "代理端口无效": "Puerto de proxy no válido",
   "代理要求不支持的认证方式": "El proxy exige un método de autenticación no compatible",
   "代理返回了未知的地址类型": "El proxy devolvió un tipo de dirección desconocido",

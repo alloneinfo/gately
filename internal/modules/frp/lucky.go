@@ -323,8 +323,9 @@ func importLuckyServer(cfg *fileConfig, li *luckyInstance, opts luckyimport.Opti
 		rep.Warnings = append(rep.Warnings, fmt.Sprintf("%s: %v，已改为不限制", name, err))
 		s.AllowPorts = ""
 	}
-	if p.BindAddr != "" && p.BindAddr != "0.0.0.0" && p.BindAddr != "::" {
-		rep.Warnings = append(rep.Warnings, fmt.Sprintf("%s: 监听地址 %s 暂不支持，frps 将监听所有地址", name, p.BindAddr))
+	if addr := strings.TrimSpace(p.BindAddr); addr != "" && addr != "0.0.0.0" {
+		// Lucky 的 frps 代理端口与连接端口监听同一地址
+		s.BindAddr, s.ProxyBindAddr = addr, addr
 	}
 	if p.KCPBindPort != 0 || p.QUICBindPort != 0 {
 		rep.Warnings = append(rep.Warnings, name+": KCP / QUIC 监听端口暂不支持，已忽略")

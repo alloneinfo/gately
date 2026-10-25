@@ -472,6 +472,9 @@
           "binPath": {
             "type": "string"
           },
+          "bindAddr": {
+            "type": "string"
+          },
           "bindPort": {
             "type": "integer"
           },
@@ -489,6 +492,9 @@
           },
           "enable": {
             "type": "boolean"
+          },
+          "proxyBindAddr": {
+            "type": "string"
           },
           "subdomainHost": {
             "type": "string"

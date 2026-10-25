@@ -499,6 +499,7 @@
   "代理拒绝连接（错误码 %d）": "Proxy refused the connection (error code %d)",
   "代理用户名或密码过长": "Proxy username or password too long",
   "代理用户名或密码错误": "Incorrect proxy username or password",
+  "代理监听地址无效": "Invalid proxy listen address",
   "代理端口无效": "Invalid proxy port",
   "代理要求不支持的认证方式": "The proxy requires an unsupported authentication method",
   "代理返回了未知的地址类型": "The proxy returned an unknown address type",

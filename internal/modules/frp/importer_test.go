@@ -182,6 +182,45 @@ func TestImportRoundTrip(t *testing.T) {
 	}
 }
 
+func TestImportServerBindAddr(t *testing.T) {
+	for _, c := range []struct{ src, bind, proxy string }{
+		// 未写 proxyBindAddr 时沿用 bindAddr
+		{"bindAddr = \"127.0.0.1\"\n", "127.0.0.1", "127.0.0.1"},
+		{"bind_addr = 10.0.0.1\nproxy_bind_addr = 0.0.0.0\n", "10.0.0.1", ""},
+		{"bindAddr = \"0.0.0.0\"\nproxyBindAddr = \"192.168.1.2\"\n", "", "192.168.1.2"},
+		{"bindPort = 7000\n", "", ""},
+	} {
+		src := c.src
+		if strings.HasPrefix(src, "bind_addr") {
+			src = "[common]\n" + src
+		}
+		res, err := ParseImport(RoleServer, src)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if res.Server.BindAddr != c.bind || res.Server.ProxyBindAddr != c.proxy {
+			t.Errorf("%q: 得到 %q / %q", c.src, res.Server.BindAddr, res.Server.ProxyBindAddr)
+		}
+		if strings.Contains(strings.Join(res.Warnings, "\n"), "bind") {
+			t.Errorf("%q: 已处理的字段不应提示 %v", c.src, res.Warnings)
+		}
+	}
+	// 生成的配置应能原样导回
+	for _, s := range []ServerSettings{
+		{BindAddr: "127.0.0.1", BindPort: 7000, DashboardAddr: "127.0.0.1"},
+		{BindAddr: "127.0.0.1", BindPort: 7000, ProxyBindAddr: "::", DashboardAddr: "127.0.0.1"},
+		{BindPort: 7000, ProxyBindAddr: "192.168.1.2", DashboardAddr: "127.0.0.1"},
+	} {
+		res, err := ParseImport(RoleServer, ServerTOML(s))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if *res.Server != s {
+			t.Errorf("回导不一致: %+v -> %+v", s, *res.Server)
+		}
+	}
+}
+
 func TestImportMultilineAndTables(t *testing.T) {
 	res, err := ParseImport(RoleServer, `bindPort = 7000 # 注释
 allowPorts = [

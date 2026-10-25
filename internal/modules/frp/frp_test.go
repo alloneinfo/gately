@@ -66,6 +66,31 @@ func TestServerTOML(t *testing.T) {
 	}
 }
 
+func TestServerTOMLBindAddr(t *testing.T) {
+	// 只限制连接端口时，代理端口仍须监听所有地址
+	got := ServerTOML(ServerSettings{BindAddr: "127.0.0.1", BindPort: 7000})
+	if !strings.Contains(got, `bindAddr = "127.0.0.1"`) || !strings.Contains(got, `proxyBindAddr = "0.0.0.0"`) {
+		t.Errorf("监听地址输出错误\n%s", got)
+	}
+	got = ServerTOML(ServerSettings{BindAddr: "127.0.0.1", BindPort: 7000, ProxyBindAddr: "192.168.1.2"})
+	if !strings.Contains(got, `proxyBindAddr = "192.168.1.2"`) {
+		t.Errorf("代理监听地址输出错误\n%s", got)
+	}
+	got = ServerTOML(ServerSettings{BindPort: 7000})
+	if strings.Contains(got, "bindAddr") || strings.Contains(got, "proxyBindAddr") {
+		t.Errorf("未设置地址时不应输出\n%s", got)
+	}
+	for _, s := range []ServerSettings{{BindAddr: "localhost"}, {ProxyBindAddr: "1.2.3"}} {
+		if err := s.Validate(); err == nil {
+			t.Errorf("无效地址应报错: %+v", s)
+		}
+	}
+	s := ServerSettings{BindAddr: " ::1 ", ProxyBindAddr: "::"}
+	if err := s.Validate(); err != nil || s.BindAddr != "::1" {
+		t.Errorf("IPv6 地址应通过: %v %+v", err, s)
+	}
+}
+
 func TestParseAllowPorts(t *testing.T) {
 	for _, bad := range []string{"abc", "0-10", "100-50", "1-70000", "6000-"} {
 		if _, err := ParseAllowPorts(bad); err == nil {

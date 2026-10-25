@@ -39,9 +39,14 @@ type ClientSettings struct {
 type ServerSettings struct {
 	Enable  bool   `json:"enable"`
 	BinPath string `json:"binPath"`
+	// BindAddr 是 frpc 连接端口的监听地址，留空监听所有地址；
+	// 填 127.0.0.1 时可放在反向代理之后，让 frpc 用 websocket / wss 连接
+	BindAddr string `json:"bindAddr"`
 	// BindPort 是 frpc 连接的端口
 	BindPort int    `json:"bindPort"`
 	Token    string `json:"token"`
+	// ProxyBindAddr 是 HTTP / HTTPS 端口与 tcp / udp 代理远程端口的监听地址，留空监听所有地址
+	ProxyBindAddr string `json:"proxyBindAddr"`
 	// VhostHTTPPort 与 VhostHTTPSPort 为 0 时不启用 http / https 代理
 	VhostHTTPPort  int `json:"vhostHttpPort"`
 	VhostHTTPSPort int `json:"vhostHttpsPort"`
@@ -105,6 +110,8 @@ func (c *ClientSettings) Validate() error {
 // Validate 校验并规范化服务端配置。
 func (s *ServerSettings) Validate() error {
 	s.BinPath = strings.TrimSpace(s.BinPath)
+	s.BindAddr = strings.TrimSpace(s.BindAddr)
+	s.ProxyBindAddr = strings.TrimSpace(s.ProxyBindAddr)
 	s.SubdomainHost = strings.TrimSpace(s.SubdomainHost)
 	s.DashboardAddr = strings.TrimSpace(s.DashboardAddr)
 	s.DashboardUser = strings.TrimSpace(s.DashboardUser)
@@ -113,6 +120,12 @@ func (s *ServerSettings) Validate() error {
 	}
 	if !validPort(s.BindPort) {
 		return errors.New("绑定端口无效")
+	}
+	if s.BindAddr != "" && net.ParseIP(s.BindAddr) == nil {
+		return errors.New("监听地址无效")
+	}
+	if s.ProxyBindAddr != "" && net.ParseIP(s.ProxyBindAddr) == nil {
+		return errors.New("代理监听地址无效")
 	}
 	for _, p := range []int{s.VhostHTTPPort, s.VhostHTTPSPort, s.DashboardPort} {
 		if p != 0 && !validPort(p) {
@@ -257,7 +270,16 @@ func ClientTOML(c ClientSettings, proxies []Proxy) string {
 // ServerTOML 生成 frps 配置文件内容。
 func ServerTOML(s ServerSettings) string {
 	var b strings.Builder
+	if s.BindAddr != "" {
+		fmt.Fprintf(&b, "bindAddr = %s\n", quote(s.BindAddr))
+	}
 	fmt.Fprintf(&b, "bindPort = %d\n", s.BindPort)
+	if s.ProxyBindAddr != "" {
+		fmt.Fprintf(&b, "proxyBindAddr = %s\n", quote(s.ProxyBindAddr))
+	} else if s.BindAddr != "" {
+		// frps 的 proxyBindAddr 默认跟随 bindAddr；这里留空表示监听所有地址，需显式写出
+		b.WriteString("proxyBindAddr = \"0.0.0.0\"\n")
+	}
 	if s.VhostHTTPPort != 0 {
 		fmt.Fprintf(&b, "vhostHTTPPort = %d\n", s.VhostHTTPPort)
 	}

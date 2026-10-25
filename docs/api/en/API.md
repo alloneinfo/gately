@@ -784,12 +784,14 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | --- | --- |
 | `allowPorts` | string |
 | `binPath` | string |
+| `bindAddr` | string |
 | `bindPort` | integer |
 | `dashboardAddr` | string |
 | `dashboardPort` | integer |
 | `dashboardPwd` | string |
 | `dashboardUser` | string |
 | `enable` | boolean |
+| `proxyBindAddr` | string |
 | `subdomainHost` | string |
 | `token` | string |
 | `vhostHttpPort` | integer |

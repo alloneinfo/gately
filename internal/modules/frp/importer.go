@@ -350,7 +350,9 @@ func importServer(top map[string]any, legacy bool, res *ImportResult) *ServerSet
 	h := handled{}
 	h.add("authentication_method", "auth.method", "tls_enable", "tls_only", "transport.tls.force")
 	s := &ServerSettings{
+		BindAddr:       pick(top, "bindAddr", "bind_addr"),
 		BindPort:       pickInt(top, "bindPort", "bind_port"),
+		ProxyBindAddr:  pick(top, "proxyBindAddr", "proxy_bind_addr"),
 		Token:          pick(top, "auth.token", "token", "privilege_token"),
 		VhostHTTPPort:  pickInt(top, "vhostHTTPPort", "vhost_http_port"),
 		VhostHTTPSPort: pickInt(top, "vhostHTTPSPort", "vhost_https_port"),
@@ -360,11 +362,22 @@ func importServer(top map[string]any, legacy bool, res *ImportResult) *ServerSet
 		DashboardUser:  pick(top, "webServer.user", "dashboard_user"),
 		DashboardPwd:   pick(top, "webServer.password", "dashboard_pwd"),
 	}
-	h.add("bindPort", "bind_port", "auth.token", "token", "privilege_token", "vhostHTTPPort", "vhost_http_port", "vhostHTTPSPort", "vhost_https_port",
+	h.add("bindAddr", "bind_addr", "proxyBindAddr", "proxy_bind_addr", "bindPort", "bind_port", "auth.token", "token", "privilege_token", "vhostHTTPPort", "vhost_http_port", "vhostHTTPSPort", "vhost_https_port",
 		"subDomainHost", "subdomain_host", "webServer.port", "dashboard_port", "webServer.addr", "dashboard_addr",
 		"webServer.user", "dashboard_user", "webServer.password", "dashboard_pwd", "allowPorts", "allow_ports")
 	if s.BindPort == 0 {
 		s.BindPort = 7000
+	}
+	if s.ProxyBindAddr == "" {
+		// 原配置未写 proxyBindAddr 时 frps 沿用 bindAddr，导入后保持相同的监听范围
+		s.ProxyBindAddr = s.BindAddr
+	}
+	// Gately 中留空即监听所有地址，0.0.0.0 统一为空，与生成的配置可互相导回
+	if s.BindAddr == "0.0.0.0" {
+		s.BindAddr = ""
+	}
+	if s.ProxyBindAddr == "0.0.0.0" {
+		s.ProxyBindAddr = ""
 	}
 	if m := pick(top, "auth.method", "authentication_method"); m != "" && m != "token" {
 		res.Warnings = append(res.Warnings, fmt.Sprintf("认证方式 %s 暂不支持，仅导入令牌", m))

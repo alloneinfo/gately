@@ -85,8 +85,16 @@
             <div class="g-card-body">
               <el-form label-width="130px" :label-position="labelPosition" class="svc-form">
                 <el-form-item :label="t('common.enable')"><el-switch v-model="server.settings.enable" /></el-form-item>
+                <el-form-item :label="t('frp.bindAddr')">
+                  <el-input v-model="server.settings.bindAddr" :placeholder="t('frp.allAddrs')" class="w-200 mono" />
+                  <span class="help">{{ t('frp.bindAddrHelp') }}</span>
+                </el-form-item>
                 <el-form-item :label="t('frp.bindPort')"><el-input-number v-model="server.settings.bindPort" :min="1" :max="65535" /></el-form-item>
                 <el-form-item :label="t('frp.token')"><el-input v-model="server.settings.token" type="password" show-password :placeholder="t('frp.tokenServerPlaceholder')" /></el-form-item>
+                <el-form-item :label="t('frp.proxyBindAddr')">
+                  <el-input v-model="server.settings.proxyBindAddr" :placeholder="t('frp.allAddrs')" class="w-200 mono" />
+                  <span class="help">{{ t('frp.proxyBindAddrHelp') }}</span>
+                </el-form-item>
                 <el-form-item :label="t('frp.httpPort')"><el-input-number v-model="server.settings.vhostHttpPort" :min="0" :max="65535" /><span class="help">{{ t('frp.httpPortHelp') }}</span></el-form-item>
                 <el-form-item :label="t('frp.httpsPort')"><el-input-number v-model="server.settings.vhostHttpsPort" :min="0" :max="65535" /><span class="help">{{ t('frp.httpsPortHelp') }}</span></el-form-item>
                 <el-form-item :label="t('frp.subdomainHost')"><el-input v-model="server.settings.subdomainHost" :placeholder="t('frp.subdomainHostPlaceholder')" /></el-form-item>
@@ -130,7 +138,8 @@
           <template v-if="importPreview.client.token"> · {{ t('frp.hasToken') }}</template>
         </div>
         <div v-if="importPreview.server" class="preview-line mono">
-          bind {{ importPreview.server.bindPort }}
+          bind {{ importPreview.server.bindAddr ? importPreview.server.bindAddr + ':' : '' }}{{ importPreview.server.bindPort }}
+          <template v-if="importPreview.server.proxyBindAddr"> · proxy {{ importPreview.server.proxyBindAddr }}</template>
           <template v-if="importPreview.server.vhostHttpPort"> · http {{ importPreview.server.vhostHttpPort }}</template>
           <template v-if="importPreview.server.vhostHttpsPort"> · https {{ importPreview.server.vhostHttpsPort }}</template>
           <template v-if="importPreview.server.subdomainHost"> · {{ importPreview.server.subdomainHost }}</template>
@@ -215,8 +224,10 @@ interface ClientSettings {
 interface ServerSettings {
   enable: boolean
   binPath: string
+  bindAddr: string
   bindPort: number
   token: string
+  proxyBindAddr: string
   vhostHttpPort: number
   vhostHttpsPort: number
   subdomainHost: string

@@ -60,7 +60,7 @@ func TestImportLuckyFRP(t *testing.T) {
 		t.Fatal("disabled 代理应保持停用")
 	}
 	s := m.cfg.Server
-	if s.Enable || s.BindPort != 7100 || s.Token != "st" || s.VhostHTTPPort != 8080 || s.SubdomainHost != "example.com" || s.AllowPorts != "6000-6100,7000" || s.DashboardPort != 0 {
+	if s.Enable || s.BindPort != 7100 || s.Token != "st" || s.VhostHTTPPort != 8080 || s.SubdomainHost != "example.com" || s.AllowPorts != "6000-6100,7000" || s.DashboardPort != 0 || s.BindAddr != "" || s.ProxyBindAddr != "" {
 		t.Fatalf("服务端映射错误: %+v", s)
 	}
 	joined := strings.Join(rep.Warnings, "\n")
