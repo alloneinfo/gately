@@ -79,7 +79,6 @@
   "stepSwitchDesc": "Módulo a módulo, desactívalo en Lucky y actívalo en Gately. Detén Lucky cuando todo funcione correctamente.",
   "migrationGuide": "Guía completa de migración",
   "footerNote": "Publicado bajo {license}",
-  "copyFailed": "Error al copiar, selecciona el texto manualmente",
   "stackEmbed": "binario único con go:embed",
   "promises": {
     "openSource": {

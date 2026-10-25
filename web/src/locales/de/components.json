@@ -1,6 +1,7 @@
 {
   "clipboard": {
-    "copyFailed": "Automatisches Kopieren nicht möglich. Der Text ist markiert; drücken Sie zum Kopieren Strg/Cmd+C."
+    "copyFailed": "Automatisches Kopieren nicht möglich. Der Text ist markiert; drücken Sie zum Kopieren Strg/Cmd+C.",
+    "copyUnavailable": "Automatisches Kopieren nicht möglich. Markieren Sie den Text und kopieren Sie ihn manuell."
   },
   "themePicker": {
     "switchTheme": "Design wechseln",

@@ -85,8 +85,8 @@
         <h2><Rocket :size="18" />{{ t('about.quickStart') }}</h2>
         <p class="muted small">{{ t('about.dockerNote') }}</p>
         <div class="code">
-          <button class="code-copy" :title="t('common.copy')" @click="copy(DOCKER_CMD)"><Copy :size="14" /></button>
-          <pre class="mono">{{ DOCKER_CMD }}</pre>
+          <button class="code-copy" :title="t('common.copy')" @click="copyText(DOCKER_CMD, { el: dockerCmdEl })"><Copy :size="14" /></button>
+          <pre ref="dockerCmdEl" class="mono">{{ DOCKER_CMD }}</pre>
         </div>
         <p class="muted small">
           <i18n-t keypath="about.binaryNote" tag="span">
@@ -177,6 +177,7 @@ import {
 import { api, type SystemSettings, type SystemInfo, type UpdateInfo, type UpgradeStatus } from '../api'
 import AppLogo from '../components/AppLogo.vue'
 import UpdateDialog from '../components/UpdateDialog.vue'
+import { copyText } from '../composables/useClipboard'
 
 const { t, locale } = useI18n()
 
@@ -312,14 +313,8 @@ async function upgradeUpload(ev: Event) {
   dialog.value?.upload(file)
 }
 
-async function copy(text: string) {
-  try {
-    await navigator.clipboard.writeText(text)
-    ElMessage.success(t('common.copied'))
-  } catch {
-    ElMessage.warning(t('about.copyFailed'))
-  }
-}
+// 安装命令所在的 pre，自动复制失败时选中它供手动复制
+const dockerCmdEl = ref<HTMLElement>()
 
 onMounted(async () => {
   loadProxy()

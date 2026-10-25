@@ -1,6 +1,7 @@
 {
   "clipboard": {
-    "copyFailed": "자동으로 복사할 수 없어 텍스트를 선택해 두었습니다. Ctrl/Cmd+C를 눌러 복사하세요"
+    "copyFailed": "자동으로 복사할 수 없어 텍스트를 선택해 두었습니다. Ctrl/Cmd+C를 눌러 복사하세요",
+    "copyUnavailable": "자동으로 복사할 수 없습니다. 텍스트를 선택해 직접 복사하세요."
   },
   "themePicker": {
     "switchTheme": "테마 전환",

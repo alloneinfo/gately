@@ -1,6 +1,7 @@
 {
   "clipboard": {
-    "copyFailed": "無法自動複製，已選取文字，請按 Ctrl/Cmd+C 複製"
+    "copyFailed": "無法自動複製，已選取文字，請按 Ctrl/Cmd+C 複製",
+    "copyUnavailable": "無法自動複製，請手動選取文字後複製"
   },
   "themePicker": {
     "switchTheme": "切換主題",

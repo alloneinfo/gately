@@ -32,7 +32,6 @@
   "abnormal": "{count} 件の異常",
   "attention": "{count} 件の要確認",
   "allOk": "すべて正常",
-  "copyFailed": "コピーに失敗しました。手動で選択してください",
   "proc": {
     "version": "バージョン",
     "commit": "コミット",

@@ -125,7 +125,7 @@
         <div v-if="publicIPs.length" class="public-ips">
           <div v-for="p in publicIPs" :key="p.label" class="public-ip">
             <span class="pip-label"><Globe :size="13" />{{ t('overview.publicIp', { label: p.label }) }}</span>
-            <span class="mono copyable" :title="t('overview.clickToCopy')" @click="copy(p.value)">{{ p.value }}</span>
+            <span class="mono copyable" :title="t('overview.clickToCopy')" @click="copy(p.value, $event)">{{ p.value }}</span>
           </div>
         </div>
         <div class="ifaces">
@@ -139,8 +139,8 @@
               </span>
             </div>
             <div class="iface-addrs">
-              <span v-for="a in i.ipv4" :key="a" class="addr v4 mono copyable" :title="t('overview.clickToCopy')" @click="copy(a.split('/')[0])">{{ a }}</span>
-              <span v-for="a in visibleV6(i.ipv6)" :key="a" class="addr v6 mono copyable" :title="t('overview.clickToCopy')" @click="copy(a.split('/')[0])">{{ a }}</span>
+              <span v-for="a in i.ipv4" :key="a" class="addr v4 mono copyable" :title="t('overview.clickToCopy')" @click="copy(a.split('/')[0], $event)">{{ a }}</span>
+              <span v-for="a in visibleV6(i.ipv6)" :key="a" class="addr v6 mono copyable" :title="t('overview.clickToCopy')" @click="copy(a.split('/')[0], $event)">{{ a }}</span>
               <el-tooltip v-if="i.ipv6.length > visibleV6(i.ipv6).length" placement="top" :show-after="200">
                 <template #content>
                   <div v-for="a in i.ipv6" :key="a" class="mono">{{ a }}</div>
@@ -199,8 +199,8 @@
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
-import { ElMessage } from 'element-plus'
 import { useI18n } from 'vue-i18n'
+import { copyText } from '../composables/useClipboard'
 import {
   Activity,
   ArrowDown,
@@ -381,13 +381,9 @@ function push(arr: number[], v: number | undefined) {
   }
 }
 
-async function copy(text: string) {
-  try {
-    await navigator.clipboard.writeText(text)
-    ElMessage.success(t('common.copied'))
-  } catch {
-    ElMessage.warning(t('overview.copyFailed'))
-  }
+// 点击地址复制；自动复制失败时选中被点击的地址供手动复制
+function copy(text: string, e: MouseEvent) {
+  copyText(text, { el: e.currentTarget as HTMLElement })
 }
 
 async function load() {

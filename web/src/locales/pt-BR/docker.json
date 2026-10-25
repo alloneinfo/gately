@@ -191,8 +191,7 @@
       "timestamps": "Carimbos de data/hora",
       "autoRefresh": "Atualização automática",
       "toBottom": "Rolar até o fim",
-      "noLogs": "(Sem logs)",
-      "copyFailed": "Falha ao copiar, selecione o texto manualmente"
+      "noLogs": "(Sem logs)"
     },
     "overview": {
       "basicInfo": "Informações básicas",

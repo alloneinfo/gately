@@ -191,8 +191,7 @@
       "timestamps": "タイムスタンプ",
       "autoRefresh": "自動更新",
       "toBottom": "最下部へ",
-      "noLogs": "(ログなし)",
-      "copyFailed": "コピーに失敗しました。テキストを手動で選択してください"
+      "noLogs": "(ログなし)"
     },
     "overview": {
       "basicInfo": "基本情報",

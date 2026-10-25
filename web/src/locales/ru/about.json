@@ -79,7 +79,6 @@
   "stepSwitchDesc": "Модуль за модулем: отключайте в Lucky и включайте в Gately. Когда всё проверено, остановите Lucky.",
   "migrationGuide": "Полное руководство по миграции",
   "footerNote": "Выпущено под лицензией {license}",
-  "copyFailed": "Не удалось скопировать, выделите текст вручную",
   "stackEmbed": "один бинарный файл на go:embed",
   "promises": {
     "openSource": {

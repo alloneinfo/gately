@@ -76,8 +76,8 @@
                 <img v-if="totp.qr" :src="totp.qr" class="qr" :alt="t('settings.totp.qrAlt')" />
                 <div class="secret-box">
                   <div class="meta">{{ t('settings.totp.manualHint') }}</div>
-                  <div class="mono secret">{{ totp.secret }}</div>
-                  <el-button size="small" text :icon="Copy" @click="copy(totp.secret)">{{ t('settings.totp.copySecret') }}</el-button>
+                  <div ref="totpSecretEl" class="mono secret">{{ totp.secret }}</div>
+                  <el-button size="small" text :icon="Copy" @click="copyText(totp.secret, { el: totpSecretEl })">{{ t('settings.totp.copySecret') }}</el-button>
                 </div>
               </div>
             </template>
@@ -508,6 +508,7 @@ import {
 import { api, type ImportFileResult, type SystemInfo, type SystemSettings } from '../api'
 import PageHeader from '../components/PageHeader.vue'
 import { useListText, splitLines } from '../composables/useListText'
+import { copyText } from '../composables/useClipboard'
 import OtpInput from '../components/OtpInput.vue'
 import PasskeyManager from '../components/PasskeyManager.vue'
 import ReadonlyUsers from '../components/ReadonlyUsers.vue'
@@ -663,21 +664,8 @@ function randomEntry() {
   }
 }
 
-async function copy(text: string) {
-  try {
-    await navigator.clipboard.writeText(text)
-    ElMessage.success(t('common.copied'))
-  } catch {
-    // 非 HTTPS 环境下剪贴板 API 不可用，退回到选择复制
-    const ta = document.createElement('textarea')
-    ta.value = text
-    document.body.appendChild(ta)
-    ta.select()
-    document.execCommand('copy')
-    ta.remove()
-    ElMessage.success(t('common.copied'))
-  }
-}
+// TOTP 密钥所在节点，自动复制失败时选中它供手动复制
+const totpSecretEl = ref<HTMLElement>()
 
 // 预设项的显示名依赖当前语言，用 computed 保证切换语言后刷新
 const dnsPresets = computed(() => [

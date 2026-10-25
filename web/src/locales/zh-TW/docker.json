@@ -191,8 +191,7 @@
       "timestamps": "時間戳記",
       "autoRefresh": "自動重新整理",
       "toBottom": "到底部",
-      "noLogs": "(無日誌)",
-      "copyFailed": "複製失敗，請手動選取文字"
+      "noLogs": "(無日誌)"
     },
     "overview": {
       "basicInfo": "基本資訊",

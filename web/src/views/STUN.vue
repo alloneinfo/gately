@@ -32,7 +32,7 @@
         </template>
         <Field :label="t('stun.publicAddr')" mono>
           <template v-if="r.enable && !moduleOff && r.state.publicAddr">
-            <span class="copyable" :title="t('stun.clickToCopy')" @click="copy(r.state.publicAddr)">{{ r.state.publicAddr }}</span>
+            <span class="copyable" :title="t('stun.clickToCopy')" @click="copy(r.state.publicAddr, $event)">{{ r.state.publicAddr }}</span>
             <div v-if="r.state.since" class="meta">{{ t('stun.since', { time: fmtTime(r.state.since) }) }}</div>
           </template>
           <span v-else class="muted">-</span>
@@ -217,6 +217,7 @@ import { useListText, splitLinesOrCommas } from '../composables/useListText'
 import WebhookEditor, { type WebhookConfig } from '../components/WebhookEditor.vue'
 import type { NetInterface } from '../components/IPSourceEditor.vue'
 import { usePolling } from '../composables/usePolling'
+import { copyText } from '../composables/useClipboard'
 
 interface Rule {
   key?: string
@@ -376,9 +377,9 @@ function fmtTime(iso: string) {
   return new Date(iso).toLocaleString()
 }
 
-async function copy(s: string) {
-  await navigator.clipboard?.writeText(s)
-  ElMessage.success(t('stun.copied', { text: s }))
+// 点击公网地址复制；自动复制失败时选中被点击的地址供手动复制
+function copy(s: string, e: MouseEvent) {
+  copyText(s, { el: e.currentTarget as HTMLElement, success: t('stun.copied', { text: s }) })
 }
 
 async function load() {

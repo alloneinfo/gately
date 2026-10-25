@@ -1,6 +1,7 @@
 {
   "clipboard": {
-    "copyFailed": "无法自动复制，已选中文本，请按 Ctrl/Cmd+C 复制"
+    "copyFailed": "无法自动复制，已选中文本，请按 Ctrl/Cmd+C 复制",
+    "copyUnavailable": "无法自动复制，请手动选择文本后复制"
   },
   "themePicker": {
     "switchTheme": "切换主题",

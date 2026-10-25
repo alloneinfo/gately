@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useData } from 'vitepress'
+import { copyText } from '../clipboard'
 
 const { theme, lang } = useData()
 const s = computed(() => theme.value.sponsor)
@@ -25,17 +26,11 @@ const cryptoFirst = computed(() => !String(lang.value).toLowerCase().startsWith(
 const copied = ref('')
 let timer: ReturnType<typeof setTimeout> | undefined
 
-async function copy(key: string, text: string) {
-  try {
-    await navigator.clipboard.writeText(text)
-  } catch {
-    // 非安全上下文或浏览器不支持剪贴板接口时，退回到选中文本复制
-    const ta = document.createElement('textarea')
-    ta.value = text
-    document.body.appendChild(ta)
-    ta.select()
-    document.execCommand('copy')
-    document.body.removeChild(ta)
+// 复制钱包地址；失败时选中按钮前面的地址文本，不显示「已复制」
+async function copy(key: string, text: string, e: MouseEvent) {
+  const addr = (e.currentTarget as HTMLElement).previousElementSibling as HTMLElement | null
+  if (!(await copyText(text, addr))) {
+    return
   }
   copied.value = key
   clearTimeout(timer)
@@ -74,7 +69,7 @@ async function copy(key: string, text: string) {
         <li v-for="w in wallets" :key="w.network">
           <span class="net">{{ w.network }}</span>
           <code class="addr">{{ w.address }}</code>
-          <button type="button" class="copy" @click="copy(w.network, w.address)">
+          <button type="button" class="copy" @click="copy(w.network, w.address, $event)">
             {{ copied === w.network ? s.copied : s.copy }}
           </button>
         </li>

@@ -191,8 +191,7 @@
       "timestamps": "타임스탬프",
       "autoRefresh": "자동 새로고침",
       "toBottom": "맨 아래로",
-      "noLogs": "(로그 없음)",
-      "copyFailed": "복사에 실패했습니다. 텍스트를 직접 선택하세요"
+      "noLogs": "(로그 없음)"
     },
     "overview": {
       "basicInfo": "기본 정보",

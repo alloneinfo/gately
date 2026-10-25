@@ -11,7 +11,7 @@
       <div class="endpoints">
         <div class="ep main">
           <code ref="discoveryEl" class="mono">{{ issuer + OIDC_DISCOVERY }}</code>
-          <el-button size="small" text :icon="Copy" :aria-label="t('oidc.copy')" @click="copyText(issuer + OIDC_DISCOVERY, discoveryEl)" />
+          <el-button size="small" text :icon="Copy" :aria-label="t('oidc.copy')" @click="copyText(issuer + OIDC_DISCOVERY, { el: discoveryEl })" />
         </div>
         <div class="form-help">{{ t('oidc.discoveryHelp') }}</div>
         <el-collapse class="more">

@@ -93,14 +93,30 @@ defineExpose({ focus, shake })
   inset: 0;
   width: 100%;
   height: 100%;
-  opacity: 0;
+  /* 保持 opacity: 1：Bitwarden 等密码管理器把 opacity 过低的输入框当作隐藏字段，不会自动填充；
+     文字、背景、光标都设为透明，视觉上仍只显示下面的格子 */
   border: 0;
   padding: 0;
   font-size: 16px; /* 避免 iOS 聚焦时自动缩放 */
   color: transparent;
+  -webkit-text-fill-color: transparent;
   background: transparent;
   caret-color: transparent;
+  outline: none;
+  forced-color-adjust: none; /* 高对比度模式下系统会强制文字颜色，透明会失效 */
   z-index: 1;
+}
+.otp-native::selection {
+  background: transparent;
+}
+/* 浏览器原生自动填充会强制加底色和文字颜色（!important 无法覆盖），
+   用超长的 transition 延迟让它们一直不生效，否则会在格子上盖出一块色块和重叠的数字。
+   :autofill 在 Chrome 110+、Safari 15+、Firefox 86+ 可用 */
+.otp-native:autofill {
+  -webkit-text-fill-color: transparent;
+  transition:
+    background-color 0s 600000s,
+    color 0s 600000s;
 }
 .cell {
   height: 56px;

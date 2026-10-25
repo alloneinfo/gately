@@ -191,8 +191,7 @@
       "timestamps": "Timestamps",
       "autoRefresh": "Auto refresh",
       "toBottom": "Scroll to bottom",
-      "noLogs": "(No logs)",
-      "copyFailed": "Copy failed, please select the text manually"
+      "noLogs": "(No logs)"
     },
     "overview": {
       "basicInfo": "Basic information",

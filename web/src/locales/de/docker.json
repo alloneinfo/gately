@@ -191,8 +191,7 @@
       "timestamps": "Zeitstempel",
       "autoRefresh": "Automatisch aktualisieren",
       "toBottom": "Nach unten scrollen",
-      "noLogs": "(Keine Protokolle)",
-      "copyFailed": "Kopieren fehlgeschlagen, bitte Text manuell markieren"
+      "noLogs": "(Keine Protokolle)"
     },
     "overview": {
       "basicInfo": "Allgemeine Informationen",

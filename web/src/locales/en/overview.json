@@ -32,7 +32,6 @@
   "abnormal": "{count} abnormal",
   "attention": "{count} need attention",
   "allOk": "All normal",
-  "copyFailed": "Copy failed, please select the text manually",
   "proc": {
     "version": "Version",
     "commit": "Commit",

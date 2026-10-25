@@ -191,8 +191,7 @@
       "timestamps": "Marcas de tiempo",
       "autoRefresh": "Actualización automática",
       "toBottom": "Ir al final",
-      "noLogs": "(Sin registros)",
-      "copyFailed": "Error al copiar, selecciona el texto manualmente"
+      "noLogs": "(Sin registros)"
     },
     "overview": {
       "basicInfo": "Información básica",

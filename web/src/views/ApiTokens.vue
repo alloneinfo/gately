@@ -527,8 +527,10 @@ function closeSecret() {
   secretName.value = ''
 }
 
-// 复制明文：selectNode 供点击文本时全选，copyText 含降级逻辑
-const copy = copyText
+// 复制明文：selectNode 供点击文本时全选，copyText 含降级逻辑，失败时选中对应节点
+function copy(text: string, el?: HTMLElement | null) {
+  copyText(text, { el })
+}
 
 onMounted(load)
 </script>

@@ -79,7 +79,6 @@
   "stepSwitchDesc": "依模組逐個在 Lucky 中停用、在 Gately 中啟用，確認無誤後再停掉 Lucky。",
   "migrationGuide": "完整遷移指南",
   "footerNote": "以 {license} 發佈",
-  "copyFailed": "複製失敗，請手動選取",
   "stackEmbed": "go:embed 單一檔案",
   "promises": {
     "openSource": {

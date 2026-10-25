@@ -79,7 +79,6 @@
   "stepSwitchDesc": "按模块逐个在 Lucky 中停用、在 Gately 中启用，确认无误后再停掉 Lucky。",
   "migrationGuide": "完整迁移指南",
   "footerNote": "以 {license} 发布",
-  "copyFailed": "复制失败，请手动选择",
   "stackEmbed": "go:embed 单文件",
   "promises": {
     "openSource": {

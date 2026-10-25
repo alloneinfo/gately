@@ -1,6 +1,7 @@
 {
   "clipboard": {
-    "copyFailed": "自動でコピーできませんでした。テキストを選択したので Ctrl/Cmd+C でコピーしてください"
+    "copyFailed": "自動でコピーできませんでした。テキストを選択したので Ctrl/Cmd+C でコピーしてください",
+    "copyUnavailable": "自動でコピーできませんでした。テキストを選択して手動でコピーしてください。"
   },
   "themePicker": {
     "switchTheme": "テーマを切り替え",

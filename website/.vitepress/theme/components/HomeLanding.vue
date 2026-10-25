@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue'
 import { useData, withBase } from 'vitepress'
 import AiNotice from './AiNotice.vue'
+import { copyText } from '../clipboard'
 import {
   Globe, RadioTower, ArrowLeftRight, ShieldCheck, Waypoints, ShieldAlert, Network, Boxes,
   Terminal, HardDrive, Clock, KeyRound, Copy, Check, Github, Lock, Eye, FileJson, Package,
@@ -46,20 +47,21 @@ const installTabs = computed(() => [
 ])
 const activeTab = ref('docker')
 const copied = ref(false)
+// 安装命令所在的 code，复制失败时选中它供手动复制
+const installCodeEl = ref<HTMLElement>()
+let copiedTimer: ReturnType<typeof setTimeout> | undefined
 
 async function copyCode() {
   const tab = installTabs.value.find((x) => x.key === activeTab.value)
   if (!tab) {
     return
   }
-  try {
-    await navigator.clipboard.writeText(tab.code)
-    copied.value = true
-    setTimeout(() => {
+  copied.value = await copyText(tab.code, installCodeEl.value)
+  clearTimeout(copiedTimer)
+  if (copied.value) {
+    copiedTimer = setTimeout(() => {
       copied.value = false
     }, 1800)
-  } catch {
-    copied.value = false
   }
 }
 
@@ -185,7 +187,7 @@ const openFaq = ref(0)
             <component :is="copied ? Check : Copy" :size="14" />{{ copied ? h.copied : h.copy }}
           </button>
         </div>
-        <pre><code>{{ installTabs.find((x) => x.key === activeTab)?.code }}</code></pre>
+        <pre><code ref="installCodeEl">{{ installTabs.find((x) => x.key === activeTab)?.code }}</code></pre>
       </div>
       <p class="more"><a :href="link('/docs/guide/install')">{{ h.fullInstall }}</a></p>
     </section>

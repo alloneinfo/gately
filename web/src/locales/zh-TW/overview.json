@@ -32,7 +32,6 @@
   "abnormal": "{count} 項異常",
   "attention": "{count} 項需關注",
   "allOk": "全部正常",
-  "copyFailed": "複製失敗，請手動選取",
   "proc": {
     "version": "版本",
     "commit": "提交",

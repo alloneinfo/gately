@@ -1,6 +1,7 @@
 {
   "clipboard": {
-    "copyFailed": "Não foi possível copiar automaticamente. O texto está selecionado; pressione Ctrl/Cmd+C para copiar."
+    "copyFailed": "Não foi possível copiar automaticamente. O texto está selecionado; pressione Ctrl/Cmd+C para copiar.",
+    "copyUnavailable": "Não foi possível copiar automaticamente. Selecione o texto e copie manualmente."
   },
   "themePicker": {
     "switchTheme": "Trocar tema",

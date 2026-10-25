@@ -79,7 +79,6 @@
   "stepSwitchDesc": "Module by module, disable it in Lucky and enable it in Gately. Stop Lucky once everything checks out.",
   "migrationGuide": "Full migration guide",
   "footerNote": "Released under {license}",
-  "copyFailed": "Copy failed, please select the text manually",
   "stackEmbed": "go:embed single binary",
   "promises": {
     "openSource": {

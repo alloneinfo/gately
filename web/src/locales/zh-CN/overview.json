@@ -32,7 +32,6 @@
   "abnormal": "{count} 项异常",
   "attention": "{count} 项需关注",
   "allOk": "全部正常",
-  "copyFailed": "复制失败，请手动选择",
   "proc": {
     "version": "版本",
     "commit": "提交",

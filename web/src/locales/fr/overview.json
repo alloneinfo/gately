@@ -32,7 +32,6 @@
   "abnormal": "{count} en anomalie",
   "attention": "{count} à vérifier",
   "allOk": "Tout est normal",
-  "copyFailed": "Échec de la copie, sélectionnez le texte manuellement",
   "proc": {
     "version": "Version",
     "commit": "Commit",

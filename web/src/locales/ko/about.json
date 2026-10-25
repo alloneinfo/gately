@@ -79,7 +79,6 @@
   "stepSwitchDesc": "모듈별로 하나씩 Lucky에서 끄고 Gately에서 켠 뒤, 문제가 없는지 확인하고 Lucky를 종료하세요.",
   "migrationGuide": "전체 마이그레이션 가이드",
   "footerNote": "{license}로 배포됨",
-  "copyFailed": "복사에 실패했습니다. 직접 선택하세요",
   "stackEmbed": "go:embed 단일 파일",
   "promises": {
     "openSource": {

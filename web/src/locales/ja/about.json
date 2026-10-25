@@ -79,7 +79,6 @@
   "stepSwitchDesc": "モジュールごとに、Lucky で無効化して Gately で有効化します。問題がないことを確認してから Lucky を停止してください。",
   "migrationGuide": "移行ガイドの全文",
   "footerNote": "{license} で公開",
-  "copyFailed": "コピーに失敗しました。手動で選択してください",
   "stackEmbed": "go:embed 単一ファイル",
   "promises": {
     "openSource": {

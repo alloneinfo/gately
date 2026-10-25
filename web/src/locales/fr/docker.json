@@ -191,8 +191,7 @@
       "timestamps": "Horodatages",
       "autoRefresh": "Actualisation automatique",
       "toBottom": "Aller en bas",
-      "noLogs": "(Aucun journal)",
-      "copyFailed": "Échec de la copie, sélectionnez le texte manuellement"
+      "noLogs": "(Aucun journal)"
     },
     "overview": {
       "basicInfo": "Informations générales",
