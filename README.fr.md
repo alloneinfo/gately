@@ -8,17 +8,23 @@ Boîte à outils de passerelle réseau open source et auditable, pour les résea
 
 ![Aperçu de Gately](docs/images/overview.webp)
 
-![DNS dynamique](docs/images/ddns.webp)
+![Services web : proxy inverse, fichiers statiques et redirections par domaine, avec WAF, règles IP et authentification par site](docs/images/web.webp)
 
-![Docker](docs/images/docker.webp)
+![Statistiques par site : requêtes, erreurs, état des backends, principales IP et pays d'origine](docs/images/site-stats.webp)
 
 ![Redirection de ports avec routage SNI : un seul port 443 partagé par plusieurs services](docs/images/portforward-sni.webp)
 
+![DNS dynamique](docs/images/ddns.webp)
+
 ![Protection contre les intrusions : bannissements façon fail2ban synchronisés avec nftables](docs/images/guard.webp)
 
-![Historique de configuration avec diff et restauration en un clic](docs/images/config-history.webp)
+![Docker](docs/images/docker.webp)
 
-![Journal d'audit](docs/images/audit-log.webp)
+![frp : plusieurs instances frpc et frps, proxys regroupés par client](docs/images/frp.webp)
+
+![Terminal web : SSH, Telnet et shell local dans le navigateur](docs/images/terminal.webp)
+
+![Historique de configuration avec diff et restauration en un clic](docs/images/config-history.webp)
 
 ![Documentation d'API intégrée](docs/images/api-docs.webp)
 

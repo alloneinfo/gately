@@ -8,17 +8,23 @@ An open-source, auditable network gateway toolkit for home networks, NAS boxes, 
 
 ![Gately overview](docs/images/overview.webp)
 
-![Dynamic DNS](docs/images/ddns.webp)
+![Web services: reverse proxy, static files and redirects by domain, with WAF, IP rules and sign-in per site](docs/images/web.webp)
 
-![Docker](docs/images/docker.webp)
+![Per-site traffic stats: requests, errors, backend health, top client IPs and countries](docs/images/site-stats.webp)
 
 ![Port forwarding with SNI routing: one port 443 shared by several services](docs/images/portforward-sni.webp)
 
+![Dynamic DNS](docs/images/ddns.webp)
+
 ![Intrusion protection: fail2ban-style bans synced to nftables](docs/images/guard.webp)
 
-![Configuration history with diff and one-click rollback](docs/images/config-history.webp)
+![Docker](docs/images/docker.webp)
 
-![Audit log](docs/images/audit-log.webp)
+![frp: several frpc and frps instances, with proxies grouped by client](docs/images/frp.webp)
+
+![Web terminal: SSH, Telnet and the local shell in the browser](docs/images/terminal.webp)
+
+![Configuration history with diff and one-click rollback](docs/images/config-history.webp)
 
 ![Built-in API docs](docs/images/api-docs.webp)
 

@@ -8,17 +8,23 @@
 
 ![Gately 概覽](docs/images/overview.webp)
 
-![動態網域](docs/images/ddns.webp)
+![Web 服務：依網域反向代理、靜態檔案與重新導向，每個站點可單獨啟用 WAF、IP 規則與登入驗證](docs/images/web.webp)
 
-![Docker](docs/images/docker.webp)
+![站點統計：請求數、錯誤、後端健康狀態、來源 IP 與國家排行](docs/images/site-stats.webp)
 
 ![連接埠轉發的 SNI 分流：多個服務共用 443 連接埠](docs/images/portforward-sni.webp)
 
+![動態網域](docs/images/ddns.webp)
+
 ![入侵防護：類 fail2ban 的自動封鎖，同步到 nftables 防火牆](docs/images/guard.webp)
 
-![設定歷史：差異比對與一鍵回滾](docs/images/config-history.webp)
+![Docker](docs/images/docker.webp)
 
-![操作稽核](docs/images/audit-log.webp)
+![frp：多個 frpc 與 frps 實例，代理依客戶端歸屬](docs/images/frp.webp)
+
+![Web 終端：在瀏覽器中使用 SSH、Telnet 與本機 Shell](docs/images/terminal.webp)
+
+![設定歷史：差異比對與一鍵回滾](docs/images/config-history.webp)
 
 ![內建 API 文件](docs/images/api-docs.webp)
 

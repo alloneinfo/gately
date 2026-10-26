@@ -8,17 +8,23 @@ Ein quelloffenes, prüfbares Toolkit für Netzwerk-Gateways – für Heimnetz, N
 
 ![Gately-Übersicht](docs/images/overview.webp)
 
-![Dynamisches DNS](docs/images/ddns.webp)
+![Webdienste: Reverse Proxy, statische Dateien und Weiterleitungen pro Domain, mit WAF, IP-Regeln und Anmeldung pro Site](docs/images/web.webp)
 
-![Docker](docs/images/docker.webp)
+![Statistik pro Site: Anfragen, Fehler, Backend-Status, häufigste Client-IPs und Länder](docs/images/site-stats.webp)
 
 ![Portweiterleitung mit SNI-Routing: ein Port 443, geteilt von mehreren Diensten](docs/images/portforward-sni.webp)
 
+![Dynamisches DNS](docs/images/ddns.webp)
+
 ![Einbruchschutz: Sperren im Stil von fail2ban, synchronisiert mit nftables](docs/images/guard.webp)
 
-![Konfigurationsverlauf mit Diff und Rollback per Klick](docs/images/config-history.webp)
+![Docker](docs/images/docker.webp)
 
-![Audit-Log](docs/images/audit-log.webp)
+![frp: mehrere frpc- und frps-Instanzen, Proxys nach Client gruppiert](docs/images/frp.webp)
+
+![Web-Terminal: SSH, Telnet und lokale Shell im Browser](docs/images/terminal.webp)
+
+![Konfigurationsverlauf mit Diff und Rollback per Klick](docs/images/config-history.webp)
 
 ![Integrierte API-Dokumentation](docs/images/api-docs.webp)
 

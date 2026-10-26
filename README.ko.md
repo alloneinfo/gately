@@ -8,17 +8,23 @@
 
 ![Gately 개요](docs/images/overview.webp)
 
-![동적 DNS](docs/images/ddns.webp)
+![웹 서비스: 도메인별 리버스 프록시, 정적 파일, 리디렉션. 사이트마다 WAF, IP 규칙, 로그인 인증 설정 가능](docs/images/web.webp)
 
-![Docker](docs/images/docker.webp)
+![사이트 통계: 요청 수, 오류, 백엔드 상태, 접속 IP와 국가 순위](docs/images/site-stats.webp)
 
 ![SNI 라우팅을 적용한 포트 포워딩: 여러 서비스가 443 포트를 함께 사용](docs/images/portforward-sni.webp)
 
+![동적 DNS](docs/images/ddns.webp)
+
 ![침입 방지: fail2ban 방식의 자동 차단을 nftables 방화벽에 동기화](docs/images/guard.webp)
 
-![설정 기록: 차이 비교와 원클릭 롤백](docs/images/config-history.webp)
+![Docker](docs/images/docker.webp)
 
-![감사 로그](docs/images/audit-log.webp)
+![frp: 여러 frpc·frps 인스턴스, 프록시는 클라이언트별로 관리](docs/images/frp.webp)
+
+![웹 터미널: 브라우저에서 SSH, Telnet, 로컬 셸 사용](docs/images/terminal.webp)
+
+![설정 기록: 차이 비교와 원클릭 롤백](docs/images/config-history.webp)
 
 ![내장 API 문서](docs/images/api-docs.webp)
 

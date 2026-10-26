@@ -8,17 +8,23 @@
 
 ![Gately 概要](docs/images/overview.webp)
 
-![ダイナミック DNS](docs/images/ddns.webp)
+![Web サービス：ドメインごとのリバースプロキシ、静的ファイル、リダイレクト。サイトごとに WAF、IP ルール、ログイン認証を設定可能](docs/images/web.webp)
 
-![Docker](docs/images/docker.webp)
+![サイト統計：リクエスト数、エラー、バックエンドの稼働状態、アクセス元 IP と国のランキング](docs/images/site-stats.webp)
 
 ![SNI 振り分けによるポート転送：複数のサービスで 443 番ポートを共用](docs/images/portforward-sni.webp)
 
+![ダイナミック DNS](docs/images/ddns.webp)
+
 ![侵入防御：fail2ban 風の自動ブロックを nftables ファイアウォールに同期](docs/images/guard.webp)
 
-![設定履歴：差分表示とワンクリックロールバック](docs/images/config-history.webp)
+![Docker](docs/images/docker.webp)
 
-![監査ログ](docs/images/audit-log.webp)
+![frp：複数の frpc / frps インスタンス、プロキシはクライアントごとに管理](docs/images/frp.webp)
+
+![Web ターミナル：ブラウザーで SSH、Telnet、ローカルシェルを利用](docs/images/terminal.webp)
+
+![設定履歴：差分表示とワンクリックロールバック](docs/images/config-history.webp)
 
 ![組み込みの API ドキュメント](docs/images/api-docs.webp)
 

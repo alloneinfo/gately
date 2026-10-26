@@ -8,17 +8,23 @@ Um conjunto de ferramentas de gateway de rede, de código aberto e auditável, p
 
 ![Visão geral do Gately](docs/images/overview.webp)
 
-![DNS dinâmico](docs/images/ddns.webp)
+![Serviços web: proxy reverso, arquivos estáticos e redirecionamentos por domínio, com WAF, regras de IP e login por site](docs/images/web.webp)
 
-![Docker](docs/images/docker.webp)
+![Estatísticas por site: requisições, erros, saúde dos backends e principais IPs e países de origem](docs/images/site-stats.webp)
 
 ![Redirecionamento de portas com roteamento SNI: uma única porta 443 compartilhada por vários serviços](docs/images/portforward-sni.webp)
 
+![DNS dinâmico](docs/images/ddns.webp)
+
 ![Proteção contra intrusões: bloqueios no estilo fail2ban sincronizados com o nftables](docs/images/guard.webp)
 
-![Histórico de configuração com diff e rollback em um clique](docs/images/config-history.webp)
+![Docker](docs/images/docker.webp)
 
-![Log de auditoria](docs/images/audit-log.webp)
+![frp: várias instâncias de frpc e frps, com os proxies agrupados por cliente](docs/images/frp.webp)
+
+![Terminal web: SSH, Telnet e o shell local no navegador](docs/images/terminal.webp)
+
+![Histórico de configuração com diff e rollback em um clique](docs/images/config-history.webp)
 
 ![Documentação da API integrada](docs/images/api-docs.webp)
 

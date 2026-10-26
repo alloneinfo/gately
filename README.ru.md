@@ -8,17 +8,23 @@
 
 ![Обзор Gately](docs/images/overview.webp)
 
-![Динамический DNS](docs/images/ddns.webp)
+![Веб-службы: обратный прокси, статические файлы и перенаправления по доменам, с WAF, правилами IP и входом для каждого сайта](docs/images/web.webp)
 
-![Docker](docs/images/docker.webp)
+![Статистика сайта: запросы, ошибки, состояние бэкендов, основные IP-адреса и страны клиентов](docs/images/site-stats.webp)
 
 ![Проброс портов с маршрутизацией по SNI: один порт 443 для нескольких служб](docs/images/portforward-sni.webp)
 
+![Динамический DNS](docs/images/ddns.webp)
+
 ![Защита от вторжений: блокировки в стиле fail2ban с синхронизацией в nftables](docs/images/guard.webp)
 
-![История конфигурации: сравнение различий и откат в один клик](docs/images/config-history.webp)
+![Docker](docs/images/docker.webp)
 
-![Журнал аудита](docs/images/audit-log.webp)
+![frp: несколько экземпляров frpc и frps, прокси сгруппированы по клиентам](docs/images/frp.webp)
+
+![Веб-терминал: SSH, Telnet и локальная оболочка в браузере](docs/images/terminal.webp)
+
+![История конфигурации: сравнение различий и откат в один клик](docs/images/config-history.webp)
 
 ![Встроенная документация API](docs/images/api-docs.webp)
 
