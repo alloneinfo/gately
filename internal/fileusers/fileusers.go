@@ -411,3 +411,25 @@ func clone(users []User) []User {
 	}
 	return out
 }
+
+// CountShared 返回 shared 中没有同名本地用户的个数，即服务开启共享用户后实际可以登录的共享用户数；
+// 与本地用户同名的共享用户只按本地用户校验，不重复计数。fold 为 true 时用户名不区分大小写比较（如 SMB）。
+func CountShared(local []string, shared []User, fold bool) int {
+	key := func(name string) string {
+		if fold {
+			return strings.ToLower(name)
+		}
+		return name
+	}
+	names := make(map[string]bool, len(local))
+	for _, name := range local {
+		names[key(name)] = true
+	}
+	n := 0
+	for _, u := range shared {
+		if !names[key(u.Name)] {
+			n++
+		}
+	}
+	return n
+}

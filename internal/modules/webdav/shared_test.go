@@ -150,3 +150,67 @@ func TestWebDAVSharedUsersKeepOne(t *testing.T) {
 		t.Fatalf("有本地用户时应允许删光共享用户: %v", err)
 	}
 }
+
+// TestWebDAVListenLogCountsSharedUsers 验证监听日志的用户数计入共享用户（issue #26），与本地用户同名的共享用户不重复计数；
+// 修改共享用户时服务不重启，记一条按新列表计数的日志；关闭共享用户后只计本地用户。
+func TestWebDAVListenLogCountsSharedUsers(t *testing.T) {
+	ln, _ := net.Listen("tcp4", "127.0.0.1:0")
+	port := ln.Addr().(*net.TCPAddr).Port
+	ln.Close()
+	st, _ := config.Open(t.TempDir())
+	m := New(nil)
+	logs := logbuf.New(50, log.New(io.Discard, "", 0))
+	if err := m.Init(module.Env{Store: st, Logs: logs}); err != nil {
+		t.Fatal(err)
+	}
+	root := t.TempDir()
+	if err := fileusers.Default.Save([]fileusers.User{
+		{Name: "alice", Password: "pa", Root: root},
+		{Name: "bob", Password: "pb", Root: root},
+		{Name: "dup", Password: "shared", Root: root},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	m.settings = Settings{Enable: true, ListenIP: "127.0.0.1", Port: port, SharedUsers: true,
+		Users: []User{{Name: "dup", Password: "local", Root: root}}}
+	m.mu.Lock()
+	m.restartLocked()
+	m.mu.Unlock()
+	if m.err != "" {
+		t.Fatal(m.err)
+	}
+	defer m.Stop()
+	addr := "127.0.0.1:" + strconv.Itoa(port)
+	last := func() string {
+		t.Helper()
+		all := logs.Since(0)
+		if len(all) == 0 {
+			t.Fatal("没有日志")
+		}
+		return all[len(all)-1].Message
+	}
+	if got, want := last(), "WebDAV 监听 "+addr+"（3 个用户，其中 2 个共享用户）"; got != want {
+		t.Fatalf("监听日志 %q，期望 %q", got, want)
+	}
+	if err := fileusers.Default.Save([]fileusers.User{{Name: "alice", Password: "pa", Root: root}}); err != nil {
+		t.Fatal(err)
+	}
+	if got, want := last(), "共享用户已更新（2 个用户，其中 1 个共享用户）"; got != want {
+		t.Fatalf("修改共享用户后日志 %q，期望 %q", got, want)
+	}
+	m.mu.Lock()
+	m.settings.SharedUsers = false
+	m.restartLocked()
+	m.mu.Unlock()
+	if got, want := last(), "WebDAV 监听 "+addr+"（1 个用户）"; got != want {
+		t.Fatalf("关闭共享用户后日志 %q，期望 %q", got, want)
+	}
+	// 关闭共享用户后修改共享用户不再记日志
+	n := len(logs.Since(0))
+	if err := fileusers.Default.Save([]fileusers.User{{Name: "carol", Password: "pc", Root: root}}); err != nil {
+		t.Fatal(err)
+	}
+	if len(logs.Since(0)) != n {
+		t.Fatalf("未开启共享用户时不应记日志: %q", last())
+	}
+}

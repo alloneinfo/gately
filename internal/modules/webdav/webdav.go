@@ -137,10 +137,15 @@ func (m *Module) Init(env module.Env) error {
 		return err
 	}
 	// 共享用户修改后丢弃缓存的处理器，已登录的客户端下次请求即按新的密码与目录校验
+	// 服务不重启，运行中且开启共享用户时记一条日志说明当前用户数
 	fileusers.Default.Subscribe(func() {
 		m.mu.Lock()
+		defer m.mu.Unlock()
 		m.shared = map[string]*userHandler{}
-		m.mu.Unlock()
+		if m.settings.Enable && m.settings.SharedUsers && m.srv != nil {
+			shared := m.sharedCountLocked()
+			m.logs.Add(logbuf.LevelInfo, "", fmt.Sprintf("共享用户已更新（%d 个用户，其中 %d 个共享用户）", len(m.settings.Users)+shared, shared))
+		}
 	})
 	// 共享用户页面展示本服务的启用状态、开关与本地用户
 	fileusers.Default.AddService(ID, func() fileusers.Service {
@@ -226,7 +231,30 @@ func (m *Module) restartLocked() {
 	}
 	srv := m.srv
 	go func() { _ = srv.Serve(ln) }()
-	m.logs.Add(logbuf.LevelInfo, "", fmt.Sprintf("WebDAV 监听 %s（%d 个用户）", addr, len(m.handlers)))
+	m.logListenLocked(addr)
+}
+
+// sharedCountLocked 返回开启共享用户时可以登录的共享用户数（与本地用户同名的按本地用户，用户名区分大小写），未开启时为 0。
+func (m *Module) sharedCountLocked() int {
+	if !m.settings.SharedUsers {
+		return 0
+	}
+	local := make([]string, 0, len(m.settings.Users))
+	for _, u := range m.settings.Users {
+		local = append(local, u.Name)
+	}
+	return fileusers.CountShared(local, fileusers.Default.List(), false)
+}
+
+// logListenLocked 记录监听日志，开启共享用户时用户数计入共享用户；格式串保持完整以便日志翻译按模板匹配。
+func (m *Module) logListenLocked(addr string) {
+	local := len(m.settings.Users)
+	if m.settings.SharedUsers {
+		shared := m.sharedCountLocked()
+		m.logs.Add(logbuf.LevelInfo, "", fmt.Sprintf("WebDAV 监听 %s（%d 个用户，其中 %d 个共享用户）", addr, local+shared, shared))
+		return
+	}
+	m.logs.Add(logbuf.LevelInfo, "", fmt.Sprintf("WebDAV 监听 %s（%d 个用户）", addr, local))
 }
 
 // newUserHandler 按用户的目录配置创建 WebDAV 处理器：Mounts 非空时为多目录，否则为单个目录。

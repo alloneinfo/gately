@@ -359,7 +359,30 @@ func (m *Module) restartLocked() {
 			m.logs.Add(logbuf.LevelWarn, "", "FTP 服务退出: "+err.Error())
 		}
 	}()
-	m.logs.Add(logbuf.LevelInfo, "", fmt.Sprintf("FTP 监听 %s（%d 个用户）", srv.Addr(), len(d.users)))
+	m.logListenLocked(srv.Addr())
+}
+
+// sharedCountLocked 返回开启共享用户时可以登录的共享用户数（与本地用户同名的按本地用户，用户名区分大小写），未开启时为 0。
+func (m *Module) sharedCountLocked() int {
+	if !m.settings.SharedUsers {
+		return 0
+	}
+	local := make([]string, 0, len(m.settings.Users))
+	for _, u := range m.settings.Users {
+		local = append(local, u.Name)
+	}
+	return fileusers.CountShared(local, fileusers.Default.List(), false)
+}
+
+// logListenLocked 记录监听日志，开启共享用户时用户数计入共享用户；格式串保持完整以便日志翻译按模板匹配。
+func (m *Module) logListenLocked(addr string) {
+	local := len(m.settings.Users)
+	if m.settings.SharedUsers {
+		shared := m.sharedCountLocked()
+		m.logs.Add(logbuf.LevelInfo, "", fmt.Sprintf("FTP 监听 %s（%d 个用户，其中 %d 个共享用户）", addr, local+shared, shared))
+		return
+	}
+	m.logs.Add(logbuf.LevelInfo, "", fmt.Sprintf("FTP 监听 %s（%d 个用户）", addr, local))
 }
 
 // Routes 实现 module.Module。

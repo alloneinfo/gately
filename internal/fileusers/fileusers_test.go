@@ -219,3 +219,28 @@ func TestServices(t *testing.T) {
 		t.Fatalf("换配置目录后应清空: %+v", got)
 	}
 }
+
+// TestCountShared 验证只统计没有同名本地用户的共享用户，fold 控制用户名是否区分大小写。
+func TestCountShared(t *testing.T) {
+	shared := []User{{Name: "alice"}, {Name: "Bob"}, {Name: "carol"}}
+	cases := []struct {
+		name  string
+		local []string
+		fold  bool
+		want  int
+	}{
+		{"没有本地用户", nil, false, 3},
+		{"同名共享用户不计入", []string{"alice", "dave"}, false, 2},
+		{"区分大小写时 bob 与 Bob 不同名", []string{"bob"}, false, 3},
+		{"不区分大小写时 bob 覆盖 Bob", []string{"bob"}, true, 2},
+		{"全部同名", []string{"alice", "Bob", "carol"}, false, 0},
+	}
+	for _, c := range cases {
+		if got := CountShared(c.local, shared, c.fold); got != c.want {
+			t.Errorf("%s: 得到 %d，期望 %d", c.name, got, c.want)
+		}
+	}
+	if got := CountShared([]string{"a"}, nil, false); got != 0 {
+		t.Errorf("没有共享用户时应为 0: %d", got)
+	}
+}

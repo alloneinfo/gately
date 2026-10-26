@@ -185,3 +185,64 @@ func TestFTPSharedUsersDisconnect(t *testing.T) {
 		t.Fatalf("修改共享用户后旧会话应被断开，仍收到 %d %s", code, msg)
 	}
 }
+
+// TestFTPListenLogCountsSharedUsers 验证监听日志的用户数计入共享用户（issue #26），与本地用户同名的共享用户不重复计数，
+// 修改共享用户重启后按新列表计数，关闭共享用户后只计本地用户。
+func TestFTPListenLogCountsSharedUsers(t *testing.T) {
+	ln, _ := net.Listen("tcp4", "127.0.0.1:0")
+	port := ln.Addr().(*net.TCPAddr).Port
+	ln.Close()
+	st, _ := config.Open(t.TempDir())
+	m := New(nil)
+	logs := logbuf.New(50, log.New(io.Discard, "", 0))
+	if err := m.Init(module.Env{Store: st, Logs: logs}); err != nil {
+		t.Fatal(err)
+	}
+	root := t.TempDir()
+	if err := fileusers.Default.Save([]fileusers.User{
+		{Name: "alice", Password: "pa", Root: root},
+		{Name: "bob", Password: "pb", Root: root},
+		{Name: "rw", Password: "shared", Root: root},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	m.settings = Settings{Enable: true, ListenIP: "127.0.0.1", Port: port, SharedUsers: true,
+		Users: []User{{Name: "rw", Password: "p1", Root: root}}}
+	m.mu.Lock()
+	m.restartLocked()
+	m.mu.Unlock()
+	if m.err != "" {
+		t.Fatal(m.err)
+	}
+	defer m.Stop()
+	addr := "127.0.0.1:" + strconv.Itoa(port)
+	// lastListen 返回最近一条监听日志
+	lastListen := func() string {
+		t.Helper()
+		all := logs.Since(0)
+		for i := len(all) - 1; i >= 0; i-- {
+			if strings.HasPrefix(all[i].Message, "FTP 监听") {
+				return all[i].Message
+			}
+		}
+		t.Fatal("没有监听日志")
+		return ""
+	}
+	if got, want := lastListen(), "FTP 监听 "+addr+"（3 个用户，其中 2 个共享用户）"; got != want {
+		t.Fatalf("监听日志 %q，期望 %q", got, want)
+	}
+	// 修改共享用户后服务重启，按新列表计数
+	if err := fileusers.Default.Save([]fileusers.User{{Name: "alice", Password: "pa", Root: root}}); err != nil {
+		t.Fatal(err)
+	}
+	if got, want := lastListen(), "FTP 监听 "+addr+"（2 个用户，其中 1 个共享用户）"; got != want {
+		t.Fatalf("修改共享用户后监听日志 %q，期望 %q", got, want)
+	}
+	m.mu.Lock()
+	m.settings.SharedUsers = false
+	m.restartLocked()
+	m.mu.Unlock()
+	if got, want := lastListen(), "FTP 监听 "+addr+"（1 个用户）"; got != want {
+		t.Fatalf("关闭共享用户后监听日志 %q，期望 %q", got, want)
+	}
+}
