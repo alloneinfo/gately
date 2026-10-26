@@ -249,6 +249,7 @@ func (m *Module) viewLocked(inst *Instance) InstanceView {
 	v.AdminPassword = crud.Mask(v.AdminPassword)
 	// 列表中的切片与配置共用底层数组，复制一份避免界面数据被后续修改影响
 	v.Sources = append([]Source(nil), inst.Sources...)
+	v.AccessURLs = append([]string(nil), inst.AccessURLs...)
 	if rt := m.runs[inst.Key]; rt != nil {
 		v.State = rt.sup.State()
 		v.Error = rt.err

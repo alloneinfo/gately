@@ -5,6 +5,8 @@
   "editInstance": "Edit instance",
   "empty": "No instances yet. Add one and choose the directories to share to manage files in the browser",
   "accessUrl": "Access URL",
+  "accessUrlHelp": "URLs that open File Browser in a browser, such as a domain reverse proxied by the Web service. You can add several. When empty, the URL is guessed from the listen address and port. The first URL is also used as the external URL for share links",
+  "addAccessUrl": "Add URL",
   "sources": "Shared directories",
   "readOnly": "Read-only",
   "adminUser": "Admin username",

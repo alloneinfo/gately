@@ -93,6 +93,7 @@ API는 `GET` / `PUT /api/fileusers`이며 API 토큰에는 `fileusers:read` / `f
 | `listenIp` | 비어 있음 | 수신 주소. 비우면 모든 IPv4 주소에서 수신. Web 서비스 리버스 프록시로만 접속할 때는 `127.0.0.1` |
 | `port` | 8080 | 수신 포트 |
 | `baseUrl` | `/` | 접속 경로. Web 서비스에서 경로별로 리버스 프록시할 때(예: `/files`) 같은 경로를 입력 |
+| `accessUrls` | 비어 있음 | 접속 주소. 여러 개를 지정할 수 있으며 웹 서비스로 리버스 프록시한 `https://files.example.com/` 등을 인스턴스 카드에 표시합니다. 비워 두면 수신 주소와 포트로 추측합니다. 첫 번째 주소의 스킴, 호스트, 포트는 File Browser의 `http.externalUrl`에 기록되어 공유 링크에 사용됩니다 |
 | `sources` | 없음 | 공유 디렉터리. 각 항목은 `path`(절대 경로), `name`(표시 이름, 비우면 디렉터리 이름), `readOnly`로 구성. 새 사용자는 기본적으로 모두 접근 가능 |
 | `authMethod` | `password` | 로그인 방식: `password` 비밀번호, `proxy` 리버스 프록시가 전달한 사용자 이름 헤더 신뢰, `noauth` 로그인 없음 |
 | `proxyHeader` | `Remote-User` | `proxy` 방식에서 사용자 이름을 읽는 헤더. 없는 사용자는 자동 생성 |

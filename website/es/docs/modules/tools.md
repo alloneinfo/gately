@@ -93,6 +93,7 @@ Cada instancia es un proceso de File Browser independiente:
 | `listenIp` | vacío | Dirección de escucha; vacío escucha en todas las direcciones IPv4. Usa `127.0.0.1` si solo se accede a través de un proxy inverso del Servicio web |
 | `port` | 8080 | Puerto de escucha |
 | `baseUrl` | `/` | Ruta base; si usas un proxy inverso por ruta en el Servicio web (por ejemplo `/files`), introduce la misma ruta |
+| `accessUrls` | Vacío | URL de acceso, admite varias, como `https://files.example.com/` con proxy inverso del servicio web; se muestran en la tarjeta de la instancia. Si está vacío, se deduce de la dirección y el puerto de escucha. El esquema, host y puerto de la primera URL se escriben en `http.externalUrl` de File Browser, que usan los enlaces compartidos |
 | `sources` | ninguno | Directorios compartidos, cada uno con `path` (absoluta), `name` (nombre visible, por defecto el del directorio) y `readOnly`; los usuarios nuevos acceden a todos por defecto |
 | `authMethod` | `password` | Inicio de sesión: `password` con usuario y contraseña, `proxy` confía en la cabecera de usuario del proxy inverso, `noauth` sin inicio de sesión |
 | `proxyHeader` | `Remote-User` | Cabecera con el nombre de usuario para `proxy`; los usuarios que no existen se crean automáticamente |

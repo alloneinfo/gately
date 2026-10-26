@@ -93,6 +93,7 @@ WebDAV、FTP 与 SMB 共用一份「共享用户」，字段与各服务的本�
 | `listenIp` | 空 | 监听地址，留空监听全部 IPv4 地址；只通过 Web 服务反向代理访问时可填 `127.0.0.1` |
 | `port` | 8080 | 监听端口 |
 | `baseUrl` | `/` | 访问路径，在 Web 服务中按路径反向代理（例如 `/files`）时填写相同的路径 |
+| `accessUrls` | 空 | 访问地址，可填多个，例如经 Web 服务反向代理的 `https://files.example.com/`，显示在实例卡片上；留空时按监听地址和端口推测。第一个地址的协议、主机与端口写入 File Browser 的 `http.externalUrl`，分享链接使用该地址 |
 | `sources` | 无 | 共享目录，每项包含 `path`（绝对路径）、`name`（显示名称，留空取目录名）与 `readOnly`；新用户默认可以访问全部目录 |
 | `authMethod` | `password` | 登录方式：`password` 账号密码，`proxy` 信任反向代理传入的用户名请求头，`noauth` 免登录 |
 | `proxyHeader` | `Remote-User` | `proxy` 方式读取用户名的请求头，不存在的用户自动创建 |

@@ -93,6 +93,7 @@ WebDAV、FTP 與 SMB 共用一份「共用使用者」，欄位與各服務的�
 | `listenIp` | 空 | 監聽位址，留空監聽全部 IPv4 位址；只透過 Web 服務反向代理存取時可填 `127.0.0.1` |
 | `port` | 8080 | 監聽連接埠 |
 | `baseUrl` | `/` | 存取路徑，在 Web 服務中按路徑反向代理（例如 `/files`）時填寫相同的路徑 |
+| `accessUrls` | 空 | 存取位址，可填多個，例如經 Web 服務反向代理的 `https://files.example.com/`，顯示在實例卡片上；留空時依監聽位址與連接埠推測。第一個位址的協定、主機與連接埠寫入 File Browser 的 `http.externalUrl`，分享連結使用該位址 |
 | `sources` | 無 | 共享目錄，每項包含 `path`（絕對路徑）、`name`（顯示名稱，留空取目錄名）與 `readOnly`；新使用者預設可以存取全部目錄 |
 | `authMethod` | `password` | 登入方式：`password` 帳號密碼，`proxy` 信任反向代理傳入的使用者名稱標頭，`noauth` 免登入 |
 | `proxyHeader` | `Remote-User` | `proxy` 方式讀取使用者名稱的標頭，不存在的使用者自動建立 |

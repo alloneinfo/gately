@@ -93,6 +93,7 @@ Chaque instance est un processus File Browser distinct :
 | `listenIp` | vide | Adresse d’écoute ; vide écoute sur toutes les adresses IPv4. Utilisez `127.0.0.1` si l’accès passe uniquement par un proxy inverse du Service Web |
 | `port` | 8080 | Port d’écoute |
 | `baseUrl` | `/` | Chemin de base ; en proxy inverse par chemin dans le Service Web (par exemple `/files`), saisissez le même chemin |
+| `accessUrls` | Vide | URL d’accès, plusieurs possibles, par exemple `https://files.example.com/` en proxy inverse via le service Web ; affichées sur la carte de l’instance. Si vide, l’URL est déduite de l’adresse et du port d’écoute. Le schéma, l’hôte et le port de la première URL sont écrits dans `http.externalUrl` de File Browser, utilisé par les liens de partage |
 | `sources` | aucun | Répertoires partagés, chacun avec `path` (absolu), `name` (nom affiché, par défaut celui du répertoire) et `readOnly` ; les nouveaux utilisateurs ont accès à tous par défaut |
 | `authMethod` | `password` | Connexion : `password` par mot de passe, `proxy` fait confiance à l’en-tête de nom d’utilisateur du proxy inverse, `noauth` sans connexion |
 | `proxyHeader` | `Remote-User` | En-tête portant le nom d’utilisateur pour `proxy` ; les utilisateurs absents sont créés automatiquement |

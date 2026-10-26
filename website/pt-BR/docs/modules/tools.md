@@ -93,6 +93,7 @@ Cada instância é um processo do File Browser separado:
 | `listenIp` | vazio | Endereço de escuta; vazio escuta em todos os endereços IPv4. Use `127.0.0.1` quando o acesso for apenas por um proxy reverso do Serviço Web |
 | `port` | 8080 | Porta de escuta |
 | `baseUrl` | `/` | Caminho base; ao usar proxy reverso por caminho no Serviço Web (por exemplo `/files`), informe o mesmo caminho |
+| `accessUrls` | Vazio | URLs de acesso, várias permitidas, como `https://files.example.com/` com proxy reverso pelo serviço Web; exibidas no cartão da instância. Se vazio, a URL é deduzida do endereço e da porta de escuta. O esquema, host e porta da primeira URL são gravados em `http.externalUrl` do File Browser, usado pelos links de compartilhamento |
 | `sources` | nenhum | Diretórios compartilhados, cada um com `path` (absoluto), `name` (nome exibido, por padrão o do diretório) e `readOnly`; novos usuários acessam todos por padrão |
 | `authMethod` | `password` | Login: `password` com usuário e senha, `proxy` confia no cabeçalho de usuário do proxy reverso, `noauth` sem login |
 | `proxyHeader` | `Remote-User` | Cabeçalho com o nome de usuário para `proxy`; usuários inexistentes são criados automaticamente |

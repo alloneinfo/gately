@@ -93,6 +93,7 @@ Jede Instanz ist ein eigener File-Browser-Prozess:
 | `listenIp` | leer | Lauschadresse; leer lauscht auf allen IPv4-Adressen. `127.0.0.1` eintragen, wenn der Zugriff nur über einen Reverse Proxy des Webdienstes erfolgt |
 | `port` | 8080 | Lauschport |
 | `baseUrl` | `/` | Basispfad; bei pfadbasiertem Reverse Proxy im Webdienst (z. B. `/files`) denselben Pfad eintragen |
+| `accessUrls` | Leer | Zugriffs-URLs, mehrere möglich, etwa `https://files.example.com/` per Reverse Proxy des Webdienstes; werden auf der Instanzkarte angezeigt. Ohne Eintrag wird die URL aus Listen-Adresse und Port abgeleitet. Schema, Host und Port der ersten URL werden in `http.externalUrl` von File Browser geschrieben, das Freigabelinks verwenden |
 | `sources` | keine | Freigegebene Verzeichnisse mit `path` (absolut), `name` (Anzeigename, standardmäßig der Verzeichnisname) und `readOnly`; neue Benutzer haben standardmäßig Zugriff auf alle |
 | `authMethod` | `password` | Anmeldung: `password` per Passwort, `proxy` vertraut dem Benutzernamen-Header des Reverse Proxys, `noauth` ohne Anmeldung |
 | `proxyHeader` | `Remote-User` | Header mit dem Benutzernamen für `proxy`; fehlende Benutzer werden automatisch angelegt |

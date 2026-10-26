@@ -16,7 +16,9 @@
         <template #sub>{{ authLabel(it.authMethod) }}<template v-if="it.remark"> · {{ it.remark }}</template></template>
         <template #status><StatusBadge v-bind="badge(it)" /></template>
         <Field :label="t('filebrowser.accessUrl')" mono wide>
-          <a :href="accessUrl(it)" target="_blank" rel="noopener">{{ accessUrl(it) }}</a>
+          <div class="url-list">
+            <a v-for="u in accessUrls(it)" :key="u" :href="u" target="_blank" rel="noopener">{{ u }}</a>
+          </div>
         </Field>
         <Field :label="t('filebrowser.sources')" wide>
           <span v-for="s in it.sources" :key="s.name" class="src-tag" :title="s.path">
@@ -69,6 +71,16 @@
         <el-form-item :label="t('filebrowser.baseUrl')">
           <el-input v-model="editing.baseUrl" placeholder="/" class="mono" />
           <div class="form-help">{{ t('filebrowser.baseUrlHelp') }}</div>
+        </el-form-item>
+        <el-form-item :label="t('filebrowser.accessUrl')">
+          <div class="src-list">
+            <div v-for="(_, i) in editing.accessUrls" :key="i" class="src-row">
+              <el-input v-model="editing.accessUrls[i]" :placeholder="guessUrl(editing)" class="mono src-path" />
+              <el-button text type="danger" :icon="X" @click="editing.accessUrls.splice(i, 1)" />
+            </div>
+            <el-button link type="primary" size="small" :icon="Plus" :disabled="editing.accessUrls.length >= 10" @click="editing.accessUrls.push('')">{{ t('filebrowser.addAccessUrl') }}</el-button>
+          </div>
+          <div class="form-help">{{ t('filebrowser.accessUrlHelp') }}</div>
         </el-form-item>
         <el-form-item :label="t('filebrowser.sources')">
           <div class="src-list">
@@ -167,6 +179,8 @@ interface Instance {
   disableWebDav: boolean
   locale: string
   tokenHours: number
+  // accessUrls 为用户填写的访问地址，为空时按监听地址推测
+  accessUrls: string[]
   remark: string
 }
 // InstanceView 是后端返回的实例，附带运行状态
@@ -226,6 +240,7 @@ function empty(): Instance {
     disableWebDav: false,
     locale: uiLocale(),
     tokenHours: 2,
+    accessUrls: [],
     remark: '',
   }
 }
@@ -240,8 +255,13 @@ function authLabel(m: string): string {
   return t('filebrowser.authPassword')
 }
 
-// accessUrl 拼出浏览器访问地址：监听全部地址时使用当前访问 Gately 的主机名
-function accessUrl(it: Instance): string {
+// accessUrls 返回卡片上显示的访问地址：优先使用用户填写的地址，未填写时按监听地址推测
+function accessUrls(it: Instance): string[] {
+  return it.accessUrls?.length ? it.accessUrls : [guessUrl(it)]
+}
+
+// guessUrl 拼出推测的访问地址：监听全部地址时使用当前访问 Gately 的主机名
+function guessUrl(it: Instance): string {
   let host = it.listenIp
   if (!host || host === '0.0.0.0' || host === '::') {
     host = window.location.hostname
@@ -307,13 +327,22 @@ async function onInstalled() {
   await Promise.all([loadSettings(), loadInstances()])
 }
 
-function openEditor(it?: Instance) {
-  editing.value = it ? JSON.parse(JSON.stringify(it)) : empty()
+function openEditor(it?: InstanceView) {
+  if (it) {
+    // 去掉运行状态等只读字段，后端按未知字段拒绝请求
+    const { state: _s, error: _e, ...inst } = it
+    editing.value = JSON.parse(JSON.stringify(inst))
+  } else {
+    editing.value = empty()
+  }
   if (!editing.value.sources?.length) {
     editing.value.sources = [{ path: '', name: '', readOnly: false }]
   }
   if (!editing.value.tokenHours) {
     editing.value.tokenHours = 2
+  }
+  if (!editing.value.accessUrls) {
+    editing.value.accessUrls = []
   }
   if (!editing.value.proxyHeader) {
     editing.value.proxyHeader = 'Remote-User'
@@ -326,6 +355,7 @@ async function save() {
     const { key, ...body } = editing.value
     // 忽略未填写路径的空行
     body.sources = body.sources.filter((s) => s.path.trim() !== '' || s.name.trim() !== '')
+    body.accessUrls = body.accessUrls.map((u) => u.trim()).filter((u) => u !== '')
     if (key) {
       await api.put(`/api/filebrowser/instances/${key}`, body)
     } else {
@@ -393,6 +423,15 @@ onMounted(() => {
 }
 .card-grid + .g-card {
   margin-top: 16px;
+}
+.url-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.url-list a {
+  overflow-wrap: anywhere;
 }
 .src-tag {
   display: inline-block;

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"net/url"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -30,6 +31,8 @@ const (
 	minAdminPassword = 8
 	// defaultTokenHours 是登录会话的默认有效期（小时），与上游默认值一致
 	defaultTokenHours = 2
+	// maxAccessURLs 是每个实例最多可填写的访问地址数
+	maxAccessURLs = 10
 )
 
 // locales 是 FileBrowser Quantum 支持的界面语言。
@@ -79,8 +82,12 @@ type Instance struct {
 	// Locale 是新用户的默认界面语言，留空使用上游默认（英文）
 	Locale string `json:"locale"`
 	// TokenHours 是登录会话的有效期（小时），0 表示默认 2 小时
-	TokenHours int    `json:"tokenHours"`
-	Remark     string `json:"remark"`
+	TokenHours int `json:"tokenHours"`
+	// AccessURLs 是用户填写的浏览器访问地址（例如经 Web 服务反向代理的域名），可填多个；
+	// 为空时界面按监听地址与端口推测。第一个地址的协议、主机与端口作为 File Browser 的外部地址，
+	// 用于生成分享链接
+	AccessURLs []string `json:"accessUrls"`
+	Remark     string   `json:"remark"`
 }
 
 // Validate 校验并规范化实例配置。
@@ -149,7 +156,49 @@ func (i *Instance) Validate() error {
 	if i.TokenHours < 0 || i.TokenHours > 8760 {
 		return errors.New("登录有效期应在 1-8760 小时之间")
 	}
+	return i.validateAccessURLs()
+}
+
+// validateAccessURLs 校验访问地址：去掉空行与重复项，每个地址必须是带主机名的 http(s) 地址。
+func (i *Instance) validateAccessURLs() error {
+	var out []string
+	seen := map[string]bool{}
+	for _, raw := range i.AccessURLs {
+		raw = strings.TrimSpace(raw)
+		if raw == "" {
+			continue
+		}
+		u, err := url.Parse(raw)
+		if err != nil || (u.Scheme != "http" && u.Scheme != "https") || u.Host == "" || u.Hostname() == "" {
+			return fmt.Errorf("访问地址 %q 无效，应类似 https://files.example.com/", raw)
+		}
+		if u.User != nil || u.RawQuery != "" || u.Fragment != "" {
+			return fmt.Errorf("访问地址 %q 不能包含账号、查询参数或锚点", raw)
+		}
+		if seen[strings.ToLower(raw)] {
+			continue
+		}
+		seen[strings.ToLower(raw)] = true
+		out = append(out, raw)
+	}
+	if len(out) > maxAccessURLs {
+		return fmt.Errorf("访问地址最多 %d 个", maxAccessURLs)
+	}
+	i.AccessURLs = out
 	return nil
+}
+
+// externalURL 返回第一个访问地址的协议、主机与端口，写入 File Browser 的 http.externalUrl。
+// 上游会在其后拼接 baseURL，所以这里不带路径。
+func (i *Instance) externalURL() string {
+	if len(i.AccessURLs) == 0 {
+		return ""
+	}
+	u, err := url.Parse(i.AccessURLs[0])
+	if err != nil {
+		return ""
+	}
+	return u.Scheme + "://" + u.Host
 }
 
 // validateSources 校验共享目录：至少一个、绝对路径、名称不重复。
@@ -198,6 +247,7 @@ type fbHTTP struct {
 	Listen            string `json:"listen,omitempty"`
 	Port              int    `json:"port"`
 	BaseURL           string `json:"baseURL"`
+	ExternalURL       string `json:"externalUrl,omitempty"`
 	TrustProxyHeaders bool   `json:"trustProxyHeaders"`
 	DisableWebDAV     bool   `json:"disableWebDAV"`
 }
@@ -275,6 +325,7 @@ func (i *Instance) Config(dataDir string) ([]byte, error) {
 			Listen:            i.ListenIP,
 			Port:              i.Port,
 			BaseURL:           i.BaseURL,
+			ExternalURL:       i.externalURL(),
 			TrustProxyHeaders: i.TrustProxyHeaders,
 			DisableWebDAV:     i.DisableWebDAV,
 		},

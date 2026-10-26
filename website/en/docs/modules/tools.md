@@ -93,6 +93,7 @@ Each instance is a separate File Browser process:
 | `listenIp` | empty | Listen address; empty listens on all IPv4 addresses. Use `127.0.0.1` when it is only reached through a Web Service reverse proxy |
 | `port` | 8080 | Listen port |
 | `baseUrl` | `/` | Base path; when reverse proxying by path in the Web Service (for example `/files`), enter the same path |
+| `accessUrls` | Empty | Access URLs, several allowed, such as `https://files.example.com/` reverse proxied by the Web service; shown on the instance card. When empty, the URL is guessed from the listen address and port. The scheme, host and port of the first URL are written to File Browser's `http.externalUrl`, which share links use |
 | `sources` | none | Shared directories, each with `path` (absolute), `name` (display name, defaults to the directory name) and `readOnly`; new users can access all of them by default |
 | `authMethod` | `password` | Sign-in method: `password` for username and password, `proxy` to trust the username header from a reverse proxy, `noauth` for no sign-in |
 | `proxyHeader` | `Remote-User` | Header that carries the username for `proxy`; missing users are created automatically |

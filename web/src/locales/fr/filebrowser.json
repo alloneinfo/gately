@@ -5,6 +5,8 @@
   "editInstance": "Modifier l’instance",
   "empty": "Aucune instance. Ajoutez-en une et choisissez les répertoires à partager pour gérer vos fichiers dans le navigateur",
   "accessUrl": "URL d’accès",
+  "accessUrlHelp": "URL qui ouvrent File Browser dans le navigateur, par exemple un domaine en proxy inverse via le service Web. Vous pouvez en ajouter plusieurs. Si vide, l’URL est déduite de l’adresse et du port d’écoute. La première URL sert aussi d’URL externe pour les liens de partage",
+  "addAccessUrl": "Ajouter une URL",
   "sources": "Répertoires partagés",
   "readOnly": "Lecture seule",
   "adminUser": "Nom de l’administrateur",

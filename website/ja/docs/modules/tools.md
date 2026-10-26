@@ -93,6 +93,7 @@ API は `GET` / `PUT /api/fileusers` で、API トークンには `fileusers:rea
 | `listenIp` | 空 | 待ち受けアドレス。空欄ですべての IPv4 アドレス。Web サービスのリバースプロキシ経由でのみアクセスする場合は `127.0.0.1` |
 | `port` | 8080 | 待ち受けポート |
 | `baseUrl` | `/` | アクセスパス。Web サービスでパス単位にリバースプロキシする場合（例 `/files`）は同じパスを入力 |
+| `accessUrls` | 空 | アクセス URL。複数指定でき、Web サービスでリバースプロキシした `https://files.example.com/` などをインスタンスカードに表示します。空の場合は待ち受けアドレスとポートから推測します。最初の URL のスキーム・ホスト・ポートは File Browser の `http.externalUrl` に書き込まれ、共有リンクに使われます |
 | `sources` | なし | 共有ディレクトリ。各項目に `path`（絶対パス）、`name`（表示名、空欄でディレクトリ名）、`readOnly`。新しいユーザーは既定ですべてにアクセス可能 |
 | `authMethod` | `password` | サインイン方式。`password` はパスワード、`proxy` はリバースプロキシが渡すユーザー名ヘッダーを信頼、`noauth` はサインイン不要 |
 | `proxyHeader` | `Remote-User` | `proxy` 方式でユーザー名を読むヘッダー。存在しないユーザーは自動作成 |

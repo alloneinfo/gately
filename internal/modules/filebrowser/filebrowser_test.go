@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -54,25 +55,34 @@ func TestValidateDefaults(t *testing.T) {
 
 func TestValidateRejects(t *testing.T) {
 	cases := map[string]func(i *Instance){
-		"空名称":      func(i *Instance) { i.Name = " " },
-		"无效监听地址":   func(i *Instance) { i.ListenIP = "localhost" },
-		"端口为 0":    func(i *Instance) { i.Port = 0 },
-		"端口过大":     func(i *Instance) { i.Port = 70000 },
-		"路径含空格":    func(i *Instance) { i.BaseURL = "/a b" },
-		"路径含 ..":   func(i *Instance) { i.BaseURL = "/a/../b" },
-		"路径含 //":   func(i *Instance) { i.BaseURL = "//evil" },
-		"没有目录":     func(i *Instance) { i.Sources = nil },
-		"相对目录":     func(i *Instance) { i.Sources = []Source{{Path: "data"}} },
-		"目录名重复":    func(i *Instance) { i.Sources = []Source{{Path: "/a/x"}, {Path: "/b/X"}} },
-		"目录名含斜杠":   func(i *Instance) { i.Sources = []Source{{Path: "/a", Name: "a/b"}} },
-		"未知登录方式":   func(i *Instance) { i.AuthMethod = "ldap" },
-		"无效请求头":    func(i *Instance) { i.AuthMethod, i.ProxyHeader = AuthProxy, "X User" },
-		"用户名含冒号":   func(i *Instance) { i.AdminUser = "a:b" },
-		"密码登录缺密码":  func(i *Instance) { i.AdminPassword = "" },
-		"密码太短":     func(i *Instance) { i.AdminPassword = "admin" },
-		"密码为脱敏占位符": func(i *Instance) { i.AdminPassword = crud.SecretMask },
-		"未知语言":     func(i *Instance) { i.Locale = "xx" },
-		"有效期为负":    func(i *Instance) { i.TokenHours = -1 },
+		"空名称":        func(i *Instance) { i.Name = " " },
+		"无效监听地址":     func(i *Instance) { i.ListenIP = "localhost" },
+		"端口为 0":      func(i *Instance) { i.Port = 0 },
+		"端口过大":       func(i *Instance) { i.Port = 70000 },
+		"路径含空格":      func(i *Instance) { i.BaseURL = "/a b" },
+		"路径含 ..":     func(i *Instance) { i.BaseURL = "/a/../b" },
+		"路径含 //":     func(i *Instance) { i.BaseURL = "//evil" },
+		"没有目录":       func(i *Instance) { i.Sources = nil },
+		"相对目录":       func(i *Instance) { i.Sources = []Source{{Path: "data"}} },
+		"目录名重复":      func(i *Instance) { i.Sources = []Source{{Path: "/a/x"}, {Path: "/b/X"}} },
+		"目录名含斜杠":     func(i *Instance) { i.Sources = []Source{{Path: "/a", Name: "a/b"}} },
+		"未知登录方式":     func(i *Instance) { i.AuthMethod = "ldap" },
+		"无效请求头":      func(i *Instance) { i.AuthMethod, i.ProxyHeader = AuthProxy, "X User" },
+		"用户名含冒号":     func(i *Instance) { i.AdminUser = "a:b" },
+		"密码登录缺密码":    func(i *Instance) { i.AdminPassword = "" },
+		"密码太短":       func(i *Instance) { i.AdminPassword = "admin" },
+		"密码为脱敏占位符":   func(i *Instance) { i.AdminPassword = crud.SecretMask },
+		"未知语言":       func(i *Instance) { i.Locale = "xx" },
+		"有效期为负":      func(i *Instance) { i.TokenHours = -1 },
+		"访问地址无协议":    func(i *Instance) { i.AccessURLs = []string{"files.example.com"} },
+		"访问地址非 http": func(i *Instance) { i.AccessURLs = []string{"ftp://files.example.com/"} },
+		"访问地址含查询":    func(i *Instance) { i.AccessURLs = []string{"https://files.example.com/?a=1"} },
+		"访问地址含账号":    func(i *Instance) { i.AccessURLs = []string{"https://u:p@files.example.com/"} },
+		"访问地址过多": func(i *Instance) {
+			for k := 0; k <= maxAccessURLs; k++ {
+				i.AccessURLs = append(i.AccessURLs, fmt.Sprintf("https://h%d.example.com/", k))
+			}
+		},
 	}
 	for name, mutate := range cases {
 		i := validInstance()
@@ -117,6 +127,26 @@ func TestConfigOutput(t *testing.T) {
 	}
 	if c.UserDefaults == nil || c.UserDefaults.UI.Locale != "zh-cn" {
 		t.Errorf("默认语言错误: %+v", c.UserDefaults)
+	}
+	if c.HTTP.ExternalURL != "" {
+		t.Errorf("未填写访问地址时不应写出外部地址: %q", c.HTTP.ExternalURL)
+	}
+
+	// 访问地址：去掉空行与重复项，第一个地址的源写入 externalUrl（上游会再拼接 baseURL）
+	e := validInstance()
+	e.BaseURL = "/files"
+	e.AccessURLs = []string{" ", " https://fb.example.com:8443/files/ ", "https://fb.example.com:8443/files/", "http://192.168.1.2:8080/files/"}
+	if err := e.Validate(); err != nil {
+		t.Fatal(err)
+	}
+	if len(e.AccessURLs) != 2 || e.AccessURLs[0] != "https://fb.example.com:8443/files/" {
+		t.Errorf("访问地址规范化错误: %q", e.AccessURLs)
+	}
+	data, _ = e.Config("/d")
+	c = fbConfig{}
+	_ = json.Unmarshal(data, &c)
+	if c.HTTP.ExternalURL != "https://fb.example.com:8443" {
+		t.Errorf("外部地址错误: %q", c.HTTP.ExternalURL)
 	}
 
 	// 代理认证：关闭密码登录，写出请求头；未设置语言时不写 userDefaults，避免锁定上游的默认设置

@@ -5,6 +5,8 @@
   "editInstance": "Editar instância",
   "empty": "Nenhuma instância ainda. Adicione uma e escolha os diretórios a compartilhar para gerenciar arquivos no navegador",
   "accessUrl": "URL de acesso",
+  "accessUrlHelp": "URLs que abrem o File Browser no navegador, como um domínio com proxy reverso pelo serviço Web. Você pode adicionar várias. Se vazio, a URL é deduzida do endereço e da porta de escuta. A primeira URL também é usada como URL externa dos links de compartilhamento",
+  "addAccessUrl": "Adicionar URL",
   "sources": "Diretórios compartilhados",
   "readOnly": "Somente leitura",
   "adminUser": "Usuário administrador",

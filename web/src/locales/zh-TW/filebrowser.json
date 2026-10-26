@@ -5,6 +5,8 @@
   "editInstance": "編輯實例",
   "empty": "尚無實例。新增實例並選擇要共享的目錄，即可在瀏覽器中管理檔案",
   "accessUrl": "存取位址",
+  "accessUrlHelp": "在瀏覽器中開啟 File Browser 的位址，例如經 Web 服務反向代理的網域，可填寫多個。留空時依監聽位址與連接埠推測。第一個位址同時作為分享連結使用的外部位址",
+  "addAccessUrl": "新增存取位址",
   "sources": "共享目錄",
   "readOnly": "唯讀",
   "adminUser": "管理員使用者名稱",

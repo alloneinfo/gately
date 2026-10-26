@@ -5,6 +5,8 @@
   "editInstance": "Instanz bearbeiten",
   "empty": "Noch keine Instanzen. Legen Sie eine an und wählen Sie die freizugebenden Verzeichnisse, um Dateien im Browser zu verwalten",
   "accessUrl": "Zugriffs-URL",
+  "accessUrlHelp": "URLs, unter denen File Browser im Browser geöffnet wird, etwa eine über den Webdienst per Reverse Proxy bereitgestellte Domain. Mehrere sind möglich. Ohne Eintrag wird die URL aus Listen-Adresse und Port abgeleitet. Die erste URL dient auch als externe URL für Freigabelinks",
+  "addAccessUrl": "URL hinzufügen",
   "sources": "Freigegebene Verzeichnisse",
   "readOnly": "Schreibgeschützt",
   "adminUser": "Admin-Benutzername",

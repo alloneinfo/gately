@@ -5,6 +5,8 @@
   "editInstance": "编辑实例",
   "empty": "暂无实例。添加实例并选择要共享的目录，即可在浏览器中管理文件",
   "accessUrl": "访问地址",
+  "accessUrlHelp": "在浏览器中打开 File Browser 的地址，例如经 Web 服务反向代理的域名，可填写多个。留空时按监听地址和端口推测。第一个地址同时作为分享链接使用的外部地址",
+  "addAccessUrl": "添加访问地址",
   "sources": "共享目录",
   "readOnly": "只读",
   "adminUser": "管理员用户名",
