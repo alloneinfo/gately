@@ -4303,6 +4303,285 @@
         "x-token-allowed": true
       }
     },
+    "/api/cloudflared/install": {
+      "delete": {
+        "description": "Eliminar 配置目录 bin 下安装的程序与全部保存的旧版本，之后重启使用该程序的进程：PATH 中有同名程序时改用它，没有时进程无法启动。模块配置不受影响，清除配置使用 `POST /api/{module}/reset`。\n\nPermiso necesario: `cloudflared:write`.",
+        "responses": {
+          "200": {
+            "description": "Correcto"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parámetros de solicitud incorrectos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token no válido, caducado o sin sesión iniciada"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Al token le falta el permiso necesario"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Desinstalar un programa gestionado",
+        "tags": [
+          "Túnel de Cloudflare"
+        ],
+        "x-required-scope": "cloudflared:write",
+        "x-token-allowed": true
+      },
+      "get": {
+        "description": "Disponible en frp, Túnel de Cloudflare, Tailscale y File Browser. Devuelve la versión instalada en bin dentro del directorio de configuración, las versiones anteriores guardadas (`backups`, como máximo 3), el proxy de descarga de este programa (`proxy`), la plataforma actual y el progreso de instalación `state` (`stage` es checking, downloading, verifying, extracting, done, uptodate o failed). Un `unsupported` no vacío indica que el proyecto no ofrece un programa para la plataforma actual.\n\nPermiso necesario: `cloudflared:read`.",
+        "responses": {
+          "200": {
+            "description": "Correcto"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parámetros de solicitud incorrectos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token no válido, caducado o sin sesión iniciada"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Al token le falta el permiso necesario"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Ver la información de instalación y el progreso de un programa gestionado",
+        "tags": [
+          "Túnel de Cloudflare"
+        ],
+        "x-required-scope": "cloudflared:read",
+        "x-token-allowed": true
+      },
+      "post": {
+        "description": "Cuerpo `{\"version\": \"\", \"proxy\": \"\"}`: un `version` vacío instala la última versión estable (si ya está instalada no se descarga nada y `stage` es uptodate); en otro caso, la versión indicada. `proxy` es el proxy de descarga (http, https o socks5), se guarda para la próxima vez y, si está vacío, se usa el ajuste global `updateProxy`. La descarga se verifica con su SHA-256 y se instala en bin dentro del directorio de configuración; la versión existente pasa a las versiones anteriores y se reinician los procesos que usan el programa. Responde de inmediato; consulte el progreso con `GET /api/{module}/install`.\n\nPermiso necesario: `cloudflared:write`.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Correcto"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parámetros de solicitud incorrectos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token no válido, caducado o sin sesión iniciada"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Al token le falta el permiso necesario"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Instalar o actualizar en línea un programa gestionado",
+        "tags": [
+          "Túnel de Cloudflare"
+        ],
+        "x-required-scope": "cloudflared:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/cloudflared/install/backups/{id}": {
+      "delete": {
+        "description": "Permiso necesario: `cloudflared:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Correcto"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parámetros de solicitud incorrectos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token no válido, caducado o sin sesión iniciada"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Al token le falta el permiso necesario"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Eliminar una versión anterior guardada",
+        "tags": [
+          "Túnel de Cloudflare"
+        ],
+        "x-required-scope": "cloudflared:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/cloudflared/install/rollback": {
+      "post": {
+        "description": "Cuerpo `{\"id\": \"\u003cID de versión anterior\u003e\"}`. La versión actual se guarda como versión anterior para poder volver a ella; después se reinician los procesos que usan el programa.\n\nPermiso necesario: `cloudflared:write`.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Correcto"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parámetros de solicitud incorrectos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token no válido, caducado o sin sesión iniciada"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Al token le falta el permiso necesario"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Cambiar a una versión anterior guardada",
+        "tags": [
+          "Túnel de Cloudflare"
+        ],
+        "x-required-scope": "cloudflared:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/cloudflared/logs": {
       "delete": {
         "description": "Permiso necesario: `cloudflared:write`.",
@@ -4490,6 +4769,57 @@
           "Túnel de Cloudflare"
         ],
         "x-required-scope": "cloudflared:read",
+        "x-token-allowed": true
+      }
+    },
+    "/api/cloudflared/reset": {
+      "post": {
+        "description": "frp、Túnel de Cloudflare、Tailscale 与 File Browser 提供，无需请求体。停止该模块的全部进程，把配置（包括程序路径与下载代理）恢复为默认值，并Eliminar Gately 为它生成的文件：frp 的配置文件、File Browser 各实例的数据目录（用户、分享链接与缓存）、Tailscale 默认状态目录中的登录状态（Gately 托管的 tailscaled 运行中时先Cierre de sesión；自定义状态目录与系统已有的 tailscaled 不处理）。旧配置保存在配置历史中，可以恢复；安装的程序不受影响，卸载使用 `DELETE /api/{module}/install`。\n\nPermiso necesario: `cloudflared:write`.",
+        "responses": {
+          "200": {
+            "description": "Correcto"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parámetros de solicitud incorrectos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token no válido, caducado o sin sesión iniciada"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Al token le falta el permiso necesario"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Restaurar los ajustes predeterminados del módulo",
+        "tags": [
+          "Túnel de Cloudflare"
+        ],
+        "x-required-scope": "cloudflared:write",
         "x-token-allowed": true
       }
     },
@@ -10652,8 +10982,8 @@
       }
     },
     "/api/filebrowser/install": {
-      "get": {
-        "description": "Permiso necesario: `filebrowser:read`.",
+      "delete": {
+        "description": "Eliminar 配置目录 bin 下安装的程序与全部保存的旧版本，之后重启使用该程序的进程：PATH 中有同名程序时改用它，没有时进程无法启动。模块配置不受影响，清除配置使用 `POST /api/{module}/reset`。\n\nPermiso necesario: `filebrowser:write`.",
         "responses": {
           "200": {
             "description": "Correcto"
@@ -10694,7 +11024,56 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Ver el progreso de instalación de File Browser",
+        "summary": "Desinstalar un programa gestionado",
+        "tags": [
+          "File Browser"
+        ],
+        "x-required-scope": "filebrowser:write",
+        "x-token-allowed": true
+      },
+      "get": {
+        "description": "Disponible en frp, Túnel de Cloudflare, Tailscale y File Browser. Devuelve la versión instalada en bin dentro del directorio de configuración, las versiones anteriores guardadas (`backups`, como máximo 3), el proxy de descarga de este programa (`proxy`), la plataforma actual y el progreso de instalación `state` (`stage` es checking, downloading, verifying, extracting, done, uptodate o failed). Un `unsupported` no vacío indica que el proyecto no ofrece un programa para la plataforma actual.\n\nPermiso necesario: `filebrowser:read`.",
+        "responses": {
+          "200": {
+            "description": "Correcto"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parámetros de solicitud incorrectos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token no válido, caducado o sin sesión iniciada"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Al token le falta el permiso necesario"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Ver la información de instalación y el progreso de un programa gestionado",
         "tags": [
           "File Browser"
         ],
@@ -10702,7 +11081,16 @@
         "x-token-allowed": true
       },
       "post": {
-        "description": "Descarga la última versión estable de GitHub, verifica su SHA-256, la instala en bin dentro del directorio de configuración y reinicia las instancias activas; GitHub se consulta a través del ajuste de proxy de actualización. Responde de inmediato; el progreso se consulta con `GET /api/filebrowser/install`.\n\nPermiso necesario: `filebrowser:write`.",
+        "description": "Cuerpo `{\"version\": \"\", \"proxy\": \"\"}`: un `version` vacío instala la última versión estable (si ya está instalada no se descarga nada y `stage` es uptodate); en otro caso, la versión indicada. `proxy` es el proxy de descarga (http, https o socks5), se guarda para la próxima vez y, si está vacío, se usa el ajuste global `updateProxy`. La descarga se verifica con su SHA-256 y se instala en bin dentro del directorio de configuración; la versión existente pasa a las versiones anteriores y se reinician los procesos que usan el programa. Responde de inmediato; consulte el progreso con `GET /api/{module}/install`.\n\nPermiso necesario: `filebrowser:write`.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "Correcto"
@@ -10743,7 +11131,128 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Descargar e instalar FileBrowser Quantum",
+        "summary": "Instalar o actualizar en línea un programa gestionado",
+        "tags": [
+          "File Browser"
+        ],
+        "x-required-scope": "filebrowser:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/filebrowser/install/backups/{id}": {
+      "delete": {
+        "description": "Permiso necesario: `filebrowser:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Correcto"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parámetros de solicitud incorrectos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token no válido, caducado o sin sesión iniciada"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Al token le falta el permiso necesario"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Eliminar una versión anterior guardada",
+        "tags": [
+          "File Browser"
+        ],
+        "x-required-scope": "filebrowser:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/filebrowser/install/rollback": {
+      "post": {
+        "description": "Cuerpo `{\"id\": \"\u003cID de versión anterior\u003e\"}`. La versión actual se guarda como versión anterior para poder volver a ella; después se reinician los procesos que usan el programa.\n\nPermiso necesario: `filebrowser:write`.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Correcto"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parámetros de solicitud incorrectos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token no válido, caducado o sin sesión iniciada"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Al token le falta el permiso necesario"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Cambiar a una versión anterior guardada",
         "tags": [
           "File Browser"
         ],
@@ -11394,6 +11903,57 @@
         "x-token-allowed": true
       }
     },
+    "/api/filebrowser/reset": {
+      "post": {
+        "description": "frp、Túnel de Cloudflare、Tailscale 与 File Browser 提供，无需请求体。停止该模块的全部进程，把配置（包括程序路径与下载代理）恢复为默认值，并Eliminar Gately 为它生成的文件：frp 的配置文件、File Browser 各实例的数据目录（用户、分享链接与缓存）、Tailscale 默认状态目录中的登录状态（Gately 托管的 tailscaled 运行中时先Cierre de sesión；自定义状态目录与系统已有的 tailscaled 不处理）。旧配置保存在配置历史中，可以恢复；安装的程序不受影响，卸载使用 `DELETE /api/{module}/install`。\n\nPermiso necesario: `filebrowser:write`.",
+        "responses": {
+          "200": {
+            "description": "Correcto"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parámetros de solicitud incorrectos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token no válido, caducado o sin sesión iniciada"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Al token le falta el permiso necesario"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Restaurar los ajustes predeterminados del módulo",
+        "tags": [
+          "File Browser"
+        ],
+        "x-required-scope": "filebrowser:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/filebrowser/settings": {
       "get": {
         "description": "Devuelve el ejecutable en uso, su versión y si es FileBrowser Quantum.\n\nPermiso necesario: `filebrowser:read`.",
@@ -11781,6 +12341,285 @@
           }
         ],
         "summary": "Importar configuraciones existentes de frpc / frps (admite ini antiguo y toml nuevo); con apply en false solo se muestra una vista previa",
+        "tags": [
+          "Traversal de red interna frp"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/frp/install": {
+      "delete": {
+        "description": "Eliminar 配置目录 bin 下安装的程序与全部保存的旧版本，之后重启使用该程序的进程：PATH 中有同名程序时改用它，没有时进程无法启动。模块配置不受影响，清除配置使用 `POST /api/{module}/reset`。\n\nPermiso necesario: `frp:write`.",
+        "responses": {
+          "200": {
+            "description": "Correcto"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parámetros de solicitud incorrectos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token no válido, caducado o sin sesión iniciada"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Al token le falta el permiso necesario"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Desinstalar un programa gestionado",
+        "tags": [
+          "Traversal de red interna frp"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      },
+      "get": {
+        "description": "Disponible en frp, Túnel de Cloudflare, Tailscale y File Browser. Devuelve la versión instalada en bin dentro del directorio de configuración, las versiones anteriores guardadas (`backups`, como máximo 3), el proxy de descarga de este programa (`proxy`), la plataforma actual y el progreso de instalación `state` (`stage` es checking, downloading, verifying, extracting, done, uptodate o failed). Un `unsupported` no vacío indica que el proyecto no ofrece un programa para la plataforma actual.\n\nPermiso necesario: `frp:read`.",
+        "responses": {
+          "200": {
+            "description": "Correcto"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parámetros de solicitud incorrectos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token no válido, caducado o sin sesión iniciada"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Al token le falta el permiso necesario"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Ver la información de instalación y el progreso de un programa gestionado",
+        "tags": [
+          "Traversal de red interna frp"
+        ],
+        "x-required-scope": "frp:read",
+        "x-token-allowed": true
+      },
+      "post": {
+        "description": "Cuerpo `{\"version\": \"\", \"proxy\": \"\"}`: un `version` vacío instala la última versión estable (si ya está instalada no se descarga nada y `stage` es uptodate); en otro caso, la versión indicada. `proxy` es el proxy de descarga (http, https o socks5), se guarda para la próxima vez y, si está vacío, se usa el ajuste global `updateProxy`. La descarga se verifica con su SHA-256 y se instala en bin dentro del directorio de configuración; la versión existente pasa a las versiones anteriores y se reinician los procesos que usan el programa. Responde de inmediato; consulte el progreso con `GET /api/{module}/install`.\n\nPermiso necesario: `frp:write`.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Correcto"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parámetros de solicitud incorrectos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token no válido, caducado o sin sesión iniciada"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Al token le falta el permiso necesario"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Instalar o actualizar en línea un programa gestionado",
+        "tags": [
+          "Traversal de red interna frp"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/frp/install/backups/{id}": {
+      "delete": {
+        "description": "Permiso necesario: `frp:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Correcto"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parámetros de solicitud incorrectos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token no válido, caducado o sin sesión iniciada"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Al token le falta el permiso necesario"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Eliminar una versión anterior guardada",
+        "tags": [
+          "Traversal de red interna frp"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/frp/install/rollback": {
+      "post": {
+        "description": "Cuerpo `{\"id\": \"\u003cID de versión anterior\u003e\"}`. La versión actual se guarda como versión anterior para poder volver a ella; después se reinician los procesos que usan el programa.\n\nPermiso necesario: `frp:write`.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Correcto"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parámetros de solicitud incorrectos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token no válido, caducado o sin sesión iniciada"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Al token le falta el permiso necesario"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Cambiar a una versión anterior guardada",
         "tags": [
           "Traversal de red interna frp"
         ],
@@ -12363,6 +13202,57 @@
           }
         ],
         "summary": "Activar o desactivar Entrada",
+        "tags": [
+          "Traversal de red interna frp"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/frp/reset": {
+      "post": {
+        "description": "frp、Túnel de Cloudflare、Tailscale 与 File Browser 提供，无需请求体。停止该模块的全部进程，把配置（包括程序路径与下载代理）恢复为默认值，并Eliminar Gately 为它生成的文件：frp 的配置文件、File Browser 各实例的数据目录（用户、分享链接与缓存）、Tailscale 默认状态目录中的登录状态（Gately 托管的 tailscaled 运行中时先Cierre de sesión；自定义状态目录与系统已有的 tailscaled 不处理）。旧配置保存在配置历史中，可以恢复；安装的程序不受影响，卸载使用 `DELETE /api/{module}/install`。\n\nPermiso necesario: `frp:write`.",
+        "responses": {
+          "200": {
+            "description": "Correcto"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parámetros de solicitud incorrectos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token no válido, caducado o sin sesión iniciada"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Al token le falta el permiso necesario"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Restaurar los ajustes predeterminados del módulo",
         "tags": [
           "Traversal de red interna frp"
         ],
@@ -20903,6 +21793,285 @@
         "x-token-allowed": false
       }
     },
+    "/api/tailscale/install": {
+      "delete": {
+        "description": "Eliminar 配置目录 bin 下安装的程序与全部保存的旧版本，之后重启使用该程序的进程：PATH 中有同名程序时改用它，没有时进程无法启动。模块配置不受影响，清除配置使用 `POST /api/{module}/reset`。\n\nPermiso necesario: `tailscale:write`.",
+        "responses": {
+          "200": {
+            "description": "Correcto"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parámetros de solicitud incorrectos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token no válido, caducado o sin sesión iniciada"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Al token le falta el permiso necesario"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Desinstalar un programa gestionado",
+        "tags": [
+          "Red Tailscale"
+        ],
+        "x-required-scope": "tailscale:write",
+        "x-token-allowed": true
+      },
+      "get": {
+        "description": "Disponible en frp, Túnel de Cloudflare, Tailscale y File Browser. Devuelve la versión instalada en bin dentro del directorio de configuración, las versiones anteriores guardadas (`backups`, como máximo 3), el proxy de descarga de este programa (`proxy`), la plataforma actual y el progreso de instalación `state` (`stage` es checking, downloading, verifying, extracting, done, uptodate o failed). Un `unsupported` no vacío indica que el proyecto no ofrece un programa para la plataforma actual.\n\nPermiso necesario: `tailscale:read`.",
+        "responses": {
+          "200": {
+            "description": "Correcto"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parámetros de solicitud incorrectos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token no válido, caducado o sin sesión iniciada"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Al token le falta el permiso necesario"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Ver la información de instalación y el progreso de un programa gestionado",
+        "tags": [
+          "Red Tailscale"
+        ],
+        "x-required-scope": "tailscale:read",
+        "x-token-allowed": true
+      },
+      "post": {
+        "description": "Cuerpo `{\"version\": \"\", \"proxy\": \"\"}`: un `version` vacío instala la última versión estable (si ya está instalada no se descarga nada y `stage` es uptodate); en otro caso, la versión indicada. `proxy` es el proxy de descarga (http, https o socks5), se guarda para la próxima vez y, si está vacío, se usa el ajuste global `updateProxy`. La descarga se verifica con su SHA-256 y se instala en bin dentro del directorio de configuración; la versión existente pasa a las versiones anteriores y se reinician los procesos que usan el programa. Responde de inmediato; consulte el progreso con `GET /api/{module}/install`.\n\nPermiso necesario: `tailscale:write`.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Correcto"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parámetros de solicitud incorrectos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token no válido, caducado o sin sesión iniciada"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Al token le falta el permiso necesario"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Instalar o actualizar en línea un programa gestionado",
+        "tags": [
+          "Red Tailscale"
+        ],
+        "x-required-scope": "tailscale:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/tailscale/install/backups/{id}": {
+      "delete": {
+        "description": "Permiso necesario: `tailscale:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Correcto"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parámetros de solicitud incorrectos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token no válido, caducado o sin sesión iniciada"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Al token le falta el permiso necesario"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Eliminar una versión anterior guardada",
+        "tags": [
+          "Red Tailscale"
+        ],
+        "x-required-scope": "tailscale:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/tailscale/install/rollback": {
+      "post": {
+        "description": "Cuerpo `{\"id\": \"\u003cID de versión anterior\u003e\"}`. La versión actual se guarda como versión anterior para poder volver a ella; después se reinician los procesos que usan el programa.\n\nPermiso necesario: `tailscale:write`.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Correcto"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parámetros de solicitud incorrectos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token no válido, caducado o sin sesión iniciada"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Al token le falta el permiso necesario"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Cambiar a una versión anterior guardada",
+        "tags": [
+          "Red Tailscale"
+        ],
+        "x-required-scope": "tailscale:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/tailscale/logout": {
       "post": {
         "description": "Permiso necesario: `tailscale:write`.",
@@ -21141,6 +22310,57 @@
           "Red Tailscale"
         ],
         "x-required-scope": "tailscale:read",
+        "x-token-allowed": true
+      }
+    },
+    "/api/tailscale/reset": {
+      "post": {
+        "description": "frp、Túnel de Cloudflare、Tailscale 与 File Browser 提供，无需请求体。停止该模块的全部进程，把配置（包括程序路径与下载代理）恢复为默认值，并Eliminar Gately 为它生成的文件：frp 的配置文件、File Browser 各实例的数据目录（用户、分享链接与缓存）、Tailscale 默认状态目录中的登录状态（Gately 托管的 tailscaled 运行中时先Cierre de sesión；自定义状态目录与系统已有的 tailscaled 不处理）。旧配置保存在配置历史中，可以恢复；安装的程序不受影响，卸载使用 `DELETE /api/{module}/install`。\n\nPermiso necesario: `tailscale:write`.",
+        "responses": {
+          "200": {
+            "description": "Correcto"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parámetros de solicitud incorrectos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token no válido, caducado o sin sesión iniciada"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Al token le falta el permiso necesario"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Restaurar los ajustes predeterminados del módulo",
+        "tags": [
+          "Red Tailscale"
+        ],
+        "x-required-scope": "tailscale:write",
         "x-token-allowed": true
       }
     },

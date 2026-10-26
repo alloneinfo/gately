@@ -124,6 +124,12 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | GET | `/api/tailscale/status` | `tailscale:read` | View Tailscale connection status |
 | POST | `/api/tailscale/restart` | `tailscale:write` | Restart Tailscale |
 | POST | `/api/tailscale/logout` | `tailscale:write` | Sign out of Tailscale |
+| GET | `/api/tailscale/install` | `tailscale:read` | View the install info and progress of a managed program |
+| POST | `/api/tailscale/install` | `tailscale:write` | Install or update a managed program online |
+| POST | `/api/tailscale/install/rollback` | `tailscale:write` | Switch to a saved previous version |
+| DELETE | `/api/tailscale/install` | `tailscale:write` | Uninstall a managed program |
+| DELETE | `/api/tailscale/install/backups/{id}` | `tailscale:write` | Delete a saved previous version |
+| POST | `/api/tailscale/reset` | `tailscale:write` | Restore the module default settings |
 
 ## frp tunneling
 
@@ -138,6 +144,12 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | PUT | `/api/frp/proxies/{key}/enable` | `frp:write` | Enable or disable Entry |
 | PUT | `/api/frp/proxies-order` | `frp:write` | Reorder Entry |
 | POST | `/api/frp/import` | `frp:write` | Import an existing frpc / frps configuration (legacy ini and new toml are supported); preview only when apply is false |
+| GET | `/api/frp/install` | `frp:read` | View the install info and progress of a managed program |
+| POST | `/api/frp/install` | `frp:write` | Install or update a managed program online |
+| POST | `/api/frp/install/rollback` | `frp:write` | Switch to a saved previous version |
+| DELETE | `/api/frp/install` | `frp:write` | Uninstall a managed program |
+| DELETE | `/api/frp/install/backups/{id}` | `frp:write` | Delete a saved previous version |
+| POST | `/api/frp/reset` | `frp:write` | Restore the module default settings |
 | GET | `/api/frp/client` | `frp:read` | Read frp client configuration |
 | PUT | `/api/frp/client` | `frp:write` | Save frp client configuration |
 | GET | `/api/frp/server` | `frp:read` | Read frp server configuration |
@@ -158,6 +170,12 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | POST | `/api/cloudflared/tunnels/{key}/restart` | `cloudflared:write` | Restart a Cloudflare Tunnel |
 | GET | `/api/cloudflared/settings` | `cloudflared:read` | Read Cloudflare Tunnel settings |
 | PUT | `/api/cloudflared/settings` | `cloudflared:write` | Save Cloudflare Tunnel settings |
+| GET | `/api/cloudflared/install` | `cloudflared:read` | View the install info and progress of a managed program |
+| POST | `/api/cloudflared/install` | `cloudflared:write` | Install or update a managed program online |
+| POST | `/api/cloudflared/install/rollback` | `cloudflared:write` | Switch to a saved previous version |
+| DELETE | `/api/cloudflared/install` | `cloudflared:write` | Uninstall a managed program |
+| DELETE | `/api/cloudflared/install/backups/{id}` | `cloudflared:write` | Delete a saved previous version |
+| POST | `/api/cloudflared/reset` | `cloudflared:write` | Restore the module default settings |
 
 ## SSL certificate
 
@@ -454,8 +472,12 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | POST | `/api/filebrowser/instances/{key}/restart` | `filebrowser:write` | Restart a File Browser instance |
 | GET | `/api/filebrowser/settings` | `filebrowser:read` | Read File Browser program settings |
 | PUT | `/api/filebrowser/settings` | `filebrowser:write` | Save File Browser program settings |
-| GET | `/api/filebrowser/install` | `filebrowser:read` | View File Browser installation progress |
-| POST | `/api/filebrowser/install` | `filebrowser:write` | Download and install FileBrowser Quantum |
+| GET | `/api/filebrowser/install` | `filebrowser:read` | View the install info and progress of a managed program |
+| POST | `/api/filebrowser/install` | `filebrowser:write` | Install or update a managed program online |
+| POST | `/api/filebrowser/install/rollback` | `filebrowser:write` | Switch to a saved previous version |
+| DELETE | `/api/filebrowser/install` | `filebrowser:write` | Uninstall a managed program |
+| DELETE | `/api/filebrowser/install/backups/{id}` | `filebrowser:write` | Delete a saved previous version |
+| POST | `/api/filebrowser/reset` | `filebrowser:write` | Restore the module default settings |
 
 ## Storage Mounts
 

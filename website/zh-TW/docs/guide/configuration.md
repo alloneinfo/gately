@@ -35,15 +35,13 @@
 
 ## 外部程式目錄
 
-Tailscale、frp、cloudflared 這三個模組託管官方的外部程式，依以下順序尋找可執行檔：
+Tailscale、frp、cloudflared 與 File Browser 託管官方的外部程式，依以下順序尋找可執行檔：
 
 1. 模組設定中填寫的路徑；
-2. `PATH`；
-3. 設定目錄下的 `bin/` 子目錄。
+2. 設定目錄下的 `bin/` 子目錄；
+3. `PATH`。
 
-Docker 部署時把執行檔放進掛載的設定目錄即可，例如 `./gately-data/bin/frpc`。Tailscale 需要同時提供 `tailscale` 與 `tailscaled`。詳見 [Tailscale / frp / cloudflared](/zh-TW/docs/modules/tunnels)。
-
-File Browser 模組託管 FileBrowser Quantum，尋找順序為：填寫的路徑、設定目錄下的 `bin/`、`PATH`；可以在頁面中一鍵下載安裝到 `bin/filebrowser`。詳見 [File Browser](/zh-TW/docs/modules/tools#filebrowser)。
+各模組頁面可以線上安裝、更新與回滾，程式裝在 `bin/` 下，舊版本儲存在 `bin/.versions/`，詳見 [線上安裝、更新與回滾](/zh-TW/docs/modules/tunnels#install)。也可以自行把執行檔放進設定目錄，Docker 部署時例如 `./gately-data/bin/frpc`；Tailscale 需要同時提供 `tailscale` 與 `tailscaled`。
 
 ## 執行日誌
 

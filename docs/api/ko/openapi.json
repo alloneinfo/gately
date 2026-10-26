@@ -4303,6 +4303,285 @@
         "x-token-allowed": true
       }
     },
+    "/api/cloudflared/install": {
+      "delete": {
+        "description": "配置目录 bin 下安装的程序与全部保存的旧版本，之后重启使用该程序的进程：PATH 中有同名程序时改用它，没有时进程无法启动。模块配置不受影响，清除配置使用 `POST /api/{module}/reset`。\n\n필요한 권한: `cloudflared:write`. 삭제",
+        "responses": {
+          "200": {
+            "description": "성공"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "요청 매개변수 오류"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰이 유효하지 않거나 만료되었거나 로그인하지 않음"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰에 필요한 권한이 없음"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "관리 프로그램 제거",
+        "tags": [
+          "Cloudflare 터널"
+        ],
+        "x-required-scope": "cloudflared:write",
+        "x-token-allowed": true
+      },
+      "get": {
+        "description": "frp, Cloudflare 터널, Tailscale, File Browser 에서 제공합니다. 설정 디렉터리 bin 에 설치된 버전, 저장된 이전 버전(`backups`, 최대 3개), 이 프로그램에 따로 지정한 다운로드 프록시 `proxy`, 현재 플랫폼, 설치 진행 상태 `state`(`stage` 는 checking, downloading, verifying, extracting, done, uptodate, failed 중 하나)를 반환합니다. `unsupported` 가 비어 있지 않으면 업스트림이 현재 플랫폼용 프로그램을 제공하지 않는다는 뜻입니다.\n\n필요한 권한: `cloudflared:read`.",
+        "responses": {
+          "200": {
+            "description": "성공"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "요청 매개변수 오류"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰이 유효하지 않거나 만료되었거나 로그인하지 않음"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰에 필요한 권한이 없음"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "관리 프로그램의 설치 정보와 진행 상태 보기",
+        "tags": [
+          "Cloudflare 터널"
+        ],
+        "x-required-scope": "cloudflared:read",
+        "x-token-allowed": true
+      },
+      "post": {
+        "description": "요청 본문 `{\"version\": \"\", \"proxy\": \"\"}`: `version` 이 비어 있으면 최신 정식 버전을 설치하고(이미 최신이면 다운로드하지 않으며 `stage` 는 uptodate), 아니면 지정한 버전을 설치합니다. `proxy` 는 다운로드 프록시(http, https, socks5)로 다음에도 쓰도록 저장되며, 비어 있으면 전역 설정 `updateProxy` 를 사용합니다. 다운로드 후 SHA-256 을 검증해 설정 디렉터리 bin 에 설치하고, 기존 버전은 이전 버전 목록으로 옮기며, 이 프로그램을 사용하는 프로세스를 다시 시작합니다. 즉시 반환하며 진행 상태는 `GET /api/{module}/install` 로 조회합니다.\n\n필요한 권한: `cloudflared:write`.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "성공"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "요청 매개변수 오류"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰이 유효하지 않거나 만료되었거나 로그인하지 않음"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰에 필요한 권한이 없음"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "관리 프로그램 온라인 설치 또는 업데이트",
+        "tags": [
+          "Cloudflare 터널"
+        ],
+        "x-required-scope": "cloudflared:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/cloudflared/install/backups/{id}": {
+      "delete": {
+        "description": "필요한 권한: `cloudflared:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "성공"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "요청 매개변수 오류"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰이 유효하지 않거나 만료되었거나 로그인하지 않음"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰에 필요한 권한이 없음"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "저장된 이전 버전 삭제",
+        "tags": [
+          "Cloudflare 터널"
+        ],
+        "x-required-scope": "cloudflared:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/cloudflared/install/rollback": {
+      "post": {
+        "description": "요청 본문 `{\"id\": \"\u003c이전 버전 ID\u003e\"}`. 현재 버전은 이전 버전으로 저장되어 나중에 다시 전환할 수 있으며, 완료 후 이 프로그램을 사용하는 프로세스를 다시 시작합니다.\n\n필요한 권한: `cloudflared:write`.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "성공"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "요청 매개변수 오류"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰이 유효하지 않거나 만료되었거나 로그인하지 않음"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰에 필요한 권한이 없음"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "저장된 이전 버전으로 전환",
+        "tags": [
+          "Cloudflare 터널"
+        ],
+        "x-required-scope": "cloudflared:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/cloudflared/logs": {
       "delete": {
         "description": "필요한 권한: `cloudflared:write`.",
@@ -4490,6 +4769,57 @@
           "Cloudflare 터널"
         ],
         "x-required-scope": "cloudflared:read",
+        "x-token-allowed": true
+      }
+    },
+    "/api/cloudflared/reset": {
+      "post": {
+        "description": "frp、Cloudflare 터널、Tailscale 与 File Browser 提供，无需请求体。停止该模块的全部进程，把配置（包括程序路径与下载代理）恢复为默认值，并Gately 为它生成的文件：frp 的配置文件、File Browser 各实例的数据目录（用户、分享链接与缓存）、Tailscale 默认状态目录中的登录状态（Gately 托管的 tailscaled 运行中时先로그아웃；自定义状态目录与系统已有的 tailscaled 不处理）。旧配置保存在配置历史中，可以恢复；安装的程序不受影响，卸载使用 `DELETE /api/{module}/install`。\n\n필요한 권한: `cloudflared:write`. 삭제",
+        "responses": {
+          "200": {
+            "description": "성공"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "요청 매개변수 오류"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰이 유효하지 않거나 만료되었거나 로그인하지 않음"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰에 필요한 권한이 없음"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "모듈 기본 설정 복원",
+        "tags": [
+          "Cloudflare 터널"
+        ],
+        "x-required-scope": "cloudflared:write",
         "x-token-allowed": true
       }
     },
@@ -10652,8 +10982,8 @@
       }
     },
     "/api/filebrowser/install": {
-      "get": {
-        "description": "필요한 권한: `filebrowser:read`.",
+      "delete": {
+        "description": "配置目录 bin 下安装的程序与全部保存的旧版本，之后重启使用该程序的进程：PATH 中有同名程序时改用它，没有时进程无法启动。模块配置不受影响，清除配置使用 `POST /api/{module}/reset`。\n\n필요한 권한: `filebrowser:write`. 삭제",
         "responses": {
           "200": {
             "description": "성공"
@@ -10694,7 +11024,56 @@
             "bearerAuth": []
           }
         ],
-        "summary": "File Browser 설치 진행 상황 보기",
+        "summary": "관리 프로그램 제거",
+        "tags": [
+          "File Browser"
+        ],
+        "x-required-scope": "filebrowser:write",
+        "x-token-allowed": true
+      },
+      "get": {
+        "description": "frp, Cloudflare 터널, Tailscale, File Browser 에서 제공합니다. 설정 디렉터리 bin 에 설치된 버전, 저장된 이전 버전(`backups`, 최대 3개), 이 프로그램에 따로 지정한 다운로드 프록시 `proxy`, 현재 플랫폼, 설치 진행 상태 `state`(`stage` 는 checking, downloading, verifying, extracting, done, uptodate, failed 중 하나)를 반환합니다. `unsupported` 가 비어 있지 않으면 업스트림이 현재 플랫폼용 프로그램을 제공하지 않는다는 뜻입니다.\n\n필요한 권한: `filebrowser:read`.",
+        "responses": {
+          "200": {
+            "description": "성공"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "요청 매개변수 오류"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰이 유효하지 않거나 만료되었거나 로그인하지 않음"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰에 필요한 권한이 없음"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "관리 프로그램의 설치 정보와 진행 상태 보기",
         "tags": [
           "File Browser"
         ],
@@ -10702,7 +11081,16 @@
         "x-token-allowed": true
       },
       "post": {
-        "description": "GitHub에서 최신 안정 버전을 내려받아 SHA-256을 검증하고 설정 디렉터리의 bin에 설치한 뒤 활성화된 인스턴스를 다시 시작합니다. GitHub 접속은 \"업데이트 프록시\" 설정을 따릅니다. 즉시 반환하며 진행 상황은 `GET /api/filebrowser/install`로 조회합니다.\n\n필요한 권한: `filebrowser:write`.",
+        "description": "요청 본문 `{\"version\": \"\", \"proxy\": \"\"}`: `version` 이 비어 있으면 최신 정식 버전을 설치하고(이미 최신이면 다운로드하지 않으며 `stage` 는 uptodate), 아니면 지정한 버전을 설치합니다. `proxy` 는 다운로드 프록시(http, https, socks5)로 다음에도 쓰도록 저장되며, 비어 있으면 전역 설정 `updateProxy` 를 사용합니다. 다운로드 후 SHA-256 을 검증해 설정 디렉터리 bin 에 설치하고, 기존 버전은 이전 버전 목록으로 옮기며, 이 프로그램을 사용하는 프로세스를 다시 시작합니다. 즉시 반환하며 진행 상태는 `GET /api/{module}/install` 로 조회합니다.\n\n필요한 권한: `filebrowser:write`.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "성공"
@@ -10743,7 +11131,128 @@
             "bearerAuth": []
           }
         ],
-        "summary": "FileBrowser Quantum 다운로드 및 설치",
+        "summary": "관리 프로그램 온라인 설치 또는 업데이트",
+        "tags": [
+          "File Browser"
+        ],
+        "x-required-scope": "filebrowser:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/filebrowser/install/backups/{id}": {
+      "delete": {
+        "description": "필요한 권한: `filebrowser:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "성공"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "요청 매개변수 오류"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰이 유효하지 않거나 만료되었거나 로그인하지 않음"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰에 필요한 권한이 없음"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "저장된 이전 버전 삭제",
+        "tags": [
+          "File Browser"
+        ],
+        "x-required-scope": "filebrowser:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/filebrowser/install/rollback": {
+      "post": {
+        "description": "요청 본문 `{\"id\": \"\u003c이전 버전 ID\u003e\"}`. 현재 버전은 이전 버전으로 저장되어 나중에 다시 전환할 수 있으며, 완료 후 이 프로그램을 사용하는 프로세스를 다시 시작합니다.\n\n필요한 권한: `filebrowser:write`.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "성공"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "요청 매개변수 오류"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰이 유효하지 않거나 만료되었거나 로그인하지 않음"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰에 필요한 권한이 없음"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "저장된 이전 버전으로 전환",
         "tags": [
           "File Browser"
         ],
@@ -11394,6 +11903,57 @@
         "x-token-allowed": true
       }
     },
+    "/api/filebrowser/reset": {
+      "post": {
+        "description": "frp、Cloudflare 터널、Tailscale 与 File Browser 提供，无需请求体。停止该模块的全部进程，把配置（包括程序路径与下载代理）恢复为默认值，并Gately 为它生成的文件：frp 的配置文件、File Browser 各实例的数据目录（用户、分享链接与缓存）、Tailscale 默认状态目录中的登录状态（Gately 托管的 tailscaled 运行中时先로그아웃；自定义状态目录与系统已有的 tailscaled 不处理）。旧配置保存在配置历史中，可以恢复；安装的程序不受影响，卸载使用 `DELETE /api/{module}/install`。\n\n필요한 권한: `filebrowser:write`. 삭제",
+        "responses": {
+          "200": {
+            "description": "성공"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "요청 매개변수 오류"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰이 유효하지 않거나 만료되었거나 로그인하지 않음"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰에 필요한 권한이 없음"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "모듈 기본 설정 복원",
+        "tags": [
+          "File Browser"
+        ],
+        "x-required-scope": "filebrowser:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/filebrowser/settings": {
       "get": {
         "description": "사용 중인 실행 파일, 버전, FileBrowser Quantum 여부를 반환합니다.\n\n필요한 권한: `filebrowser:read`.",
@@ -11781,6 +12341,285 @@
           }
         ],
         "summary": "기존 frpc / frps 설정 가져오기 (구버전 ini와 신버전 toml 지원). apply가 false이면 미리보기만 수행",
+        "tags": [
+          "frp 내부망 터널링"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/frp/install": {
+      "delete": {
+        "description": "配置目录 bin 下安装的程序与全部保存的旧版本，之后重启使用该程序的进程：PATH 中有同名程序时改用它，没有时进程无法启动。模块配置不受影响，清除配置使用 `POST /api/{module}/reset`。\n\n필요한 권한: `frp:write`. 삭제",
+        "responses": {
+          "200": {
+            "description": "성공"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "요청 매개변수 오류"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰이 유효하지 않거나 만료되었거나 로그인하지 않음"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰에 필요한 권한이 없음"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "관리 프로그램 제거",
+        "tags": [
+          "frp 내부망 터널링"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      },
+      "get": {
+        "description": "frp, Cloudflare 터널, Tailscale, File Browser 에서 제공합니다. 설정 디렉터리 bin 에 설치된 버전, 저장된 이전 버전(`backups`, 최대 3개), 이 프로그램에 따로 지정한 다운로드 프록시 `proxy`, 현재 플랫폼, 설치 진행 상태 `state`(`stage` 는 checking, downloading, verifying, extracting, done, uptodate, failed 중 하나)를 반환합니다. `unsupported` 가 비어 있지 않으면 업스트림이 현재 플랫폼용 프로그램을 제공하지 않는다는 뜻입니다.\n\n필요한 권한: `frp:read`.",
+        "responses": {
+          "200": {
+            "description": "성공"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "요청 매개변수 오류"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰이 유효하지 않거나 만료되었거나 로그인하지 않음"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰에 필요한 권한이 없음"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "관리 프로그램의 설치 정보와 진행 상태 보기",
+        "tags": [
+          "frp 내부망 터널링"
+        ],
+        "x-required-scope": "frp:read",
+        "x-token-allowed": true
+      },
+      "post": {
+        "description": "요청 본문 `{\"version\": \"\", \"proxy\": \"\"}`: `version` 이 비어 있으면 최신 정식 버전을 설치하고(이미 최신이면 다운로드하지 않으며 `stage` 는 uptodate), 아니면 지정한 버전을 설치합니다. `proxy` 는 다운로드 프록시(http, https, socks5)로 다음에도 쓰도록 저장되며, 비어 있으면 전역 설정 `updateProxy` 를 사용합니다. 다운로드 후 SHA-256 을 검증해 설정 디렉터리 bin 에 설치하고, 기존 버전은 이전 버전 목록으로 옮기며, 이 프로그램을 사용하는 프로세스를 다시 시작합니다. 즉시 반환하며 진행 상태는 `GET /api/{module}/install` 로 조회합니다.\n\n필요한 권한: `frp:write`.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "성공"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "요청 매개변수 오류"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰이 유효하지 않거나 만료되었거나 로그인하지 않음"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰에 필요한 권한이 없음"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "관리 프로그램 온라인 설치 또는 업데이트",
+        "tags": [
+          "frp 내부망 터널링"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/frp/install/backups/{id}": {
+      "delete": {
+        "description": "필요한 권한: `frp:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "성공"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "요청 매개변수 오류"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰이 유효하지 않거나 만료되었거나 로그인하지 않음"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰에 필요한 권한이 없음"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "저장된 이전 버전 삭제",
+        "tags": [
+          "frp 내부망 터널링"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/frp/install/rollback": {
+      "post": {
+        "description": "요청 본문 `{\"id\": \"\u003c이전 버전 ID\u003e\"}`. 현재 버전은 이전 버전으로 저장되어 나중에 다시 전환할 수 있으며, 완료 후 이 프로그램을 사용하는 프로세스를 다시 시작합니다.\n\n필요한 권한: `frp:write`.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "성공"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "요청 매개변수 오류"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰이 유효하지 않거나 만료되었거나 로그인하지 않음"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰에 필요한 권한이 없음"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "저장된 이전 버전으로 전환",
         "tags": [
           "frp 내부망 터널링"
         ],
@@ -12363,6 +13202,57 @@
           }
         ],
         "summary": "항목 사용 설정/해제",
+        "tags": [
+          "frp 내부망 터널링"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/frp/reset": {
+      "post": {
+        "description": "frp、Cloudflare 터널、Tailscale 与 File Browser 提供，无需请求体。停止该模块的全部进程，把配置（包括程序路径与下载代理）恢复为默认值，并Gately 为它生成的文件：frp 的配置文件、File Browser 各实例的数据目录（用户、分享链接与缓存）、Tailscale 默认状态目录中的登录状态（Gately 托管的 tailscaled 运行中时先로그아웃；自定义状态目录与系统已有的 tailscaled 不处理）。旧配置保存在配置历史中，可以恢复；安装的程序不受影响，卸载使用 `DELETE /api/{module}/install`。\n\n필요한 권한: `frp:write`. 삭제",
+        "responses": {
+          "200": {
+            "description": "성공"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "요청 매개변수 오류"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰이 유효하지 않거나 만료되었거나 로그인하지 않음"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰에 필요한 권한이 없음"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "모듈 기본 설정 복원",
         "tags": [
           "frp 내부망 터널링"
         ],
@@ -20903,6 +21793,285 @@
         "x-token-allowed": false
       }
     },
+    "/api/tailscale/install": {
+      "delete": {
+        "description": "配置目录 bin 下安装的程序与全部保存的旧版本，之后重启使用该程序的进程：PATH 中有同名程序时改用它，没有时进程无法启动。模块配置不受影响，清除配置使用 `POST /api/{module}/reset`。\n\n필요한 권한: `tailscale:write`. 삭제",
+        "responses": {
+          "200": {
+            "description": "성공"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "요청 매개변수 오류"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰이 유효하지 않거나 만료되었거나 로그인하지 않음"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰에 필요한 권한이 없음"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "관리 프로그램 제거",
+        "tags": [
+          "Tailscale 네트워킹"
+        ],
+        "x-required-scope": "tailscale:write",
+        "x-token-allowed": true
+      },
+      "get": {
+        "description": "frp, Cloudflare 터널, Tailscale, File Browser 에서 제공합니다. 설정 디렉터리 bin 에 설치된 버전, 저장된 이전 버전(`backups`, 최대 3개), 이 프로그램에 따로 지정한 다운로드 프록시 `proxy`, 현재 플랫폼, 설치 진행 상태 `state`(`stage` 는 checking, downloading, verifying, extracting, done, uptodate, failed 중 하나)를 반환합니다. `unsupported` 가 비어 있지 않으면 업스트림이 현재 플랫폼용 프로그램을 제공하지 않는다는 뜻입니다.\n\n필요한 권한: `tailscale:read`.",
+        "responses": {
+          "200": {
+            "description": "성공"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "요청 매개변수 오류"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰이 유효하지 않거나 만료되었거나 로그인하지 않음"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰에 필요한 권한이 없음"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "관리 프로그램의 설치 정보와 진행 상태 보기",
+        "tags": [
+          "Tailscale 네트워킹"
+        ],
+        "x-required-scope": "tailscale:read",
+        "x-token-allowed": true
+      },
+      "post": {
+        "description": "요청 본문 `{\"version\": \"\", \"proxy\": \"\"}`: `version` 이 비어 있으면 최신 정식 버전을 설치하고(이미 최신이면 다운로드하지 않으며 `stage` 는 uptodate), 아니면 지정한 버전을 설치합니다. `proxy` 는 다운로드 프록시(http, https, socks5)로 다음에도 쓰도록 저장되며, 비어 있으면 전역 설정 `updateProxy` 를 사용합니다. 다운로드 후 SHA-256 을 검증해 설정 디렉터리 bin 에 설치하고, 기존 버전은 이전 버전 목록으로 옮기며, 이 프로그램을 사용하는 프로세스를 다시 시작합니다. 즉시 반환하며 진행 상태는 `GET /api/{module}/install` 로 조회합니다.\n\n필요한 권한: `tailscale:write`.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "성공"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "요청 매개변수 오류"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰이 유효하지 않거나 만료되었거나 로그인하지 않음"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰에 필요한 권한이 없음"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "관리 프로그램 온라인 설치 또는 업데이트",
+        "tags": [
+          "Tailscale 네트워킹"
+        ],
+        "x-required-scope": "tailscale:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/tailscale/install/backups/{id}": {
+      "delete": {
+        "description": "필요한 권한: `tailscale:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "성공"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "요청 매개변수 오류"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰이 유효하지 않거나 만료되었거나 로그인하지 않음"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰에 필요한 권한이 없음"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "저장된 이전 버전 삭제",
+        "tags": [
+          "Tailscale 네트워킹"
+        ],
+        "x-required-scope": "tailscale:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/tailscale/install/rollback": {
+      "post": {
+        "description": "요청 본문 `{\"id\": \"\u003c이전 버전 ID\u003e\"}`. 현재 버전은 이전 버전으로 저장되어 나중에 다시 전환할 수 있으며, 완료 후 이 프로그램을 사용하는 프로세스를 다시 시작합니다.\n\n필요한 권한: `tailscale:write`.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "성공"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "요청 매개변수 오류"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰이 유효하지 않거나 만료되었거나 로그인하지 않음"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰에 필요한 권한이 없음"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "저장된 이전 버전으로 전환",
+        "tags": [
+          "Tailscale 네트워킹"
+        ],
+        "x-required-scope": "tailscale:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/tailscale/logout": {
       "post": {
         "description": "필요한 권한: `tailscale:write`.",
@@ -21141,6 +22310,57 @@
           "Tailscale 네트워킹"
         ],
         "x-required-scope": "tailscale:read",
+        "x-token-allowed": true
+      }
+    },
+    "/api/tailscale/reset": {
+      "post": {
+        "description": "frp、Cloudflare 터널、Tailscale 与 File Browser 提供，无需请求体。停止该模块的全部进程，把配置（包括程序路径与下载代理）恢复为默认值，并Gately 为它生成的文件：frp 的配置文件、File Browser 各实例的数据目录（用户、分享链接与缓存）、Tailscale 默认状态目录中的登录状态（Gately 托管的 tailscaled 运行中时先로그아웃；自定义状态目录与系统已有的 tailscaled 不处理）。旧配置保存在配置历史中，可以恢复；安装的程序不受影响，卸载使用 `DELETE /api/{module}/install`。\n\n필요한 권한: `tailscale:write`. 삭제",
+        "responses": {
+          "200": {
+            "description": "성공"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "요청 매개변수 오류"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰이 유효하지 않거나 만료되었거나 로그인하지 않음"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "토큰에 필요한 권한이 없음"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "모듈 기본 설정 복원",
+        "tags": [
+          "Tailscale 네트워킹"
+        ],
+        "x-required-scope": "tailscale:write",
         "x-token-allowed": true
       }
     },

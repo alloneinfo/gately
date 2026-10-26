@@ -4303,6 +4303,285 @@
         "x-token-allowed": true
       }
     },
+    "/api/cloudflared/install": {
+      "delete": {
+        "description": "删除配置目录 bin 下安装的程序与全部保存的旧版本，之后重启使用该程序的进程：PATH 中有同名程序时改用它，没有时进程无法启动。模块配置不受影响，清除配置使用 `POST /api/{module}/reset`。\n\n所需权限：`cloudflared:write`。",
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "请求参数错误"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌无效、已过期或未登录"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌缺少所需权限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "卸载托管程序",
+        "tags": [
+          "Cloudflare 隧道"
+        ],
+        "x-required-scope": "cloudflared:write",
+        "x-token-allowed": true
+      },
+      "get": {
+        "description": "frp、Cloudflare 隧道、Tailscale 与 File Browser 提供。返回配置目录 bin 下已安装的版本、保存的旧版本（`backups`，最多 3 个）、该程序单独设置的下载代理 `proxy`、当前平台，以及安装进度 `state`（`stage` 为 checking、downloading、verifying、extracting、done、uptodate 或 failed）。`unsupported` 非空时表示上游没有提供当前平台的程序。\n\n所需权限：`cloudflared:read`。",
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "请求参数错误"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌无效、已过期或未登录"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌缺少所需权限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "查看托管程序的安装信息与进度",
+        "tags": [
+          "Cloudflare 隧道"
+        ],
+        "x-required-scope": "cloudflared:read",
+        "x-token-allowed": true
+      },
+      "post": {
+        "description": "请求体 `{\"version\": \"\", \"proxy\": \"\"}`：`version` 为空时安装最新正式版（已是最新版时不下载，`stage` 为 uptodate），否则安装指定版本；`proxy` 为下载代理（http、https 或 socks5），会保存下来供下次使用，为空时沿用全局设置 `updateProxy`。下载后校验 SHA-256，安装到配置目录的 bin 下，原有版本移入旧版本列表，完成后重启使用该程序的进程。立即返回，进度通过 `GET /api/{module}/install` 查询。\n\n所需权限：`cloudflared:write`。",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "请求参数错误"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌无效、已过期或未登录"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌缺少所需权限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "在线安装或更新托管程序",
+        "tags": [
+          "Cloudflare 隧道"
+        ],
+        "x-required-scope": "cloudflared:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/cloudflared/install/backups/{id}": {
+      "delete": {
+        "description": "所需权限：`cloudflared:write`。",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "请求参数错误"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌无效、已过期或未登录"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌缺少所需权限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "删除保存的旧版本",
+        "tags": [
+          "Cloudflare 隧道"
+        ],
+        "x-required-scope": "cloudflared:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/cloudflared/install/rollback": {
+      "post": {
+        "description": "请求体 `{\"id\": \"\u003c旧版本 ID\u003e\"}`。当前版本会另存为旧版本，之后仍可切回；完成后重启使用该程序的进程。\n\n所需权限：`cloudflared:write`。",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "请求参数错误"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌无效、已过期或未登录"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌缺少所需权限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "切换到保存的旧版本",
+        "tags": [
+          "Cloudflare 隧道"
+        ],
+        "x-required-scope": "cloudflared:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/cloudflared/logs": {
       "delete": {
         "description": "所需权限：`cloudflared:write`。",
@@ -4490,6 +4769,57 @@
           "Cloudflare 隧道"
         ],
         "x-required-scope": "cloudflared:read",
+        "x-token-allowed": true
+      }
+    },
+    "/api/cloudflared/reset": {
+      "post": {
+        "description": "frp、Cloudflare 隧道、Tailscale 与 File Browser 提供，无需请求体。停止该模块的全部进程，把配置（包括程序路径与下载代理）恢复为默认值，并删除 Gately 为它生成的文件：frp 的配置文件、File Browser 各实例的数据目录（用户、分享链接与缓存）、Tailscale 默认状态目录中的登录状态（Gately 托管的 tailscaled 运行中时先退出登录；自定义状态目录与系统已有的 tailscaled 不处理）。旧配置保存在配置历史中，可以恢复；安装的程序不受影响，卸载使用 `DELETE /api/{module}/install`。\n\n所需权限：`cloudflared:write`。",
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "请求参数错误"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌无效、已过期或未登录"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌缺少所需权限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "恢复模块默认配置",
+        "tags": [
+          "Cloudflare 隧道"
+        ],
+        "x-required-scope": "cloudflared:write",
         "x-token-allowed": true
       }
     },
@@ -10652,8 +10982,8 @@
       }
     },
     "/api/filebrowser/install": {
-      "get": {
-        "description": "所需权限：`filebrowser:read`。",
+      "delete": {
+        "description": "删除配置目录 bin 下安装的程序与全部保存的旧版本，之后重启使用该程序的进程：PATH 中有同名程序时改用它，没有时进程无法启动。模块配置不受影响，清除配置使用 `POST /api/{module}/reset`。\n\n所需权限：`filebrowser:write`。",
         "responses": {
           "200": {
             "description": "成功"
@@ -10694,7 +11024,56 @@
             "bearerAuth": []
           }
         ],
-        "summary": "查看 File Browser 下载安装进度",
+        "summary": "卸载托管程序",
+        "tags": [
+          "File Browser"
+        ],
+        "x-required-scope": "filebrowser:write",
+        "x-token-allowed": true
+      },
+      "get": {
+        "description": "frp、Cloudflare 隧道、Tailscale 与 File Browser 提供。返回配置目录 bin 下已安装的版本、保存的旧版本（`backups`，最多 3 个）、该程序单独设置的下载代理 `proxy`、当前平台，以及安装进度 `state`（`stage` 为 checking、downloading、verifying、extracting、done、uptodate 或 failed）。`unsupported` 非空时表示上游没有提供当前平台的程序。\n\n所需权限：`filebrowser:read`。",
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "请求参数错误"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌无效、已过期或未登录"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌缺少所需权限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "查看托管程序的安装信息与进度",
         "tags": [
           "File Browser"
         ],
@@ -10702,7 +11081,16 @@
         "x-token-allowed": true
       },
       "post": {
-        "description": "从 GitHub 下载最新正式版并校验 SHA-256，安装到配置目录的 bin 下，完成后重启已启用的实例；访问 GitHub 遵循“更新代理”设置。立即返回，进度通过 `GET /api/filebrowser/install` 查询。\n\n所需权限：`filebrowser:write`。",
+        "description": "请求体 `{\"version\": \"\", \"proxy\": \"\"}`：`version` 为空时安装最新正式版（已是最新版时不下载，`stage` 为 uptodate），否则安装指定版本；`proxy` 为下载代理（http、https 或 socks5），会保存下来供下次使用，为空时沿用全局设置 `updateProxy`。下载后校验 SHA-256，安装到配置目录的 bin 下，原有版本移入旧版本列表，完成后重启使用该程序的进程。立即返回，进度通过 `GET /api/{module}/install` 查询。\n\n所需权限：`filebrowser:write`。",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "成功"
@@ -10743,7 +11131,128 @@
             "bearerAuth": []
           }
         ],
-        "summary": "下载安装 FileBrowser Quantum",
+        "summary": "在线安装或更新托管程序",
+        "tags": [
+          "File Browser"
+        ],
+        "x-required-scope": "filebrowser:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/filebrowser/install/backups/{id}": {
+      "delete": {
+        "description": "所需权限：`filebrowser:write`。",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "请求参数错误"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌无效、已过期或未登录"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌缺少所需权限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "删除保存的旧版本",
+        "tags": [
+          "File Browser"
+        ],
+        "x-required-scope": "filebrowser:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/filebrowser/install/rollback": {
+      "post": {
+        "description": "请求体 `{\"id\": \"\u003c旧版本 ID\u003e\"}`。当前版本会另存为旧版本，之后仍可切回；完成后重启使用该程序的进程。\n\n所需权限：`filebrowser:write`。",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "请求参数错误"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌无效、已过期或未登录"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌缺少所需权限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "切换到保存的旧版本",
         "tags": [
           "File Browser"
         ],
@@ -11394,6 +11903,57 @@
         "x-token-allowed": true
       }
     },
+    "/api/filebrowser/reset": {
+      "post": {
+        "description": "frp、Cloudflare 隧道、Tailscale 与 File Browser 提供，无需请求体。停止该模块的全部进程，把配置（包括程序路径与下载代理）恢复为默认值，并删除 Gately 为它生成的文件：frp 的配置文件、File Browser 各实例的数据目录（用户、分享链接与缓存）、Tailscale 默认状态目录中的登录状态（Gately 托管的 tailscaled 运行中时先退出登录；自定义状态目录与系统已有的 tailscaled 不处理）。旧配置保存在配置历史中，可以恢复；安装的程序不受影响，卸载使用 `DELETE /api/{module}/install`。\n\n所需权限：`filebrowser:write`。",
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "请求参数错误"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌无效、已过期或未登录"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌缺少所需权限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "恢复模块默认配置",
+        "tags": [
+          "File Browser"
+        ],
+        "x-required-scope": "filebrowser:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/filebrowser/settings": {
       "get": {
         "description": "返回使用的可执行文件、版本，以及它是否为 FileBrowser Quantum。\n\n所需权限：`filebrowser:read`。",
@@ -11781,6 +12341,285 @@
           }
         ],
         "summary": "导入已有的 frpc / frps 配置（支持旧版 ini 与新版 toml）；apply 为 false 时仅预览",
+        "tags": [
+          "frp 内网穿透"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/frp/install": {
+      "delete": {
+        "description": "删除配置目录 bin 下安装的程序与全部保存的旧版本，之后重启使用该程序的进程：PATH 中有同名程序时改用它，没有时进程无法启动。模块配置不受影响，清除配置使用 `POST /api/{module}/reset`。\n\n所需权限：`frp:write`。",
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "请求参数错误"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌无效、已过期或未登录"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌缺少所需权限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "卸载托管程序",
+        "tags": [
+          "frp 内网穿透"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      },
+      "get": {
+        "description": "frp、Cloudflare 隧道、Tailscale 与 File Browser 提供。返回配置目录 bin 下已安装的版本、保存的旧版本（`backups`，最多 3 个）、该程序单独设置的下载代理 `proxy`、当前平台，以及安装进度 `state`（`stage` 为 checking、downloading、verifying、extracting、done、uptodate 或 failed）。`unsupported` 非空时表示上游没有提供当前平台的程序。\n\n所需权限：`frp:read`。",
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "请求参数错误"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌无效、已过期或未登录"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌缺少所需权限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "查看托管程序的安装信息与进度",
+        "tags": [
+          "frp 内网穿透"
+        ],
+        "x-required-scope": "frp:read",
+        "x-token-allowed": true
+      },
+      "post": {
+        "description": "请求体 `{\"version\": \"\", \"proxy\": \"\"}`：`version` 为空时安装最新正式版（已是最新版时不下载，`stage` 为 uptodate），否则安装指定版本；`proxy` 为下载代理（http、https 或 socks5），会保存下来供下次使用，为空时沿用全局设置 `updateProxy`。下载后校验 SHA-256，安装到配置目录的 bin 下，原有版本移入旧版本列表，完成后重启使用该程序的进程。立即返回，进度通过 `GET /api/{module}/install` 查询。\n\n所需权限：`frp:write`。",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "请求参数错误"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌无效、已过期或未登录"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌缺少所需权限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "在线安装或更新托管程序",
+        "tags": [
+          "frp 内网穿透"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/frp/install/backups/{id}": {
+      "delete": {
+        "description": "所需权限：`frp:write`。",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "请求参数错误"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌无效、已过期或未登录"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌缺少所需权限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "删除保存的旧版本",
+        "tags": [
+          "frp 内网穿透"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/frp/install/rollback": {
+      "post": {
+        "description": "请求体 `{\"id\": \"\u003c旧版本 ID\u003e\"}`。当前版本会另存为旧版本，之后仍可切回；完成后重启使用该程序的进程。\n\n所需权限：`frp:write`。",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "请求参数错误"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌无效、已过期或未登录"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌缺少所需权限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "切换到保存的旧版本",
         "tags": [
           "frp 内网穿透"
         ],
@@ -12363,6 +13202,57 @@
           }
         ],
         "summary": "启用或停用条目",
+        "tags": [
+          "frp 内网穿透"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/frp/reset": {
+      "post": {
+        "description": "frp、Cloudflare 隧道、Tailscale 与 File Browser 提供，无需请求体。停止该模块的全部进程，把配置（包括程序路径与下载代理）恢复为默认值，并删除 Gately 为它生成的文件：frp 的配置文件、File Browser 各实例的数据目录（用户、分享链接与缓存）、Tailscale 默认状态目录中的登录状态（Gately 托管的 tailscaled 运行中时先退出登录；自定义状态目录与系统已有的 tailscaled 不处理）。旧配置保存在配置历史中，可以恢复；安装的程序不受影响，卸载使用 `DELETE /api/{module}/install`。\n\n所需权限：`frp:write`。",
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "请求参数错误"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌无效、已过期或未登录"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌缺少所需权限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "恢复模块默认配置",
         "tags": [
           "frp 内网穿透"
         ],
@@ -20903,6 +21793,285 @@
         "x-token-allowed": false
       }
     },
+    "/api/tailscale/install": {
+      "delete": {
+        "description": "删除配置目录 bin 下安装的程序与全部保存的旧版本，之后重启使用该程序的进程：PATH 中有同名程序时改用它，没有时进程无法启动。模块配置不受影响，清除配置使用 `POST /api/{module}/reset`。\n\n所需权限：`tailscale:write`。",
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "请求参数错误"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌无效、已过期或未登录"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌缺少所需权限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "卸载托管程序",
+        "tags": [
+          "Tailscale 组网"
+        ],
+        "x-required-scope": "tailscale:write",
+        "x-token-allowed": true
+      },
+      "get": {
+        "description": "frp、Cloudflare 隧道、Tailscale 与 File Browser 提供。返回配置目录 bin 下已安装的版本、保存的旧版本（`backups`，最多 3 个）、该程序单独设置的下载代理 `proxy`、当前平台，以及安装进度 `state`（`stage` 为 checking、downloading、verifying、extracting、done、uptodate 或 failed）。`unsupported` 非空时表示上游没有提供当前平台的程序。\n\n所需权限：`tailscale:read`。",
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "请求参数错误"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌无效、已过期或未登录"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌缺少所需权限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "查看托管程序的安装信息与进度",
+        "tags": [
+          "Tailscale 组网"
+        ],
+        "x-required-scope": "tailscale:read",
+        "x-token-allowed": true
+      },
+      "post": {
+        "description": "请求体 `{\"version\": \"\", \"proxy\": \"\"}`：`version` 为空时安装最新正式版（已是最新版时不下载，`stage` 为 uptodate），否则安装指定版本；`proxy` 为下载代理（http、https 或 socks5），会保存下来供下次使用，为空时沿用全局设置 `updateProxy`。下载后校验 SHA-256，安装到配置目录的 bin 下，原有版本移入旧版本列表，完成后重启使用该程序的进程。立即返回，进度通过 `GET /api/{module}/install` 查询。\n\n所需权限：`tailscale:write`。",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "请求参数错误"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌无效、已过期或未登录"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌缺少所需权限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "在线安装或更新托管程序",
+        "tags": [
+          "Tailscale 组网"
+        ],
+        "x-required-scope": "tailscale:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/tailscale/install/backups/{id}": {
+      "delete": {
+        "description": "所需权限：`tailscale:write`。",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "请求参数错误"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌无效、已过期或未登录"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌缺少所需权限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "删除保存的旧版本",
+        "tags": [
+          "Tailscale 组网"
+        ],
+        "x-required-scope": "tailscale:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/tailscale/install/rollback": {
+      "post": {
+        "description": "请求体 `{\"id\": \"\u003c旧版本 ID\u003e\"}`。当前版本会另存为旧版本，之后仍可切回；完成后重启使用该程序的进程。\n\n所需权限：`tailscale:write`。",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "请求参数错误"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌无效、已过期或未登录"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌缺少所需权限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "切换到保存的旧版本",
+        "tags": [
+          "Tailscale 组网"
+        ],
+        "x-required-scope": "tailscale:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/tailscale/logout": {
       "post": {
         "description": "所需权限：`tailscale:write`。",
@@ -21141,6 +22310,57 @@
           "Tailscale 组网"
         ],
         "x-required-scope": "tailscale:read",
+        "x-token-allowed": true
+      }
+    },
+    "/api/tailscale/reset": {
+      "post": {
+        "description": "frp、Cloudflare 隧道、Tailscale 与 File Browser 提供，无需请求体。停止该模块的全部进程，把配置（包括程序路径与下载代理）恢复为默认值，并删除 Gately 为它生成的文件：frp 的配置文件、File Browser 各实例的数据目录（用户、分享链接与缓存）、Tailscale 默认状态目录中的登录状态（Gately 托管的 tailscaled 运行中时先退出登录；自定义状态目录与系统已有的 tailscaled 不处理）。旧配置保存在配置历史中，可以恢复；安装的程序不受影响，卸载使用 `DELETE /api/{module}/install`。\n\n所需权限：`tailscale:write`。",
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "请求参数错误"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌无效、已过期或未登录"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌缺少所需权限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "恢复模块默认配置",
+        "tags": [
+          "Tailscale 组网"
+        ],
+        "x-required-scope": "tailscale:write",
         "x-token-allowed": true
       }
     },

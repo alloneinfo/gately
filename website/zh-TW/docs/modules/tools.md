@@ -84,7 +84,7 @@ WebDAV、FTP 與 SMB 共用一份「共用使用者」，欄位與各服務的�
 
 在「檔案服務」分組的「File Browser」中設定。Gately 託管 [FileBrowser Quantum](https://github.com/gtsteffaniak/filebrowser)：一個網頁檔案管理器，可以線上預覽圖片、影片與文件、上傳下載、產生分享連結，並有自己的多使用者與權限管理。原版 filebrowser/filebrowser 已於 2026 年封存、不再修復安全問題，因此託管的是仍在維護的 Quantum 分支。
 
-程式不內建在 Gately 中。頁面下方「FileBrowser Quantum 程式」卡片的「下載安裝」從 GitHub 下載最新正式版到設定目錄的 `bin/filebrowser`，依 GitHub 記錄的 SHA-256 校驗，存取 GitHub 時使用「設定」中的更新代理；再次點擊即可更新，更新後已啟用的實例自動重新啟動。也可以自行放置程式並填寫路徑。程式依以下順序尋找：填寫的路徑、設定目錄下的 `bin/`、`PATH`；找到的程式不是 Quantum（例如 `PATH` 中的原版）時頁面會提示。
+程式不內建在 Gately 中。頁面下方的「線上安裝」卡片從 GitHub 下載 FileBrowser Quantum 到設定目錄的 `bin/filebrowser`，支援更新、安裝指定版本、單獨設定下載代理、回滾與解除安裝，更新或回滾後已啟用的實例自動重新啟動，詳見 [線上安裝、更新與回滾](/zh-TW/docs/modules/tunnels#install)。頁首的「恢復預設設定」會刪除全部實例及其資料，見 [恢復預設設定](/zh-TW/docs/modules/tunnels#reset)。也可以自行放置程式並填寫路徑。程式依以下順序尋找：填寫的路徑、設定目錄下的 `bin/`、`PATH`；找到的程式不是 Quantum（例如 `PATH` 中的原版）時頁面會提示。
 
 每個實例是一個獨立的 File Browser 行程：
 

@@ -124,6 +124,12 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | GET | `/api/tailscale/status` | `tailscale:read` | 檢視 Tailscale 連線狀態 |
 | POST | `/api/tailscale/restart` | `tailscale:write` | 重新啟動 Tailscale |
 | POST | `/api/tailscale/logout` | `tailscale:write` | 登出 Tailscale |
+| GET | `/api/tailscale/install` | `tailscale:read` | 檢視託管程式的安裝資訊與進度 |
+| POST | `/api/tailscale/install` | `tailscale:write` | 線上安裝或更新託管程式 |
+| POST | `/api/tailscale/install/rollback` | `tailscale:write` | 切換到保存的舊版本 |
+| DELETE | `/api/tailscale/install` | `tailscale:write` | 解除安裝託管程式 |
+| DELETE | `/api/tailscale/install/backups/{id}` | `tailscale:write` | 刪除保存的舊版本 |
+| POST | `/api/tailscale/reset` | `tailscale:write` | 恢復模組預設設定 |
 
 ## frp 內網穿透
 
@@ -138,6 +144,12 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | PUT | `/api/frp/proxies/{key}/enable` | `frp:write` | 啟用或停用項目 |
 | PUT | `/api/frp/proxies-order` | `frp:write` | 調整項目排序 |
 | POST | `/api/frp/import` | `frp:write` | 匯入既有的 frpc / frps 設定（支援舊版 ini 與新版 toml）；apply 為 false 時僅預覽 |
+| GET | `/api/frp/install` | `frp:read` | 檢視託管程式的安裝資訊與進度 |
+| POST | `/api/frp/install` | `frp:write` | 線上安裝或更新託管程式 |
+| POST | `/api/frp/install/rollback` | `frp:write` | 切換到保存的舊版本 |
+| DELETE | `/api/frp/install` | `frp:write` | 解除安裝託管程式 |
+| DELETE | `/api/frp/install/backups/{id}` | `frp:write` | 刪除保存的舊版本 |
+| POST | `/api/frp/reset` | `frp:write` | 恢復模組預設設定 |
 | GET | `/api/frp/client` | `frp:read` | 讀取 frp 用戶端設定 |
 | PUT | `/api/frp/client` | `frp:write` | 儲存 frp 用戶端設定 |
 | GET | `/api/frp/server` | `frp:read` | 讀取 frp 伺服器端設定 |
@@ -158,6 +170,12 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | POST | `/api/cloudflared/tunnels/{key}/restart` | `cloudflared:write` | 重新啟動一條 Cloudflare 通道 |
 | GET | `/api/cloudflared/settings` | `cloudflared:read` | 讀取 Cloudflare 通道設定 |
 | PUT | `/api/cloudflared/settings` | `cloudflared:write` | 儲存 Cloudflare 通道設定 |
+| GET | `/api/cloudflared/install` | `cloudflared:read` | 檢視託管程式的安裝資訊與進度 |
+| POST | `/api/cloudflared/install` | `cloudflared:write` | 線上安裝或更新託管程式 |
+| POST | `/api/cloudflared/install/rollback` | `cloudflared:write` | 切換到保存的舊版本 |
+| DELETE | `/api/cloudflared/install` | `cloudflared:write` | 解除安裝託管程式 |
+| DELETE | `/api/cloudflared/install/backups/{id}` | `cloudflared:write` | 刪除保存的舊版本 |
+| POST | `/api/cloudflared/reset` | `cloudflared:write` | 恢復模組預設設定 |
 
 ## SSL 憑證
 
@@ -454,8 +472,12 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | POST | `/api/filebrowser/instances/{key}/restart` | `filebrowser:write` | 重新啟動一個 File Browser 實例 |
 | GET | `/api/filebrowser/settings` | `filebrowser:read` | 讀取 File Browser 程式設定 |
 | PUT | `/api/filebrowser/settings` | `filebrowser:write` | 儲存 File Browser 程式設定 |
-| GET | `/api/filebrowser/install` | `filebrowser:read` | 查看 File Browser 下載安裝進度 |
-| POST | `/api/filebrowser/install` | `filebrowser:write` | 下載安裝 FileBrowser Quantum |
+| GET | `/api/filebrowser/install` | `filebrowser:read` | 檢視託管程式的安裝資訊與進度 |
+| POST | `/api/filebrowser/install` | `filebrowser:write` | 線上安裝或更新託管程式 |
+| POST | `/api/filebrowser/install/rollback` | `filebrowser:write` | 切換到保存的舊版本 |
+| DELETE | `/api/filebrowser/install` | `filebrowser:write` | 解除安裝託管程式 |
+| DELETE | `/api/filebrowser/install/backups/{id}` | `filebrowser:write` | 刪除保存的舊版本 |
+| POST | `/api/filebrowser/reset` | `filebrowser:write` | 恢復模組預設設定 |
 
 ## 儲存掛載
 

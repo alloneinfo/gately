@@ -28,9 +28,9 @@
 
 端口转发、STUN、Web 服务需要直接监听宿主机端口。使用桥接网络时，需要自行映射每一个用到的端口。
 
-## Tailscale、frp、cloudflared 为什么要自己放二进制？
+## Tailscale、frp、cloudflared 的程序从哪里来？
 
-这三个模块托管官方外部程序，Gately 本体不内置它们，因此始终可以使用上游最新版本。放置位置见 [配置与运行参数](/docs/guide/configuration)。File Browser 可以在页面中一键下载安装。
+这些模块托管官方外部程序，Gately 本体不内置它们。在各模块页面的「在线安装」卡片中可以下载最新版或指定版本，支持单独设置下载代理，升级后有问题可以回滚到旧版本，也可以卸载程序或恢复默认配置，详见 [在线安装、更新与回滚](/docs/modules/tunnels#install)。Tailscale 只在 Linux 上支持在线安装。也可以自行放置程序，位置见 [配置与运行参数](/docs/guide/configuration)。
 
 ## STUN 规则启用后外网仍无法访问？
 

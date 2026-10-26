@@ -28,9 +28,9 @@ Yes. Every release ships OpenWrt packages: the `.ipk` for OpenWrt 24.10 and earl
 
 Port forwarding, STUN and web services listen directly on host ports. With bridge networking you have to publish every port in use yourself.
 
-## Why do I have to supply the Tailscale, frp and cloudflared binaries myself?
+## Where do the Tailscale, frp and cloudflared programs come from?
 
-These three modules supervise the official external programs. Gately does not bundle them, so you can always use the latest upstream version. See [Configuration & Runtime Options](/en/docs/guide/configuration) for where to put them. File Browser can be downloaded and installed from its page with one click.
+These modules supervise the official external programs, which Gately does not bundle. The "online install" card on each module page downloads the latest version or a specific version, can use its own download proxy, and lets you roll back to an older version if an upgrade has problems, uninstall the program or restore default settings; see [Online install, update and rollback](/en/docs/modules/tunnels#install). Tailscale online install is available on Linux only. You can also place the programs yourself; see [Configuration & Runtime Options](/en/docs/guide/configuration) for where.
 
 ## My STUN rule is enabled but I still cannot connect from outside
 

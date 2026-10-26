@@ -4303,6 +4303,285 @@
         "x-token-allowed": true
       }
     },
+    "/api/cloudflared/install": {
+      "delete": {
+        "description": "刪除配置目录 bin 下安装的程序与全部保存的旧版本，之后重启使用该程序的进程：PATH 中有同名程序时改用它，没有时进程无法启动。模块配置不受影响，清除配置使用 `POST /api/{module}/reset`。\n\n所需權限：`cloudflared:write`。",
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "請求參數錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖無效、已過期或未登入"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖缺少所需權限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "解除安裝託管程式",
+        "tags": [
+          "Cloudflare 通道"
+        ],
+        "x-required-scope": "cloudflared:write",
+        "x-token-allowed": true
+      },
+      "get": {
+        "description": "frp、Cloudflare 通道、Tailscale 與 File Browser 提供。傳回設定目錄 bin 下已安裝的版本、保存的舊版本（`backups`，最多 3 個）、該程式單獨設定的下載代理 `proxy`、目前平台，以及安裝進度 `state`（`stage` 為 checking、downloading、verifying、extracting、done、uptodate 或 failed）。`unsupported` 非空時表示上游沒有提供目前平台的程式。\n\n所需權限：`cloudflared:read`。",
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "請求參數錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖無效、已過期或未登入"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖缺少所需權限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "檢視託管程式的安裝資訊與進度",
+        "tags": [
+          "Cloudflare 通道"
+        ],
+        "x-required-scope": "cloudflared:read",
+        "x-token-allowed": true
+      },
+      "post": {
+        "description": "請求主體 `{\"version\": \"\", \"proxy\": \"\"}`：`version` 為空時安裝最新正式版（已是最新版時不下載，`stage` 為 uptodate），否則安裝指定版本；`proxy` 為下載代理（http、https 或 socks5），會保存下來供下次使用，為空時沿用全域設定 `updateProxy`。下載後校驗 SHA-256，安裝到設定目錄的 bin 下，原有版本移入舊版本清單，完成後重新啟動使用該程式的程序。立即返回，進度透過 `GET /api/{module}/install` 查詢。\n\n所需權限：`cloudflared:write`。",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "請求參數錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖無效、已過期或未登入"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖缺少所需權限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "線上安裝或更新託管程式",
+        "tags": [
+          "Cloudflare 通道"
+        ],
+        "x-required-scope": "cloudflared:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/cloudflared/install/backups/{id}": {
+      "delete": {
+        "description": "所需權限：`cloudflared:write`。",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "請求參數錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖無效、已過期或未登入"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖缺少所需權限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "刪除保存的舊版本",
+        "tags": [
+          "Cloudflare 通道"
+        ],
+        "x-required-scope": "cloudflared:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/cloudflared/install/rollback": {
+      "post": {
+        "description": "請求主體 `{\"id\": \"\u003c舊版本 ID\u003e\"}`。目前版本會另存為舊版本，之後仍可切回；完成後重新啟動使用該程式的程序。\n\n所需權限：`cloudflared:write`。",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "請求參數錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖無效、已過期或未登入"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖缺少所需權限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "切換到保存的舊版本",
+        "tags": [
+          "Cloudflare 通道"
+        ],
+        "x-required-scope": "cloudflared:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/cloudflared/logs": {
       "delete": {
         "description": "所需權限：`cloudflared:write`。",
@@ -4490,6 +4769,57 @@
           "Cloudflare 通道"
         ],
         "x-required-scope": "cloudflared:read",
+        "x-token-allowed": true
+      }
+    },
+    "/api/cloudflared/reset": {
+      "post": {
+        "description": "frp、Cloudflare 通道、Tailscale 与 File Browser 提供，无需请求体。停止该模块的全部进程，把配置（包括程序路径与下载代理）恢复为默认值，并刪除 Gately 为它生成的文件：frp 的配置文件、File Browser 各实例的数据目录（用户、分享链接与缓存）、Tailscale 默认状态目录中的登录状态（Gately 托管的 tailscaled 运行中时先登出；自定义状态目录与系统已有的 tailscaled 不处理）。旧配置保存在配置历史中，可以恢复；安装的程序不受影响，卸载使用 `DELETE /api/{module}/install`。\n\n所需權限：`cloudflared:write`。",
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "請求參數錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖無效、已過期或未登入"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖缺少所需權限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "恢復模組預設設定",
+        "tags": [
+          "Cloudflare 通道"
+        ],
+        "x-required-scope": "cloudflared:write",
         "x-token-allowed": true
       }
     },
@@ -10652,8 +10982,8 @@
       }
     },
     "/api/filebrowser/install": {
-      "get": {
-        "description": "所需權限：`filebrowser:read`。",
+      "delete": {
+        "description": "刪除配置目录 bin 下安装的程序与全部保存的旧版本，之后重启使用该程序的进程：PATH 中有同名程序时改用它，没有时进程无法启动。模块配置不受影响，清除配置使用 `POST /api/{module}/reset`。\n\n所需權限：`filebrowser:write`。",
         "responses": {
           "200": {
             "description": "成功"
@@ -10694,7 +11024,56 @@
             "bearerAuth": []
           }
         ],
-        "summary": "查看 File Browser 下載安裝進度",
+        "summary": "解除安裝託管程式",
+        "tags": [
+          "File Browser"
+        ],
+        "x-required-scope": "filebrowser:write",
+        "x-token-allowed": true
+      },
+      "get": {
+        "description": "frp、Cloudflare 通道、Tailscale 與 File Browser 提供。傳回設定目錄 bin 下已安裝的版本、保存的舊版本（`backups`，最多 3 個）、該程式單獨設定的下載代理 `proxy`、目前平台，以及安裝進度 `state`（`stage` 為 checking、downloading、verifying、extracting、done、uptodate 或 failed）。`unsupported` 非空時表示上游沒有提供目前平台的程式。\n\n所需權限：`filebrowser:read`。",
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "請求參數錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖無效、已過期或未登入"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖缺少所需權限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "檢視託管程式的安裝資訊與進度",
         "tags": [
           "File Browser"
         ],
@@ -10702,7 +11081,16 @@
         "x-token-allowed": true
       },
       "post": {
-        "description": "從 GitHub 下載最新正式版並校驗 SHA-256，安裝到設定目錄的 bin 下，完成後重新啟動已啟用的實例；存取 GitHub 遵循「更新代理」設定。立即返回，進度透過 `GET /api/filebrowser/install` 查詢。\n\n所需權限：`filebrowser:write`。",
+        "description": "請求主體 `{\"version\": \"\", \"proxy\": \"\"}`：`version` 為空時安裝最新正式版（已是最新版時不下載，`stage` 為 uptodate），否則安裝指定版本；`proxy` 為下載代理（http、https 或 socks5），會保存下來供下次使用，為空時沿用全域設定 `updateProxy`。下載後校驗 SHA-256，安裝到設定目錄的 bin 下，原有版本移入舊版本清單，完成後重新啟動使用該程式的程序。立即返回，進度透過 `GET /api/{module}/install` 查詢。\n\n所需權限：`filebrowser:write`。",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "成功"
@@ -10743,7 +11131,128 @@
             "bearerAuth": []
           }
         ],
-        "summary": "下載安裝 FileBrowser Quantum",
+        "summary": "線上安裝或更新託管程式",
+        "tags": [
+          "File Browser"
+        ],
+        "x-required-scope": "filebrowser:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/filebrowser/install/backups/{id}": {
+      "delete": {
+        "description": "所需權限：`filebrowser:write`。",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "請求參數錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖無效、已過期或未登入"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖缺少所需權限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "刪除保存的舊版本",
+        "tags": [
+          "File Browser"
+        ],
+        "x-required-scope": "filebrowser:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/filebrowser/install/rollback": {
+      "post": {
+        "description": "請求主體 `{\"id\": \"\u003c舊版本 ID\u003e\"}`。目前版本會另存為舊版本，之後仍可切回；完成後重新啟動使用該程式的程序。\n\n所需權限：`filebrowser:write`。",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "請求參數錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖無效、已過期或未登入"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖缺少所需權限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "切換到保存的舊版本",
         "tags": [
           "File Browser"
         ],
@@ -11394,6 +11903,57 @@
         "x-token-allowed": true
       }
     },
+    "/api/filebrowser/reset": {
+      "post": {
+        "description": "frp、Cloudflare 通道、Tailscale 与 File Browser 提供，无需请求体。停止该模块的全部进程，把配置（包括程序路径与下载代理）恢复为默认值，并刪除 Gately 为它生成的文件：frp 的配置文件、File Browser 各实例的数据目录（用户、分享链接与缓存）、Tailscale 默认状态目录中的登录状态（Gately 托管的 tailscaled 运行中时先登出；自定义状态目录与系统已有的 tailscaled 不处理）。旧配置保存在配置历史中，可以恢复；安装的程序不受影响，卸载使用 `DELETE /api/{module}/install`。\n\n所需權限：`filebrowser:write`。",
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "請求參數錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖無效、已過期或未登入"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖缺少所需權限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "恢復模組預設設定",
+        "tags": [
+          "File Browser"
+        ],
+        "x-required-scope": "filebrowser:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/filebrowser/settings": {
       "get": {
         "description": "返回使用的可執行檔、版本，以及它是否為 FileBrowser Quantum。\n\n所需權限：`filebrowser:read`。",
@@ -11781,6 +12341,285 @@
           }
         ],
         "summary": "匯入既有的 frpc / frps 設定（支援舊版 ini 與新版 toml）；apply 為 false 時僅預覽",
+        "tags": [
+          "frp 內網穿透"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/frp/install": {
+      "delete": {
+        "description": "刪除配置目录 bin 下安装的程序与全部保存的旧版本，之后重启使用该程序的进程：PATH 中有同名程序时改用它，没有时进程无法启动。模块配置不受影响，清除配置使用 `POST /api/{module}/reset`。\n\n所需權限：`frp:write`。",
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "請求參數錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖無效、已過期或未登入"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖缺少所需權限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "解除安裝託管程式",
+        "tags": [
+          "frp 內網穿透"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      },
+      "get": {
+        "description": "frp、Cloudflare 通道、Tailscale 與 File Browser 提供。傳回設定目錄 bin 下已安裝的版本、保存的舊版本（`backups`，最多 3 個）、該程式單獨設定的下載代理 `proxy`、目前平台，以及安裝進度 `state`（`stage` 為 checking、downloading、verifying、extracting、done、uptodate 或 failed）。`unsupported` 非空時表示上游沒有提供目前平台的程式。\n\n所需權限：`frp:read`。",
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "請求參數錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖無效、已過期或未登入"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖缺少所需權限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "檢視託管程式的安裝資訊與進度",
+        "tags": [
+          "frp 內網穿透"
+        ],
+        "x-required-scope": "frp:read",
+        "x-token-allowed": true
+      },
+      "post": {
+        "description": "請求主體 `{\"version\": \"\", \"proxy\": \"\"}`：`version` 為空時安裝最新正式版（已是最新版時不下載，`stage` 為 uptodate），否則安裝指定版本；`proxy` 為下載代理（http、https 或 socks5），會保存下來供下次使用，為空時沿用全域設定 `updateProxy`。下載後校驗 SHA-256，安裝到設定目錄的 bin 下，原有版本移入舊版本清單，完成後重新啟動使用該程式的程序。立即返回，進度透過 `GET /api/{module}/install` 查詢。\n\n所需權限：`frp:write`。",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "請求參數錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖無效、已過期或未登入"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖缺少所需權限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "線上安裝或更新託管程式",
+        "tags": [
+          "frp 內網穿透"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/frp/install/backups/{id}": {
+      "delete": {
+        "description": "所需權限：`frp:write`。",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "請求參數錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖無效、已過期或未登入"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖缺少所需權限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "刪除保存的舊版本",
+        "tags": [
+          "frp 內網穿透"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/frp/install/rollback": {
+      "post": {
+        "description": "請求主體 `{\"id\": \"\u003c舊版本 ID\u003e\"}`。目前版本會另存為舊版本，之後仍可切回；完成後重新啟動使用該程式的程序。\n\n所需權限：`frp:write`。",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "請求參數錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖無效、已過期或未登入"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖缺少所需權限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "切換到保存的舊版本",
         "tags": [
           "frp 內網穿透"
         ],
@@ -12363,6 +13202,57 @@
           }
         ],
         "summary": "啟用或停用項目",
+        "tags": [
+          "frp 內網穿透"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/frp/reset": {
+      "post": {
+        "description": "frp、Cloudflare 通道、Tailscale 与 File Browser 提供，无需请求体。停止该模块的全部进程，把配置（包括程序路径与下载代理）恢复为默认值，并刪除 Gately 为它生成的文件：frp 的配置文件、File Browser 各实例的数据目录（用户、分享链接与缓存）、Tailscale 默认状态目录中的登录状态（Gately 托管的 tailscaled 运行中时先登出；自定义状态目录与系统已有的 tailscaled 不处理）。旧配置保存在配置历史中，可以恢复；安装的程序不受影响，卸载使用 `DELETE /api/{module}/install`。\n\n所需權限：`frp:write`。",
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "請求參數錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖無效、已過期或未登入"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖缺少所需權限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "恢復模組預設設定",
         "tags": [
           "frp 內網穿透"
         ],
@@ -20903,6 +21793,285 @@
         "x-token-allowed": false
       }
     },
+    "/api/tailscale/install": {
+      "delete": {
+        "description": "刪除配置目录 bin 下安装的程序与全部保存的旧版本，之后重启使用该程序的进程：PATH 中有同名程序时改用它，没有时进程无法启动。模块配置不受影响，清除配置使用 `POST /api/{module}/reset`。\n\n所需權限：`tailscale:write`。",
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "請求參數錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖無效、已過期或未登入"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖缺少所需權限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "解除安裝託管程式",
+        "tags": [
+          "Tailscale 組網"
+        ],
+        "x-required-scope": "tailscale:write",
+        "x-token-allowed": true
+      },
+      "get": {
+        "description": "frp、Cloudflare 通道、Tailscale 與 File Browser 提供。傳回設定目錄 bin 下已安裝的版本、保存的舊版本（`backups`，最多 3 個）、該程式單獨設定的下載代理 `proxy`、目前平台，以及安裝進度 `state`（`stage` 為 checking、downloading、verifying、extracting、done、uptodate 或 failed）。`unsupported` 非空時表示上游沒有提供目前平台的程式。\n\n所需權限：`tailscale:read`。",
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "請求參數錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖無效、已過期或未登入"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖缺少所需權限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "檢視託管程式的安裝資訊與進度",
+        "tags": [
+          "Tailscale 組網"
+        ],
+        "x-required-scope": "tailscale:read",
+        "x-token-allowed": true
+      },
+      "post": {
+        "description": "請求主體 `{\"version\": \"\", \"proxy\": \"\"}`：`version` 為空時安裝最新正式版（已是最新版時不下載，`stage` 為 uptodate），否則安裝指定版本；`proxy` 為下載代理（http、https 或 socks5），會保存下來供下次使用，為空時沿用全域設定 `updateProxy`。下載後校驗 SHA-256，安裝到設定目錄的 bin 下，原有版本移入舊版本清單，完成後重新啟動使用該程式的程序。立即返回，進度透過 `GET /api/{module}/install` 查詢。\n\n所需權限：`tailscale:write`。",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "請求參數錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖無效、已過期或未登入"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖缺少所需權限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "線上安裝或更新託管程式",
+        "tags": [
+          "Tailscale 組網"
+        ],
+        "x-required-scope": "tailscale:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/tailscale/install/backups/{id}": {
+      "delete": {
+        "description": "所需權限：`tailscale:write`。",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "請求參數錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖無效、已過期或未登入"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖缺少所需權限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "刪除保存的舊版本",
+        "tags": [
+          "Tailscale 組網"
+        ],
+        "x-required-scope": "tailscale:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/tailscale/install/rollback": {
+      "post": {
+        "description": "請求主體 `{\"id\": \"\u003c舊版本 ID\u003e\"}`。目前版本會另存為舊版本，之後仍可切回；完成後重新啟動使用該程式的程序。\n\n所需權限：`tailscale:write`。",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "請求參數錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖無效、已過期或未登入"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖缺少所需權限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "切換到保存的舊版本",
+        "tags": [
+          "Tailscale 組網"
+        ],
+        "x-required-scope": "tailscale:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/tailscale/logout": {
       "post": {
         "description": "所需權限：`tailscale:write`。",
@@ -21141,6 +22310,57 @@
           "Tailscale 組網"
         ],
         "x-required-scope": "tailscale:read",
+        "x-token-allowed": true
+      }
+    },
+    "/api/tailscale/reset": {
+      "post": {
+        "description": "frp、Cloudflare 通道、Tailscale 与 File Browser 提供，无需请求体。停止该模块的全部进程，把配置（包括程序路径与下载代理）恢复为默认值，并刪除 Gately 为它生成的文件：frp 的配置文件、File Browser 各实例的数据目录（用户、分享链接与缓存）、Tailscale 默认状态目录中的登录状态（Gately 托管的 tailscaled 运行中时先登出；自定义状态目录与系统已有的 tailscaled 不处理）。旧配置保存在配置历史中，可以恢复；安装的程序不受影响，卸载使用 `DELETE /api/{module}/install`。\n\n所需權限：`tailscale:write`。",
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "請求參數錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖無效、已過期或未登入"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖缺少所需權限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "恢復模組預設設定",
+        "tags": [
+          "Tailscale 組網"
+        ],
+        "x-required-scope": "tailscale:write",
         "x-token-allowed": true
       }
     },

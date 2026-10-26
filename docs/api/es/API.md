@@ -124,6 +124,12 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | GET | `/api/tailscale/status` | `tailscale:read` | Ver el estado de conexión de Tailscale |
 | POST | `/api/tailscale/restart` | `tailscale:write` | Reiniciar Tailscale |
 | POST | `/api/tailscale/logout` | `tailscale:write` | Cerrar sesión de Tailscale |
+| GET | `/api/tailscale/install` | `tailscale:read` | Ver la información de instalación y el progreso de un programa gestionado |
+| POST | `/api/tailscale/install` | `tailscale:write` | Instalar o actualizar en línea un programa gestionado |
+| POST | `/api/tailscale/install/rollback` | `tailscale:write` | Cambiar a una versión anterior guardada |
+| DELETE | `/api/tailscale/install` | `tailscale:write` | Desinstalar un programa gestionado |
+| DELETE | `/api/tailscale/install/backups/{id}` | `tailscale:write` | Eliminar una versión anterior guardada |
+| POST | `/api/tailscale/reset` | `tailscale:write` | Restaurar los ajustes predeterminados del módulo |
 
 ## Traversal de red interna frp
 
@@ -138,6 +144,12 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | PUT | `/api/frp/proxies/{key}/enable` | `frp:write` | Activar o desactivar Entrada |
 | PUT | `/api/frp/proxies-order` | `frp:write` | Reordenar Entrada |
 | POST | `/api/frp/import` | `frp:write` | Importar configuraciones existentes de frpc / frps (admite ini antiguo y toml nuevo); con apply en false solo se muestra una vista previa |
+| GET | `/api/frp/install` | `frp:read` | Ver la información de instalación y el progreso de un programa gestionado |
+| POST | `/api/frp/install` | `frp:write` | Instalar o actualizar en línea un programa gestionado |
+| POST | `/api/frp/install/rollback` | `frp:write` | Cambiar a una versión anterior guardada |
+| DELETE | `/api/frp/install` | `frp:write` | Desinstalar un programa gestionado |
+| DELETE | `/api/frp/install/backups/{id}` | `frp:write` | Eliminar una versión anterior guardada |
+| POST | `/api/frp/reset` | `frp:write` | Restaurar los ajustes predeterminados del módulo |
 | GET | `/api/frp/client` | `frp:read` | Leer la configuración del cliente frp |
 | PUT | `/api/frp/client` | `frp:write` | Guardar la configuración del cliente frp |
 | GET | `/api/frp/server` | `frp:read` | Leer la configuración del servidor frp |
@@ -158,6 +170,12 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | POST | `/api/cloudflared/tunnels/{key}/restart` | `cloudflared:write` | Reiniciar un túnel de Cloudflare |
 | GET | `/api/cloudflared/settings` | `cloudflared:read` | Leer los ajustes del túnel de Cloudflare |
 | PUT | `/api/cloudflared/settings` | `cloudflared:write` | Guardar los ajustes del túnel de Cloudflare |
+| GET | `/api/cloudflared/install` | `cloudflared:read` | Ver la información de instalación y el progreso de un programa gestionado |
+| POST | `/api/cloudflared/install` | `cloudflared:write` | Instalar o actualizar en línea un programa gestionado |
+| POST | `/api/cloudflared/install/rollback` | `cloudflared:write` | Cambiar a una versión anterior guardada |
+| DELETE | `/api/cloudflared/install` | `cloudflared:write` | Desinstalar un programa gestionado |
+| DELETE | `/api/cloudflared/install/backups/{id}` | `cloudflared:write` | Eliminar una versión anterior guardada |
+| POST | `/api/cloudflared/reset` | `cloudflared:write` | Restaurar los ajustes predeterminados del módulo |
 
 ## Certificado SSL
 
@@ -454,8 +472,12 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | POST | `/api/filebrowser/instances/{key}/restart` | `filebrowser:write` | Reiniciar una instancia de File Browser |
 | GET | `/api/filebrowser/settings` | `filebrowser:read` | Leer los ajustes del programa File Browser |
 | PUT | `/api/filebrowser/settings` | `filebrowser:write` | Guardar los ajustes del programa File Browser |
-| GET | `/api/filebrowser/install` | `filebrowser:read` | Ver el progreso de instalación de File Browser |
-| POST | `/api/filebrowser/install` | `filebrowser:write` | Descargar e instalar FileBrowser Quantum |
+| GET | `/api/filebrowser/install` | `filebrowser:read` | Ver la información de instalación y el progreso de un programa gestionado |
+| POST | `/api/filebrowser/install` | `filebrowser:write` | Instalar o actualizar en línea un programa gestionado |
+| POST | `/api/filebrowser/install/rollback` | `filebrowser:write` | Cambiar a una versión anterior guardada |
+| DELETE | `/api/filebrowser/install` | `filebrowser:write` | Desinstalar un programa gestionado |
+| DELETE | `/api/filebrowser/install/backups/{id}` | `filebrowser:write` | Eliminar una versión anterior guardada |
+| POST | `/api/filebrowser/reset` | `filebrowser:write` | Restaurar los ajustes predeterminados del módulo |
 
 ## Montajes de almacenamiento
 

@@ -4303,6 +4303,285 @@
         "x-token-allowed": true
       }
     },
+    "/api/cloudflared/install": {
+      "delete": {
+        "description": "配置目录 bin 下安装的程序与全部保存的旧版本，之后重启使用该程序的进程：PATH 中有同名程序时改用它，没有时进程无法启动。模块配置不受影响，清除配置使用 `POST /api/{module}/reset`。\n\nErforderliche Berechtigung: `cloudflared:write`. löschen",
+        "responses": {
+          "200": {
+            "description": "Erfolgreich"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Anfrageparameter fehlerhaft"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token ungültig, abgelaufen oder nicht angemeldet"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Dem Token fehlt die erforderliche Berechtigung"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Verwaltetes Programm deinstallieren",
+        "tags": [
+          "Cloudflare-Tunnel"
+        ],
+        "x-required-scope": "cloudflared:write",
+        "x-token-allowed": true
+      },
+      "get": {
+        "description": "Verfügbar für frp, Cloudflare-Tunnel, Tailscale und File Browser. Liefert die im bin-Verzeichnis des Konfigurationsverzeichnisses installierte Version, die gespeicherten früheren Versionen (`backups`, höchstens 3), den für dieses Programm gesetzten Download-Proxy (`proxy`), die aktuelle Plattform und den Installationsfortschritt `state` (`stage` ist checking, downloading, verifying, extracting, done, uptodate oder failed). Ein nicht leeres `unsupported` bedeutet, dass das Projekt kein Programm für die aktuelle Plattform anbietet.\n\nErforderliche Berechtigung: `cloudflared:read`.",
+        "responses": {
+          "200": {
+            "description": "Erfolgreich"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Anfrageparameter fehlerhaft"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token ungültig, abgelaufen oder nicht angemeldet"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Dem Token fehlt die erforderliche Berechtigung"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Installationsinfo und Fortschritt eines verwalteten Programms anzeigen",
+        "tags": [
+          "Cloudflare-Tunnel"
+        ],
+        "x-required-scope": "cloudflared:read",
+        "x-token-allowed": true
+      },
+      "post": {
+        "description": "Request-Body `{\"version\": \"\", \"proxy\": \"\"}`: Ein leeres `version` installiert die neueste stabile Version (ist sie bereits installiert, wird nichts heruntergeladen und `stage` ist uptodate), sonst die angegebene Version; `proxy` ist der Download-Proxy (http, https oder socks5), wird für das nächste Mal gespeichert und bei leerem Wert gilt die globale Einstellung `updateProxy`. Der Download wird per SHA-256 geprüft und in bin im Konfigurationsverzeichnis installiert, die bisherige Version wandert zu den früheren Versionen und Prozesse, die das Programm verwenden, werden neu gestartet. Antwortet sofort; den Fortschritt fragen Sie mit `GET /api/{module}/install` ab.\n\nErforderliche Berechtigung: `cloudflared:write`.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Erfolgreich"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Anfrageparameter fehlerhaft"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token ungültig, abgelaufen oder nicht angemeldet"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Dem Token fehlt die erforderliche Berechtigung"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Verwaltetes Programm online installieren oder aktualisieren",
+        "tags": [
+          "Cloudflare-Tunnel"
+        ],
+        "x-required-scope": "cloudflared:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/cloudflared/install/backups/{id}": {
+      "delete": {
+        "description": "Erforderliche Berechtigung: `cloudflared:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Erfolgreich"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Anfrageparameter fehlerhaft"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token ungültig, abgelaufen oder nicht angemeldet"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Dem Token fehlt die erforderliche Berechtigung"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Gespeicherte frühere Version löschen",
+        "tags": [
+          "Cloudflare-Tunnel"
+        ],
+        "x-required-scope": "cloudflared:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/cloudflared/install/rollback": {
+      "post": {
+        "description": "Request-Body `{\"id\": \"\u003cID der früheren Version\u003e\"}`. Die aktuelle Version wird als frühere Version gespeichert, sodass Sie zurückwechseln können; danach werden die Prozesse, die das Programm verwenden, neu gestartet.\n\nErforderliche Berechtigung: `cloudflared:write`.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Erfolgreich"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Anfrageparameter fehlerhaft"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token ungültig, abgelaufen oder nicht angemeldet"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Dem Token fehlt die erforderliche Berechtigung"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Zu einer gespeicherten früheren Version wechseln",
+        "tags": [
+          "Cloudflare-Tunnel"
+        ],
+        "x-required-scope": "cloudflared:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/cloudflared/logs": {
       "delete": {
         "description": "Erforderliche Berechtigung: `cloudflared:write`.",
@@ -4490,6 +4769,57 @@
           "Cloudflare-Tunnel"
         ],
         "x-required-scope": "cloudflared:read",
+        "x-token-allowed": true
+      }
+    },
+    "/api/cloudflared/reset": {
+      "post": {
+        "description": "frp、Cloudflare-Tunnel、Tailscale 与 File Browser 提供，无需请求体。停止该模块的全部进程，把配置（包括程序路径与下载代理）恢复为默认值，并Gately 为它生成的文件：frp 的配置文件、File Browser 各实例的数据目录（用户、分享链接与缓存）、Tailscale 默认状态目录中的登录状态（Gately 托管的 tailscaled 运行中时先abgemeldet；自定义状态目录与系统已有的 tailscaled 不处理）。旧配置保存在配置历史中，可以恢复；安装的程序不受影响，卸载使用 `DELETE /api/{module}/install`。\n\nErforderliche Berechtigung: `cloudflared:write`. löschen",
+        "responses": {
+          "200": {
+            "description": "Erfolgreich"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Anfrageparameter fehlerhaft"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token ungültig, abgelaufen oder nicht angemeldet"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Dem Token fehlt die erforderliche Berechtigung"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Standardeinstellungen des Moduls wiederherstellen",
+        "tags": [
+          "Cloudflare-Tunnel"
+        ],
+        "x-required-scope": "cloudflared:write",
         "x-token-allowed": true
       }
     },
@@ -10652,8 +10982,8 @@
       }
     },
     "/api/filebrowser/install": {
-      "get": {
-        "description": "Erforderliche Berechtigung: `filebrowser:read`.",
+      "delete": {
+        "description": "配置目录 bin 下安装的程序与全部保存的旧版本，之后重启使用该程序的进程：PATH 中有同名程序时改用它，没有时进程无法启动。模块配置不受影响，清除配置使用 `POST /api/{module}/reset`。\n\nErforderliche Berechtigung: `filebrowser:write`. löschen",
         "responses": {
           "200": {
             "description": "Erfolgreich"
@@ -10694,7 +11024,56 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Installationsfortschritt von File Browser anzeigen",
+        "summary": "Verwaltetes Programm deinstallieren",
+        "tags": [
+          "File Browser"
+        ],
+        "x-required-scope": "filebrowser:write",
+        "x-token-allowed": true
+      },
+      "get": {
+        "description": "Verfügbar für frp, Cloudflare-Tunnel, Tailscale und File Browser. Liefert die im bin-Verzeichnis des Konfigurationsverzeichnisses installierte Version, die gespeicherten früheren Versionen (`backups`, höchstens 3), den für dieses Programm gesetzten Download-Proxy (`proxy`), die aktuelle Plattform und den Installationsfortschritt `state` (`stage` ist checking, downloading, verifying, extracting, done, uptodate oder failed). Ein nicht leeres `unsupported` bedeutet, dass das Projekt kein Programm für die aktuelle Plattform anbietet.\n\nErforderliche Berechtigung: `filebrowser:read`.",
+        "responses": {
+          "200": {
+            "description": "Erfolgreich"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Anfrageparameter fehlerhaft"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token ungültig, abgelaufen oder nicht angemeldet"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Dem Token fehlt die erforderliche Berechtigung"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Installationsinfo und Fortschritt eines verwalteten Programms anzeigen",
         "tags": [
           "File Browser"
         ],
@@ -10702,7 +11081,16 @@
         "x-token-allowed": true
       },
       "post": {
-        "description": "Lädt die neueste stabile Version von GitHub, prüft ihre SHA-256-Prüfsumme, installiert sie nach bin im Konfigurationsverzeichnis und startet danach die aktivierten Instanzen neu; GitHub wird über die Einstellung „Update-Proxy“ erreicht. Antwortet sofort; den Fortschritt liefert `GET /api/filebrowser/install`.\n\nErforderliche Berechtigung: `filebrowser:write`.",
+        "description": "Request-Body `{\"version\": \"\", \"proxy\": \"\"}`: Ein leeres `version` installiert die neueste stabile Version (ist sie bereits installiert, wird nichts heruntergeladen und `stage` ist uptodate), sonst die angegebene Version; `proxy` ist der Download-Proxy (http, https oder socks5), wird für das nächste Mal gespeichert und bei leerem Wert gilt die globale Einstellung `updateProxy`. Der Download wird per SHA-256 geprüft und in bin im Konfigurationsverzeichnis installiert, die bisherige Version wandert zu den früheren Versionen und Prozesse, die das Programm verwenden, werden neu gestartet. Antwortet sofort; den Fortschritt fragen Sie mit `GET /api/{module}/install` ab.\n\nErforderliche Berechtigung: `filebrowser:write`.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "Erfolgreich"
@@ -10743,7 +11131,128 @@
             "bearerAuth": []
           }
         ],
-        "summary": "FileBrowser Quantum herunterladen und installieren",
+        "summary": "Verwaltetes Programm online installieren oder aktualisieren",
+        "tags": [
+          "File Browser"
+        ],
+        "x-required-scope": "filebrowser:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/filebrowser/install/backups/{id}": {
+      "delete": {
+        "description": "Erforderliche Berechtigung: `filebrowser:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Erfolgreich"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Anfrageparameter fehlerhaft"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token ungültig, abgelaufen oder nicht angemeldet"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Dem Token fehlt die erforderliche Berechtigung"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Gespeicherte frühere Version löschen",
+        "tags": [
+          "File Browser"
+        ],
+        "x-required-scope": "filebrowser:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/filebrowser/install/rollback": {
+      "post": {
+        "description": "Request-Body `{\"id\": \"\u003cID der früheren Version\u003e\"}`. Die aktuelle Version wird als frühere Version gespeichert, sodass Sie zurückwechseln können; danach werden die Prozesse, die das Programm verwenden, neu gestartet.\n\nErforderliche Berechtigung: `filebrowser:write`.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Erfolgreich"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Anfrageparameter fehlerhaft"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token ungültig, abgelaufen oder nicht angemeldet"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Dem Token fehlt die erforderliche Berechtigung"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Zu einer gespeicherten früheren Version wechseln",
         "tags": [
           "File Browser"
         ],
@@ -11394,6 +11903,57 @@
         "x-token-allowed": true
       }
     },
+    "/api/filebrowser/reset": {
+      "post": {
+        "description": "frp、Cloudflare-Tunnel、Tailscale 与 File Browser 提供，无需请求体。停止该模块的全部进程，把配置（包括程序路径与下载代理）恢复为默认值，并Gately 为它生成的文件：frp 的配置文件、File Browser 各实例的数据目录（用户、分享链接与缓存）、Tailscale 默认状态目录中的登录状态（Gately 托管的 tailscaled 运行中时先abgemeldet；自定义状态目录与系统已有的 tailscaled 不处理）。旧配置保存在配置历史中，可以恢复；安装的程序不受影响，卸载使用 `DELETE /api/{module}/install`。\n\nErforderliche Berechtigung: `filebrowser:write`. löschen",
+        "responses": {
+          "200": {
+            "description": "Erfolgreich"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Anfrageparameter fehlerhaft"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token ungültig, abgelaufen oder nicht angemeldet"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Dem Token fehlt die erforderliche Berechtigung"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Standardeinstellungen des Moduls wiederherstellen",
+        "tags": [
+          "File Browser"
+        ],
+        "x-required-scope": "filebrowser:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/filebrowser/settings": {
       "get": {
         "description": "Gibt die verwendete Programmdatei, ihre Version und ob es sich um FileBrowser Quantum handelt zurück.\n\nErforderliche Berechtigung: `filebrowser:read`.",
@@ -11781,6 +12341,285 @@
           }
         ],
         "summary": "Vorhandene frpc-/frps-Konfiguration importieren (unterstützt altes ini und neues toml); bei apply false nur Vorschau",
+        "tags": [
+          "frp-Intranet-Durchleitung"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/frp/install": {
+      "delete": {
+        "description": "配置目录 bin 下安装的程序与全部保存的旧版本，之后重启使用该程序的进程：PATH 中有同名程序时改用它，没有时进程无法启动。模块配置不受影响，清除配置使用 `POST /api/{module}/reset`。\n\nErforderliche Berechtigung: `frp:write`. löschen",
+        "responses": {
+          "200": {
+            "description": "Erfolgreich"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Anfrageparameter fehlerhaft"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token ungültig, abgelaufen oder nicht angemeldet"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Dem Token fehlt die erforderliche Berechtigung"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Verwaltetes Programm deinstallieren",
+        "tags": [
+          "frp-Intranet-Durchleitung"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      },
+      "get": {
+        "description": "Verfügbar für frp, Cloudflare-Tunnel, Tailscale und File Browser. Liefert die im bin-Verzeichnis des Konfigurationsverzeichnisses installierte Version, die gespeicherten früheren Versionen (`backups`, höchstens 3), den für dieses Programm gesetzten Download-Proxy (`proxy`), die aktuelle Plattform und den Installationsfortschritt `state` (`stage` ist checking, downloading, verifying, extracting, done, uptodate oder failed). Ein nicht leeres `unsupported` bedeutet, dass das Projekt kein Programm für die aktuelle Plattform anbietet.\n\nErforderliche Berechtigung: `frp:read`.",
+        "responses": {
+          "200": {
+            "description": "Erfolgreich"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Anfrageparameter fehlerhaft"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token ungültig, abgelaufen oder nicht angemeldet"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Dem Token fehlt die erforderliche Berechtigung"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Installationsinfo und Fortschritt eines verwalteten Programms anzeigen",
+        "tags": [
+          "frp-Intranet-Durchleitung"
+        ],
+        "x-required-scope": "frp:read",
+        "x-token-allowed": true
+      },
+      "post": {
+        "description": "Request-Body `{\"version\": \"\", \"proxy\": \"\"}`: Ein leeres `version` installiert die neueste stabile Version (ist sie bereits installiert, wird nichts heruntergeladen und `stage` ist uptodate), sonst die angegebene Version; `proxy` ist der Download-Proxy (http, https oder socks5), wird für das nächste Mal gespeichert und bei leerem Wert gilt die globale Einstellung `updateProxy`. Der Download wird per SHA-256 geprüft und in bin im Konfigurationsverzeichnis installiert, die bisherige Version wandert zu den früheren Versionen und Prozesse, die das Programm verwenden, werden neu gestartet. Antwortet sofort; den Fortschritt fragen Sie mit `GET /api/{module}/install` ab.\n\nErforderliche Berechtigung: `frp:write`.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Erfolgreich"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Anfrageparameter fehlerhaft"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token ungültig, abgelaufen oder nicht angemeldet"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Dem Token fehlt die erforderliche Berechtigung"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Verwaltetes Programm online installieren oder aktualisieren",
+        "tags": [
+          "frp-Intranet-Durchleitung"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/frp/install/backups/{id}": {
+      "delete": {
+        "description": "Erforderliche Berechtigung: `frp:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Erfolgreich"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Anfrageparameter fehlerhaft"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token ungültig, abgelaufen oder nicht angemeldet"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Dem Token fehlt die erforderliche Berechtigung"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Gespeicherte frühere Version löschen",
+        "tags": [
+          "frp-Intranet-Durchleitung"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/frp/install/rollback": {
+      "post": {
+        "description": "Request-Body `{\"id\": \"\u003cID der früheren Version\u003e\"}`. Die aktuelle Version wird als frühere Version gespeichert, sodass Sie zurückwechseln können; danach werden die Prozesse, die das Programm verwenden, neu gestartet.\n\nErforderliche Berechtigung: `frp:write`.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Erfolgreich"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Anfrageparameter fehlerhaft"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token ungültig, abgelaufen oder nicht angemeldet"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Dem Token fehlt die erforderliche Berechtigung"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Zu einer gespeicherten früheren Version wechseln",
         "tags": [
           "frp-Intranet-Durchleitung"
         ],
@@ -12363,6 +13202,57 @@
           }
         ],
         "summary": "Einträge aktivieren oder deaktivieren",
+        "tags": [
+          "frp-Intranet-Durchleitung"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/frp/reset": {
+      "post": {
+        "description": "frp、Cloudflare-Tunnel、Tailscale 与 File Browser 提供，无需请求体。停止该模块的全部进程，把配置（包括程序路径与下载代理）恢复为默认值，并Gately 为它生成的文件：frp 的配置文件、File Browser 各实例的数据目录（用户、分享链接与缓存）、Tailscale 默认状态目录中的登录状态（Gately 托管的 tailscaled 运行中时先abgemeldet；自定义状态目录与系统已有的 tailscaled 不处理）。旧配置保存在配置历史中，可以恢复；安装的程序不受影响，卸载使用 `DELETE /api/{module}/install`。\n\nErforderliche Berechtigung: `frp:write`. löschen",
+        "responses": {
+          "200": {
+            "description": "Erfolgreich"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Anfrageparameter fehlerhaft"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token ungültig, abgelaufen oder nicht angemeldet"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Dem Token fehlt die erforderliche Berechtigung"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Standardeinstellungen des Moduls wiederherstellen",
         "tags": [
           "frp-Intranet-Durchleitung"
         ],
@@ -20903,6 +21793,285 @@
         "x-token-allowed": false
       }
     },
+    "/api/tailscale/install": {
+      "delete": {
+        "description": "配置目录 bin 下安装的程序与全部保存的旧版本，之后重启使用该程序的进程：PATH 中有同名程序时改用它，没有时进程无法启动。模块配置不受影响，清除配置使用 `POST /api/{module}/reset`。\n\nErforderliche Berechtigung: `tailscale:write`. löschen",
+        "responses": {
+          "200": {
+            "description": "Erfolgreich"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Anfrageparameter fehlerhaft"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token ungültig, abgelaufen oder nicht angemeldet"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Dem Token fehlt die erforderliche Berechtigung"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Verwaltetes Programm deinstallieren",
+        "tags": [
+          "Tailscale-Netzwerk"
+        ],
+        "x-required-scope": "tailscale:write",
+        "x-token-allowed": true
+      },
+      "get": {
+        "description": "Verfügbar für frp, Cloudflare-Tunnel, Tailscale und File Browser. Liefert die im bin-Verzeichnis des Konfigurationsverzeichnisses installierte Version, die gespeicherten früheren Versionen (`backups`, höchstens 3), den für dieses Programm gesetzten Download-Proxy (`proxy`), die aktuelle Plattform und den Installationsfortschritt `state` (`stage` ist checking, downloading, verifying, extracting, done, uptodate oder failed). Ein nicht leeres `unsupported` bedeutet, dass das Projekt kein Programm für die aktuelle Plattform anbietet.\n\nErforderliche Berechtigung: `tailscale:read`.",
+        "responses": {
+          "200": {
+            "description": "Erfolgreich"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Anfrageparameter fehlerhaft"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token ungültig, abgelaufen oder nicht angemeldet"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Dem Token fehlt die erforderliche Berechtigung"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Installationsinfo und Fortschritt eines verwalteten Programms anzeigen",
+        "tags": [
+          "Tailscale-Netzwerk"
+        ],
+        "x-required-scope": "tailscale:read",
+        "x-token-allowed": true
+      },
+      "post": {
+        "description": "Request-Body `{\"version\": \"\", \"proxy\": \"\"}`: Ein leeres `version` installiert die neueste stabile Version (ist sie bereits installiert, wird nichts heruntergeladen und `stage` ist uptodate), sonst die angegebene Version; `proxy` ist der Download-Proxy (http, https oder socks5), wird für das nächste Mal gespeichert und bei leerem Wert gilt die globale Einstellung `updateProxy`. Der Download wird per SHA-256 geprüft und in bin im Konfigurationsverzeichnis installiert, die bisherige Version wandert zu den früheren Versionen und Prozesse, die das Programm verwenden, werden neu gestartet. Antwortet sofort; den Fortschritt fragen Sie mit `GET /api/{module}/install` ab.\n\nErforderliche Berechtigung: `tailscale:write`.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Erfolgreich"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Anfrageparameter fehlerhaft"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token ungültig, abgelaufen oder nicht angemeldet"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Dem Token fehlt die erforderliche Berechtigung"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Verwaltetes Programm online installieren oder aktualisieren",
+        "tags": [
+          "Tailscale-Netzwerk"
+        ],
+        "x-required-scope": "tailscale:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/tailscale/install/backups/{id}": {
+      "delete": {
+        "description": "Erforderliche Berechtigung: `tailscale:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Erfolgreich"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Anfrageparameter fehlerhaft"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token ungültig, abgelaufen oder nicht angemeldet"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Dem Token fehlt die erforderliche Berechtigung"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Gespeicherte frühere Version löschen",
+        "tags": [
+          "Tailscale-Netzwerk"
+        ],
+        "x-required-scope": "tailscale:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/tailscale/install/rollback": {
+      "post": {
+        "description": "Request-Body `{\"id\": \"\u003cID der früheren Version\u003e\"}`. Die aktuelle Version wird als frühere Version gespeichert, sodass Sie zurückwechseln können; danach werden die Prozesse, die das Programm verwenden, neu gestartet.\n\nErforderliche Berechtigung: `tailscale:write`.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Erfolgreich"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Anfrageparameter fehlerhaft"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token ungültig, abgelaufen oder nicht angemeldet"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Dem Token fehlt die erforderliche Berechtigung"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Zu einer gespeicherten früheren Version wechseln",
+        "tags": [
+          "Tailscale-Netzwerk"
+        ],
+        "x-required-scope": "tailscale:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/tailscale/logout": {
       "post": {
         "description": "Erforderliche Berechtigung: `tailscale:write`.",
@@ -21141,6 +22310,57 @@
           "Tailscale-Netzwerk"
         ],
         "x-required-scope": "tailscale:read",
+        "x-token-allowed": true
+      }
+    },
+    "/api/tailscale/reset": {
+      "post": {
+        "description": "frp、Cloudflare-Tunnel、Tailscale 与 File Browser 提供，无需请求体。停止该模块的全部进程，把配置（包括程序路径与下载代理）恢复为默认值，并Gately 为它生成的文件：frp 的配置文件、File Browser 各实例的数据目录（用户、分享链接与缓存）、Tailscale 默认状态目录中的登录状态（Gately 托管的 tailscaled 运行中时先abgemeldet；自定义状态目录与系统已有的 tailscaled 不处理）。旧配置保存在配置历史中，可以恢复；安装的程序不受影响，卸载使用 `DELETE /api/{module}/install`。\n\nErforderliche Berechtigung: `tailscale:write`. löschen",
+        "responses": {
+          "200": {
+            "description": "Erfolgreich"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Anfrageparameter fehlerhaft"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token ungültig, abgelaufen oder nicht angemeldet"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Dem Token fehlt die erforderliche Berechtigung"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Standardeinstellungen des Moduls wiederherstellen",
+        "tags": [
+          "Tailscale-Netzwerk"
+        ],
+        "x-required-scope": "tailscale:write",
         "x-token-allowed": true
       }
     },

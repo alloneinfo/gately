@@ -28,9 +28,9 @@
 
 連接埠轉發、STUN、Web 服務需要直接監聽主機的連接埠。使用橋接網路時，需要自行對應每一個用到的連接埠。
 
-## Tailscale、frp、cloudflared 為什麼要自己放執行檔？
+## Tailscale、frp、cloudflared 的程式從哪裡來？
 
-這三個模組託管官方外部程式，Gately 本體並未內建它們，因此始終可以使用上游最新版本。放置位置請見 [設定與執行參數](/zh-TW/docs/guide/configuration)。File Browser 可以在頁面中一鍵下載安裝。
+這些模組託管官方外部程式，Gately 本體並未內建它們。在各模組頁面的「線上安裝」卡片中可以下載最新版或指定版本，支援單獨設定下載代理，升級後有問題可以回滾到舊版本，也可以解除安裝程式或恢復預設設定，詳見 [線上安裝、更新與回滾](/zh-TW/docs/modules/tunnels#install)。Tailscale 只在 Linux 上支援線上安裝。也可以自行放置程式，位置請見 [設定與執行參數](/zh-TW/docs/guide/configuration)。
 
 ## STUN 規則啟用後外網仍無法存取？
 

@@ -84,7 +84,7 @@ API는 `GET` / `PUT /api/fileusers`이며 API 토큰에는 `fileusers:read` / `f
 
 "파일 서비스" 그룹의 "File Browser"에서 설정합니다. Gately는 [FileBrowser Quantum](https://github.com/gtsteffaniak/filebrowser)을 호스팅합니다. 이미지·동영상·문서 미리 보기, 업로드와 다운로드, 공유 링크 생성을 지원하고 자체 사용자와 권한 관리를 갖춘 웹 파일 관리자입니다. 원본 filebrowser/filebrowser는 2026년에 보관 처리되어 더 이상 보안 수정이 없으므로, 유지 관리가 계속되는 Quantum 포크를 호스팅합니다.
 
-프로그램은 Gately에 포함되어 있지 않습니다. 페이지 아래 "FileBrowser Quantum 프로그램" 카드의 "다운로드 및 설치"는 GitHub에서 최신 안정 버전을 설정 디렉터리의 `bin/filebrowser`로 내려받고, GitHub에 기록된 SHA-256으로 검증하며, GitHub 접속에는 "설정"의 업데이트 프록시를 사용합니다. 다시 누르면 업데이트되고, 활성화된 인스턴스는 새 프로그램으로 다시 시작합니다. 프로그램을 직접 배치하고 경로를 입력할 수도 있습니다. 프로그램은 입력한 경로, 설정 디렉터리의 `bin/`, `PATH` 순서로 찾으며, 찾은 프로그램이 Quantum이 아니면(예: `PATH`의 원본) 페이지에 경고가 표시됩니다.
+프로그램은 Gately에 포함되어 있지 않습니다. 페이지 아래 "온라인 설치" 카드는 GitHub에서 FileBrowser Quantum을 설정 디렉터리의 `bin/filebrowser`로 내려받으며, 업데이트, 버전 지정 설치, 별도 다운로드 프록시, 롤백, 제거를 지원합니다. 업데이트나 롤백 후에는 활성화된 인스턴스가 자동으로 다시 시작합니다. 자세한 내용은 [온라인 설치, 업데이트, 롤백](/ko/docs/modules/tunnels#install)을 참고하세요. 페이지 상단의 "기본 설정 복원"은 모든 인스턴스와 그 데이터를 삭제합니다. [기본 설정 복원](/ko/docs/modules/tunnels#reset)을 참고하세요. 프로그램을 직접 배치하고 경로를 입력할 수도 있습니다. 프로그램은 입력한 경로, 설정 디렉터리의 `bin/`, `PATH` 순서로 찾으며, 찾은 프로그램이 Quantum이 아니면(예: `PATH`의 원본) 페이지에 경고가 표시됩니다.
 
 인스턴스마다 별도의 File Browser 프로세스가 실행됩니다.
 

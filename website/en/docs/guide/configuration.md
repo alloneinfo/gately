@@ -35,15 +35,13 @@ With `-apply <dir>`, every start copies the `<name>.json` files in that director
 
 ## External program directory
 
-The Tailscale, frp and cloudflared modules supervise the official external programs. Gately looks for each executable in this order:
+Tailscale, frp, cloudflared and File Browser supervise the official external programs. Gately looks for each executable in this order:
 
 1. The path set in the module settings;
-2. `PATH`;
-3. The `bin/` subdirectory of the config directory.
+2. The `bin/` subdirectory of the config directory;
+3. `PATH`.
 
-For Docker deployments, put the binaries in the mounted config directory, for example `./gately-data/bin/frpc`. Tailscale needs both `tailscale` and `tailscaled`. See [Tailscale / frp / cloudflared](/en/docs/modules/tunnels) for details.
-
-The File Browser module hosts FileBrowser Quantum and looks it up in this order: the path you entered, `bin/` under the config directory, then `PATH`; the page can download and install it into `bin/filebrowser` with one click. See [File Browser](/en/docs/modules/tools#filebrowser).
+Each module page can install, update and roll back its program online. Programs are installed in `bin/` and older versions are kept in `bin/.versions/`; see [Online install, update and rollback](/en/docs/modules/tunnels#install). You can also put the binaries into the config directory yourself, for example `./gately-data/bin/frpc` in Docker deployments; Tailscale needs both `tailscale` and `tailscaled`.
 
 ## Runtime logs
 

@@ -124,6 +124,12 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | GET | `/api/tailscale/status` | `tailscale:read` | Ver o estado da conexão do Tailscale |
 | POST | `/api/tailscale/restart` | `tailscale:write` | Reiniciar o Tailscale |
 | POST | `/api/tailscale/logout` | `tailscale:write` | Sair do login do Tailscale |
+| GET | `/api/tailscale/install` | `tailscale:read` | Ver as informações de instalação e o progresso de um programa gerenciado |
+| POST | `/api/tailscale/install` | `tailscale:write` | Instalar ou atualizar online um programa gerenciado |
+| POST | `/api/tailscale/install/rollback` | `tailscale:write` | Mudar para uma versão anterior salva |
+| DELETE | `/api/tailscale/install` | `tailscale:write` | Desinstalar um programa gerenciado |
+| DELETE | `/api/tailscale/install/backups/{id}` | `tailscale:write` | Excluir uma versão anterior salva |
+| POST | `/api/tailscale/reset` | `tailscale:write` | Restaurar as configurações padrão do módulo |
 
 ## Travessia de rede interna frp
 
@@ -138,6 +144,12 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | PUT | `/api/frp/proxies/{key}/enable` | `frp:write` | Ativar ou desativar Entrada |
 | PUT | `/api/frp/proxies-order` | `frp:write` | Reordenar Entrada |
 | POST | `/api/frp/import` | `frp:write` | Importar configuração existente de frpc / frps (suporta ini antigo e toml novo); com apply igual a false apenas pré-visualiza |
+| GET | `/api/frp/install` | `frp:read` | Ver as informações de instalação e o progresso de um programa gerenciado |
+| POST | `/api/frp/install` | `frp:write` | Instalar ou atualizar online um programa gerenciado |
+| POST | `/api/frp/install/rollback` | `frp:write` | Mudar para uma versão anterior salva |
+| DELETE | `/api/frp/install` | `frp:write` | Desinstalar um programa gerenciado |
+| DELETE | `/api/frp/install/backups/{id}` | `frp:write` | Excluir uma versão anterior salva |
+| POST | `/api/frp/reset` | `frp:write` | Restaurar as configurações padrão do módulo |
 | GET | `/api/frp/client` | `frp:read` | Ler configuração do cliente frp |
 | PUT | `/api/frp/client` | `frp:write` | Salvar configuração do cliente frp |
 | GET | `/api/frp/server` | `frp:read` | Ler configuração do servidor frp |
@@ -158,6 +170,12 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | POST | `/api/cloudflared/tunnels/{key}/restart` | `cloudflared:write` | Reiniciar um túnel Cloudflare |
 | GET | `/api/cloudflared/settings` | `cloudflared:read` | Ler configurações do túnel Cloudflare |
 | PUT | `/api/cloudflared/settings` | `cloudflared:write` | Salvar configurações do túnel Cloudflare |
+| GET | `/api/cloudflared/install` | `cloudflared:read` | Ver as informações de instalação e o progresso de um programa gerenciado |
+| POST | `/api/cloudflared/install` | `cloudflared:write` | Instalar ou atualizar online um programa gerenciado |
+| POST | `/api/cloudflared/install/rollback` | `cloudflared:write` | Mudar para uma versão anterior salva |
+| DELETE | `/api/cloudflared/install` | `cloudflared:write` | Desinstalar um programa gerenciado |
+| DELETE | `/api/cloudflared/install/backups/{id}` | `cloudflared:write` | Excluir uma versão anterior salva |
+| POST | `/api/cloudflared/reset` | `cloudflared:write` | Restaurar as configurações padrão do módulo |
 
 ## Certificado SSL
 
@@ -454,8 +472,12 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | POST | `/api/filebrowser/instances/{key}/restart` | `filebrowser:write` | Reiniciar uma instância do File Browser |
 | GET | `/api/filebrowser/settings` | `filebrowser:read` | Ler as configurações do programa File Browser |
 | PUT | `/api/filebrowser/settings` | `filebrowser:write` | Salvar as configurações do programa File Browser |
-| GET | `/api/filebrowser/install` | `filebrowser:read` | Ver o progresso da instalação do File Browser |
-| POST | `/api/filebrowser/install` | `filebrowser:write` | Baixar e instalar o FileBrowser Quantum |
+| GET | `/api/filebrowser/install` | `filebrowser:read` | Ver as informações de instalação e o progresso de um programa gerenciado |
+| POST | `/api/filebrowser/install` | `filebrowser:write` | Instalar ou atualizar online um programa gerenciado |
+| POST | `/api/filebrowser/install/rollback` | `filebrowser:write` | Mudar para uma versão anterior salva |
+| DELETE | `/api/filebrowser/install` | `filebrowser:write` | Desinstalar um programa gerenciado |
+| DELETE | `/api/filebrowser/install/backups/{id}` | `filebrowser:write` | Excluir uma versão anterior salva |
+| POST | `/api/filebrowser/reset` | `filebrowser:write` | Restaurar as configurações padrão do módulo |
 
 ## Montagens de armazenamento
 

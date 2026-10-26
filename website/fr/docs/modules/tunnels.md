@@ -1,16 +1,48 @@
 # Tailscale / frp / cloudflared
 
-Ces trois modules intègrent les programmes officiels en tant que processus gérés : redémarrage automatique, journaux collectés dans l'interface et configuration directement depuis l'interface. Gately n'embarque pas ces programmes, vous pouvez donc toujours utiliser la dernière version publiée en amont.
+Ces trois modules intègrent les programmes officiels en tant que processus gérés : redémarrage automatique, journaux collectés dans l'interface et configuration directement depuis l'interface. Gately n'embarque pas ces programmes ; ils s'installent, se mettent à jour et se restaurent en ligne depuis la page.
+
+## Installation, mise à jour et retour arrière en ligne {#install}
+
+Les pages frp, tunnel Cloudflare, Tailscale et [File Browser](/fr/docs/modules/tools#filebrowser) comportent en bas une carte « Installation en ligne » :
+
+- **Télécharger et installer / Mettre à jour** : télécharge la dernière version stable depuis l'amont, la vérifie avec le SHA-256 publié par l'amont, contrôle qu'elle s'exécute sur cette machine, l'installe dans `bin/` sous le répertoire de configuration, puis redémarre les processus qui utilisent le programme. Une version déjà à jour n'est pas retéléchargée ;
+- **Installer une version** : saisissez un numéro de version (par exemple `v0.65.0` pour frp, `2025.8.0` pour cloudflared, `1.90.2` pour Tailscale), utile aussi pour revenir à une version antérieure ;
+- **Proxy de téléchargement** : réglable par programme, prend en charge http, https et socks5 et est enregistré au lancement de l'installation ; vide, le proxy de mise à jour des « Paramètres » est utilisé ;
+- **Versions précédentes et retour arrière** : les versions remplacées par une mise à jour ou un retour arrière sont conservées dans `bin/.versions/`, 3 au plus. Si la nouvelle version pose problème, cliquez sur « Revenir » dans la liste ; la version actuelle est conservée elle aussi, vous pouvez donc y revenir ensuite ;
+- **Désinstaller** : supprime le programme installé dans `bin/` et toutes les versions précédentes ; les paramètres du module sont conservés. Les processus qui utilisent le programme redémarrent et se rabattent sur un programme du même nom dans `PATH` ; sans lui, ils ne peuvent pas s'exécuter.
+
+| Programme | Source | Fichiers installés |
+| --- | --- | --- |
+| frp | GitHub fatedier/frp | `frpc`, `frps` |
+| cloudflared | GitHub cloudflare/cloudflared | `cloudflared` |
+| Tailscale | Paquets statiques pkgs.tailscale.com, Linux uniquement | `tailscale`, `tailscaled` |
+| FileBrowser Quantum | GitHub gtsteffaniak/filebrowser | `filebrowser` |
+
+Pour macOS et Windows, Tailscale ne fournit pas de paquet directement exécutable : utilisez l'installateur officiel, puis indiquez le chemin dans les paramètres. La carte signale quand la plateforme actuelle n'est pas prise en charge.
+
+## Rétablir les valeurs par défaut {#reset}
+
+Le bouton « Rétablir les valeurs par défaut » de l'en-tête est distinct de la désinstallation : il arrête tous les processus du module, remet les paramètres (chemin du programme et proxy de téléchargement compris) à leurs valeurs par défaut et supprime les fichiers que Gately a générés pour lui. Les programmes installés sont conservés.
+
+| Module | Contenu supprimé |
+| --- | --- |
+| frp | Paramètres du client, du serveur et de tous les proxys, fichiers de configuration générés dans `frp/` |
+| Tunnel Cloudflare | Tous les tunnels et les paramètres du programme |
+| Tailscale | Tous les paramètres et l'état de connexion du répertoire d'état par défaut ; si le tailscaled géré par Gately tourne, il se déconnecte d'abord. Les répertoires d'état personnalisés et le tailscaled déjà présent sur le système restent intacts |
+| File Browser | Toutes les instances et les paramètres du programme, avec les utilisateurs, liens de partage et caches de chaque instance ; les fichiers des répertoires partagés restent intacts |
+
+L'ancienne configuration est conservée dans l'[historique de configuration](/fr/docs/guide/audit) et peut être restaurée en cas d'erreur. Pour tout retirer, désinstallez d'abord le programme, puis rétablissez les valeurs par défaut. Les API sont `DELETE /api/{module}/install` (désinstallation) et `POST /api/{module}/reset` (rétablissement des valeurs par défaut).
 
 ## Emplacement des programmes
 
 Les exécutables sont recherchés dans cet ordre :
 
 1. Le chemin défini dans les paramètres du module ;
-2. `PATH` ;
-3. Le sous-répertoire `bin/` du répertoire de configuration.
+2. Le sous-répertoire `bin/` du répertoire de configuration (emplacement de l'installation en ligne) ;
+3. `PATH`.
 
-Pour un déploiement Docker, placez le binaire dans le répertoire de configuration monté, par exemple `./gately-data/bin/frpc`. Tailscale nécessite à la fois `tailscale` et `tailscaled`.
+Quand un chemin est indiqué, la version installée en ligne n'est pas utilisée et la carte le signale. Vous pouvez aussi placer le binaire vous-même dans le répertoire de configuration, avec Docker par exemple `./gately-data/bin/frpc`. Tailscale nécessite à la fois `tailscale` et `tailscaled` ; avec le tailscaled déjà présent sur le système, la commande `tailscale` installée devrait avoir la même version que le démon.
 
 Les jetons et les clés sont stockés avec les permissions 0600. Le jeton cloudflared est transmis via une variable d'environnement, il n'apparaît donc pas dans la liste des processus.
 

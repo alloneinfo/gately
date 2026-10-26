@@ -35,15 +35,13 @@ Mit `-apply <Verzeichnis>` kopiert Gately bei jedem Start die Dateien `<Name>.js
 
 ## Verzeichnis für externe Programme
 
-Die Module Tailscale, frp und cloudflared betreiben die offiziellen externen Programme. Gately sucht die ausführbare Datei in dieser Reihenfolge:
+Tailscale, frp, cloudflared und File Browser betreiben die offiziellen externen Programme. Gately sucht die ausführbare Datei in dieser Reihenfolge:
 
 1. dem in den Moduleinstellungen angegebenen Pfad;
-2. `PATH`;
-3. dem Unterverzeichnis `bin/` des Konfigurationsverzeichnisses.
+2. dem Unterverzeichnis `bin/` des Konfigurationsverzeichnisses;
+3. `PATH`.
 
-Legen Sie bei Docker-Bereitstellungen die Binärdateien in das eingebundene Konfigurationsverzeichnis, zum Beispiel `./gately-data/bin/frpc`. Tailscale benötigt sowohl `tailscale` als auch `tailscaled`. Details finden Sie unter [Tailscale / frp / cloudflared](/de/docs/modules/tunnels).
-
-Das Modul File Browser betreibt FileBrowser Quantum und sucht es in dieser Reihenfolge: eingetragener Pfad, `bin/` im Konfigurationsverzeichnis, dann `PATH`; die Seite kann es mit einem Klick nach `bin/filebrowser` herunterladen und installieren. Siehe [File Browser](/de/docs/modules/tools#filebrowser).
+Auf jeder Modulseite lassen sich die Programme online installieren, aktualisieren und zurücksetzen. Sie werden unter `bin/` installiert, frühere Versionen liegen in `bin/.versions/`; Details unter [Online installieren, aktualisieren und zurücksetzen](/de/docs/modules/tunnels#install). Sie können die Binärdateien auch selbst in das Konfigurationsverzeichnis legen, bei Docker-Bereitstellungen zum Beispiel `./gately-data/bin/frpc`; Tailscale benötigt sowohl `tailscale` als auch `tailscaled`.
 
 ## Laufzeitprotokolle
 

@@ -35,15 +35,13 @@ Avec `-apply <dossier>`, chaque démarrage copie les fichiers `<nom>.json` de ce
 
 ## Dossier des programmes externes
 
-Les modules Tailscale, frp et cloudflared supervisent les programmes externes officiels. Gately cherche chaque exécutable dans cet ordre :
+Tailscale, frp, cloudflared et File Browser supervisent les programmes externes officiels. Gately cherche chaque exécutable dans cet ordre :
 
 1. Le chemin défini dans les paramètres du module ;
-2. `PATH` ;
-3. Le sous-dossier `bin/` du dossier de configuration.
+2. Le sous-dossier `bin/` du dossier de configuration ;
+3. `PATH`.
 
-Pour un déploiement Docker, placez les binaires dans le dossier de configuration monté, par exemple `./gately-data/bin/frpc`. Tailscale nécessite à la fois `tailscale` et `tailscaled`. Consultez [Tailscale / frp / cloudflared](/fr/docs/modules/tunnels) pour les détails.
-
-Le module File Browser héberge FileBrowser Quantum et le recherche dans cet ordre : le chemin indiqué, `bin/` sous le répertoire de configuration, puis `PATH` ; la page peut le télécharger et l’installer dans `bin/filebrowser` en un clic. Voir [File Browser](/fr/docs/modules/tools#filebrowser).
+Chaque page de module permet l'installation, la mise à jour et le retour arrière en ligne : les programmes sont installés dans `bin/` et les anciennes versions conservées dans `bin/.versions/`. Voir [Installation, mise à jour et retour arrière en ligne](/fr/docs/modules/tunnels#install). Vous pouvez aussi placer les binaires vous-même dans le dossier de configuration, avec Docker par exemple `./gately-data/bin/frpc` ; Tailscale nécessite à la fois `tailscale` et `tailscaled`.
 
 ## Journaux d'exécution
 

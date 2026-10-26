@@ -1,16 +1,48 @@
 # Tailscale / frp / cloudflared
 
-三個模組以行程託管方式整合官方程式：自動重啟、日誌彙整到介面、設定在介面中完成。Gately 本體並未內建這些程式，因此始終可以使用上游最新版本。
+三個模組以行程託管方式整合官方程式：自動重啟、日誌彙整到介面、設定在介面中完成。Gately 本體並未內建這些程式，可以在頁面中線上安裝、更新與回滾。
+
+## 線上安裝、更新與回滾 {#install}
+
+frp、Cloudflare 通道、Tailscale 與 [File Browser](/zh-TW/docs/modules/tools#filebrowser) 頁面下方都有「線上安裝」卡片：
+
+- **下載安裝 / 更新到最新版**：從上游下載最新正式版，依上游記錄的 SHA-256 校驗，確認能在本機執行後安裝到設定目錄的 `bin/`，完成後自動重啟使用該程式的行程。已經是最新版時不會重複下載；
+- **安裝指定版本**：填寫版本號（例如 frp 的 `v0.65.0`、cloudflared 的 `2025.8.0`、Tailscale 的 `1.90.2`），可用於降級；
+- **下載代理**：每個程式可以單獨設定，支援 http、https 與 socks5，開始安裝時儲存；留空時使用「設定」中的更新代理；
+- **舊版本與回滾**：被更新或回滾替換下來的版本儲存在 `bin/.versions/` 下，最多保留 3 個。新版本有問題時在清單中點「回滾」即可切回，目前版本同樣會保留，之後還能再切回來；
+- **解除安裝**：刪除 `bin/` 下安裝的程式與全部舊版本，模組設定保留。之後使用該程式的行程會重啟，`PATH` 中有同名程式時改用它，沒有時無法執行。
+
+| 程式 | 來源 | 安裝的檔案 |
+| --- | --- | --- |
+| frp | GitHub fatedier/frp | `frpc`、`frps` |
+| cloudflared | GitHub cloudflare/cloudflared | `cloudflared` |
+| Tailscale | pkgs.tailscale.com 靜態套件，僅 Linux | `tailscale`、`tailscaled` |
+| FileBrowser Quantum | GitHub gtsteffaniak/filebrowser | `filebrowser` |
+
+Tailscale 在 macOS 與 Windows 上沒有可直接執行的程式套件，請使用官方安裝程式，再於設定中填寫路徑。卡片會提示目前平台不支援的情況。
+
+## 恢復預設設定 {#reset}
+
+頁首的「恢復預設設定」與解除安裝分開處理：停止該模組的全部行程，把設定（包括程式路徑與下載代理）恢復為預設值，並刪除 Gately 為它產生的檔案，安裝的程式保留。
+
+| 模組 | 清除的內容 |
+| --- | --- |
+| frp | 用戶端、伺服器端與全部代理設定，`frp/` 下產生的設定檔 |
+| Cloudflare 通道 | 全部通道與程式設定 |
+| Tailscale | 全部設定，預設狀態目錄中的登入狀態；Gately 託管的 tailscaled 執行中時先登出。自訂的狀態目錄與系統既有的 tailscaled 不處理 |
+| File Browser | 全部實例與程式設定，各實例的使用者、分享連結與快取；共享目錄中的檔案不受影響 |
+
+舊設定保存在 [設定歷史](/zh-TW/docs/guide/audit) 中，誤操作時可以還原。要徹底移除，先解除安裝程式，再恢復預設設定。介面為 `DELETE /api/{module}/install`（解除安裝）與 `POST /api/{module}/reset`（恢復預設設定）。
 
 ## 程式放置
 
 依以下順序尋找可執行檔：
 
 1. 模組設定中填寫的路徑；
-2. `PATH`；
-3. 設定目錄下的 `bin/` 子目錄。
+2. 設定目錄下的 `bin/` 子目錄（線上安裝的位置）；
+3. `PATH`。
 
-Docker 部署時把執行檔放進掛載的設定目錄即可，例如 `./gately-data/bin/frpc`。Tailscale 需要同時提供 `tailscale` 與 `tailscaled`。
+填寫了路徑時線上安裝的版本不會生效，卡片會提示。也可以自行把執行檔放進設定目錄，Docker 部署時例如 `./gately-data/bin/frpc`。Tailscale 需要同時提供 `tailscale` 與 `tailscaled`；使用系統既有的 tailscaled 時，安裝的 `tailscale` 指令最好與常駐程式版本一致。
 
 權杖與金鑰以 0600 權限儲存，cloudflared 的權杖透過環境變數傳遞，不會出現在行程清單中。
 

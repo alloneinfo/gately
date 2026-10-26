@@ -35,15 +35,13 @@
 
 ## 外部程序目录
 
-Tailscale、frp、cloudflared 这三个模块托管官方的外部程序，按以下顺序查找可执行文件：
+Tailscale、frp、cloudflared 与 File Browser 托管官方的外部程序，按以下顺序查找可执行文件：
 
 1. 模块设置中填写的路径；
-2. `PATH`；
-3. 配置目录下的 `bin/` 子目录。
+2. 配置目录下的 `bin/` 子目录；
+3. `PATH`。
 
-Docker 部署时把二进制放进挂载的配置目录即可，例如 `./gately-data/bin/frpc`。Tailscale 需要同时提供 `tailscale` 与 `tailscaled`。详见 [Tailscale / frp / cloudflared](/docs/modules/tunnels)。
-
-File Browser 模块托管 FileBrowser Quantum，查找顺序为：填写的路径、配置目录下的 `bin/`、`PATH`；可以在页面中一键下载安装到 `bin/filebrowser`。详见 [File Browser](/docs/modules/tools#filebrowser)。
+各模块页面可以在线安装、更新与回滚，程序装在 `bin/` 下，旧版本保存在 `bin/.versions/`，详见 [在线安装、更新与回滚](/docs/modules/tunnels#install)。也可以自行把二进制放进配置目录，Docker 部署时例如 `./gately-data/bin/frpc`；Tailscale 需要同时提供 `tailscale` 与 `tailscaled`。
 
 ## 运行日志
 

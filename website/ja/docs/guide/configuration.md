@@ -35,15 +35,13 @@
 
 ## 外部プログラムのディレクトリ
 
-Tailscale、frp、cloudflared の 3 つのモジュールは公式の外部プログラムを管理し、次の順序で実行ファイルを探します。
+Tailscale、frp、cloudflared、File Browser は公式の外部プログラムを管理し、次の順序で実行ファイルを探します。
 
 1. モジュール設定に入力したパス
-2. `PATH`
-3. 設定ディレクトリ配下の `bin/` サブディレクトリ
+2. 設定ディレクトリ配下の `bin/` サブディレクトリ
+3. `PATH`
 
-Docker でデプロイする場合は、マウントした設定ディレクトリにバイナリを置くだけで使えます（例：`./gately-data/bin/frpc`）。Tailscale には `tailscale` と `tailscaled` の両方が必要です。詳しくは [Tailscale / frp / cloudflared](/ja/docs/modules/tunnels) を参照してください。
-
-File Browser モジュールは FileBrowser Quantum をホストし、入力したパス、設定ディレクトリの `bin/`、`PATH` の順に探します。ページからワンクリックで `bin/filebrowser` にダウンロードしてインストールできます。詳しくは [File Browser](/ja/docs/modules/tools#filebrowser) を参照してください。
+各モジュールページからオンラインでインストール、更新、ロールバックできます。プログラムは `bin/` に、旧バージョンは `bin/.versions/` に保存されます。詳しくは [オンラインでのインストール・更新・ロールバック](/ja/docs/modules/tunnels#install) を参照してください。バイナリを自分で設定ディレクトリに置くこともできます（Docker でデプロイする場合の例：`./gately-data/bin/frpc`）。Tailscale には `tailscale` と `tailscaled` の両方が必要です。
 
 ## 実行ログ
 

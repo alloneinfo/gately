@@ -1,16 +1,48 @@
 # Tailscale / frp / cloudflared
 
-三个模块以进程托管方式集成官方程序：自动重启、日志汇总到界面、配置在界面中完成。Gately 本体不内置这些程序，因此始终可以使用上游最新版本。
+三个模块以进程托管方式集成官方程序：自动重启、日志汇总到界面、配置在界面中完成。Gately 本体不内置这些程序，可以在页面中在线安装、更新与回滚。
+
+## 在线安装、更新与回滚 {#install}
+
+frp、Cloudflare 隧道、Tailscale 与 [File Browser](/docs/modules/tools#filebrowser) 页面下方都有「在线安装」卡片：
+
+- **下载安装 / 更新到最新版**：从上游下载最新正式版，按上游记录的 SHA-256 校验，确认能在本机运行后安装到配置目录的 `bin/`，完成后自动重启使用该程序的进程。已经是最新版时不会重复下载；
+- **安装指定版本**：填写版本号（例如 frp 的 `v0.65.0`、cloudflared 的 `2025.8.0`、Tailscale 的 `1.90.2`），可用于降级；
+- **下载代理**：每个程序可以单独设置，支持 http、https 与 socks5，开始安装时保存；留空时使用「设置」中的更新代理；
+- **旧版本与回滚**：被更新或回滚替换下来的版本保存在 `bin/.versions/` 下，最多保留 3 个。新版本有问题时在列表中点「回滚」即可切回，当前版本同样会保留，之后还能再切回来；
+- **卸载**：删除 `bin/` 下安装的程序与全部旧版本，模块配置保留。之后使用该程序的进程会重启，`PATH` 中有同名程序时改用它，没有时无法运行。
+
+| 程序 | 来源 | 安装的文件 |
+| --- | --- | --- |
+| frp | GitHub fatedier/frp | `frpc`、`frps` |
+| cloudflared | GitHub cloudflare/cloudflared | `cloudflared` |
+| Tailscale | pkgs.tailscale.com 静态包，仅 Linux | `tailscale`、`tailscaled` |
+| FileBrowser Quantum | GitHub gtsteffaniak/filebrowser | `filebrowser` |
+
+Tailscale 在 macOS 与 Windows 上没有可直接运行的程序包，请使用官方安装程序，再在设置中填写路径。卡片会提示当前平台不支持的情况。
+
+## 恢复默认配置 {#reset}
+
+页头的「恢复默认配置」与卸载分开处理：停止该模块的全部进程，把设置（包括程序路径与下载代理）恢复为默认值，并删除 Gately 为它生成的文件，安装的程序保留。
+
+| 模块 | 清除的内容 |
+| --- | --- |
+| frp | 客户端、服务端与全部代理设置，`frp/` 下生成的配置文件 |
+| Cloudflare 隧道 | 全部隧道与程序设置 |
+| Tailscale | 全部设置，默认状态目录中的登录状态；Gately 托管的 tailscaled 运行中时先退出登录。自定义的状态目录与系统已有的 tailscaled 不处理 |
+| File Browser | 全部实例与程序设置，各实例的用户、分享链接与缓存；共享目录中的文件不受影响 |
+
+旧配置保存在 [配置历史](/docs/guide/audit) 中，误操作时可以恢复。要彻底移除，先卸载程序，再恢复默认配置。接口为 `DELETE /api/{module}/install`（卸载）与 `POST /api/{module}/reset`（恢复默认配置）。
 
 ## 程序放置
 
 按以下顺序查找可执行文件：
 
 1. 模块设置中填写的路径；
-2. `PATH`；
-3. 配置目录下的 `bin/` 子目录。
+2. 配置目录下的 `bin/` 子目录（在线安装的位置）；
+3. `PATH`。
 
-Docker 部署时把二进制放进挂载的配置目录即可，例如 `./gately-data/bin/frpc`。Tailscale 需要同时提供 `tailscale` 与 `tailscaled`。
+填写了路径时在线安装的版本不会生效，卡片会提示。也可以自行把二进制放进配置目录，Docker 部署时例如 `./gately-data/bin/frpc`。Tailscale 需要同时提供 `tailscale` 与 `tailscaled`；使用系统已有的 tailscaled 时，安装的 `tailscale` 命令最好与守护进程版本一致。
 
 令牌与密钥以 0600 权限保存，cloudflared 的令牌通过环境变量传递，不会出现在进程列表中。
 

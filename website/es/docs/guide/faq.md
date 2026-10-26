@@ -28,9 +28,9 @@ Sí. Cada versión incluye paquetes para OpenWrt: el `.ipk` para OpenWrt 24.10 y
 
 El reenvío de puertos, STUN y los servicios web escuchan directamente en puertos del host. Con una red bridge tienes que publicar tú mismo cada puerto en uso.
 
-## ¿Por qué tengo que aportar yo mismo los binarios de Tailscale, frp y cloudflared?
+## ¿De dónde salen los programas de Tailscale, frp y cloudflared?
 
-Estos tres módulos supervisan los programas oficiales externos. Gately no los incluye, de modo que siempre puedes usar la última versión oficial. Consulta [Configuración y parámetros de ejecución](/es/docs/guide/configuration) para saber dónde colocarlos. File Browser se puede descargar e instalar desde su página con un clic.
+Estos módulos supervisan los programas oficiales externos, que Gately no incluye. La tarjeta «Instalación en línea» de cada página de módulo descarga la última versión o una versión concreta, admite un proxy de descarga propio y permite volver a la versión anterior si la actualización da problemas, además de desinstalar el programa o restaurar los valores predeterminados; consulta [Instalación, actualización y reversión en línea](/es/docs/modules/tunnels#install). La instalación en línea de Tailscale solo funciona en Linux. También puedes colocar los programas tú mismo; consulta [Configuración y parámetros de ejecución](/es/docs/guide/configuration) para saber dónde.
 
 ## Mi regla STUN está activada, pero sigo sin poder conectar desde fuera
 

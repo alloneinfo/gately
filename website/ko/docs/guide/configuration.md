@@ -35,15 +35,13 @@
 
 ## 외부 프로그램 디렉터리
 
-Tailscale, frp, cloudflared 모듈은 공식 외부 프로그램을 관리하며 다음 순서로 실행 파일을 찾습니다.
+Tailscale, frp, cloudflared, File Browser는 공식 외부 프로그램을 관리하며 다음 순서로 실행 파일을 찾습니다.
 
 1. 모듈 설정에 입력한 경로
-2. `PATH`
-3. 설정 디렉터리 아래의 `bin/` 하위 디렉터리
+2. 설정 디렉터리 아래의 `bin/` 하위 디렉터리
+3. `PATH`
 
-Docker로 배포할 때는 마운트한 설정 디렉터리에 바이너리를 넣으면 됩니다. 예: `./gately-data/bin/frpc`. Tailscale은 `tailscale`과 `tailscaled`가 모두 필요합니다. 자세한 내용은 [Tailscale / frp / cloudflared](/ko/docs/modules/tunnels)를 참고하세요.
-
-File Browser 모듈은 FileBrowser Quantum을 호스팅하며 입력한 경로, 설정 디렉터리의 `bin/`, `PATH` 순서로 찾습니다. 페이지에서 클릭 한 번으로 `bin/filebrowser`에 내려받아 설치할 수 있습니다. 자세한 내용은 [File Browser](/ko/docs/modules/tools#filebrowser)를 참고하세요.
+각 모듈 페이지에서 온라인으로 설치, 업데이트, 롤백할 수 있습니다. 프로그램은 `bin/`에 설치되고 이전 버전은 `bin/.versions/`에 보관됩니다. 자세한 내용은 [온라인 설치, 업데이트, 롤백](/ko/docs/modules/tunnels#install)을 참고하세요. 바이너리를 설정 디렉터리에 직접 넣을 수도 있으며, Docker 배포에서는 예를 들어 `./gately-data/bin/frpc`입니다. Tailscale은 `tailscale`과 `tailscaled`가 모두 필요합니다.
 
 ## 실행 로그
 

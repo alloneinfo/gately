@@ -124,6 +124,12 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | GET | `/api/tailscale/status` | `tailscale:read` | Просмотр состояния подключения Tailscale |
 | POST | `/api/tailscale/restart` | `tailscale:write` | Перезапустить Tailscale |
 | POST | `/api/tailscale/logout` | `tailscale:write` | Выйти из Tailscale |
+| GET | `/api/tailscale/install` | `tailscale:read` | Просмотр сведений об установке и хода установки управляемой программы |
+| POST | `/api/tailscale/install` | `tailscale:write` | Установить или обновить управляемую программу онлайн |
+| POST | `/api/tailscale/install/rollback` | `tailscale:write` | Переключиться на сохранённую предыдущую версию |
+| DELETE | `/api/tailscale/install` | `tailscale:write` | Удалить управляемую программу |
+| DELETE | `/api/tailscale/install/backups/{id}` | `tailscale:write` | Удалить сохранённую предыдущую версию |
+| POST | `/api/tailscale/reset` | `tailscale:write` | Сбросить настройки модуля по умолчанию |
 
 ## Проброс внутренней сети frp
 
@@ -138,6 +144,12 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | PUT | `/api/frp/proxies/{key}/enable` | `frp:write` | Включить или отключить: Элемент |
 | PUT | `/api/frp/proxies-order` | `frp:write` | Изменить порядок: Элемент |
 | POST | `/api/frp/import` | `frp:write` | Импорт существующей конфигурации frpc / frps (поддерживаются старый ini и новый toml); если apply равен false, выполняется только предпросмотр |
+| GET | `/api/frp/install` | `frp:read` | Просмотр сведений об установке и хода установки управляемой программы |
+| POST | `/api/frp/install` | `frp:write` | Установить или обновить управляемую программу онлайн |
+| POST | `/api/frp/install/rollback` | `frp:write` | Переключиться на сохранённую предыдущую версию |
+| DELETE | `/api/frp/install` | `frp:write` | Удалить управляемую программу |
+| DELETE | `/api/frp/install/backups/{id}` | `frp:write` | Удалить сохранённую предыдущую версию |
+| POST | `/api/frp/reset` | `frp:write` | Сбросить настройки модуля по умолчанию |
 | GET | `/api/frp/client` | `frp:read` | Чтение конфигурации клиента frp |
 | PUT | `/api/frp/client` | `frp:write` | Сохранить конфигурацию клиента frp |
 | GET | `/api/frp/server` | `frp:read` | Чтение конфигурации сервера frp |
@@ -158,6 +170,12 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | POST | `/api/cloudflared/tunnels/{key}/restart` | `cloudflared:write` | Перезапустить туннель Cloudflare |
 | GET | `/api/cloudflared/settings` | `cloudflared:read` | Чтение настроек туннеля Cloudflare |
 | PUT | `/api/cloudflared/settings` | `cloudflared:write` | Сохранить настройки туннеля Cloudflare |
+| GET | `/api/cloudflared/install` | `cloudflared:read` | Просмотр сведений об установке и хода установки управляемой программы |
+| POST | `/api/cloudflared/install` | `cloudflared:write` | Установить или обновить управляемую программу онлайн |
+| POST | `/api/cloudflared/install/rollback` | `cloudflared:write` | Переключиться на сохранённую предыдущую версию |
+| DELETE | `/api/cloudflared/install` | `cloudflared:write` | Удалить управляемую программу |
+| DELETE | `/api/cloudflared/install/backups/{id}` | `cloudflared:write` | Удалить сохранённую предыдущую версию |
+| POST | `/api/cloudflared/reset` | `cloudflared:write` | Сбросить настройки модуля по умолчанию |
 
 ## SSL-сертификат
 
@@ -454,8 +472,12 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | POST | `/api/filebrowser/instances/{key}/restart` | `filebrowser:write` | Перезапустить экземпляр File Browser |
 | GET | `/api/filebrowser/settings` | `filebrowser:read` | Получить настройки программы File Browser |
 | PUT | `/api/filebrowser/settings` | `filebrowser:write` | Сохранить настройки программы File Browser |
-| GET | `/api/filebrowser/install` | `filebrowser:read` | Показать ход установки File Browser |
-| POST | `/api/filebrowser/install` | `filebrowser:write` | Скачать и установить FileBrowser Quantum |
+| GET | `/api/filebrowser/install` | `filebrowser:read` | Просмотр сведений об установке и хода установки управляемой программы |
+| POST | `/api/filebrowser/install` | `filebrowser:write` | Установить или обновить управляемую программу онлайн |
+| POST | `/api/filebrowser/install/rollback` | `filebrowser:write` | Переключиться на сохранённую предыдущую версию |
+| DELETE | `/api/filebrowser/install` | `filebrowser:write` | Удалить управляемую программу |
+| DELETE | `/api/filebrowser/install/backups/{id}` | `filebrowser:write` | Удалить сохранённую предыдущую версию |
+| POST | `/api/filebrowser/reset` | `filebrowser:write` | Сбросить настройки модуля по умолчанию |
 
 ## Монтирование хранилищ
 

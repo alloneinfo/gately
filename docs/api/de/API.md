@@ -124,6 +124,12 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | GET | `/api/tailscale/status` | `tailscale:read` | Tailscale-Verbindungsstatus anzeigen |
 | POST | `/api/tailscale/restart` | `tailscale:write` | Tailscale neu starten |
 | POST | `/api/tailscale/logout` | `tailscale:write` | Von Tailscale abmelden |
+| GET | `/api/tailscale/install` | `tailscale:read` | Installationsinfo und Fortschritt eines verwalteten Programms anzeigen |
+| POST | `/api/tailscale/install` | `tailscale:write` | Verwaltetes Programm online installieren oder aktualisieren |
+| POST | `/api/tailscale/install/rollback` | `tailscale:write` | Zu einer gespeicherten früheren Version wechseln |
+| DELETE | `/api/tailscale/install` | `tailscale:write` | Verwaltetes Programm deinstallieren |
+| DELETE | `/api/tailscale/install/backups/{id}` | `tailscale:write` | Gespeicherte frühere Version löschen |
+| POST | `/api/tailscale/reset` | `tailscale:write` | Standardeinstellungen des Moduls wiederherstellen |
 
 ## frp-Intranet-Durchleitung
 
@@ -138,6 +144,12 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | PUT | `/api/frp/proxies/{key}/enable` | `frp:write` | Einträge aktivieren oder deaktivieren |
 | PUT | `/api/frp/proxies-order` | `frp:write` | Einträge neu anordnen |
 | POST | `/api/frp/import` | `frp:write` | Vorhandene frpc-/frps-Konfiguration importieren (unterstützt altes ini und neues toml); bei apply false nur Vorschau |
+| GET | `/api/frp/install` | `frp:read` | Installationsinfo und Fortschritt eines verwalteten Programms anzeigen |
+| POST | `/api/frp/install` | `frp:write` | Verwaltetes Programm online installieren oder aktualisieren |
+| POST | `/api/frp/install/rollback` | `frp:write` | Zu einer gespeicherten früheren Version wechseln |
+| DELETE | `/api/frp/install` | `frp:write` | Verwaltetes Programm deinstallieren |
+| DELETE | `/api/frp/install/backups/{id}` | `frp:write` | Gespeicherte frühere Version löschen |
+| POST | `/api/frp/reset` | `frp:write` | Standardeinstellungen des Moduls wiederherstellen |
 | GET | `/api/frp/client` | `frp:read` | frp-Client-Konfiguration lesen |
 | PUT | `/api/frp/client` | `frp:write` | frp-Client-Konfiguration speichern |
 | GET | `/api/frp/server` | `frp:read` | frp-Server-Konfiguration lesen |
@@ -158,6 +170,12 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | POST | `/api/cloudflared/tunnels/{key}/restart` | `cloudflared:write` | Einen Cloudflare-Tunnel neu starten |
 | GET | `/api/cloudflared/settings` | `cloudflared:read` | Cloudflare-Tunnel-Einstellungen lesen |
 | PUT | `/api/cloudflared/settings` | `cloudflared:write` | Cloudflare-Tunnel-Einstellungen speichern |
+| GET | `/api/cloudflared/install` | `cloudflared:read` | Installationsinfo und Fortschritt eines verwalteten Programms anzeigen |
+| POST | `/api/cloudflared/install` | `cloudflared:write` | Verwaltetes Programm online installieren oder aktualisieren |
+| POST | `/api/cloudflared/install/rollback` | `cloudflared:write` | Zu einer gespeicherten früheren Version wechseln |
+| DELETE | `/api/cloudflared/install` | `cloudflared:write` | Verwaltetes Programm deinstallieren |
+| DELETE | `/api/cloudflared/install/backups/{id}` | `cloudflared:write` | Gespeicherte frühere Version löschen |
+| POST | `/api/cloudflared/reset` | `cloudflared:write` | Standardeinstellungen des Moduls wiederherstellen |
 
 ## SSL-Zertifikate
 
@@ -454,8 +472,12 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | POST | `/api/filebrowser/instances/{key}/restart` | `filebrowser:write` | Eine File-Browser-Instanz neu starten |
 | GET | `/api/filebrowser/settings` | `filebrowser:read` | File-Browser-Programmeinstellungen lesen |
 | PUT | `/api/filebrowser/settings` | `filebrowser:write` | File-Browser-Programmeinstellungen speichern |
-| GET | `/api/filebrowser/install` | `filebrowser:read` | Installationsfortschritt von File Browser anzeigen |
-| POST | `/api/filebrowser/install` | `filebrowser:write` | FileBrowser Quantum herunterladen und installieren |
+| GET | `/api/filebrowser/install` | `filebrowser:read` | Installationsinfo und Fortschritt eines verwalteten Programms anzeigen |
+| POST | `/api/filebrowser/install` | `filebrowser:write` | Verwaltetes Programm online installieren oder aktualisieren |
+| POST | `/api/filebrowser/install/rollback` | `filebrowser:write` | Zu einer gespeicherten früheren Version wechseln |
+| DELETE | `/api/filebrowser/install` | `filebrowser:write` | Verwaltetes Programm deinstallieren |
+| DELETE | `/api/filebrowser/install/backups/{id}` | `filebrowser:write` | Gespeicherte frühere Version löschen |
+| POST | `/api/filebrowser/reset` | `filebrowser:write` | Standardeinstellungen des Moduls wiederherstellen |
 
 ## Speicher-Einbindungen
 
