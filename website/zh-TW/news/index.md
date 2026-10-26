@@ -7,6 +7,10 @@ description: Gately 各版本的發布公告與更新說明。
 
 重要版本的發布公告如下，每個版本的完整變更與下載檔案見 [GitHub Releases](https://github.com/wangwanjie/gately/releases)。
 
+## [v0.5.9.1](/zh-TW/news/v0.5.9.1)
+
+2026 年 10 月 26 日 · Web 服務的 HTTPS 監聽可在同一埠接受 HTTP（跳轉或直接服務）；File Browser 實例可填寫存取位址；修復編輯 File Browser 實例與 Cloudflare 隧道時儲存失敗。
+
 ## [v0.5.9](/zh-TW/news/v0.5.9)
 
 2026 年 10 月 26 日 · 託管 File Browser；申請 IP 位址憑證與短期憑證；frp、cloudflared、Tailscale、File Browser 可線上安裝、更新、回滾與解除安裝；檔案服務共用使用者改為獨立頁面。

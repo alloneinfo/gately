@@ -7,6 +7,10 @@ description: Gately 각 버전의 릴리스 공지와 변경 사항입니다.
 
 주요 버전의 릴리스 공지는 아래와 같습니다. 모든 버전의 전체 변경 사항과 다운로드 파일은 [GitHub Releases](https://github.com/wangwanjie/gately/releases)에서 확인하세요.
 
+## [v0.5.9.1](/ko/news/v0.5.9.1)
+
+2026년 10월 26일 · Web 서비스의 HTTPS 리스너가 같은 포트에서 HTTP를 받을 수 있습니다(리디렉션 또는 그대로 제공). File Browser 인스턴스에 접속 주소를 지정할 수 있고, File Browser 인스턴스와 Cloudflare 터널을 편집한 뒤 저장되지 않던 문제를 고쳤습니다.
+
 ## [v0.5.9](/ko/news/v0.5.9)
 
 2026년 10월 26일 · File Browser를 호스팅합니다. IP 주소 인증서와 단기 인증서를 발급할 수 있고, frp, cloudflared, Tailscale, File Browser를 온라인으로 설치, 업데이트, 롤백, 제거할 수 있으며, 파일 서비스 공유 사용자가 별도 페이지로 옮겨졌습니다.
