@@ -30,7 +30,7 @@ Portweiterleitung, STUN und Web-Dienste lauschen direkt auf Ports des Hosts. Bei
 
 ## Warum muss ich die Binärdateien von Tailscale, frp und cloudflared selbst bereitstellen?
 
-Diese drei Module betreiben die offiziellen externen Programme. Gately liefert sie nicht mit, sodass Sie stets die neueste Upstream-Version nutzen können. Wohin Sie sie legen, steht unter [Konfiguration & Laufzeitoptionen](/de/docs/guide/configuration).
+Diese drei Module betreiben die offiziellen externen Programme. Gately liefert sie nicht mit, sodass Sie stets die neueste Upstream-Version nutzen können. Wohin Sie sie legen, steht unter [Konfiguration & Laufzeitoptionen](/de/docs/guide/configuration). File Browser lässt sich auf seiner Seite mit einem Klick herunterladen und installieren.
 
 ## Meine STUN-Regel ist aktiviert, aber ich komme von außen nicht durch
 

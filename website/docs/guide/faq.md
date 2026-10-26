@@ -30,7 +30,7 @@
 
 ## Tailscale、frp、cloudflared 为什么要自己放二进制？
 
-这三个模块托管官方外部程序，Gately 本体不内置它们，因此始终可以使用上游最新版本。放置位置见 [配置与运行参数](/docs/guide/configuration)。
+这三个模块托管官方外部程序，Gately 本体不内置它们，因此始终可以使用上游最新版本。放置位置见 [配置与运行参数](/docs/guide/configuration)。File Browser 可以在页面中一键下载安装。
 
 ## STUN 规则启用后外网仍无法访问？
 

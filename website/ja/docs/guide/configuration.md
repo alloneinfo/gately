@@ -43,6 +43,8 @@ Tailscale、frp、cloudflared の 3 つのモジュールは公式の外部プ�
 
 Docker でデプロイする場合は、マウントした設定ディレクトリにバイナリを置くだけで使えます（例：`./gately-data/bin/frpc`）。Tailscale には `tailscale` と `tailscaled` の両方が必要です。詳しくは [Tailscale / frp / cloudflared](/ja/docs/modules/tunnels) を参照してください。
 
+File Browser モジュールは FileBrowser Quantum をホストし、入力したパス、設定ディレクトリの `bin/`、`PATH` の順に探します。ページからワンクリックで `bin/filebrowser` にダウンロードしてインストールできます。詳しくは [File Browser](/ja/docs/modules/tools#filebrowser) を参照してください。
+
 ## 実行ログ
 
 システムと各モジュールの実行ログは、既定で設定ディレクトリの `logs/` に書き込まれます。再起動やアップグレードの後も「システムログ」と各モジュールのページで確認できます。

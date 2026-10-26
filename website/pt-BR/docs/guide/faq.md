@@ -30,7 +30,7 @@ Redirecionamento de portas, STUN e serviços Web precisam escutar diretamente na
 
 ## Por que preciso fornecer os binários de Tailscale, frp e cloudflared?
 
-Esses três módulos gerenciam programas externos oficiais, que o Gately não embute. Assim você sempre pode usar a versão mais recente do projeto original. Veja onde colocá-los em [Configuração e opções de execução](/pt-BR/docs/guide/configuration).
+Esses três módulos gerenciam programas externos oficiais, que o Gately não embute. Assim você sempre pode usar a versão mais recente do projeto original. Veja onde colocá-los em [Configuração e opções de execução](/pt-BR/docs/guide/configuration). O File Browser pode ser baixado e instalado pela própria página com um clique.
 
 ## Com a regra STUN ativa, o acesso externo continua sem funcionar?
 

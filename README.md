@@ -55,6 +55,7 @@ Gately is fully open source, so users and the community can read the source and 
 | WebDAV | Multiple users, per-user directories, read-only mode; shared users common to WebDAV, FTP and SMB |
 | FTP | Multiple users, per-user directories, read-only mode, FTPS and passive port ranges; shared users common to WebDAV, FTP and SMB |
 | SMB | Multiple users, per-user shares backed by one or more directories, read-only mode, SMB 2/3, encryption and Bonjour discovery; shared users common to WebDAV, FTP and SMB |
+| File Browser | Hosts the FileBrowser Quantum web file manager: multiple instances, several shared directories with read-only mode, password or reverse proxy auth, one-click download and install from the page |
 | Storage mounts | Local directories, remote WebDAV mounts and SMB shares, online file manager |
 | Scheduled tasks | Cron expressions, commands or HTTP requests, run history |
 | Security and settings | Passkey (WebAuthn) sign-in, two-factor authentication (TOTP), read-only accounts, login rate limiting, secure entry path, LAN-only access, HTTPS for the admin UI, multiple API tokens (per-module read/write grants), custom DNS (DoH supported), time zone, config backup and restore, real client address from trusted local reverse proxies, turn feature modules on or off (disabled modules start no services and serve no API) |
@@ -156,6 +157,8 @@ When upgrading from an older version, the previous global API token becomes a "l
 ### Tailscale, frp, cloudflared
 
 These three modules manage the official external programs (automatic restart, logs aggregated in the UI). Gately does not bundle them, so you can always run the latest upstream release. Programs are located in this order: the path set in the module settings, `PATH`, then the `bin/` subdirectory of the config directory. For Docker deployments, drop the binary into the mounted config directory, for example `./gately-data/bin/frpc`; Tailscale needs both `tailscale` and `tailscaled`. Tokens and keys in config files are stored with 0600 permissions, and the cloudflared token is passed via an environment variable so it never appears in the process list.
+
+The File Browser module hosts [FileBrowser Quantum](https://github.com/gtsteffaniak/filebrowser) (the original filebrowser is archived and no longer receives security fixes) and looks it up in this order: the path you entered, `bin/` under the config directory, then `PATH`; the page can also download and install it into `bin/filebrowser` with one click. The admin password is passed via an environment variable and never written to the config file.
 
 ## Development
 

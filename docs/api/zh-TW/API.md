@@ -48,6 +48,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `webdav` | WebDAV 服務 | `webdav:read`、`webdav:write` |
 | `ftp` | FTP 服務 | `ftp:read`、`ftp:write` |
 | `smb` | SMB 服務 | `smb:read`、`smb:write` |
+| `filebrowser` | File Browser | `filebrowser:read`、`filebrowser:write` |
 | `storage` | 儲存掛載 | `storage:read`、`storage:write` |
 | `notify` | 通知中心 | `notify:read`、`notify:write` |
 | `nettools` | 網路診斷 | `nettools:read`、`nettools:write` |
@@ -438,6 +439,24 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | PUT | `/api/smb/shared-users` | `webdav:write,ftp:write,smb:write` | 儲存檔案服務共用使用者（舊介面） |
 | PUT | `/api/smb/settings` | `smb:write` | 儲存 SMB 設定 |
 
+## File Browser
+
+| 方法 | 路徑 | 所需權限 | 說明 |
+| --- | --- | --- | --- |
+| GET | `/api/filebrowser/logs` | `filebrowser:read` | 檢視模組執行日誌 |
+| DELETE | `/api/filebrowser/logs` | `filebrowser:write` | 清空模組執行日誌 |
+| GET | `/api/filebrowser/instances` | `filebrowser:read` | 取得File Browser 實例清單 |
+| POST | `/api/filebrowser/instances` | `filebrowser:write` | 新增File Browser 實例 |
+| PUT | `/api/filebrowser/instances/{key}` | `filebrowser:write` | 修改File Browser 實例 |
+| DELETE | `/api/filebrowser/instances/{key}` | `filebrowser:write` | 刪除File Browser 實例 |
+| PUT | `/api/filebrowser/instances/{key}/enable` | `filebrowser:write` | 啟用或停用File Browser 實例 |
+| PUT | `/api/filebrowser/instances-order` | `filebrowser:write` | 調整File Browser 實例排序 |
+| POST | `/api/filebrowser/instances/{key}/restart` | `filebrowser:write` | 重新啟動一個 File Browser 實例 |
+| GET | `/api/filebrowser/settings` | `filebrowser:read` | 讀取 File Browser 程式設定 |
+| PUT | `/api/filebrowser/settings` | `filebrowser:write` | 儲存 File Browser 程式設定 |
+| GET | `/api/filebrowser/install` | `filebrowser:read` | 查看 File Browser 下載安裝進度 |
+| POST | `/api/filebrowser/install` | `filebrowser:write` | 下載安裝 FileBrowser Quantum |
+
 ## 儲存掛載
 
 | 方法 | 路徑 | 所需權限 | 說明 |
@@ -742,6 +761,35 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `level` | string |
 | `name` | string |
 | `type` | string |
+
+### filebrowser.Instance
+
+| 欄位 | 類型 |
+| --- | --- |
+| `adminPassword` | string |
+| `adminUser` | string |
+| `authMethod` | string |
+| `baseUrl` | string |
+| `disableWebDav` | boolean |
+| `enable` | boolean |
+| `key` | string |
+| `listenIp` | string |
+| `locale` | string |
+| `name` | string |
+| `port` | integer |
+| `proxyHeader` | string |
+| `remark` | string |
+| `sources` | 陣列 of `filebrowser.Source` |
+| `tokenHours` | integer |
+| `trustProxyHeaders` | boolean |
+
+### filebrowser.Source
+
+| 欄位 | 類型 |
+| --- | --- |
+| `name` | string |
+| `path` | string |
+| `readOnly` | boolean |
 
 ### frp.ClientSettings
 

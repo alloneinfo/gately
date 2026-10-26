@@ -18,6 +18,12 @@ type Env struct {
 	Logs  *logbuf.Buffer
 }
 
+// HTTPClientAware 由需要访问外网（例如下载托管程序）的模块实现。
+// 框架注入的函数每次调用都返回遵循“更新代理”设置的客户端，代理修改后立即生效。
+type HTTPClientAware interface {
+	SetHTTPClient(fn func() *http.Client)
+}
+
 // Router 用于注册模块接口。pattern 采用 Go 1.22 ServeMux 语法，
 // 但路径部分相对模块前缀，例如 "GET /rules" 实际挂载为 "GET /api/<ID>/rules"。
 type Router interface {

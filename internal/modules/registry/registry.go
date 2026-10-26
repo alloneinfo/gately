@@ -10,6 +10,7 @@ import (
 	"github.com/wangwanjie/gately/internal/modules/cron"
 	"github.com/wangwanjie/gately/internal/modules/ddns"
 	"github.com/wangwanjie/gately/internal/modules/docker"
+	"github.com/wangwanjie/gately/internal/modules/filebrowser"
 	"github.com/wangwanjie/gately/internal/modules/frp"
 	"github.com/wangwanjie/gately/internal/modules/ftp"
 	"github.com/wangwanjie/gately/internal/modules/guard"
@@ -74,6 +75,7 @@ func New() (mods []module.Module, certs *ssl.Module) {
 		webdav.New(certs),
 		ftp.New(certs),
 		smb.New(),
+		filebrowser.New(),
 		files,
 		notify.New(),
 		nettools.New(),

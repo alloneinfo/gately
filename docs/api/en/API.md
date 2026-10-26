@@ -48,6 +48,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `webdav` | WebDAV Service | `webdav:read`、`webdav:write` |
 | `ftp` | FTP service | `ftp:read`、`ftp:write` |
 | `smb` | SMB Service | `smb:read`、`smb:write` |
+| `filebrowser` | File Browser | `filebrowser:read`、`filebrowser:write` |
 | `storage` | Storage Mounts | `storage:read`、`storage:write` |
 | `notify` | Notification center | `notify:read`、`notify:write` |
 | `nettools` | Network diagnostics | `nettools:read`、`nettools:write` |
@@ -438,6 +439,24 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | PUT | `/api/smb/shared-users` | `webdav:write,ftp:write,smb:write` | Save file service shared users (legacy endpoint) |
 | PUT | `/api/smb/settings` | `smb:write` | Save SMB settings |
 
+## File Browser
+
+| Method | Path | Required permission | Description |
+| --- | --- | --- | --- |
+| GET | `/api/filebrowser/logs` | `filebrowser:read` | View module runtime logs |
+| DELETE | `/api/filebrowser/logs` | `filebrowser:write` | Clear module runtime logs |
+| GET | `/api/filebrowser/instances` | `filebrowser:read` | List File Browser instance |
+| POST | `/api/filebrowser/instances` | `filebrowser:write` | Create File Browser instance |
+| PUT | `/api/filebrowser/instances/{key}` | `filebrowser:write` | Update File Browser instance |
+| DELETE | `/api/filebrowser/instances/{key}` | `filebrowser:write` | Delete File Browser instance |
+| PUT | `/api/filebrowser/instances/{key}/enable` | `filebrowser:write` | Enable or disable File Browser instance |
+| PUT | `/api/filebrowser/instances-order` | `filebrowser:write` | Reorder File Browser instance |
+| POST | `/api/filebrowser/instances/{key}/restart` | `filebrowser:write` | Restart a File Browser instance |
+| GET | `/api/filebrowser/settings` | `filebrowser:read` | Read File Browser program settings |
+| PUT | `/api/filebrowser/settings` | `filebrowser:write` | Save File Browser program settings |
+| GET | `/api/filebrowser/install` | `filebrowser:read` | View File Browser installation progress |
+| POST | `/api/filebrowser/install` | `filebrowser:write` | Download and install FileBrowser Quantum |
+
 ## Storage Mounts
 
 | Method | Path | Required permission | Description |
@@ -742,6 +761,35 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | `level` | string |
 | `name` | string |
 | `type` | string |
+
+### filebrowser.Instance
+
+| Field | Type |
+| --- | --- |
+| `adminPassword` | string |
+| `adminUser` | string |
+| `authMethod` | string |
+| `baseUrl` | string |
+| `disableWebDav` | boolean |
+| `enable` | boolean |
+| `key` | string |
+| `listenIp` | string |
+| `locale` | string |
+| `name` | string |
+| `port` | integer |
+| `proxyHeader` | string |
+| `remark` | string |
+| `sources` | Array of `filebrowser.Source` |
+| `tokenHours` | integer |
+| `trustProxyHeaders` | boolean |
+
+### filebrowser.Source
+
+| Field | Type |
+| --- | --- |
+| `name` | string |
+| `path` | string |
+| `readOnly` | boolean |
 
 ### frp.ClientSettings
 

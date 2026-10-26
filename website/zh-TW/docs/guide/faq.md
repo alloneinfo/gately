@@ -30,7 +30,7 @@
 
 ## Tailscale、frp、cloudflared 為什麼要自己放執行檔？
 
-這三個模組託管官方外部程式，Gately 本體並未內建它們，因此始終可以使用上游最新版本。放置位置請見 [設定與執行參數](/zh-TW/docs/guide/configuration)。
+這三個模組託管官方外部程式，Gately 本體並未內建它們，因此始終可以使用上游最新版本。放置位置請見 [設定與執行參數](/zh-TW/docs/guide/configuration)。File Browser 可以在頁面中一鍵下載安裝。
 
 ## STUN 規則啟用後外網仍無法存取？
 

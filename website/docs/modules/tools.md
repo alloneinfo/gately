@@ -80,6 +80,35 @@ WebDAV、FTP 与 SMB 共用一份「共享用户」，字段与各服务的本�
 
 接口为 `GET` / `PUT /api/fileusers`，API 令牌需要 `fileusers:read` / `fileusers:write` 权限，读取结果中的 `services` 列出各服务的使用情况。原来各服务下的 `GET` / `PUT /api/<服务>/shared-users` 已弃用，仍可使用并读写同一份列表：读取沿用所在服务的读权限，修改需要同时具备 `webdav:write`、`ftp:write` 与 `smb:write`。
 
+## File Browser {#filebrowser}
+
+在「文件服务」分组的「File Browser」中配置。Gately 托管 [FileBrowser Quantum](https://github.com/gtsteffaniak/filebrowser)：一个网页文件管理器，可以在线预览图片、视频与文档、上传下载、生成分享链接，并有自己的多用户与权限管理。原版 filebrowser/filebrowser 已于 2026 年归档、不再修复安全问题，因此托管的是仍在维护的 Quantum 分支。
+
+程序不内置在 Gately 中。页面下方「FileBrowser Quantum 程序」卡片的「下载安装」从 GitHub 下载最新正式版到配置目录的 `bin/filebrowser`，按 GitHub 记录的 SHA-256 校验，访问 GitHub 时使用「设置」中的更新代理；再次点击即可更新，更新后已启用的实例自动重启。也可以自行放置程序并填写路径。程序按以下顺序查找：填写的路径、配置目录下的 `bin/`、`PATH`；找到的程序不是 Quantum（例如 `PATH` 中的原版）时页面会提示。
+
+每个实例是一个独立的 File Browser 进程：
+
+| 字段 | 默认值 | 说明 |
+| --- | --- | --- |
+| `listenIp` | 空 | 监听地址，留空监听全部 IPv4 地址；只通过 Web 服务反向代理访问时可填 `127.0.0.1` |
+| `port` | 8080 | 监听端口 |
+| `baseUrl` | `/` | 访问路径，在 Web 服务中按路径反向代理（例如 `/files`）时填写相同的路径 |
+| `sources` | 无 | 共享目录，每项包含 `path`（绝对路径）、`name`（显示名称，留空取目录名）与 `readOnly`；新用户默认可以访问全部目录 |
+| `authMethod` | `password` | 登录方式：`password` 账号密码，`proxy` 信任反向代理传入的用户名请求头，`noauth` 免登录 |
+| `proxyHeader` | `Remote-User` | `proxy` 方式读取用户名的请求头，不存在的用户自动创建 |
+| `adminUser` | `admin` | 管理员用户名 |
+| `adminPassword` | 无 | 管理员密码，至少 8 位，`password` 方式必填 |
+| `trustProxyHeaders` | 关闭 | 信任 `X-Forwarded-*` 与 `X-Real-IP`，位于反向代理之后时开启 |
+| `disableWebDav` | 关闭 | 关闭 File Browser 自带的 WebDAV 接口 |
+| `locale` | 空 | 新用户的默认界面语言，如 `zh-cn`，留空为英文 |
+| `tokenHours` | 2 | 登录有效期（小时） |
+
+- 管理员密码在每次启动时同步到 File Browser，以 Gately 中的设置为准；其他用户、分享链接与个人设置在 File Browser 中管理，保存在实例自己的数据库里。
+- 配置文件、数据库与缓存保存在配置目录的 `filebrowser/<实例 key>/` 下，配置文件权限 0600；管理员密码通过环境变量传给进程，不写入文件。删除实例会一并删除这个目录，共享目录中的文件保持原样。
+- 共享目录不存在时实例不会启动，卡片上显示原因。
+- 对外访问推荐在 [Web 服务](/docs/modules/web) 中添加反向代理站点指向 `http://127.0.0.1:端口`，用 HTTPS 与访问控制保护，并开启「信任代理头」。`proxy` 方式要配合 Web 服务的转发认证把用户名放进请求头，File Browser 的端口不能对外开放，否则可以伪造请求头登录。
+- 文件以 Gately 进程的身份读写。
+
 ## 存储挂载
 
 在「文件服务」分组的「存储挂载」中添加挂载点，在页面内在线管理文件。

@@ -68,6 +68,10 @@
       "title": "SMB Service",
       "desc": "SMB file sharing service"
     },
+    "filebrowser": {
+      "title": "File Browser",
+      "desc": "Web file manager with previews and sharing"
+    },
     "fileusers": {
       "title": "File shared users",
       "desc": "Users shared by WebDAV, FTP and SMB"

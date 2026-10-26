@@ -80,6 +80,35 @@ WebDAV, FTP y SMB comparten una lista de «usuarios compartidos» con los mismos
 
 La API es `GET` / `PUT /api/fileusers`, que requiere el permiso `fileusers:read` / `fileusers:write` para los tokens de API; `services` en la respuesta muestra cómo los usa cada servicio. Los anteriores `GET` / `PUT /api/<servicio>/shared-users` de cada servicio están obsoletos pero siguen funcionando y leen y escriben la misma lista: la lectura usa el permiso de lectura de ese servicio y un cambio necesita `webdav:write`, `ftp:write` y `smb:write` a la vez.
 
+## File Browser {#filebrowser}
+
+Se configura en «File Browser», dentro del grupo «Servicios de archivos». Gately aloja [FileBrowser Quantum](https://github.com/gtsteffaniak/filebrowser), un gestor de archivos web que previsualiza imágenes, vídeos y documentos, sube y descarga archivos, crea enlaces para compartir y tiene sus propios usuarios y permisos. El filebrowser/filebrowser original se archivó en 2026 y ya no recibe correcciones de seguridad, por eso Gately aloja la bifurcación Quantum, que sigue mantenida.
+
+El programa no viene incluido en Gately. «Descargar e instalar», en la tarjeta «Programa FileBrowser Quantum» al pie de la página, descarga la última versión estable de GitHub en `bin/filebrowser` dentro del directorio de configuración, la verifica con el SHA-256 que registra GitHub y accede a GitHub a través del proxy de actualización de «Ajustes»; púlsalo de nuevo para actualizar, y las instancias activas se reinician con el programa nuevo. También puedes colocar el programa tú mismo e indicar su ruta. El programa se busca en este orden: la ruta indicada, `bin/` en el directorio de configuración y `PATH`; la página avisa si el programa encontrado no es Quantum (por ejemplo, el original en `PATH`).
+
+Cada instancia es un proceso de File Browser independiente:
+
+| Campo | Predeterminado | Descripción |
+| --- | --- | --- |
+| `listenIp` | vacío | Dirección de escucha; vacío escucha en todas las direcciones IPv4. Usa `127.0.0.1` si solo se accede a través de un proxy inverso del Servicio web |
+| `port` | 8080 | Puerto de escucha |
+| `baseUrl` | `/` | Ruta base; si usas un proxy inverso por ruta en el Servicio web (por ejemplo `/files`), introduce la misma ruta |
+| `sources` | ninguno | Directorios compartidos, cada uno con `path` (absoluta), `name` (nombre visible, por defecto el del directorio) y `readOnly`; los usuarios nuevos acceden a todos por defecto |
+| `authMethod` | `password` | Inicio de sesión: `password` con usuario y contraseña, `proxy` confía en la cabecera de usuario del proxy inverso, `noauth` sin inicio de sesión |
+| `proxyHeader` | `Remote-User` | Cabecera con el nombre de usuario para `proxy`; los usuarios que no existen se crean automáticamente |
+| `adminUser` | `admin` | Usuario administrador |
+| `adminPassword` | ninguno | Contraseña del administrador, al menos 8 caracteres, obligatoria con `password` |
+| `trustProxyHeaders` | desactivado | Confía en `X-Forwarded-*` y `X-Real-IP`; actívalo detrás de un proxy inverso |
+| `disableWebDav` | desactivado | Desactiva la interfaz WebDAV integrada en File Browser |
+| `locale` | vacío | Idioma de la interfaz para usuarios nuevos, como `es`; vacío es inglés |
+| `tokenHours` | 2 | Duración de la sesión en horas |
+
+- La contraseña del administrador se sincroniza con File Browser en cada inicio, así que prevalece el valor de Gately; los demás usuarios, enlaces compartidos y preferencias se gestionan en File Browser y se guardan en la base de datos de la instancia.
+- El archivo de configuración, la base de datos y la caché se guardan en `filebrowser/<clave de la instancia>/` dentro del directorio de configuración, con el archivo de configuración en 0600; la contraseña del administrador llega al proceso mediante una variable de entorno y nunca se escribe en un archivo. Al eliminar una instancia se elimina este directorio, y los archivos de los directorios compartidos se conservan tal cual.
+- Una instancia cuyo directorio compartido no existe no se inicia, y su tarjeta muestra el motivo.
+- Para el acceso desde fuera, añade en el [Servicio web](/es/docs/modules/web) un sitio de proxy inverso hacia `http://127.0.0.1:puerto`, protégelo con HTTPS y control de acceso y activa «Confiar en cabeceras del proxy». El método `proxy` necesita la autenticación delegada del Servicio web para poner el nombre de usuario en la cabecera, y el puerto de File Browser debe quedar cerrado al exterior, ya que de lo contrario se podría falsificar la cabecera para iniciar sesión.
+- Los archivos se leen y escriben con la identidad del proceso de Gately.
+
 ## Montajes de almacenamiento
 
 Añade montajes en «Montajes de almacenamiento», dentro del grupo «Servicios de archivos», y administra los archivos en línea desde la página.

@@ -30,7 +30,7 @@ El reenvío de puertos, STUN y los servicios web escuchan directamente en puerto
 
 ## ¿Por qué tengo que aportar yo mismo los binarios de Tailscale, frp y cloudflared?
 
-Estos tres módulos supervisan los programas oficiales externos. Gately no los incluye, de modo que siempre puedes usar la última versión oficial. Consulta [Configuración y parámetros de ejecución](/es/docs/guide/configuration) para saber dónde colocarlos.
+Estos tres módulos supervisan los programas oficiales externos. Gately no los incluye, de modo que siempre puedes usar la última versión oficial. Consulta [Configuración y parámetros de ejecución](/es/docs/guide/configuration) para saber dónde colocarlos. File Browser se puede descargar e instalar desde su página con un clic.
 
 ## Mi regla STUN está activada, pero sigo sin poder conectar desde fuera
 

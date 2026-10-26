@@ -68,6 +68,10 @@
       "title": "SMB-Dienst",
       "desc": "SMB-Dateifreigabedienst"
     },
+    "filebrowser": {
+      "title": "File Browser",
+      "desc": "Web-Dateimanager mit Vorschau und Freigaben"
+    },
     "fileusers": {
       "title": "Gemeinsame Dateibenutzer",
       "desc": "Benutzer, die WebDAV, FTP und SMB gemeinsam nutzen"

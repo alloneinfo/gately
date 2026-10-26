@@ -55,6 +55,7 @@ Gately ist vollständig quelloffen, sodass Nutzer und Community Quellcode und Ko
 | WebDAV | Mehrere Benutzer, eigene Verzeichnisse, schreibgeschützt; gemeinsame Benutzer für WebDAV, FTP und SMB |
 | FTP | Mehrere Benutzer, eigene Verzeichnisse, schreibgeschützt, mit FTPS und passivem Portbereich; gemeinsame Benutzer für WebDAV, FTP und SMB |
 | SMB | Mehrere Benutzer, Freigaben je Benutzer aus einem oder mehreren Verzeichnissen, schreibgeschützt, mit SMB 2/3, Verschlüsselung und Bonjour-Erkennung; gemeinsame Benutzer für WebDAV, FTP und SMB |
+| File Browser | Betreibt den Web-Dateimanager FileBrowser Quantum: mehrere Instanzen, mehrere freigegebene Verzeichnisse mit Schreibschutz, Anmeldung per Passwort oder Reverse Proxy, Download und Installation mit einem Klick auf der Seite |
 | Speicher-Einbindungen | Lokale Verzeichnisse, entfernte WebDAV-Mounts und SMB-Freigaben, Dateiverwaltung online |
 | Geplante Aufgaben | cron-Ausdrücke, Befehle oder HTTP-Anfragen, Ausführungsprotokoll |
 | Sicherheit und Einstellungen | Anmeldung per Passkey (WebAuthn), Zwei-Faktor-Authentifizierung (TOTP), schreibgeschützte Konten, Ratenbegrenzung bei fehlgeschlagenen Anmeldungen, Sicherheitseinstieg, Zugriff nur aus dem internen Netz, HTTPS für die Verwaltungsoberfläche, mehrere API-Tokens (Lese-/Schreibrechte je Modul), benutzerdefiniertes DNS (mit DoH-Unterstützung), Zeitzone, Konfigurationsbackup und -wiederherstellung, echte Client-Adresse von vertrauenswürdigen lokalen Reverse-Proxys, Funktionsmodule ein- und ausschalten (deaktivierte Module starten keine Dienste und stellen keine API bereit) |
@@ -156,6 +157,8 @@ Beim Upgrade von einer älteren Version wird das bisherige globale API-Token aut
 ### Tailscale, frp, cloudflared
 
 Diese drei Module verwalten offizielle externe Programme (automatischer Neustart, Logs werden in der Oberfläche gesammelt). Gately selbst enthält sie nicht, sodass stets die neueste Upstream-Version genutzt werden kann. Die Programme werden in dieser Reihenfolge gesucht: der in den Moduleinstellungen angegebene Pfad, `PATH`, das Unterverzeichnis `bin/` im Konfigurationsverzeichnis. Bei Docker-Deployments legen Sie die Binärdatei einfach in das eingebundene Konfigurationsverzeichnis, z. B. `./gately-data/bin/frpc`; für Tailscale müssen `tailscale` und `tailscaled` bereitgestellt werden. Token und Schlüssel in den Konfigurationsdateien werden mit Berechtigung 0600 gespeichert; das cloudflared-Token wird über eine Umgebungsvariable übergeben und taucht nicht in der Prozessliste auf.
+
+Das Modul File Browser betreibt [FileBrowser Quantum](https://github.com/gtsteffaniak/filebrowser) (das ursprüngliche filebrowser ist archiviert und erhält keine Sicherheitskorrekturen mehr) und sucht es in dieser Reihenfolge: eingetragener Pfad, `bin/` im Konfigurationsverzeichnis, dann `PATH`; die Seite kann es auch mit einem Klick nach `bin/filebrowser` herunterladen und installieren. Das Admin-Passwort wird über eine Umgebungsvariable übergeben und nie in die Konfigurationsdatei geschrieben.
 
 ## Entwicklung
 

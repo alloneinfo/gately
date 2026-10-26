@@ -48,6 +48,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `webdav` | WebDAV-Dienst | `webdav:read`、`webdav:write` |
 | `ftp` | FTP-Dienst | `ftp:read`、`ftp:write` |
 | `smb` | SMB-Dienst | `smb:read`、`smb:write` |
+| `filebrowser` | File Browser | `filebrowser:read`、`filebrowser:write` |
 | `storage` | Speicher-Einbindungen | `storage:read`、`storage:write` |
 | `notify` | Benachrichtigungszentrale | `notify:read`、`notify:write` |
 | `nettools` | Netzwerkdiagnose | `nettools:read`、`nettools:write` |
@@ -438,6 +439,24 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | PUT | `/api/smb/shared-users` | `webdav:write,ftp:write,smb:write` | Gemeinsame Benutzer der Dateidienste speichern (alter Endpunkt) |
 | PUT | `/api/smb/settings` | `smb:write` | SMB-Einstellungen speichern |
 
+## File Browser
+
+| Methode | Pfad | Erforderliche Berechtigung | Beschreibung |
+| --- | --- | --- | --- |
+| GET | `/api/filebrowser/logs` | `filebrowser:read` | Laufzeitprotokolle eines Moduls anzeigen |
+| DELETE | `/api/filebrowser/logs` | `filebrowser:write` | Modulprotokolle leeren |
+| GET | `/api/filebrowser/instances` | `filebrowser:read` | File-Browser-Instanz auflisten |
+| POST | `/api/filebrowser/instances` | `filebrowser:write` | File-Browser-Instanz hinzufügen |
+| PUT | `/api/filebrowser/instances/{key}` | `filebrowser:write` | File-Browser-Instanz ändern |
+| DELETE | `/api/filebrowser/instances/{key}` | `filebrowser:write` | File-Browser-Instanz löschen |
+| PUT | `/api/filebrowser/instances/{key}/enable` | `filebrowser:write` | File-Browser-Instanz aktivieren oder deaktivieren |
+| PUT | `/api/filebrowser/instances-order` | `filebrowser:write` | File-Browser-Instanz neu anordnen |
+| POST | `/api/filebrowser/instances/{key}/restart` | `filebrowser:write` | Eine File-Browser-Instanz neu starten |
+| GET | `/api/filebrowser/settings` | `filebrowser:read` | File-Browser-Programmeinstellungen lesen |
+| PUT | `/api/filebrowser/settings` | `filebrowser:write` | File-Browser-Programmeinstellungen speichern |
+| GET | `/api/filebrowser/install` | `filebrowser:read` | Installationsfortschritt von File Browser anzeigen |
+| POST | `/api/filebrowser/install` | `filebrowser:write` | FileBrowser Quantum herunterladen und installieren |
+
 ## Speicher-Einbindungen
 
 | Methode | Pfad | Erforderliche Berechtigung | Beschreibung |
@@ -742,6 +761,35 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | `level` | string |
 | `name` | string |
 | `type` | string |
+
+### filebrowser.Instance
+
+| Feld | Typ |
+| --- | --- |
+| `adminPassword` | string |
+| `adminUser` | string |
+| `authMethod` | string |
+| `baseUrl` | string |
+| `disableWebDav` | boolean |
+| `enable` | boolean |
+| `key` | string |
+| `listenIp` | string |
+| `locale` | string |
+| `name` | string |
+| `port` | integer |
+| `proxyHeader` | string |
+| `remark` | string |
+| `sources` | Array von `filebrowser.Source` |
+| `tokenHours` | integer |
+| `trustProxyHeaders` | boolean |
+
+### filebrowser.Source
+
+| Feld | Typ |
+| --- | --- |
+| `name` | string |
+| `path` | string |
+| `readOnly` | boolean |
 
 ### frp.ClientSettings
 

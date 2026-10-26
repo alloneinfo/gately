@@ -68,6 +68,10 @@
       "title": "SMB サービス",
       "desc": "SMB ファイル共有サービス"
     },
+    "filebrowser": {
+      "title": "File Browser",
+      "desc": "プレビューと共有に対応した Web ファイルマネージャー"
+    },
     "fileusers": {
       "title": "ファイル共有ユーザー",
       "desc": "WebDAV・FTP・SMB で共用するユーザー"

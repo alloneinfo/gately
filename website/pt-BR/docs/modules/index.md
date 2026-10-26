@@ -20,4 +20,4 @@ Você pode desativar um módulo inteiro em "Configurações → Módulos". Um m�
 | Diagnóstico de rede | Ping, traceroute, sondagem de portas, consulta DNS, teste de velocidade, varredura da rede local | [Ver](/pt-BR/docs/modules/nettools) |
 | Central de notificações | Envio de eventos por vários canais e regras | [Ver](/pt-BR/docs/modules/notify) |
 | Backup da configuração | Backups criptografados, política de retenção, backup agendado e restauração | [Ver](/pt-BR/docs/modules/backup) |
-| Arquivos e ferramentas de operação | WebDAV, FTP, SMB, montagens de armazenamento, Wake-on-LAN, tarefas agendadas | [Ver](/pt-BR/docs/modules/tools) |
+| Arquivos e ferramentas de operação | WebDAV, FTP, SMB, File Browser, montagens de armazenamento, Wake-on-LAN, tarefas agendadas | [Ver](/pt-BR/docs/modules/tools) |

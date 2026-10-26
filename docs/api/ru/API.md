@@ -48,6 +48,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `webdav` | WebDAV-сервер | `webdav:read`、`webdav:write` |
 | `ftp` | Служба FTP | `ftp:read`、`ftp:write` |
 | `smb` | Служба SMB | `smb:read`、`smb:write` |
+| `filebrowser` | File Browser | `filebrowser:read`、`filebrowser:write` |
 | `storage` | Монтирование хранилищ | `storage:read`、`storage:write` |
 | `notify` | Центр уведомлений | `notify:read`、`notify:write` |
 | `nettools` | Диагностика сети | `nettools:read`、`nettools:write` |
@@ -438,6 +439,24 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | PUT | `/api/smb/shared-users` | `webdav:write,ftp:write,smb:write` | Сохранить общих пользователей файловых служб (старый метод) |
 | PUT | `/api/smb/settings` | `smb:write` | Сохранить настройки SMB |
 
+## File Browser
+
+| Метод | Путь | Необходимое право | Описание |
+| --- | --- | --- | --- |
+| GET | `/api/filebrowser/logs` | `filebrowser:read` | Просмотр журнала работы модуля |
+| DELETE | `/api/filebrowser/logs` | `filebrowser:write` | Очистить журнал работы модуля |
+| GET | `/api/filebrowser/instances` | `filebrowser:read` | Список: Экземпляр File Browser |
+| POST | `/api/filebrowser/instances` | `filebrowser:write` | Добавить: Экземпляр File Browser |
+| PUT | `/api/filebrowser/instances/{key}` | `filebrowser:write` | Изменить: Экземпляр File Browser |
+| DELETE | `/api/filebrowser/instances/{key}` | `filebrowser:write` | Удалить: Экземпляр File Browser |
+| PUT | `/api/filebrowser/instances/{key}/enable` | `filebrowser:write` | Включить или отключить: Экземпляр File Browser |
+| PUT | `/api/filebrowser/instances-order` | `filebrowser:write` | Изменить порядок: Экземпляр File Browser |
+| POST | `/api/filebrowser/instances/{key}/restart` | `filebrowser:write` | Перезапустить экземпляр File Browser |
+| GET | `/api/filebrowser/settings` | `filebrowser:read` | Получить настройки программы File Browser |
+| PUT | `/api/filebrowser/settings` | `filebrowser:write` | Сохранить настройки программы File Browser |
+| GET | `/api/filebrowser/install` | `filebrowser:read` | Показать ход установки File Browser |
+| POST | `/api/filebrowser/install` | `filebrowser:write` | Скачать и установить FileBrowser Quantum |
+
 ## Монтирование хранилищ
 
 | Метод | Путь | Необходимое право | Описание |
@@ -742,6 +761,35 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `level` | string |
 | `name` | string |
 | `type` | string |
+
+### filebrowser.Instance
+
+| Поле | Тип |
+| --- | --- |
+| `adminPassword` | string |
+| `adminUser` | string |
+| `authMethod` | string |
+| `baseUrl` | string |
+| `disableWebDav` | boolean |
+| `enable` | boolean |
+| `key` | string |
+| `listenIp` | string |
+| `locale` | string |
+| `name` | string |
+| `port` | integer |
+| `proxyHeader` | string |
+| `remark` | string |
+| `sources` | Массив из `filebrowser.Source` |
+| `tokenHours` | integer |
+| `trustProxyHeaders` | boolean |
+
+### filebrowser.Source
+
+| Поле | Тип |
+| --- | --- |
+| `name` | string |
+| `path` | string |
+| `readOnly` | boolean |
 
 ### frp.ClientSettings
 

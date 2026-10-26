@@ -30,7 +30,7 @@ Port forwarding, STUN and web services listen directly on host ports. With bridg
 
 ## Why do I have to supply the Tailscale, frp and cloudflared binaries myself?
 
-These three modules supervise the official external programs. Gately does not bundle them, so you can always use the latest upstream version. See [Configuration & Runtime Options](/en/docs/guide/configuration) for where to put them.
+These three modules supervise the official external programs. Gately does not bundle them, so you can always use the latest upstream version. See [Configuration & Runtime Options](/en/docs/guide/configuration) for where to put them. File Browser can be downloaded and installed from its page with one click.
 
 ## My STUN rule is enabled but I still cannot connect from outside
 

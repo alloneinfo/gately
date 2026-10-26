@@ -80,6 +80,35 @@ WebDAV, FTP et SMB partagent une liste d’« utilisateurs partagés » avec les
 
 L’API est `GET` / `PUT /api/fileusers`, qui demande la permission `fileusers:read` / `fileusers:write` pour les jetons d’API ; `services` dans la réponse indique comment chaque service les utilise. Les anciens `GET` / `PUT /api/<service>/shared-users` de chaque service sont obsolètes mais fonctionnent toujours et lisent et écrivent la même liste : la lecture utilise la permission de lecture du service, et une modification exige à la fois `webdav:write`, `ftp:write` et `smb:write`.
 
+## File Browser {#filebrowser}
+
+Se configure dans « File Browser », dans le groupe « Services de fichiers ». Gately héberge [FileBrowser Quantum](https://github.com/gtsteffaniak/filebrowser), un gestionnaire de fichiers web qui prévisualise images, vidéos et documents, envoie et télécharge des fichiers, crée des liens de partage et dispose de ses propres utilisateurs et permissions. Le filebrowser/filebrowser d’origine a été archivé en 2026 et ne reçoit plus de correctifs de sécurité ; Gately héberge donc le fork Quantum, toujours maintenu.
+
+Le programme n’est pas fourni avec Gately. « Télécharger et installer », sur la carte « Programme FileBrowser Quantum » en bas de la page, récupère la dernière version stable depuis GitHub dans `bin/filebrowser` sous le répertoire de configuration, la vérifie avec le SHA-256 enregistré par GitHub et joint GitHub via le proxy de mise à jour des « Paramètres » ; cliquez de nouveau pour mettre à jour, et les instances activées redémarrent avec le nouveau programme. Vous pouvez aussi placer le programme vous-même et indiquer son chemin. Le programme est recherché dans cet ordre : le chemin indiqué, `bin/` sous le répertoire de configuration, puis `PATH` ; la page avertit si le programme trouvé n’est pas Quantum (par exemple l’original dans `PATH`).
+
+Chaque instance est un processus File Browser distinct :
+
+| Champ | Par défaut | Description |
+| --- | --- | --- |
+| `listenIp` | vide | Adresse d’écoute ; vide écoute sur toutes les adresses IPv4. Utilisez `127.0.0.1` si l’accès passe uniquement par un proxy inverse du Service Web |
+| `port` | 8080 | Port d’écoute |
+| `baseUrl` | `/` | Chemin de base ; en proxy inverse par chemin dans le Service Web (par exemple `/files`), saisissez le même chemin |
+| `sources` | aucun | Répertoires partagés, chacun avec `path` (absolu), `name` (nom affiché, par défaut celui du répertoire) et `readOnly` ; les nouveaux utilisateurs ont accès à tous par défaut |
+| `authMethod` | `password` | Connexion : `password` par mot de passe, `proxy` fait confiance à l’en-tête de nom d’utilisateur du proxy inverse, `noauth` sans connexion |
+| `proxyHeader` | `Remote-User` | En-tête portant le nom d’utilisateur pour `proxy` ; les utilisateurs absents sont créés automatiquement |
+| `adminUser` | `admin` | Nom de l’administrateur |
+| `adminPassword` | aucun | Mot de passe administrateur, au moins 8 caractères, obligatoire avec `password` |
+| `trustProxyHeaders` | désactivé | Fait confiance à `X-Forwarded-*` et `X-Real-IP` ; à activer derrière un proxy inverse |
+| `disableWebDav` | désactivé | Désactive l’interface WebDAV intégrée à File Browser |
+| `locale` | vide | Langue d’interface des nouveaux utilisateurs, par exemple `fr` ; vide correspond à l’anglais |
+| `tokenHours` | 2 | Durée de session en heures |
+
+- Le mot de passe administrateur est synchronisé avec File Browser à chaque démarrage, la valeur de Gately fait donc foi ; les autres utilisateurs, liens de partage et préférences se gèrent dans File Browser et sont stockés dans la base de données de l’instance.
+- Le fichier de configuration, la base de données et le cache se trouvent dans `filebrowser/<clé de l’instance>/` sous le répertoire de configuration, le fichier de configuration en 0600 ; le mot de passe administrateur est transmis au processus par une variable d’environnement et n’est jamais écrit dans un fichier. Supprimer une instance supprime ce répertoire, et les fichiers des répertoires partagés restent intacts.
+- Une instance dont un répertoire partagé n’existe pas ne démarre pas, et sa carte en indique la raison.
+- Pour un accès depuis l’extérieur, ajoutez dans le [Service Web](/fr/docs/modules/web) un site de proxy inverse vers `http://127.0.0.1:port`, protégez-le par HTTPS et contrôle d’accès, et activez « Faire confiance aux en-têtes du proxy ». La méthode `proxy` nécessite l’authentification déléguée du Service Web pour placer le nom d’utilisateur dans l’en-tête, et le port de File Browser doit rester fermé vers l’extérieur, sinon l’en-tête peut être falsifié pour se connecter.
+- Les fichiers sont lus et écrits avec l’identité du processus Gately.
+
 ## Montages de stockage
 
 Ajoutez des montages dans « Montages de stockage » du groupe « Services de fichiers », et gérez les fichiers en ligne depuis la page.

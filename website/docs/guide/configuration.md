@@ -43,6 +43,8 @@ Tailscale、frp、cloudflared 这三个模块托管官方的外部程序，按�
 
 Docker 部署时把二进制放进挂载的配置目录即可，例如 `./gately-data/bin/frpc`。Tailscale 需要同时提供 `tailscale` 与 `tailscaled`。详见 [Tailscale / frp / cloudflared](/docs/modules/tunnels)。
 
+File Browser 模块托管 FileBrowser Quantum，查找顺序为：填写的路径、配置目录下的 `bin/`、`PATH`；可以在页面中一键下载安装到 `bin/filebrowser`。详见 [File Browser](/docs/modules/tools#filebrowser)。
+
 ## 运行日志
 
 系统日志与各模块的运行日志默认写入配置目录下的 `logs/`，重启或升级后仍可在「系统日志」和各模块页面查看：

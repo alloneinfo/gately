@@ -80,6 +80,35 @@ WebDAV、FTP 與 SMB 共用一份「共用使用者」，欄位與各服務的�
 
 介面為 `GET` / `PUT /api/fileusers`，API 權杖需要 `fileusers:read` / `fileusers:write` 權限，讀取結果中的 `services` 列出各服務的使用情況。原來各服務下的 `GET` / `PUT /api/<服務>/shared-users` 已棄用，仍可使用並讀寫同一份清單：讀取沿用所在服務的讀取權限，修改需要同時具備 `webdav:write`、`ftp:write` 與 `smb:write`。
 
+## File Browser {#filebrowser}
+
+在「檔案服務」分組的「File Browser」中設定。Gately 託管 [FileBrowser Quantum](https://github.com/gtsteffaniak/filebrowser)：一個網頁檔案管理器，可以線上預覽圖片、影片與文件、上傳下載、產生分享連結，並有自己的多使用者與權限管理。原版 filebrowser/filebrowser 已於 2026 年封存、不再修復安全問題，因此託管的是仍在維護的 Quantum 分支。
+
+程式不內建在 Gately 中。頁面下方「FileBrowser Quantum 程式」卡片的「下載安裝」從 GitHub 下載最新正式版到設定目錄的 `bin/filebrowser`，依 GitHub 記錄的 SHA-256 校驗，存取 GitHub 時使用「設定」中的更新代理；再次點擊即可更新，更新後已啟用的實例自動重新啟動。也可以自行放置程式並填寫路徑。程式依以下順序尋找：填寫的路徑、設定目錄下的 `bin/`、`PATH`；找到的程式不是 Quantum（例如 `PATH` 中的原版）時頁面會提示。
+
+每個實例是一個獨立的 File Browser 行程：
+
+| 欄位 | 預設值 | 說明 |
+| --- | --- | --- |
+| `listenIp` | 空 | 監聽位址，留空監聽全部 IPv4 位址；只透過 Web 服務反向代理存取時可填 `127.0.0.1` |
+| `port` | 8080 | 監聽連接埠 |
+| `baseUrl` | `/` | 存取路徑，在 Web 服務中按路徑反向代理（例如 `/files`）時填寫相同的路徑 |
+| `sources` | 無 | 共享目錄，每項包含 `path`（絕對路徑）、`name`（顯示名稱，留空取目錄名）與 `readOnly`；新使用者預設可以存取全部目錄 |
+| `authMethod` | `password` | 登入方式：`password` 帳號密碼，`proxy` 信任反向代理傳入的使用者名稱標頭，`noauth` 免登入 |
+| `proxyHeader` | `Remote-User` | `proxy` 方式讀取使用者名稱的標頭，不存在的使用者自動建立 |
+| `adminUser` | `admin` | 管理員使用者名稱 |
+| `adminPassword` | 無 | 管理員密碼，至少 8 位，`password` 方式必填 |
+| `trustProxyHeaders` | 關閉 | 信任 `X-Forwarded-*` 與 `X-Real-IP`，位於反向代理之後時開啟 |
+| `disableWebDav` | 關閉 | 關閉 File Browser 內建的 WebDAV 介面 |
+| `locale` | 空 | 新使用者的預設介面語言，如 `zh-tw`，留空為英文 |
+| `tokenHours` | 2 | 登入有效期（小時） |
+
+- 管理員密碼在每次啟動時同步到 File Browser，以 Gately 中的設定為準；其他使用者、分享連結與個人設定在 File Browser 中管理，儲存在實例自己的資料庫裡。
+- 設定檔、資料庫與快取儲存在設定目錄的 `filebrowser/<實例 key>/` 下，設定檔權限 0600；管理員密碼透過環境變數傳給行程，不寫入檔案。刪除實例會一併刪除這個目錄，共享目錄中的檔案保持原樣。
+- 共享目錄不存在時實例不會啟動，卡片上顯示原因。
+- 對外存取建議在 [Web 服務](/zh-TW/docs/modules/web) 中新增反向代理站點指向 `http://127.0.0.1:連接埠`，用 HTTPS 與存取控制保護，並開啟「信任代理標頭」。`proxy` 方式要搭配 Web 服務的轉發驗證把使用者名稱放進標頭，File Browser 的連接埠不能對外開放，否則可以偽造標頭登入。
+- 檔案以 Gately 行程的身分讀寫。
+
 ## 儲存掛載
 
 在「檔案服務」分組的「儲存掛載」中新增掛載點，在頁面內線上管理檔案。

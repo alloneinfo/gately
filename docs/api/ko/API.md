@@ -48,6 +48,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `webdav` | WebDAV 서비스 | `webdav:read`、`webdav:write` |
 | `ftp` | FTP 서비스 | `ftp:read`、`ftp:write` |
 | `smb` | SMB 서비스 | `smb:read`、`smb:write` |
+| `filebrowser` | File Browser | `filebrowser:read`、`filebrowser:write` |
 | `storage` | 스토리지 마운트 | `storage:read`、`storage:write` |
 | `notify` | 알림 센터 | `notify:read`、`notify:write` |
 | `nettools` | 네트워크 진단 | `nettools:read`、`nettools:write` |
@@ -438,6 +439,24 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | PUT | `/api/smb/shared-users` | `webdav:write,ftp:write,smb:write` | 파일 서비스 공유 사용자 저장 (이전 엔드포인트) |
 | PUT | `/api/smb/settings` | `smb:write` | SMB 설정 저장 |
 
+## File Browser
+
+| 메서드 | 경로 | 필요 권한 | 설명 |
+| --- | --- | --- | --- |
+| GET | `/api/filebrowser/logs` | `filebrowser:read` | 모듈 실행 로그 보기 |
+| DELETE | `/api/filebrowser/logs` | `filebrowser:write` | 모듈 실행 로그 비우기 |
+| GET | `/api/filebrowser/instances` | `filebrowser:read` | File Browser 인스턴스 목록 조회 |
+| POST | `/api/filebrowser/instances` | `filebrowser:write` | File Browser 인스턴스 추가 |
+| PUT | `/api/filebrowser/instances/{key}` | `filebrowser:write` | File Browser 인스턴스 수정 |
+| DELETE | `/api/filebrowser/instances/{key}` | `filebrowser:write` | File Browser 인스턴스 삭제 |
+| PUT | `/api/filebrowser/instances/{key}/enable` | `filebrowser:write` | File Browser 인스턴스 사용 설정/해제 |
+| PUT | `/api/filebrowser/instances-order` | `filebrowser:write` | File Browser 인스턴스 순서 변경 |
+| POST | `/api/filebrowser/instances/{key}/restart` | `filebrowser:write` | File Browser 인스턴스 다시 시작 |
+| GET | `/api/filebrowser/settings` | `filebrowser:read` | File Browser 프로그램 설정 조회 |
+| PUT | `/api/filebrowser/settings` | `filebrowser:write` | File Browser 프로그램 설정 저장 |
+| GET | `/api/filebrowser/install` | `filebrowser:read` | File Browser 설치 진행 상황 보기 |
+| POST | `/api/filebrowser/install` | `filebrowser:write` | FileBrowser Quantum 다운로드 및 설치 |
+
 ## 스토리지 마운트
 
 | 메서드 | 경로 | 필요 권한 | 설명 |
@@ -742,6 +761,35 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `level` | string |
 | `name` | string |
 | `type` | string |
+
+### filebrowser.Instance
+
+| 필드 | 타입 |
+| --- | --- |
+| `adminPassword` | string |
+| `adminUser` | string |
+| `authMethod` | string |
+| `baseUrl` | string |
+| `disableWebDav` | boolean |
+| `enable` | boolean |
+| `key` | string |
+| `listenIp` | string |
+| `locale` | string |
+| `name` | string |
+| `port` | integer |
+| `proxyHeader` | string |
+| `remark` | string |
+| `sources` | Array of `filebrowser.Source` |
+| `tokenHours` | integer |
+| `trustProxyHeaders` | boolean |
+
+### filebrowser.Source
+
+| 필드 | 타입 |
+| --- | --- |
+| `name` | string |
+| `path` | string |
+| `readOnly` | boolean |
 
 ### frp.ClientSettings
 

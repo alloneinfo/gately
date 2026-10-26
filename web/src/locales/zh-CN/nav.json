@@ -68,6 +68,10 @@
       "title": "SMB 服务",
       "desc": "SMB 文件共享服务"
     },
+    "filebrowser": {
+      "title": "File Browser",
+      "desc": "网页文件管理器，支持预览与分享"
+    },
     "fileusers": {
       "title": "文件共享用户",
       "desc": "WebDAV、FTP、SMB 共用的用户"

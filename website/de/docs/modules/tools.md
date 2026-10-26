@@ -80,6 +80,35 @@ WebDAV, FTP und SMB teilen sich eine Liste „gemeinsamer Benutzer“ mit densel
 
 Die API ist `GET` / `PUT /api/fileusers`, für API-Token mit der Berechtigung `fileusers:read` / `fileusers:write`; `services` in der Antwort zeigt, wie jeder Dienst sie nutzt. Die bisherigen `GET` / `PUT /api/<Dienst>/shared-users` der einzelnen Dienste sind veraltet, funktionieren aber weiter und lesen und schreiben dieselbe Liste: Lesen nutzt die Leseberechtigung des Dienstes, eine Änderung braucht `webdav:write`, `ftp:write` und `smb:write` zusammen.
 
+## File Browser {#filebrowser}
+
+Wird unter „File Browser“ in der Gruppe „Dateidienste“ konfiguriert. Gately betreibt [FileBrowser Quantum](https://github.com/gtsteffaniak/filebrowser), einen Web-Dateimanager mit Vorschau für Bilder, Videos und Dokumente, Up- und Download, Freigabelinks sowie eigener Benutzer- und Rechteverwaltung. Das ursprüngliche filebrowser/filebrowser wurde 2026 archiviert und erhält keine Sicherheitskorrekturen mehr, daher betreibt Gately den weiterhin gepflegten Quantum-Fork.
+
+Das Programm ist nicht in Gately enthalten. „Herunterladen und installieren“ auf der Karte „FileBrowser-Quantum-Programm“ unten auf der Seite lädt die neueste stabile Version von GitHub nach `bin/filebrowser` im Konfigurationsverzeichnis, prüft sie anhand der von GitHub erfassten SHA-256-Prüfsumme und erreicht GitHub über den Update-Proxy aus den „Einstellungen“; ein erneuter Klick aktualisiert, und aktivierte Instanzen starten mit dem neuen Programm neu. Sie können das Programm auch selbst ablegen und seinen Pfad eintragen. Gesucht wird in dieser Reihenfolge: eingetragener Pfad, `bin/` im Konfigurationsverzeichnis, dann `PATH`; die Seite warnt, wenn das gefundene Programm nicht Quantum ist (etwa das ursprüngliche in `PATH`).
+
+Jede Instanz ist ein eigener File-Browser-Prozess:
+
+| Feld | Standard | Beschreibung |
+| --- | --- | --- |
+| `listenIp` | leer | Lauschadresse; leer lauscht auf allen IPv4-Adressen. `127.0.0.1` eintragen, wenn der Zugriff nur über einen Reverse Proxy des Webdienstes erfolgt |
+| `port` | 8080 | Lauschport |
+| `baseUrl` | `/` | Basispfad; bei pfadbasiertem Reverse Proxy im Webdienst (z. B. `/files`) denselben Pfad eintragen |
+| `sources` | keine | Freigegebene Verzeichnisse mit `path` (absolut), `name` (Anzeigename, standardmäßig der Verzeichnisname) und `readOnly`; neue Benutzer haben standardmäßig Zugriff auf alle |
+| `authMethod` | `password` | Anmeldung: `password` per Passwort, `proxy` vertraut dem Benutzernamen-Header des Reverse Proxys, `noauth` ohne Anmeldung |
+| `proxyHeader` | `Remote-User` | Header mit dem Benutzernamen für `proxy`; fehlende Benutzer werden automatisch angelegt |
+| `adminUser` | `admin` | Admin-Benutzername |
+| `adminPassword` | keins | Admin-Passwort, mindestens 8 Zeichen, bei `password` Pflicht |
+| `trustProxyHeaders` | aus | Vertraut `X-Forwarded-*` und `X-Real-IP`; hinter einem Reverse Proxy einschalten |
+| `disableWebDav` | aus | Schaltet die in File Browser eingebaute WebDAV-Schnittstelle ab |
+| `locale` | leer | Oberflächensprache für neue Benutzer, etwa `de`; leer bedeutet Englisch |
+| `tokenHours` | 2 | Sitzungsdauer in Stunden |
+
+- Das Admin-Passwort wird bei jedem Start mit File Browser abgeglichen, der Wert in Gately hat also Vorrang; weitere Benutzer, Freigabelinks und persönliche Einstellungen werden in File Browser verwaltet und in der Datenbank der Instanz gespeichert.
+- Konfigurationsdatei, Datenbank und Cache liegen in `filebrowser/<Instanzschlüssel>/` im Konfigurationsverzeichnis, die Konfigurationsdatei mit 0600; das Admin-Passwort erreicht den Prozess über eine Umgebungsvariable und wird nie in eine Datei geschrieben. Beim Löschen einer Instanz wird dieses Verzeichnis entfernt, die Dateien in den freigegebenen Verzeichnissen bleiben erhalten.
+- Eine Instanz, deren freigegebenes Verzeichnis nicht existiert, startet nicht, und ihre Karte nennt den Grund.
+- Für Zugriff von außen empfiehlt sich im [Webdienst](/de/docs/modules/web) eine Reverse-Proxy-Site auf `http://127.0.0.1:Port`, geschützt mit HTTPS und Zugriffskontrolle, mit eingeschaltetem „Proxy-Headern vertrauen“. Die Methode `proxy` braucht die Forward-Authentifizierung des Webdienstes, die den Benutzernamen in den Header schreibt, und der File-Browser-Port muss von außen unerreichbar bleiben, sonst lässt sich der Header zur Anmeldung fälschen.
+- Dateien werden mit der Identität des Gately-Prozesses gelesen und geschrieben.
+
 ## Speicher-Einbindungen
 
 Fügen Sie Einbindungen unter „Speicher-Einbindungen“ in der Gruppe „Dateidienste“ hinzu und verwalten Sie Dateien online auf der Seite.

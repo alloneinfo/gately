@@ -68,6 +68,10 @@
       "title": "SMB 서비스",
       "desc": "SMB 파일 공유 서비스"
     },
+    "filebrowser": {
+      "title": "File Browser",
+      "desc": "미리 보기와 공유를 지원하는 웹 파일 관리자"
+    },
     "fileusers": {
       "title": "파일 공유 사용자",
       "desc": "WebDAV, FTP, SMB가 함께 쓰는 사용자"

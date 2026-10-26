@@ -80,6 +80,35 @@ WebDAV, FTP, SMB는 '공유 사용자' 목록 하나를 함께 씁니다. 필드
 
 API는 `GET` / `PUT /api/fileusers`이며 API 토큰에는 `fileusers:read` / `fileusers:write` 권한이 필요합니다. 응답의 `services`에 서비스별 사용 현황이 들어 있습니다. 기존 서비스별 `GET` / `PUT /api/<서비스>/shared-users`는 더 이상 권장하지 않지만 계속 동작하며 같은 목록을 읽고 씁니다. 읽기는 해당 서비스의 읽기 권한을 쓰고, 변경에는 `webdav:write`, `ftp:write`, `smb:write`가 모두 필요합니다.
 
+## File Browser {#filebrowser}
+
+"파일 서비스" 그룹의 "File Browser"에서 설정합니다. Gately는 [FileBrowser Quantum](https://github.com/gtsteffaniak/filebrowser)을 호스팅합니다. 이미지·동영상·문서 미리 보기, 업로드와 다운로드, 공유 링크 생성을 지원하고 자체 사용자와 권한 관리를 갖춘 웹 파일 관리자입니다. 원본 filebrowser/filebrowser는 2026년에 보관 처리되어 더 이상 보안 수정이 없으므로, 유지 관리가 계속되는 Quantum 포크를 호스팅합니다.
+
+프로그램은 Gately에 포함되어 있지 않습니다. 페이지 아래 "FileBrowser Quantum 프로그램" 카드의 "다운로드 및 설치"는 GitHub에서 최신 안정 버전을 설정 디렉터리의 `bin/filebrowser`로 내려받고, GitHub에 기록된 SHA-256으로 검증하며, GitHub 접속에는 "설정"의 업데이트 프록시를 사용합니다. 다시 누르면 업데이트되고, 활성화된 인스턴스는 새 프로그램으로 다시 시작합니다. 프로그램을 직접 배치하고 경로를 입력할 수도 있습니다. 프로그램은 입력한 경로, 설정 디렉터리의 `bin/`, `PATH` 순서로 찾으며, 찾은 프로그램이 Quantum이 아니면(예: `PATH`의 원본) 페이지에 경고가 표시됩니다.
+
+인스턴스마다 별도의 File Browser 프로세스가 실행됩니다.
+
+| 필드 | 기본값 | 설명 |
+| --- | --- | --- |
+| `listenIp` | 비어 있음 | 수신 주소. 비우면 모든 IPv4 주소에서 수신. Web 서비스 리버스 프록시로만 접속할 때는 `127.0.0.1` |
+| `port` | 8080 | 수신 포트 |
+| `baseUrl` | `/` | 접속 경로. Web 서비스에서 경로별로 리버스 프록시할 때(예: `/files`) 같은 경로를 입력 |
+| `sources` | 없음 | 공유 디렉터리. 각 항목은 `path`(절대 경로), `name`(표시 이름, 비우면 디렉터리 이름), `readOnly`로 구성. 새 사용자는 기본적으로 모두 접근 가능 |
+| `authMethod` | `password` | 로그인 방식: `password` 비밀번호, `proxy` 리버스 프록시가 전달한 사용자 이름 헤더 신뢰, `noauth` 로그인 없음 |
+| `proxyHeader` | `Remote-User` | `proxy` 방식에서 사용자 이름을 읽는 헤더. 없는 사용자는 자동 생성 |
+| `adminUser` | `admin` | 관리자 사용자 이름 |
+| `adminPassword` | 없음 | 관리자 비밀번호. 8자 이상, `password` 방식에서 필수 |
+| `trustProxyHeaders` | 꺼짐 | `X-Forwarded-*`와 `X-Real-IP`를 신뢰. 리버스 프록시 뒤에서 켬 |
+| `disableWebDav` | 꺼짐 | File Browser 내장 WebDAV 인터페이스 끄기 |
+| `locale` | 비어 있음 | 새 사용자의 기본 인터페이스 언어(예: `ko`). 비우면 영어 |
+| `tokenHours` | 2 | 로그인 유효 시간(시간) |
+
+- 관리자 비밀번호는 시작할 때마다 File Browser에 동기화되며 Gately의 설정이 우선합니다. 다른 사용자, 공유 링크, 개인 설정은 File Browser에서 관리하며 인스턴스 자체 데이터베이스에 저장됩니다.
+- 설정 파일, 데이터베이스, 캐시는 설정 디렉터리의 `filebrowser/<인스턴스 key>/`에 저장되며 설정 파일 권한은 0600입니다. 관리자 비밀번호는 환경 변수로 프로세스에 전달되어 파일에 기록되지 않습니다. 인스턴스를 삭제하면 이 디렉터리도 삭제되고, 공유 디렉터리의 파일은 그대로 남습니다.
+- 공유 디렉터리가 없는 인스턴스는 시작하지 않으며 카드에 이유가 표시됩니다.
+- 외부 접속은 [Web 서비스](/ko/docs/modules/web)에서 `http://127.0.0.1:포트`를 가리키는 리버스 프록시 사이트를 추가해 HTTPS와 접근 제어로 보호하고 "프록시 헤더 신뢰"를 켜는 방식을 권장합니다. `proxy` 방식은 Web 서비스의 포워드 인증으로 사용자 이름을 헤더에 넣어야 하며, File Browser 포트를 외부에 열면 헤더를 위조해 로그인할 수 있으므로 열지 마세요.
+- 파일은 Gately 프로세스의 권한으로 읽고 씁니다.
+
 ## 스토리지 마운트
 
 「파일 서비스」 그룹의 「스토리지 마운트」에서 마운트 지점을 추가하고 페이지 안에서 파일을 온라인으로 관리합니다.

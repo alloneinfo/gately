@@ -43,6 +43,8 @@ Die Module Tailscale, frp und cloudflared betreiben die offiziellen externen Pro
 
 Legen Sie bei Docker-Bereitstellungen die Binärdateien in das eingebundene Konfigurationsverzeichnis, zum Beispiel `./gately-data/bin/frpc`. Tailscale benötigt sowohl `tailscale` als auch `tailscaled`. Details finden Sie unter [Tailscale / frp / cloudflared](/de/docs/modules/tunnels).
 
+Das Modul File Browser betreibt FileBrowser Quantum und sucht es in dieser Reihenfolge: eingetragener Pfad, `bin/` im Konfigurationsverzeichnis, dann `PATH`; die Seite kann es mit einem Klick nach `bin/filebrowser` herunterladen und installieren. Siehe [File Browser](/de/docs/modules/tools#filebrowser).
+
 ## Laufzeitprotokolle
 
 Die Laufzeitprotokolle des Systems und aller Module werden standardmäßig nach `logs/` im Konfigurationsverzeichnis geschrieben und sind daher nach einem Neustart oder Upgrade weiterhin auf der Seite Systemprotokolle und in jedem Modul sichtbar:

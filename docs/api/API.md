@@ -48,6 +48,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `webdav` | WebDAV 服务 | `webdav:read`、`webdav:write` |
 | `ftp` | FTP 服务 | `ftp:read`、`ftp:write` |
 | `smb` | SMB 服务 | `smb:read`、`smb:write` |
+| `filebrowser` | File Browser | `filebrowser:read`、`filebrowser:write` |
 | `storage` | 存储挂载 | `storage:read`、`storage:write` |
 | `notify` | 通知中心 | `notify:read`、`notify:write` |
 | `nettools` | 网络诊断 | `nettools:read`、`nettools:write` |
@@ -438,6 +439,24 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | PUT | `/api/smb/shared-users` | `webdav:write,ftp:write,smb:write` | 保存文件服务共享用户（旧接口） |
 | PUT | `/api/smb/settings` | `smb:write` | 保存 SMB 设置 |
 
+## File Browser
+
+| 方法 | 路径 | 所需权限 | 说明 |
+| --- | --- | --- | --- |
+| GET | `/api/filebrowser/logs` | `filebrowser:read` | 查看模块运行日志 |
+| DELETE | `/api/filebrowser/logs` | `filebrowser:write` | 清空模块运行日志 |
+| GET | `/api/filebrowser/instances` | `filebrowser:read` | 获取File Browser 实例列表 |
+| POST | `/api/filebrowser/instances` | `filebrowser:write` | 新增File Browser 实例 |
+| PUT | `/api/filebrowser/instances/{key}` | `filebrowser:write` | 修改File Browser 实例 |
+| DELETE | `/api/filebrowser/instances/{key}` | `filebrowser:write` | 删除File Browser 实例 |
+| PUT | `/api/filebrowser/instances/{key}/enable` | `filebrowser:write` | 启用或停用File Browser 实例 |
+| PUT | `/api/filebrowser/instances-order` | `filebrowser:write` | 调整File Browser 实例排序 |
+| POST | `/api/filebrowser/instances/{key}/restart` | `filebrowser:write` | 重启一个 File Browser 实例 |
+| GET | `/api/filebrowser/settings` | `filebrowser:read` | 读取 File Browser 程序设置 |
+| PUT | `/api/filebrowser/settings` | `filebrowser:write` | 保存 File Browser 程序设置 |
+| GET | `/api/filebrowser/install` | `filebrowser:read` | 查看 File Browser 下载安装进度 |
+| POST | `/api/filebrowser/install` | `filebrowser:write` | 下载安装 FileBrowser Quantum |
+
 ## 存储挂载
 
 | 方法 | 路径 | 所需权限 | 说明 |
@@ -742,6 +761,35 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `level` | string |
 | `name` | string |
 | `type` | string |
+
+### filebrowser.Instance
+
+| 字段 | 类型 |
+| --- | --- |
+| `adminPassword` | string |
+| `adminUser` | string |
+| `authMethod` | string |
+| `baseUrl` | string |
+| `disableWebDav` | boolean |
+| `enable` | boolean |
+| `key` | string |
+| `listenIp` | string |
+| `locale` | string |
+| `name` | string |
+| `port` | integer |
+| `proxyHeader` | string |
+| `remark` | string |
+| `sources` | 数组 of `filebrowser.Source` |
+| `tokenHours` | integer |
+| `trustProxyHeaders` | boolean |
+
+### filebrowser.Source
+
+| 字段 | 类型 |
+| --- | --- |
+| `name` | string |
+| `path` | string |
+| `readOnly` | boolean |
 
 ### frp.ClientSettings
 

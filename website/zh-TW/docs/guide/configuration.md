@@ -43,6 +43,8 @@ Tailscale、frp、cloudflared 這三個模組託管官方的外部程式，依�
 
 Docker 部署時把執行檔放進掛載的設定目錄即可，例如 `./gately-data/bin/frpc`。Tailscale 需要同時提供 `tailscale` 與 `tailscaled`。詳見 [Tailscale / frp / cloudflared](/zh-TW/docs/modules/tunnels)。
 
+File Browser 模組託管 FileBrowser Quantum，尋找順序為：填寫的路徑、設定目錄下的 `bin/`、`PATH`；可以在頁面中一鍵下載安裝到 `bin/filebrowser`。詳見 [File Browser](/zh-TW/docs/modules/tools#filebrowser)。
+
 ## 執行日誌
 
 系統日誌與各模組的執行日誌預設寫入設定目錄下的 `logs/`，重新啟動或升級後仍可在「系統日誌」與各模組頁面查看：

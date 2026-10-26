@@ -43,6 +43,8 @@ The Tailscale, frp and cloudflared modules supervise the official external progr
 
 For Docker deployments, put the binaries in the mounted config directory, for example `./gately-data/bin/frpc`. Tailscale needs both `tailscale` and `tailscaled`. See [Tailscale / frp / cloudflared](/en/docs/modules/tunnels) for details.
 
+The File Browser module hosts FileBrowser Quantum and looks it up in this order: the path you entered, `bin/` under the config directory, then `PATH`; the page can download and install it into `bin/filebrowser` with one click. See [File Browser](/en/docs/modules/tools#filebrowser).
+
 ## Runtime logs
 
 System and module runtime logs are written to `logs/` in the configuration directory by default, so they are still available on the System logs page and each module page after a restart or upgrade:

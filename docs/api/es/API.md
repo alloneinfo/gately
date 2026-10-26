@@ -48,6 +48,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `webdav` | Servicio WebDAV | `webdav:read`、`webdav:write` |
 | `ftp` | Servicio FTP | `ftp:read`、`ftp:write` |
 | `smb` | Servicio SMB | `smb:read`、`smb:write` |
+| `filebrowser` | File Browser | `filebrowser:read`、`filebrowser:write` |
 | `storage` | Montajes de almacenamiento | `storage:read`、`storage:write` |
 | `notify` | Centro de notificaciones | `notify:read`、`notify:write` |
 | `nettools` | Diagnóstico de red | `nettools:read`、`nettools:write` |
@@ -438,6 +439,24 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | PUT | `/api/smb/shared-users` | `webdav:write,ftp:write,smb:write` | Guardar los usuarios compartidos de los servicios de archivos (endpoint antiguo) |
 | PUT | `/api/smb/settings` | `smb:write` | Guardar la configuración de SMB |
 
+## File Browser
+
+| Método | Ruta | Permiso requerido | Descripción |
+| --- | --- | --- | --- |
+| GET | `/api/filebrowser/logs` | `filebrowser:read` | Ver los registros de ejecución del módulo |
+| DELETE | `/api/filebrowser/logs` | `filebrowser:write` | Vaciar los registros de ejecución del módulo |
+| GET | `/api/filebrowser/instances` | `filebrowser:read` | Listar Instancia de File Browser |
+| POST | `/api/filebrowser/instances` | `filebrowser:write` | Añadir Instancia de File Browser |
+| PUT | `/api/filebrowser/instances/{key}` | `filebrowser:write` | Modificar Instancia de File Browser |
+| DELETE | `/api/filebrowser/instances/{key}` | `filebrowser:write` | Eliminar Instancia de File Browser |
+| PUT | `/api/filebrowser/instances/{key}/enable` | `filebrowser:write` | Activar o desactivar Instancia de File Browser |
+| PUT | `/api/filebrowser/instances-order` | `filebrowser:write` | Reordenar Instancia de File Browser |
+| POST | `/api/filebrowser/instances/{key}/restart` | `filebrowser:write` | Reiniciar una instancia de File Browser |
+| GET | `/api/filebrowser/settings` | `filebrowser:read` | Leer los ajustes del programa File Browser |
+| PUT | `/api/filebrowser/settings` | `filebrowser:write` | Guardar los ajustes del programa File Browser |
+| GET | `/api/filebrowser/install` | `filebrowser:read` | Ver el progreso de instalación de File Browser |
+| POST | `/api/filebrowser/install` | `filebrowser:write` | Descargar e instalar FileBrowser Quantum |
+
 ## Montajes de almacenamiento
 
 | Método | Ruta | Permiso requerido | Descripción |
@@ -742,6 +761,35 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | `level` | string |
 | `name` | string |
 | `type` | string |
+
+### filebrowser.Instance
+
+| Campo | Tipo |
+| --- | --- |
+| `adminPassword` | string |
+| `adminUser` | string |
+| `authMethod` | string |
+| `baseUrl` | string |
+| `disableWebDav` | boolean |
+| `enable` | boolean |
+| `key` | string |
+| `listenIp` | string |
+| `locale` | string |
+| `name` | string |
+| `port` | integer |
+| `proxyHeader` | string |
+| `remark` | string |
+| `sources` | Lista de `filebrowser.Source` |
+| `tokenHours` | integer |
+| `trustProxyHeaders` | boolean |
+
+### filebrowser.Source
+
+| Campo | Tipo |
+| --- | --- |
+| `name` | string |
+| `path` | string |
+| `readOnly` | boolean |
 
 ### frp.ClientSettings
 

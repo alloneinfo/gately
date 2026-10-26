@@ -48,6 +48,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `webdav` | WebDAV サービス | `webdav:read`、`webdav:write` |
 | `ftp` | FTP サービス | `ftp:read`、`ftp:write` |
 | `smb` | SMB サービス | `smb:read`、`smb:write` |
+| `filebrowser` | File Browser | `filebrowser:read`、`filebrowser:write` |
 | `storage` | ストレージマウント | `storage:read`、`storage:write` |
 | `notify` | 通知センター | `notify:read`、`notify:write` |
 | `nettools` | ネットワーク診断 | `nettools:read`、`nettools:write` |
@@ -438,6 +439,24 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | PUT | `/api/smb/shared-users` | `webdav:write,ftp:write,smb:write` | ファイルサービスの共有ユーザーを保存（旧エンドポイント） |
 | PUT | `/api/smb/settings` | `smb:write` | SMB 設定を保存 |
 
+## File Browser
+
+| メソッド | パス | 必要な権限 | 説明 |
+| --- | --- | --- | --- |
+| GET | `/api/filebrowser/logs` | `filebrowser:read` | モジュールの実行ログを表示 |
+| DELETE | `/api/filebrowser/logs` | `filebrowser:write` | モジュールの実行ログを消去 |
+| GET | `/api/filebrowser/instances` | `filebrowser:read` | File Browser インスタンス の一覧を取得 |
+| POST | `/api/filebrowser/instances` | `filebrowser:write` | File Browser インスタンス を追加 |
+| PUT | `/api/filebrowser/instances/{key}` | `filebrowser:write` | File Browser インスタンス を更新 |
+| DELETE | `/api/filebrowser/instances/{key}` | `filebrowser:write` | File Browser インスタンス を削除 |
+| PUT | `/api/filebrowser/instances/{key}/enable` | `filebrowser:write` | File Browser インスタンス の有効/無効を切り替え |
+| PUT | `/api/filebrowser/instances-order` | `filebrowser:write` | File Browser インスタンス の並び順を変更 |
+| POST | `/api/filebrowser/instances/{key}/restart` | `filebrowser:write` | File Browser インスタンスを再起動 |
+| GET | `/api/filebrowser/settings` | `filebrowser:read` | File Browser のプログラム設定を取得 |
+| PUT | `/api/filebrowser/settings` | `filebrowser:write` | File Browser のプログラム設定を保存 |
+| GET | `/api/filebrowser/install` | `filebrowser:read` | File Browser のインストール進行状況を表示 |
+| POST | `/api/filebrowser/install` | `filebrowser:write` | FileBrowser Quantum をダウンロードしてインストール |
+
 ## ストレージマウント
 
 | メソッド | パス | 必要な権限 | 説明 |
@@ -742,6 +761,35 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `level` | string |
 | `name` | string |
 | `type` | string |
+
+### filebrowser.Instance
+
+| フィールド | 型 |
+| --- | --- |
+| `adminPassword` | string |
+| `adminUser` | string |
+| `authMethod` | string |
+| `baseUrl` | string |
+| `disableWebDav` | boolean |
+| `enable` | boolean |
+| `key` | string |
+| `listenIp` | string |
+| `locale` | string |
+| `name` | string |
+| `port` | integer |
+| `proxyHeader` | string |
+| `remark` | string |
+| `sources` | 配列 of `filebrowser.Source` |
+| `tokenHours` | integer |
+| `trustProxyHeaders` | boolean |
+
+### filebrowser.Source
+
+| フィールド | 型 |
+| --- | --- |
+| `name` | string |
+| `path` | string |
+| `readOnly` | boolean |
 
 ### frp.ClientSettings
 

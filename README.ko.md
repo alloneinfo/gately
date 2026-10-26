@@ -55,6 +55,7 @@ Gately는 완전한 오픈소스로, 사용자와 커뮤니티가 소스 코드�
 | WebDAV | 다중 사용자, 사용자별 디렉터리, 읽기 전용. WebDAV·FTP·SMB 공통 공유 사용자 |
 | FTP | 다중 사용자, 사용자별 디렉터리, 읽기 전용. FTPS 및 패시브 포트 범위 지원. WebDAV·FTP·SMB 공통 공유 사용자 |
 | SMB | 다중 사용자, 사용자별 여러 디렉터리 공유, 읽기 전용. SMB 2/3, 암호화 및 Bonjour 검색 지원. WebDAV·FTP·SMB 공통 공유 사용자 |
+| File Browser | 웹 파일 관리자 FileBrowser Quantum 호스팅: 다중 인스턴스, 여러 공유 디렉터리와 읽기 전용, 비밀번호 또는 리버스 프록시 인증, 페이지에서 원클릭 다운로드 및 설치 |
 | 스토리지 마운트 | 로컬 디렉터리, 원격 WebDAV 마운트, SMB 공유, 온라인 파일 관리 |
 | 예약 작업 | cron 표현식, 명령 또는 HTTP 요청, 실행 기록 |
 | 보안 및 설정 | 패스키(WebAuthn) 로그인, 2단계 인증(TOTP), 읽기 전용 계정, 로그인 실패 속도 제한, 보안 진입점, 내부망 전용 접속, 관리 UI의 HTTPS, 다중 API 토큰(모듈별 읽기/쓰기 권한), 사용자 지정 DNS(DoH 지원), 시간대, 설정 백업 및 복원, 로컬 리버스 프록시가 전달한 실제 클라이언트 주소 신뢰, 기능 모듈 켜기/끄기(비활성 모듈은 서비스를 시작하지 않고 API도 제공하지 않음) |
@@ -156,6 +157,8 @@ curl -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns/tasks
 ### Tailscale, frp, cloudflared
 
 이 세 모듈은 공식 외부 프로그램을 관리합니다(자동 재시작, 로그를 UI에 집계). Gately 본체에는 포함되어 있지 않으므로 항상 업스트림의 최신 버전을 사용할 수 있습니다. 프로그램은 다음 순서로 찾습니다. 모듈 설정에 입력한 경로, `PATH`, 설정 디렉터리 아래의 `bin/` 하위 디렉터리. Docker 배포에서는 마운트한 설정 디렉터리에 바이너리를 넣으면 됩니다(예: `./gately-data/bin/frpc`). Tailscale은 `tailscale`과 `tailscaled`를 모두 제공해야 합니다. 설정 파일의 토큰과 키는 0600 권한으로 저장되며, cloudflared 토큰은 환경 변수로 전달되어 프로세스 목록에 나타나지 않습니다.
+
+File Browser 모듈은 [FileBrowser Quantum](https://github.com/gtsteffaniak/filebrowser)을 호스팅합니다(원본 filebrowser는 보관 처리되어 보안 수정이 없습니다). 입력한 경로, 설정 디렉터리의 `bin/`, `PATH` 순서로 찾으며, 페이지에서 클릭 한 번으로 `bin/filebrowser`에 내려받아 설치할 수도 있습니다. 관리자 비밀번호는 환경 변수로 전달되어 설정 파일에 기록되지 않습니다.
 
 ## 개발
 

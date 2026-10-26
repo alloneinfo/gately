@@ -80,6 +80,35 @@ WebDAV, FTP and SMB share one list of "shared users" with the same fields as eac
 
 The API is `GET` / `PUT /api/fileusers`, which needs the `fileusers:read` / `fileusers:write` permission for API tokens; `services` in the response shows how each service uses them. The former `GET` / `PUT /api/<service>/shared-users` of each service are deprecated but still work and read and write the same list: reading uses the read permission of that service, and a change needs `webdav:write`, `ftp:write` and `smb:write` together.
 
+## File Browser {#filebrowser}
+
+Configured under "File Browser" in the "File Services" group. Gately hosts [FileBrowser Quantum](https://github.com/gtsteffaniak/filebrowser), a web file manager that previews images, videos and documents, uploads and downloads files, creates share links and has its own users and permissions. The original filebrowser/filebrowser was archived in 2026 and no longer receives security fixes, so Gately hosts the maintained Quantum fork.
+
+The program is not bundled with Gately. "Download and install" on the "FileBrowser Quantum program" card at the bottom of the page fetches the latest stable release from GitHub into `bin/filebrowser` under the config directory, verifies it against the SHA-256 recorded by GitHub and reaches GitHub through the update proxy from "Settings"; click it again to update, and enabled instances restart with the new program. You can also place the program yourself and enter its path. The program is looked up in this order: the path you entered, `bin/` under the config directory, then `PATH`; the page warns when the program found is not Quantum (for example the original one in `PATH`).
+
+Each instance is a separate File Browser process:
+
+| Field | Default | Description |
+| --- | --- | --- |
+| `listenIp` | empty | Listen address; empty listens on all IPv4 addresses. Use `127.0.0.1` when it is only reached through a Web Service reverse proxy |
+| `port` | 8080 | Listen port |
+| `baseUrl` | `/` | Base path; when reverse proxying by path in the Web Service (for example `/files`), enter the same path |
+| `sources` | none | Shared directories, each with `path` (absolute), `name` (display name, defaults to the directory name) and `readOnly`; new users can access all of them by default |
+| `authMethod` | `password` | Sign-in method: `password` for username and password, `proxy` to trust the username header from a reverse proxy, `noauth` for no sign-in |
+| `proxyHeader` | `Remote-User` | Header that carries the username for `proxy`; missing users are created automatically |
+| `adminUser` | `admin` | Admin username |
+| `adminPassword` | none | Admin password, at least 8 characters, required for `password` |
+| `trustProxyHeaders` | off | Trust `X-Forwarded-*` and `X-Real-IP`; turn on behind a reverse proxy |
+| `disableWebDav` | off | Turn off the WebDAV interface built into File Browser |
+| `locale` | empty | Default interface language for new users, such as `en` or `zh-cn`; empty means English |
+| `tokenHours` | 2 | Session lifetime in hours |
+
+- The admin password is synced to File Browser on every start, so the value in Gately wins; other users, share links and personal settings are managed in File Browser and stored in the instance's own database.
+- The config file, database and cache live in `filebrowser/<instance key>/` under the config directory, with the config file at 0600; the admin password reaches the process through an environment variable and is never written to a file. Deleting an instance deletes this directory, and the files in the shared directories stay as they are.
+- An instance whose shared directory does not exist does not start, and its card shows why.
+- For access from outside, add a reverse proxy site in the [Web Service](/en/docs/modules/web) pointing to `http://127.0.0.1:port`, protect it with HTTPS and access control, and turn on "Trust proxy headers". The `proxy` method needs the Web Service forward auth to put the username into the header, and the File Browser port must stay closed to the outside, otherwise the header can be forged to sign in.
+- Files are read and written as the Gately process.
+
 ## Storage Mounts
 
 Add mounts under "Storage Mounts" in the "File Services" group, and manage files online on the page.

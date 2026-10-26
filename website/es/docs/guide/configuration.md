@@ -43,6 +43,8 @@ Los módulos de Tailscale, frp y cloudflared supervisan los programas oficiales 
 
 En despliegues con Docker, coloca los binarios en el directorio de configuración montado, por ejemplo `./gately-data/bin/frpc`. Tailscale necesita tanto `tailscale` como `tailscaled`. Consulta [Tailscale / frp / cloudflared](/es/docs/modules/tunnels) para más detalles.
 
+El módulo File Browser aloja FileBrowser Quantum y lo busca en este orden: la ruta indicada, `bin/` en el directorio de configuración y `PATH`; la página puede descargarlo e instalarlo en `bin/filebrowser` con un clic. Consulta [File Browser](/es/docs/modules/tools#filebrowser).
+
 ## Registros de ejecución
 
 Los registros de ejecución del sistema y de cada módulo se escriben por defecto en `logs/` dentro del directorio de configuración, así que siguen disponibles en la página de registros del sistema y en la de cada módulo después de reiniciar o actualizar:

@@ -55,6 +55,7 @@ Gately 完全開源，使用者和社群可以直接檢視原始碼與設定。�
 | WebDAV | 多使用者、獨立目錄、唯讀；WebDAV、FTP、SMB 共用一份共享使用者 |
 | FTP | 多使用者、獨立目錄、唯讀，支援 FTPS 與被動連接埠範圍；WebDAV、FTP、SMB 共用一份共享使用者 |
 | SMB | 多使用者、依使用者分享多個目錄、唯讀，支援 SMB 2/3、加密與 Bonjour 探索；WebDAV、FTP、SMB 共用一份共享使用者 |
+| File Browser | 託管 FileBrowser Quantum 網頁檔案管理器：多實例、多個共享目錄與唯讀、帳號密碼或反向代理驗證，頁面中一鍵下載安裝 |
 | 儲存掛載 | 本機目錄、遠端 WebDAV 與 SMB 共用掛載，線上檔案管理 |
 | 排程工作 | cron 運算式，指令或 HTTP 請求，執行記錄 |
 | 安全與設定 | Passkey（WebAuthn）登入、兩步驟驗證（TOTP）、唯讀帳號、登入失敗限流、安全入口、僅內網存取、管理介面 HTTPS、多組 API 權杖（依模組讀寫授權）、自訂 DNS（支援 DoH）、時區、設定備份與還原、信任本機反向代理傳來的真實用戶端位址、依需求開關功能模組（關閉的模組不啟動服務、不提供介面） |
@@ -156,6 +157,8 @@ curl -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns/tasks
 ### Tailscale、frp、cloudflared
 
 這三個模組託管官方的外部程式（自動重啟、日誌彙整到介面），Gately 本體不內建它們，因此始終可以使用上游的最新版本。程式依下列順序尋找：模組設定中填寫的路徑、`PATH`、設定目錄下的 `bin/` 子目錄。Docker 部署時把二進位檔放進掛載的設定目錄即可，例如 `./gately-data/bin/frpc`；Tailscale 需要同時提供 `tailscale` 與 `tailscaled`。設定檔中的權杖與金鑰以 0600 權限儲存，cloudflared 的權杖透過環境變數傳遞，不會出現在處理程序清單中。
+
+File Browser 模組託管 [FileBrowser Quantum](https://github.com/gtsteffaniak/filebrowser)（原版 filebrowser 已封存、不再修復安全問題），尋找順序為：填寫的路徑、設定目錄下的 `bin/`、`PATH`，也可以在頁面中一鍵下載安裝到 `bin/filebrowser`。管理員密碼透過環境變數傳遞，不寫入設定檔。
 
 ## 開發
 

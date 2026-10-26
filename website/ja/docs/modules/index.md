@@ -20,4 +20,4 @@ Gately の各機能は独立したモジュールで、個別に有効化・無�
 | ネットワーク診断 | Ping、トレースルート、ポート検査、DNS 照会、速度測定、LAN スキャン | [開く](/ja/docs/modules/nettools) |
 | 通知センター | 複数チャネルへのイベント通知とルール | [開く](/ja/docs/modules/notify) |
 | 設定バックアップ | 暗号化バックアップ、保持ポリシー、定期バックアップと復元 | [開く](/ja/docs/modules/backup) |
-| ファイルと運用ツール | WebDAV、FTP、SMB、ストレージマウント、Wake-on-LAN、スケジュールタスク | [開く](/ja/docs/modules/tools) |
+| ファイルと運用ツール | WebDAV、FTP、SMB、File Browser、ストレージマウント、Wake-on-LAN、スケジュールタスク | [開く](/ja/docs/modules/tools) |

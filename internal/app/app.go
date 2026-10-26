@@ -196,6 +196,9 @@ func New(opts Options) (*App, error) {
 		seen[m.ID()] = true
 		entry := &moduleEntry{mod: m, logs: logbuf.New(a.settings.LogLines, logger)}
 		a.persistLogs(entry.logs, m.ID(), a.settings)
+		if hc, ok := m.(module.HTTPClientAware); ok {
+			hc.SetHTTPClient(a.updateClient)
+		}
 		if err := m.Init(module.Env{Store: store, Logs: entry.logs}); err != nil {
 			return nil, fmt.Errorf("模块 %s 初始化失败: %w", m.ID(), err)
 		}

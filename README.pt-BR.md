@@ -55,6 +55,7 @@ O Gately é totalmente aberto, para que usuários e comunidade possam examinar d
 | WebDAV | Vários usuários, diretórios independentes, somente leitura; usuários compartilhados comuns a WebDAV, FTP e SMB |
 | FTP | Vários usuários, diretórios independentes, somente leitura, com suporte a FTPS e intervalo de portas passivas; usuários compartilhados comuns a WebDAV, FTP e SMB |
 | SMB | Vários usuários, compartilhamentos por usuário com um ou mais diretórios, somente leitura, com suporte a SMB 2/3, criptografia e descoberta Bonjour; usuários compartilhados comuns a WebDAV, FTP e SMB |
+| File Browser | Hospeda o gerenciador de arquivos web FileBrowser Quantum: várias instâncias, vários diretórios compartilhados com somente leitura, autenticação por senha ou proxy reverso, download e instalação com um clique pela página |
 | Montagens de armazenamento | Diretórios locais, montagens WebDAV remotas e compartilhamentos SMB, gerenciamento de arquivos online |
 | Tarefas agendadas | Expressões cron, comandos ou requisições HTTP, histórico de execuções |
 | Segurança e configurações | Login com passkey (WebAuthn), autenticação em dois fatores (TOTP), contas somente leitura, limitação de falhas de login, entrada de segurança, acesso somente pela rede interna, HTTPS na interface de administração, vários tokens de API (autorização de leitura e escrita por módulo), DNS personalizado (com suporte a DoH), fuso horário, backup e restauração da configuração, endereço real do cliente vindo de proxies reversos locais confiáveis, ativação e desativação dos módulos de recursos (módulos desativados não iniciam serviços nem oferecem API) |
@@ -156,6 +157,8 @@ Ao atualizar de uma versão antiga, o token de API global anterior se torna auto
 ### Tailscale, frp, cloudflared
 
 Esses três módulos gerenciam programas externos oficiais (reinício automático, logs reunidos na interface). O Gately não os inclui, o que permite usar sempre a versão mais recente do upstream. Os programas são procurados nesta ordem: o caminho informado nas configurações do módulo, `PATH` e o subdiretório `bin/` do diretório de configuração. Em implantações com Docker, basta colocar o binário no diretório de configuração montado, por exemplo `./gately-data/bin/frpc`; para o Tailscale, é preciso fornecer `tailscale` e `tailscaled`. Tokens e chaves nos arquivos de configuração são salvos com permissão 0600; o token do cloudflared é passado por variável de ambiente e não aparece na lista de processos.
+
+O módulo File Browser hospeda o [FileBrowser Quantum](https://github.com/gtsteffaniak/filebrowser) (o filebrowser original está arquivado e não recebe mais correções de segurança) e o procura nesta ordem: o caminho informado, `bin/` no diretório de configuração e `PATH`; a página também pode baixá-lo e instalá-lo em `bin/filebrowser` com um clique. A senha do administrador é passada por uma variável de ambiente e nunca é gravada no arquivo de configuração.
 
 ## Desenvolvimento
 
