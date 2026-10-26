@@ -788,6 +788,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 
 | Поле | Тип |
 | --- | --- |
+| `accessUrls` | Массив из string |
 | `adminPassword` | string |
 | `adminUser` | string |
 | `authMethod` | string |
@@ -1393,6 +1394,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `minTls` | string |
 | `name` | string |
 | `network` | string |
+| `plainHttp` | string |
 | `port` | integer |
 | `remark` | string |
 | `sites` | Массив из `webservice.Site` |

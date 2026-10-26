@@ -68,6 +68,7 @@ Pour les sites « Texte fixe », le `Content-Type` se choisit parmi les types co
 ## Transport et protocoles
 
 - HTTPS : utilise un certificat du module [Certificats SSL](/fr/docs/modules/ssl) qui couvre le domaine ;
+- HTTP sur le même port : un écouteur HTTPS peut aussi accepter le HTTP en clair, le protocole étant reconnu au premier octet de chaque connexion. *Rediriger vers HTTPS* renvoie `http://hôte:port` vers `https://hôte:port` (301 pour GET/HEAD, 308 pour les autres méthodes), utile quand un seul port est disponible et que les visiteurs peuvent se tromper de schéma ; *Servir* répond en HTTP non chiffré. Les validations ACME HTTP-01 restent prises en charge et modifier cette option redémarre l'écouteur ;
 - HTTP/3 (QUIC) : à activer sur un écouteur HTTPS pour servir aussi HTTP/3 en UDP sur le même numéro de port, annoncé au navigateur par l'en-tête de réponse `Alt-Svc` ; ce port UDP doit être autorisé dans le pare-feu et la redirection de ports ;
 - WebSocket : pris en charge automatiquement par le proxy inverse ;
 - Protocole PROXY : un écouteur peut accepter les en-têtes PROXY envoyés par des composants en amont (comme haproxy et frp). Il ne fait confiance qu'aux IP ou sous-réseaux listés dans « Paramètres globaux → Sources PROXY de confiance » ; une liste vide ne fait confiance à aucune source. Le proxy inverse peut envoyer des en-têtes PROXY au backend.

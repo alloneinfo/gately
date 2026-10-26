@@ -31,6 +31,7 @@
           <span class="tags">
             <el-tag size="small" effect="plain" class="mono">{{ l.tls ? 'https' : 'http' }}://{{ l.listenIp || '*' }}:{{ l.port }}</el-tag>
             <el-tag size="small" type="info">{{ networkText(l.network) }}</el-tag>
+            <el-tag v-if="l.tls && l.plainHttp" size="small" type="info">{{ plainHttpText(l.plainHttp) }}</el-tag>
             <el-tag v-if="l.acceptProxyProtocol" size="small" type="info">{{ t('web.acceptProxyTag') }}</el-tag>
           </span>
         </template>
@@ -128,6 +129,14 @@
           <el-select v-model="editingListener.minTls" class="w-120">
             <el-option v-for="v in ['1.0', '1.1', '1.2', '1.3']" :key="v" :label="'TLS ' + v" :value="v" />
           </el-select>
+        </el-form-item>
+        <el-form-item v-if="editingListener.tls" :label="t('web.plainHttp')">
+          <el-radio-group v-model="editingListener.plainHttp">
+            <el-radio-button value="">{{ t('web.plainHttpOff') }}</el-radio-button>
+            <el-radio-button value="redirect">{{ t('web.plainHttpRedirect') }}</el-radio-button>
+            <el-radio-button value="serve">{{ t('web.plainHttpServe') }}</el-radio-button>
+          </el-radio-group>
+          <span class="help">{{ t('web.plainHttpHelp') }}</span>
         </el-form-item>
         <el-form-item v-if="editingListener.tls" label="HTTP/3">
           <el-switch v-model="editingListener.http3" />
@@ -452,6 +461,8 @@ interface Listener {
   tls: boolean
   minTls: string
   http3: boolean
+  // 开启 HTTPS 后同端口收到明文 HTTP 的处理方式：'' 不接受，redirect 跳转到 HTTPS，serve 直接服务
+  plainHttp?: '' | 'redirect' | 'serve'
   acceptProxyProtocol: boolean
   sites: Site[] | null
   default: Site
@@ -618,11 +629,16 @@ function emptyListener(): Listener {
     tls: true,
     minTls: '1.2',
     http3: false,
+    plainHttp: '',
     acceptProxyProtocol: false,
     sites: [],
     default: { ...emptySite(), enable: false },
     remark: '',
   }
+}
+
+function plainHttpText(v: string) {
+  return v === 'redirect' ? t('web.plainHttpRedirectTag') : t('web.plainHttpServeTag')
 }
 
 function networkText(n: string) {

@@ -788,6 +788,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 
 | 필드 | 타입 |
 | --- | --- |
+| `accessUrls` | Array of string |
 | `adminPassword` | string |
 | `adminUser` | string |
 | `authMethod` | string |
@@ -1393,6 +1394,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `minTls` | string |
 | `name` | string |
 | `network` | string |
+| `plainHttp` | string |
 | `port` | integer |
 | `remark` | string |
 | `sites` | Array of `webservice.Site` |

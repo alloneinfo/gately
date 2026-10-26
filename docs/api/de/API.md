@@ -788,6 +788,7 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 
 | Feld | Typ |
 | --- | --- |
+| `accessUrls` | Array von string |
 | `adminPassword` | string |
 | `adminUser` | string |
 | `authMethod` | string |
@@ -1393,6 +1394,7 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | `minTls` | string |
 | `name` | string |
 | `network` | string |
+| `plainHttp` | string |
 | `port` | integer |
 | `remark` | string |
 | `sites` | Array von `webservice.Site` |

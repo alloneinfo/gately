@@ -105,11 +105,16 @@ func (l *listenerRunner) route(host string) *siteHandler {
 
 func (l *listenerRunner) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// 通过 TCP 访问时告知浏览器可改用 HTTP/3；HTTP/3 请求本身无需再通告
-	if l.altSvc != "" && r.ProtoMajor < 3 {
+	if l.altSvc != "" && r.ProtoMajor < 3 && r.TLS != nil {
 		w.Header().Set("Alt-Svc", l.altSvc)
 	}
 	// ACME HTTP-01 验证请求优先应答（仅在签发进行中登记过 token 时命中）
 	if r.TLS == nil && acmehttp.Serve(w, r) {
+		return
+	}
+	// HTTPS 端口收到的明文请求按设置跳转到同端口的 https 地址（ACME 验证已在上面应答）
+	if r.TLS == nil && l.cfg.PlainHTTP == PlainHTTPRedirect {
+		redirectToHTTPS(w, r)
 		return
 	}
 	// 第三方登录回调只在配置的认证域名上处理，与站点路由无关
@@ -223,7 +228,7 @@ func (t *siteTable) retire() {
 // sameSocket 判断两份监听配置的端口相关设置是否相同，相同时修改站点无需重启监听。
 func sameSocket(a, b Listener) bool {
 	return a.Network == b.Network && a.ListenIP == b.ListenIP && a.Port == b.Port && a.TLS == b.TLS &&
-		a.MinTLS == b.MinTLS && a.HTTP3 == b.HTTP3 && a.AcceptProxyProtocol == b.AcceptProxyProtocol
+		a.PlainHTTP == b.PlainHTTP && a.MinTLS == b.MinTLS && a.HTTP3 == b.HTTP3 && a.AcceptProxyProtocol == b.AcceptProxyProtocol
 }
 
 // reload 在不关闭监听的情况下替换站点表：新请求立即使用新配置，已建立的连接（含 WebSocket）保持不断。
@@ -288,7 +293,12 @@ func (l *listenerRunner) start(certs CertSource, trusted []string) error {
 			min = tls.VersionTLS12
 		}
 		l.srv.TLSConfig = &tls.Config{GetCertificate: certs.GetCertificate, MinVersion: min, NextProtos: []string{"h2", "http/1.1"}}
-		ln = tls.NewListener(ln, l.srv.TLSConfig)
+		if l.cfg.PlainHTTP != "" {
+			// 同一端口同时接受 HTTPS 与明文 HTTP，按连接的第一个字节区分
+			ln = newSniffListener(ln, l.srv.TLSConfig)
+		} else {
+			ln = tls.NewListener(ln, l.srv.TLSConfig)
+		}
 		if l.cfg.HTTP3 {
 			if err := l.startHTTP3(addr); err != nil {
 				// HTTP/3 失败不影响 HTTP/1.1 与 HTTP/2 服务
@@ -308,7 +318,27 @@ func (l *listenerRunner) start(certs CertSource, trusted []string) error {
 		scheme = "https"
 	}
 	l.log.Infof("%s 监听 %s（%d 个站点）", scheme, addr, len(l.current().sites))
+	switch l.cfg.PlainHTTP {
+	case PlainHTTPRedirect:
+		l.log.Infof("同一端口收到的明文 HTTP 请求跳转到 HTTPS")
+	case PlainHTTPServe:
+		l.log.Infof("同一端口同时以明文 HTTP 提供站点")
+	}
 	return nil
+}
+
+// redirectToHTTPS 把明文请求跳转到同主机同端口的 https 地址。Host 原样保留（含客户端访问时的端口），
+// 经过端口映射访问时跳转后的端口与客户端看到的一致。GET/HEAD 用 301，其余方法用 308 保留请求方法与请求体。
+func redirectToHTTPS(w http.ResponseWriter, r *http.Request) {
+	if r.Host == "" {
+		http.Error(w, "缺少 Host 请求头，无法跳转到 HTTPS", http.StatusBadRequest)
+		return
+	}
+	code := http.StatusMovedPermanently
+	if r.Method != http.MethodGet && r.Method != http.MethodHead {
+		code = http.StatusPermanentRedirect
+	}
+	http.Redirect(w, r, "https://"+r.Host+r.URL.RequestURI(), code)
 }
 
 // startHTTP3 在与 TCP 相同的地址与端口号上启动 UDP（QUIC）监听。

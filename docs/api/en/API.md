@@ -788,6 +788,7 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 
 | Field | Type |
 | --- | --- |
+| `accessUrls` | Array of string |
 | `adminPassword` | string |
 | `adminUser` | string |
 | `authMethod` | string |
@@ -1393,6 +1394,7 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | `minTls` | string |
 | `name` | string |
 | `network` | string |
+| `plainHttp` | string |
 | `port` | integer |
 | `remark` | string |
 | `sites` | Array of `webservice.Site` |

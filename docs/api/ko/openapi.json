@@ -350,6 +350,12 @@
       },
       "filebrowser.Instance": {
         "properties": {
+          "accessUrls": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
           "adminPassword": {
             "type": "string"
           },
@@ -1805,6 +1811,9 @@
             "type": "string"
           },
           "network": {
+            "type": "string"
+          },
+          "plainHttp": {
             "type": "string"
           },
           "port": {

@@ -136,6 +136,14 @@ func (s Site) authPrefix() string {
 	return authPath
 }
 
+// 开启 HTTPS 的监听器在同一端口收到明文 HTTP 请求时的处理方式。
+const (
+	// PlainHTTPRedirect 把明文请求跳转到同主机同端口的 https 地址
+	PlainHTTPRedirect = "redirect"
+	// PlainHTTPServe 直接按 HTTP 提供站点
+	PlainHTTPServe = "serve"
+)
+
 // Listener 是一个监听端口及其站点。
 type Listener struct {
 	Key    string `json:"key"`
@@ -150,6 +158,9 @@ type Listener struct {
 	MinTLS string `json:"minTls"`
 	// HTTP3 在同一端口号的 UDP 上同时提供 HTTP/3（QUIC），需要开启 HTTPS
 	HTTP3 bool `json:"http3"`
+	// PlainHTTP 决定开启 HTTPS 后同一端口收到明文 HTTP 请求时的处理方式：
+	// 空为不接受（与普通 HTTPS 端口相同），redirect 跳转到同端口的 https 地址，serve 直接按 HTTP 提供站点
+	PlainHTTP string `json:"plainHttp"`
 	// AcceptProxyProtocol 接收上游（如 haproxy、frp）发送的 PROXY 协议头，仅信任全局设置中的来源
 	AcceptProxyProtocol bool   `json:"acceptProxyProtocol"`
 	Sites               []Site `json:"sites"`
@@ -253,6 +264,15 @@ func (l *Listener) Validate() error {
 	}
 	if l.HTTP3 && !l.TLS {
 		return errors.New("HTTP/3 需要同时开启 HTTPS")
+	}
+	switch l.PlainHTTP {
+	case "", PlainHTTPRedirect, PlainHTTPServe:
+	default:
+		return fmt.Errorf("不支持的明文 HTTP 处理方式 %q", l.PlainHTTP)
+	}
+	// 未开启 HTTPS 时端口本来就是明文 HTTP，这个选项没有意义
+	if !l.TLS {
+		l.PlainHTTP = ""
 	}
 	switch l.MinTLS {
 	case "", "1.0", "1.1", "1.2", "1.3":

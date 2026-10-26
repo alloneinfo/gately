@@ -68,6 +68,7 @@ Em sites de "Texto fixo", o `Content-Type` pode ser escolhido entre os tipos com
 ## Transporte e protocolos
 
 - HTTPS: usa um certificado do módulo de [Certificados SSL](/pt-BR/docs/modules/ssl) que cubra o domínio;
+- HTTP na mesma porta: um listener com HTTPS também pode aceitar HTTP sem criptografia, distinguindo o protocolo pelo primeiro byte de cada conexão. *Redirecionar para HTTPS* envia `http://host:porta` para `https://host:porta` (301 para GET/HEAD, 308 para os demais métodos), útil quando só há uma porta disponível e os visitantes podem digitar o esquema errado; *Servir* responde em HTTP sem criptografia. As validações ACME HTTP-01 continuam sendo respondidas e alterar esta opção reinicia o listener;
 - HTTP/3 (QUIC): ativado em um listener com HTTPS; o HTTP/3 passa a ser servido também via UDP no mesmo número de porta e anunciado aos navegadores pelo cabeçalho de resposta `Alt-Svc`. Libere essa porta UDP no firewall e no redirecionamento de portas;
 - WebSocket: compatível automaticamente com o proxy reverso;
 - Protocolo PROXY: um listener pode aceitar cabeçalhos PROXY enviados por componentes upstream (como haproxy e frp). Ele confia apenas nos IPs ou sub-redes listados em "Configurações globais → Origens PROXY confiáveis"; deixar vazio não confia em nenhuma origem. O proxy reverso pode enviar cabeçalhos PROXY ao backend.

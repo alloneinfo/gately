@@ -42,7 +42,7 @@ Gately 完全開源，使用者和社群可以直接檢視原始碼與設定。�
 | Tailscale | 託管 tailscaled（使用者空間網路，容器友善）或接入系統既有的常駐程式；驗證金鑰／登入連結、Headscale、子網路由、出口節點、節點清單與 SOCKS5 代理、固定連接埠、tailscaled 額外參數與環境變數；Linux 上可線上安裝、更新、回滾與解除安裝，可恢復預設設定 |
 | frp | frpc 用戶端（tcp/udp/http/https/stcp/xtcp 代理，新增刪除即時生效）與 frps 伺服器端（連接埠白名單、子網域、主控台），可一鍵匯入舊版 ini／新版 toml 設定；線上安裝、更新、回滾與解除安裝，可恢復預設設定 |
 | Cloudflare 通道 | cloudflared 權杖通道與 trycloudflare 臨時通道，多通道、自動重啟、公開位址顯示；線上安裝、更新、回滾與解除安裝，可恢復預設設定 |
-| Web 服務 | 依網域反向代理／重新導向／靜態檔案／固定文字／中斷連線（相當於 nginx return 444）；HTTPS 與 HTTP/3（QUIC）；WebSocket；PROXY 協定收發；基本驗證、網頁驗證、GitHub/Google/QQ/OIDC 登入、支援 TOTP 二次驗證並可跨子網域單一登入的共用使用者、內建 OIDC 身分提供者（讓 Gitea、Grafana 等應用程式以共用使用者登入）、轉發認證到 Authelia 等外部服務；IP 黑白名單與定時重新整理的訂閱 IP 清單（如省市 IP 段）、路徑規則、臨時分享連結、驗證失敗自動封鎖、GeoIP 國家過濾；依路徑分流後端、HTTPS 後端依造訪網域傳送 SNI、後端權重／備援／負載平衡策略、主動與被動健康檢查、壓縮、限流、回應快取、路徑改寫；靜態站台支援無副檔名網址與自訂 404 頁面；修改站台不會中斷既有連線；分鐘級存取統計與 Prometheus 指標 |
+| Web 服務 | 依網域反向代理／重新導向／靜態檔案／固定文字／中斷連線（相當於 nginx return 444）；HTTPS 與 HTTP/3（QUIC）、HTTP 與 HTTPS 共用同一埠（跳轉或直接服務）；WebSocket；PROXY 協定收發；基本驗證、網頁驗證、GitHub/Google/QQ/OIDC 登入、支援 TOTP 二次驗證並可跨子網域單一登入的共用使用者、內建 OIDC 身分提供者（讓 Gitea、Grafana 等應用程式以共用使用者登入）、轉發認證到 Authelia 等外部服務；IP 黑白名單與定時重新整理的訂閱 IP 清單（如省市 IP 段）、路徑規則、臨時分享連結、驗證失敗自動封鎖、GeoIP 國家過濾；依路徑分流後端、HTTPS 後端依造訪網域傳送 SNI、後端權重／備援／負載平衡策略、主動與被動健康檢查、壓縮、限流、回應快取、路徑改寫；靜態站台支援無副檔名網址與自訂 404 頁面；修改站台不會中斷既有連線；分鐘級存取統計與 Prometheus 指標 |
 | WAF 防火牆 | Coraza + OWASP CRS v4，可依檔案啟用規則、自訂 SecLang、攔截／僅偵測；請求內容檢查上限可調，超過上限時只檢查前段或依路徑略過，網盤、WebDAV 等上傳站台也能掛上 WAF |
 | 入侵防護 | 類 fail2ban 的日誌規則（日誌檔案、systemd 日誌、命令輸出、Docker 容器日誌、管理後台登入失敗、WAF 攔截），內建 SSH、Nginx、Vaultwarden 等範本；誘餌連接埠與連接埠掃描偵測；統一封鎖清單，支援手動網段與永久封鎖、遞增時長與白名單；封鎖同步到系統防火牆（nftables）在核心層丟棄，沒有 nftables 的平台對 Gately 自身的服務生效 |
 | Docker 管理 | 容器建立與編輯、日誌與終端機、Compose、映像檔更新檢查與一鍵升級（失敗自動還原）、網路與磁碟區 |

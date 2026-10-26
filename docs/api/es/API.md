@@ -788,6 +788,7 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 
 | Campo | Tipo |
 | --- | --- |
+| `accessUrls` | Lista de string |
 | `adminPassword` | string |
 | `adminUser` | string |
 | `authMethod` | string |
@@ -1393,6 +1394,7 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | `minTls` | string |
 | `name` | string |
 | `network` | string |
+| `plainHttp` | string |
 | `port` | integer |
 | `remark` | string |
 | `sites` | Lista de `webservice.Site` |

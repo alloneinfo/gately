@@ -68,6 +68,7 @@ Bei „Fester Text“-Sites lässt sich `Content-Type` aus gängigen Typen wähl
 ## Transport und Protokolle
 
 - HTTPS: nutzt ein Zertifikat aus dem Modul [SSL-Zertifikate](/de/docs/modules/ssl), das die Domain abdeckt;
+- HTTP auf demselben Port: Ein Listener mit HTTPS kann zusätzlich unverschlüsseltes HTTP annehmen; das Protokoll wird am ersten Byte jeder Verbindung erkannt. *Auf HTTPS umleiten* leitet `http://Host:Port` auf `https://Host:Port` weiter (301 für GET/HEAD, 308 für andere Methoden) – praktisch, wenn nur ein Port verfügbar ist und Besucher das Schema falsch eingeben; *Ausliefern* antwortet per unverschlüsseltem HTTP. ACME-HTTP-01-Prüfungen werden weiterhin beantwortet, eine Änderung startet den Listener neu;
 - HTTP/3 (QUIC): wird in einem Listener mit aktiviertem HTTPS eingeschaltet; HTTP/3 wird dann zusätzlich per UDP auf derselben Portnummer bereitgestellt und Browsern über den Antwort-Header `Alt-Svc` angekündigt. Der UDP-Port muss in Firewall und Portweiterleitung freigegeben sein;
 - WebSocket: wird vom Reverse Proxy automatisch unterstützt;
 - PROXY-Protokoll: Ein Listener kann PROXY-Header akzeptieren, die vorgelagerte Komponenten (wie haproxy und frp) senden. Er vertraut nur den IPs oder Subnetzen unter „Globale Einstellungen → Vertrauenswürdige PROXY-Quellen“; bleibt die Liste leer, wird keiner Quelle vertraut. Der Reverse Proxy kann PROXY-Header an das Backend senden.
