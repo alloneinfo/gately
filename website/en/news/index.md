@@ -7,6 +7,10 @@ description: Release announcements and notes for each Gately version.
 
 Announcements for major releases are listed below. See [GitHub Releases](https://github.com/wangwanjie/gately/releases) for the full changes and downloads of every version.
 
+## [v0.5.9](/en/news/v0.5.9)
+
+October 26, 2026 · Hosted File Browser; IP address and short-lived certificates; online install, update, rollback and uninstall for frp, cloudflared, Tailscale and File Browser; the file service shared users move to a page of their own.
+
 ## [v0.5.8.1](/en/news/v0.5.8.1)
 
 October 26, 2026 · WebDAV, FTP and SMB share one list of shared users; the Web Service gains a Close connection site type and logs the Referer and User-Agent; frps can listen on chosen addresses; copy buttons work over HTTP.

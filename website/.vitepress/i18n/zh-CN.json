@@ -80,8 +80,8 @@
   "home": {
     "pill": "开源 · 可审计 · 单文件部署",
     "announce": {
-      "text": "v0.5.8 发布：OIDC 单点登录与 SMB 服务 →",
-      "link": "/news/v0.5.8"
+      "text": "v0.5.9 发布：File Browser、IP 证书与在线安装 →",
+      "link": "/news/v0.5.9"
     },
     "titleLine1": "看得见的",
     "titleLine2": "网络网关工具集",
@@ -156,7 +156,7 @@
       },
       {
         "title": "SSL 证书",
-        "text": "ACME 自动签发与续期，支持 DNS-01（含通配符）与 HTTP-01、EAB，可映射到目录并在变化后执行脚本。"
+        "text": "ACME 自动签发与续期，支持 DNS-01（含通配符）与 HTTP-01、EAB，以及短期证书与 IP 地址证书，可映射到目录并在变化后执行脚本。"
       },
       {
         "title": "Web 服务",
@@ -168,7 +168,7 @@
       },
       {
         "title": "组网与穿透",
-        "text": "以进程托管方式集成 Tailscale、frp（frpc / frps）与 cloudflared 隧道，始终使用上游最新版本。"
+        "text": "以进程托管方式集成 Tailscale、frp（frpc / frps）与 cloudflared 隧道，支持在线安装、更新、回滚与卸载。"
       },
       {
         "title": "Docker 管理",
@@ -180,7 +180,7 @@
       },
       {
         "title": "文件服务",
-        "text": "WebDAV、FTP 服务与存储挂载，支持本地目录、远程 WebDAV 与 SMB 共享挂载及在线文件管理。"
+        "text": "WebDAV、FTP、SMB 服务与 File Browser，存储挂载支持本地目录、远程 WebDAV 与 SMB 共享，并提供在线文件管理。"
       },
       {
         "title": "计划任务与唤醒",

@@ -7,6 +7,10 @@ description: Gately の各バージョンのリリースのお知らせと更新
 
 主要なバージョンのリリースのお知らせを以下に掲載します。各バージョンの変更点の全体とダウンロードファイルは [GitHub Releases](https://github.com/wangwanjie/gately/releases) を参照してください。
 
+## [v0.5.9](/ja/news/v0.5.9)
+
+2026年10月26日 · File Browser をホスト。IP アドレス証明書と短期証明書を発行可能に。frp、cloudflared、Tailscale、File Browser をオンラインでインストール、更新、ロールバック、アンインストール可能に。ファイルサービスの共有ユーザーを専用ページに移動。
+
 ## [v0.5.8.1](/ja/news/v0.5.8.1)
 
 2026年10月26日 · WebDAV・FTP・SMB で共有ユーザーを共用。Web サービスに「接続を切断」サイトを追加し、アクセスログに Referer と User-Agent を記録。frps の待ち受けアドレスを指定可能に。HTTP でもコピーボタンが使えます。

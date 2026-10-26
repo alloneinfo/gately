@@ -7,6 +7,10 @@ description: Anúncios e notas de cada versão do Gately.
 
 Abaixo estão os anúncios das versões principais. Veja as [GitHub Releases](https://github.com/wangwanjie/gately/releases) para as mudanças completas e os downloads de cada versão.
 
+## [v0.5.9](/pt-BR/news/v0.5.9)
+
+26 de outubro de 2026 · File Browser gerenciado pelo Gately; certificados de endereço IP e de curta duração; instalação, atualização, reversão e desinstalação online de frp, cloudflared, Tailscale e File Browser; os usuários compartilhados dos serviços de arquivos ganham uma página própria.
+
 ## [v0.5.8.1](/pt-BR/news/v0.5.8.1)
 
 26 de outubro de 2026 · WebDAV, FTP e SMB compartilham uma lista de usuários compartilhados; o Serviço Web ganha o tipo de site Fechar conexão e registra Referer e User-Agent; o frps pode escutar em endereços escolhidos; os botões de copiar funcionam via HTTP.

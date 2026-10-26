@@ -80,8 +80,8 @@
   "home": {
     "pill": "Open Source · Prüfbar · Einzelne Binärdatei",
     "announce": {
-      "text": "v0.5.8: OIDC-Single-Sign-on und SMB-Dienst →",
-      "link": "/de/news/v0.5.8"
+      "text": "v0.5.9: File Browser, IP-Zertifikate und Online-Installation →",
+      "link": "/de/news/v0.5.9"
     },
     "titleLine1": "Ein Toolkit für Netzwerk-Gateways,",
     "titleLine2": "das Sie durchschauen können",
@@ -156,7 +156,7 @@
       },
       {
         "title": "SSL-Zertifikate",
-        "text": "Automatische ACME-Ausstellung und -Erneuerung mit DNS-01 (inklusive Wildcards), HTTP-01 und EAB; Zertifikate in ein Verzeichnis abbilden und nach Änderungen ein Skript ausführen."
+        "text": "Automatische ACME-Ausstellung und -Erneuerung mit DNS-01 (inklusive Wildcards), HTTP-01 und EAB, auch kurzlebige und IP-Adress-Zertifikate; Zertifikate in ein Verzeichnis abbilden und nach Änderungen ein Skript ausführen."
       },
       {
         "title": "Web-Dienste",
@@ -168,7 +168,7 @@
       },
       {
         "title": "Netzwerk & Tunnel",
-        "text": "Betreibt Tailscale, frp (frpc / frps) und cloudflared-Tunnel als verwaltete Prozesse und nutzt stets die neueste Upstream-Version."
+        "text": "Betreibt Tailscale, frp (frpc / frps) und cloudflared-Tunnel als verwaltete Prozesse, mit Online-Installation, Update, Rollback und Deinstallation."
       },
       {
         "title": "Docker-Verwaltung",
@@ -180,7 +180,7 @@
       },
       {
         "title": "Dateidienste",
-        "text": "WebDAV- und FTP-Dienste mit Speicher-Einbindungen für lokale Verzeichnisse, entferntes WebDAV und SMB-Freigaben sowie Dateiverwaltung im Browser."
+        "text": "WebDAV-, FTP- und SMB-Dienste, File Browser und Speicher-Einbindungen für lokale Verzeichnisse, entferntes WebDAV und SMB-Freigaben sowie Dateiverwaltung im Browser."
       },
       {
         "title": "Geplante Aufgaben & Wake-on-LAN",

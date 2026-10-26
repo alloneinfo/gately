@@ -80,8 +80,8 @@
   "home": {
     "pill": "Código aberto · Auditável · Binário único",
     "announce": {
-      "text": "v0.5.8: login único OIDC e Serviço SMB →",
-      "link": "/pt-BR/news/v0.5.8"
+      "text": "v0.5.9: File Browser, certificados IP e instalação online →",
+      "link": "/pt-BR/news/v0.5.9"
     },
     "titleLine1": "Um kit de gateway de rede",
     "titleLine2": "que você enxerga por dentro",
@@ -156,7 +156,7 @@
       },
       {
         "title": "Certificados SSL",
-        "text": "Emissão e renovação automáticas via ACME, com DNS-01 (incluindo wildcard), HTTP-01 e EAB; mapeie certificados para um diretório e execute um script após cada alteração."
+        "text": "Emissão e renovação automáticas via ACME, com DNS-01 (incluindo wildcard), HTTP-01 e EAB, além de certificados de curta duração e para endereços IP; mapeie certificados para um diretório e execute um script após cada alteração."
       },
       {
         "title": "Serviços Web",
@@ -168,7 +168,7 @@
       },
       {
         "title": "Redes e túneis",
-        "text": "Gerencia Tailscale, frp (frpc / frps) e túneis cloudflared como processos supervisionados, sempre com a versão mais recente do projeto original."
+        "text": "Gerencia Tailscale, frp (frpc / frps) e túneis cloudflared como processos supervisionados, com instalação, atualização, rollback e desinstalação online."
       },
       {
         "title": "Gerenciamento do Docker",
@@ -180,7 +180,7 @@
       },
       {
         "title": "Serviços de arquivos",
-        "text": "Serviços WebDAV e FTP e montagens de armazenamento para diretórios locais, WebDAV remoto e compartilhamentos SMB, com gerenciador de arquivos online."
+        "text": "Serviços WebDAV, FTP e SMB, File Browser e montagens de armazenamento para diretórios locais, WebDAV remoto e compartilhamentos SMB, com gerenciador de arquivos online."
       },
       {
         "title": "Tarefas agendadas e Wake-on-LAN",

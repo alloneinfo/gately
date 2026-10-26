@@ -7,6 +7,10 @@ description: Gately 各版本的发布公告与更新说明。
 
 重要版本的发布公告如下，每个版本的完整变更与下载文件见 [GitHub Releases](https://github.com/wangwanjie/gately/releases)。
 
+## [v0.5.9](/news/v0.5.9)
+
+2026 年 10 月 26 日 · 托管 File Browser；申请 IP 地址证书与短期证书；frp、cloudflared、Tailscale、File Browser 可在线安装、更新、回滚与卸载；文件服务共享用户改为独立页面。
+
 ## [v0.5.8.1](/news/v0.5.8.1)
 
 2026 年 10 月 26 日 · WebDAV、FTP、SMB 共用一份共享用户；Web 服务新增「断开连接」站点类型，访问日志记录 Referer 与 User-Agent；frps 可指定监听地址；HTTP 访问时复制按钮可用。

@@ -80,8 +80,8 @@
   "home": {
     "pill": "Código abierto · Auditable · Binario único",
     "announce": {
-      "text": "v0.5.8: inicio de sesión único OIDC y Servicio SMB →",
-      "link": "/es/news/v0.5.8"
+      "text": "v0.5.9: File Browser, certificados IP e instalación en línea →",
+      "link": "/es/news/v0.5.9"
     },
     "titleLine1": "Una pasarela de red",
     "titleLine2": "que puedes ver por dentro",
@@ -156,7 +156,7 @@
       },
       {
         "title": "Certificados SSL",
-        "text": "Emisión y renovación automáticas con ACME, mediante DNS-01 (con comodines) o HTTP-01, y EAB; exporta los certificados a un directorio y ejecuta un script tras cada cambio."
+        "text": "Emisión y renovación automáticas con ACME, mediante DNS-01 (con comodines) o HTTP-01, y EAB, con certificados de corta duración y para direcciones IP; exporta los certificados a un directorio y ejecuta un script tras cada cambio."
       },
       {
         "title": "Servicios web",
@@ -168,7 +168,7 @@
       },
       {
         "title": "Redes y túneles",
-        "text": "Supervisa los túneles de Tailscale, frp (frpc / frps) y cloudflared como procesos gestionados, siempre con la última versión oficial."
+        "text": "Supervisa los túneles de Tailscale, frp (frpc / frps) y cloudflared como procesos gestionados, con instalación, actualización, reversión y desinstalación en línea."
       },
       {
         "title": "Gestión de Docker",
@@ -180,7 +180,7 @@
       },
       {
         "title": "Servicios de archivos",
-        "text": "Servicios WebDAV y FTP con montajes de almacenamiento de directorios locales, WebDAV remoto y recursos compartidos SMB, y administración de archivos en línea."
+        "text": "Servicios WebDAV, FTP y SMB, File Browser y montajes de almacenamiento de directorios locales, WebDAV remoto y recursos compartidos SMB, con administración de archivos en línea."
       },
       {
         "title": "Tareas programadas y Wake-on-LAN",

@@ -80,8 +80,8 @@
   "home": {
     "pill": "開源 · 可稽核 · 單檔部署",
     "announce": {
-      "text": "v0.5.8 發布：OIDC 單一登入與 SMB 服務 →",
-      "link": "/zh-TW/news/v0.5.8"
+      "text": "v0.5.9 發布：File Browser、IP 憑證與線上安裝 →",
+      "link": "/zh-TW/news/v0.5.9"
     },
     "titleLine1": "看得見的",
     "titleLine2": "網路閘道工具集",
@@ -156,7 +156,7 @@
       },
       {
         "title": "SSL 憑證",
-        "text": "ACME 自動簽發與續期，支援 DNS-01（含萬用字元）與 HTTP-01、EAB，可對應到目錄並在變更後執行指令碼。"
+        "text": "ACME 自動簽發與續期，支援 DNS-01（含萬用字元）與 HTTP-01、EAB，以及短期憑證與 IP 位址憑證，可對應到目錄並在變更後執行指令碼。"
       },
       {
         "title": "Web 服務",
@@ -168,7 +168,7 @@
       },
       {
         "title": "組網與穿透",
-        "text": "以行程託管方式整合 Tailscale、frp（frpc / frps）與 cloudflared 通道，一律使用上游最新版本。"
+        "text": "以行程託管方式整合 Tailscale、frp（frpc / frps）與 cloudflared 通道，支援線上安裝、更新、回滾與解除安裝。"
       },
       {
         "title": "Docker 管理",
@@ -180,7 +180,7 @@
       },
       {
         "title": "檔案服務",
-        "text": "WebDAV、FTP 服務與儲存掛載，支援本機目錄、遠端 WebDAV 與 SMB 共用掛載及線上檔案管理。"
+        "text": "WebDAV、FTP、SMB 服務與 File Browser，儲存掛載支援本機目錄、遠端 WebDAV 與 SMB 共用，並提供線上檔案管理。"
       },
       {
         "title": "排程工作與喚醒",

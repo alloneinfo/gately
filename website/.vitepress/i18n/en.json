@@ -80,8 +80,8 @@
   "home": {
     "pill": "Open source · Auditable · Single binary",
     "announce": {
-      "text": "v0.5.8 is out: OIDC single sign-on and SMB Service →",
-      "link": "/en/news/v0.5.8"
+      "text": "v0.5.9 is out: File Browser, IP certificates and online install →",
+      "link": "/en/news/v0.5.9"
     },
     "titleLine1": "A network gateway toolkit",
     "titleLine2": "you can see through",
@@ -156,7 +156,7 @@
       },
       {
         "title": "SSL Certificates",
-        "text": "Automatic ACME issuance and renewal with DNS-01 (including wildcards), HTTP-01 and EAB; map certificates to a directory and run a script after changes."
+        "text": "Automatic ACME issuance and renewal with DNS-01 (including wildcards), HTTP-01 and EAB, plus short-lived and IP address certificates; map certificates to a directory and run a script after changes."
       },
       {
         "title": "Web Services",
@@ -168,7 +168,7 @@
       },
       {
         "title": "Networking & Tunnels",
-        "text": "Supervises Tailscale, frp (frpc / frps) and cloudflared tunnels as managed processes, always using the latest upstream release."
+        "text": "Supervises Tailscale, frp (frpc / frps) and cloudflared tunnels as managed processes, with online install, update, rollback and uninstall."
       },
       {
         "title": "Docker Management",
@@ -180,7 +180,7 @@
       },
       {
         "title": "File Services",
-        "text": "WebDAV and FTP services plus storage mounts for local directories, remote WebDAV and SMB shares, with online file management."
+        "text": "WebDAV, FTP and SMB services, File Browser, and storage mounts for local directories, remote WebDAV and SMB shares, with online file management."
       },
       {
         "title": "Scheduled Tasks & Wake-on-LAN",
