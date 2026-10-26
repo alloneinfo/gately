@@ -121,6 +121,7 @@
   "profileHelp": "對應 ACME 的 profile，也可輸入 CA 支援的其他設定檔名稱",
   "profileShortLivedHelp": "有效期約 6 天，到期前 {hours} 小時自動續簽；Let's Encrypt 只為短期憑證簽發 IP 位址憑證",
   "ipCertTip": "IP 位址憑證需使用 Let's Encrypt 的短期憑證，並透過 HTTP-01 驗證（CA 會存取該 IP 的 80 埠）",
+  "ipCertTipCustom": "IP 位址憑證需透過 HTTP-01 驗證（CA 會存取該 IP 的 80 連接埠）",
   "ipCertApply": "一鍵設定",
   "shortLivedTag": "短期",
   "hoursLeft": "剩餘 {hours} 小時",

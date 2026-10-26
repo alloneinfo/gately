@@ -205,6 +205,8 @@ func New(opts Options) (*App, error) {
 		a.modules = append(a.modules, entry)
 	}
 	a.resolveEnabledModules()
+	// 已关闭的文件服务不参与共享用户的保存检查
+	fileusers.Default.SetActive(a.moduleEnabled)
 	if err := a.initTokens(); err != nil {
 		return nil, err
 	}

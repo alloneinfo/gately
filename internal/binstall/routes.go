@@ -95,7 +95,11 @@ func (in *Installer) Register(r module.Router) {
 			}
 		}
 		if _, err := in.Start(body.Version, body.Proxy); err != nil {
-			httpx.Error(w, http.StatusBadRequest, "%v", err)
+			status := http.StatusBadRequest
+			if errors.Is(err, ErrBusy) {
+				status = http.StatusConflict
+			}
+			httpx.Error(w, status, "%v", err)
 			return
 		}
 		httpx.OK(w, in.View())

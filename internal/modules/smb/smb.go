@@ -200,7 +200,7 @@ func (m *Module) Init(env module.Env) error {
 		return sv
 	})
 	// 只靠共享用户启用时，修改后至少要有一个能用于 SMB 的共享用户
-	fileusers.Default.AddCheck(func(users []fileusers.User) error {
+	fileusers.Default.AddCheck(m.ID(), func(users []fileusers.User) error {
 		m.mu.Lock()
 		s := m.settings
 		loadErr := m.loadErr

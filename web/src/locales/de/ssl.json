@@ -121,6 +121,7 @@
   "profileHelp": "Das ACME-Profil; Sie können auch einen anderen von der CA unterstützten Profilnamen eingeben",
   "profileShortLivedHelp": "Etwa 6 Tage gültig und wird {hours} Stunden vor Ablauf automatisch erneuert; Let's Encrypt stellt IP-Adress-Zertifikate nur mit diesem Profil aus",
   "ipCertTip": "IP-Adress-Zertifikate benötigen das kurzlebige Profil von Let's Encrypt und HTTP-01-Validierung (die CA verbindet sich mit Port 80 der IP)",
+  "ipCertTipCustom": "IP-Adresszertifikate benötigen die HTTP-01-Validierung (die CA verbindet sich mit Port 80 der IP)",
   "ipCertApply": "Automatisch einrichten",
   "shortLivedTag": "Kurzlebig",
   "hoursLeft": "Noch {hours} Stunden",

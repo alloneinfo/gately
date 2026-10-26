@@ -85,7 +85,7 @@
           <el-form-item :label="t('ssl.domain')" required>
             <el-input v-model="domainsText" type="textarea" :rows="2" :placeholder="t('ssl.domainsPlaceholder')" class="mono" />
           </el-form-item>
-          <el-alert v-if="ipNeedsSetup" type="warning" :closable="false" show-icon class="http-tip" :title="t('ssl.ipCertTip')">
+          <el-alert v-if="ipNeedsSetup" type="warning" :closable="false" show-icon class="http-tip" :title="t(editing.acme.ca === 'custom' ? 'ssl.ipCertTipCustom' : 'ssl.ipCertTip')">
             <el-button size="small" type="primary" link @click="applyIPCert">{{ t('ssl.ipCertApply') }}</el-button>
           </el-alert>
           <el-form-item :label="t('ssl.email')"><el-input v-model="editing.acme.email" :placeholder="t('ssl.emailPlaceholder')" /></el-form-item>
@@ -246,7 +246,7 @@
       <el-form v-if="settings" :model="settings" label-width="170px" :label-position="labelPosition">
         <el-form-item :label="t('ssl.autoRenew')"><el-switch v-model="settings.enable" /></el-form-item>
         <el-form-item :label="t('ssl.renewBeforeDays')"><el-input-number v-model="settings.renewBeforeDays" :min="1" :max="60" /></el-form-item>
-        <el-form-item :label="t('ssl.shortLivedHours')"><el-input-number v-model="settings.shortLivedRenewHours" :min="1" :max="120" /></el-form-item>
+        <el-form-item :label="t('ssl.shortLivedHours')"><el-input-number v-model="settings.shortLivedRenewHours" :min="1" :max="80" /></el-form-item>
         <el-form-item :label="t('ssl.defaultEmail')"><el-input v-model="settings.defaultEmail" /></el-form-item>
       </el-form>
       <template #footer>
@@ -390,18 +390,26 @@ function isIPAddress(s: string) {
 }
 // 短期证书续签提前小时数，用于提示与状态判断
 const renewHours = computed(() => renewSettings.value?.shortLivedRenewHours ?? 24)
-// ipNeedsSetup 在填写了 IP 地址、但验证方式或证书配置不满足 IP 证书要求时提示一键设置（自建 CA 不限制）
+// ipNeedsSetup 在填写了 IP 地址、但验证方式或证书配置不满足 IP 证书要求时提示一键设置
+// （自建 CA 不限制 CA 与证书配置，但与后端一致仍要求 HTTP-01 验证）
 const ipNeedsSetup = computed(() => {
   const a = editing.value.acme
-  if (!(a.domains ?? []).some(isIPAddress) || a.ca === 'custom') {
+  if (!(a.domains ?? []).some(isIPAddress)) {
     return false
+  }
+  if (a.ca === 'custom') {
+    return a.challenge !== 'http'
   }
   return a.challenge !== 'http' || a.profile !== 'shortlived' || ['zerossl', 'google'].includes(a.ca)
 })
 
-// applyIPCert 按 IP 证书要求设置：Let's Encrypt、短期证书、HTTP-01 验证
+// applyIPCert 按 IP 证书要求设置：Let's Encrypt、短期证书、HTTP-01 验证；自建 CA 只切换验证方式
 function applyIPCert() {
   const a = editing.value.acme
+  if (a.ca === 'custom') {
+    a.challenge = 'http'
+    return
+  }
   if (a.ca !== 'letsencrypt-staging') {
     a.ca = 'letsencrypt'
   }

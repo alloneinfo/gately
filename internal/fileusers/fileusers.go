@@ -125,7 +125,9 @@ type Registry struct {
 
 	subMu  sync.Mutex
 	subs   map[int]func()
-	checks map[int]func([]User) error
+	checks map[int]check
+	// active 判断文件服务模块是否开启，已关闭模块的检查不执行；为 nil 时全部执行
+	active func(id string) bool
 	// services 为各文件服务登记的使用情况查询，按服务 ID 保存
 	services map[string]func() Service
 	nextID   int
@@ -133,7 +135,13 @@ type Registry struct {
 
 // New 创建空的注册表。
 func New() *Registry {
-	return &Registry{subs: map[int]func(){}, checks: map[int]func([]User) error{}, services: map[string]func() Service{}}
+	return &Registry{subs: map[int]func(){}, checks: map[int]check{}, services: map[string]func() Service{}}
+}
+
+// check 是文件服务 id 注册的保存前检查。
+type check struct {
+	id string
+	fn func([]User) error
 }
 
 // Default 是进程内唯一的注册表，由各文件服务在 Init 时以同一个配置目录初始化。
@@ -160,7 +168,7 @@ func (r *Registry) Init(store *config.Store) error {
 	}
 	r.store, r.users = store, f.Users
 	r.subMu.Lock()
-	r.subs, r.checks, r.services = map[int]func(){}, map[int]func([]User) error{}, map[string]func() Service{}
+	r.subs, r.checks, r.services = map[int]func(){}, map[int]check{}, map[string]func() Service{}
 	r.subMu.Unlock()
 	return nil
 }
@@ -241,13 +249,14 @@ func (r *Registry) Subscribe(fn func()) (cancel func()) {
 	}
 }
 
-// AddCheck 注册保存前的检查，返回错误时拒绝保存，返回取消函数。
+// AddCheck 注册文件服务 service 的保存前检查，返回错误时拒绝保存，返回取消函数。
 // 各文件服务用它保证只靠共享用户启用的服务在修改后仍有可登录的用户；检查在保存请求中同步执行，不能持有调用方的锁。
-func (r *Registry) AddCheck(fn func([]User) error) (cancel func()) {
+// 在「功能模块」中关闭的服务不执行检查（见 SetActive），否则界面上看不到的服务会拦截保存。
+func (r *Registry) AddCheck(service string, fn func([]User) error) (cancel func()) {
 	r.subMu.Lock()
 	id := r.nextID
 	r.nextID++
-	r.checks[id] = fn
+	r.checks[id] = check{id: service, fn: fn}
 	r.subMu.Unlock()
 	return func() {
 		r.subMu.Lock()
@@ -303,11 +312,21 @@ func (r *Registry) Services(keep func(id string) bool) []Service {
 	return out
 }
 
+// SetActive 设置判断文件服务模块是否开启的函数，由应用在加载模块后调用。
+func (r *Registry) SetActive(fn func(id string) bool) {
+	r.subMu.Lock()
+	r.active = fn
+	r.subMu.Unlock()
+}
+
 func (r *Registry) check(users []User) error {
 	r.subMu.Lock()
 	checks := make([]func([]User) error, 0, len(r.checks))
-	for _, fn := range r.checks {
-		checks = append(checks, fn)
+	for _, c := range r.checks {
+		if r.active != nil && !r.active(c.id) {
+			continue
+		}
+		checks = append(checks, c.fn)
 	}
 	r.subMu.Unlock()
 	for _, fn := range checks {

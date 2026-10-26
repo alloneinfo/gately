@@ -9,6 +9,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"io"
 	"log"
 	"net/http"
@@ -484,3 +485,82 @@ func TestRoutes(t *testing.T) {
 type routerFunc func(pattern string, h http.HandlerFunc)
 
 func (f routerFunc) HandleFunc(pattern string, h http.HandlerFunc) { f(pattern, h) }
+
+// TestReinstallSameVersion 验证重装同一版本时先移走现有文件再替换（Windows 不能覆盖运行中的程序），
+// 不产生旧版本，也不残留临时目录。
+func TestReinstallSameVersion(t *testing.T) {
+	skipWindows(t)
+	up := newUpstream(t, "demo.tar.gz")
+	in := newInstaller(t, up.spec("democ", "demos"), nil)
+	up.set("1.0.0", tarGz(t, map[string][]byte{"democ": script("1.0.0"), "demos": script("1.0.0")}))
+	if st := install(t, in, ""); st.Stage != StageDone {
+		t.Fatalf("首次安装失败: %+v", st)
+	}
+	// 模拟 demos 丢失后指定同一版本修复安装
+	if err := os.Remove(filepath.Join(in.BinDir(), "demos")); err != nil {
+		t.Fatal(err)
+	}
+	if st := install(t, in, "1.0.0"); st.Stage != StageDone {
+		t.Fatalf("同版本重装失败: %+v", st)
+	}
+	if got := in.Installed(); !got.Present || len(got.Missing) != 0 || got.Version != "1.0.0" {
+		t.Fatalf("重装结果错误: %+v", got)
+	}
+	if len(in.Backups()) != 0 {
+		t.Fatalf("同版本重装不应保存旧版本: %+v", in.Backups())
+	}
+	entries, _ := os.ReadDir(in.BinDir())
+	for _, e := range entries {
+		if strings.HasPrefix(e.Name(), ".replaced-") || strings.HasPrefix(e.Name(), ".install-") {
+			t.Errorf("临时目录未清理: %s", e.Name())
+		}
+	}
+}
+
+// TestCleanStale 验证创建安装器时清理上次异常退出残留的暂存目录，只删本程序的。
+func TestCleanStale(t *testing.T) {
+	bin := filepath.Join(t.TempDir(), "bin")
+	keep := []string{".install-other-1", ".versions", "demo"}
+	stale := []string{".install-demo-1", ".replaced-demo-2", ".uninstall-demo-3"}
+	for _, d := range append(append([]string{}, keep...), stale...) {
+		if err := os.MkdirAll(filepath.Join(bin, d), 0o700); err != nil {
+			t.Fatal(err)
+		}
+	}
+	New(Spec{Key: "demo", Files: []string{"demo"}}, Options{BinDir: bin})
+	for _, d := range stale {
+		if _, err := os.Stat(filepath.Join(bin, d)); !os.IsNotExist(err) {
+			t.Errorf("残留目录 %s 应被删除", d)
+		}
+	}
+	for _, d := range keep {
+		if _, err := os.Stat(filepath.Join(bin, d)); err != nil {
+			t.Errorf("目录 %s 不应被删除: %v", d, err)
+		}
+	}
+}
+
+// TestBusyExclusive 验证安装、回滚、卸载互斥：任一进行时其他操作返回 ErrBusy，不改动进度。
+func TestBusyExclusive(t *testing.T) {
+	up := newUpstream(t, "demo.tar.gz")
+	in := newInstaller(t, up.spec("democ"), nil)
+	if err := in.acquire(); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := in.Start("", ""); !errors.Is(err, ErrBusy) {
+		t.Errorf("回滚或卸载进行时安装应报忙: %v", err)
+	}
+	if in.State().Running {
+		t.Error("被拒绝的安装不应改动进度")
+	}
+	if err := in.Uninstall(); !errors.Is(err, ErrBusy) {
+		t.Errorf("应报忙: %v", err)
+	}
+	if _, err := in.Rollback("20260101-000000.000"); !errors.Is(err, ErrBusy) {
+		t.Errorf("应报忙: %v", err)
+	}
+	in.release()
+	if err := in.Uninstall(); err != nil {
+		t.Errorf("释放后应可卸载: %v", err)
+	}
+}

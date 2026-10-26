@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+
+	"github.com/wangwanjie/gately/internal/crud"
 )
 
 // 登录方式。
@@ -132,6 +134,10 @@ func (i *Instance) Validate() error {
 	}
 	if i.AuthMethod == AuthPassword && i.AdminPassword == "" {
 		return errors.New("请设置管理员密码")
+	}
+	// 脱敏占位符只在更新时由 Merge 还原为原密码；新建实例时原样提交（如复制 GET 的结果）不能当作密码
+	if i.AdminPassword == crud.SecretMask {
+		return errors.New("请重新填写管理员密码")
 	}
 	if i.AdminPassword != "" && len([]rune(i.AdminPassword)) < minAdminPassword {
 		return fmt.Errorf("管理员密码至少 %d 位", minAdminPassword)

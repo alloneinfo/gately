@@ -138,6 +138,9 @@ type fileConfig struct {
 	Accounts map[string]Account `json:"accounts,omitempty"`
 }
 
+// maxShortLivedRenewHours 为短期证书续签提前小时数上限，约为 Let's Encrypt 短期证书有效期的一半
+const maxShortLivedRenewHours = 80
+
 func defaultSettings() Settings {
 	return Settings{Enable: true, RenewBeforeDays: 30, ShortLivedRenewHours: 24}
 }
@@ -148,6 +151,10 @@ func (s *Settings) normalize() {
 	}
 	if s.ShortLivedRenewHours <= 0 {
 		s.ShortLivedRenewHours = 24
+	}
+	// Let's Encrypt 短期证书有效期约 160 小时，提前量过大会导致每次检查都重签
+	if s.ShortLivedRenewHours > maxShortLivedRenewHours {
+		s.ShortLivedRenewHours = maxShortLivedRenewHours
 	}
 }
 
@@ -218,6 +225,9 @@ func (a *ACMEConfig) validate(settings Settings) error {
 		d = strings.ToLower(strings.Trim(strings.TrimSpace(d), "."))
 		if d == "" {
 			continue
+		}
+		if err := checkIPLike(d); err != nil {
+			return err
 		}
 		// IP 地址统一成规范写法（IPv6 去掉方括号并压缩），与证书中的 IP SAN 一致
 		if ip, ok := parseIPIdentifier(d); ok {
@@ -305,6 +315,26 @@ func parseIPIdentifier(s string) (netip.Addr, bool) {
 		return netip.Addr{}, false
 	}
 	return ip.Unmap(), true
+}
+
+// 只由数字和点组成的标识，按 IPv4 处理
+var reIPv4Like = regexp.MustCompile(`^[0-9.]+$`)
+
+// checkIPLike 拒绝看起来像 IP 却无法作为证书标识的写法：带 zone 的 IPv6、
+// 无法解析的 IPv6（域名不含冒号）以及前导零等非规范 IPv4，避免被当作域名保存后签发失败。
+func checkIPLike(d string) error {
+	s := strings.TrimSuffix(strings.TrimPrefix(d, "["), "]")
+	ip, err := netip.ParseAddr(s)
+	if err == nil {
+		if ip.Zone() != "" {
+			return fmt.Errorf("IP 地址 %q 不能带区域标识", d)
+		}
+		return nil
+	}
+	if strings.Contains(s, ":") || reIPv4Like.MatchString(s) {
+		return fmt.Errorf("IP 地址 %q 格式错误", d)
+	}
+	return nil
 }
 
 // hasIPIdentifier 判断域名列表中是否包含 IP 地址。

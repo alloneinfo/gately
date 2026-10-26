@@ -153,7 +153,7 @@ func (m *Module) Init(env module.Env) error {
 		return sv
 	})
 	// 只靠共享用户启用时，不允许把共享用户删光
-	fileusers.Default.AddCheck(func(users []fileusers.User) error {
+	fileusers.Default.AddCheck(m.ID(), func(users []fileusers.User) error {
 		m.mu.Lock()
 		s := m.settings
 		m.mu.Unlock()

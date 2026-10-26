@@ -121,6 +121,7 @@
   "profileHelp": "ACME profile 입니다. CA가 지원하는 다른 프로필 이름도 입력할 수 있습니다",
   "profileShortLivedHelp": "유효 기간은 약 6일이며 만료 {hours}시간 전에 자동 갱신합니다. Let's Encrypt는 단기 인증서로만 IP 주소 인증서를 발급합니다",
   "ipCertTip": "IP 주소 인증서는 Let's Encrypt 단기 인증서와 HTTP-01 검증이 필요합니다 (CA가 해당 IP의 80번 포트로 접속합니다)",
+  "ipCertTipCustom": "IP 주소 인증서는 HTTP-01 검증이 필요합니다(CA가 해당 IP의 80번 포트에 접속합니다)",
   "ipCertApply": "자동 설정",
   "shortLivedTag": "단기",
   "hoursLeft": "{hours}시간 남음",

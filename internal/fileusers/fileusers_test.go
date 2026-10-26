@@ -146,7 +146,7 @@ func TestAddCheck(t *testing.T) {
 	}
 	notified := 0
 	r.Subscribe(func() { notified++ })
-	cancel := r.AddCheck(func(users []User) error {
+	cancel := r.AddCheck("webdav", func(users []User) error {
 		if len(users) == 0 {
 			return errors.New("至少保留一个")
 		}
@@ -162,13 +162,32 @@ func TestAddCheck(t *testing.T) {
 	if err := r.Save(nil); err != nil || notified != 2 {
 		t.Fatalf("取消检查后应可保存: %v", err)
 	}
-	r.AddCheck(func([]User) error { return errors.New("拒绝") })
+	r.AddCheck("webdav", func([]User) error { return errors.New("拒绝") })
 	other, _ := config.Open(t.TempDir())
 	if err := r.Init(other); err != nil {
 		t.Fatal(err)
 	}
 	if err := r.Save(nil); err != nil || notified != 2 {
 		t.Fatalf("换配置目录后旧的检查与订阅应清空: %v %d", err, notified)
+	}
+}
+
+// TestAddCheckInactive 验证在「功能模块」中关闭的服务不执行保存前检查，开启的服务照常检查。
+func TestAddCheckInactive(t *testing.T) {
+	st, _ := config.Open(t.TempDir())
+	r := New()
+	if err := r.Init(st); err != nil {
+		t.Fatal(err)
+	}
+	r.AddCheck("ftp", func([]User) error { return errors.New("FTP 拒绝") })
+	active := map[string]bool{"ftp": false}
+	r.SetActive(func(id string) bool { return active[id] })
+	if err := r.Save(nil); err != nil {
+		t.Fatalf("已关闭的服务不应拦截保存: %v", err)
+	}
+	active["ftp"] = true
+	if err := r.Save(nil); err == nil {
+		t.Fatal("开启的服务应执行检查")
 	}
 }
 

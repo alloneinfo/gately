@@ -172,6 +172,8 @@ type Installer struct {
 
 	mu    sync.Mutex
 	state State
+	// busy 在安装、回滚、卸载期间为 true，三者互斥；检查与占用在 mu 下一次完成
+	busy bool
 	// fileMu 串行化对 bin 与旧版本目录的修改
 	fileMu sync.Mutex
 	// probe 缓存主程序版本，按修改时间失效，避免界面轮询时反复执行
@@ -188,7 +190,50 @@ func New(spec Spec, opt Options) *Installer {
 	} else {
 		in.plat = CurrentPlatform()
 	}
+	// 上次异常退出（被杀、断电、容器重启）时残留的暂存目录
+	in.cleanStale()
 	return in
+}
+
+// 暂存目录前缀：下载解压、替换同版本时移走的旧文件、卸载时移走的文件
+func (in *Installer) stagePrefixes() []string {
+	return []string{".install-" + in.spec.Key + "-", ".replaced-" + in.spec.Key + "-", ".uninstall-" + in.spec.Key + "-"}
+}
+
+// cleanStale 删除 bin 下本程序残留的暂存目录。只在没有安装、回滚、卸载进行时调用。
+func (in *Installer) cleanStale() {
+	entries, err := os.ReadDir(in.opt.BinDir)
+	if err != nil {
+		return
+	}
+	for _, e := range entries {
+		if !e.IsDir() {
+			continue
+		}
+		for _, prefix := range in.stagePrefixes() {
+			if strings.HasPrefix(e.Name(), prefix) {
+				_ = os.RemoveAll(filepath.Join(in.opt.BinDir, e.Name()))
+			}
+		}
+	}
+}
+
+// acquire 占用安装器，已有安装、回滚或卸载进行时返回 ErrBusy。
+func (in *Installer) acquire() error {
+	in.mu.Lock()
+	defer in.mu.Unlock()
+	if in.busy {
+		return ErrBusy
+	}
+	in.busy = true
+	return nil
+}
+
+// release 释放 acquire 的占用。
+func (in *Installer) release() {
+	in.mu.Lock()
+	in.busy = false
+	in.mu.Unlock()
 }
 
 // BinDir 返回安装目录。
@@ -295,6 +340,11 @@ func (in *Installer) Start(version, proxy string) (State, error) {
 	if in.state.Running {
 		return in.state, nil
 	}
+	// 回滚或卸载正在进行
+	if in.busy {
+		return in.state, ErrBusy
+	}
+	in.busy = true
 	in.state = State{Running: true, Stage: StageChecking}
 	go in.run(client, strings.TrimSpace(version))
 	return in.state, nil
@@ -331,6 +381,7 @@ func ValidateProxy(raw string) error {
 func (in *Installer) run(client *http.Client, version string) {
 	ctx, cancel := context.WithTimeout(context.Background(), installTimeout)
 	defer cancel()
+	defer in.release()
 	log := in.logger()
 	ver, changed, err := in.install(ctx, client, version)
 	if err != nil {
@@ -382,6 +433,7 @@ func (in *Installer) install(ctx context.Context, client *http.Client, version s
 	if err := fsperm.MkdirAll(in.opt.BinDir, 0o700); err != nil {
 		return "", false, fmt.Errorf("创建目录失败: %v", err)
 	}
+	in.cleanStale()
 	// 下载与解压都放在 bin 下的临时目录，与安装位置同一文件系统，替换时只需改名
 	stage, err := os.MkdirTemp(in.opt.BinDir, ".install-"+in.spec.Key+"-")
 	if err != nil {
@@ -420,17 +472,25 @@ func (in *Installer) install(ctx context.Context, client *http.Client, version s
 	return rel.Version, true, nil
 }
 
-// swap 把 dir 中的文件装入 bin：先把现有文件移入新的旧版本目录（与要装入的版本相同则直接覆盖），
-// 再移入新文件；中途失败时尽量还原。newVersion 仅用于判断是否需要备份。
+// swap 把 dir 中的文件装入 bin：先把现有文件移入新的旧版本目录，再移入新文件；中途失败时尽量还原。
+// 与要装入的版本相同时，现有文件移入临时目录、替换成功后删除，不计入旧版本。
+// 现有文件总是先改名移走，Windows 不允许直接覆盖正在运行的程序。newVersion 仅用于判断是否需要备份。
 func (in *Installer) swap(dir, newVersion string) error {
 	in.fileMu.Lock()
 	defer in.fileMu.Unlock()
 	cur := in.installedLocked()
-	var backupDir string
-	if cur.Present && !(newVersion != "" && sameVersion(cur.Version, newVersion)) {
+	var backupDir, replacedDir string
+	if cur.Present {
 		var err error
-		backupDir, err = in.saveCurrentLocked(cur.Version)
-		if err != nil {
+		if newVersion != "" && sameVersion(cur.Version, newVersion) {
+			if replacedDir, err = os.MkdirTemp(in.opt.BinDir, ".replaced-"+in.spec.Key+"-"); err != nil {
+				return fmt.Errorf("安装失败: %v", err)
+			}
+			if err = in.moveCurrentLocked(replacedDir); err != nil {
+				return err
+			}
+			backupDir = replacedDir
+		} else if backupDir, err = in.saveCurrentLocked(cur.Version); err != nil {
 			return err
 		}
 	}
@@ -447,6 +507,10 @@ func (in *Installer) swap(dir, newVersion string) error {
 			return fmt.Errorf("安装失败: %v", err)
 		}
 	}
+	if replacedDir != "" {
+		// Windows 上旧程序仍在运行时删除失败，留给下次 cleanStale 清理
+		_ = os.RemoveAll(replacedDir)
+	}
 	in.probeMod = time.Time{}
 	in.pruneLocked()
 	return nil
@@ -455,7 +519,8 @@ func (in *Installer) swap(dir, newVersion string) error {
 // saveCurrentLocked 把 bin 下的现有文件移入新的旧版本目录，返回该目录。
 func (in *Installer) saveCurrentLocked(version string) (string, error) {
 	// 版本未知时留空，由界面显示“未知版本”
-	now := time.Now()
+	// 目录名即排序依据，用 UTC 避免夏令时回拨或更换时区后新旧顺序错乱
+	now := time.Now().UTC()
 	dir := filepath.Join(in.backupRoot(), now.Format("20060102-150405.000"))
 	if err := fsperm.MkdirAll(dir, 0o700); err != nil {
 		return "", fmt.Errorf("保存旧版本失败: %v", err)
@@ -465,6 +530,14 @@ func (in *Installer) saveCurrentLocked(version string) (string, error) {
 		os.RemoveAll(dir)
 		return "", fmt.Errorf("保存旧版本失败: %v", err)
 	}
+	if err := in.moveCurrentLocked(dir); err != nil {
+		return "", err
+	}
+	return dir, nil
+}
+
+// moveCurrentLocked 把 bin 下的现有文件移入 dir，失败时还原并删除 dir。
+func (in *Installer) moveCurrentLocked(dir string) error {
 	for _, f := range in.spec.Files {
 		name := ExeName(f)
 		src := filepath.Join(in.opt.BinDir, name)
@@ -474,10 +547,10 @@ func (in *Installer) saveCurrentLocked(version string) (string, error) {
 		// 改名对运行中的程序同样有效（包括 Windows），进程重启前继续使用原文件
 		if err := os.Rename(src, filepath.Join(dir, name)); err != nil {
 			in.restoreLocked(dir)
-			return "", fmt.Errorf("保存旧版本失败: %v", err)
+			return fmt.Errorf("保存旧版本失败: %v", err)
 		}
 	}
-	return dir, nil
+	return nil
 }
 
 // restoreLocked 把旧版本目录中的文件移回 bin 并删除该目录，用于替换失败时还原。
@@ -505,13 +578,14 @@ var ErrNoBackup = errors.New("该旧版本不存在")
 
 // Rollback 切换到保存的旧版本 id：当前版本另存为旧版本，之后仍可切回。完成后通知使用方重启进程。
 func (in *Installer) Rollback(id string) (string, error) {
-	if in.State().Running {
-		return "", ErrBusy
-	}
 	// id 只能是旧版本目录名，防止路径穿越
 	if id == "" || id != filepath.Base(id) || strings.HasPrefix(id, ".") {
 		return "", ErrNoBackup
 	}
+	if err := in.acquire(); err != nil {
+		return "", err
+	}
+	defer in.release()
 	in.fileMu.Lock()
 	var target Backup
 	found := false
@@ -599,28 +673,49 @@ func ProbeOutput(path string, re *regexp.Regexp, args ...string) (string, error)
 // Uninstall 删除 bin 下安装的程序与全部保存的旧版本，完成后通知使用方重启进程
 // （之后改用 PATH 中的同名程序，没有时进程无法启动）。模块配置不受影响。
 func (in *Installer) Uninstall() error {
-	if in.State().Running {
-		return ErrBusy
+	if err := in.acquire(); err != nil {
+		return err
 	}
+	defer in.release()
 	in.fileMu.Lock()
-	var errs []error
-	for _, f := range in.spec.Files {
-		if err := os.Remove(filepath.Join(in.opt.BinDir, ExeName(f))); err != nil && !os.IsNotExist(err) {
-			errs = append(errs, err)
+	// 先把程序改名移入临时目录（Windows 不允许删除运行中的程序，但允许改名），
+	// 通知使用方停止或重启进程后再删除
+	var trash string
+	if in.installedLocked().Present || in.anyFileLocked() {
+		var err error
+		if trash, err = os.MkdirTemp(in.opt.BinDir, ".uninstall-"+in.spec.Key+"-"); err != nil {
+			in.fileMu.Unlock()
+			return fmt.Errorf("卸载失败: %v", err)
+		}
+		if err = in.moveCurrentLocked(trash); err != nil {
+			in.fileMu.Unlock()
+			return fmt.Errorf("卸载失败: %v", err)
 		}
 	}
-	if err := os.RemoveAll(in.backupRoot()); err != nil {
-		errs = append(errs, err)
-	}
+	err := os.RemoveAll(in.backupRoot())
 	in.probeMod = time.Time{}
 	in.fileMu.Unlock()
-	if len(errs) > 0 {
-		return fmt.Errorf("卸载失败: %v", errors.Join(errs...))
-	}
-	in.logger().Infof("已卸载 %s 并删除保存的旧版本", in.spec.Name)
 	in.setState(func(st *State) { *st = State{} })
 	if in.opt.OnChange != nil {
 		in.opt.OnChange()
 	}
+	if trash != "" {
+		// 进程仍未退出时删除失败，留给下次 cleanStale 清理
+		_ = os.RemoveAll(trash)
+	}
+	if err != nil {
+		return fmt.Errorf("卸载失败: %v", err)
+	}
+	in.logger().Infof("已卸载 %s 并删除保存的旧版本", in.spec.Name)
 	return nil
+}
+
+// anyFileLocked 判断 bin 下是否有本程序的任一文件（例如只剩 frps）。
+func (in *Installer) anyFileLocked() bool {
+	for _, f := range in.spec.Files {
+		if _, err := os.Stat(filepath.Join(in.opt.BinDir, ExeName(f))); err == nil {
+			return true
+		}
+	}
+	return false
 }

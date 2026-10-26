@@ -273,18 +273,27 @@ type settingsView struct {
 	Error       string `json:"error"`
 }
 
-func (m *Module) settingsLocked() settingsView {
+// settingsView 返回设置与程序信息。探测版本要执行外部程序（最长数秒），在锁外进行，
+// 避免卡住的程序阻塞实例列表轮询与启停。
+func (m *Module) settingsView() settingsView {
+	m.mu.Lock()
 	out := settingsView{Settings: m.cfg.Settings, InstallPath: m.localBin()}
 	bin, err := m.resolveBin()
 	if err != nil {
+		m.mu.Unlock()
 		out.Error = err.Error()
 		return out
 	}
-	if m.versionPath != bin {
-		m.versionPath = bin
-		m.version, m.quantum = probeVersion(bin)
+	cached := m.versionPath == bin
+	version, quantum := m.version, m.quantum
+	m.mu.Unlock()
+	if !cached {
+		version, quantum = probeVersion(bin)
+		m.mu.Lock()
+		m.versionPath, m.version, m.quantum = bin, version, quantum
+		m.mu.Unlock()
 	}
-	out.Binary, out.Version, out.Quantum = bin, m.version, m.quantum
+	out.Binary, out.Version, out.Quantum = bin, version, quantum
 	if !out.Quantum {
 		out.Error = "找到的程序不是 FileBrowser Quantum，可能是已停止维护的原版 filebrowser，请点击“下载安装”或更换可执行文件"
 	}
@@ -318,9 +327,7 @@ func (m *Module) Routes(r module.Router) {
 		httpx.OK(w, map[string]bool{"ok": true})
 	})
 	r.HandleFunc("GET /settings", func(w http.ResponseWriter, req *http.Request) {
-		m.mu.Lock()
-		defer m.mu.Unlock()
-		httpx.OK(w, m.settingsLocked())
+		httpx.OK(w, m.settingsView())
 	})
 	r.HandleFunc("PUT /settings", func(w http.ResponseWriter, req *http.Request) {
 		var s Settings

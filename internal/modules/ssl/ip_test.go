@@ -74,6 +74,10 @@ func TestValidateIPCert(t *testing.T) {
 		"IPv6 ULA":            base(func(a *ACMEConfig) { a.Domains = []string{"fd00::1"} }),
 		"ZeroSSL 不支持 IP":      base(func(a *ACMEConfig) { a.CA = "zerossl"; a.EABKid = "k"; a.EABHMAC = "h" }),
 		"证书配置名非法":             base(func(a *ACMEConfig) { a.Domains = []string{"example.com"}; a.Profile = "short lived" }),
+		"IPv6 带 zone":         base(func(a *ACMEConfig) { a.Domains = []string{"fe80::1%eth0"} }),
+		"无法解析的 IPv6":          base(func(a *ACMEConfig) { a.Domains = []string{"2001:db8::zz"} }),
+		"前导零 IPv4":            base(func(a *ACMEConfig) { a.Domains = []string{"08.8.8.8"} }),
+		"不完整 IPv4":            base(func(a *ACMEConfig) { a.Domains = []string{"8.8.8"} }),
 	}
 	for name, a := range bad {
 		if err := a.validate(Settings{}); err == nil {
@@ -473,5 +477,37 @@ func TestPebbleIPShortLived(t *testing.T) {
 	info2, _ := certInfo(m.cfg.Certs[0].CertPEM)
 	if info2.NotAfter.Sub(info2.NotBefore) < 30*24*time.Hour || m.cfg.Certs[0].IssuedProfile != "" {
 		t.Fatalf("改回默认配置后应重签普通证书: %v %q（%s）", info2.NotAfter.Sub(info2.NotBefore), m.cfg.Certs[0].IssuedProfile, m.stateLocked("ip").LastError)
+	}
+}
+
+// TestShortLivedRenewHoursCap 校验短期证书续签提前小时数被限制在有效期一半以内，避免每次检查都重签
+func TestShortLivedRenewHoursCap(t *testing.T) {
+	s := Settings{ShortLivedRenewHours: 168}
+	s.normalize()
+	if s.ShortLivedRenewHours != maxShortLivedRenewHours {
+		t.Fatalf("提前小时数应限制为 %d，实际 %d", maxShortLivedRenewHours, s.ShortLivedRenewHours)
+	}
+	s = Settings{ShortLivedRenewHours: 48}
+	s.normalize()
+	if s.ShortLivedRenewHours != 48 {
+		t.Fatalf("合理的提前小时数不应改变: %d", s.ShortLivedRenewHours)
+	}
+}
+
+// TestHasCertificateEmptyName 校验空主机名不算有证书，即使存在可用于无 SNI 握手的 IP 证书
+func TestHasCertificateEmptyName(t *testing.T) {
+	m := newTestModule(t)
+	now := time.Now()
+	v4, v4k := selfSignedIP(t, []string{"8.8.8.8"}, now, now.Add(24*time.Hour))
+	m.cfg.Certs = []Cert{{Key: "v4", Enable: true, Source: SourceUpload, CertPEM: v4, KeyPEM: v4k}}
+	m.rebuildTLSLocked()
+	if m.HasCertificate("") {
+		t.Fatal("空主机名不应视为有证书")
+	}
+	if !m.HasCertificate("8.8.8.8") {
+		t.Fatal("IP 主机名应有证书")
+	}
+	if _, err := m.GetCertificate(&tls.ClientHelloInfo{}); err != nil {
+		t.Fatalf("无 SNI 握手仍应回退到 IP 证书: %v", err)
 	}
 }

@@ -121,6 +121,7 @@
   "profileHelp": "The ACME profile; you can also type another profile name the CA supports",
   "profileShortLivedHelp": "Valid for about 6 days and renewed automatically {hours} hours before expiry; Let's Encrypt issues IP address certificates only with this profile",
   "ipCertTip": "IP address certificates need the Let's Encrypt short-lived profile and HTTP-01 validation (the CA connects to port 80 of the IP)",
+  "ipCertTipCustom": "IP address certificates need HTTP-01 validation (the CA connects to port 80 of the IP)",
   "ipCertApply": "Set up automatically",
   "shortLivedTag": "Short-lived",
   "hoursLeft": "{hours} hours left",

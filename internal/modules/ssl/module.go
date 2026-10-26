@@ -607,6 +607,10 @@ func (m *Module) GetCertificate(hello *tls.ClientHelloInfo) (*tls.Certificate, e
 
 // HasCertificate 判断是否有覆盖该域名的证书。
 func (m *Module) HasCertificate(name string) bool {
+	// 空名（如不带 Host 的 HTTP/1.0 请求）不算有证书；无 SNI 的回退只用于 TLS 握手
+	if name == "" {
+		return false
+	}
 	_, err := m.GetCertificate(&tls.ClientHelloInfo{ServerName: name})
 	return err == nil
 }
