@@ -34,7 +34,7 @@ Request bodies use `Content-Type: application/json`, and errors are returned uni
 
 ### Scopes
 
-A permission has the form `<scope>:read` or `<scope>:write`, and write includes read. A scope is a module ID (such as `ddns`, `portforward`, `notify`, `backup`) or one of four built-in scopes:
+A permission has the form `<scope>:read` or `<scope>:write`, and write includes read. A scope is a module ID (such as `ddns`, `portforward`, `notify`, `backup`) or one of five built-in scopes:
 
 | Scope | Name | Available permissions | Endpoints |
 | --- | --- | --- | --- |
@@ -42,6 +42,7 @@ A permission has the form `<scope>:read` or `<scope>:write`, and write includes 
 | `logs` | System logs | `logs:read` | `/api/logs` |
 | `import` | Lucky config import | `import:write` | `/api/import/lucky` |
 | `fileusers` | File service shared users | `fileusers:read`, `fileusers:write` | `/api/fileusers` |
+| `metrics` | Global metrics (Prometheus) | `metrics:read` | `/api/metrics` |
 
 Wildcards:
 
@@ -56,6 +57,7 @@ The permission an endpoint needs is determined by its path and method:
 - A path `/api/<module>/...` needs a permission for the `<module>` scope: GET and HEAD require `read`, and other methods require `write`.
 - Module logs `GET /api/<module>/logs` are read-only, and clearing logs (DELETE) is a write operation.
 - The following GET endpoints return sensitive content or open an interactive channel, so they are treated as `write`: endpoints whose path contains a `ws` (WebSocket terminal), `exec`, `download`, `export`, `read`, `config` or `preview-archive` segment, for example certificate download, running commands in a container and reading files.
+- The legacy endpoints `PUT /api/webdav/shared-users`, `PUT /api/ftp/shared-users` and `PUT /api/smb/shared-users` all modify the single list of shared users used by the three services, so they require `webdav:write`, `ftp:write` and `smb:write` together; the newer `/api/fileusers` endpoint uses the `fileusers` scope.
 - `GET /api/session` and `GET /api/openapi.json` accept any valid token.
 
 ### Operations tokens cannot perform
@@ -64,7 +66,9 @@ The following endpoints accept login sessions only, and any token access returns
 
 - Account and two-factor authentication: `/api/account`
 - Token management: `/api/tokens`
+- Audit log and configuration history: `/api/audit`, `/api/history`
 - System settings, system token, restart, online upgrade: `/api/system/settings`, `/api/system/token`, `/api/system/restart`, `/api/system/upgrade`
+- Diagnostics bundle, self-check and onboarding: `/api/system/diagnostics`, `/api/system/selfcheck`, `/api/system/onboarding`
 - Configuration backup download and restore: `/api/system/backup`, `/api/system/restore`
 - Local backup file download: `/api/backup/local`
 - Web Terminal security settings: `/api/webterminal/security`

@@ -34,7 +34,7 @@ Le corps des requêtes utilise `Content-Type: application/json`, et les erreurs 
 
 ### Portée des permissions
 
-Le format d'une permission est `<domaine>:read` ou `<domaine>:write`, la permission d'écriture incluant la lecture. Le domaine est l'ID d'un module fonctionnel (p. ex. `ddns`, `portforward`, `notify`, `backup`) plus quatre domaines intégrés :
+Le format d'une permission est `<domaine>:read` ou `<domaine>:write`, la permission d'écriture incluant la lecture. Le domaine est l'ID d'un module fonctionnel (p. ex. `ddns`, `portforward`, `notify`, `backup`) plus cinq domaines intégrés :
 
 | Domaine | Nom | Permissions disponibles | API correspondantes |
 | --- | --- | --- | --- |
@@ -42,6 +42,7 @@ Le format d'une permission est `<domaine>:read` ou `<domaine>:write`, la permiss
 | `logs` | Journaux système | `logs:read` | `/api/logs` |
 | `import` | Import de configuration Lucky | `import:write` | `/api/import/lucky` |
 | `fileusers` | Utilisateurs partagés des services de fichiers | `fileusers:read`, `fileusers:write` | `/api/fileusers` |
+| `metrics` | Métriques globales (Prometheus) | `metrics:read` | `/api/metrics` |
 
 Notations génériques :
 
@@ -56,6 +57,7 @@ La permission requise par une API dépend du chemin et de la méthode :
 - Le chemin `/api/<module>/...` exige une permission du domaine `<module>` : GET et HEAD demandent `read`, les autres méthodes demandent `write`.
 - Les journaux d'un module `GET /api/<module>/logs` sont en lecture seule ; leur effacement (DELETE) est une opération d'écriture.
 - Les API GET suivantes renvoient du contenu sensible ou ouvrent un canal interactif, et sont traitées comme `write` : celles dont le chemin contient un segment `ws` (terminal WebSocket), `exec`, `download`, `export`, `read`, `config` ou `preview-archive`, par exemple le téléchargement de certificats, l'exécution de commandes dans un conteneur et la lecture de fichiers.
+- Les anciennes API `PUT /api/webdav/shared-users`, `PUT /api/ftp/shared-users` et `PUT /api/smb/shared-users` modifient la même liste d'utilisateurs partagés par les trois services : elles exigent à la fois `webdav:write`, `ftp:write` et `smb:write`. La nouvelle API `/api/fileusers` utilise le domaine `fileusers`.
 - `GET /api/session` et `GET /api/openapi.json` acceptent n'importe quel jeton valide.
 
 ### Opérations interdites aux jetons
@@ -64,7 +66,9 @@ Les API suivantes n'acceptent que les sessions de connexion ; tout accès par je
 
 - Compte et authentification à deux facteurs : `/api/account`
 - Gestion des jetons : `/api/tokens`
+- Journal d'audit et historique de configuration : `/api/audit`, `/api/history`
 - Paramètres système, jeton système, redémarrage, mise à niveau en ligne : `/api/system/settings`, `/api/system/token`, `/api/system/restart`, `/api/system/upgrade`
+- Paquet de diagnostic, autodiagnostic et configuration initiale : `/api/system/diagnostics`, `/api/system/selfcheck`, `/api/system/onboarding`
 - Téléchargement et restauration de la sauvegarde de configuration : `/api/system/backup`, `/api/system/restore`
 - Téléchargement des fichiers de sauvegarde locaux : `/api/backup/local`
 - Paramètres de sécurité du terminal Web : `/api/webterminal/security`

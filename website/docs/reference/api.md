@@ -34,7 +34,7 @@ curl -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/status
 
 ### 权限范围
 
-权限格式为 `<权限域>:read` 或 `<权限域>:write`，写权限包含读权限。权限域是功能模块的 ID（如 `ddns`、`portforward`、`notify`、`backup`）加上四个内置域：
+权限格式为 `<权限域>:read` 或 `<权限域>:write`，写权限包含读权限。权限域是功能模块的 ID（如 `ddns`、`portforward`、`notify`、`backup`）加上五个内置域：
 
 | 权限域 | 名称 | 可用权限 | 对应接口 |
 | --- | --- | --- | --- |
@@ -42,6 +42,7 @@ curl -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/status
 | `logs` | 系统日志 | `logs:read` | `/api/logs` |
 | `import` | Lucky 配置导入 | `import:write` | `/api/import/lucky` |
 | `fileusers` | 文件服务共享用户 | `fileusers:read`、`fileusers:write` | `/api/fileusers` |
+| `metrics` | 全局指标（Prometheus） | `metrics:read` | `/api/metrics` |
 
 通配写法：
 
@@ -56,6 +57,7 @@ curl -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/status
 - 路径 `/api/<模块>/...` 需要 `<模块>` 域的权限，GET 与 HEAD 要求 `read`，其余方法要求 `write`。
 - 模块日志 `GET /api/<模块>/logs` 属于只读，清空日志（DELETE）属于写操作。
 - 下列 GET 接口会返回敏感内容或建立交互通道，按 `write` 处理：路径中含有 `ws`（WebSocket 终端）、`exec`、`download`、`export`、`read`、`config`、`preview-archive` 段的接口，例如证书下载、容器内执行命令与文件读取。
+- 旧接口 `PUT /api/webdav/shared-users`、`PUT /api/ftp/shared-users`、`PUT /api/smb/shared-users` 修改的是三个服务共用的同一份共享用户，需要同时具备 `webdav:write`、`ftp:write`、`smb:write`；新接口 `/api/fileusers` 使用 `fileusers` 域的权限。
 - `GET /api/session` 与 `GET /api/openapi.json` 接受任意有效令牌。
 
 ### 令牌禁止的操作
@@ -64,7 +66,9 @@ curl -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/status
 
 - 账号与两步验证：`/api/account`
 - 令牌管理：`/api/tokens`
+- 审计日志与配置历史：`/api/audit`、`/api/history`
 - 系统设置、系统令牌、重启、在线升级：`/api/system/settings`、`/api/system/token`、`/api/system/restart`、`/api/system/upgrade`
+- 诊断包、自检与初始引导：`/api/system/diagnostics`、`/api/system/selfcheck`、`/api/system/onboarding`
 - 配置备份下载与恢复：`/api/system/backup`、`/api/system/restore`
 - 本地备份文件下载：`/api/backup/local`
 - Web 终端安全设置：`/api/webterminal/security`

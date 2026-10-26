@@ -34,7 +34,7 @@ curl -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/status
 
 ### 權限範圍
 
-權限格式為 `<權限域>:read` 或 `<權限域>:write`，寫入權限包含讀取權限。權限域是功能模組的 ID（如 `ddns`、`portforward`、`notify`、`backup`）加上四個內建域：
+權限格式為 `<權限域>:read` 或 `<權限域>:write`，寫入權限包含讀取權限。權限域是功能模組的 ID（如 `ddns`、`portforward`、`notify`、`backup`）加上五個內建域：
 
 | 權限域 | 名稱 | 可用權限 | 對應介面 |
 | --- | --- | --- | --- |
@@ -42,6 +42,7 @@ curl -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/status
 | `logs` | 系統日誌 | `logs:read` | `/api/logs` |
 | `import` | Lucky 設定匯入 | `import:write` | `/api/import/lucky` |
 | `fileusers` | 檔案服務共用使用者 | `fileusers:read`、`fileusers:write` | `/api/fileusers` |
+| `metrics` | 全域指標（Prometheus） | `metrics:read` | `/api/metrics` |
 
 萬用寫法：
 
@@ -56,6 +57,7 @@ curl -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/status
 - 路徑 `/api/<模組>/...` 需要 `<模組>` 域的權限，GET 與 HEAD 要求 `read`，其餘方法要求 `write`。
 - 模組日誌 `GET /api/<模組>/logs` 屬於唯讀，清空日誌（DELETE）屬於寫入操作。
 - 下列 GET 介面會回傳敏感內容或建立互動通道，按 `write` 處理：路徑中含有 `ws`（WebSocket 終端機）、`exec`、`download`、`export`、`read`、`config`、`preview-archive` 段的介面，例如憑證下載、容器內執行命令與檔案讀取。
+- 舊介面 `PUT /api/webdav/shared-users`、`PUT /api/ftp/shared-users`、`PUT /api/smb/shared-users` 修改的是三個服務共用的同一份共用使用者，需要同時具備 `webdav:write`、`ftp:write`、`smb:write`；新介面 `/api/fileusers` 使用 `fileusers` 域的權限。
 - `GET /api/session` 與 `GET /api/openapi.json` 接受任意有效權杖。
 
 ### 權杖禁止的操作
@@ -64,7 +66,9 @@ curl -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/status
 
 - 帳號與兩步驟驗證：`/api/account`
 - 權杖管理：`/api/tokens`
+- 稽核日誌與設定歷史：`/api/audit`、`/api/history`
 - 系統設定、系統權杖、重新啟動、線上升級：`/api/system/settings`、`/api/system/token`、`/api/system/restart`、`/api/system/upgrade`
+- 診斷包、自我檢查與初始引導：`/api/system/diagnostics`、`/api/system/selfcheck`、`/api/system/onboarding`
 - 設定備份下載與還原：`/api/system/backup`、`/api/system/restore`
 - 本機備份檔案下載：`/api/backup/local`
 - Web 終端機安全設定：`/api/webterminal/security`

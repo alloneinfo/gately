@@ -34,7 +34,7 @@ Los cuerpos de las peticiones usan `Content-Type: application/json`, y los error
 
 ### Alcances
 
-Un permiso tiene la forma `<alcance>:read` o `<alcance>:write`, y write incluye read. Un alcance es el ID de un módulo (como `ddns`, `portforward`, `notify`, `backup`) o uno de los cuatro alcances integrados:
+Un permiso tiene la forma `<alcance>:read` o `<alcance>:write`, y write incluye read. Un alcance es el ID de un módulo (como `ddns`, `portforward`, `notify`, `backup`) o uno de los cinco alcances integrados:
 
 | Alcance | Nombre | Permisos disponibles | Endpoints |
 | --- | --- | --- | --- |
@@ -42,6 +42,7 @@ Un permiso tiene la forma `<alcance>:read` o `<alcance>:write`, y write incluye 
 | `logs` | Registros del sistema | `logs:read` | `/api/logs` |
 | `import` | Importación de configuración de Lucky | `import:write` | `/api/import/lucky` |
 | `fileusers` | Usuarios compartidos de los servicios de archivos | `fileusers:read`, `fileusers:write` | `/api/fileusers` |
+| `metrics` | Métricas globales (Prometheus) | `metrics:read` | `/api/metrics` |
 
 Comodines:
 
@@ -56,6 +57,7 @@ El permiso que necesita un endpoint lo determinan su ruta y su método:
 - Una ruta `/api/<módulo>/...` necesita un permiso del alcance `<módulo>`: GET y HEAD requieren `read`, y el resto de métodos requieren `write`.
 - Los registros de módulo `GET /api/<módulo>/logs` son de solo lectura, y borrar los registros (DELETE) es una operación de escritura.
 - Los siguientes endpoints GET devuelven contenido sensible o abren un canal interactivo, por lo que se tratan como `write`: los endpoints cuya ruta contiene un segmento `ws` (terminal WebSocket), `exec`, `download`, `export`, `read`, `config` o `preview-archive`, por ejemplo la descarga de certificados, la ejecución de comandos en un contenedor y la lectura de archivos.
+- Los endpoints antiguos `PUT /api/webdav/shared-users`, `PUT /api/ftp/shared-users` y `PUT /api/smb/shared-users` modifican la misma lista de usuarios compartidos por los tres servicios, por lo que requieren `webdav:write`, `ftp:write` y `smb:write` a la vez; el endpoint nuevo `/api/fileusers` usa el alcance `fileusers`.
 - `GET /api/session` y `GET /api/openapi.json` aceptan cualquier token válido.
 
 ### Operaciones que los tokens no pueden realizar
@@ -64,7 +66,9 @@ Los siguientes endpoints solo aceptan sesiones de inicio de sesión, y cualquier
 
 - Cuenta y autenticación de dos factores: `/api/account`
 - Gestión de tokens: `/api/tokens`
+- Registro de auditoría e historial de configuración: `/api/audit`, `/api/history`
 - Ajustes del sistema, token del sistema, reinicio, actualización en línea: `/api/system/settings`, `/api/system/token`, `/api/system/restart`, `/api/system/upgrade`
+- Paquete de diagnóstico, autocomprobación y configuración inicial: `/api/system/diagnostics`, `/api/system/selfcheck`, `/api/system/onboarding`
 - Descarga y restauración de la copia de seguridad de la configuración: `/api/system/backup`, `/api/system/restore`
 - Descarga de archivos de copia locales: `/api/backup/local`
 - Ajustes de seguridad del terminal web: `/api/webterminal/security`

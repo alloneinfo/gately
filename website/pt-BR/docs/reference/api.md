@@ -34,7 +34,7 @@ Os corpos das requisições usam `Content-Type: application/json`, e os erros s�
 
 ### Escopos
 
-Uma permissão tem o formato `<scope>:read` ou `<scope>:write`, e write inclui read. Um escopo é o ID de um módulo (como `ddns`, `portforward`, `notify`, `backup`) ou um dos quatro escopos embutidos:
+Uma permissão tem o formato `<scope>:read` ou `<scope>:write`, e write inclui read. Um escopo é o ID de um módulo (como `ddns`, `portforward`, `notify`, `backup`) ou um dos cinco escopos embutidos:
 
 | Escopo | Nome | Permissões disponíveis | Endpoints |
 | --- | --- | --- | --- |
@@ -42,6 +42,7 @@ Uma permissão tem o formato `<scope>:read` ou `<scope>:write`, e write inclui r
 | `logs` | Logs do sistema | `logs:read` | `/api/logs` |
 | `import` | Importação de configuração do Lucky | `import:write` | `/api/import/lucky` |
 | `fileusers` | Usuários compartilhados dos serviços de arquivos | `fileusers:read`, `fileusers:write` | `/api/fileusers` |
+| `metrics` | Métricas globais (Prometheus) | `metrics:read` | `/api/metrics` |
 
 Curingas:
 
@@ -56,6 +57,7 @@ A permissão necessária para um endpoint é determinada pelo seu caminho e mét
 - Um caminho `/api/<module>/...` exige uma permissão do escopo `<module>`: GET e HEAD exigem `read`, e os demais métodos exigem `write`.
 - Os logs dos módulos `GET /api/<module>/logs` são somente leitura, e limpar os logs (DELETE) é uma operação de escrita.
 - Os endpoints GET a seguir retornam conteúdo sensível ou abrem um canal interativo, por isso são tratados como `write`: endpoints cujo caminho contém um segmento `ws` (terminal WebSocket), `exec`, `download`, `export`, `read`, `config` ou `preview-archive`, por exemplo o download de certificados, a execução de comandos em um contêiner e a leitura de arquivos.
+- Os endpoints antigos `PUT /api/webdav/shared-users`, `PUT /api/ftp/shared-users` e `PUT /api/smb/shared-users` alteram a mesma lista de usuários compartilhados pelos três serviços, por isso exigem `webdav:write`, `ftp:write` e `smb:write` ao mesmo tempo; o endpoint novo `/api/fileusers` usa o escopo `fileusers`.
 - `GET /api/session` e `GET /api/openapi.json` aceitam qualquer token válido.
 
 ### Operações que os tokens não podem executar
@@ -64,7 +66,9 @@ Os endpoints a seguir aceitam apenas sessões com login, e qualquer acesso com t
 
 - Conta e autenticação em dois fatores: `/api/account`
 - Gerenciamento de tokens: `/api/tokens`
+- Log de auditoria e histórico de configuração: `/api/audit`, `/api/history`
 - Configurações do sistema, token do sistema, reinício, atualização online: `/api/system/settings`, `/api/system/token`, `/api/system/restart`, `/api/system/upgrade`
+- Pacote de diagnóstico, autoverificação e configuração inicial: `/api/system/diagnostics`, `/api/system/selfcheck`, `/api/system/onboarding`
 - Download e restauração do backup da configuração: `/api/system/backup`, `/api/system/restore`
 - Download de arquivos de backup locais: `/api/backup/local`
 - Configurações de segurança do Terminal Web: `/api/webterminal/security`

@@ -34,7 +34,7 @@ curl -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/status
 
 ### Области прав
 
-Права записываются как `<область>:read` или `<область>:write`, право записи включает право чтения. Область — это ID функционального модуля (например, `ddns`, `portforward`, `notify`, `backup`) плюс четыре встроенные области:
+Права записываются как `<область>:read` или `<область>:write`, право записи включает право чтения. Область — это ID функционального модуля (например, `ddns`, `portforward`, `notify`, `backup`) плюс пять встроенных областей:
 
 | Область | Название | Доступные права | Интерфейсы |
 | --- | --- | --- | --- |
@@ -42,6 +42,7 @@ curl -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/status
 | `logs` | Системные журналы | `logs:read` | `/api/logs` |
 | `import` | Импорт конфигурации Lucky | `import:write` | `/api/import/lucky` |
 | `fileusers` | Общие пользователи файловых служб | `fileusers:read`, `fileusers:write` | `/api/fileusers` |
+| `metrics` | Глобальные метрики (Prometheus) | `metrics:read` | `/api/metrics` |
 
 Шаблоны:
 
@@ -56,6 +57,7 @@ curl -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/status
 - Путь `/api/<модуль>/...` требует прав области `<модуль>`: для GET и HEAD нужно `read`, для остальных методов `write`.
 - Журнал модуля `GET /api/<модуль>/logs` относится к чтению, а очистка журнала (DELETE) — к записи.
 - Следующие GET-интерфейсы возвращают чувствительные данные или открывают интерактивный канал, поэтому требуют `write`: пути, содержащие сегменты `ws` (WebSocket-терминал), `exec`, `download`, `export`, `read`, `config`, `preview-archive`, например скачивание сертификатов, выполнение команд в контейнере и чтение файлов.
+- Старые интерфейсы `PUT /api/webdav/shared-users`, `PUT /api/ftp/shared-users` и `PUT /api/smb/shared-users` меняют единый список общих пользователей трёх служб, поэтому требуют одновременно `webdav:write`, `ftp:write` и `smb:write`; новый интерфейс `/api/fileusers` использует область `fileusers`.
 - `GET /api/session` и `GET /api/openapi.json` принимают любой действующий токен.
 
 ### Операции, запрещённые для токенов
@@ -64,7 +66,9 @@ curl -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/status
 
 - Аккаунт и двухфакторная аутентификация: `/api/account`
 - Управление токенами: `/api/tokens`
+- Журнал аудита и история конфигурации: `/api/audit`, `/api/history`
 - Системные настройки, системный токен, перезапуск, онлайн-обновление: `/api/system/settings`, `/api/system/token`, `/api/system/restart`, `/api/system/upgrade`
+- Диагностический пакет, самопроверка и первоначальная настройка: `/api/system/diagnostics`, `/api/system/selfcheck`, `/api/system/onboarding`
 - Скачивание и восстановление резервной копии конфигурации: `/api/system/backup`, `/api/system/restore`
 - Скачивание локальных файлов резервных копий: `/api/backup/local`
 - Настройки безопасности веб-терминала: `/api/webterminal/security`

@@ -34,7 +34,7 @@ Anfragekörper verwenden `Content-Type: application/json`, und Fehler werden ein
 
 ### Scopes
 
-Eine Berechtigung hat die Form `<scope>:read` oder `<scope>:write`, wobei write read einschließt. Ein Scope ist eine Modul-ID (etwa `ddns`, `portforward`, `notify`, `backup`) oder einer von vier eingebauten Scopes:
+Eine Berechtigung hat die Form `<scope>:read` oder `<scope>:write`, wobei write read einschließt. Ein Scope ist eine Modul-ID (etwa `ddns`, `portforward`, `notify`, `backup`) oder einer von fünf eingebauten Scopes:
 
 | Scope | Name | Verfügbare Berechtigungen | Endpunkte |
 | --- | --- | --- | --- |
@@ -42,6 +42,7 @@ Eine Berechtigung hat die Form `<scope>:read` oder `<scope>:write`, wobei write 
 | `logs` | Systemprotokolle | `logs:read` | `/api/logs` |
 | `import` | Import der Lucky-Konfiguration | `import:write` | `/api/import/lucky` |
 | `fileusers` | Gemeinsame Benutzer der Dateidienste | `fileusers:read`, `fileusers:write` | `/api/fileusers` |
+| `metrics` | Globale Metriken (Prometheus) | `metrics:read` | `/api/metrics` |
 
 Platzhalter:
 
@@ -56,6 +57,7 @@ Welche Berechtigung ein Endpunkt braucht, bestimmen sein Pfad und seine Methode:
 - Ein Pfad `/api/<module>/...` braucht eine Berechtigung für den Scope `<module>`: GET und HEAD erfordern `read`, alle anderen Methoden `write`.
 - Modul-Logs `GET /api/<module>/logs` sind schreibgeschützt, das Leeren der Logs (DELETE) ist ein Schreibvorgang.
 - Die folgenden GET-Endpunkte liefern sensible Inhalte oder öffnen einen interaktiven Kanal und werden daher als `write` behandelt: Endpunkte, deren Pfad ein Segment `ws` (WebSocket-Terminal), `exec`, `download`, `export`, `read`, `config` oder `preview-archive` enthält, zum Beispiel Zertifikats-Download, das Ausführen von Befehlen in einem Container und das Lesen von Dateien.
+- Die älteren Endpunkte `PUT /api/webdav/shared-users`, `PUT /api/ftp/shared-users` und `PUT /api/smb/shared-users` ändern dieselbe gemeinsame Benutzerliste der drei Dienste und erfordern daher `webdav:write`, `ftp:write` und `smb:write` zugleich; der neuere Endpunkt `/api/fileusers` verwendet den Scope `fileusers`.
 - `GET /api/session` und `GET /api/openapi.json` akzeptieren jedes gültige Token.
 
 ### Vorgänge, die Token nicht ausführen können
@@ -64,7 +66,9 @@ Die folgenden Endpunkte akzeptieren nur Anmeldesitzungen, und jeder Zugriff mit 
 
 - Konto und Zwei-Faktor-Authentifizierung: `/api/account`
 - Token-Verwaltung: `/api/tokens`
+- Audit-Log und Konfigurationsverlauf: `/api/audit`, `/api/history`
 - Systemeinstellungen, System-Token, Neustart, Online-Upgrade: `/api/system/settings`, `/api/system/token`, `/api/system/restart`, `/api/system/upgrade`
+- Diagnosepaket, Selbsttest und Ersteinrichtung: `/api/system/diagnostics`, `/api/system/selfcheck`, `/api/system/onboarding`
 - Download und Wiederherstellung der Konfigurationssicherung: `/api/system/backup`, `/api/system/restore`
 - Download lokaler Sicherungsdateien: `/api/backup/local`
 - Sicherheitseinstellungen des Web-Terminals: `/api/webterminal/security`

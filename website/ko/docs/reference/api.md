@@ -34,7 +34,7 @@ curl -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/status
 
 ### 권한 범위
 
-권한 형식은 `<권한 도메인>:read` 또는 `<권한 도메인>:write`이며 쓰기 권한은 읽기 권한을 포함합니다. 권한 도메인은 기능 모듈의 ID(`ddns`, `portforward`, `notify`, `backup` 등)에 내장 도메인 네 개를 더한 것입니다.
+권한 형식은 `<권한 도메인>:read` 또는 `<권한 도메인>:write`이며 쓰기 권한은 읽기 권한을 포함합니다. 권한 도메인은 기능 모듈의 ID(`ddns`, `portforward`, `notify`, `backup` 등)에 내장 도메인 다섯 개를 더한 것입니다.
 
 | 권한 도메인 | 이름 | 사용 가능한 권한 | 해당 엔드포인트 |
 | --- | --- | --- | --- |
@@ -42,6 +42,7 @@ curl -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/status
 | `logs` | 시스템 로그 | `logs:read` | `/api/logs` |
 | `import` | Lucky 설정 가져오기 | `import:write` | `/api/import/lucky` |
 | `fileusers` | 파일 서비스 공유 사용자 | `fileusers:read`, `fileusers:write` | `/api/fileusers` |
+| `metrics` | 전역 지표(Prometheus) | `metrics:read` | `/api/metrics` |
 
 와일드카드 표기:
 
@@ -56,6 +57,7 @@ curl -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/status
 - 경로 `/api/<모듈>/...`에는 `<모듈>` 도메인의 권한이 필요하며 GET과 HEAD에는 `read`, 그 외 메서드에는 `write`가 필요합니다.
 - 모듈 로그 `GET /api/<모듈>/logs`는 읽기 전용이고 로그 비우기(DELETE)는 쓰기 작업입니다.
 - 다음 GET 엔드포인트는 민감한 내용을 반환하거나 상호작용 채널을 만들기 때문에 `write`로 처리합니다. 경로에 `ws`(WebSocket 터미널), `exec`, `download`, `export`, `read`, `config`, `preview-archive` 세그먼트가 포함된 엔드포인트이며 예를 들어 인증서 다운로드, 컨테이너 안 명령 실행과 파일 읽기가 있습니다.
+- 기존 엔드포인트 `PUT /api/webdav/shared-users`, `PUT /api/ftp/shared-users`, `PUT /api/smb/shared-users`는 세 서비스가 함께 쓰는 하나의 공유 사용자 목록을 수정하므로 `webdav:write`, `ftp:write`, `smb:write`가 모두 필요합니다. 새 엔드포인트 `/api/fileusers`는 `fileusers` 도메인의 권한을 사용합니다.
 - `GET /api/session`과 `GET /api/openapi.json`은 유효한 토큰이면 무엇이든 받아들입니다.
 
 ### 토큰으로 할 수 없는 작업
@@ -64,7 +66,9 @@ curl -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/status
 
 - 계정과 2단계 인증: `/api/account`
 - 토큰 관리: `/api/tokens`
+- 감사 로그와 설정 기록: `/api/audit`, `/api/history`
 - 시스템 설정, 시스템 토큰, 재시작, 온라인 업그레이드: `/api/system/settings`, `/api/system/token`, `/api/system/restart`, `/api/system/upgrade`
+- 진단 패키지, 자체 점검, 초기 설정: `/api/system/diagnostics`, `/api/system/selfcheck`, `/api/system/onboarding`
 - 설정 백업 다운로드와 복원: `/api/system/backup`, `/api/system/restore`
 - 로컬 백업 파일 다운로드: `/api/backup/local`
 - 웹 터미널 보안 설정: `/api/webterminal/security`

@@ -34,7 +34,7 @@ curl -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/status
 
 ### 権限のスコープ
 
-権限の形式は `<スコープ>:read` または `<スコープ>:write` で、write には read が含まれます。スコープは機能モジュールの ID（`ddns`、`portforward`、`notify`、`backup` など）に、組み込みの 4 つのスコープを加えたものです。
+権限の形式は `<スコープ>:read` または `<スコープ>:write` で、write には read が含まれます。スコープは機能モジュールの ID（`ddns`、`portforward`、`notify`、`backup` など）に、組み込みの 5 つのスコープを加えたものです。
 
 | スコープ | 名前 | 利用できる権限 | 対応する API |
 | --- | --- | --- | --- |
@@ -42,6 +42,7 @@ curl -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/status
 | `logs` | システムログ | `logs:read` | `/api/logs` |
 | `import` | Lucky 設定のインポート | `import:write` | `/api/import/lucky` |
 | `fileusers` | ファイルサービスの共有ユーザー | `fileusers:read`、`fileusers:write` | `/api/fileusers` |
+| `metrics` | グローバルメトリクス（Prometheus） | `metrics:read` | `/api/metrics` |
 
 ワイルドカードの書き方：
 
@@ -56,6 +57,7 @@ API に必要な権限は、パスとメソッドで決まります。
 - パス `/api/<モジュール>/...` には `<モジュール>` スコープの権限が必要で、GET と HEAD は `read`、それ以外のメソッドは `write` が必要です。
 - モジュールログの `GET /api/<モジュール>/logs` は読み取り専用で、ログの消去（DELETE）は書き込み操作です。
 - 次の GET API は、機密性の高い内容を返すか、対話的なチャネルを確立するため、`write` として扱われます。パスに `ws`（WebSocket ターミナル）、`exec`、`download`、`export`、`read`、`config`、`preview-archive` のセグメントを含む API で、たとえば証明書のダウンロード、コンテナ内でのコマンド実行、ファイルの読み取りが該当します。
+- 旧 API の `PUT /api/webdav/shared-users`、`PUT /api/ftp/shared-users`、`PUT /api/smb/shared-users` は 3 つのサービスで共通の共有ユーザーを変更するため、`webdav:write`、`ftp:write`、`smb:write` をすべて必要とします。新しい `/api/fileusers` は `fileusers` スコープの権限を使います。
 - `GET /api/session` と `GET /api/openapi.json` は、有効なトークンであれば何でも受け付けます。
 
 ### トークンでは許可されない操作
@@ -64,7 +66,9 @@ API に必要な権限は、パスとメソッドで決まります。
 
 - アカウントと 2 段階認証：`/api/account`
 - トークン管理：`/api/tokens`
+- 監査ログと設定履歴：`/api/audit`、`/api/history`
 - システム設定、システムトークン、再起動、オンラインアップグレード：`/api/system/settings`、`/api/system/token`、`/api/system/restart`、`/api/system/upgrade`
+- 診断パッケージ、セルフチェック、初期セットアップ：`/api/system/diagnostics`、`/api/system/selfcheck`、`/api/system/onboarding`
 - 設定バックアップのダウンロードと復元：`/api/system/backup`、`/api/system/restore`
 - ローカルのバックアップファイルのダウンロード：`/api/backup/local`
 - Web ターミナルのセキュリティ設定：`/api/webterminal/security`
