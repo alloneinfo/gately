@@ -13,5 +13,6 @@
   "qrHelp": "Scannez avec une application d'authentification (Google Authenticator, 1Password…) ou saisissez la clé. Effectif après enregistrement ; régénérer invalide l'ancienne clé",
   "emailPlaceholder": "E-mail (facultatif)",
   "displayNamePlaceholder": "Nom affiché (facultatif)",
-  "groupsPlaceholder": "Groupes (facultatif, Entrée pour ajouter)"
+  "groupsPlaceholder": "Groupes (facultatif, Entrée pour ajouter)",
+  "totpShow": "Afficher le QR code"
 }

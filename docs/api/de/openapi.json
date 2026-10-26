@@ -3739,6 +3739,67 @@
         "x-token-allowed": true
       }
     },
+    "/api/backup/secrets": {
+      "get": {
+        "description": "Erforderliche Berechtigung: `backup:write`.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Erfolgreich"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Anfrageparameter fehlerhaft"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token ungültig, abgelaufen oder nicht angemeldet"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Dem Token fehlt die erforderliche Berechtigung"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Geheimnisse im Klartext anzeigen",
+        "tags": [
+          "Konfigurations-Backup"
+        ],
+        "x-required-scope": "backup:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/backup/settings": {
       "get": {
         "description": "Erforderliche Berechtigung: `backup:read`.",
@@ -5394,6 +5455,77 @@
         "x-token-allowed": true
       }
     },
+    "/api/cloudflared/tunnels/{key}/secrets": {
+      "get": {
+        "description": "Erforderliche Berechtigung: `cloudflared:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Erfolgreich"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Anfrageparameter fehlerhaft"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token ungültig, abgelaufen oder nicht angemeldet"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Dem Token fehlt die erforderliche Berechtigung"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Geheimnisse im Klartext anzeigen",
+        "tags": [
+          "Cloudflare-Tunnel"
+        ],
+        "x-required-scope": "cloudflared:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/cron/logs": {
       "delete": {
         "description": "Erforderliche Berechtigung: `cron:write`.",
@@ -6994,6 +7126,77 @@
           }
         ],
         "summary": "DDNS-Aufgaben aktivieren oder deaktivieren",
+        "tags": [
+          "Dynamisches DNS"
+        ],
+        "x-required-scope": "ddns:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/ddns/tasks/{key}/secrets": {
+      "get": {
+        "description": "Erforderliche Berechtigung: `ddns:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Erfolgreich"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Anfrageparameter fehlerhaft"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token ungültig, abgelaufen oder nicht angemeldet"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Dem Token fehlt die erforderliche Berechtigung"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Geheimnisse im Klartext anzeigen",
         "tags": [
           "Dynamisches DNS"
         ],
@@ -10537,6 +10740,67 @@
         "x-token-allowed": true
       }
     },
+    "/api/docker/settings/secrets": {
+      "get": {
+        "description": "Erforderliche Berechtigung: `docker:write`.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Erfolgreich"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Anfrageparameter fehlerhaft"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token ungültig, abgelaufen oder nicht angemeldet"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Dem Token fehlt die erforderliche Berechtigung"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Registry-Passwörter im Klartext anzeigen (Schlüssel registry:\u003cRegistry-Adresse\u003e)",
+        "tags": [
+          "Docker-Verwaltung"
+        ],
+        "x-required-scope": "docker:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/docker/tasks": {
       "delete": {
         "description": "Erforderliche Berechtigung: `docker:write`.",
@@ -11722,6 +11986,77 @@
         "x-token-allowed": true
       }
     },
+    "/api/filebrowser/instances/{key}/secrets": {
+      "get": {
+        "description": "Erforderliche Berechtigung: `filebrowser:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Erfolgreich"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Anfrageparameter fehlerhaft"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token ungültig, abgelaufen oder nicht angemeldet"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Dem Token fehlt die erforderliche Berechtigung"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Geheimnisse im Klartext anzeigen",
+        "tags": [
+          "File Browser"
+        ],
+        "x-required-scope": "filebrowser:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/filebrowser/logs": {
       "delete": {
         "description": "Erforderliche Berechtigung: `filebrowser:write`.",
@@ -12174,6 +12509,67 @@
           }
         ],
         "summary": "Gemeinsame Benutzer der Dateidienste speichern",
+        "tags": [
+          "Gemeinsame Benutzer der Dateidienste"
+        ],
+        "x-required-scope": "fileusers:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/fileusers/secrets": {
+      "get": {
+        "description": "Erforderliche Berechtigung: `fileusers:write`.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Erfolgreich"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Anfrageparameter fehlerhaft"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token ungültig, abgelaufen oder nicht angemeldet"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Dem Token fehlt die erforderliche Berechtigung"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Passwörter der gemeinsamen Benutzer im Klartext anzeigen",
         "tags": [
           "Gemeinsame Benutzer der Dateidienste"
         ],
@@ -13670,6 +14066,67 @@
           }
         ],
         "summary": "FTP-Einstellungen speichern",
+        "tags": [
+          "FTP-Dienst"
+        ],
+        "x-required-scope": "ftp:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/ftp/settings/secrets": {
+      "get": {
+        "description": "Erforderliche Berechtigung: `ftp:write`.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Erfolgreich"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Anfrageparameter fehlerhaft"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token ungültig, abgelaufen oder nicht angemeldet"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Dem Token fehlt die erforderliche Berechtigung"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Passwörter der lokalen Benutzer im Klartext anzeigen",
         "tags": [
           "FTP-Dienst"
         ],
@@ -16353,6 +16810,77 @@
         "x-token-allowed": true
       }
     },
+    "/api/notify/channels/{key}/secrets": {
+      "get": {
+        "description": "Erforderliche Berechtigung: `notify:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Erfolgreich"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Anfrageparameter fehlerhaft"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token ungültig, abgelaufen oder nicht angemeldet"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Dem Token fehlt die erforderliche Berechtigung"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Geheimnisse im Klartext anzeigen",
+        "tags": [
+          "Benachrichtigungszentrale"
+        ],
+        "x-required-scope": "notify:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/notify/channels/{key}/test": {
       "post": {
         "description": "Erforderliche Berechtigung: `notify:write`.",
@@ -18190,6 +18718,67 @@
         "x-token-allowed": true
       }
     },
+    "/api/smb/settings/secrets": {
+      "get": {
+        "description": "Erforderliche Berechtigung: `smb:write`.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Erfolgreich"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Anfrageparameter fehlerhaft"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token ungültig, abgelaufen oder nicht angemeldet"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Dem Token fehlt die erforderliche Berechtigung"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Passwörter der lokalen Benutzer im Klartext anzeigen",
+        "tags": [
+          "SMB-Dienst"
+        ],
+        "x-required-scope": "smb:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/smb/shared-users": {
       "get": {
         "description": "Veraltet, stattdessen `GET /api/fileusers` verwenden; dieser Endpunkt bleibt aus Kompatibilitätsgründen erhalten. Gibt die von WebDAV, FTP und SMB gemeinsam genutzten Benutzer der Dateidienste zurück, Passwörter maskiert. Besteht fileusers.json die Prüfung nicht, wird `error` zurückgegeben und kein gemeinsamer Benutzer kann sich anmelden, bis eine gültige Liste gespeichert wird. `issues` listet gemeinsame Benutzer, die für SMB nicht nutzbar sind, mit Grund: `name` (der Name enthält für SMB unzulässige Zeichen), `bcrypt` (das Passwort ist ein bcrypt-Hash), `share` (ein Verzeichnisname ist als Freigabename ungültig oder doppelt).\n\nErforderliche Berechtigung: `smb:read`.",
@@ -18867,6 +19456,77 @@
           }
         ],
         "summary": "Zertifikat sofort ausstellen oder erneuern",
+        "tags": [
+          "SSL-Zertifikate"
+        ],
+        "x-required-scope": "ssl:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/ssl/certs/{key}/secrets": {
+      "get": {
+        "description": "Erforderliche Berechtigung: `ssl:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Erfolgreich"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Anfrageparameter fehlerhaft"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token ungültig, abgelaufen oder nicht angemeldet"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Dem Token fehlt die erforderliche Berechtigung"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Geheimnisse im Klartext anzeigen",
         "tags": [
           "SSL-Zertifikate"
         ],
@@ -20292,6 +20952,77 @@
         "x-token-allowed": true
       }
     },
+    "/api/storage/mounts/{key}/secrets": {
+      "get": {
+        "description": "Erforderliche Berechtigung: `storage:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Erfolgreich"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Anfrageparameter fehlerhaft"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token ungültig, abgelaufen oder nicht angemeldet"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Dem Token fehlt die erforderliche Berechtigung"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Geheimnisse im Klartext anzeigen",
+        "tags": [
+          "Speicher-Einbindungen"
+        ],
+        "x-required-scope": "storage:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/stun/logs": {
       "delete": {
         "description": "Erforderliche Berechtigung: `stun:write`.",
@@ -21567,6 +22298,62 @@
         "x-token-allowed": false
       }
     },
+    "/api/system/settings/secrets": {
+      "get": {
+        "description": "**Nur für Anmeldesitzungen verfügbar; API-Tokens können auf diesen Endpunkt nicht zugreifen.**",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Erfolgreich"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Anfrageparameter fehlerhaft"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token ungültig, abgelaufen oder nicht angemeldet"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Dem Token fehlt die erforderliche Berechtigung"
+          }
+        },
+        "summary": "Client Secrets der Drittanbieter-Anmeldung im Klartext anzeigen",
+        "tags": [
+          "System"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
+      }
+    },
     "/api/system/update": {
       "get": {
         "description": "Verwendet für den Zugriff auf GitHub den Proxy aus der globalen Einstellung `updateProxy`. `selfUpgrade.supported` gibt an, ob diese Installation online aktualisiert werden kann; andernfalls ist `reason` `os`, `docker`, `fnos`, `opkg`, `apk` oder `readonly`.\n\nErforderliche Berechtigung: `status:read`.",
@@ -22417,6 +23204,67 @@
           }
         ],
         "summary": "Tailscale neu starten",
+        "tags": [
+          "Tailscale-Netzwerk"
+        ],
+        "x-required-scope": "tailscale:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/tailscale/secrets": {
+      "get": {
+        "description": "Erforderliche Berechtigung: `tailscale:write`.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Erfolgreich"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Anfrageparameter fehlerhaft"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token ungültig, abgelaufen oder nicht angemeldet"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Dem Token fehlt die erforderliche Berechtigung"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Geheimnisse im Klartext anzeigen",
         "tags": [
           "Tailscale-Netzwerk"
         ],
@@ -23890,6 +24738,67 @@
           }
         ],
         "summary": "WebDAV-Einstellungen speichern",
+        "tags": [
+          "WebDAV-Dienst"
+        ],
+        "x-required-scope": "webdav:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/webdav/settings/secrets": {
+      "get": {
+        "description": "Erforderliche Berechtigung: `webdav:write`.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Erfolgreich"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Anfrageparameter fehlerhaft"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token ungültig, abgelaufen oder nicht angemeldet"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Dem Token fehlt die erforderliche Berechtigung"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Passwörter der lokalen Benutzer im Klartext anzeigen",
         "tags": [
           "WebDAV-Dienst"
         ],
@@ -25677,6 +26586,128 @@
         "x-token-allowed": true
       }
     },
+    "/api/webservice/settings/secrets/oauth": {
+      "get": {
+        "description": "Erforderliche Berechtigung: `webservice:write`.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Erfolgreich"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Anfrageparameter fehlerhaft"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token ungültig, abgelaufen oder nicht angemeldet"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Dem Token fehlt die erforderliche Berechtigung"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Client Secrets der Drittanbieter-Anmeldungen im Klartext anzeigen (nach Kennung der Anmeldemethode)",
+        "tags": [
+          "Web-Dienst"
+        ],
+        "x-required-scope": "webservice:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/webservice/settings/secrets/totp": {
+      "get": {
+        "description": "Erforderliche Berechtigung: `webservice:write`.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Erfolgreich"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Anfrageparameter fehlerhaft"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token ungültig, abgelaufen oder nicht angemeldet"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Dem Token fehlt die erforderliche Berechtigung"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "TOTP-Geheimnisse der gemeinsamen Benutzer im Klartext anzeigen (nach Benutzername)",
+        "tags": [
+          "Web-Dienst"
+        ],
+        "x-required-scope": "webservice:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/webservice/stats": {
       "get": {
         "description": "Erforderliche Berechtigung: `webservice:read`.",
@@ -26385,6 +27416,77 @@
         "x-token-allowed": true
       }
     },
+    "/api/webterminal/connections/{key}/secrets": {
+      "get": {
+        "description": "Erforderliche Berechtigung: `webterminal:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Erfolgreich"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Anfrageparameter fehlerhaft"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token ungültig, abgelaufen oder nicht angemeldet"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Dem Token fehlt die erforderliche Berechtigung"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Geheimnisse im Klartext anzeigen",
+        "tags": [
+          "Web-Terminal"
+        ],
+        "x-required-scope": "webterminal:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/webterminal/connections/{key}/test": {
       "post": {
         "description": "Erforderliche Berechtigung: `webterminal:write`.",
@@ -26892,6 +27994,77 @@
           }
         ],
         "summary": "Einträge aktivieren oder deaktivieren",
+        "tags": [
+          "Web-Terminal"
+        ],
+        "x-required-scope": "webterminal:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/webterminal/credentials/{key}/secrets": {
+      "get": {
+        "description": "Erforderliche Berechtigung: `webterminal:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Erfolgreich"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Anfrageparameter fehlerhaft"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token ungültig, abgelaufen oder nicht angemeldet"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Dem Token fehlt die erforderliche Berechtigung"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Geheimnisse im Klartext anzeigen",
         "tags": [
           "Web-Terminal"
         ],

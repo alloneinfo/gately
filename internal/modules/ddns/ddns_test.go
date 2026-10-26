@@ -320,6 +320,26 @@ func TestAPISecretMasking(t *testing.T) {
 		t.Fatalf("密钥应被保留: %+v", got.Credentials)
 	}
 
+	// 查看密钥明文接口返回真实密钥，任务不存在时返回 404
+	resp, err = http.Get(srv.URL + "/api/ddns/tasks/" + created.Key + "/secrets")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var secrets map[string]string
+	_ = json.NewDecoder(resp.Body).Decode(&secrets)
+	resp.Body.Close()
+	if resp.StatusCode != 200 || secrets["secret"] != "sk" {
+		t.Fatalf("应返回密钥明文: %d %+v", resp.StatusCode, secrets)
+	}
+	resp, err = http.Get(srv.URL + "/api/ddns/tasks/missing/secrets")
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp.Body.Close()
+	if resp.StatusCode != 404 {
+		t.Fatalf("任务不存在应返回 404，实际 %d", resp.StatusCode)
+	}
+
 	resp, err = http.Get(srv.URL + "/api/ddns/providers")
 	if err != nil {
 		t.Fatal(err)

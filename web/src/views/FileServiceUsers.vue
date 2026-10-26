@@ -27,7 +27,7 @@
       </div>
     </div>
 
-    <FileUsers v-if="shared.loaded.value" v-model="shared.users.value" :title="t('sharedFileUsers.title')" :desc="t('sharedFileUsers.usersDesc')">
+    <FileUsers v-if="shared.loaded.value" v-model="shared.users.value" :title="t('sharedFileUsers.title')" :desc="t('sharedFileUsers.usersDesc')" secrets-url="/api/fileusers/secrets">
       <template #notice>
         <div class="notice">{{ t('sharedFileUsers.help') }}</div>
       </template>

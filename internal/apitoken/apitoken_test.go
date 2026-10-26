@@ -39,6 +39,9 @@ func TestRequiredAndMatch(t *testing.T) {
 		{"GET", "/api/webterminal/connections/abc/ws", "webterminal:write"},
 		{"GET", "/api/docker/containers/abc/files/read", "docker:write"},
 		{"GET", "/api/docker/containers/abc/logs", "docker:read"},
+		// 查看密钥明文需要写权限
+		{"GET", "/api/frp/clients/abc/secrets", "frp:write"},
+		{"GET", "/api/tailscale/secrets", "tailscale:write"},
 		// 文件服务共享用户由三个服务共用：读取沿用所在服务的读权限，修改需要三个服务的写权限
 		{"GET", "/api/ftp/shared-users", "ftp:read"},
 		{"PUT", "/api/webdav/shared-users", "webdav:write,ftp:write,smb:write"},

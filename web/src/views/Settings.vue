@@ -148,7 +148,7 @@
                   </template>
                 </i18n-t>
               </el-form-item>
-              <el-form-item :label="t('settings.thirdLogin.providers')"><OAuthProviders v-model="login.providers" /></el-form-item>
+              <el-form-item :label="t('settings.thirdLogin.providers')"><OAuthProviders v-model="login.providers" secrets-url="/api/system/settings/secrets" /></el-form-item>
               <el-form-item :label="t('settings.thirdLogin.allowed')">
                 <el-input v-model="allowedText" type="textarea" :rows="4" class="mono" :placeholder="t('settings.thirdLogin.allowedPlaceholder')" />
                 <div class="form-help">{{ t('settings.thirdLogin.allowedHelp') }}</div>

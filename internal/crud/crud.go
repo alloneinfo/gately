@@ -8,6 +8,7 @@
 //	DELETE /<path>/{key}         删除
 //	PUT    /<path>/{key}/enable  启停，body {"enable": bool}
 //	PUT    /<path>-order         排序，body {"keys": [...]}
+//	GET    /<path>/{key}/secrets 查看条目中被脱敏的密钥明文（仅在提供 Secrets 时注册）
 package crud
 
 import (
@@ -43,6 +44,9 @@ type Collection[T any] struct {
 	Removed func(key string)
 	// BeforeRemove 在删除前调用（持锁），返回错误时拒绝删除，例如条目仍被引用；可为 nil
 	BeforeRemove func(it *T) error
+	// Secrets 返回条目中被脱敏字段的明文（字段名 → 值），供管理界面“显示密码”使用；可为 nil。
+	// 接口路径含 secrets 片段，按写权限鉴权，只读账号与只读令牌无法调用
+	Secrets func(it *T) map[string]string
 }
 
 // NewKey 生成随机 key。
@@ -89,6 +93,21 @@ func (c *Collection[T]) Register(r module.Router, path string) {
 	module.DocOf(r, "DELETE "+path+"/{key}", module.Doc{Summary: "删除"})
 	module.DocOf(r, "PUT "+path+"/{key}/enable", module.Doc{Summary: "启用或停用", Req: &enableRequest{}})
 	module.DocOf(r, "PUT "+path+"-order", module.Doc{Summary: "调整排序", Req: &orderRequest{}})
+	if c.Secrets != nil {
+		r.HandleFunc("GET "+path+"/{key}/secrets", c.secrets)
+		module.DocOf(r, "GET "+path+"/{key}/secrets", module.Doc{Summary: "查看密钥明文", Resp: map[string]string{}})
+	}
+}
+
+func (c *Collection[T]) secrets(w http.ResponseWriter, r *http.Request) {
+	c.Mu.Lock()
+	defer c.Mu.Unlock()
+	it := c.Find(r.PathValue("key"))
+	if it == nil {
+		httpx.Error(w, http.StatusNotFound, "条目不存在")
+		return
+	}
+	httpx.OK(w, c.Secrets(it))
 }
 
 func (c *Collection[T]) list(w http.ResponseWriter, r *http.Request) {
@@ -268,6 +287,16 @@ func Mask(s string) string {
 		return ""
 	}
 	return SecretMask
+}
+
+// SecretsHandler 返回查看单例设置中密钥明文的接口处理函数，get 在持有 mu 时调用。
+// 注册路径须以 /secrets 结尾，使其按写权限鉴权（见 apitoken.Required）。
+func SecretsHandler(mu *sync.Mutex, get func() map[string]string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		mu.Lock()
+		defer mu.Unlock()
+		httpx.OK(w, get())
+	}
 }
 
 // KeepSecret 若新值为占位符则恢复旧值。

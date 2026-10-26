@@ -1,10 +1,12 @@
 package webdav
 
 import (
+	"encoding/json"
 	"io"
 	"log"
 	"net"
 	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -95,4 +97,39 @@ func TestWebDAVUsers(t *testing.T) {
 	if c := do("PUT", "/m.txt", "multi", "p3", "m"); c == 201 {
 		t.Fatal("虚拟根目录不应能写入")
 	}
+}
+
+// TestSettingsSecrets 验证查看本地用户密码明文的接口按用户名返回原始密码，而设置接口仍返回占位符。
+func TestSettingsSecrets(t *testing.T) {
+	st, _ := config.Open(t.TempDir())
+	m := New(nil)
+	if err := m.Init(module.Env{Store: st, Logs: logbuf.New(20, log.New(io.Discard, "", 0))}); err != nil {
+		t.Fatal(err)
+	}
+	m.mu.Lock()
+	m.settings = Settings{Users: []User{{Name: "alice", Password: "p1", Root: "/a"}, {Name: "bob", Password: "p2", Root: "/b"}}}
+	m.mu.Unlock()
+	mux := http.NewServeMux()
+	m.Routes(secretsRouter{mux})
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, httptest.NewRequest("GET", "/settings/secrets", nil))
+	var out map[string]string
+	if err := json.Unmarshal(rec.Body.Bytes(), &out); err != nil {
+		t.Fatal(err)
+	}
+	if rec.Code != http.StatusOK || len(out) != 2 || out["alice"] != "p1" || out["bob"] != "p2" {
+		t.Fatalf("应按用户名返回密码明文: %d %s", rec.Code, rec.Body.String())
+	}
+	rec = httptest.NewRecorder()
+	mux.ServeHTTP(rec, httptest.NewRequest("GET", "/settings", nil))
+	if strings.Contains(rec.Body.String(), "p1") {
+		t.Fatalf("设置接口不应返回密码明文: %s", rec.Body.String())
+	}
+}
+
+// secretsRouter 把模块接口直接注册到 ServeMux，用于测试。
+type secretsRouter struct{ *http.ServeMux }
+
+func (r secretsRouter) HandleFunc(pattern string, h http.HandlerFunc) {
+	r.ServeMux.HandleFunc(pattern, h)
 }

@@ -84,6 +84,10 @@ func (m *Module) registerCredentials(r module.Router) {
 		Validate: func(c *Credential) error { return c.Validate() },
 		Merge:    mergeCredentialSecrets,
 		View:     viewCredential,
+		// 查看被脱敏的密码与私钥口令明文；私钥在界面上没有显示按钮，不经此接口返回
+		Secrets: func(c *Credential) map[string]string {
+			return map[string]string{"password": c.Password, "passphrase": c.Passphrase}
+		},
 		// 预设变更后，丢弃引用该预设的连接在池中的 SSH 连接，下次使用新凭据重新认证
 		Changed: m.dropCredentialUsersLocked,
 		// 仍被连接引用的预设不允许删除，避免连接失去凭据

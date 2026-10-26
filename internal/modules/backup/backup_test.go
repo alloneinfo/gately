@@ -1,7 +1,10 @@
 package backup
 
 import (
+	"encoding/json"
 	"errors"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"strings"
@@ -142,5 +145,24 @@ func TestSettingsValidate(t *testing.T) {
 	s = Settings{Keep: 1000}
 	if s.Validate() == nil {
 		t.Fatal("过大的保留数量应被拒绝")
+	}
+}
+
+type secretsRouter struct{ mux *http.ServeMux }
+
+func (r secretsRouter) HandleFunc(pattern string, h http.HandlerFunc) { r.mux.HandleFunc(pattern, h) }
+
+// TestSecrets 验证查看备份口令明文接口返回真实口令。
+func TestSecrets(t *testing.T) {
+	m, _ := newModule(t, nil)
+	m.cfg.Settings.Password = "pw"
+	mux := http.NewServeMux()
+	m.Routes(secretsRouter{mux})
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, httptest.NewRequest("GET", "/secrets", nil))
+	var got map[string]string
+	_ = json.Unmarshal(rec.Body.Bytes(), &got)
+	if rec.Code != 200 || got["password"] != "pw" {
+		t.Fatalf("应返回口令明文: %d %s", rec.Code, rec.Body.String())
 	}
 }

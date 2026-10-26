@@ -3739,6 +3739,67 @@
         "x-token-allowed": true
       }
     },
+    "/api/backup/secrets": {
+      "get": {
+        "description": "Требуемое разрешение: `backup:write`.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Успешно"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка параметров запроса"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Токен недействителен, истёк или вход не выполнен"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "У токена нет необходимого права"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Показать секреты открытым текстом",
+        "tags": [
+          "Резервная копия конфигурации"
+        ],
+        "x-required-scope": "backup:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/backup/settings": {
       "get": {
         "description": "Требуемое разрешение: `backup:read`.",
@@ -5394,6 +5455,77 @@
         "x-token-allowed": true
       }
     },
+    "/api/cloudflared/tunnels/{key}/secrets": {
+      "get": {
+        "description": "Требуемое разрешение: `cloudflared:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Успешно"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка параметров запроса"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Токен недействителен, истёк или вход не выполнен"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "У токена нет необходимого права"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Показать секреты открытым текстом",
+        "tags": [
+          "Туннель Cloudflare"
+        ],
+        "x-required-scope": "cloudflared:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/cron/logs": {
       "delete": {
         "description": "Требуемое разрешение: `cron:write`.",
@@ -6994,6 +7126,77 @@
           }
         ],
         "summary": "Включить или отключить: Задача DDNS",
+        "tags": [
+          "Динамический DNS"
+        ],
+        "x-required-scope": "ddns:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/ddns/tasks/{key}/secrets": {
+      "get": {
+        "description": "Требуемое разрешение: `ddns:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Успешно"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка параметров запроса"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Токен недействителен, истёк или вход не выполнен"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "У токена нет необходимого права"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Показать секреты открытым текстом",
         "tags": [
           "Динамический DNS"
         ],
@@ -10537,6 +10740,67 @@
         "x-token-allowed": true
       }
     },
+    "/api/docker/settings/secrets": {
+      "get": {
+        "description": "Требуемое разрешение: `docker:write`.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Успешно"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка параметров запроса"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Токен недействителен, истёк или вход не выполнен"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "У токена нет необходимого права"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Показать пароли реестров открытым текстом (ключи registry:\u003cадрес реестра\u003e)",
+        "tags": [
+          "Управление Docker"
+        ],
+        "x-required-scope": "docker:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/docker/tasks": {
       "delete": {
         "description": "Требуемое разрешение: `docker:write`.",
@@ -11722,6 +11986,77 @@
         "x-token-allowed": true
       }
     },
+    "/api/filebrowser/instances/{key}/secrets": {
+      "get": {
+        "description": "Требуемое разрешение: `filebrowser:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Успешно"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка параметров запроса"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Токен недействителен, истёк или вход не выполнен"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "У токена нет необходимого права"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Показать секреты открытым текстом",
+        "tags": [
+          "File Browser"
+        ],
+        "x-required-scope": "filebrowser:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/filebrowser/logs": {
       "delete": {
         "description": "Требуемое разрешение: `filebrowser:write`.",
@@ -12174,6 +12509,67 @@
           }
         ],
         "summary": "Сохранить общих пользователей файловых служб",
+        "tags": [
+          "Общие пользователи файловых служб"
+        ],
+        "x-required-scope": "fileusers:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/fileusers/secrets": {
+      "get": {
+        "description": "Требуемое разрешение: `fileusers:write`.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Успешно"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка параметров запроса"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Токен недействителен, истёк или вход не выполнен"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "У токена нет необходимого права"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Показать пароли общих пользователей открытым текстом",
         "tags": [
           "Общие пользователи файловых служб"
         ],
@@ -13670,6 +14066,67 @@
           }
         ],
         "summary": "Сохранить настройки FTP",
+        "tags": [
+          "Служба FTP"
+        ],
+        "x-required-scope": "ftp:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/ftp/settings/secrets": {
+      "get": {
+        "description": "Требуемое разрешение: `ftp:write`.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Успешно"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка параметров запроса"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Токен недействителен, истёк или вход не выполнен"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "У токена нет необходимого права"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Показать пароли локальных пользователей открытым текстом",
         "tags": [
           "Служба FTP"
         ],
@@ -16353,6 +16810,77 @@
         "x-token-allowed": true
       }
     },
+    "/api/notify/channels/{key}/secrets": {
+      "get": {
+        "description": "Требуемое разрешение: `notify:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Успешно"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка параметров запроса"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Токен недействителен, истёк или вход не выполнен"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "У токена нет необходимого права"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Показать секреты открытым текстом",
+        "tags": [
+          "Центр уведомлений"
+        ],
+        "x-required-scope": "notify:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/notify/channels/{key}/test": {
       "post": {
         "description": "Требуемое разрешение: `notify:write`.",
@@ -18190,6 +18718,67 @@
         "x-token-allowed": true
       }
     },
+    "/api/smb/settings/secrets": {
+      "get": {
+        "description": "Требуемое разрешение: `smb:write`.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Успешно"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка параметров запроса"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Токен недействителен, истёк или вход не выполнен"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "У токена нет необходимого права"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Показать пароли локальных пользователей открытым текстом",
+        "tags": [
+          "Служба SMB"
+        ],
+        "x-required-scope": "smb:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/smb/shared-users": {
       "get": {
         "description": "Устарело, используйте `GET /api/fileusers`; этот метод оставлен для совместимости. Возвращает общих пользователей файловых служб, общих для WebDAV, FTP и SMB, пароли скрыты. Если fileusers.json не проходит проверку, возвращается `error`, и ни один общий пользователь не может войти, пока не будет сохранён корректный список. `issues` перечисляет общих пользователей, которых нельзя использовать для SMB, и причину: `name` (в имени есть недопустимые для SMB символы), `bcrypt` (пароль хранится как хеш bcrypt), `share` (имя каталога нельзя использовать как имя ресурса или оно повторяется).\n\nТребуемое разрешение: `smb:read`.",
@@ -18867,6 +19456,77 @@
           }
         ],
         "summary": "Немедленно выпустить или продлить сертификат",
+        "tags": [
+          "SSL-сертификат"
+        ],
+        "x-required-scope": "ssl:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/ssl/certs/{key}/secrets": {
+      "get": {
+        "description": "Требуемое разрешение: `ssl:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Успешно"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка параметров запроса"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Токен недействителен, истёк или вход не выполнен"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "У токена нет необходимого права"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Показать секреты открытым текстом",
         "tags": [
           "SSL-сертификат"
         ],
@@ -20292,6 +20952,77 @@
         "x-token-allowed": true
       }
     },
+    "/api/storage/mounts/{key}/secrets": {
+      "get": {
+        "description": "Требуемое разрешение: `storage:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Успешно"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка параметров запроса"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Токен недействителен, истёк или вход не выполнен"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "У токена нет необходимого права"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Показать секреты открытым текстом",
+        "tags": [
+          "Монтирование хранилищ"
+        ],
+        "x-required-scope": "storage:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/stun/logs": {
       "delete": {
         "description": "Требуемое разрешение: `stun:write`.",
@@ -21567,6 +22298,62 @@
         "x-token-allowed": false
       }
     },
+    "/api/system/settings/secrets": {
+      "get": {
+        "description": "**Доступно только для сессий входа; API-токены не имеют доступа к этому эндпоинту.**",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Успешно"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка параметров запроса"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Токен недействителен, истёк или вход не выполнен"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "У токена нет необходимого права"
+          }
+        },
+        "summary": "Показать Client Secret стороннего входа открытым текстом",
+        "tags": [
+          "Система"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
+      }
+    },
     "/api/system/update": {
       "get": {
         "description": "Для доступа к GitHub использует прокси из глобальной настройки `updateProxy`. `selfUpgrade.supported` показывает, можно ли обновить эту установку онлайн; если нет, `reason` равен `os`, `docker`, `fnos`, `opkg`, `apk` или `readonly`.\n\nТребуемое разрешение: `status:read`.",
@@ -22417,6 +23204,67 @@
           }
         ],
         "summary": "Перезапустить Tailscale",
+        "tags": [
+          "Сеть Tailscale"
+        ],
+        "x-required-scope": "tailscale:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/tailscale/secrets": {
+      "get": {
+        "description": "Требуемое разрешение: `tailscale:write`.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Успешно"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка параметров запроса"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Токен недействителен, истёк или вход не выполнен"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "У токена нет необходимого права"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Показать секреты открытым текстом",
         "tags": [
           "Сеть Tailscale"
         ],
@@ -23890,6 +24738,67 @@
           }
         ],
         "summary": "Сохранить настройки WebDAV",
+        "tags": [
+          "WebDAV-сервер"
+        ],
+        "x-required-scope": "webdav:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/webdav/settings/secrets": {
+      "get": {
+        "description": "Требуемое разрешение: `webdav:write`.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Успешно"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка параметров запроса"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Токен недействителен, истёк или вход не выполнен"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "У токена нет необходимого права"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Показать пароли локальных пользователей открытым текстом",
         "tags": [
           "WebDAV-сервер"
         ],
@@ -25677,6 +26586,128 @@
         "x-token-allowed": true
       }
     },
+    "/api/webservice/settings/secrets/oauth": {
+      "get": {
+        "description": "Требуемое разрешение: `webservice:write`.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Успешно"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка параметров запроса"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Токен недействителен, истёк или вход не выполнен"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "У токена нет необходимого права"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Показать Client Secret сторонних входов открытым текстом (по идентификатору способа входа)",
+        "tags": [
+          "Веб-служба"
+        ],
+        "x-required-scope": "webservice:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/webservice/settings/secrets/totp": {
+      "get": {
+        "description": "Требуемое разрешение: `webservice:write`.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Успешно"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка параметров запроса"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Токен недействителен, истёк или вход не выполнен"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "У токена нет необходимого права"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Показать секреты TOTP общих пользователей открытым текстом (по имени пользователя)",
+        "tags": [
+          "Веб-служба"
+        ],
+        "x-required-scope": "webservice:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/webservice/stats": {
       "get": {
         "description": "Требуемое разрешение: `webservice:read`.",
@@ -26385,6 +27416,77 @@
         "x-token-allowed": true
       }
     },
+    "/api/webterminal/connections/{key}/secrets": {
+      "get": {
+        "description": "Требуемое разрешение: `webterminal:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Успешно"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка параметров запроса"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Токен недействителен, истёк или вход не выполнен"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "У токена нет необходимого права"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Показать секреты открытым текстом",
+        "tags": [
+          "Веб-терминал"
+        ],
+        "x-required-scope": "webterminal:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/webterminal/connections/{key}/test": {
       "post": {
         "description": "Требуемое разрешение: `webterminal:write`.",
@@ -26892,6 +27994,77 @@
           }
         ],
         "summary": "Включить или отключить: Элемент",
+        "tags": [
+          "Веб-терминал"
+        ],
+        "x-required-scope": "webterminal:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/webterminal/credentials/{key}/secrets": {
+      "get": {
+        "description": "Требуемое разрешение: `webterminal:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Успешно"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка параметров запроса"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Токен недействителен, истёк или вход не выполнен"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "У токена нет необходимого права"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Показать секреты открытым текстом",
         "tags": [
           "Веб-терминал"
         ],

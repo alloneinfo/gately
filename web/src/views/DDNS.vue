@@ -88,7 +88,7 @@
               <el-input v-model="editing.credentials.id" />
             </el-form-item>
             <el-form-item v-if="currentProvider?.secretLabel" :label="currentProvider.secretLabel">
-              <el-input v-model="editing.credentials.secret" type="password" show-password :placeholder="t('ddns.secretPlaceholder')" />
+              <SecretInput v-model="editing.credentials.secret" :placeholder="t('ddns.secretPlaceholder')" :reveal="secretOf(editing.key && `/api/ddns/tasks/${editing.key}/secrets`, 'secret')" />
             </el-form-item>
             <el-form-item v-for="f in currentProvider?.extra ?? []" :key="f.key" :label="f.label" :required="f.required">
               <el-input v-model="extra[f.key]" :type="f.multiline ? 'textarea' : 'text'" :rows="3" :placeholder="f.placeholder" />
@@ -175,6 +175,8 @@ import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { ChevronsDownUp, ChevronsUpDown, Globe, Pencil, Plus, RefreshCw, Trash2, Zap } from 'lucide-vue-next'
 import { api } from '../api'
+import SecretInput from '../components/SecretInput.vue'
+import { secretOf } from '../secrets'
 import PageHeader from '../components/PageHeader.vue'
 import ModuleBanner from '../components/ModuleBanner.vue'
 import CompactToggle from '../components/CompactToggle.vue'

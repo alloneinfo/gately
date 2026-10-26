@@ -1,9 +1,18 @@
 package cloudflared
 
 import (
+	"encoding/json"
+	"io"
+	"log"
+	"net/http"
+	"net/http/httptest"
 	"slices"
 	"strings"
 	"testing"
+
+	"github.com/wangwanjie/gately/internal/config"
+	"github.com/wangwanjie/gately/internal/logbuf"
+	"github.com/wangwanjie/gately/internal/module"
 )
 
 func TestTunnelArgs(t *testing.T) {
@@ -60,5 +69,32 @@ func TestRuntimeOnLine(t *testing.T) {
 	rt.reset()
 	if rt.url != "" || rt.conns != 0 {
 		t.Error("reset 未清空")
+	}
+}
+
+// TestTunnelSecrets 验证查看隧道令牌明文接口返回真实令牌，隧道不存在时返回 404。
+func TestTunnelSecrets(t *testing.T) {
+	store, err := config.Open(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	m := New()
+	if err := m.Init(module.Env{Store: store, Logs: logbuf.New(100, log.New(io.Discard, "", 0))}); err != nil {
+		t.Fatal(err)
+	}
+	m.cfg.Tunnels = []Tunnel{{Key: "k", Name: "t", Mode: ModeToken, Token: "tok"}}
+	mux := http.NewServeMux()
+	m.Routes(testRouter{mux})
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, httptest.NewRequest("GET", "/api/cloudflared/tunnels/k/secrets", nil))
+	var got map[string]string
+	_ = json.Unmarshal(rec.Body.Bytes(), &got)
+	if rec.Code != 200 || got["token"] != "tok" {
+		t.Fatalf("应返回令牌明文: %d %s", rec.Code, rec.Body.String())
+	}
+	rec = httptest.NewRecorder()
+	mux.ServeHTTP(rec, httptest.NewRequest("GET", "/api/cloudflared/tunnels/missing/secrets", nil))
+	if rec.Code != 404 {
+		t.Fatalf("隧道不存在应返回 404，实际 %d", rec.Code)
 	}
 }

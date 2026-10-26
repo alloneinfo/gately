@@ -312,8 +312,10 @@ func (m *Module) Routes(r module.Router) {
 		Validate: func(i *Instance) error { return i.Validate() },
 		Merge:    func(old, updated *Instance) { crud.KeepSecret(old.AdminPassword, &updated.AdminPassword) },
 		View:     func(i *Instance) any { return m.viewLocked(i) },
-		Changed:  m.applyLocked,
-		Removed:  m.removeLocked,
+		// 查看被脱敏的管理员密码明文
+		Secrets: func(i *Instance) map[string]string { return map[string]string{"adminPassword": i.AdminPassword} },
+		Changed: m.applyLocked,
+		Removed: m.removeLocked,
 	}
 	instances.Register(r, "/instances")
 	r.HandleFunc("POST /instances/{key}/restart", func(w http.ResponseWriter, req *http.Request) {

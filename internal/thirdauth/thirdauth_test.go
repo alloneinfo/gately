@@ -147,3 +147,15 @@ func TestProviderProxy(t *testing.T) {
 		t.Error("缺少协议的代理地址应校验失败")
 	}
 }
+
+// TestLoginSecrets 验证 Secrets 按登录方式标识返回 Client Secret 明文，Masked 不影响原配置。
+func TestLoginSecrets(t *testing.T) {
+	c := LoginConfig{Providers: []Provider{{Key: "github", ClientSecret: "s1"}, {Key: "corp", ClientSecret: "s2"}}}
+	if c.Masked().Providers[0].ClientSecret != "********" {
+		t.Fatal("Masked 应脱敏 Client Secret")
+	}
+	got := c.Secrets()
+	if len(got) != 2 || got["github"] != "s1" || got["corp"] != "s2" {
+		t.Fatalf("应按标识返回 Client Secret 明文: %v", got)
+	}
+}

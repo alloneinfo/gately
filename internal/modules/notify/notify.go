@@ -394,6 +394,7 @@ func (m *Module) Routes(r module.Router) {
 		View: func(c *Channel) any {
 			return channelView{Channel: *c, HasSecret: c.Secret != ""}
 		},
+		Secrets: func(c *Channel) map[string]string { return map[string]string{"secret": c.Secret} },
 	}
 	channels.Register(r, "/channels")
 	rules := &crud.Collection[Rule]{

@@ -705,6 +705,9 @@ func TestReadonlyUser(t *testing.T) {
 		{"GET", "/api/account/users"},
 		{"GET", "/api/tokens"},
 		{"POST", "/api/system/restart"},
+		// 只读账号不能查看密钥明文
+		{"GET", "/api/frp/clients/abc/secrets"},
+		{"GET", "/api/ddns/tasks/abc/secrets"},
 	} {
 		var body any
 		if c.method == "POST" {

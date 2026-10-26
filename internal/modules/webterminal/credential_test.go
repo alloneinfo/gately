@@ -68,3 +68,30 @@ func TestCredentialPreset(t *testing.T) {
 		t.Fatalf("预设缺失时应提示: %v", err)
 	}
 }
+
+// TestSecretsEndpoints 验证连接与认证预设的查看明文接口返回被脱敏字段的真实值，条目不存在时返回 404。
+func TestSecretsEndpoints(t *testing.T) {
+	m, srv := newModule(t)
+	m.mu.Lock()
+	m.cfg.Connections = []Connection{{Key: "c", Name: "nas", Type: "ssh"}}
+	m.cfg.Connections[0].SSH.Password = "sp"
+	m.cfg.Connections[0].SSH.Proxy.Password = "pp"
+	m.cfg.Connections[0].Telnet.Password = "tp"
+	m.cfg.Credentials = []Credential{{Key: "k", Name: "cred", AuthType: "password", Password: "cp", Passphrase: "ph"}}
+	m.mu.Unlock()
+
+	code, out := call(t, srv, "GET", "/connections/c/secrets", nil)
+	if code != http.StatusOK || out["ssh.password"] != "sp" || out["ssh.proxy.password"] != "pp" || out["telnet.password"] != "tp" {
+		t.Fatalf("连接应返回密码明文: %d %v", code, out)
+	}
+	code, out = call(t, srv, "GET", "/credentials/k/secrets", nil)
+	if code != http.StatusOK || out["password"] != "cp" || out["passphrase"] != "ph" {
+		t.Fatalf("认证预设应返回密码明文: %d %v", code, out)
+	}
+	if code, _ := call(t, srv, "GET", "/connections/missing/secrets", nil); code != http.StatusNotFound {
+		t.Fatalf("连接不存在应返回 404，实际 %d", code)
+	}
+	if code, _ := call(t, srv, "GET", "/credentials/missing/secrets", nil); code != http.StatusNotFound {
+		t.Fatalf("认证预设不存在应返回 404，实际 %d", code)
+	}
+}

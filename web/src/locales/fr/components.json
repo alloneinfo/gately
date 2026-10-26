@@ -150,5 +150,9 @@
     "cloudflared": "Tous les tunnels sont arrêtés et supprimés, le chemin du programme et le proxy de téléchargement sont effacés.",
     "tailscale": "Tailscale est arrêté (le tailscaled géré par Gately se déconnecte d'abord), les paramètres par défaut sont rétablis et l'état de connexion du répertoire d'état par défaut est supprimé.",
     "filebrowser": "Toutes les instances sont arrêtées et supprimées avec leurs utilisateurs, liens de partage et caches (les fichiers des répertoires partagés ne sont pas touchés), et le chemin du programme et le proxy de téléchargement sont effacés."
+  },
+  "secretInput": {
+    "show": "Afficher",
+    "hide": "Masquer"
   }
 }

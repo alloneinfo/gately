@@ -402,6 +402,11 @@ func (m *Module) Routes(r module.Router) {
 		m.applyLocked()
 		httpx.OK(w, map[string]bool{"ok": true})
 	})
+	// 查看被脱敏的认证密钥明文
+	r.HandleFunc("GET /secrets", crud.SecretsHandler(&m.mu, func() map[string]string {
+		return map[string]string{"authKey": m.settings.AuthKey}
+	}))
+	module.DocOf(r, "GET /secrets", module.Doc{Summary: "查看密钥明文", Resp: map[string]string{}})
 	r.HandleFunc("GET /status", func(w http.ResponseWriter, req *http.Request) {
 		httpx.OK(w, m.status())
 	})

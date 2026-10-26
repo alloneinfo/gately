@@ -13,5 +13,6 @@
   "qrHelp": "用驗證器 App（Google Authenticator、1Password 等）掃碼或手動輸入金鑰，儲存設定後生效；重新產生會使舊金鑰失效",
   "emailPlaceholder": "電子郵件（選填）",
   "displayNamePlaceholder": "顯示名稱（選填）",
-  "groupsPlaceholder": "群組（選填，按 Enter 新增）"
+  "groupsPlaceholder": "群組（選填，按 Enter 新增）",
+  "totpShow": "查看 QR 碼"
 }

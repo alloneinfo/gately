@@ -13,5 +13,6 @@
   "qrHelp": "Отсканируйте приложением-аутентификатором (Google Authenticator, 1Password и др.) или введите ключ вручную. Действует после сохранения настроек; новый ключ отменяет старый",
   "emailPlaceholder": "Email (необязательно)",
   "displayNamePlaceholder": "Отображаемое имя (необязательно)",
-  "groupsPlaceholder": "Группы (необязательно, Enter — добавить)"
+  "groupsPlaceholder": "Группы (необязательно, Enter — добавить)",
+  "totpShow": "Показать QR-код"
 }

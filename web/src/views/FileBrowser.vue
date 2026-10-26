@@ -111,7 +111,7 @@
             <el-input v-model="editing.adminUser" placeholder="admin" />
           </el-form-item>
           <el-form-item v-if="editing.authMethod === 'password'" :label="t('filebrowser.adminPassword')">
-            <el-input v-model="editing.adminPassword" type="password" show-password autocomplete="new-password" />
+            <SecretInput v-model="editing.adminPassword" autocomplete="new-password" :reveal="secretOf(editing.key && `/api/filebrowser/instances/${editing.key}/secrets`, 'adminPassword')" />
             <div class="form-help">{{ t('filebrowser.adminPasswordHelp') }}</div>
           </el-form-item>
         </template>
@@ -148,6 +148,8 @@ import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { Download, FolderOpen, FolderPlus, Pencil, Plus, RefreshCw, Save, Terminal, Trash2, X } from 'lucide-vue-next'
 import { api } from '../api'
+import SecretInput from '../components/SecretInput.vue'
+import { secretOf } from '../secrets'
 import PageHeader from '../components/PageHeader.vue'
 import EntityCard from '../components/EntityCard.vue'
 import Field from '../components/Field.vue'

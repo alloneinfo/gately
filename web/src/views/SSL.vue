@@ -103,7 +103,7 @@
           </el-form-item>
           <template v-if="['zerossl', 'google', 'custom'].includes(editing.acme.ca)">
             <el-form-item label="EAB Key ID"><el-input v-model="editing.acme.eabKid" /></el-form-item>
-            <el-form-item label="EAB HMAC Key"><el-input v-model="editing.acme.eabHmac" type="password" show-password /></el-form-item>
+            <el-form-item label="EAB HMAC Key"><SecretInput v-model="editing.acme.eabHmac" :reveal="secretOf(editing.key && `/api/ssl/certs/${editing.key}/secrets`, 'eabHmac')" /></el-form-item>
           </template>
           <el-form-item :label="t('ssl.keyType')">
             <el-select v-model="editing.acme.keyType" class="w-160">
@@ -146,7 +146,7 @@
             <el-input v-model="editing.acme.credentials.id" />
           </el-form-item>
           <el-form-item v-if="currentProvider?.secretLabel" :label="currentProvider.secretLabel">
-            <el-input v-model="editing.acme.credentials.secret" type="password" show-password :placeholder="t('ssl.secretPlaceholder')" />
+            <SecretInput v-model="editing.acme.credentials.secret" :placeholder="t('ssl.secretPlaceholder')" :reveal="secretOf(editing.key && `/api/ssl/certs/${editing.key}/secrets`, 'secret')" />
           </el-form-item>
           <el-form-item v-for="f in currentProvider?.extra ?? []" :key="f.key" :label="f.label">
             <el-input v-model="extra[f.key]" :placeholder="f.placeholder" />
@@ -263,6 +263,8 @@ import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { Download, Pencil, Plus, RotateCw, Send, ShieldCheck, SlidersHorizontal, Trash2, Upload } from 'lucide-vue-next'
 import { api } from '../api'
+import SecretInput from '../components/SecretInput.vue'
+import { secretOf } from '../secrets'
 import PageHeader from '../components/PageHeader.vue'
 import ModuleBanner from '../components/ModuleBanner.vue'
 import CompactToggle from '../components/CompactToggle.vue'

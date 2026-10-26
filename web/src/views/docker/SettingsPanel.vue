@@ -39,7 +39,7 @@
             <div v-for="(r, i) in s.registries" :key="i" class="row reg">
               <el-input v-model="r.server" :placeholder="t('docker.settings.serverPlaceholder')" class="mono" />
               <el-input v-model="r.username" :placeholder="t('docker.settings.username')" />
-              <el-input v-model="r.password" type="password" show-password :placeholder="t('docker.settings.passwordPlaceholder')" />
+              <SecretInput v-model="r.password" :placeholder="t('docker.settings.passwordPlaceholder')" :reveal="secretOf('/api/docker/settings/secrets', `registry:${r.server}`)" />
               <el-button text type="danger" :icon="Trash2" :aria-label="t('common.delete')" @click="s.registries.splice(i, 1)" />
             </div>
             <el-button :icon="Plus" @click="s.registries.push({ server: '', username: '', password: '' })">{{ t('docker.settings.addRegistry') }}</el-button>
@@ -58,6 +58,8 @@ import { ElMessage } from 'element-plus'
 import { Plus, Save, SlidersHorizontal, Trash2 } from 'lucide-vue-next'
 import { api } from '../../api'
 import { useFormLayout } from '../../composables/useIsMobile'
+import SecretInput from '../../components/SecretInput.vue'
+import { secretOf } from '../../secrets'
 import type { DockerInfo, DockerSettings } from './types'
 
 const { t } = useI18n()

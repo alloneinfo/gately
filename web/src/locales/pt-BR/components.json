@@ -150,5 +150,9 @@
     "cloudflared": "Para e exclui todos os túneis e limpa o caminho do programa e o proxy de download.",
     "tailscale": "Para o Tailscale (o tailscaled gerenciado pelo Gately sai da conta antes), restaura as configurações padrão e exclui o estado de login no diretório de estado padrão.",
     "filebrowser": "Para e exclui todas as instâncias com seus usuários, links de compartilhamento e caches (os arquivos dos diretórios compartilhados não são afetados), e limpa o caminho do programa e o proxy de download."
+  },
+  "secretInput": {
+    "show": "Mostrar",
+    "hide": "Ocultar"
   }
 }

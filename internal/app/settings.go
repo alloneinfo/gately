@@ -249,6 +249,11 @@ func (a *App) handleGetSettings(w http.ResponseWriter, r *http.Request) {
 	httpx.OK(w, a.viewSettings())
 }
 
+// handleSettingsSecrets 返回管理界面第三方登录的 Client Secret 明文，按登录方式标识索引（{"github": "密钥"}）。
+func (a *App) handleSettingsSecrets(w http.ResponseWriter, r *http.Request) {
+	httpx.OK(w, a.settingsSnapshot().ThirdLogin.Secrets())
+}
+
 func (a *App) handlePutSettings(w http.ResponseWriter, r *http.Request) {
 	var req settingsView
 	if err := httpx.ReadJSON(r, &req); err != nil {

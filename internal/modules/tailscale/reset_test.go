@@ -1,8 +1,11 @@
 package tailscale
 
 import (
+	"encoding/json"
 	"io"
 	"log"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"testing"
@@ -56,5 +59,31 @@ func TestReset(t *testing.T) {
 	}
 	if _, err := os.Stat(custom); err != nil {
 		t.Errorf("自定义状态目录应保留: %v", err)
+	}
+}
+
+type secretsRouter struct{ mux *http.ServeMux }
+
+func (r secretsRouter) HandleFunc(pattern string, h http.HandlerFunc) { r.mux.HandleFunc(pattern, h) }
+
+// TestSecrets 验证查看认证密钥明文接口返回真实密钥。
+func TestSecrets(t *testing.T) {
+	store, err := config.Open(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	m := New()
+	if err := m.Init(module.Env{Store: store, Logs: logbuf.New(100, log.New(io.Discard, "", 0))}); err != nil {
+		t.Fatal(err)
+	}
+	m.settings.AuthKey = "tskey-x"
+	mux := http.NewServeMux()
+	m.Routes(secretsRouter{mux})
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, httptest.NewRequest("GET", "/secrets", nil))
+	var got map[string]string
+	_ = json.Unmarshal(rec.Body.Bytes(), &got)
+	if rec.Code != 200 || got["authKey"] != "tskey-x" {
+		t.Fatalf("应返回认证密钥明文: %d %s", rec.Code, rec.Body.String())
 	}
 }

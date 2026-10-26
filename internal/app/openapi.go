@@ -129,7 +129,7 @@ func docTag(r routeInfo, titles map[string]string) string {
 		return "账号"
 	case r.Path == "/api/import/lucky":
 		return "配置导入"
-	case r.Path == "/api/fileusers":
+	case r.Path == "/api/fileusers" || strings.HasPrefix(r.Path, "/api/fileusers/"):
 		return "文件服务共享用户"
 	}
 	return "系统"

@@ -397,6 +397,12 @@ func (m *Module) Routes(r module.Router) {
 		}
 		httpx.OK(w, map[string]any{"settings": s, "running": m.srv != nil, "error": m.err})
 	})
+	// 查看本地用户密码明文，结果按用户名索引（{"用户名": "密码"}）；bcrypt 哈希的密码原样返回哈希。
+	// 路径含 secrets 片段，按写权限鉴权，只读账号与只读令牌无法调用
+	r.HandleFunc("GET /settings/secrets", crud.SecretsHandler(&m.mu, func() map[string]string {
+		return userPasswords(m.settings.Users)
+	}))
+	module.DocOf(r, "GET /settings/secrets", module.Doc{Summary: "查看本地用户密码明文", Resp: map[string]string{}})
 	// 文件服务共享用户：WebDAV、FTP、SMB 共用同一份列表
 	fileusers.Default.Routes(r, nil)
 	r.HandleFunc("PUT /settings", func(w http.ResponseWriter, req *http.Request) {
@@ -421,4 +427,13 @@ func (m *Module) Routes(r module.Router) {
 		m.restartLocked()
 		httpx.OK(w, map[string]any{"running": m.srv != nil, "error": m.err})
 	})
+}
+
+// userPasswords 返回本地用户的密码明文，按用户名索引。
+func userPasswords(users []User) map[string]string {
+	out := make(map[string]string, len(users))
+	for _, u := range users {
+		out[u.Name] = u.Password
+	}
+	return out
 }

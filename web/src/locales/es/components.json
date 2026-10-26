@@ -150,5 +150,9 @@
     "cloudflared": "Se detienen y eliminan todos los túneles y se borran la ruta del programa y el proxy de descarga.",
     "tailscale": "Se detiene Tailscale (el tailscaled gestionado por Gately cierra sesión antes), se restauran los ajustes predeterminados y se elimina el estado de sesión del directorio de estado predeterminado.",
     "filebrowser": "Se detienen y eliminan todas las instancias junto con sus usuarios, enlaces compartidos y cachés (los archivos de los directorios compartidos no se tocan), y se borran la ruta del programa y el proxy de descarga."
+  },
+  "secretInput": {
+    "show": "Mostrar",
+    "hide": "Ocultar"
   }
 }

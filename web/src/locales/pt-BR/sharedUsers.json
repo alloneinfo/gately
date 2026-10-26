@@ -13,5 +13,6 @@
   "qrHelp": "Escaneie com um app autenticador (Google Authenticator, 1Password etc.) ou digite a chave. Vale após salvar as configurações; gerar novamente invalida a chave antiga",
   "emailPlaceholder": "E-mail (opcional)",
   "displayNamePlaceholder": "Nome de exibição (opcional)",
-  "groupsPlaceholder": "Grupos (opcional, Enter para adicionar)"
+  "groupsPlaceholder": "Grupos (opcional, Enter para adicionar)",
+  "totpShow": "Ver QR code"
 }

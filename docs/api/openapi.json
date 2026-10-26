@@ -3739,6 +3739,67 @@
         "x-token-allowed": true
       }
     },
+    "/api/backup/secrets": {
+      "get": {
+        "description": "所需权限：`backup:write`。",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "请求参数错误"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌无效、已过期或未登录"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌缺少所需权限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "查看密钥明文",
+        "tags": [
+          "配置备份"
+        ],
+        "x-required-scope": "backup:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/backup/settings": {
       "get": {
         "description": "所需权限：`backup:read`。",
@@ -5394,6 +5455,77 @@
         "x-token-allowed": true
       }
     },
+    "/api/cloudflared/tunnels/{key}/secrets": {
+      "get": {
+        "description": "所需权限：`cloudflared:write`。",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "请求参数错误"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌无效、已过期或未登录"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌缺少所需权限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "查看密钥明文",
+        "tags": [
+          "Cloudflare 隧道"
+        ],
+        "x-required-scope": "cloudflared:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/cron/logs": {
       "delete": {
         "description": "所需权限：`cron:write`。",
@@ -6994,6 +7126,77 @@
           }
         ],
         "summary": "启用或停用DDNS 任务",
+        "tags": [
+          "动态域名"
+        ],
+        "x-required-scope": "ddns:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/ddns/tasks/{key}/secrets": {
+      "get": {
+        "description": "所需权限：`ddns:write`。",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "请求参数错误"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌无效、已过期或未登录"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌缺少所需权限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "查看密钥明文",
         "tags": [
           "动态域名"
         ],
@@ -10537,6 +10740,67 @@
         "x-token-allowed": true
       }
     },
+    "/api/docker/settings/secrets": {
+      "get": {
+        "description": "所需权限：`docker:write`。",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "请求参数错误"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌无效、已过期或未登录"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌缺少所需权限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "查看仓库密码明文（键为 registry:\u003c仓库地址\u003e）",
+        "tags": [
+          "Docker 管理"
+        ],
+        "x-required-scope": "docker:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/docker/tasks": {
       "delete": {
         "description": "所需权限：`docker:write`。",
@@ -11722,6 +11986,77 @@
         "x-token-allowed": true
       }
     },
+    "/api/filebrowser/instances/{key}/secrets": {
+      "get": {
+        "description": "所需权限：`filebrowser:write`。",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "请求参数错误"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌无效、已过期或未登录"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌缺少所需权限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "查看密钥明文",
+        "tags": [
+          "File Browser"
+        ],
+        "x-required-scope": "filebrowser:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/filebrowser/logs": {
       "delete": {
         "description": "所需权限：`filebrowser:write`。",
@@ -12174,6 +12509,67 @@
           }
         ],
         "summary": "保存文件服务共享用户",
+        "tags": [
+          "文件服务共享用户"
+        ],
+        "x-required-scope": "fileusers:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/fileusers/secrets": {
+      "get": {
+        "description": "所需权限：`fileusers:write`。",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "请求参数错误"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌无效、已过期或未登录"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌缺少所需权限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "查看共享用户密码明文",
         "tags": [
           "文件服务共享用户"
         ],
@@ -13670,6 +14066,67 @@
           }
         ],
         "summary": "保存 FTP 设置",
+        "tags": [
+          "FTP 服务"
+        ],
+        "x-required-scope": "ftp:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/ftp/settings/secrets": {
+      "get": {
+        "description": "所需权限：`ftp:write`。",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "请求参数错误"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌无效、已过期或未登录"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌缺少所需权限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "查看本地用户密码明文",
         "tags": [
           "FTP 服务"
         ],
@@ -16353,6 +16810,77 @@
         "x-token-allowed": true
       }
     },
+    "/api/notify/channels/{key}/secrets": {
+      "get": {
+        "description": "所需权限：`notify:write`。",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "请求参数错误"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌无效、已过期或未登录"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌缺少所需权限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "查看密钥明文",
+        "tags": [
+          "通知中心"
+        ],
+        "x-required-scope": "notify:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/notify/channels/{key}/test": {
       "post": {
         "description": "所需权限：`notify:write`。",
@@ -18190,6 +18718,67 @@
         "x-token-allowed": true
       }
     },
+    "/api/smb/settings/secrets": {
+      "get": {
+        "description": "所需权限：`smb:write`。",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "请求参数错误"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌无效、已过期或未登录"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌缺少所需权限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "查看本地用户密码明文",
+        "tags": [
+          "SMB 服务"
+        ],
+        "x-required-scope": "smb:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/smb/shared-users": {
       "get": {
         "description": "已弃用，请改用 `GET /api/fileusers`，本接口保留兼容。返回 WebDAV、FTP、SMB 共用的文件服务共享用户，密码脱敏。fileusers.json 未通过校验时返回 `error`，此时共享用户都不能登录，保存一份有效的列表后恢复。`issues` 列出无法用于 SMB 的共享用户及原因：`name`（用户名含 SMB 不允许的字符）、`bcrypt`（密码是 bcrypt 哈希）、`share`（目录名称不能作为共享名或重复）。\n\n所需权限：`smb:read`。",
@@ -18867,6 +19456,77 @@
           }
         ],
         "summary": "立即签发或续期证书",
+        "tags": [
+          "SSL 证书"
+        ],
+        "x-required-scope": "ssl:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/ssl/certs/{key}/secrets": {
+      "get": {
+        "description": "所需权限：`ssl:write`。",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "请求参数错误"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌无效、已过期或未登录"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌缺少所需权限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "查看密钥明文",
         "tags": [
           "SSL 证书"
         ],
@@ -20292,6 +20952,77 @@
         "x-token-allowed": true
       }
     },
+    "/api/storage/mounts/{key}/secrets": {
+      "get": {
+        "description": "所需权限：`storage:write`。",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "请求参数错误"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌无效、已过期或未登录"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌缺少所需权限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "查看密钥明文",
+        "tags": [
+          "存储挂载"
+        ],
+        "x-required-scope": "storage:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/stun/logs": {
       "delete": {
         "description": "所需权限：`stun:write`。",
@@ -21567,6 +22298,62 @@
         "x-token-allowed": false
       }
     },
+    "/api/system/settings/secrets": {
+      "get": {
+        "description": "**仅登录会话可用，API 令牌无法访问此接口。**",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "请求参数错误"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌无效、已过期或未登录"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌缺少所需权限"
+          }
+        },
+        "summary": "查看第三方登录 Client Secret 明文",
+        "tags": [
+          "系统"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
+      }
+    },
     "/api/system/update": {
       "get": {
         "description": "访问 GitHub 时使用全局设置 `updateProxy` 中的代理。`selfUpgrade.supported` 表示当前部署方式能否在线升级，不能时 `reason` 为 `os`、`docker`、`fnos`、`opkg`、`apk` 或 `readonly`。\n\n所需权限：`status:read`。",
@@ -22417,6 +23204,67 @@
           }
         ],
         "summary": "重启 Tailscale",
+        "tags": [
+          "Tailscale 组网"
+        ],
+        "x-required-scope": "tailscale:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/tailscale/secrets": {
+      "get": {
+        "description": "所需权限：`tailscale:write`。",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "请求参数错误"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌无效、已过期或未登录"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌缺少所需权限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "查看密钥明文",
         "tags": [
           "Tailscale 组网"
         ],
@@ -23890,6 +24738,67 @@
           }
         ],
         "summary": "保存 WebDAV 设置",
+        "tags": [
+          "WebDAV 服务"
+        ],
+        "x-required-scope": "webdav:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/webdav/settings/secrets": {
+      "get": {
+        "description": "所需权限：`webdav:write`。",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "请求参数错误"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌无效、已过期或未登录"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌缺少所需权限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "查看本地用户密码明文",
         "tags": [
           "WebDAV 服务"
         ],
@@ -25677,6 +26586,128 @@
         "x-token-allowed": true
       }
     },
+    "/api/webservice/settings/secrets/oauth": {
+      "get": {
+        "description": "所需权限：`webservice:write`。",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "请求参数错误"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌无效、已过期或未登录"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌缺少所需权限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "查看第三方登录的 Client Secret 明文（按登录方式标识索引）",
+        "tags": [
+          "Web 服务"
+        ],
+        "x-required-scope": "webservice:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/webservice/settings/secrets/totp": {
+      "get": {
+        "description": "所需权限：`webservice:write`。",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "请求参数错误"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌无效、已过期或未登录"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌缺少所需权限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "查看共享用户的 TOTP 密钥明文（按用户名索引）",
+        "tags": [
+          "Web 服务"
+        ],
+        "x-required-scope": "webservice:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/webservice/stats": {
       "get": {
         "description": "所需权限：`webservice:read`。",
@@ -26385,6 +27416,77 @@
         "x-token-allowed": true
       }
     },
+    "/api/webterminal/connections/{key}/secrets": {
+      "get": {
+        "description": "所需权限：`webterminal:write`。",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "请求参数错误"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌无效、已过期或未登录"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌缺少所需权限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "查看密钥明文",
+        "tags": [
+          "Web 终端"
+        ],
+        "x-required-scope": "webterminal:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/webterminal/connections/{key}/test": {
       "post": {
         "description": "所需权限：`webterminal:write`。",
@@ -26892,6 +27994,77 @@
           }
         ],
         "summary": "启用或停用条目",
+        "tags": [
+          "Web 终端"
+        ],
+        "x-required-scope": "webterminal:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/webterminal/credentials/{key}/secrets": {
+      "get": {
+        "description": "所需权限：`webterminal:write`。",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "请求参数错误"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌无效、已过期或未登录"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌缺少所需权限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "查看密钥明文",
         "tags": [
           "Web 终端"
         ],

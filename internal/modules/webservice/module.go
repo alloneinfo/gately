@@ -267,6 +267,16 @@ func (m *Module) Routes(r module.Router) {
 		s.OIDC = maskOIDC(s.OIDC)
 		httpx.OK(w, s)
 	})
+	// 查看被脱敏的密钥明文，路径含 secrets 片段，按写权限鉴权，只读账号与只读令牌无法调用。
+	// 共享用户密码与 OIDC 客户端密钥只保存 bcrypt 哈希，无法还原明文，不提供查看
+	r.HandleFunc("GET /settings/secrets/totp", crud.SecretsHandler(&m.mu, func() map[string]string {
+		return totpSecrets(m.cfg.Settings.AuthUsers)
+	}))
+	r.HandleFunc("GET /settings/secrets/oauth", crud.SecretsHandler(&m.mu, func() map[string]string {
+		return oauthSecrets(m.cfg.Settings.OAuthProviders)
+	}))
+	module.DocOf(r, "GET /settings/secrets/totp", module.Doc{Summary: "查看共享用户的 TOTP 密钥明文（按用户名索引）", Resp: map[string]string{}})
+	module.DocOf(r, "GET /settings/secrets/oauth", module.Doc{Summary: "查看第三方登录的 Client Secret 明文（按登录方式标识索引）", Resp: map[string]string{}})
 	r.HandleFunc("POST /totp-secret", m.handleNewTOTP)
 	module.DocOf(r, "POST /totp-secret", module.Doc{Summary: "为共享用户生成新的 TOTP 密钥（不保存，保存设置后生效）", Req: &totpRequest{}, Resp: &totpResponse{}})
 	r.HandleFunc("PUT /settings", m.handlePutSettings)
@@ -290,6 +300,24 @@ func (m *Module) Routes(r module.Router) {
 	module.DocOf(r, "POST /geoip/upload", module.Doc{Summary: "上传 GeoIP 数据库（multipart 字段 file，.mmdb）"})
 	module.DocOf(r, "DELETE /geoip", module.Doc{Summary: "移除 GeoIP 数据库", Resp: &geoip.Info{}})
 	module.DocOf(r, "POST /geoip/download", module.Doc{Summary: "从地址下载 GeoIP 数据库（.mmdb）", Req: &geoipDownload{}})
+}
+
+// totpSecrets 返回共享用户的 TOTP 密钥明文，按用户名索引；未启用二次验证的用户值为空字符串。
+func totpSecrets(users []AuthUser) map[string]string {
+	out := make(map[string]string, len(users))
+	for _, u := range users {
+		out[u.Name] = u.TOTPSecret
+	}
+	return out
+}
+
+// oauthSecrets 返回第三方登录的 Client Secret 明文，按登录方式标识（Key）索引。
+func oauthSecrets(providers []OAuthProvider) map[string]string {
+	out := make(map[string]string, len(providers))
+	for _, p := range providers {
+		out[p.Key] = p.ClientSecret
+	}
+	return out
 }
 
 func (m *Module) handlePutSettings(w http.ResponseWriter, r *http.Request) {

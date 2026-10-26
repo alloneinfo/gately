@@ -360,6 +360,26 @@ func (r *Registry) Masked() []User {
 	return users
 }
 
+// Passwords 返回共享用户的密码明文，按用户名索引（{"用户名": "密码"}），供管理界面“显示密码”使用；
+// bcrypt 哈希的密码原样返回哈希。
+func (r *Registry) Passwords() map[string]string {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	out := make(map[string]string, len(r.users))
+	for _, u := range r.users {
+		out[u.Name] = u.Password
+	}
+	return out
+}
+
+// HandleSecrets 返回查看共享用户密码明文的处理函数，结果同 Passwords。
+// 注册路径须以 /secrets 结尾，使其按写权限鉴权，只读账号与只读令牌无法调用。
+func (r *Registry) HandleSecrets() http.HandlerFunc {
+	return func(w http.ResponseWriter, _ *http.Request) {
+		httpx.OK(w, r.Passwords())
+	}
+}
+
 // HandleGet 返回读取共享用户的处理函数；extra 为附加在结果中的信息（如各服务的使用情况），可为空。
 func (r *Registry) HandleGet(extra func(map[string]any)) http.HandlerFunc {
 	return func(w http.ResponseWriter, _ *http.Request) {

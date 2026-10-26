@@ -1,7 +1,10 @@
 package fileusers
 
 import (
+	"encoding/json"
 	"errors"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	"golang.org/x/crypto/bcrypt"
@@ -242,5 +245,26 @@ func TestCountShared(t *testing.T) {
 	}
 	if got := CountShared([]string{"a"}, nil, false); got != 0 {
 		t.Errorf("没有共享用户时应为 0: %d", got)
+	}
+}
+
+// TestPasswords 验证查看共享用户密码明文的接口按用户名返回原始密码。
+func TestPasswords(t *testing.T) {
+	st, _ := config.Open(t.TempDir())
+	r := New()
+	if err := r.Init(st); err != nil {
+		t.Fatal(err)
+	}
+	if err := r.Save([]User{{Name: "alice", Password: "pa", Root: "/a"}, {Name: "bob", Password: "pb", Root: "/b"}}); err != nil {
+		t.Fatal(err)
+	}
+	rec := httptest.NewRecorder()
+	r.HandleSecrets()(rec, httptest.NewRequest("GET", "/api/fileusers/secrets", nil))
+	var out map[string]string
+	if err := json.Unmarshal(rec.Body.Bytes(), &out); err != nil {
+		t.Fatal(err)
+	}
+	if rec.Code != http.StatusOK || len(out) != 2 || out["alice"] != "pa" || out["bob"] != "pb" {
+		t.Fatalf("应按用户名返回密码明文: %d %s", rec.Code, rec.Body.String())
 	}
 }

@@ -39,7 +39,7 @@
       </div>
     </div>
 
-    <FileUsers v-if="settings" v-model="settings.users" />
+    <FileUsers v-if="settings" v-model="settings.users" secrets-url="/api/ftp/settings/secrets" />
     <SharedFileUsers
       v-if="settings && shared.loaded.value"
       v-model:enabled="settings.sharedUsers"

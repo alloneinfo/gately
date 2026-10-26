@@ -3739,6 +3739,67 @@
         "x-token-allowed": true
       }
     },
+    "/api/backup/secrets": {
+      "get": {
+        "description": "所需權限：`backup:write`。",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "請求參數錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖無效、已過期或未登入"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖缺少所需權限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "查看金鑰明文",
+        "tags": [
+          "設定備份"
+        ],
+        "x-required-scope": "backup:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/backup/settings": {
       "get": {
         "description": "所需權限：`backup:read`。",
@@ -5394,6 +5455,77 @@
         "x-token-allowed": true
       }
     },
+    "/api/cloudflared/tunnels/{key}/secrets": {
+      "get": {
+        "description": "所需權限：`cloudflared:write`。",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "請求參數錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖無效、已過期或未登入"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖缺少所需權限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "查看金鑰明文",
+        "tags": [
+          "Cloudflare 通道"
+        ],
+        "x-required-scope": "cloudflared:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/cron/logs": {
       "delete": {
         "description": "所需權限：`cron:write`。",
@@ -6994,6 +7126,77 @@
           }
         ],
         "summary": "啟用或停用DDNS 任務",
+        "tags": [
+          "動態網域"
+        ],
+        "x-required-scope": "ddns:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/ddns/tasks/{key}/secrets": {
+      "get": {
+        "description": "所需權限：`ddns:write`。",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "請求參數錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖無效、已過期或未登入"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖缺少所需權限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "查看金鑰明文",
         "tags": [
           "動態網域"
         ],
@@ -10537,6 +10740,67 @@
         "x-token-allowed": true
       }
     },
+    "/api/docker/settings/secrets": {
+      "get": {
+        "description": "所需權限：`docker:write`。",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "請求參數錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖無效、已過期或未登入"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖缺少所需權限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "查看倉庫密碼明文（鍵為 registry:\u003c倉庫位址\u003e）",
+        "tags": [
+          "Docker 管理"
+        ],
+        "x-required-scope": "docker:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/docker/tasks": {
       "delete": {
         "description": "所需權限：`docker:write`。",
@@ -11722,6 +11986,77 @@
         "x-token-allowed": true
       }
     },
+    "/api/filebrowser/instances/{key}/secrets": {
+      "get": {
+        "description": "所需權限：`filebrowser:write`。",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "請求參數錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖無效、已過期或未登入"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖缺少所需權限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "查看金鑰明文",
+        "tags": [
+          "File Browser"
+        ],
+        "x-required-scope": "filebrowser:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/filebrowser/logs": {
       "delete": {
         "description": "所需權限：`filebrowser:write`。",
@@ -12174,6 +12509,67 @@
           }
         ],
         "summary": "儲存檔案服務共用使用者",
+        "tags": [
+          "檔案服務共用使用者"
+        ],
+        "x-required-scope": "fileusers:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/fileusers/secrets": {
+      "get": {
+        "description": "所需權限：`fileusers:write`。",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "請求參數錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖無效、已過期或未登入"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖缺少所需權限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "查看共用使用者密碼明文",
         "tags": [
           "檔案服務共用使用者"
         ],
@@ -13670,6 +14066,67 @@
           }
         ],
         "summary": "儲存 FTP 設定",
+        "tags": [
+          "FTP 服務"
+        ],
+        "x-required-scope": "ftp:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/ftp/settings/secrets": {
+      "get": {
+        "description": "所需權限：`ftp:write`。",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "請求參數錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖無效、已過期或未登入"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖缺少所需權限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "查看本機使用者密碼明文",
         "tags": [
           "FTP 服務"
         ],
@@ -16353,6 +16810,77 @@
         "x-token-allowed": true
       }
     },
+    "/api/notify/channels/{key}/secrets": {
+      "get": {
+        "description": "所需權限：`notify:write`。",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "請求參數錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖無效、已過期或未登入"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖缺少所需權限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "查看金鑰明文",
+        "tags": [
+          "通知中心"
+        ],
+        "x-required-scope": "notify:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/notify/channels/{key}/test": {
       "post": {
         "description": "所需權限：`notify:write`。",
@@ -18190,6 +18718,67 @@
         "x-token-allowed": true
       }
     },
+    "/api/smb/settings/secrets": {
+      "get": {
+        "description": "所需權限：`smb:write`。",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "請求參數錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖無效、已過期或未登入"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖缺少所需權限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "查看本機使用者密碼明文",
+        "tags": [
+          "SMB 服務"
+        ],
+        "x-required-scope": "smb:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/smb/shared-users": {
       "get": {
         "description": "已棄用，請改用 `GET /api/fileusers`，本介面保留相容。回傳 WebDAV、FTP、SMB 共用的檔案服務共用使用者，密碼脫敏。fileusers.json 未通過校驗時回傳 `error`，此時共用使用者都無法登入，儲存一份有效的清單後恢復。`issues` 列出無法用於 SMB 的共用使用者及原因：`name`（使用者名稱含 SMB 不允許的字元）、`bcrypt`（密碼是 bcrypt 雜湊）、`share`（目錄名稱不能作為共用名稱或重複）。\n\n所需權限：`smb:read`。",
@@ -18867,6 +19456,77 @@
           }
         ],
         "summary": "立即簽發或續期憑證",
+        "tags": [
+          "SSL 憑證"
+        ],
+        "x-required-scope": "ssl:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/ssl/certs/{key}/secrets": {
+      "get": {
+        "description": "所需權限：`ssl:write`。",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "請求參數錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖無效、已過期或未登入"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖缺少所需權限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "查看金鑰明文",
         "tags": [
           "SSL 憑證"
         ],
@@ -20292,6 +20952,77 @@
         "x-token-allowed": true
       }
     },
+    "/api/storage/mounts/{key}/secrets": {
+      "get": {
+        "description": "所需權限：`storage:write`。",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "請求參數錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖無效、已過期或未登入"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖缺少所需權限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "查看金鑰明文",
+        "tags": [
+          "儲存掛載"
+        ],
+        "x-required-scope": "storage:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/stun/logs": {
       "delete": {
         "description": "所需權限：`stun:write`。",
@@ -21567,6 +22298,62 @@
         "x-token-allowed": false
       }
     },
+    "/api/system/settings/secrets": {
+      "get": {
+        "description": "**僅限登入工作階段使用，API 權杖無法存取此介面。**",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "請求參數錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖無效、已過期或未登入"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖缺少所需權限"
+          }
+        },
+        "summary": "查看第三方登入 Client Secret 明文",
+        "tags": [
+          "系統"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
+      }
+    },
     "/api/system/update": {
       "get": {
         "description": "存取 GitHub 時使用全域設定 `updateProxy` 中的代理。`selfUpgrade.supported` 表示目前部署方式能否線上升級，不能時 `reason` 為 `os`、`docker`、`fnos`、`opkg`、`apk` 或 `readonly`。\n\n所需權限：`status:read`。",
@@ -22417,6 +23204,67 @@
           }
         ],
         "summary": "重新啟動 Tailscale",
+        "tags": [
+          "Tailscale 組網"
+        ],
+        "x-required-scope": "tailscale:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/tailscale/secrets": {
+      "get": {
+        "description": "所需權限：`tailscale:write`。",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "請求參數錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖無效、已過期或未登入"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖缺少所需權限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "查看金鑰明文",
         "tags": [
           "Tailscale 組網"
         ],
@@ -23890,6 +24738,67 @@
           }
         ],
         "summary": "儲存 WebDAV 設定",
+        "tags": [
+          "WebDAV 服務"
+        ],
+        "x-required-scope": "webdav:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/webdav/settings/secrets": {
+      "get": {
+        "description": "所需權限：`webdav:write`。",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "請求參數錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖無效、已過期或未登入"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖缺少所需權限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "查看本機使用者密碼明文",
         "tags": [
           "WebDAV 服務"
         ],
@@ -25677,6 +26586,128 @@
         "x-token-allowed": true
       }
     },
+    "/api/webservice/settings/secrets/oauth": {
+      "get": {
+        "description": "所需權限：`webservice:write`。",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "請求參數錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖無效、已過期或未登入"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖缺少所需權限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "查看第三方登入的 Client Secret 明文（依登入方式識別索引）",
+        "tags": [
+          "Web 服務"
+        ],
+        "x-required-scope": "webservice:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/webservice/settings/secrets/totp": {
+      "get": {
+        "description": "所需權限：`webservice:write`。",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "請求參數錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖無效、已過期或未登入"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖缺少所需權限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "查看共用使用者的 TOTP 金鑰明文（依使用者名稱索引）",
+        "tags": [
+          "Web 服務"
+        ],
+        "x-required-scope": "webservice:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/webservice/stats": {
       "get": {
         "description": "所需權限：`webservice:read`。",
@@ -26385,6 +27416,77 @@
         "x-token-allowed": true
       }
     },
+    "/api/webterminal/connections/{key}/secrets": {
+      "get": {
+        "description": "所需權限：`webterminal:write`。",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "請求參數錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖無效、已過期或未登入"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖缺少所需權限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "查看金鑰明文",
+        "tags": [
+          "Web 終端機"
+        ],
+        "x-required-scope": "webterminal:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/webterminal/connections/{key}/test": {
       "post": {
         "description": "所需權限：`webterminal:write`。",
@@ -26892,6 +27994,77 @@
           }
         ],
         "summary": "啟用或停用項目",
+        "tags": [
+          "Web 終端機"
+        ],
+        "x-required-scope": "webterminal:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/webterminal/credentials/{key}/secrets": {
+      "get": {
+        "description": "所需權限：`webterminal:write`。",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "請求參數錯誤"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖無效、已過期或未登入"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "權杖缺少所需權限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "查看金鑰明文",
         "tags": [
           "Web 終端機"
         ],

@@ -88,6 +88,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/ddns/tasks/{key}` | `ddns:write` | 删除DDNS 任务 |
 | PUT | `/api/ddns/tasks/{key}/enable` | `ddns:write` | 启用或停用DDNS 任务 |
 | PUT | `/api/ddns/tasks-order` | `ddns:write` | 调整DDNS 任务排序 |
+| GET | `/api/ddns/tasks/{key}/secrets` | `ddns:write` | 查看密钥明文 |
 | POST | `/api/ddns/tasks/{key}/sync` | `ddns:write` | 立即同步一个 DDNS 任务 |
 | GET | `/api/ddns/providers` | `ddns:read` | 列出支持的 DNS 服务商及其所需参数 |
 | GET | `/api/ddns/netinterfaces` | `ddns:read` | 列出本机网卡及地址 |
@@ -121,6 +122,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/tailscale/logs` | `tailscale:write` | 清空模块运行日志 |
 | GET | `/api/tailscale/settings` | `tailscale:read` | 读取 Tailscale 设置 |
 | PUT | `/api/tailscale/settings` | `tailscale:write` | 保存 Tailscale 设置 |
+| GET | `/api/tailscale/secrets` | `tailscale:write` | 查看密钥明文 |
 | GET | `/api/tailscale/status` | `tailscale:read` | 查看 Tailscale 连接状态 |
 | POST | `/api/tailscale/restart` | `tailscale:write` | 重启 Tailscale |
 | POST | `/api/tailscale/logout` | `tailscale:write` | 退出 Tailscale 登录 |
@@ -167,6 +169,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/cloudflared/tunnels/{key}` | `cloudflared:write` | 删除Cloudflare 隧道 |
 | PUT | `/api/cloudflared/tunnels/{key}/enable` | `cloudflared:write` | 启用或停用Cloudflare 隧道 |
 | PUT | `/api/cloudflared/tunnels-order` | `cloudflared:write` | 调整Cloudflare 隧道排序 |
+| GET | `/api/cloudflared/tunnels/{key}/secrets` | `cloudflared:write` | 查看密钥明文 |
 | POST | `/api/cloudflared/tunnels/{key}/restart` | `cloudflared:write` | 重启一条 Cloudflare 隧道 |
 | GET | `/api/cloudflared/settings` | `cloudflared:read` | 读取 Cloudflare 隧道设置 |
 | PUT | `/api/cloudflared/settings` | `cloudflared:write` | 保存 Cloudflare 隧道设置 |
@@ -189,6 +192,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/ssl/certs/{key}` | `ssl:write` | 删除证书 |
 | PUT | `/api/ssl/certs/{key}/enable` | `ssl:write` | 启用或停用证书 |
 | PUT | `/api/ssl/certs-order` | `ssl:write` | 调整证书排序 |
+| GET | `/api/ssl/certs/{key}/secrets` | `ssl:write` | 查看密钥明文 |
 | POST | `/api/ssl/certs/{key}/renew` | `ssl:write` | 立即签发或续期证书 |
 | GET | `/api/ssl/certs/{key}/download` | `ssl:write` | 下载证书与私钥 |
 | POST | `/api/ssl/certs/{key}/deploy` | `ssl:write` | 立即部署证书 |
@@ -233,6 +237,8 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | POST | `/api/webservice/iplists/{key}/refresh` | `webservice:write` | 立即刷新订阅 IP 列表 |
 | POST | `/api/webservice/import/nginx` | `webservice:write` | 导入 nginx 配置 |
 | GET | `/api/webservice/settings` | `webservice:read` | 读取 Web 服务全局设置 |
+| GET | `/api/webservice/settings/secrets/totp` | `webservice:write` | 查看共享用户的 TOTP 密钥明文（按用户名索引） |
+| GET | `/api/webservice/settings/secrets/oauth` | `webservice:write` | 查看第三方登录的 Client Secret 明文（按登录方式标识索引） |
 | POST | `/api/webservice/totp-secret` | `webservice:write` | 为共享用户生成新的 TOTP 密钥（不保存，保存设置后生效） |
 | PUT | `/api/webservice/settings` | `webservice:write` | 保存 Web 服务全局设置 |
 | GET | `/api/webservice/stats` | `webservice:read` | 站点分钟级统计（?listener=&site=&minutes=） |
@@ -294,6 +300,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/webterminal/connections/{key}` | `webterminal:write` | 删除终端连接 |
 | PUT | `/api/webterminal/connections/{key}/enable` | `webterminal:write` | 启用或停用终端连接 |
 | PUT | `/api/webterminal/connections-order` | `webterminal:write` | 调整终端连接排序 |
+| GET | `/api/webterminal/connections/{key}/secrets` | `webterminal:write` | 查看密钥明文 |
 | DELETE | `/api/webterminal/connections/{key}/hostkey` | `webterminal:write` | 清除已记录的主机密钥 |
 | POST | `/api/webterminal/connections/{key}/test` | `webterminal:write` | 测试已保存连接 |
 | POST | `/api/webterminal/connections/test` | `webterminal:write` | 测试临时连接参数 |
@@ -304,6 +311,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/webterminal/credentials/{key}` | `webterminal:write` | 删除条目 |
 | PUT | `/api/webterminal/credentials/{key}/enable` | `webterminal:write` | 启用或停用条目 |
 | PUT | `/api/webterminal/credentials-order` | `webterminal:write` | 调整条目排序 |
+| GET | `/api/webterminal/credentials/{key}/secrets` | `webterminal:write` | 查看密钥明文 |
 | GET | `/api/webterminal/connections/{key}/ws` | `webterminal:write` | 打开终端会话（WebSocket） |
 | GET | `/api/webterminal/sessions/{id}/ws` | `webterminal:write` | 接入已有终端会话（WebSocket） |
 | GET | `/api/webterminal/sessions` | `webterminal:read` | 列出终端会话 |
@@ -398,6 +406,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | POST | `/api/docker/prune` | `docker:write` | 清理无用的 Docker 资源 |
 | GET | `/api/docker/settings` | `docker:read` | 读取 Docker 模块设置 |
 | PUT | `/api/docker/settings` | `docker:write` | 保存 Docker 模块设置 |
+| GET | `/api/docker/settings/secrets` | `docker:write` | 查看仓库密码明文（键为 registry:<仓库地址>） |
 | GET | `/api/docker/containers` | `docker:read` | 列出容器 |
 | POST | `/api/docker/containers` | `docker:write` | 创建容器 |
 | POST | `/api/docker/containers/check-all` | `docker:write` | 检查全部容器镜像更新 |
@@ -431,6 +440,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | GET | `/api/webdav/logs` | `webdav:read` | 查看模块运行日志 |
 | DELETE | `/api/webdav/logs` | `webdav:write` | 清空模块运行日志 |
 | GET | `/api/webdav/settings` | `webdav:read` | 读取 WebDAV 设置 |
+| GET | `/api/webdav/settings/secrets` | `webdav:write` | 查看本地用户密码明文 |
 | GET | `/api/webdav/shared-users` | `webdav:read` | 读取文件服务共享用户（旧接口） |
 | PUT | `/api/webdav/shared-users` | `webdav:write,ftp:write,smb:write` | 保存文件服务共享用户（旧接口） |
 | PUT | `/api/webdav/settings` | `webdav:write` | 保存 WebDAV 设置 |
@@ -442,6 +452,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | GET | `/api/ftp/logs` | `ftp:read` | 查看模块运行日志 |
 | DELETE | `/api/ftp/logs` | `ftp:write` | 清空模块运行日志 |
 | GET | `/api/ftp/settings` | `ftp:read` | 读取 FTP 设置 |
+| GET | `/api/ftp/settings/secrets` | `ftp:write` | 查看本地用户密码明文 |
 | GET | `/api/ftp/shared-users` | `ftp:read` | 读取文件服务共享用户（旧接口） |
 | PUT | `/api/ftp/shared-users` | `webdav:write,ftp:write,smb:write` | 保存文件服务共享用户（旧接口） |
 | PUT | `/api/ftp/settings` | `ftp:write` | 保存 FTP 设置 |
@@ -453,6 +464,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | GET | `/api/smb/logs` | `smb:read` | 查看模块运行日志 |
 | DELETE | `/api/smb/logs` | `smb:write` | 清空模块运行日志 |
 | GET | `/api/smb/settings` | `smb:read` | 读取 SMB 设置 |
+| GET | `/api/smb/settings/secrets` | `smb:write` | 查看本地用户密码明文 |
 | GET | `/api/smb/shared-users` | `smb:read` | 读取文件服务共享用户（旧接口） |
 | PUT | `/api/smb/shared-users` | `webdav:write,ftp:write,smb:write` | 保存文件服务共享用户（旧接口） |
 | PUT | `/api/smb/settings` | `smb:write` | 保存 SMB 设置 |
@@ -469,6 +481,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/filebrowser/instances/{key}` | `filebrowser:write` | 删除File Browser 实例 |
 | PUT | `/api/filebrowser/instances/{key}/enable` | `filebrowser:write` | 启用或停用File Browser 实例 |
 | PUT | `/api/filebrowser/instances-order` | `filebrowser:write` | 调整File Browser 实例排序 |
+| GET | `/api/filebrowser/instances/{key}/secrets` | `filebrowser:write` | 查看密钥明文 |
 | POST | `/api/filebrowser/instances/{key}/restart` | `filebrowser:write` | 重启一个 File Browser 实例 |
 | GET | `/api/filebrowser/settings` | `filebrowser:read` | 读取 File Browser 程序设置 |
 | PUT | `/api/filebrowser/settings` | `filebrowser:write` | 保存 File Browser 程序设置 |
@@ -491,6 +504,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/storage/mounts/{key}` | `storage:write` | 删除条目 |
 | PUT | `/api/storage/mounts/{key}/enable` | `storage:write` | 启用或停用条目 |
 | PUT | `/api/storage/mounts-order` | `storage:write` | 调整条目排序 |
+| GET | `/api/storage/mounts/{key}/secrets` | `storage:write` | 查看密钥明文 |
 | GET | `/api/storage/files/{key}/list` | `storage:read` | 列出存储目录 |
 | GET | `/api/storage/files/{key}/download` | `storage:write` | 下载存储文件 |
 | POST | `/api/storage/files/{key}/upload` | `storage:write` | 上传文件到存储 |
@@ -510,6 +524,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/notify/channels/{key}` | `notify:write` | 删除通知渠道 |
 | PUT | `/api/notify/channels/{key}/enable` | `notify:write` | 启用或停用通知渠道 |
 | PUT | `/api/notify/channels-order` | `notify:write` | 调整通知渠道排序 |
+| GET | `/api/notify/channels/{key}/secrets` | `notify:write` | 查看密钥明文 |
 | GET | `/api/notify/rules` | `notify:read` | 获取通知规则列表 |
 | POST | `/api/notify/rules` | `notify:write` | 新增通知规则 |
 | PUT | `/api/notify/rules/{key}` | `notify:write` | 修改通知规则 |
@@ -548,6 +563,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | PUT | `/api/backup/targets-order` | `backup:write` | 调整备份目的地排序 |
 | GET | `/api/backup/settings` | `backup:read` | 备份设置 |
 | PUT | `/api/backup/settings` | `backup:write` | 修改备份设置（口令传占位符表示保持不变） |
+| GET | `/api/backup/secrets` | `backup:write` | 查看密钥明文 |
 | POST | `/api/backup/run` | `backup:write` | 立即备份一次 |
 | GET | `/api/backup/status` | `backup:read` | 最近一次备份结果与下次执行时间 |
 | GET | `/api/backup/mounts` | `backup:read` | 可作为备份目的地的存储挂载点 |
@@ -560,6 +576,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | --- | --- | --- | --- |
 | GET | `/api/fileusers` | `fileusers:read` | 读取文件服务共享用户 |
 | PUT | `/api/fileusers` | `fileusers:write` | 保存文件服务共享用户 |
+| GET | `/api/fileusers/secrets` | `fileusers:write` | 查看共享用户密码明文 |
 
 ## 系统
 
@@ -570,6 +587,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | GET | `/api/logs` | `logs:read` | 查看系统日志 |
 | GET | `/api/system/settings` | 仅登录会话 | 读取全局设置 |
 | PUT | `/api/system/settings` | 仅登录会话 | 保存全局设置 |
+| GET | `/api/system/settings/secrets` | 仅登录会话 | 查看第三方登录 Client Secret 明文 |
 | GET | `/api/system/info` | `status:read` | 查看系统信息 |
 | GET | `/api/system/update` | `status:read` | 检查新版本 |
 | POST | `/api/system/upgrade` | 仅登录会话 | 在线升级到最新版本 |

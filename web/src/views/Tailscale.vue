@@ -63,7 +63,7 @@
         <el-form label-width="130px" :label-position="labelPosition" class="svc-form">
           <el-form-item :label="t('common.enable')"><el-switch v-model="settings.enable" /></el-form-item>
           <el-form-item :label="t('tailscale.authKey')">
-            <el-input v-model="settings.authKey" type="password" show-password :placeholder="t('tailscale.authKeyPlaceholder')" />
+            <SecretInput v-model="settings.authKey" :placeholder="t('tailscale.authKeyPlaceholder')" :reveal="secretOf('/api/tailscale/secrets', 'authKey')" />
           </el-form-item>
           <el-form-item :label="t('tailscale.hostname')"><el-input v-model="settings.hostname" :placeholder="t('tailscale.hostnamePlaceholder')" /></el-form-item>
           <el-form-item :label="t('tailscale.loginServer')">
@@ -136,6 +136,8 @@ import { ElMessage } from 'element-plus'
 import { useI18n } from 'vue-i18n'
 import { Activity, Cpu, Network, RefreshCw, Save, SlidersHorizontal, Waypoints } from 'lucide-vue-next'
 import { api } from '../api'
+import SecretInput from '../components/SecretInput.vue'
+import { secretOf } from '../secrets'
 import PageHeader from '../components/PageHeader.vue'
 import Field from '../components/Field.vue'
 import StatusBadge, { type StatusType } from '../components/StatusBadge.vue'

@@ -88,6 +88,7 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | DELETE | `/api/ddns/tasks/{key}` | `ddns:write` | Excluir Tarefa DDNS |
 | PUT | `/api/ddns/tasks/{key}/enable` | `ddns:write` | Ativar ou desativar Tarefa DDNS |
 | PUT | `/api/ddns/tasks-order` | `ddns:write` | Reordenar Tarefa DDNS |
+| GET | `/api/ddns/tasks/{key}/secrets` | `ddns:write` | Ver segredos em texto puro |
 | POST | `/api/ddns/tasks/{key}/sync` | `ddns:write` | Sincronizar uma tarefa DDNS imediatamente |
 | GET | `/api/ddns/providers` | `ddns:read` | Listar provedores de DNS suportados e seus parâmetros necessários |
 | GET | `/api/ddns/netinterfaces` | `ddns:read` | Listar placas de rede e endereços desta máquina |
@@ -121,6 +122,7 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | DELETE | `/api/tailscale/logs` | `tailscale:write` | Limpar logs de execução do módulo |
 | GET | `/api/tailscale/settings` | `tailscale:read` | Ler configurações do Tailscale |
 | PUT | `/api/tailscale/settings` | `tailscale:write` | Salvar configurações do Tailscale |
+| GET | `/api/tailscale/secrets` | `tailscale:write` | Ver segredos em texto puro |
 | GET | `/api/tailscale/status` | `tailscale:read` | Ver o estado da conexão do Tailscale |
 | POST | `/api/tailscale/restart` | `tailscale:write` | Reiniciar o Tailscale |
 | POST | `/api/tailscale/logout` | `tailscale:write` | Sair do login do Tailscale |
@@ -167,6 +169,7 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | DELETE | `/api/cloudflared/tunnels/{key}` | `cloudflared:write` | Excluir Túnel Cloudflare |
 | PUT | `/api/cloudflared/tunnels/{key}/enable` | `cloudflared:write` | Ativar ou desativar Túnel Cloudflare |
 | PUT | `/api/cloudflared/tunnels-order` | `cloudflared:write` | Reordenar Túnel Cloudflare |
+| GET | `/api/cloudflared/tunnels/{key}/secrets` | `cloudflared:write` | Ver segredos em texto puro |
 | POST | `/api/cloudflared/tunnels/{key}/restart` | `cloudflared:write` | Reiniciar um túnel Cloudflare |
 | GET | `/api/cloudflared/settings` | `cloudflared:read` | Ler configurações do túnel Cloudflare |
 | PUT | `/api/cloudflared/settings` | `cloudflared:write` | Salvar configurações do túnel Cloudflare |
@@ -189,6 +192,7 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | DELETE | `/api/ssl/certs/{key}` | `ssl:write` | Excluir Certificado |
 | PUT | `/api/ssl/certs/{key}/enable` | `ssl:write` | Ativar ou desativar Certificado |
 | PUT | `/api/ssl/certs-order` | `ssl:write` | Reordenar Certificado |
+| GET | `/api/ssl/certs/{key}/secrets` | `ssl:write` | Ver segredos em texto puro |
 | POST | `/api/ssl/certs/{key}/renew` | `ssl:write` | Emitir ou renovar o certificado imediatamente |
 | GET | `/api/ssl/certs/{key}/download` | `ssl:write` | Baixar certificado e chave privada |
 | POST | `/api/ssl/certs/{key}/deploy` | `ssl:write` | Implantar um certificado agora |
@@ -233,6 +237,8 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | POST | `/api/webservice/iplists/{key}/refresh` | `webservice:write` | Atualizar agora uma lista de IP assinada |
 | POST | `/api/webservice/import/nginx` | `webservice:write` | Importar configuração do nginx |
 | GET | `/api/webservice/settings` | `webservice:read` | Ler configurações globais do serviço web |
+| GET | `/api/webservice/settings/secrets/totp` | `webservice:write` | Ver segredos TOTP dos usuários compartilhados em texto puro (por nome de usuário) |
+| GET | `/api/webservice/settings/secrets/oauth` | `webservice:write` | Ver Client Secrets dos logins de terceiros em texto puro (por identificador do método) |
 | POST | `/api/webservice/totp-secret` | `webservice:write` | Gerar nova chave TOTP para um usuário compartilhado (não salva; vale após salvar as configurações) |
 | PUT | `/api/webservice/settings` | `webservice:write` | Salvar configurações globais do serviço web |
 | GET | `/api/webservice/stats` | `webservice:read` | Estatísticas por minuto do site (?listener=&site=&minutes=) |
@@ -294,6 +300,7 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | DELETE | `/api/webterminal/connections/{key}` | `webterminal:write` | Excluir Conexão de terminal |
 | PUT | `/api/webterminal/connections/{key}/enable` | `webterminal:write` | Ativar ou desativar Conexão de terminal |
 | PUT | `/api/webterminal/connections-order` | `webterminal:write` | Reordenar Conexão de terminal |
+| GET | `/api/webterminal/connections/{key}/secrets` | `webterminal:write` | Ver segredos em texto puro |
 | DELETE | `/api/webterminal/connections/{key}/hostkey` | `webterminal:write` | Limpar chaves de host registradas |
 | POST | `/api/webterminal/connections/{key}/test` | `webterminal:write` | Testar conexão salva |
 | POST | `/api/webterminal/connections/test` | `webterminal:write` | Testar parâmetros de conexão temporários |
@@ -304,6 +311,7 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | DELETE | `/api/webterminal/credentials/{key}` | `webterminal:write` | Excluir Entrada |
 | PUT | `/api/webterminal/credentials/{key}/enable` | `webterminal:write` | Ativar ou desativar Entrada |
 | PUT | `/api/webterminal/credentials-order` | `webterminal:write` | Reordenar Entrada |
+| GET | `/api/webterminal/credentials/{key}/secrets` | `webterminal:write` | Ver segredos em texto puro |
 | GET | `/api/webterminal/connections/{key}/ws` | `webterminal:write` | Abrir sessão de terminal (WebSocket) |
 | GET | `/api/webterminal/sessions/{id}/ws` | `webterminal:write` | Anexar a uma sessão de terminal existente (WebSocket) |
 | GET | `/api/webterminal/sessions` | `webterminal:read` | Listar sessões de terminal |
@@ -398,6 +406,7 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | POST | `/api/docker/prune` | `docker:write` | Limpar recursos Docker não utilizados |
 | GET | `/api/docker/settings` | `docker:read` | Ler configurações do módulo Docker |
 | PUT | `/api/docker/settings` | `docker:write` | Salvar configurações do módulo Docker |
+| GET | `/api/docker/settings/secrets` | `docker:write` | Ver senhas dos registros em texto puro (chaves registry:<endereço do registro>) |
 | GET | `/api/docker/containers` | `docker:read` | Listar contêineres |
 | POST | `/api/docker/containers` | `docker:write` | Criar contêiner |
 | POST | `/api/docker/containers/check-all` | `docker:write` | Verificar atualizações de todas as imagens de contêineres |
@@ -431,6 +440,7 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | GET | `/api/webdav/logs` | `webdav:read` | Ver logs de execução do módulo |
 | DELETE | `/api/webdav/logs` | `webdav:write` | Limpar logs de execução do módulo |
 | GET | `/api/webdav/settings` | `webdav:read` | Ler configurações do WebDAV |
+| GET | `/api/webdav/settings/secrets` | `webdav:write` | Ver senhas dos usuários locais em texto puro |
 | GET | `/api/webdav/shared-users` | `webdav:read` | Ler os usuários compartilhados dos serviços de arquivos (endpoint antigo) |
 | PUT | `/api/webdav/shared-users` | `webdav:write,ftp:write,smb:write` | Salvar os usuários compartilhados dos serviços de arquivos (endpoint antigo) |
 | PUT | `/api/webdav/settings` | `webdav:write` | Salvar configurações do WebDAV |
@@ -442,6 +452,7 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | GET | `/api/ftp/logs` | `ftp:read` | Ver logs de execução do módulo |
 | DELETE | `/api/ftp/logs` | `ftp:write` | Limpar logs de execução do módulo |
 | GET | `/api/ftp/settings` | `ftp:read` | Ler configurações do FTP |
+| GET | `/api/ftp/settings/secrets` | `ftp:write` | Ver senhas dos usuários locais em texto puro |
 | GET | `/api/ftp/shared-users` | `ftp:read` | Ler os usuários compartilhados dos serviços de arquivos (endpoint antigo) |
 | PUT | `/api/ftp/shared-users` | `webdav:write,ftp:write,smb:write` | Salvar os usuários compartilhados dos serviços de arquivos (endpoint antigo) |
 | PUT | `/api/ftp/settings` | `ftp:write` | Salvar configurações do FTP |
@@ -453,6 +464,7 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | GET | `/api/smb/logs` | `smb:read` | Ver logs de execução do módulo |
 | DELETE | `/api/smb/logs` | `smb:write` | Limpar logs de execução do módulo |
 | GET | `/api/smb/settings` | `smb:read` | Obter configurações do SMB |
+| GET | `/api/smb/settings/secrets` | `smb:write` | Ver senhas dos usuários locais em texto puro |
 | GET | `/api/smb/shared-users` | `smb:read` | Ler os usuários compartilhados dos serviços de arquivos (endpoint antigo) |
 | PUT | `/api/smb/shared-users` | `webdav:write,ftp:write,smb:write` | Salvar os usuários compartilhados dos serviços de arquivos (endpoint antigo) |
 | PUT | `/api/smb/settings` | `smb:write` | Salvar configurações do SMB |
@@ -469,6 +481,7 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | DELETE | `/api/filebrowser/instances/{key}` | `filebrowser:write` | Excluir Instância do File Browser |
 | PUT | `/api/filebrowser/instances/{key}/enable` | `filebrowser:write` | Ativar ou desativar Instância do File Browser |
 | PUT | `/api/filebrowser/instances-order` | `filebrowser:write` | Reordenar Instância do File Browser |
+| GET | `/api/filebrowser/instances/{key}/secrets` | `filebrowser:write` | Ver segredos em texto puro |
 | POST | `/api/filebrowser/instances/{key}/restart` | `filebrowser:write` | Reiniciar uma instância do File Browser |
 | GET | `/api/filebrowser/settings` | `filebrowser:read` | Ler as configurações do programa File Browser |
 | PUT | `/api/filebrowser/settings` | `filebrowser:write` | Salvar as configurações do programa File Browser |
@@ -491,6 +504,7 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | DELETE | `/api/storage/mounts/{key}` | `storage:write` | Excluir Entrada |
 | PUT | `/api/storage/mounts/{key}/enable` | `storage:write` | Ativar ou desativar Entrada |
 | PUT | `/api/storage/mounts-order` | `storage:write` | Reordenar Entrada |
+| GET | `/api/storage/mounts/{key}/secrets` | `storage:write` | Ver segredos em texto puro |
 | GET | `/api/storage/files/{key}/list` | `storage:read` | Listar diretório de armazenamento |
 | GET | `/api/storage/files/{key}/download` | `storage:write` | Baixar arquivo do armazenamento |
 | POST | `/api/storage/files/{key}/upload` | `storage:write` | Enviar arquivo para o armazenamento |
@@ -510,6 +524,7 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | DELETE | `/api/notify/channels/{key}` | `notify:write` | Excluir Canais de notificação |
 | PUT | `/api/notify/channels/{key}/enable` | `notify:write` | Ativar ou desativar Canais de notificação |
 | PUT | `/api/notify/channels-order` | `notify:write` | Reordenar Canais de notificação |
+| GET | `/api/notify/channels/{key}/secrets` | `notify:write` | Ver segredos em texto puro |
 | GET | `/api/notify/rules` | `notify:read` | Listar Regras de notificação |
 | POST | `/api/notify/rules` | `notify:write` | Adicionar Regras de notificação |
 | PUT | `/api/notify/rules/{key}` | `notify:write` | Modificar Regras de notificação |
@@ -548,6 +563,7 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | PUT | `/api/backup/targets-order` | `backup:write` | Reordenar Destino do backup |
 | GET | `/api/backup/settings` | `backup:read` | Configurações de backup |
 | PUT | `/api/backup/settings` | `backup:write` | Modificar configurações de backup (enviar o marcador no lugar da senha mantém o valor atual) |
+| GET | `/api/backup/secrets` | `backup:write` | Ver segredos em texto puro |
 | POST | `/api/backup/run` | `backup:write` | Fazer um backup agora |
 | GET | `/api/backup/status` | `backup:read` | Resultado do último backup e horário da próxima execução |
 | GET | `/api/backup/mounts` | `backup:read` | Pontos de montagem de armazenamento que podem ser destino de backup |
@@ -560,6 +576,7 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | --- | --- | --- | --- |
 | GET | `/api/fileusers` | `fileusers:read` | Ler os usuários compartilhados dos serviços de arquivos |
 | PUT | `/api/fileusers` | `fileusers:write` | Salvar os usuários compartilhados dos serviços de arquivos |
+| GET | `/api/fileusers/secrets` | `fileusers:write` | Ver senhas dos usuários compartilhados em texto puro |
 
 ## Sistema
 
@@ -570,6 +587,7 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | GET | `/api/logs` | `logs:read` | Ver logs do sistema |
 | GET | `/api/system/settings` | Somente sessão de login | Ler configurações globais |
 | PUT | `/api/system/settings` | Somente sessão de login | Salvar configurações globais |
+| GET | `/api/system/settings/secrets` | Somente sessão de login | Ver Client Secrets do login de terceiros em texto puro |
 | GET | `/api/system/info` | `status:read` | Ver informações do sistema |
 | GET | `/api/system/update` | `status:read` | Verificar nova versão |
 | POST | `/api/system/upgrade` | Somente sessão de login | Atualizar online para a versão mais recente |

@@ -13,5 +13,6 @@
   "qrHelp": "인증 앱(Google Authenticator, 1Password 등)으로 스캔하거나 키를 직접 입력하세요. 설정을 저장하면 적용되며, 다시 생성하면 이전 키는 무효가 됩니다",
   "emailPlaceholder": "이메일(선택)",
   "displayNamePlaceholder": "표시 이름(선택)",
-  "groupsPlaceholder": "그룹(선택, Enter로 추가)"
+  "groupsPlaceholder": "그룹(선택, Enter로 추가)",
+  "totpShow": "QR 코드 보기"
 }

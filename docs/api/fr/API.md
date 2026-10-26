@@ -88,6 +88,7 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | DELETE | `/api/ddns/tasks/{key}` | `ddns:write` | Supprimer Tâche DDNS |
 | PUT | `/api/ddns/tasks/{key}/enable` | `ddns:write` | Activer ou désactiver Tâche DDNS |
 | PUT | `/api/ddns/tasks-order` | `ddns:write` | Réordonner Tâche DDNS |
+| GET | `/api/ddns/tasks/{key}/secrets` | `ddns:write` | Afficher les secrets en clair |
 | POST | `/api/ddns/tasks/{key}/sync` | `ddns:write` | Synchroniser immédiatement une tâche DDNS |
 | GET | `/api/ddns/providers` | `ddns:read` | Lister les fournisseurs DNS pris en charge et leurs paramètres requis |
 | GET | `/api/ddns/netinterfaces` | `ddns:read` | Lister les cartes réseau de cette machine et leurs adresses |
@@ -121,6 +122,7 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | DELETE | `/api/tailscale/logs` | `tailscale:write` | Vider les journaux d'exécution d'un module |
 | GET | `/api/tailscale/settings` | `tailscale:read` | Lire les paramètres Tailscale |
 | PUT | `/api/tailscale/settings` | `tailscale:write` | Enregistrer les paramètres Tailscale |
+| GET | `/api/tailscale/secrets` | `tailscale:write` | Afficher les secrets en clair |
 | GET | `/api/tailscale/status` | `tailscale:read` | Consulter l'état de connexion Tailscale |
 | POST | `/api/tailscale/restart` | `tailscale:write` | Redémarrer Tailscale |
 | POST | `/api/tailscale/logout` | `tailscale:write` | Se déconnecter de Tailscale |
@@ -167,6 +169,7 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | DELETE | `/api/cloudflared/tunnels/{key}` | `cloudflared:write` | Supprimer Tunnel Cloudflare |
 | PUT | `/api/cloudflared/tunnels/{key}/enable` | `cloudflared:write` | Activer ou désactiver Tunnel Cloudflare |
 | PUT | `/api/cloudflared/tunnels-order` | `cloudflared:write` | Réordonner Tunnel Cloudflare |
+| GET | `/api/cloudflared/tunnels/{key}/secrets` | `cloudflared:write` | Afficher les secrets en clair |
 | POST | `/api/cloudflared/tunnels/{key}/restart` | `cloudflared:write` | Redémarrer un tunnel Cloudflare |
 | GET | `/api/cloudflared/settings` | `cloudflared:read` | Lire les paramètres du tunnel Cloudflare |
 | PUT | `/api/cloudflared/settings` | `cloudflared:write` | Enregistrer les paramètres du tunnel Cloudflare |
@@ -189,6 +192,7 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | DELETE | `/api/ssl/certs/{key}` | `ssl:write` | Supprimer Certificat |
 | PUT | `/api/ssl/certs/{key}/enable` | `ssl:write` | Activer ou désactiver Certificat |
 | PUT | `/api/ssl/certs-order` | `ssl:write` | Réordonner Certificat |
+| GET | `/api/ssl/certs/{key}/secrets` | `ssl:write` | Afficher les secrets en clair |
 | POST | `/api/ssl/certs/{key}/renew` | `ssl:write` | Émettre ou renouveler un certificat immédiatement |
 | GET | `/api/ssl/certs/{key}/download` | `ssl:write` | Télécharger le certificat et la clé privée |
 | POST | `/api/ssl/certs/{key}/deploy` | `ssl:write` | Déployer un certificat maintenant |
@@ -233,6 +237,8 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | POST | `/api/webservice/iplists/{key}/refresh` | `webservice:write` | Actualiser maintenant une liste d'IP abonnée |
 | POST | `/api/webservice/import/nginx` | `webservice:write` | Importer une configuration nginx |
 | GET | `/api/webservice/settings` | `webservice:read` | Lire les paramètres globaux du service Web |
+| GET | `/api/webservice/settings/secrets/totp` | `webservice:write` | Afficher en clair les secrets TOTP des utilisateurs partagés (indexés par nom d'utilisateur) |
+| GET | `/api/webservice/settings/secrets/oauth` | `webservice:write` | Afficher en clair les Client Secret des connexions tierces (indexés par identifiant de méthode) |
 | POST | `/api/webservice/totp-secret` | `webservice:write` | Générer une nouvelle clé TOTP pour un utilisateur partagé (non enregistrée ; effective après enregistrement) |
 | PUT | `/api/webservice/settings` | `webservice:write` | Enregistrer les paramètres globaux du service Web |
 | GET | `/api/webservice/stats` | `webservice:read` | Statistiques par minute du site (?listener=&site=&minutes=) |
@@ -294,6 +300,7 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | DELETE | `/api/webterminal/connections/{key}` | `webterminal:write` | Supprimer Connexion de terminal |
 | PUT | `/api/webterminal/connections/{key}/enable` | `webterminal:write` | Activer ou désactiver Connexion de terminal |
 | PUT | `/api/webterminal/connections-order` | `webterminal:write` | Réordonner Connexion de terminal |
+| GET | `/api/webterminal/connections/{key}/secrets` | `webterminal:write` | Afficher les secrets en clair |
 | DELETE | `/api/webterminal/connections/{key}/hostkey` | `webterminal:write` | Effacer la clé d'hôte enregistrée |
 | POST | `/api/webterminal/connections/{key}/test` | `webterminal:write` | Tester une connexion enregistrée |
 | POST | `/api/webterminal/connections/test` | `webterminal:write` | Tester des paramètres de connexion temporaires |
@@ -304,6 +311,7 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | DELETE | `/api/webterminal/credentials/{key}` | `webterminal:write` | Supprimer Entrée |
 | PUT | `/api/webterminal/credentials/{key}/enable` | `webterminal:write` | Activer ou désactiver Entrée |
 | PUT | `/api/webterminal/credentials-order` | `webterminal:write` | Réordonner Entrée |
+| GET | `/api/webterminal/credentials/{key}/secrets` | `webterminal:write` | Afficher les secrets en clair |
 | GET | `/api/webterminal/connections/{key}/ws` | `webterminal:write` | Ouvrir une session de terminal (WebSocket) |
 | GET | `/api/webterminal/sessions/{id}/ws` | `webterminal:write` | Se rattacher à une session de terminal existante (WebSocket) |
 | GET | `/api/webterminal/sessions` | `webterminal:read` | Lister les sessions de terminal |
@@ -398,6 +406,7 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | POST | `/api/docker/prune` | `docker:write` | Nettoyer les ressources Docker inutiles |
 | GET | `/api/docker/settings` | `docker:read` | Lire les paramètres du module Docker |
 | PUT | `/api/docker/settings` | `docker:write` | Enregistrer les paramètres du module Docker |
+| GET | `/api/docker/settings/secrets` | `docker:write` | Afficher en clair les mots de passe des registres (clés registry:<adresse du registre>) |
 | GET | `/api/docker/containers` | `docker:read` | Lister les conteneurs |
 | POST | `/api/docker/containers` | `docker:write` | Créer un conteneur |
 | POST | `/api/docker/containers/check-all` | `docker:write` | Vérifier les mises à jour de toutes les images de conteneurs |
@@ -431,6 +440,7 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | GET | `/api/webdav/logs` | `webdav:read` | Consulter les journaux d'exécution d'un module |
 | DELETE | `/api/webdav/logs` | `webdav:write` | Vider les journaux d'exécution d'un module |
 | GET | `/api/webdav/settings` | `webdav:read` | Lire les paramètres WebDAV |
+| GET | `/api/webdav/settings/secrets` | `webdav:write` | Afficher en clair les mots de passe des utilisateurs locaux |
 | GET | `/api/webdav/shared-users` | `webdav:read` | Lire les utilisateurs partagés des services de fichiers (ancien point d’accès) |
 | PUT | `/api/webdav/shared-users` | `webdav:write,ftp:write,smb:write` | Enregistrer les utilisateurs partagés des services de fichiers (ancien point d’accès) |
 | PUT | `/api/webdav/settings` | `webdav:write` | Enregistrer les paramètres WebDAV |
@@ -442,6 +452,7 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | GET | `/api/ftp/logs` | `ftp:read` | Consulter les journaux d'exécution d'un module |
 | DELETE | `/api/ftp/logs` | `ftp:write` | Vider les journaux d'exécution d'un module |
 | GET | `/api/ftp/settings` | `ftp:read` | Lire les paramètres FTP |
+| GET | `/api/ftp/settings/secrets` | `ftp:write` | Afficher en clair les mots de passe des utilisateurs locaux |
 | GET | `/api/ftp/shared-users` | `ftp:read` | Lire les utilisateurs partagés des services de fichiers (ancien point d’accès) |
 | PUT | `/api/ftp/shared-users` | `webdav:write,ftp:write,smb:write` | Enregistrer les utilisateurs partagés des services de fichiers (ancien point d’accès) |
 | PUT | `/api/ftp/settings` | `ftp:write` | Enregistrer les paramètres FTP |
@@ -453,6 +464,7 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | GET | `/api/smb/logs` | `smb:read` | Consulter les journaux d'exécution d'un module |
 | DELETE | `/api/smb/logs` | `smb:write` | Vider les journaux d'exécution d'un module |
 | GET | `/api/smb/settings` | `smb:read` | Lire les paramètres SMB |
+| GET | `/api/smb/settings/secrets` | `smb:write` | Afficher en clair les mots de passe des utilisateurs locaux |
 | GET | `/api/smb/shared-users` | `smb:read` | Lire les utilisateurs partagés des services de fichiers (ancien point d’accès) |
 | PUT | `/api/smb/shared-users` | `webdav:write,ftp:write,smb:write` | Enregistrer les utilisateurs partagés des services de fichiers (ancien point d’accès) |
 | PUT | `/api/smb/settings` | `smb:write` | Enregistrer les paramètres SMB |
@@ -469,6 +481,7 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | DELETE | `/api/filebrowser/instances/{key}` | `filebrowser:write` | Supprimer Instance File Browser |
 | PUT | `/api/filebrowser/instances/{key}/enable` | `filebrowser:write` | Activer ou désactiver Instance File Browser |
 | PUT | `/api/filebrowser/instances-order` | `filebrowser:write` | Réordonner Instance File Browser |
+| GET | `/api/filebrowser/instances/{key}/secrets` | `filebrowser:write` | Afficher les secrets en clair |
 | POST | `/api/filebrowser/instances/{key}/restart` | `filebrowser:write` | Redémarrer une instance File Browser |
 | GET | `/api/filebrowser/settings` | `filebrowser:read` | Lire les paramètres du programme File Browser |
 | PUT | `/api/filebrowser/settings` | `filebrowser:write` | Enregistrer les paramètres du programme File Browser |
@@ -491,6 +504,7 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | DELETE | `/api/storage/mounts/{key}` | `storage:write` | Supprimer Entrée |
 | PUT | `/api/storage/mounts/{key}/enable` | `storage:write` | Activer ou désactiver Entrée |
 | PUT | `/api/storage/mounts-order` | `storage:write` | Réordonner Entrée |
+| GET | `/api/storage/mounts/{key}/secrets` | `storage:write` | Afficher les secrets en clair |
 | GET | `/api/storage/files/{key}/list` | `storage:read` | Lister le répertoire de stockage |
 | GET | `/api/storage/files/{key}/download` | `storage:write` | Télécharger un fichier du stockage |
 | POST | `/api/storage/files/{key}/upload` | `storage:write` | Téléverser un fichier vers le stockage |
@@ -510,6 +524,7 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | DELETE | `/api/notify/channels/{key}` | `notify:write` | Supprimer Canaux de notification |
 | PUT | `/api/notify/channels/{key}/enable` | `notify:write` | Activer ou désactiver Canaux de notification |
 | PUT | `/api/notify/channels-order` | `notify:write` | Réordonner Canaux de notification |
+| GET | `/api/notify/channels/{key}/secrets` | `notify:write` | Afficher les secrets en clair |
 | GET | `/api/notify/rules` | `notify:read` | Lister Règles de notification |
 | POST | `/api/notify/rules` | `notify:write` | Ajouter Règles de notification |
 | PUT | `/api/notify/rules/{key}` | `notify:write` | Modifier Règles de notification |
@@ -548,6 +563,7 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | PUT | `/api/backup/targets-order` | `backup:write` | Réordonner Destination de sauvegarde |
 | GET | `/api/backup/settings` | `backup:read` | Paramètres de sauvegarde |
 | PUT | `/api/backup/settings` | `backup:write` | Modifier les paramètres de sauvegarde (un espace réservé pour la phrase secrète la laisse inchangée) |
+| GET | `/api/backup/secrets` | `backup:write` | Afficher les secrets en clair |
 | POST | `/api/backup/run` | `backup:write` | Lancer une sauvegarde immédiatement |
 | GET | `/api/backup/status` | `backup:read` | Résultat de la dernière sauvegarde et heure de la prochaine exécution |
 | GET | `/api/backup/mounts` | `backup:read` | Points de montage de stockage utilisables comme destinations de sauvegarde |
@@ -560,6 +576,7 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | --- | --- | --- | --- |
 | GET | `/api/fileusers` | `fileusers:read` | Lire les utilisateurs partagés des services de fichiers |
 | PUT | `/api/fileusers` | `fileusers:write` | Enregistrer les utilisateurs partagés des services de fichiers |
+| GET | `/api/fileusers/secrets` | `fileusers:write` | Afficher en clair les mots de passe des utilisateurs partagés |
 
 ## Système
 
@@ -570,6 +587,7 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | GET | `/api/logs` | `logs:read` | Consulter les journaux système |
 | GET | `/api/system/settings` | Session connectée uniquement | Lire les paramètres globaux |
 | PUT | `/api/system/settings` | Session connectée uniquement | Enregistrer les paramètres globaux |
+| GET | `/api/system/settings/secrets` | Session connectée uniquement | Afficher en clair les Client Secret de la connexion tierce |
 | GET | `/api/system/info` | `status:read` | Consulter les informations système |
 | GET | `/api/system/update` | `status:read` | Rechercher une nouvelle version |
 | POST | `/api/system/upgrade` | Session connectée uniquement | Mettre à niveau en ligne vers la dernière version |

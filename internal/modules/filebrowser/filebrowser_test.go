@@ -532,3 +532,18 @@ func TestReset(t *testing.T) {
 		t.Errorf("安装的程序应保留: %v", err)
 	}
 }
+
+// TestSecrets 验证查看管理员密码明文接口返回真实密码，实例不存在时返回 404。
+func TestSecrets(t *testing.T) {
+	m, srv := newTestModule(t, t.TempDir())
+	m.mu.Lock()
+	m.cfg.Instances = []Instance{{Key: "k", Name: "fb", AdminPassword: "s3cret"}}
+	m.mu.Unlock()
+	var got map[string]string
+	if code := doJSON(t, "GET", srv.URL+"/api/filebrowser/instances/k/secrets", nil, &got); code != 200 || got["adminPassword"] != "s3cret" {
+		t.Fatalf("应返回管理员密码明文: %d %+v", code, got)
+	}
+	if code := doJSON(t, "GET", srv.URL+"/api/filebrowser/instances/missing/secrets", nil, nil); code != 404 {
+		t.Fatalf("实例不存在应返回 404，实际 %d", code)
+	}
+}

@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/cookiejar"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/wangwanjie/gately/internal/config"
@@ -89,6 +90,16 @@ func TestFileUsersAPI(t *testing.T) {
 	}
 	if code, _ := tokenRequest(t, srv.URL, "PUT", "/api/fileusers", ro, map[string]any{"users": users}); code != http.StatusForbidden {
 		t.Fatalf("fileusers:read 不能保存，实际 %d", code)
+	}
+	// 查看密码明文需要 fileusers:write，结果按用户名索引
+	if code, out := doJSON(t, c, "GET", srv.URL+"/api/fileusers/secrets", nil); code != 200 || strings.TrimSpace(string(out)) != `{"bob":"secret"}` {
+		t.Fatalf("应按用户名返回共享用户密码明文 %d %s", code, out)
+	}
+	if code, out := tokenRequest(t, srv.URL, "GET", "/api/fileusers/secrets", ok, nil); code != 200 {
+		t.Fatalf("fileusers:write 应能查看密码明文 %d %s", code, out)
+	}
+	if code, _ := tokenRequest(t, srv.URL, "GET", "/api/fileusers/secrets", ro, nil); code != http.StatusForbidden {
+		t.Fatalf("fileusers:read 不能查看密码明文，实际 %d", code)
 	}
 	_, wd := createToken(t, srv.URL, c, map[string]any{"name": "wd", "scopes": []string{"webdav:write"}})
 	if code, _ := tokenRequest(t, srv.URL, "PUT", "/api/fileusers", wd, map[string]any{"users": users}); code != http.StatusForbidden {

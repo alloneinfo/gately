@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"io"
 	"log"
+	"net/http"
+	"net/http/httptest"
 	"strings"
 	"testing"
 
@@ -57,5 +59,36 @@ func TestImportLuckyStorage(t *testing.T) {
 	}
 	if rep, _ := m.ImportLucky(luckyimport.Document{"List": raw}, luckyimport.Options{}); rep != nil {
 		t.Fatal("缺少 AliyunpanConf 的配置不应被识别为存储管理")
+	}
+}
+
+type secretsRouter struct{ mux *http.ServeMux }
+
+func (tr secretsRouter) HandleFunc(p string, h http.HandlerFunc) {
+	method, path, _ := strings.Cut(p, " ")
+	tr.mux.HandleFunc(method+" /api/storage"+path, h)
+}
+
+// TestMountSecrets 验证查看存储密码明文接口返回真实密码，挂载不存在时返回 404。
+func TestMountSecrets(t *testing.T) {
+	st, _ := config.Open(t.TempDir())
+	m := New()
+	if err := m.Init(module.Env{Store: st, Logs: logbuf.New(20, log.New(io.Discard, "", 0))}); err != nil {
+		t.Fatal(err)
+	}
+	m.cfg.Mounts = []Mount{{Key: "k", Name: "nas", Type: "webdav", Password: "pw"}}
+	mux := http.NewServeMux()
+	m.Routes(secretsRouter{mux})
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, httptest.NewRequest("GET", "/api/storage/mounts/k/secrets", nil))
+	var got map[string]string
+	_ = json.Unmarshal(rec.Body.Bytes(), &got)
+	if rec.Code != 200 || got["password"] != "pw" {
+		t.Fatalf("应返回密码明文: %d %s", rec.Code, rec.Body.String())
+	}
+	rec = httptest.NewRecorder()
+	mux.ServeHTTP(rec, httptest.NewRequest("GET", "/api/storage/mounts/missing/secrets", nil))
+	if rec.Code != 404 {
+		t.Fatalf("挂载不存在应返回 404，实际 %d", rec.Code)
 	}
 }

@@ -309,6 +309,12 @@ func (m *Module) Routes(r module.Router) {
 		running, errMsg := m.statusLocked()
 		httpx.OK(w, map[string]any{"settings": s, "running": running, "error": errMsg, "supported": supported})
 	})
+	// 查看本地用户密码明文，结果按用户名索引（{"用户名": "密码"}）；bcrypt 哈希的密码原样返回哈希。
+	// 路径含 secrets 片段，按写权限鉴权，只读账号与只读令牌无法调用
+	r.HandleFunc("GET /settings/secrets", crud.SecretsHandler(&m.mu, func() map[string]string {
+		return userPasswords(m.settings.Users)
+	}))
+	module.DocOf(r, "GET /settings/secrets", module.Doc{Summary: "查看本地用户密码明文", Resp: map[string]string{}})
 	// 文件服务共享用户：WebDAV、FTP、SMB 共用同一份列表；SMB 额外返回无法用于 SMB 的共享用户
 	fileusers.Default.Routes(r, func(out map[string]any) {
 		// 按当前的本地用户计算，与本地用户同名的共享用户只按本地用户校验，不列为问题
@@ -363,4 +369,13 @@ func (m *Module) statusLocked() (bool, string) {
 // keepPasswords 把提交中仍为占位符的密码恢复为原密码；用户没有固定 ID，改名时的匹配规则见 crud.KeepSecrets。
 func keepPasswords(old, updated []User) {
 	crud.KeepSecrets(old, updated, func(u *User) string { return u.Name }, func(u *User) *string { return &u.Password })
+}
+
+// userPasswords 返回本地用户的密码明文，按用户名索引。
+func userPasswords(users []User) map[string]string {
+	out := make(map[string]string, len(users))
+	for _, u := range users {
+		out[u.Name] = u.Password
+	}
+	return out
 }

@@ -98,29 +98,29 @@
         </template>
 
         <template v-else-if="editingChannel.kind === 'telegram'">
-          <el-form-item label="Bot Token"><el-input v-model="editingChannel.secret" show-password :placeholder="secretHint" /></el-form-item>
+          <el-form-item label="Bot Token"><SecretInput v-model="editingChannel.secret" :reveal="secretReveal" :placeholder="secretHint" /></el-form-item>
           <el-form-item label="Chat ID"><el-input v-model="editingChannel.target" /></el-form-item>
           <el-form-item :label="t('notify.apiUrl')"><el-input v-model="editingChannel.url" :placeholder="t('notify.telegramUrlPlaceholder')" /></el-form-item>
         </template>
 
         <template v-else-if="editingChannel.kind === 'bark'">
-          <el-form-item :label="t('notify.deviceKey')"><el-input v-model="editingChannel.secret" show-password :placeholder="secretHint" /></el-form-item>
+          <el-form-item :label="t('notify.deviceKey')"><SecretInput v-model="editingChannel.secret" :reveal="secretReveal" :placeholder="secretHint" /></el-form-item>
           <el-form-item :label="t('notify.serviceUrl')"><el-input v-model="editingChannel.url" :placeholder="t('notify.barkUrlPlaceholder')" /></el-form-item>
         </template>
 
         <template v-else-if="editingChannel.kind === 'ntfy'">
           <el-form-item :label="t('notify.serviceUrl')"><el-input v-model="editingChannel.url" :placeholder="t('notify.ntfyUrlPlaceholder')" /></el-form-item>
           <el-form-item :label="t('notify.topic')"><el-input v-model="editingChannel.target" /></el-form-item>
-          <el-form-item :label="t('notify.accessToken')"><el-input v-model="editingChannel.secret" show-password :placeholder="secretHint" /></el-form-item>
+          <el-form-item :label="t('notify.accessToken')"><SecretInput v-model="editingChannel.secret" :reveal="secretReveal" :placeholder="secretHint" /></el-form-item>
         </template>
 
         <template v-else-if="editingChannel.kind === 'gotify'">
           <el-form-item :label="t('notify.serviceUrl')"><el-input v-model="editingChannel.url" placeholder="https://gotify.example.com" /></el-form-item>
-          <el-form-item :label="t('notify.appToken')"><el-input v-model="editingChannel.secret" show-password :placeholder="secretHint" /></el-form-item>
+          <el-form-item :label="t('notify.appToken')"><SecretInput v-model="editingChannel.secret" :reveal="secretReveal" :placeholder="secretHint" /></el-form-item>
         </template>
 
         <template v-else-if="editingChannel.kind === 'pushover'">
-          <el-form-item :label="t('notify.appToken')"><el-input v-model="editingChannel.secret" show-password :placeholder="secretHint" /></el-form-item>
+          <el-form-item :label="t('notify.appToken')"><SecretInput v-model="editingChannel.secret" :reveal="secretReveal" :placeholder="secretHint" /></el-form-item>
           <el-form-item :label="t('notify.userKey')"><el-input v-model="editingChannel.target" /></el-form-item>
         </template>
 
@@ -129,11 +129,11 @@
         </template>
 
         <template v-else-if="editingChannel.kind === 'serverchan'">
-          <el-form-item label="SendKey"><el-input v-model="editingChannel.secret" show-password :placeholder="secretHint" /></el-form-item>
+          <el-form-item label="SendKey"><SecretInput v-model="editingChannel.secret" :reveal="secretReveal" :placeholder="secretHint" /></el-form-item>
         </template>
 
         <template v-else-if="editingChannel.kind === 'pushplus'">
-          <el-form-item label="Token"><el-input v-model="editingChannel.secret" show-password :placeholder="secretHint" /></el-form-item>
+          <el-form-item label="Token"><SecretInput v-model="editingChannel.secret" :reveal="secretReveal" :placeholder="secretHint" /></el-form-item>
         </template>
 
         <template v-else-if="editingChannel.kind === 'smtp'">
@@ -147,7 +147,7 @@
           </el-form-item>
           <el-form-item :label="t('notify.port')"><el-input-number v-model="editingChannel.port" :min="0" :max="65535" /></el-form-item>
           <el-form-item :label="t('notify.user')"><el-input v-model="editingChannel.user" /></el-form-item>
-          <el-form-item :label="t('notify.password')"><el-input v-model="editingChannel.secret" show-password :placeholder="secretHint" /></el-form-item>
+          <el-form-item :label="t('notify.password')"><SecretInput v-model="editingChannel.secret" :reveal="secretReveal" :placeholder="secretHint" /></el-form-item>
           <el-form-item :label="t('notify.from')"><el-input v-model="editingChannel.from" :placeholder="t('notify.fromPlaceholder')" /></el-form-item>
           <el-form-item :label="t('notify.to')"><el-input v-model="editingChannel.target" :placeholder="t('notify.toPlaceholder')" /></el-form-item>
         </template>
@@ -155,7 +155,7 @@
         <template v-else>
           <el-form-item :label="t('notify.botUrl')"><el-input v-model="editingChannel.url" placeholder="https://..." /></el-form-item>
           <el-form-item v-if="editingChannel.kind !== 'wecom'" :label="t('notify.signSecret')">
-            <el-input v-model="editingChannel.secret" show-password :placeholder="secretHint" />
+            <SecretInput v-model="editingChannel.secret" :reveal="secretReveal" :placeholder="secretHint" />
             <div class="form-help">{{ t('notify.signHelp') }}</div>
           </el-form-item>
         </template>
@@ -217,6 +217,8 @@ import { ElMessage } from 'element-plus'
 import { useI18n } from 'vue-i18n'
 import { Bell, Pencil, Plus, Send, Trash2 } from 'lucide-vue-next'
 import { api } from '../api'
+import { SECRET_MASK, secretOf } from '../secrets'
+import SecretInput from '../components/SecretInput.vue'
 import PageHeader from '../components/PageHeader.vue'
 import EntityCard from '../components/EntityCard.vue'
 import Field from '../components/Field.vue'
@@ -330,6 +332,8 @@ const editingRule = ref<Rule>(emptyRule())
 // 定时刷新，标签页在后台时暂停
 const polling = usePolling(load, 15000)
 
+// secretReveal 取回已保存渠道的密钥明文，新渠道没有可取回的内容
+const secretReveal = computed(() => secretOf(editingChannel.value.key && `/api/notify/channels/${editingChannel.value.key}/secrets`, 'secret'))
 const secretHint = computed(() => (editingChannel.value.hasSecret ? t('notify.secretSet') : ''))
 // 输入框保留原始文本，回车可正常换行（见 useListText）
 const headersText = useListText(() => editingChannel.value.webhook.headers, (v) => (editingChannel.value.webhook.headers = v), { split: splitLines })
@@ -409,6 +413,10 @@ async function load() {
 
 function openChannel(c?: Channel) {
   editingChannel.value = c ? { ...emptyChannel(), ...JSON.parse(JSON.stringify(c)) } : emptyChannel()
+  // 接口不返回已保存的密钥（留空表示保持原值）；用占位符表示“已设置”，点击显示时再取回明文
+  if (c?.hasSecret) {
+    editingChannel.value.secret = SECRET_MASK
+  }
   channelVisible.value = true
 }
 
@@ -420,6 +428,10 @@ function openRule(r?: Rule) {
 async function saveChannel() {
   try {
     const { key, hasSecret: _h, ...body } = editingChannel.value
+    // 未查看也未修改的密钥仍是占位符，按原接口约定提交空值以保持原值
+    if (body.secret === SECRET_MASK) {
+      body.secret = ''
+    }
     if (key) {
       await api.put(`/api/notify/channels/${key}`, body)
     } else {

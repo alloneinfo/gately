@@ -11,7 +11,7 @@
       </div>
       <div class="provider-row">
         <el-input v-model="p.clientId" :placeholder="t('oauthProviders.clientIdPlaceholder')" />
-        <el-input v-model="p.clientSecret" type="password" show-password :placeholder="t('oauthProviders.clientSecretPlaceholder')" />
+        <SecretInput v-model="p.clientSecret" :placeholder="t('oauthProviders.clientSecretPlaceholder')" :reveal="revealOf(p)" />
       </div>
       <div class="form-help">{{ hintOf(p) }}</div>
       <div v-if="p.type === 'oidc'" class="provider-row">
@@ -27,13 +27,40 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, toRaw, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Plus, Trash2 } from 'lucide-vue-next'
 import type { OAuthProvider } from '../api'
+import SecretInput from './SecretInput.vue'
+import { fetchSecret } from '../secrets'
 
 const { t } = useI18n()
 const model = defineModel<OAuthProvider[]>({ required: true })
+// secretsUrl 为查看已保存 Client Secret 明文的接口（返回按登录方式标识索引的密钥表），不提供时密钥框只切换显示
+const props = defineProps<{ secretsUrl?: string }>()
+
+// savedKeys 记录每个登录方式载入时的标识：明文表按已保存的标识索引，界面上改了标识后仍按原标识取回
+const savedKeys = new WeakMap<OAuthProvider, string>()
+watch(
+  model,
+  (list) => {
+    for (const p of list) {
+      if (!savedKeys.has(toRaw(p))) {
+        savedKeys.set(toRaw(p), p.key)
+      }
+    }
+  },
+  { immediate: true },
+)
+
+// revealOf 返回取回已保存 Client Secret 明文的函数
+function revealOf(p: OAuthProvider): (() => Promise<string | undefined>) | undefined {
+  const url = props.secretsUrl
+  if (!url) {
+    return undefined
+  }
+  return () => fetchSecret(url, savedKeys.get(toRaw(p)) ?? p.key)
+}
 
 const types = computed(() => [
   { value: 'github', label: 'GitHub' },

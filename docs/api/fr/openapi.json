@@ -3739,6 +3739,67 @@
         "x-token-allowed": true
       }
     },
+    "/api/backup/secrets": {
+      "get": {
+        "description": "Permission requise : `backup:write`.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Succès"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Paramètres de requête incorrects"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Jeton invalide, expiré ou non connecté"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Il manque au jeton la permission requise"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Afficher les secrets en clair",
+        "tags": [
+          "Sauvegarde de configuration"
+        ],
+        "x-required-scope": "backup:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/backup/settings": {
       "get": {
         "description": "Permission requise : `backup:read`.",
@@ -5394,6 +5455,77 @@
         "x-token-allowed": true
       }
     },
+    "/api/cloudflared/tunnels/{key}/secrets": {
+      "get": {
+        "description": "Permission requise : `cloudflared:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Succès"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Paramètres de requête incorrects"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Jeton invalide, expiré ou non connecté"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Il manque au jeton la permission requise"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Afficher les secrets en clair",
+        "tags": [
+          "Tunnel Cloudflare"
+        ],
+        "x-required-scope": "cloudflared:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/cron/logs": {
       "delete": {
         "description": "Permission requise : `cron:write`.",
@@ -6994,6 +7126,77 @@
           }
         ],
         "summary": "Activer ou désactiver Tâche DDNS",
+        "tags": [
+          "DNS dynamique"
+        ],
+        "x-required-scope": "ddns:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/ddns/tasks/{key}/secrets": {
+      "get": {
+        "description": "Permission requise : `ddns:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Succès"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Paramètres de requête incorrects"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Jeton invalide, expiré ou non connecté"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Il manque au jeton la permission requise"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Afficher les secrets en clair",
         "tags": [
           "DNS dynamique"
         ],
@@ -10537,6 +10740,67 @@
         "x-token-allowed": true
       }
     },
+    "/api/docker/settings/secrets": {
+      "get": {
+        "description": "Permission requise : `docker:write`.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Succès"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Paramètres de requête incorrects"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Jeton invalide, expiré ou non connecté"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Il manque au jeton la permission requise"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Afficher en clair les mots de passe des registres (clés registry:\u003cadresse du registre\u003e)",
+        "tags": [
+          "Gestion Docker"
+        ],
+        "x-required-scope": "docker:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/docker/tasks": {
       "delete": {
         "description": "Permission requise : `docker:write`.",
@@ -11722,6 +11986,77 @@
         "x-token-allowed": true
       }
     },
+    "/api/filebrowser/instances/{key}/secrets": {
+      "get": {
+        "description": "Permission requise : `filebrowser:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Succès"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Paramètres de requête incorrects"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Jeton invalide, expiré ou non connecté"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Il manque au jeton la permission requise"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Afficher les secrets en clair",
+        "tags": [
+          "File Browser"
+        ],
+        "x-required-scope": "filebrowser:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/filebrowser/logs": {
       "delete": {
         "description": "Permission requise : `filebrowser:write`.",
@@ -12174,6 +12509,67 @@
           }
         ],
         "summary": "Enregistrer les utilisateurs partagés des services de fichiers",
+        "tags": [
+          "Utilisateurs partagés des services de fichiers"
+        ],
+        "x-required-scope": "fileusers:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/fileusers/secrets": {
+      "get": {
+        "description": "Permission requise : `fileusers:write`.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Succès"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Paramètres de requête incorrects"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Jeton invalide, expiré ou non connecté"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Il manque au jeton la permission requise"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Afficher en clair les mots de passe des utilisateurs partagés",
         "tags": [
           "Utilisateurs partagés des services de fichiers"
         ],
@@ -13670,6 +14066,67 @@
           }
         ],
         "summary": "Enregistrer les paramètres FTP",
+        "tags": [
+          "Service FTP"
+        ],
+        "x-required-scope": "ftp:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/ftp/settings/secrets": {
+      "get": {
+        "description": "Permission requise : `ftp:write`.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Succès"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Paramètres de requête incorrects"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Jeton invalide, expiré ou non connecté"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Il manque au jeton la permission requise"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Afficher en clair les mots de passe des utilisateurs locaux",
         "tags": [
           "Service FTP"
         ],
@@ -16353,6 +16810,77 @@
         "x-token-allowed": true
       }
     },
+    "/api/notify/channels/{key}/secrets": {
+      "get": {
+        "description": "Permission requise : `notify:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Succès"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Paramètres de requête incorrects"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Jeton invalide, expiré ou non connecté"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Il manque au jeton la permission requise"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Afficher les secrets en clair",
+        "tags": [
+          "Centre de notifications"
+        ],
+        "x-required-scope": "notify:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/notify/channels/{key}/test": {
       "post": {
         "description": "Permission requise : `notify:write`.",
@@ -18190,6 +18718,67 @@
         "x-token-allowed": true
       }
     },
+    "/api/smb/settings/secrets": {
+      "get": {
+        "description": "Permission requise : `smb:write`.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Succès"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Paramètres de requête incorrects"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Jeton invalide, expiré ou non connecté"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Il manque au jeton la permission requise"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Afficher en clair les mots de passe des utilisateurs locaux",
+        "tags": [
+          "Service SMB"
+        ],
+        "x-required-scope": "smb:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/smb/shared-users": {
       "get": {
         "description": "Obsolète, utilisez `GET /api/fileusers` ; ce point d’accès est conservé pour compatibilité. Renvoie les utilisateurs partagés des services de fichiers communs à WebDAV, FTP et SMB, mots de passe masqués. Si fileusers.json ne passe pas la validation, `error` est renvoyé et aucun utilisateur partagé ne peut se connecter tant qu'une liste valide n'est pas enregistrée. `issues` liste les utilisateurs partagés inutilisables pour SMB et la raison : `name` (le nom contient des caractères refusés par SMB), `bcrypt` (le mot de passe est un hachage bcrypt), `share` (un nom de répertoire ne peut pas servir de nom de partage ou est en double).\n\nPermission requise : `smb:read`.",
@@ -18867,6 +19456,77 @@
           }
         ],
         "summary": "Émettre ou renouveler un certificat immédiatement",
+        "tags": [
+          "Certificat SSL"
+        ],
+        "x-required-scope": "ssl:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/ssl/certs/{key}/secrets": {
+      "get": {
+        "description": "Permission requise : `ssl:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Succès"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Paramètres de requête incorrects"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Jeton invalide, expiré ou non connecté"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Il manque au jeton la permission requise"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Afficher les secrets en clair",
         "tags": [
           "Certificat SSL"
         ],
@@ -20292,6 +20952,77 @@
         "x-token-allowed": true
       }
     },
+    "/api/storage/mounts/{key}/secrets": {
+      "get": {
+        "description": "Permission requise : `storage:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Succès"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Paramètres de requête incorrects"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Jeton invalide, expiré ou non connecté"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Il manque au jeton la permission requise"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Afficher les secrets en clair",
+        "tags": [
+          "Montages de stockage"
+        ],
+        "x-required-scope": "storage:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/stun/logs": {
       "delete": {
         "description": "Permission requise : `stun:write`.",
@@ -21567,6 +22298,62 @@
         "x-token-allowed": false
       }
     },
+    "/api/system/settings/secrets": {
+      "get": {
+        "description": "**Disponible uniquement pour les sessions de connexion ; les jetons d'API ne peuvent pas accéder à ce point d'accès.**",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Succès"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Paramètres de requête incorrects"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Jeton invalide, expiré ou non connecté"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Il manque au jeton la permission requise"
+          }
+        },
+        "summary": "Afficher en clair les Client Secret de la connexion tierce",
+        "tags": [
+          "Système"
+        ],
+        "x-required-scope": "!denied",
+        "x-token-allowed": false
+      }
+    },
     "/api/system/update": {
       "get": {
         "description": "Utilise le proxy du réglage global `updateProxy` pour joindre GitHub. `selfUpgrade.supported` indique si cette installation peut être mise à niveau en ligne ; sinon `reason` vaut `os`, `docker`, `fnos`, `opkg`, `apk` ou `readonly`.\n\nPermission requise : `status:read`.",
@@ -22417,6 +23204,67 @@
           }
         ],
         "summary": "Redémarrer Tailscale",
+        "tags": [
+          "Réseau Tailscale"
+        ],
+        "x-required-scope": "tailscale:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/tailscale/secrets": {
+      "get": {
+        "description": "Permission requise : `tailscale:write`.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Succès"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Paramètres de requête incorrects"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Jeton invalide, expiré ou non connecté"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Il manque au jeton la permission requise"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Afficher les secrets en clair",
         "tags": [
           "Réseau Tailscale"
         ],
@@ -23890,6 +24738,67 @@
           }
         ],
         "summary": "Enregistrer les paramètres WebDAV",
+        "tags": [
+          "Service WebDAV"
+        ],
+        "x-required-scope": "webdav:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/webdav/settings/secrets": {
+      "get": {
+        "description": "Permission requise : `webdav:write`.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Succès"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Paramètres de requête incorrects"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Jeton invalide, expiré ou non connecté"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Il manque au jeton la permission requise"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Afficher en clair les mots de passe des utilisateurs locaux",
         "tags": [
           "Service WebDAV"
         ],
@@ -25677,6 +26586,128 @@
         "x-token-allowed": true
       }
     },
+    "/api/webservice/settings/secrets/oauth": {
+      "get": {
+        "description": "Permission requise : `webservice:write`.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Succès"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Paramètres de requête incorrects"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Jeton invalide, expiré ou non connecté"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Il manque au jeton la permission requise"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Afficher en clair les Client Secret des connexions tierces (indexés par identifiant de méthode)",
+        "tags": [
+          "Service Web"
+        ],
+        "x-required-scope": "webservice:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/webservice/settings/secrets/totp": {
+      "get": {
+        "description": "Permission requise : `webservice:write`.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Succès"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Paramètres de requête incorrects"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Jeton invalide, expiré ou non connecté"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Il manque au jeton la permission requise"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Afficher en clair les secrets TOTP des utilisateurs partagés (indexés par nom d'utilisateur)",
+        "tags": [
+          "Service Web"
+        ],
+        "x-required-scope": "webservice:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/webservice/stats": {
       "get": {
         "description": "Permission requise : `webservice:read`.",
@@ -26385,6 +27416,77 @@
         "x-token-allowed": true
       }
     },
+    "/api/webterminal/connections/{key}/secrets": {
+      "get": {
+        "description": "Permission requise : `webterminal:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Succès"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Paramètres de requête incorrects"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Jeton invalide, expiré ou non connecté"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Il manque au jeton la permission requise"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Afficher les secrets en clair",
+        "tags": [
+          "Terminal Web"
+        ],
+        "x-required-scope": "webterminal:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/webterminal/connections/{key}/test": {
       "post": {
         "description": "Permission requise : `webterminal:write`.",
@@ -26892,6 +27994,77 @@
           }
         ],
         "summary": "Activer ou désactiver Entrée",
+        "tags": [
+          "Terminal Web"
+        ],
+        "x-required-scope": "webterminal:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/webterminal/credentials/{key}/secrets": {
+      "get": {
+        "description": "Permission requise : `webterminal:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Succès"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Paramètres de requête incorrects"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Jeton invalide, expiré ou non connecté"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Il manque au jeton la permission requise"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Afficher les secrets en clair",
         "tags": [
           "Terminal Web"
         ],

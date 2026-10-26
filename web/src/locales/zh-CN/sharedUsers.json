@@ -13,5 +13,6 @@
   "qrHelp": "用验证器 App（Google Authenticator、1Password 等）扫码或手动输入密钥，保存设置后生效；重新生成会使旧密钥失效",
   "emailPlaceholder": "邮箱（可选）",
   "displayNamePlaceholder": "显示名（可选）",
-  "groupsPlaceholder": "分组（可选，回车添加）"
+  "groupsPlaceholder": "分组（可选，回车添加）",
+  "totpShow": "查看二维码"
 }

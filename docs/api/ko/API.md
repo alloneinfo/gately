@@ -88,6 +88,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/ddns/tasks/{key}` | `ddns:write` | DDNS 작업 삭제 |
 | PUT | `/api/ddns/tasks/{key}/enable` | `ddns:write` | DDNS 작업 사용 설정/해제 |
 | PUT | `/api/ddns/tasks-order` | `ddns:write` | DDNS 작업 순서 변경 |
+| GET | `/api/ddns/tasks/{key}/secrets` | `ddns:write` | 비밀 값 평문 보기 |
 | POST | `/api/ddns/tasks/{key}/sync` | `ddns:write` | DDNS 작업 즉시 동기화 |
 | GET | `/api/ddns/providers` | `ddns:read` | 지원되는 DNS 서비스 제공자와 필요한 매개변수 목록 조회 |
 | GET | `/api/ddns/netinterfaces` | `ddns:read` | 이 장치의 네트워크 카드 및 주소 목록 조회 |
@@ -121,6 +122,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/tailscale/logs` | `tailscale:write` | 모듈 실행 로그 비우기 |
 | GET | `/api/tailscale/settings` | `tailscale:read` | Tailscale 설정 읽기 |
 | PUT | `/api/tailscale/settings` | `tailscale:write` | Tailscale 설정 저장 |
+| GET | `/api/tailscale/secrets` | `tailscale:write` | 비밀 값 평문 보기 |
 | GET | `/api/tailscale/status` | `tailscale:read` | Tailscale 연결 상태 보기 |
 | POST | `/api/tailscale/restart` | `tailscale:write` | Tailscale 재시작 |
 | POST | `/api/tailscale/logout` | `tailscale:write` | Tailscale 로그아웃 |
@@ -167,6 +169,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/cloudflared/tunnels/{key}` | `cloudflared:write` | Cloudflare 터널 삭제 |
 | PUT | `/api/cloudflared/tunnels/{key}/enable` | `cloudflared:write` | Cloudflare 터널 사용 설정/해제 |
 | PUT | `/api/cloudflared/tunnels-order` | `cloudflared:write` | Cloudflare 터널 순서 변경 |
+| GET | `/api/cloudflared/tunnels/{key}/secrets` | `cloudflared:write` | 비밀 값 평문 보기 |
 | POST | `/api/cloudflared/tunnels/{key}/restart` | `cloudflared:write` | Cloudflare 터널 재시작 |
 | GET | `/api/cloudflared/settings` | `cloudflared:read` | Cloudflare 터널 설정 읽기 |
 | PUT | `/api/cloudflared/settings` | `cloudflared:write` | Cloudflare 터널 설정 저장 |
@@ -189,6 +192,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/ssl/certs/{key}` | `ssl:write` | 인증서 삭제 |
 | PUT | `/api/ssl/certs/{key}/enable` | `ssl:write` | 인증서 사용 설정/해제 |
 | PUT | `/api/ssl/certs-order` | `ssl:write` | 인증서 순서 변경 |
+| GET | `/api/ssl/certs/{key}/secrets` | `ssl:write` | 비밀 값 평문 보기 |
 | POST | `/api/ssl/certs/{key}/renew` | `ssl:write` | 인증서 즉시 발급 또는 갱신 |
 | GET | `/api/ssl/certs/{key}/download` | `ssl:write` | 인증서와 개인 키 다운로드 |
 | POST | `/api/ssl/certs/{key}/deploy` | `ssl:write` | 인증서 지금 배포 |
@@ -233,6 +237,8 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | POST | `/api/webservice/iplists/{key}/refresh` | `webservice:write` | 구독 IP 목록 지금 새로고침 |
 | POST | `/api/webservice/import/nginx` | `webservice:write` | nginx 설정 가져오기 |
 | GET | `/api/webservice/settings` | `webservice:read` | Web 서비스 전역 설정 읽기 |
+| GET | `/api/webservice/settings/secrets/totp` | `webservice:write` | 공유 사용자의 TOTP 비밀 키 평문 보기(사용자 이름으로 색인) |
+| GET | `/api/webservice/settings/secrets/oauth` | `webservice:write` | 서드파티 로그인의 Client Secret 평문 보기(로그인 방식 ID로 색인) |
 | POST | `/api/webservice/totp-secret` | `webservice:write` | 공유 사용자의 새 TOTP 키 생성(저장하지 않음, 설정 저장 후 적용) |
 | PUT | `/api/webservice/settings` | `webservice:write` | Web 서비스 전역 설정 저장 |
 | GET | `/api/webservice/stats` | `webservice:read` | 사이트 분 단위 통계 (?listener=&site=&minutes=) |
@@ -294,6 +300,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/webterminal/connections/{key}` | `webterminal:write` | 터미널 연결 삭제 |
 | PUT | `/api/webterminal/connections/{key}/enable` | `webterminal:write` | 터미널 연결 사용 설정/해제 |
 | PUT | `/api/webterminal/connections-order` | `webterminal:write` | 터미널 연결 순서 변경 |
+| GET | `/api/webterminal/connections/{key}/secrets` | `webterminal:write` | 비밀 값 평문 보기 |
 | DELETE | `/api/webterminal/connections/{key}/hostkey` | `webterminal:write` | 기록된 호스트 키 삭제 |
 | POST | `/api/webterminal/connections/{key}/test` | `webterminal:write` | 저장된 연결 테스트 |
 | POST | `/api/webterminal/connections/test` | `webterminal:write` | 임시 연결 매개변수 테스트 |
@@ -304,6 +311,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/webterminal/credentials/{key}` | `webterminal:write` | 항목 삭제 |
 | PUT | `/api/webterminal/credentials/{key}/enable` | `webterminal:write` | 항목 사용 설정/해제 |
 | PUT | `/api/webterminal/credentials-order` | `webterminal:write` | 항목 순서 변경 |
+| GET | `/api/webterminal/credentials/{key}/secrets` | `webterminal:write` | 비밀 값 평문 보기 |
 | GET | `/api/webterminal/connections/{key}/ws` | `webterminal:write` | 터미널 세션 열기 (WebSocket) |
 | GET | `/api/webterminal/sessions/{id}/ws` | `webterminal:write` | 기존 터미널 세션에 연결 (WebSocket) |
 | GET | `/api/webterminal/sessions` | `webterminal:read` | 터미널 세션 목록 조회 |
@@ -398,6 +406,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | POST | `/api/docker/prune` | `docker:write` | 사용하지 않는 Docker 리소스 정리 |
 | GET | `/api/docker/settings` | `docker:read` | Docker 모듈 설정 읽기 |
 | PUT | `/api/docker/settings` | `docker:write` | Docker 모듈 설정 저장 |
+| GET | `/api/docker/settings/secrets` | `docker:write` | 레지스트리 비밀번호 평문 보기(키는 registry:<레지스트리 주소>) |
 | GET | `/api/docker/containers` | `docker:read` | 컨테이너 목록 조회 |
 | POST | `/api/docker/containers` | `docker:write` | 컨테이너 생성 |
 | POST | `/api/docker/containers/check-all` | `docker:write` | 모든 컨테이너 이미지 업데이트 확인 |
@@ -431,6 +440,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | GET | `/api/webdav/logs` | `webdav:read` | 모듈 실행 로그 보기 |
 | DELETE | `/api/webdav/logs` | `webdav:write` | 모듈 실행 로그 비우기 |
 | GET | `/api/webdav/settings` | `webdav:read` | WebDAV 설정 읽기 |
+| GET | `/api/webdav/settings/secrets` | `webdav:write` | 로컬 사용자 비밀번호 평문 보기 |
 | GET | `/api/webdav/shared-users` | `webdav:read` | 파일 서비스 공유 사용자 조회 (이전 엔드포인트) |
 | PUT | `/api/webdav/shared-users` | `webdav:write,ftp:write,smb:write` | 파일 서비스 공유 사용자 저장 (이전 엔드포인트) |
 | PUT | `/api/webdav/settings` | `webdav:write` | WebDAV 설정 저장 |
@@ -442,6 +452,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | GET | `/api/ftp/logs` | `ftp:read` | 모듈 실행 로그 보기 |
 | DELETE | `/api/ftp/logs` | `ftp:write` | 모듈 실행 로그 비우기 |
 | GET | `/api/ftp/settings` | `ftp:read` | FTP 설정 읽기 |
+| GET | `/api/ftp/settings/secrets` | `ftp:write` | 로컬 사용자 비밀번호 평문 보기 |
 | GET | `/api/ftp/shared-users` | `ftp:read` | 파일 서비스 공유 사용자 조회 (이전 엔드포인트) |
 | PUT | `/api/ftp/shared-users` | `webdav:write,ftp:write,smb:write` | 파일 서비스 공유 사용자 저장 (이전 엔드포인트) |
 | PUT | `/api/ftp/settings` | `ftp:write` | FTP 설정 저장 |
@@ -453,6 +464,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | GET | `/api/smb/logs` | `smb:read` | 모듈 실행 로그 보기 |
 | DELETE | `/api/smb/logs` | `smb:write` | 모듈 실행 로그 비우기 |
 | GET | `/api/smb/settings` | `smb:read` | SMB 설정 조회 |
+| GET | `/api/smb/settings/secrets` | `smb:write` | 로컬 사용자 비밀번호 평문 보기 |
 | GET | `/api/smb/shared-users` | `smb:read` | 파일 서비스 공유 사용자 조회 (이전 엔드포인트) |
 | PUT | `/api/smb/shared-users` | `webdav:write,ftp:write,smb:write` | 파일 서비스 공유 사용자 저장 (이전 엔드포인트) |
 | PUT | `/api/smb/settings` | `smb:write` | SMB 설정 저장 |
@@ -469,6 +481,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/filebrowser/instances/{key}` | `filebrowser:write` | File Browser 인스턴스 삭제 |
 | PUT | `/api/filebrowser/instances/{key}/enable` | `filebrowser:write` | File Browser 인스턴스 사용 설정/해제 |
 | PUT | `/api/filebrowser/instances-order` | `filebrowser:write` | File Browser 인스턴스 순서 변경 |
+| GET | `/api/filebrowser/instances/{key}/secrets` | `filebrowser:write` | 비밀 값 평문 보기 |
 | POST | `/api/filebrowser/instances/{key}/restart` | `filebrowser:write` | File Browser 인스턴스 다시 시작 |
 | GET | `/api/filebrowser/settings` | `filebrowser:read` | File Browser 프로그램 설정 조회 |
 | PUT | `/api/filebrowser/settings` | `filebrowser:write` | File Browser 프로그램 설정 저장 |
@@ -491,6 +504,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/storage/mounts/{key}` | `storage:write` | 항목 삭제 |
 | PUT | `/api/storage/mounts/{key}/enable` | `storage:write` | 항목 사용 설정/해제 |
 | PUT | `/api/storage/mounts-order` | `storage:write` | 항목 순서 변경 |
+| GET | `/api/storage/mounts/{key}/secrets` | `storage:write` | 비밀 값 평문 보기 |
 | GET | `/api/storage/files/{key}/list` | `storage:read` | 스토리지 디렉터리 목록 조회 |
 | GET | `/api/storage/files/{key}/download` | `storage:write` | 스토리지 파일 다운로드 |
 | POST | `/api/storage/files/{key}/upload` | `storage:write` | 스토리지에 파일 업로드 |
@@ -510,6 +524,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/notify/channels/{key}` | `notify:write` | 알림 채널 삭제 |
 | PUT | `/api/notify/channels/{key}/enable` | `notify:write` | 알림 채널 사용 설정/해제 |
 | PUT | `/api/notify/channels-order` | `notify:write` | 알림 채널 순서 변경 |
+| GET | `/api/notify/channels/{key}/secrets` | `notify:write` | 비밀 값 평문 보기 |
 | GET | `/api/notify/rules` | `notify:read` | 알림 규칙 목록 조회 |
 | POST | `/api/notify/rules` | `notify:write` | 알림 규칙 추가 |
 | PUT | `/api/notify/rules/{key}` | `notify:write` | 알림 규칙 수정 |
@@ -548,6 +563,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | PUT | `/api/backup/targets-order` | `backup:write` | 백업 대상 순서 변경 |
 | GET | `/api/backup/settings` | `backup:read` | 백업 설정 |
 | PUT | `/api/backup/settings` | `backup:write` | 백업 설정 수정 (암호에 자리 표시자를 전달하면 기존 값 유지) |
+| GET | `/api/backup/secrets` | `backup:write` | 비밀 값 평문 보기 |
 | POST | `/api/backup/run` | `backup:write` | 지금 백업 실행 |
 | GET | `/api/backup/status` | `backup:read` | 최근 백업 결과와 다음 실행 시간 |
 | GET | `/api/backup/mounts` | `backup:read` | 백업 대상으로 사용할 수 있는 스토리지 마운트 지점 |
@@ -560,6 +576,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | --- | --- | --- | --- |
 | GET | `/api/fileusers` | `fileusers:read` | 파일 서비스 공유 사용자 조회 |
 | PUT | `/api/fileusers` | `fileusers:write` | 파일 서비스 공유 사용자 저장 |
+| GET | `/api/fileusers/secrets` | `fileusers:write` | 공유 사용자 비밀번호 평문 보기 |
 
 ## 시스템
 
@@ -570,6 +587,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | GET | `/api/logs` | `logs:read` | 시스템 로그 보기 |
 | GET | `/api/system/settings` | 로그인 세션 전용 | 전역 설정 읽기 |
 | PUT | `/api/system/settings` | 로그인 세션 전용 | 전역 설정 저장 |
+| GET | `/api/system/settings/secrets` | 로그인 세션 전용 | 서드파티 로그인 Client Secret 평문 보기 |
 | GET | `/api/system/info` | `status:read` | 시스템 정보 보기 |
 | GET | `/api/system/update` | `status:read` | 새 버전 확인 |
 | POST | `/api/system/upgrade` | 로그인 세션 전용 | 최신 버전으로 온라인 업그레이드 |

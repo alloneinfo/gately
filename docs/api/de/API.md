@@ -88,6 +88,7 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | DELETE | `/api/ddns/tasks/{key}` | `ddns:write` | DDNS-Aufgaben löschen |
 | PUT | `/api/ddns/tasks/{key}/enable` | `ddns:write` | DDNS-Aufgaben aktivieren oder deaktivieren |
 | PUT | `/api/ddns/tasks-order` | `ddns:write` | DDNS-Aufgaben neu anordnen |
+| GET | `/api/ddns/tasks/{key}/secrets` | `ddns:write` | Geheimnisse im Klartext anzeigen |
 | POST | `/api/ddns/tasks/{key}/sync` | `ddns:write` | Eine DDNS-Aufgabe sofort synchronisieren |
 | GET | `/api/ddns/providers` | `ddns:read` | Unterstützte DNS-Anbieter und ihre erforderlichen Parameter auflisten |
 | GET | `/api/ddns/netinterfaces` | `ddns:read` | Netzwerkschnittstellen und Adressen dieses Rechners auflisten |
@@ -121,6 +122,7 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | DELETE | `/api/tailscale/logs` | `tailscale:write` | Modulprotokolle leeren |
 | GET | `/api/tailscale/settings` | `tailscale:read` | Tailscale-Einstellungen lesen |
 | PUT | `/api/tailscale/settings` | `tailscale:write` | Tailscale-Einstellungen speichern |
+| GET | `/api/tailscale/secrets` | `tailscale:write` | Geheimnisse im Klartext anzeigen |
 | GET | `/api/tailscale/status` | `tailscale:read` | Tailscale-Verbindungsstatus anzeigen |
 | POST | `/api/tailscale/restart` | `tailscale:write` | Tailscale neu starten |
 | POST | `/api/tailscale/logout` | `tailscale:write` | Von Tailscale abmelden |
@@ -167,6 +169,7 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | DELETE | `/api/cloudflared/tunnels/{key}` | `cloudflared:write` | Cloudflare-Tunnel löschen |
 | PUT | `/api/cloudflared/tunnels/{key}/enable` | `cloudflared:write` | Cloudflare-Tunnel aktivieren oder deaktivieren |
 | PUT | `/api/cloudflared/tunnels-order` | `cloudflared:write` | Cloudflare-Tunnel neu anordnen |
+| GET | `/api/cloudflared/tunnels/{key}/secrets` | `cloudflared:write` | Geheimnisse im Klartext anzeigen |
 | POST | `/api/cloudflared/tunnels/{key}/restart` | `cloudflared:write` | Einen Cloudflare-Tunnel neu starten |
 | GET | `/api/cloudflared/settings` | `cloudflared:read` | Cloudflare-Tunnel-Einstellungen lesen |
 | PUT | `/api/cloudflared/settings` | `cloudflared:write` | Cloudflare-Tunnel-Einstellungen speichern |
@@ -189,6 +192,7 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | DELETE | `/api/ssl/certs/{key}` | `ssl:write` | Zertifikate löschen |
 | PUT | `/api/ssl/certs/{key}/enable` | `ssl:write` | Zertifikate aktivieren oder deaktivieren |
 | PUT | `/api/ssl/certs-order` | `ssl:write` | Zertifikate neu anordnen |
+| GET | `/api/ssl/certs/{key}/secrets` | `ssl:write` | Geheimnisse im Klartext anzeigen |
 | POST | `/api/ssl/certs/{key}/renew` | `ssl:write` | Zertifikat sofort ausstellen oder erneuern |
 | GET | `/api/ssl/certs/{key}/download` | `ssl:write` | Zertifikat und privaten Schlüssel herunterladen |
 | POST | `/api/ssl/certs/{key}/deploy` | `ssl:write` | Zertifikat jetzt bereitstellen |
@@ -233,6 +237,8 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | POST | `/api/webservice/iplists/{key}/refresh` | `webservice:write` | Abonnierte IP-Liste jetzt aktualisieren |
 | POST | `/api/webservice/import/nginx` | `webservice:write` | nginx-Konfiguration importieren |
 | GET | `/api/webservice/settings` | `webservice:read` | Globale Web-Dienst-Einstellungen lesen |
+| GET | `/api/webservice/settings/secrets/totp` | `webservice:write` | TOTP-Geheimnisse der gemeinsamen Benutzer im Klartext anzeigen (nach Benutzername) |
+| GET | `/api/webservice/settings/secrets/oauth` | `webservice:write` | Client Secrets der Drittanbieter-Anmeldungen im Klartext anzeigen (nach Kennung der Anmeldemethode) |
 | POST | `/api/webservice/totp-secret` | `webservice:write` | Neuen TOTP-Schlüssel für einen gemeinsamen Benutzer erzeugen (nicht gespeichert; wirksam nach dem Speichern) |
 | PUT | `/api/webservice/settings` | `webservice:write` | Globale Web-Dienst-Einstellungen speichern |
 | GET | `/api/webservice/stats` | `webservice:read` | Minutenstatistik einer Site (?listener=&site=&minutes=) |
@@ -294,6 +300,7 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | DELETE | `/api/webterminal/connections/{key}` | `webterminal:write` | Terminalverbindungen löschen |
 | PUT | `/api/webterminal/connections/{key}/enable` | `webterminal:write` | Terminalverbindungen aktivieren oder deaktivieren |
 | PUT | `/api/webterminal/connections-order` | `webterminal:write` | Terminalverbindungen neu anordnen |
+| GET | `/api/webterminal/connections/{key}/secrets` | `webterminal:write` | Geheimnisse im Klartext anzeigen |
 | DELETE | `/api/webterminal/connections/{key}/hostkey` | `webterminal:write` | Gespeicherten Host-Schlüssel löschen |
 | POST | `/api/webterminal/connections/{key}/test` | `webterminal:write` | Gespeicherte Verbindung testen |
 | POST | `/api/webterminal/connections/test` | `webterminal:write` | Temporäre Verbindungsparameter testen |
@@ -304,6 +311,7 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | DELETE | `/api/webterminal/credentials/{key}` | `webterminal:write` | Einträge löschen |
 | PUT | `/api/webterminal/credentials/{key}/enable` | `webterminal:write` | Einträge aktivieren oder deaktivieren |
 | PUT | `/api/webterminal/credentials-order` | `webterminal:write` | Einträge neu anordnen |
+| GET | `/api/webterminal/credentials/{key}/secrets` | `webterminal:write` | Geheimnisse im Klartext anzeigen |
 | GET | `/api/webterminal/connections/{key}/ws` | `webterminal:write` | Terminalsitzung öffnen (WebSocket) |
 | GET | `/api/webterminal/sessions/{id}/ws` | `webterminal:write` | An bestehende Terminalsitzung anbinden (WebSocket) |
 | GET | `/api/webterminal/sessions` | `webterminal:read` | Terminalsitzungen auflisten |
@@ -398,6 +406,7 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | POST | `/api/docker/prune` | `docker:write` | Ungenutzte Docker-Ressourcen bereinigen |
 | GET | `/api/docker/settings` | `docker:read` | Docker-Moduleinstellungen lesen |
 | PUT | `/api/docker/settings` | `docker:write` | Docker-Moduleinstellungen speichern |
+| GET | `/api/docker/settings/secrets` | `docker:write` | Registry-Passwörter im Klartext anzeigen (Schlüssel registry:<Registry-Adresse>) |
 | GET | `/api/docker/containers` | `docker:read` | Container auflisten |
 | POST | `/api/docker/containers` | `docker:write` | Container erstellen |
 | POST | `/api/docker/containers/check-all` | `docker:write` | Alle Container-Images auf Updates prüfen |
@@ -431,6 +440,7 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | GET | `/api/webdav/logs` | `webdav:read` | Laufzeitprotokolle eines Moduls anzeigen |
 | DELETE | `/api/webdav/logs` | `webdav:write` | Modulprotokolle leeren |
 | GET | `/api/webdav/settings` | `webdav:read` | WebDAV-Einstellungen lesen |
+| GET | `/api/webdav/settings/secrets` | `webdav:write` | Passwörter der lokalen Benutzer im Klartext anzeigen |
 | GET | `/api/webdav/shared-users` | `webdav:read` | Gemeinsame Benutzer der Dateidienste lesen (alter Endpunkt) |
 | PUT | `/api/webdav/shared-users` | `webdav:write,ftp:write,smb:write` | Gemeinsame Benutzer der Dateidienste speichern (alter Endpunkt) |
 | PUT | `/api/webdav/settings` | `webdav:write` | WebDAV-Einstellungen speichern |
@@ -442,6 +452,7 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | GET | `/api/ftp/logs` | `ftp:read` | Laufzeitprotokolle eines Moduls anzeigen |
 | DELETE | `/api/ftp/logs` | `ftp:write` | Modulprotokolle leeren |
 | GET | `/api/ftp/settings` | `ftp:read` | FTP-Einstellungen lesen |
+| GET | `/api/ftp/settings/secrets` | `ftp:write` | Passwörter der lokalen Benutzer im Klartext anzeigen |
 | GET | `/api/ftp/shared-users` | `ftp:read` | Gemeinsame Benutzer der Dateidienste lesen (alter Endpunkt) |
 | PUT | `/api/ftp/shared-users` | `webdav:write,ftp:write,smb:write` | Gemeinsame Benutzer der Dateidienste speichern (alter Endpunkt) |
 | PUT | `/api/ftp/settings` | `ftp:write` | FTP-Einstellungen speichern |
@@ -453,6 +464,7 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | GET | `/api/smb/logs` | `smb:read` | Laufzeitprotokolle eines Moduls anzeigen |
 | DELETE | `/api/smb/logs` | `smb:write` | Modulprotokolle leeren |
 | GET | `/api/smb/settings` | `smb:read` | SMB-Einstellungen abrufen |
+| GET | `/api/smb/settings/secrets` | `smb:write` | Passwörter der lokalen Benutzer im Klartext anzeigen |
 | GET | `/api/smb/shared-users` | `smb:read` | Gemeinsame Benutzer der Dateidienste lesen (alter Endpunkt) |
 | PUT | `/api/smb/shared-users` | `webdav:write,ftp:write,smb:write` | Gemeinsame Benutzer der Dateidienste speichern (alter Endpunkt) |
 | PUT | `/api/smb/settings` | `smb:write` | SMB-Einstellungen speichern |
@@ -469,6 +481,7 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | DELETE | `/api/filebrowser/instances/{key}` | `filebrowser:write` | File-Browser-Instanz löschen |
 | PUT | `/api/filebrowser/instances/{key}/enable` | `filebrowser:write` | File-Browser-Instanz aktivieren oder deaktivieren |
 | PUT | `/api/filebrowser/instances-order` | `filebrowser:write` | File-Browser-Instanz neu anordnen |
+| GET | `/api/filebrowser/instances/{key}/secrets` | `filebrowser:write` | Geheimnisse im Klartext anzeigen |
 | POST | `/api/filebrowser/instances/{key}/restart` | `filebrowser:write` | Eine File-Browser-Instanz neu starten |
 | GET | `/api/filebrowser/settings` | `filebrowser:read` | File-Browser-Programmeinstellungen lesen |
 | PUT | `/api/filebrowser/settings` | `filebrowser:write` | File-Browser-Programmeinstellungen speichern |
@@ -491,6 +504,7 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | DELETE | `/api/storage/mounts/{key}` | `storage:write` | Einträge löschen |
 | PUT | `/api/storage/mounts/{key}/enable` | `storage:write` | Einträge aktivieren oder deaktivieren |
 | PUT | `/api/storage/mounts-order` | `storage:write` | Einträge neu anordnen |
+| GET | `/api/storage/mounts/{key}/secrets` | `storage:write` | Geheimnisse im Klartext anzeigen |
 | GET | `/api/storage/files/{key}/list` | `storage:read` | Speicherverzeichnis auflisten |
 | GET | `/api/storage/files/{key}/download` | `storage:write` | Speicherdatei herunterladen |
 | POST | `/api/storage/files/{key}/upload` | `storage:write` | Datei in den Speicher hochladen |
@@ -510,6 +524,7 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | DELETE | `/api/notify/channels/{key}` | `notify:write` | Benachrichtigungskanäle löschen |
 | PUT | `/api/notify/channels/{key}/enable` | `notify:write` | Benachrichtigungskanäle aktivieren oder deaktivieren |
 | PUT | `/api/notify/channels-order` | `notify:write` | Benachrichtigungskanäle neu anordnen |
+| GET | `/api/notify/channels/{key}/secrets` | `notify:write` | Geheimnisse im Klartext anzeigen |
 | GET | `/api/notify/rules` | `notify:read` | Benachrichtigungsregeln auflisten |
 | POST | `/api/notify/rules` | `notify:write` | Benachrichtigungsregeln hinzufügen |
 | PUT | `/api/notify/rules/{key}` | `notify:write` | Benachrichtigungsregeln ändern |
@@ -548,6 +563,7 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | PUT | `/api/backup/targets-order` | `backup:write` | Backup-Ziele neu anordnen |
 | GET | `/api/backup/settings` | `backup:read` | Backup-Einstellungen |
 | PUT | `/api/backup/settings` | `backup:write` | Backup-Einstellungen ändern (Passphrase als Platzhalter übergeben, um sie beizubehalten) |
+| GET | `/api/backup/secrets` | `backup:write` | Geheimnisse im Klartext anzeigen |
 | POST | `/api/backup/run` | `backup:write` | Sofort ein Backup ausführen |
 | GET | `/api/backup/status` | `backup:read` | Ergebnis des letzten Backups und nächster Ausführungszeitpunkt |
 | GET | `/api/backup/mounts` | `backup:read` | Speicher-Mountpunkte, die als Backup-Ziel dienen können |
@@ -560,6 +576,7 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | --- | --- | --- | --- |
 | GET | `/api/fileusers` | `fileusers:read` | Gemeinsame Benutzer der Dateidienste lesen |
 | PUT | `/api/fileusers` | `fileusers:write` | Gemeinsame Benutzer der Dateidienste speichern |
+| GET | `/api/fileusers/secrets` | `fileusers:write` | Passwörter der gemeinsamen Benutzer im Klartext anzeigen |
 
 ## System
 
@@ -570,6 +587,7 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | GET | `/api/logs` | `logs:read` | Systemprotokolle anzeigen |
 | GET | `/api/system/settings` | Nur Anmeldesitzung | Globale Einstellungen lesen |
 | PUT | `/api/system/settings` | Nur Anmeldesitzung | Globale Einstellungen speichern |
+| GET | `/api/system/settings/secrets` | Nur Anmeldesitzung | Client Secrets der Drittanbieter-Anmeldung im Klartext anzeigen |
 | GET | `/api/system/info` | `status:read` | Systeminformationen anzeigen |
 | GET | `/api/system/update` | `status:read` | Nach neuer Version suchen |
 | POST | `/api/system/upgrade` | Nur Anmeldesitzung | Online auf die neueste Version aktualisieren |

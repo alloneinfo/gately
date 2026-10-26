@@ -249,6 +249,9 @@ func (a *App) Handler() http.Handler {
 	rec.add("POST /api/import/lucky", a.handleLuckyImport, "")
 	rec.add("GET /api/system/settings", a.handleGetSettings, "")
 	rec.add("PUT /api/system/settings", a.handlePutSettings, "")
+	// 查看第三方登录 Client Secret 明文，按登录方式标识索引；/api/system/settings 下的接口只允许登录会话访问，只读账号不可调用
+	rec.add("GET /api/system/settings/secrets", a.handleSettingsSecrets, "")
+	rec.docs["GET /api/system/settings/secrets"] = module.Doc{Summary: "查看第三方登录 Client Secret 明文", Resp: map[string]string{}}
 	rec.add("GET /api/system/info", a.handleSystemInfo, "")
 	rec.add("GET /api/system/update", a.handleCheckUpdate, "")
 	rec.add("POST /api/system/upgrade", a.handleUpgrade, "")
@@ -284,6 +287,9 @@ func (a *App) Handler() http.Handler {
 	}
 	rec.add("GET /api/fileusers", fileusers.Default.HandleGet(a.fileUsersExtra), "")
 	rec.add("PUT /api/fileusers", fileusers.Default.HandlePut(a.fileUsersExtra), "")
+	// 查看共享用户密码明文，路径含 secrets 片段，按 fileusers 写权限鉴权
+	rec.add("GET /api/fileusers/secrets", fileusers.Default.HandleSecrets(), "")
+	rec.docs["GET /api/fileusers/secrets"] = module.Doc{Summary: "查看共享用户密码明文", Resp: map[string]string{}}
 	rec.add("GET /api/tokens", a.handleTokenList, "")
 	rec.add("GET /api/tokens/scopes", a.handleTokenScopes, "")
 	rec.add("POST /api/tokens", a.handleTokenCreate, "")

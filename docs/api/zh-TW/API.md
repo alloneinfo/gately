@@ -88,6 +88,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/ddns/tasks/{key}` | `ddns:write` | 刪除DDNS 任務 |
 | PUT | `/api/ddns/tasks/{key}/enable` | `ddns:write` | 啟用或停用DDNS 任務 |
 | PUT | `/api/ddns/tasks-order` | `ddns:write` | 調整DDNS 任務排序 |
+| GET | `/api/ddns/tasks/{key}/secrets` | `ddns:write` | 查看金鑰明文 |
 | POST | `/api/ddns/tasks/{key}/sync` | `ddns:write` | 立即同步一個 DDNS 任務 |
 | GET | `/api/ddns/providers` | `ddns:read` | 列出支援的 DNS 服務商及其所需參數 |
 | GET | `/api/ddns/netinterfaces` | `ddns:read` | 列出本機網卡及位址 |
@@ -121,6 +122,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/tailscale/logs` | `tailscale:write` | 清空模組執行日誌 |
 | GET | `/api/tailscale/settings` | `tailscale:read` | 讀取 Tailscale 設定 |
 | PUT | `/api/tailscale/settings` | `tailscale:write` | 儲存 Tailscale 設定 |
+| GET | `/api/tailscale/secrets` | `tailscale:write` | 查看金鑰明文 |
 | GET | `/api/tailscale/status` | `tailscale:read` | 檢視 Tailscale 連線狀態 |
 | POST | `/api/tailscale/restart` | `tailscale:write` | 重新啟動 Tailscale |
 | POST | `/api/tailscale/logout` | `tailscale:write` | 登出 Tailscale |
@@ -167,6 +169,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/cloudflared/tunnels/{key}` | `cloudflared:write` | 刪除Cloudflare 通道 |
 | PUT | `/api/cloudflared/tunnels/{key}/enable` | `cloudflared:write` | 啟用或停用Cloudflare 通道 |
 | PUT | `/api/cloudflared/tunnels-order` | `cloudflared:write` | 調整Cloudflare 通道排序 |
+| GET | `/api/cloudflared/tunnels/{key}/secrets` | `cloudflared:write` | 查看金鑰明文 |
 | POST | `/api/cloudflared/tunnels/{key}/restart` | `cloudflared:write` | 重新啟動一條 Cloudflare 通道 |
 | GET | `/api/cloudflared/settings` | `cloudflared:read` | 讀取 Cloudflare 通道設定 |
 | PUT | `/api/cloudflared/settings` | `cloudflared:write` | 儲存 Cloudflare 通道設定 |
@@ -189,6 +192,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/ssl/certs/{key}` | `ssl:write` | 刪除憑證 |
 | PUT | `/api/ssl/certs/{key}/enable` | `ssl:write` | 啟用或停用憑證 |
 | PUT | `/api/ssl/certs-order` | `ssl:write` | 調整憑證排序 |
+| GET | `/api/ssl/certs/{key}/secrets` | `ssl:write` | 查看金鑰明文 |
 | POST | `/api/ssl/certs/{key}/renew` | `ssl:write` | 立即簽發或續期憑證 |
 | GET | `/api/ssl/certs/{key}/download` | `ssl:write` | 下載憑證與私鑰 |
 | POST | `/api/ssl/certs/{key}/deploy` | `ssl:write` | 立即部署憑證 |
@@ -233,6 +237,8 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | POST | `/api/webservice/iplists/{key}/refresh` | `webservice:write` | 立即重新整理訂閱 IP 清單 |
 | POST | `/api/webservice/import/nginx` | `webservice:write` | 匯入 nginx 設定 |
 | GET | `/api/webservice/settings` | `webservice:read` | 讀取 Web 服務全域設定 |
+| GET | `/api/webservice/settings/secrets/totp` | `webservice:write` | 查看共用使用者的 TOTP 金鑰明文（依使用者名稱索引） |
+| GET | `/api/webservice/settings/secrets/oauth` | `webservice:write` | 查看第三方登入的 Client Secret 明文（依登入方式識別索引） |
 | POST | `/api/webservice/totp-secret` | `webservice:write` | 為共用使用者產生新的 TOTP 金鑰（不儲存，儲存設定後生效） |
 | PUT | `/api/webservice/settings` | `webservice:write` | 儲存 Web 服務全域設定 |
 | GET | `/api/webservice/stats` | `webservice:read` | 站點分鐘級統計（?listener=&site=&minutes=） |
@@ -294,6 +300,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/webterminal/connections/{key}` | `webterminal:write` | 刪除終端機連線 |
 | PUT | `/api/webterminal/connections/{key}/enable` | `webterminal:write` | 啟用或停用終端機連線 |
 | PUT | `/api/webterminal/connections-order` | `webterminal:write` | 調整終端機連線排序 |
+| GET | `/api/webterminal/connections/{key}/secrets` | `webterminal:write` | 查看金鑰明文 |
 | DELETE | `/api/webterminal/connections/{key}/hostkey` | `webterminal:write` | 清除已記錄的主機金鑰 |
 | POST | `/api/webterminal/connections/{key}/test` | `webterminal:write` | 測試已儲存連線 |
 | POST | `/api/webterminal/connections/test` | `webterminal:write` | 測試暫時連線參數 |
@@ -304,6 +311,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/webterminal/credentials/{key}` | `webterminal:write` | 刪除項目 |
 | PUT | `/api/webterminal/credentials/{key}/enable` | `webterminal:write` | 啟用或停用項目 |
 | PUT | `/api/webterminal/credentials-order` | `webterminal:write` | 調整項目排序 |
+| GET | `/api/webterminal/credentials/{key}/secrets` | `webterminal:write` | 查看金鑰明文 |
 | GET | `/api/webterminal/connections/{key}/ws` | `webterminal:write` | 開啟終端機工作階段（WebSocket） |
 | GET | `/api/webterminal/sessions/{id}/ws` | `webterminal:write` | 接入既有終端機工作階段（WebSocket） |
 | GET | `/api/webterminal/sessions` | `webterminal:read` | 列出終端機工作階段 |
@@ -398,6 +406,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | POST | `/api/docker/prune` | `docker:write` | 清理無用的 Docker 資源 |
 | GET | `/api/docker/settings` | `docker:read` | 讀取 Docker 模組設定 |
 | PUT | `/api/docker/settings` | `docker:write` | 儲存 Docker 模組設定 |
+| GET | `/api/docker/settings/secrets` | `docker:write` | 查看倉庫密碼明文（鍵為 registry:<倉庫位址>） |
 | GET | `/api/docker/containers` | `docker:read` | 列出容器 |
 | POST | `/api/docker/containers` | `docker:write` | 建立容器 |
 | POST | `/api/docker/containers/check-all` | `docker:write` | 檢查全部容器映像檔更新 |
@@ -431,6 +440,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | GET | `/api/webdav/logs` | `webdav:read` | 檢視模組執行日誌 |
 | DELETE | `/api/webdav/logs` | `webdav:write` | 清空模組執行日誌 |
 | GET | `/api/webdav/settings` | `webdav:read` | 讀取 WebDAV 設定 |
+| GET | `/api/webdav/settings/secrets` | `webdav:write` | 查看本機使用者密碼明文 |
 | GET | `/api/webdav/shared-users` | `webdav:read` | 讀取檔案服務共用使用者（舊介面） |
 | PUT | `/api/webdav/shared-users` | `webdav:write,ftp:write,smb:write` | 儲存檔案服務共用使用者（舊介面） |
 | PUT | `/api/webdav/settings` | `webdav:write` | 儲存 WebDAV 設定 |
@@ -442,6 +452,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | GET | `/api/ftp/logs` | `ftp:read` | 檢視模組執行日誌 |
 | DELETE | `/api/ftp/logs` | `ftp:write` | 清空模組執行日誌 |
 | GET | `/api/ftp/settings` | `ftp:read` | 讀取 FTP 設定 |
+| GET | `/api/ftp/settings/secrets` | `ftp:write` | 查看本機使用者密碼明文 |
 | GET | `/api/ftp/shared-users` | `ftp:read` | 讀取檔案服務共用使用者（舊介面） |
 | PUT | `/api/ftp/shared-users` | `webdav:write,ftp:write,smb:write` | 儲存檔案服務共用使用者（舊介面） |
 | PUT | `/api/ftp/settings` | `ftp:write` | 儲存 FTP 設定 |
@@ -453,6 +464,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | GET | `/api/smb/logs` | `smb:read` | 檢視模組執行日誌 |
 | DELETE | `/api/smb/logs` | `smb:write` | 清空模組執行日誌 |
 | GET | `/api/smb/settings` | `smb:read` | 讀取 SMB 設定 |
+| GET | `/api/smb/settings/secrets` | `smb:write` | 查看本機使用者密碼明文 |
 | GET | `/api/smb/shared-users` | `smb:read` | 讀取檔案服務共用使用者（舊介面） |
 | PUT | `/api/smb/shared-users` | `webdav:write,ftp:write,smb:write` | 儲存檔案服務共用使用者（舊介面） |
 | PUT | `/api/smb/settings` | `smb:write` | 儲存 SMB 設定 |
@@ -469,6 +481,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/filebrowser/instances/{key}` | `filebrowser:write` | 刪除File Browser 實例 |
 | PUT | `/api/filebrowser/instances/{key}/enable` | `filebrowser:write` | 啟用或停用File Browser 實例 |
 | PUT | `/api/filebrowser/instances-order` | `filebrowser:write` | 調整File Browser 實例排序 |
+| GET | `/api/filebrowser/instances/{key}/secrets` | `filebrowser:write` | 查看金鑰明文 |
 | POST | `/api/filebrowser/instances/{key}/restart` | `filebrowser:write` | 重新啟動一個 File Browser 實例 |
 | GET | `/api/filebrowser/settings` | `filebrowser:read` | 讀取 File Browser 程式設定 |
 | PUT | `/api/filebrowser/settings` | `filebrowser:write` | 儲存 File Browser 程式設定 |
@@ -491,6 +504,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/storage/mounts/{key}` | `storage:write` | 刪除項目 |
 | PUT | `/api/storage/mounts/{key}/enable` | `storage:write` | 啟用或停用項目 |
 | PUT | `/api/storage/mounts-order` | `storage:write` | 調整項目排序 |
+| GET | `/api/storage/mounts/{key}/secrets` | `storage:write` | 查看金鑰明文 |
 | GET | `/api/storage/files/{key}/list` | `storage:read` | 列出儲存目錄 |
 | GET | `/api/storage/files/{key}/download` | `storage:write` | 下載儲存檔案 |
 | POST | `/api/storage/files/{key}/upload` | `storage:write` | 上傳檔案到儲存 |
@@ -510,6 +524,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/notify/channels/{key}` | `notify:write` | 刪除通知管道 |
 | PUT | `/api/notify/channels/{key}/enable` | `notify:write` | 啟用或停用通知管道 |
 | PUT | `/api/notify/channels-order` | `notify:write` | 調整通知管道排序 |
+| GET | `/api/notify/channels/{key}/secrets` | `notify:write` | 查看金鑰明文 |
 | GET | `/api/notify/rules` | `notify:read` | 取得通知規則清單 |
 | POST | `/api/notify/rules` | `notify:write` | 新增通知規則 |
 | PUT | `/api/notify/rules/{key}` | `notify:write` | 修改通知規則 |
@@ -548,6 +563,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | PUT | `/api/backup/targets-order` | `backup:write` | 調整備份目的地排序 |
 | GET | `/api/backup/settings` | `backup:read` | 備份設定 |
 | PUT | `/api/backup/settings` | `backup:write` | 修改備份設定（口令傳佔位符表示保持不變） |
+| GET | `/api/backup/secrets` | `backup:write` | 查看金鑰明文 |
 | POST | `/api/backup/run` | `backup:write` | 立即備份一次 |
 | GET | `/api/backup/status` | `backup:read` | 最近一次備份結果與下次執行時間 |
 | GET | `/api/backup/mounts` | `backup:read` | 可作為備份目的地的儲存掛載點 |
@@ -560,6 +576,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | --- | --- | --- | --- |
 | GET | `/api/fileusers` | `fileusers:read` | 讀取檔案服務共用使用者 |
 | PUT | `/api/fileusers` | `fileusers:write` | 儲存檔案服務共用使用者 |
+| GET | `/api/fileusers/secrets` | `fileusers:write` | 查看共用使用者密碼明文 |
 
 ## 系統
 
@@ -570,6 +587,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | GET | `/api/logs` | `logs:read` | 檢視系統日誌 |
 | GET | `/api/system/settings` | 僅登入工作階段 | 讀取全域設定 |
 | PUT | `/api/system/settings` | 僅登入工作階段 | 儲存全域設定 |
+| GET | `/api/system/settings/secrets` | 僅登入工作階段 | 查看第三方登入 Client Secret 明文 |
 | GET | `/api/system/info` | `status:read` | 檢視系統資訊 |
 | GET | `/api/system/update` | `status:read` | 檢查新版本 |
 | POST | `/api/system/upgrade` | 僅登入工作階段 | 線上升級到最新版本 |

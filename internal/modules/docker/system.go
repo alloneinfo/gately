@@ -9,14 +9,19 @@ import (
 	"strings"
 	"time"
 
+	"github.com/wangwanjie/gately/internal/crud"
 	"github.com/wangwanjie/gately/internal/httpx"
 	"github.com/wangwanjie/gately/internal/logbuf"
 )
 
 // 本文件实现系统信息、磁盘占用、清理与模块设置接口。
 
-// secretMask 是设置接口返回的密码占位符，提交时收到该值表示保留原密码。
-const secretMask = "******"
+// secretMask 是设置接口返回的密码占位符，提交时收到该值表示保留原密码；与其他模块共用 crud.SecretMask，
+// 便于界面识别并通过 GET /settings/secrets 取回明文。
+const secretMask = crud.SecretMask
+
+// legacySecretMask 是旧版本使用的占位符，升级前打开的页面提交它时同样保留原密码。
+const legacySecretMask = "******"
 
 func (m *Module) registerSystemRoutes(add func(pattern string, h http.HandlerFunc)) {
 	add("GET /info", m.handleInfo)
@@ -24,6 +29,14 @@ func (m *Module) registerSystemRoutes(add func(pattern string, h http.HandlerFun
 	add("POST /prune", m.handlePrune)
 	add("GET /settings", m.handleGetSettings)
 	add("PUT /settings", m.handlePutSettings)
+	// 查看仓库账号密码明文，键为 registry:<仓库地址>（与设置中保存的地址一致）
+	add("GET /settings/secrets", crud.SecretsHandler(&m.mu, func() map[string]string {
+		out := map[string]string{}
+		for _, r := range m.settings.Registries {
+			out["registry:"+r.Server] = r.Password
+		}
+		return out
+	}))
 }
 
 // ---------- 系统信息 ----------
@@ -366,7 +379,7 @@ func mergeSettings(old, in Settings) Settings {
 			continue
 		}
 		key := normalizeRegistry(r.Server)
-		if r.Password == secretMask {
+		if r.Password == secretMask || r.Password == legacySecretMask {
 			r.Password = oldPass[key]
 		}
 		if i, ok := index[key]; ok {

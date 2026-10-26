@@ -15,7 +15,7 @@
       <div v-for="(u, i) in users" :key="i" class="u-item">
         <div class="u-row">
           <div class="u-cell"><label class="u-label">{{ t('fileUsers.username') }}</label><el-input v-model="u.name" /></div>
-          <div class="u-cell"><label class="u-label">{{ t('fileUsers.password') }}</label><el-input v-model="u.password" type="password" show-password /></div>
+          <div class="u-cell"><label class="u-label">{{ t('fileUsers.password') }}</label><SecretInput v-model="u.password" :reveal="revealOf(u)" /></div>
           <div class="u-cell u-root">
             <label class="u-label">{{ t('fileUsers.directory') }}</label>
             <template v-if="!u.mounts?.length">
@@ -47,8 +47,11 @@
 </template>
 
 <script setup lang="ts">
+import { toRaw, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { FolderPlus, Trash2, UserPlus, Users } from 'lucide-vue-next'
+import SecretInput from './SecretInput.vue'
+import { fetchSecret } from '../secrets'
 
 export interface FileMount {
   name: string
@@ -68,7 +71,31 @@ const { t } = useI18n()
 const users = defineModel<FileUser[]>({ required: true })
 // 以下文案可由使用方覆盖：SMB 中每个目录是一个共享，说明与占位提示不同于 FTP / WebDAV
 // title 与插槽供共享用户卡片使用：head 放在标题栏右侧，notice 放在用户列表上方
-defineProps<{ title?: string; desc?: string; mountSummaryKey?: string; mountNamePlaceholder?: string }>()
+// secretsUrl 为查看已保存密码明文的接口（返回按用户名索引的密码表），不提供时密码框只切换显示
+const props = defineProps<{ title?: string; desc?: string; mountSummaryKey?: string; mountNamePlaceholder?: string; secretsUrl?: string }>()
+
+// savedNames 记录每个用户载入时的用户名：明文表按已保存的用户名索引，用户在界面上改名后仍按原名取回密码
+const savedNames = new WeakMap<FileUser, string>()
+watch(
+  users,
+  (list) => {
+    for (const u of list) {
+      if (!savedNames.has(toRaw(u))) {
+        savedNames.set(toRaw(u), u.name)
+      }
+    }
+  },
+  { immediate: true },
+)
+
+// revealOf 返回取回用户已保存密码明文的函数
+function revealOf(u: FileUser): (() => Promise<string | undefined>) | undefined {
+  const url = props.secretsUrl
+  if (!url) {
+    return undefined
+  }
+  return () => fetchSecret(url, savedNames.get(toRaw(u)) ?? u.name)
+}
 
 // toMulti 把单目录用户转换为多目录：已填写的目录成为第一个挂载
 function toMulti(u: FileUser) {

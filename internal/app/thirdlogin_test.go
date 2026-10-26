@@ -65,6 +65,10 @@ func TestAdminThirdLogin(t *testing.T) {
 	if code, body := doJSON(t, admin, "PUT", srv.URL+"/api/system/settings", s); code != 200 {
 		t.Fatalf("回写脱敏设置失败 %d %s", code, body)
 	}
+	// 查看 Client Secret 明文按登录方式标识返回原值
+	if code, body := doJSON(t, admin, "GET", srv.URL+"/api/system/settings/secrets", nil); code != 200 || strings.TrimSpace(string(body)) != `{"github":"sec"}` {
+		t.Fatalf("应返回 Client Secret 明文 %d %s", code, body)
+	}
 
 	newBrowser := func() *http.Client {
 		jar, _ := cookiejar.New(nil)

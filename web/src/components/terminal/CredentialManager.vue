@@ -61,7 +61,7 @@
           <el-input v-model="form.username" :placeholder="t('termConn.credential.usernamePlaceholder')" />
         </el-form-item>
         <el-form-item v-if="form.authType === 'password'" :label="t('termConn.editor.password')">
-          <el-input v-model="form.password" type="password" show-password :placeholder="t('termConn.editor.passwordPlaceholder')" />
+          <SecretInput v-model="form.password" :placeholder="t('termConn.editor.passwordPlaceholder')" :reveal="secretOf(form.key && `/api/webterminal/credentials/${form.key}/secrets`, 'password')" />
         </el-form-item>
         <template v-else>
           <el-form-item :label="t('termConn.editor.privateKey')">
@@ -73,7 +73,7 @@
             <span class="form-help">{{ t('termConn.editor.keyFileHelp') }}</span>
           </el-form-item>
           <el-form-item :label="t('termConn.editor.passphrase')">
-            <el-input v-model="form.passphrase" type="password" show-password :placeholder="t('termConn.editor.passphrasePlaceholder')" />
+            <SecretInput v-model="form.passphrase" :placeholder="t('termConn.editor.passphrasePlaceholder')" :reveal="secretOf(form.key && `/api/webterminal/credentials/${form.key}/secrets`, 'passphrase')" />
           </el-form-item>
         </template>
         <el-form-item :label="t('termConn.editor.remark')"><el-input v-model="form.remark" /></el-form-item>
@@ -93,6 +93,8 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { ChevronDown, ChevronUp, Pencil, Plus, Trash2 } from 'lucide-vue-next'
 import { api } from '../../api'
 import { useFormLayout } from '../../composables/useIsMobile'
+import SecretInput from '../SecretInput.vue'
+import { secretOf } from '../../secrets'
 import { emptyCredential, type Credential } from './types'
 
 defineProps<{ modelValue: boolean }>()

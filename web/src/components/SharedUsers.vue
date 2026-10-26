@@ -18,6 +18,7 @@
         <el-button size="small" :loading="loadingIndex === i" @click="setupTOTP(u, i)">
           {{ u.totpSecret ? t('sharedUsers.totpReset') : t('sharedUsers.totpEnable') }}
         </el-button>
+        <el-button v-if="u.totpSecret" size="small" :loading="showingIndex === i" @click="showTOTP(u, i)">{{ t('sharedUsers.totpShow') }}</el-button>
         <el-button v-if="u.totpSecret" size="small" text type="danger" @click="u.totpSecret = ''">{{ t('sharedUsers.totpDisable') }}</el-button>
         <el-input v-model="u.remark" :placeholder="t('common.remark')" class="remark" />
       </div>
@@ -57,12 +58,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, toRaw, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { Plus, Trash2 } from 'lucide-vue-next'
 import QRCode from 'qrcode'
 import { api } from '../api'
+import { SECRET_MASK, fetchSecret } from '../secrets'
 import type { AuthUser } from '../sharedUsers'
 
 const { t } = useI18n()
@@ -72,11 +74,54 @@ const qr = ref('')
 const qrSecret = ref('')
 const qrName = ref('')
 const loadingIndex = ref(-1)
+const showingIndex = ref(-1)
+// savedNames 记录每个用户载入时的用户名：TOTP 密钥明文表按已保存的用户名索引，界面上改名后仍按原名取回
+const savedNames = new WeakMap<AuthUser, string>()
+watch(
+  model,
+  (list) => {
+    for (const u of list) {
+      if (!savedNames.has(toRaw(u))) {
+        savedNames.set(toRaw(u), u.name)
+      }
+    }
+  },
+  { immediate: true },
+)
 // 已用过的分组，作为其他用户的候选项
 const allGroups = computed(() => [...new Set(model.value.flatMap((u) => u.groups ?? []))].sort())
 
 function add() {
   model.value.push({ name: '', password: '', totpSecret: '', remark: '', email: '', displayName: '', groups: [] })
+}
+
+// totpURL 生成验证器 App 使用的 otpauth 地址，格式与后端 auth.TOTPURL 一致
+function totpURL(secret: string, account: string): string {
+  const q = new URLSearchParams({ digits: '6', issuer: 'Gately', period: '30', secret })
+  return `otpauth://totp/${encodeURIComponent('Gately:' + account)}?${q.toString()}`
+}
+
+// showTOTP 重新展示已有密钥的二维码，便于在新设备上添加；已保存的密钥是脱敏占位符，先向后端取回明文
+async function showTOTP(u: AuthUser, i: number) {
+  showingIndex.value = i
+  try {
+    let secret: string | undefined = u.totpSecret
+    if (secret === SECRET_MASK) {
+      secret = await fetchSecret('/api/webservice/settings/secrets/totp', savedNames.get(toRaw(u)) ?? u.name)
+    }
+    if (!secret) {
+      return
+    }
+    const name = u.name.trim()
+    qrSecret.value = secret
+    qrName.value = name
+    qr.value = await QRCode.toDataURL(totpURL(secret, name), { width: 200, margin: 1 })
+    qrVisible.value = true
+  } catch (e) {
+    ElMessage.error((e as Error).message)
+  } finally {
+    showingIndex.value = -1
+  }
 }
 
 // setupTOTP 生成新密钥并展示二维码；保存设置后生效，旧密钥同时作废

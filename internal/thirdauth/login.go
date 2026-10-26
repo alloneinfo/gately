@@ -91,6 +91,15 @@ func (c LoginConfig) Masked() LoginConfig {
 	return c
 }
 
+// Secrets 返回各登录方式的 Client Secret 明文，按登录方式标识（Key）索引，供管理界面“显示密码”使用。
+func (c LoginConfig) Secrets() map[string]string {
+	out := make(map[string]string, len(c.Providers))
+	for _, p := range c.Providers {
+		out[p.Key] = p.ClientSecret
+	}
+	return out
+}
+
 // ProviderMap 以 Key 索引提供方。
 func (c LoginConfig) ProviderMap() map[string]Provider {
 	m := make(map[string]Provider, len(c.Providers))

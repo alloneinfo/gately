@@ -150,5 +150,9 @@
     "cloudflared": "Alle Tunnel werden gestoppt und gelöscht, Programmpfad und Download-Proxy werden geleert.",
     "tailscale": "Tailscale wird gestoppt (das von Gately verwaltete tailscaled meldet sich zuerst ab), die Standardeinstellungen werden wiederhergestellt und der Anmeldestatus im Standard-Statusverzeichnis wird gelöscht.",
     "filebrowser": "Alle Instanzen werden gestoppt und mit ihren Benutzern, Freigabelinks und Caches gelöscht (Dateien in den freigegebenen Verzeichnissen bleiben unberührt); Programmpfad und Download-Proxy werden geleert."
+  },
+  "secretInput": {
+    "show": "Anzeigen",
+    "hide": "Ausblenden"
   }
 }

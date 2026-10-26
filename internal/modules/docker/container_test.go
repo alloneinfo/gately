@@ -495,6 +495,26 @@ func TestMergeSettings(t *testing.T) {
 	if masked.Registries[0].Password != secretMask || masked.Registries[2].Password != "" {
 		t.Errorf("掩码错误: %+v", masked.Registries)
 	}
+	// 旧版本占位符同样保留原密码
+	got = mergeSettings(old, Settings{Registries: []Registry{{Server: "ghcr.io", Username: "u", Password: legacySecretMask}}})
+	if got.Registries[0].Password != "secret" {
+		t.Errorf("旧占位符应保留原密码: %+v", got.Registries)
+	}
+}
+
+// TestSettingsSecrets 验证查看仓库密码明文接口按 registry:<仓库地址> 返回明文。
+func TestSettingsSecrets(t *testing.T) {
+	m := newModule(t, "")
+	m.settings.Registries = []Registry{{Server: "ghcr.io", Username: "u", Password: "pw"}}
+	mux := http.NewServeMux()
+	m.Routes(ctrRouter{mux})
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, httptest.NewRequest("GET", "/settings/secrets", nil))
+	var got map[string]string
+	_ = json.Unmarshal(rec.Body.Bytes(), &got)
+	if rec.Code != 200 || got["registry:ghcr.io"] != "pw" {
+		t.Fatalf("应返回仓库密码明文: %d %s", rec.Code, rec.Body.String())
+	}
 }
 
 func TestPathSafety(t *testing.T) {
@@ -985,10 +1005,10 @@ func TestSettingsAPI(t *testing.T) {
 		t.Fatalf("保存失败或泄露密码: %d %s", rec.Code, rec.Body)
 	}
 	rec = api("GET", "/settings", "", nil)
-	if !strings.Contains(rec.Body.String(), `"password":"******"`) || strings.Contains(rec.Body.String(), "p1") {
+	if !strings.Contains(rec.Body.String(), `"password":"`+secretMask+`"`) || strings.Contains(rec.Body.String(), "p1") {
 		t.Errorf("GET 应掩码密码: %s", rec.Body)
 	}
-	rec = put(map[string]any{"host": host, "mirrors": []string{"m1"}, "registries": []map[string]string{{"server": "ghcr.io", "username": "u2", "password": "******"}}})
+	rec = put(map[string]any{"host": host, "mirrors": []string{"m1"}, "registries": []map[string]string{{"server": "ghcr.io", "username": "u2", "password": secretMask}}})
 	if rec.Code != 200 {
 		t.Fatalf("保存失败: %s", rec.Body)
 	}

@@ -343,6 +343,18 @@ func (m *Module) viewLocked(c *Connection) any {
 	return v
 }
 
+// connectionSecrets 返回连接中被脱敏字段的明文，键为字段的 JSON 路径，例如 ssh.proxy.password。
+// 私钥在界面上没有显示按钮，不经此接口返回。
+func connectionSecrets(c *Connection) map[string]string {
+	return map[string]string{
+		"ssh.password":          c.SSH.Password,
+		"ssh.passphrase":        c.SSH.Passphrase,
+		"ssh.proxy.password":    c.SSH.Proxy.Password,
+		"telnet.password":       c.Telnet.Password,
+		"telnet.proxy.password": c.Telnet.Proxy.Password,
+	}
+}
+
 // Routes 实现 module.Module。
 func (m *Module) Routes(r module.Router) {
 	conns := &crud.Collection[Connection]{
@@ -354,6 +366,7 @@ func (m *Module) Routes(r module.Router) {
 		Validate: func(c *Connection) error { return c.Validate() },
 		Merge:    mergeSecrets,
 		View:     m.viewLocked,
+		Secrets:  connectionSecrets,
 		// 连接配置变更或删除后，丢弃该连接在池中的 SSH 连接
 		Changed: func(key string) { m.pool.drop(key) },
 		Removed: func(key string) { m.pool.drop(key) },

@@ -150,5 +150,9 @@
     "cloudflared": "This stops and deletes all tunnels and clears the program path and the download proxy.",
     "tailscale": "This stops Tailscale (the tailscaled managed by Gately logs out first), restores the default settings and deletes the login state in the default state directory.",
     "filebrowser": "This stops and deletes all instances together with their users, share links and caches (files in the shared directories are not touched), and clears the program path and the download proxy."
+  },
+  "secretInput": {
+    "show": "Show",
+    "hide": "Hide"
   }
 }

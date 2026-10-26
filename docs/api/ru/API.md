@@ -88,6 +88,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/ddns/tasks/{key}` | `ddns:write` | Удалить: Задача DDNS |
 | PUT | `/api/ddns/tasks/{key}/enable` | `ddns:write` | Включить или отключить: Задача DDNS |
 | PUT | `/api/ddns/tasks-order` | `ddns:write` | Изменить порядок: Задача DDNS |
+| GET | `/api/ddns/tasks/{key}/secrets` | `ddns:write` | Показать секреты открытым текстом |
 | POST | `/api/ddns/tasks/{key}/sync` | `ddns:write` | Немедленно синхронизировать задачу DDNS |
 | GET | `/api/ddns/providers` | `ddns:read` | Список поддерживаемых DNS-провайдеров и необходимых им параметров |
 | GET | `/api/ddns/netinterfaces` | `ddns:read` | Список сетевых адаптеров и адресов этой машины |
@@ -121,6 +122,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/tailscale/logs` | `tailscale:write` | Очистить журнал работы модуля |
 | GET | `/api/tailscale/settings` | `tailscale:read` | Чтение настроек Tailscale |
 | PUT | `/api/tailscale/settings` | `tailscale:write` | Сохранить настройки Tailscale |
+| GET | `/api/tailscale/secrets` | `tailscale:write` | Показать секреты открытым текстом |
 | GET | `/api/tailscale/status` | `tailscale:read` | Просмотр состояния подключения Tailscale |
 | POST | `/api/tailscale/restart` | `tailscale:write` | Перезапустить Tailscale |
 | POST | `/api/tailscale/logout` | `tailscale:write` | Выйти из Tailscale |
@@ -167,6 +169,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/cloudflared/tunnels/{key}` | `cloudflared:write` | Удалить: Туннель Cloudflare |
 | PUT | `/api/cloudflared/tunnels/{key}/enable` | `cloudflared:write` | Включить или отключить: Туннель Cloudflare |
 | PUT | `/api/cloudflared/tunnels-order` | `cloudflared:write` | Изменить порядок: Туннель Cloudflare |
+| GET | `/api/cloudflared/tunnels/{key}/secrets` | `cloudflared:write` | Показать секреты открытым текстом |
 | POST | `/api/cloudflared/tunnels/{key}/restart` | `cloudflared:write` | Перезапустить туннель Cloudflare |
 | GET | `/api/cloudflared/settings` | `cloudflared:read` | Чтение настроек туннеля Cloudflare |
 | PUT | `/api/cloudflared/settings` | `cloudflared:write` | Сохранить настройки туннеля Cloudflare |
@@ -189,6 +192,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/ssl/certs/{key}` | `ssl:write` | Удалить: Сертификат |
 | PUT | `/api/ssl/certs/{key}/enable` | `ssl:write` | Включить или отключить: Сертификат |
 | PUT | `/api/ssl/certs-order` | `ssl:write` | Изменить порядок: Сертификат |
+| GET | `/api/ssl/certs/{key}/secrets` | `ssl:write` | Показать секреты открытым текстом |
 | POST | `/api/ssl/certs/{key}/renew` | `ssl:write` | Немедленно выпустить или продлить сертификат |
 | GET | `/api/ssl/certs/{key}/download` | `ssl:write` | Скачать сертификат и закрытый ключ |
 | POST | `/api/ssl/certs/{key}/deploy` | `ssl:write` | Развернуть сертификат сейчас |
@@ -233,6 +237,8 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | POST | `/api/webservice/iplists/{key}/refresh` | `webservice:write` | Обновить подписной список IP сейчас |
 | POST | `/api/webservice/import/nginx` | `webservice:write` | Импорт конфигурации nginx |
 | GET | `/api/webservice/settings` | `webservice:read` | Чтение глобальных настроек веб-службы |
+| GET | `/api/webservice/settings/secrets/totp` | `webservice:write` | Показать секреты TOTP общих пользователей открытым текстом (по имени пользователя) |
+| GET | `/api/webservice/settings/secrets/oauth` | `webservice:write` | Показать Client Secret сторонних входов открытым текстом (по идентификатору способа входа) |
 | POST | `/api/webservice/totp-secret` | `webservice:write` | Создать новый ключ TOTP для общего пользователя (не сохраняется; действует после сохранения настроек) |
 | PUT | `/api/webservice/settings` | `webservice:write` | Сохранить глобальные настройки веб-службы |
 | GET | `/api/webservice/stats` | `webservice:read` | Поминутная статистика сайта (?listener=&site=&minutes=) |
@@ -294,6 +300,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/webterminal/connections/{key}` | `webterminal:write` | Удалить: Подключение терминала |
 | PUT | `/api/webterminal/connections/{key}/enable` | `webterminal:write` | Включить или отключить: Подключение терминала |
 | PUT | `/api/webterminal/connections-order` | `webterminal:write` | Изменить порядок: Подключение терминала |
+| GET | `/api/webterminal/connections/{key}/secrets` | `webterminal:write` | Показать секреты открытым текстом |
 | DELETE | `/api/webterminal/connections/{key}/hostkey` | `webterminal:write` | Удалить записанные ключи хоста |
 | POST | `/api/webterminal/connections/{key}/test` | `webterminal:write` | Проверить сохранённое подключение |
 | POST | `/api/webterminal/connections/test` | `webterminal:write` | Проверить временные параметры подключения |
@@ -304,6 +311,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/webterminal/credentials/{key}` | `webterminal:write` | Удалить: Элемент |
 | PUT | `/api/webterminal/credentials/{key}/enable` | `webterminal:write` | Включить или отключить: Элемент |
 | PUT | `/api/webterminal/credentials-order` | `webterminal:write` | Изменить порядок: Элемент |
+| GET | `/api/webterminal/credentials/{key}/secrets` | `webterminal:write` | Показать секреты открытым текстом |
 | GET | `/api/webterminal/connections/{key}/ws` | `webterminal:write` | Открыть сессию терминала (WebSocket) |
 | GET | `/api/webterminal/sessions/{id}/ws` | `webterminal:write` | Подключиться к существующей сессии терминала (WebSocket) |
 | GET | `/api/webterminal/sessions` | `webterminal:read` | Список сессий терминала |
@@ -398,6 +406,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | POST | `/api/docker/prune` | `docker:write` | Очистить неиспользуемые ресурсы Docker |
 | GET | `/api/docker/settings` | `docker:read` | Чтение настроек модуля Docker |
 | PUT | `/api/docker/settings` | `docker:write` | Сохранить настройки модуля Docker |
+| GET | `/api/docker/settings/secrets` | `docker:write` | Показать пароли реестров открытым текстом (ключи registry:<адрес реестра>) |
 | GET | `/api/docker/containers` | `docker:read` | Список контейнеров |
 | POST | `/api/docker/containers` | `docker:write` | Создать контейнер |
 | POST | `/api/docker/containers/check-all` | `docker:write` | Проверить обновления образов всех контейнеров |
@@ -431,6 +440,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | GET | `/api/webdav/logs` | `webdav:read` | Просмотр журнала работы модуля |
 | DELETE | `/api/webdav/logs` | `webdav:write` | Очистить журнал работы модуля |
 | GET | `/api/webdav/settings` | `webdav:read` | Чтение настроек WebDAV |
+| GET | `/api/webdav/settings/secrets` | `webdav:write` | Показать пароли локальных пользователей открытым текстом |
 | GET | `/api/webdav/shared-users` | `webdav:read` | Получить общих пользователей файловых служб (старый метод) |
 | PUT | `/api/webdav/shared-users` | `webdav:write,ftp:write,smb:write` | Сохранить общих пользователей файловых служб (старый метод) |
 | PUT | `/api/webdav/settings` | `webdav:write` | Сохранить настройки WebDAV |
@@ -442,6 +452,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | GET | `/api/ftp/logs` | `ftp:read` | Просмотр журнала работы модуля |
 | DELETE | `/api/ftp/logs` | `ftp:write` | Очистить журнал работы модуля |
 | GET | `/api/ftp/settings` | `ftp:read` | Чтение настроек FTP |
+| GET | `/api/ftp/settings/secrets` | `ftp:write` | Показать пароли локальных пользователей открытым текстом |
 | GET | `/api/ftp/shared-users` | `ftp:read` | Получить общих пользователей файловых служб (старый метод) |
 | PUT | `/api/ftp/shared-users` | `webdav:write,ftp:write,smb:write` | Сохранить общих пользователей файловых служб (старый метод) |
 | PUT | `/api/ftp/settings` | `ftp:write` | Сохранить настройки FTP |
@@ -453,6 +464,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | GET | `/api/smb/logs` | `smb:read` | Просмотр журнала работы модуля |
 | DELETE | `/api/smb/logs` | `smb:write` | Очистить журнал работы модуля |
 | GET | `/api/smb/settings` | `smb:read` | Получить настройки SMB |
+| GET | `/api/smb/settings/secrets` | `smb:write` | Показать пароли локальных пользователей открытым текстом |
 | GET | `/api/smb/shared-users` | `smb:read` | Получить общих пользователей файловых служб (старый метод) |
 | PUT | `/api/smb/shared-users` | `webdav:write,ftp:write,smb:write` | Сохранить общих пользователей файловых служб (старый метод) |
 | PUT | `/api/smb/settings` | `smb:write` | Сохранить настройки SMB |
@@ -469,6 +481,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/filebrowser/instances/{key}` | `filebrowser:write` | Удалить: Экземпляр File Browser |
 | PUT | `/api/filebrowser/instances/{key}/enable` | `filebrowser:write` | Включить или отключить: Экземпляр File Browser |
 | PUT | `/api/filebrowser/instances-order` | `filebrowser:write` | Изменить порядок: Экземпляр File Browser |
+| GET | `/api/filebrowser/instances/{key}/secrets` | `filebrowser:write` | Показать секреты открытым текстом |
 | POST | `/api/filebrowser/instances/{key}/restart` | `filebrowser:write` | Перезапустить экземпляр File Browser |
 | GET | `/api/filebrowser/settings` | `filebrowser:read` | Получить настройки программы File Browser |
 | PUT | `/api/filebrowser/settings` | `filebrowser:write` | Сохранить настройки программы File Browser |
@@ -491,6 +504,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/storage/mounts/{key}` | `storage:write` | Удалить: Элемент |
 | PUT | `/api/storage/mounts/{key}/enable` | `storage:write` | Включить или отключить: Элемент |
 | PUT | `/api/storage/mounts-order` | `storage:write` | Изменить порядок: Элемент |
+| GET | `/api/storage/mounts/{key}/secrets` | `storage:write` | Показать секреты открытым текстом |
 | GET | `/api/storage/files/{key}/list` | `storage:read` | Список каталогов хранилища |
 | GET | `/api/storage/files/{key}/download` | `storage:write` | Скачать файл из хранилища |
 | POST | `/api/storage/files/{key}/upload` | `storage:write` | Загрузить файл в хранилище |
@@ -510,6 +524,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/notify/channels/{key}` | `notify:write` | Удалить: Каналы уведомлений |
 | PUT | `/api/notify/channels/{key}/enable` | `notify:write` | Включить или отключить: Каналы уведомлений |
 | PUT | `/api/notify/channels-order` | `notify:write` | Изменить порядок: Каналы уведомлений |
+| GET | `/api/notify/channels/{key}/secrets` | `notify:write` | Показать секреты открытым текстом |
 | GET | `/api/notify/rules` | `notify:read` | Список: Правила уведомлений |
 | POST | `/api/notify/rules` | `notify:write` | Добавить: Правила уведомлений |
 | PUT | `/api/notify/rules/{key}` | `notify:write` | Изменить: Правила уведомлений |
@@ -548,6 +563,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | PUT | `/api/backup/targets-order` | `backup:write` | Изменить порядок: Назначение резервных копий |
 | GET | `/api/backup/settings` | `backup:read` | Настройки резервного копирования |
 | PUT | `/api/backup/settings` | `backup:write` | Изменить настройки резервного копирования (передайте заполнитель вместо пароля, чтобы оставить его без изменений) |
+| GET | `/api/backup/secrets` | `backup:write` | Показать секреты открытым текстом |
 | POST | `/api/backup/run` | `backup:write` | Выполнить резервное копирование сейчас |
 | GET | `/api/backup/status` | `backup:read` | Результат последней резервной копии и время следующего запуска |
 | GET | `/api/backup/mounts` | `backup:read` | Точки монтирования хранилищ, доступные как назначение резервных копий |
@@ -560,6 +576,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | --- | --- | --- | --- |
 | GET | `/api/fileusers` | `fileusers:read` | Получить общих пользователей файловых служб |
 | PUT | `/api/fileusers` | `fileusers:write` | Сохранить общих пользователей файловых служб |
+| GET | `/api/fileusers/secrets` | `fileusers:write` | Показать пароли общих пользователей открытым текстом |
 
 ## Система
 
@@ -570,6 +587,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | GET | `/api/logs` | `logs:read` | Просмотр системного журнала |
 | GET | `/api/system/settings` | Только сессия входа | Чтение глобальных настроек |
 | PUT | `/api/system/settings` | Только сессия входа | Сохранить глобальные настройки |
+| GET | `/api/system/settings/secrets` | Только сессия входа | Показать Client Secret стороннего входа открытым текстом |
 | GET | `/api/system/info` | `status:read` | Просмотр информации о системе |
 | GET | `/api/system/update` | `status:read` | Проверить наличие новой версии |
 | POST | `/api/system/upgrade` | Только сессия входа | Обновить онлайн до последней версии |

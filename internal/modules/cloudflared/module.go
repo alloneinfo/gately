@@ -299,8 +299,10 @@ func (m *Module) Routes(r module.Router) {
 		Validate: func(t *Tunnel) error { return t.Validate() },
 		Merge:    func(old, updated *Tunnel) { crud.KeepSecret(old.Token, &updated.Token) },
 		View:     func(t *Tunnel) any { return m.viewLocked(t) },
-		Changed:  m.applyLocked,
-		Removed:  m.dropLocked,
+		// 查看被脱敏的隧道令牌明文
+		Secrets: func(t *Tunnel) map[string]string { return map[string]string{"token": t.Token} },
+		Changed: m.applyLocked,
+		Removed: m.dropLocked,
 	}
 	tunnels.Register(r, "/tunnels")
 	r.HandleFunc("POST /tunnels/{key}/restart", func(w http.ResponseWriter, req *http.Request) {

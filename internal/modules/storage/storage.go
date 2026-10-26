@@ -157,8 +157,10 @@ func (m *Module) Init(env module.Env) error {
 		Validate: func(mt *Mount) error { return mt.Validate() },
 		Merge:    func(old, updated *Mount) { crud.KeepSecret(old.Password, &updated.Password) },
 		View:     func(mt *Mount) any { return mt.view() },
-		Changed:  m.dropBackend,
-		Removed:  m.dropBackend,
+		// 查看被脱敏的存储密码明文
+		Secrets: func(mt *Mount) map[string]string { return map[string]string{"password": mt.Password} },
+		Changed: m.dropBackend,
+		Removed: m.dropBackend,
 	}
 	return nil
 }

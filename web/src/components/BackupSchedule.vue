@@ -17,7 +17,7 @@
         <span class="inline-help">{{ t('backupSchedule.keepHelp') }}</span>
       </el-form-item>
       <el-form-item :label="t('backupSchedule.password')">
-        <el-input v-model="settings.password" show-password :placeholder="settings.hasPassword ? t('backupSchedule.passwordSet') : t('backupSchedule.passwordEmpty')" />
+        <SecretInput v-model="settings.password" :placeholder="settings.hasPassword ? t('backupSchedule.passwordSet') : t('backupSchedule.passwordEmpty')" :reveal="secretOf('/api/backup/secrets', 'password')" />
         <div class="form-help">{{ t('backupSchedule.passwordHelp') }}</div>
       </el-form-item>
       <el-form-item :label="t('backupSchedule.localDir')">
@@ -98,6 +98,8 @@ import { useI18n } from 'vue-i18n'
 import { CalendarClock, Download, Pencil, Play, Plus, Trash2 } from 'lucide-vue-next'
 import { api } from '../api'
 import StatusBadge from './StatusBadge.vue'
+import SecretInput from './SecretInput.vue'
+import { secretOf } from '../secrets'
 import { useFormLayout } from '../composables/useIsMobile'
 import { usePolling } from '../composables/usePolling'
 

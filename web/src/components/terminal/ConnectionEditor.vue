@@ -50,7 +50,7 @@
           <span class="form-help">{{ t('termConn.editor.credentialHelp') }}</span>
         </el-form-item>
         <el-form-item v-else-if="form.ssh.authType === 'password'" :label="t('termConn.editor.password')">
-          <el-input v-model="form.ssh.password" type="password" show-password :placeholder="t('termConn.editor.passwordPlaceholder')" />
+          <SecretInput v-model="form.ssh.password" :placeholder="t('termConn.editor.passwordPlaceholder')" :reveal="revealOf('ssh.password')" />
         </el-form-item>
         <template v-else>
           <el-form-item :label="t('termConn.editor.privateKey')">
@@ -61,7 +61,7 @@
             <el-input v-model="form.ssh.keyFile" class="mono" placeholder="/root/.ssh/id_ed25519" />
             <span class="form-help">{{ t('termConn.editor.keyFileHelp') }}</span>
           </el-form-item>
-          <el-form-item :label="t('termConn.editor.passphrase')"><el-input v-model="form.ssh.passphrase" type="password" show-password :placeholder="t('termConn.editor.passphrasePlaceholder')" /></el-form-item>
+          <el-form-item :label="t('termConn.editor.passphrase')"><SecretInput v-model="form.ssh.passphrase" :placeholder="t('termConn.editor.passphrasePlaceholder')" :reveal="revealOf('ssh.passphrase')" /></el-form-item>
         </template>
         <el-form-item :label="t('termConn.editor.workDir')">
           <el-input v-model="form.ssh.workDir" class="mono" :placeholder="t('termConn.editor.sshWorkDirPlaceholder')" />
@@ -74,7 +74,7 @@
         <el-form-item v-if="form.ssh.hostKey" :label="t('termConn.editor.hostKey')">
           <span class="fp mono">{{ form.ssh.hostKey }}</span>
         </el-form-item>
-        <ProxyForm :proxy="form.ssh.proxy" />
+        <ProxyForm :proxy="form.ssh.proxy" :reveal="revealOf('ssh.proxy.password')" />
       </template>
 
       <!-- Telnet -->
@@ -85,9 +85,9 @@
         <el-form-item :label="t('termConn.editor.username')">
           <el-input v-model="form.telnet.username" :placeholder="t('termConn.editor.telnetUsernamePlaceholder')" />
         </el-form-item>
-        <el-form-item :label="t('termConn.editor.password')"><el-input v-model="form.telnet.password" type="password" show-password :placeholder="t('termConn.editor.telnetPasswordPlaceholder')" /></el-form-item>
+        <el-form-item :label="t('termConn.editor.password')"><SecretInput v-model="form.telnet.password" :placeholder="t('termConn.editor.telnetPasswordPlaceholder')" :reveal="revealOf('telnet.password')" /></el-form-item>
         <el-form-item :label="t('termConn.editor.timeout')"><el-input-number v-model="form.telnet.timeout" :min="1" :max="300" /></el-form-item>
-        <ProxyForm :proxy="form.telnet.proxy" />
+        <ProxyForm :proxy="form.telnet.proxy" :reveal="revealOf('telnet.proxy.password')" />
       </template>
 
       <!-- 本机 -->
@@ -140,6 +140,8 @@ import { api } from '../../api'
 import { useFormLayout } from '../../composables/useIsMobile'
 import CredentialManager from './CredentialManager.vue'
 import ProxyForm from './ProxyForm.vue'
+import SecretInput from '../SecretInput.vue'
+import { secretOf } from '../../secrets'
 import { emptyConn, normalizeConn, type Conn, type Credential } from './types'
 
 const props = defineProps<{ modelValue: boolean; conn: Conn | null; allowLocalShell: boolean }>()
@@ -148,6 +150,11 @@ const emit = defineEmits<{ 'update:modelValue': [v: boolean]; saved: [] }>()
 const { t } = useI18n()
 const { isMobile, labelPosition } = useFormLayout()
 const form = reactive<Conn>(emptyConn())
+
+// revealOf 返回取回已保存连接中密码明文的函数，field 为后端明文表的键（例如 ssh.proxy.password）
+function revealOf(field: string) {
+  return secretOf(form.key && `/api/webterminal/connections/${form.key}/secrets`, field)
+}
 const envRows = ref<{ k: string; v: string }[]>([])
 const quickText = ref('')
 const shells = ref<string[]>([])

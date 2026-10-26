@@ -100,7 +100,7 @@
             <div v-if="editing.type === 'smb'" class="form-help">{{ t('storage.smbUrlHelp') }}</div>
           </el-form-item>
           <el-form-item :label="t('storage.username')"><el-input v-model="editing.username" /></el-form-item>
-          <el-form-item :label="t('storage.password')"><el-input v-model="editing.password" type="password" show-password /></el-form-item>
+          <el-form-item :label="t('storage.password')"><SecretInput v-model="editing.password" :reveal="secretOf(editing.key && `/api/storage/mounts/${editing.key}/secrets`, 'password')" /></el-form-item>
           <el-form-item v-if="editing.type === 'smb'" :label="t('storage.domain')">
             <el-input v-model="editing.domain" placeholder="WORKGROUP" />
             <div class="form-help">{{ t('storage.domainHelp') }}</div>
@@ -128,6 +128,8 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { useI18n } from 'vue-i18n'
 import { Cloud, Download, File, Folder, FolderOpen, FolderPlus, HardDrive, Pencil, Plus, RefreshCw, Server, Trash2, Upload } from 'lucide-vue-next'
 import { api } from '../api'
+import SecretInput from '../components/SecretInput.vue'
+import { secretOf } from '../secrets'
 import PageHeader from '../components/PageHeader.vue'
 import EntityCard from '../components/EntityCard.vue'
 import Field from '../components/Field.vue'

@@ -38,6 +38,7 @@
       :desc="t('smb.usersDesc')"
       mount-summary-key="smb.mountSummary"
       :mount-name-placeholder="t('smb.shareName')"
+      secrets-url="/api/smb/settings/secrets"
     />
 
     <SharedFileUsers

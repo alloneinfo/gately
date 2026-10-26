@@ -88,6 +88,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/ddns/tasks/{key}` | `ddns:write` | DDNS タスク を削除 |
 | PUT | `/api/ddns/tasks/{key}/enable` | `ddns:write` | DDNS タスク の有効/無効を切り替え |
 | PUT | `/api/ddns/tasks-order` | `ddns:write` | DDNS タスク の並び順を変更 |
+| GET | `/api/ddns/tasks/{key}/secrets` | `ddns:write` | シークレットを平文で表示 |
 | POST | `/api/ddns/tasks/{key}/sync` | `ddns:write` | DDNS タスクを即時同期 |
 | GET | `/api/ddns/providers` | `ddns:read` | 対応する DNS プロバイダーと必要なパラメーターを一覧表示 |
 | GET | `/api/ddns/netinterfaces` | `ddns:read` | ローカルのネットワークインターフェースとアドレスを一覧表示 |
@@ -121,6 +122,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/tailscale/logs` | `tailscale:write` | モジュールの実行ログを消去 |
 | GET | `/api/tailscale/settings` | `tailscale:read` | Tailscale 設定を読み取り |
 | PUT | `/api/tailscale/settings` | `tailscale:write` | Tailscale 設定を保存 |
+| GET | `/api/tailscale/secrets` | `tailscale:write` | シークレットを平文で表示 |
 | GET | `/api/tailscale/status` | `tailscale:read` | Tailscale の接続状態を表示 |
 | POST | `/api/tailscale/restart` | `tailscale:write` | Tailscale を再起動 |
 | POST | `/api/tailscale/logout` | `tailscale:write` | Tailscale からログアウト |
@@ -167,6 +169,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/cloudflared/tunnels/{key}` | `cloudflared:write` | Cloudflare トンネル を削除 |
 | PUT | `/api/cloudflared/tunnels/{key}/enable` | `cloudflared:write` | Cloudflare トンネル の有効/無効を切り替え |
 | PUT | `/api/cloudflared/tunnels-order` | `cloudflared:write` | Cloudflare トンネル の並び順を変更 |
+| GET | `/api/cloudflared/tunnels/{key}/secrets` | `cloudflared:write` | シークレットを平文で表示 |
 | POST | `/api/cloudflared/tunnels/{key}/restart` | `cloudflared:write` | Cloudflare トンネルを 1 つ再起動 |
 | GET | `/api/cloudflared/settings` | `cloudflared:read` | Cloudflare トンネル設定を読み取り |
 | PUT | `/api/cloudflared/settings` | `cloudflared:write` | Cloudflare トンネルの設定を保存 |
@@ -189,6 +192,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/ssl/certs/{key}` | `ssl:write` | 証明書 を削除 |
 | PUT | `/api/ssl/certs/{key}/enable` | `ssl:write` | 証明書 の有効/無効を切り替え |
 | PUT | `/api/ssl/certs-order` | `ssl:write` | 証明書 の並び順を変更 |
+| GET | `/api/ssl/certs/{key}/secrets` | `ssl:write` | シークレットを平文で表示 |
 | POST | `/api/ssl/certs/{key}/renew` | `ssl:write` | 証明書を即時発行または更新 |
 | GET | `/api/ssl/certs/{key}/download` | `ssl:write` | 証明書と秘密鍵をダウンロード |
 | POST | `/api/ssl/certs/{key}/deploy` | `ssl:write` | 証明書を今すぐデプロイ |
@@ -233,6 +237,8 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | POST | `/api/webservice/iplists/{key}/refresh` | `webservice:write` | 購読 IP リストを今すぐ更新 |
 | POST | `/api/webservice/import/nginx` | `webservice:write` | nginx 設定をインポート |
 | GET | `/api/webservice/settings` | `webservice:read` | Web サービスのグローバル設定を読み取り |
+| GET | `/api/webservice/settings/secrets/totp` | `webservice:write` | 共有ユーザーの TOTP シークレットを平文で表示（ユーザー名で索引） |
+| GET | `/api/webservice/settings/secrets/oauth` | `webservice:write` | サードパーティログインの Client Secret を平文で表示（ログイン方式 ID で索引） |
 | POST | `/api/webservice/totp-secret` | `webservice:write` | 共有ユーザーの新しい TOTP 鍵を生成（保存はせず、設定保存後に有効） |
 | PUT | `/api/webservice/settings` | `webservice:write` | Web サービスのグローバル設定を保存 |
 | GET | `/api/webservice/stats` | `webservice:read` | サイトの分単位統計（?listener=&site=&minutes=） |
@@ -294,6 +300,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/webterminal/connections/{key}` | `webterminal:write` | ターミナル接続 を削除 |
 | PUT | `/api/webterminal/connections/{key}/enable` | `webterminal:write` | ターミナル接続 の有効/無効を切り替え |
 | PUT | `/api/webterminal/connections-order` | `webterminal:write` | ターミナル接続 の並び順を変更 |
+| GET | `/api/webterminal/connections/{key}/secrets` | `webterminal:write` | シークレットを平文で表示 |
 | DELETE | `/api/webterminal/connections/{key}/hostkey` | `webterminal:write` | 記録済みのホストキーをクリア |
 | POST | `/api/webterminal/connections/{key}/test` | `webterminal:write` | 保存済みの接続をテスト |
 | POST | `/api/webterminal/connections/test` | `webterminal:write` | 一時的な接続パラメーターをテスト |
@@ -304,6 +311,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/webterminal/credentials/{key}` | `webterminal:write` | エントリ を削除 |
 | PUT | `/api/webterminal/credentials/{key}/enable` | `webterminal:write` | エントリ の有効/無効を切り替え |
 | PUT | `/api/webterminal/credentials-order` | `webterminal:write` | エントリ の並び順を変更 |
+| GET | `/api/webterminal/credentials/{key}/secrets` | `webterminal:write` | シークレットを平文で表示 |
 | GET | `/api/webterminal/connections/{key}/ws` | `webterminal:write` | ターミナルセッションを開く（WebSocket） |
 | GET | `/api/webterminal/sessions/{id}/ws` | `webterminal:write` | 既存のターミナルセッションに接続（WebSocket） |
 | GET | `/api/webterminal/sessions` | `webterminal:read` | ターミナルセッションを一覧表示 |
@@ -398,6 +406,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | POST | `/api/docker/prune` | `docker:write` | 不要な Docker リソースをクリーンアップ |
 | GET | `/api/docker/settings` | `docker:read` | Docker モジュール設定を読み取り |
 | PUT | `/api/docker/settings` | `docker:write` | Docker モジュールの設定を保存 |
+| GET | `/api/docker/settings/secrets` | `docker:write` | レジストリのパスワードを平文で表示（キーは registry:<レジストリアドレス>） |
 | GET | `/api/docker/containers` | `docker:read` | コンテナを一覧表示 |
 | POST | `/api/docker/containers` | `docker:write` | コンテナを作成 |
 | POST | `/api/docker/containers/check-all` | `docker:write` | すべてのコンテナイメージの更新を確認 |
@@ -431,6 +440,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | GET | `/api/webdav/logs` | `webdav:read` | モジュールの実行ログを表示 |
 | DELETE | `/api/webdav/logs` | `webdav:write` | モジュールの実行ログを消去 |
 | GET | `/api/webdav/settings` | `webdav:read` | WebDAV 設定を読み取り |
+| GET | `/api/webdav/settings/secrets` | `webdav:write` | ローカルユーザーのパスワードを平文で表示 |
 | GET | `/api/webdav/shared-users` | `webdav:read` | ファイルサービスの共有ユーザーを取得（旧エンドポイント） |
 | PUT | `/api/webdav/shared-users` | `webdav:write,ftp:write,smb:write` | ファイルサービスの共有ユーザーを保存（旧エンドポイント） |
 | PUT | `/api/webdav/settings` | `webdav:write` | WebDAV 設定を保存 |
@@ -442,6 +452,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | GET | `/api/ftp/logs` | `ftp:read` | モジュールの実行ログを表示 |
 | DELETE | `/api/ftp/logs` | `ftp:write` | モジュールの実行ログを消去 |
 | GET | `/api/ftp/settings` | `ftp:read` | FTP 設定を読み取り |
+| GET | `/api/ftp/settings/secrets` | `ftp:write` | ローカルユーザーのパスワードを平文で表示 |
 | GET | `/api/ftp/shared-users` | `ftp:read` | ファイルサービスの共有ユーザーを取得（旧エンドポイント） |
 | PUT | `/api/ftp/shared-users` | `webdav:write,ftp:write,smb:write` | ファイルサービスの共有ユーザーを保存（旧エンドポイント） |
 | PUT | `/api/ftp/settings` | `ftp:write` | FTP 設定を保存 |
@@ -453,6 +464,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | GET | `/api/smb/logs` | `smb:read` | モジュールの実行ログを表示 |
 | DELETE | `/api/smb/logs` | `smb:write` | モジュールの実行ログを消去 |
 | GET | `/api/smb/settings` | `smb:read` | SMB 設定を取得 |
+| GET | `/api/smb/settings/secrets` | `smb:write` | ローカルユーザーのパスワードを平文で表示 |
 | GET | `/api/smb/shared-users` | `smb:read` | ファイルサービスの共有ユーザーを取得（旧エンドポイント） |
 | PUT | `/api/smb/shared-users` | `webdav:write,ftp:write,smb:write` | ファイルサービスの共有ユーザーを保存（旧エンドポイント） |
 | PUT | `/api/smb/settings` | `smb:write` | SMB 設定を保存 |
@@ -469,6 +481,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/filebrowser/instances/{key}` | `filebrowser:write` | File Browser インスタンス を削除 |
 | PUT | `/api/filebrowser/instances/{key}/enable` | `filebrowser:write` | File Browser インスタンス の有効/無効を切り替え |
 | PUT | `/api/filebrowser/instances-order` | `filebrowser:write` | File Browser インスタンス の並び順を変更 |
+| GET | `/api/filebrowser/instances/{key}/secrets` | `filebrowser:write` | シークレットを平文で表示 |
 | POST | `/api/filebrowser/instances/{key}/restart` | `filebrowser:write` | File Browser インスタンスを再起動 |
 | GET | `/api/filebrowser/settings` | `filebrowser:read` | File Browser のプログラム設定を取得 |
 | PUT | `/api/filebrowser/settings` | `filebrowser:write` | File Browser のプログラム設定を保存 |
@@ -491,6 +504,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/storage/mounts/{key}` | `storage:write` | エントリ を削除 |
 | PUT | `/api/storage/mounts/{key}/enable` | `storage:write` | エントリ の有効/無効を切り替え |
 | PUT | `/api/storage/mounts-order` | `storage:write` | エントリ の並び順を変更 |
+| GET | `/api/storage/mounts/{key}/secrets` | `storage:write` | シークレットを平文で表示 |
 | GET | `/api/storage/files/{key}/list` | `storage:read` | ストレージのディレクトリを一覧表示 |
 | GET | `/api/storage/files/{key}/download` | `storage:write` | ストレージのファイルをダウンロード |
 | POST | `/api/storage/files/{key}/upload` | `storage:write` | ストレージにファイルをアップロード |
@@ -510,6 +524,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | DELETE | `/api/notify/channels/{key}` | `notify:write` | 通知チャネル を削除 |
 | PUT | `/api/notify/channels/{key}/enable` | `notify:write` | 通知チャネル の有効/無効を切り替え |
 | PUT | `/api/notify/channels-order` | `notify:write` | 通知チャネル の並び順を変更 |
+| GET | `/api/notify/channels/{key}/secrets` | `notify:write` | シークレットを平文で表示 |
 | GET | `/api/notify/rules` | `notify:read` | 通知ルール の一覧を取得 |
 | POST | `/api/notify/rules` | `notify:write` | 通知ルール を追加 |
 | PUT | `/api/notify/rules/{key}` | `notify:write` | 通知ルール を更新 |
@@ -548,6 +563,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | PUT | `/api/backup/targets-order` | `backup:write` | バックアップ先 の並び順を変更 |
 | GET | `/api/backup/settings` | `backup:read` | バックアップ設定 |
 | PUT | `/api/backup/settings` | `backup:write` | バックアップ設定を変更（パスフレーズにプレースホルダーを渡すと変更なし） |
+| GET | `/api/backup/secrets` | `backup:write` | シークレットを平文で表示 |
 | POST | `/api/backup/run` | `backup:write` | 今すぐバックアップを 1 回実行 |
 | GET | `/api/backup/status` | `backup:read` | 直近のバックアップ結果と次回実行時刻 |
 | GET | `/api/backup/mounts` | `backup:read` | バックアップ先として使用できるストレージのマウントポイント |
@@ -560,6 +576,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | --- | --- | --- | --- |
 | GET | `/api/fileusers` | `fileusers:read` | ファイルサービスの共有ユーザーを取得 |
 | PUT | `/api/fileusers` | `fileusers:write` | ファイルサービスの共有ユーザーを保存 |
+| GET | `/api/fileusers/secrets` | `fileusers:write` | 共有ユーザーのパスワードを平文で表示 |
 
 ## システム
 
@@ -570,6 +587,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | GET | `/api/logs` | `logs:read` | システムログを表示 |
 | GET | `/api/system/settings` | ログインセッションのみ | グローバル設定を読み取り |
 | PUT | `/api/system/settings` | ログインセッションのみ | グローバル設定を保存 |
+| GET | `/api/system/settings/secrets` | ログインセッションのみ | サードパーティログインの Client Secret を平文で表示 |
 | GET | `/api/system/info` | `status:read` | システム情報を表示 |
 | GET | `/api/system/update` | `status:read` | 新しいバージョンを確認 |
 | POST | `/api/system/upgrade` | ログインセッションのみ | 最新バージョンへオンラインアップグレード |

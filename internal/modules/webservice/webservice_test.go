@@ -762,3 +762,45 @@ func TestValidateHeaderLines(t *testing.T) {
 		t.Error("分路径后端请求头名称非法时应拒绝保存")
 	}
 }
+
+// secretsRouter 把模块接口直接注册到 ServeMux，用于测试。
+type secretsRouter struct{ *http.ServeMux }
+
+func (r secretsRouter) HandleFunc(pattern string, h http.HandlerFunc) {
+	r.ServeMux.HandleFunc(pattern, h)
+}
+
+// TestSettingsSecrets 验证查看 TOTP 密钥与第三方登录 Client Secret 明文的接口按名称返回原值，设置接口仍脱敏。
+func TestSettingsSecrets(t *testing.T) {
+	st, _ := config.Open(t.TempDir())
+	m := New(nil, nil)
+	if err := m.Init(module.Env{Store: st, Logs: logbuf.New(50, log.New(io.Discard, "", 0))}); err != nil {
+		t.Fatal(err)
+	}
+	m.mu.Lock()
+	m.cfg.Settings.AuthUsers = []AuthUser{{ID: "u1", Name: "alice", Password: "$2a$10$hash", TOTPSecret: "JBSWY3DPEHPK3PXP"}, {ID: "u2", Name: "bob", Password: "$2a$10$hash"}}
+	m.cfg.Settings.OAuthProviders = []OAuthProvider{{Key: "github", Type: "github", ClientID: "id", ClientSecret: "gh-secret"}}
+	m.mu.Unlock()
+	mux := http.NewServeMux()
+	m.Routes(secretsRouter{mux})
+	fetch := func(path string) map[string]string {
+		rec := httptest.NewRecorder()
+		mux.ServeHTTP(rec, httptest.NewRequest("GET", path, nil))
+		var out map[string]string
+		if err := json.Unmarshal(rec.Body.Bytes(), &out); err != nil || rec.Code != http.StatusOK {
+			t.Fatalf("%s: %d %s", path, rec.Code, rec.Body.String())
+		}
+		return out
+	}
+	if out := fetch("/settings/secrets/totp"); len(out) != 2 || out["alice"] != "JBSWY3DPEHPK3PXP" || out["bob"] != "" {
+		t.Fatalf("应按用户名返回 TOTP 密钥: %v", out)
+	}
+	if out := fetch("/settings/secrets/oauth"); len(out) != 1 || out["github"] != "gh-secret" {
+		t.Fatalf("应按登录方式标识返回 Client Secret: %v", out)
+	}
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, httptest.NewRequest("GET", "/settings", nil))
+	if body := rec.Body.String(); strings.Contains(body, "gh-secret") || strings.Contains(body, "JBSWY3DPEHPK3PXP") {
+		t.Fatalf("设置接口不应返回密钥明文: %s", body)
+	}
+}

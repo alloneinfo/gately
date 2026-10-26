@@ -88,6 +88,7 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | DELETE | `/api/ddns/tasks/{key}` | `ddns:write` | Eliminar Tarea DDNS |
 | PUT | `/api/ddns/tasks/{key}/enable` | `ddns:write` | Activar o desactivar Tarea DDNS |
 | PUT | `/api/ddns/tasks-order` | `ddns:write` | Reordenar Tarea DDNS |
+| GET | `/api/ddns/tasks/{key}/secrets` | `ddns:write` | Ver secretos en texto plano |
 | POST | `/api/ddns/tasks/{key}/sync` | `ddns:write` | Sincronizar ahora una tarea DDNS |
 | GET | `/api/ddns/providers` | `ddns:read` | Listar los proveedores DNS compatibles y los parámetros que requieren |
 | GET | `/api/ddns/netinterfaces` | `ddns:read` | Listar las tarjetas de red de este equipo y sus direcciones |
@@ -121,6 +122,7 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | DELETE | `/api/tailscale/logs` | `tailscale:write` | Vaciar los registros de ejecución del módulo |
 | GET | `/api/tailscale/settings` | `tailscale:read` | Leer los ajustes de Tailscale |
 | PUT | `/api/tailscale/settings` | `tailscale:write` | Guardar los ajustes de Tailscale |
+| GET | `/api/tailscale/secrets` | `tailscale:write` | Ver secretos en texto plano |
 | GET | `/api/tailscale/status` | `tailscale:read` | Ver el estado de conexión de Tailscale |
 | POST | `/api/tailscale/restart` | `tailscale:write` | Reiniciar Tailscale |
 | POST | `/api/tailscale/logout` | `tailscale:write` | Cerrar sesión de Tailscale |
@@ -167,6 +169,7 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | DELETE | `/api/cloudflared/tunnels/{key}` | `cloudflared:write` | Eliminar Túnel de Cloudflare |
 | PUT | `/api/cloudflared/tunnels/{key}/enable` | `cloudflared:write` | Activar o desactivar Túnel de Cloudflare |
 | PUT | `/api/cloudflared/tunnels-order` | `cloudflared:write` | Reordenar Túnel de Cloudflare |
+| GET | `/api/cloudflared/tunnels/{key}/secrets` | `cloudflared:write` | Ver secretos en texto plano |
 | POST | `/api/cloudflared/tunnels/{key}/restart` | `cloudflared:write` | Reiniciar un túnel de Cloudflare |
 | GET | `/api/cloudflared/settings` | `cloudflared:read` | Leer los ajustes del túnel de Cloudflare |
 | PUT | `/api/cloudflared/settings` | `cloudflared:write` | Guardar los ajustes del túnel de Cloudflare |
@@ -189,6 +192,7 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | DELETE | `/api/ssl/certs/{key}` | `ssl:write` | Eliminar Certificado |
 | PUT | `/api/ssl/certs/{key}/enable` | `ssl:write` | Activar o desactivar Certificado |
 | PUT | `/api/ssl/certs-order` | `ssl:write` | Reordenar Certificado |
+| GET | `/api/ssl/certs/{key}/secrets` | `ssl:write` | Ver secretos en texto plano |
 | POST | `/api/ssl/certs/{key}/renew` | `ssl:write` | Emitir o renovar un certificado ahora |
 | GET | `/api/ssl/certs/{key}/download` | `ssl:write` | Descargar certificado y clave privada |
 | POST | `/api/ssl/certs/{key}/deploy` | `ssl:write` | Desplegar un certificado ahora |
@@ -233,6 +237,8 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | POST | `/api/webservice/iplists/{key}/refresh` | `webservice:write` | Actualizar ahora una lista de IP suscrita |
 | POST | `/api/webservice/import/nginx` | `webservice:write` | Importar configuración de nginx |
 | GET | `/api/webservice/settings` | `webservice:read` | Leer los ajustes globales del servicio web |
+| GET | `/api/webservice/settings/secrets/totp` | `webservice:write` | Ver en texto plano los secretos TOTP de los usuarios compartidos (por nombre de usuario) |
+| GET | `/api/webservice/settings/secrets/oauth` | `webservice:write` | Ver en texto plano los Client Secret de los inicios de sesión de terceros (por identificador del método) |
 | POST | `/api/webservice/totp-secret` | `webservice:write` | Generar una nueva clave TOTP para un usuario compartido (no se guarda; se aplica al guardar la configuración) |
 | PUT | `/api/webservice/settings` | `webservice:write` | Guardar los ajustes globales del servicio web |
 | GET | `/api/webservice/stats` | `webservice:read` | Estadísticas por minuto del sitio (?listener=&site=&minutes=) |
@@ -294,6 +300,7 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | DELETE | `/api/webterminal/connections/{key}` | `webterminal:write` | Eliminar Conexión de terminal |
 | PUT | `/api/webterminal/connections/{key}/enable` | `webterminal:write` | Activar o desactivar Conexión de terminal |
 | PUT | `/api/webterminal/connections-order` | `webterminal:write` | Reordenar Conexión de terminal |
+| GET | `/api/webterminal/connections/{key}/secrets` | `webterminal:write` | Ver secretos en texto plano |
 | DELETE | `/api/webterminal/connections/{key}/hostkey` | `webterminal:write` | Borrar la clave de host registrada |
 | POST | `/api/webterminal/connections/{key}/test` | `webterminal:write` | Probar una conexión guardada |
 | POST | `/api/webterminal/connections/test` | `webterminal:write` | Probar parámetros de conexión temporales |
@@ -304,6 +311,7 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | DELETE | `/api/webterminal/credentials/{key}` | `webterminal:write` | Eliminar Entrada |
 | PUT | `/api/webterminal/credentials/{key}/enable` | `webterminal:write` | Activar o desactivar Entrada |
 | PUT | `/api/webterminal/credentials-order` | `webterminal:write` | Reordenar Entrada |
+| GET | `/api/webterminal/credentials/{key}/secrets` | `webterminal:write` | Ver secretos en texto plano |
 | GET | `/api/webterminal/connections/{key}/ws` | `webterminal:write` | Abrir una sesión de terminal (WebSocket) |
 | GET | `/api/webterminal/sessions/{id}/ws` | `webterminal:write` | Unirse a una sesión de terminal existente (WebSocket) |
 | GET | `/api/webterminal/sessions` | `webterminal:read` | Listar sesiones de terminal |
@@ -398,6 +406,7 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | POST | `/api/docker/prune` | `docker:write` | Limpiar recursos de Docker sin uso |
 | GET | `/api/docker/settings` | `docker:read` | Leer los ajustes del módulo Docker |
 | PUT | `/api/docker/settings` | `docker:write` | Guardar los ajustes del módulo Docker |
+| GET | `/api/docker/settings/secrets` | `docker:write` | Ver en texto plano las contraseñas de los registros (claves registry:<dirección del registro>) |
 | GET | `/api/docker/containers` | `docker:read` | Listar contenedores |
 | POST | `/api/docker/containers` | `docker:write` | Crear un contenedor |
 | POST | `/api/docker/containers/check-all` | `docker:write` | Comprobar actualizaciones de las imágenes de todos los contenedores |
@@ -431,6 +440,7 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | GET | `/api/webdav/logs` | `webdav:read` | Ver los registros de ejecución del módulo |
 | DELETE | `/api/webdav/logs` | `webdav:write` | Vaciar los registros de ejecución del módulo |
 | GET | `/api/webdav/settings` | `webdav:read` | Leer los ajustes de WebDAV |
+| GET | `/api/webdav/settings/secrets` | `webdav:write` | Ver en texto plano las contraseñas de los usuarios locales |
 | GET | `/api/webdav/shared-users` | `webdav:read` | Leer los usuarios compartidos de los servicios de archivos (endpoint antiguo) |
 | PUT | `/api/webdav/shared-users` | `webdav:write,ftp:write,smb:write` | Guardar los usuarios compartidos de los servicios de archivos (endpoint antiguo) |
 | PUT | `/api/webdav/settings` | `webdav:write` | Guardar los ajustes de WebDAV |
@@ -442,6 +452,7 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | GET | `/api/ftp/logs` | `ftp:read` | Ver los registros de ejecución del módulo |
 | DELETE | `/api/ftp/logs` | `ftp:write` | Vaciar los registros de ejecución del módulo |
 | GET | `/api/ftp/settings` | `ftp:read` | Leer los ajustes de FTP |
+| GET | `/api/ftp/settings/secrets` | `ftp:write` | Ver en texto plano las contraseñas de los usuarios locales |
 | GET | `/api/ftp/shared-users` | `ftp:read` | Leer los usuarios compartidos de los servicios de archivos (endpoint antiguo) |
 | PUT | `/api/ftp/shared-users` | `webdav:write,ftp:write,smb:write` | Guardar los usuarios compartidos de los servicios de archivos (endpoint antiguo) |
 | PUT | `/api/ftp/settings` | `ftp:write` | Guardar los ajustes de FTP |
@@ -453,6 +464,7 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | GET | `/api/smb/logs` | `smb:read` | Ver los registros de ejecución del módulo |
 | DELETE | `/api/smb/logs` | `smb:write` | Vaciar los registros de ejecución del módulo |
 | GET | `/api/smb/settings` | `smb:read` | Obtener la configuración de SMB |
+| GET | `/api/smb/settings/secrets` | `smb:write` | Ver en texto plano las contraseñas de los usuarios locales |
 | GET | `/api/smb/shared-users` | `smb:read` | Leer los usuarios compartidos de los servicios de archivos (endpoint antiguo) |
 | PUT | `/api/smb/shared-users` | `webdav:write,ftp:write,smb:write` | Guardar los usuarios compartidos de los servicios de archivos (endpoint antiguo) |
 | PUT | `/api/smb/settings` | `smb:write` | Guardar la configuración de SMB |
@@ -469,6 +481,7 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | DELETE | `/api/filebrowser/instances/{key}` | `filebrowser:write` | Eliminar Instancia de File Browser |
 | PUT | `/api/filebrowser/instances/{key}/enable` | `filebrowser:write` | Activar o desactivar Instancia de File Browser |
 | PUT | `/api/filebrowser/instances-order` | `filebrowser:write` | Reordenar Instancia de File Browser |
+| GET | `/api/filebrowser/instances/{key}/secrets` | `filebrowser:write` | Ver secretos en texto plano |
 | POST | `/api/filebrowser/instances/{key}/restart` | `filebrowser:write` | Reiniciar una instancia de File Browser |
 | GET | `/api/filebrowser/settings` | `filebrowser:read` | Leer los ajustes del programa File Browser |
 | PUT | `/api/filebrowser/settings` | `filebrowser:write` | Guardar los ajustes del programa File Browser |
@@ -491,6 +504,7 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | DELETE | `/api/storage/mounts/{key}` | `storage:write` | Eliminar Entrada |
 | PUT | `/api/storage/mounts/{key}/enable` | `storage:write` | Activar o desactivar Entrada |
 | PUT | `/api/storage/mounts-order` | `storage:write` | Reordenar Entrada |
+| GET | `/api/storage/mounts/{key}/secrets` | `storage:write` | Ver secretos en texto plano |
 | GET | `/api/storage/files/{key}/list` | `storage:read` | Listar el directorio de almacenamiento |
 | GET | `/api/storage/files/{key}/download` | `storage:write` | Descargar un archivo del almacenamiento |
 | POST | `/api/storage/files/{key}/upload` | `storage:write` | Subir un archivo al almacenamiento |
@@ -510,6 +524,7 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | DELETE | `/api/notify/channels/{key}` | `notify:write` | Eliminar Canal de notificaciones |
 | PUT | `/api/notify/channels/{key}/enable` | `notify:write` | Activar o desactivar Canal de notificaciones |
 | PUT | `/api/notify/channels-order` | `notify:write` | Reordenar Canal de notificaciones |
+| GET | `/api/notify/channels/{key}/secrets` | `notify:write` | Ver secretos en texto plano |
 | GET | `/api/notify/rules` | `notify:read` | Listar Regla de notificación |
 | POST | `/api/notify/rules` | `notify:write` | Añadir Regla de notificación |
 | PUT | `/api/notify/rules/{key}` | `notify:write` | Modificar Regla de notificación |
@@ -548,6 +563,7 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | PUT | `/api/backup/targets-order` | `backup:write` | Reordenar Destino de copia de seguridad |
 | GET | `/api/backup/settings` | `backup:read` | Ajustes de copia de seguridad |
 | PUT | `/api/backup/settings` | `backup:write` | Modificar los ajustes de copia de seguridad (enviar el marcador de posición como contraseña para conservarla) |
+| GET | `/api/backup/secrets` | `backup:write` | Ver secretos en texto plano |
 | POST | `/api/backup/run` | `backup:write` | Hacer una copia de seguridad ahora |
 | GET | `/api/backup/status` | `backup:read` | Resultado de la última copia de seguridad y hora de la próxima ejecución |
 | GET | `/api/backup/mounts` | `backup:read` | Puntos de montaje de almacenamiento que pueden usarse como destino de copia de seguridad |
@@ -560,6 +576,7 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | --- | --- | --- | --- |
 | GET | `/api/fileusers` | `fileusers:read` | Leer los usuarios compartidos de los servicios de archivos |
 | PUT | `/api/fileusers` | `fileusers:write` | Guardar los usuarios compartidos de los servicios de archivos |
+| GET | `/api/fileusers/secrets` | `fileusers:write` | Ver en texto plano las contraseñas de los usuarios compartidos |
 
 ## Sistema
 
@@ -570,6 +587,7 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | GET | `/api/logs` | `logs:read` | Ver los registros del sistema |
 | GET | `/api/system/settings` | Solo sesión iniciada | Leer los ajustes globales |
 | PUT | `/api/system/settings` | Solo sesión iniciada | Guardar los ajustes globales |
+| GET | `/api/system/settings/secrets` | Solo sesión iniciada | Ver en texto plano los Client Secret del inicio de sesión de terceros |
 | GET | `/api/system/info` | `status:read` | Ver la información del sistema |
 | GET | `/api/system/update` | `status:read` | Buscar nueva versión |
 | POST | `/api/system/upgrade` | Solo sesión iniciada | Actualizar en línea a la última versión |

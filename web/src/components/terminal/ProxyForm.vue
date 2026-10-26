@@ -20,7 +20,7 @@
     <el-form-item :label="t('terminal.proxy.account')">
       <div class="row">
         <el-input v-model="proxy.username" :placeholder="t('terminal.proxy.userPlaceholder')" />
-        <el-input v-model="proxy.password" type="password" show-password :placeholder="t('terminal.proxy.passPlaceholder')" />
+        <SecretInput v-model="proxy.password" :placeholder="t('terminal.proxy.passPlaceholder')" :reveal="reveal" />
       </div>
     </el-form-item>
   </template>
@@ -29,10 +29,12 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
 import type { ProxyConf } from './types'
+import SecretInput from '../SecretInput.vue'
 
 const { t } = useI18n()
 
-defineProps<{ proxy: ProxyConf }>()
+// reveal 取回已保存的代理密码明文，新建连接时不提供
+defineProps<{ proxy: ProxyConf; reveal?: () => Promise<string | undefined> }>()
 </script>
 
 <style scoped>

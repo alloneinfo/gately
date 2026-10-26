@@ -2,6 +2,9 @@ package notify
 
 import (
 	"context"
+	"net/http"
+	"net/http/httptest"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -104,5 +107,31 @@ func TestChannelValidate(t *testing.T) {
 	_ = s.Validate()
 	if s.Port != 587 || s.Security != SecurityStartTLS {
 		t.Fatalf("SMTP 默认值不符: %+v", s)
+	}
+}
+
+type testRouter struct{ mux *http.ServeMux }
+
+func (tr testRouter) HandleFunc(p string, h http.HandlerFunc) { tr.mux.HandleFunc(p, h) }
+
+// 渠道列表只返回 hasSecret，查看明文接口返回已保存的密钥，渠道不存在时返回 404。
+func TestChannelSecrets(t *testing.T) {
+	m, _ := newTestModule(fileConfig{Channels: []Channel{{Key: "c1", Name: "tg", Kind: "telegram", Secret: "bot-token", Target: "1"}}})
+	mux := http.NewServeMux()
+	m.Routes(testRouter{mux})
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, httptest.NewRequest("GET", "/channels", nil))
+	if strings.Contains(rec.Body.String(), "bot-token") || !strings.Contains(rec.Body.String(), `"hasSecret":true`) {
+		t.Fatalf("列表不应返回密钥: %s", rec.Body.String())
+	}
+	rec = httptest.NewRecorder()
+	mux.ServeHTTP(rec, httptest.NewRequest("GET", "/channels/c1/secrets", nil))
+	if rec.Code != 200 || !strings.Contains(rec.Body.String(), `"secret":"bot-token"`) {
+		t.Fatalf("应返回密钥明文: %d %s", rec.Code, rec.Body.String())
+	}
+	rec = httptest.NewRecorder()
+	mux.ServeHTTP(rec, httptest.NewRequest("GET", "/channels/nope/secrets", nil))
+	if rec.Code != 404 {
+		t.Fatalf("渠道不存在应返回 404，实际 %d", rec.Code)
 	}
 }

@@ -179,3 +179,31 @@ func TestSharedUsersUsable(t *testing.T) {
 		t.Fatalf("只应列出不能用于 SMB 的共享用户，与本地用户同名的不列出: %s", rec.Body.String())
 	}
 }
+
+// TestSettingsSecrets 验证查看本地用户密码明文的接口按用户名返回原始密码，而设置接口仍返回占位符。
+func TestSettingsSecrets(t *testing.T) {
+	st, _ := config.Open(t.TempDir())
+	m := New()
+	if err := m.Init(module.Env{Store: st, Logs: logbuf.New(20, log.New(io.Discard, "", 0))}); err != nil {
+		t.Fatal(err)
+	}
+	m.mu.Lock()
+	m.settings = Settings{Users: []User{{Name: "alice", Password: "p1", Root: "/a"}, {Name: "bob", Password: "p2", Root: "/b"}}}
+	m.mu.Unlock()
+	mux := http.NewServeMux()
+	m.Routes(muxRouter{mux})
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, httptest.NewRequest("GET", "/settings/secrets", nil))
+	var out map[string]string
+	if err := json.Unmarshal(rec.Body.Bytes(), &out); err != nil {
+		t.Fatal(err)
+	}
+	if rec.Code != http.StatusOK || len(out) != 2 || out["alice"] != "p1" || out["bob"] != "p2" {
+		t.Fatalf("应按用户名返回密码明文: %d %s", rec.Code, rec.Body.String())
+	}
+	rec = httptest.NewRecorder()
+	mux.ServeHTTP(rec, httptest.NewRequest("GET", "/settings", nil))
+	if strings.Contains(rec.Body.String(), "p1") {
+		t.Fatalf("设置接口不应返回密码明文: %s", rec.Body.String())
+	}
+}

@@ -88,6 +88,7 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | DELETE | `/api/ddns/tasks/{key}` | `ddns:write` | Delete DDNS task |
 | PUT | `/api/ddns/tasks/{key}/enable` | `ddns:write` | Enable or disable DDNS task |
 | PUT | `/api/ddns/tasks-order` | `ddns:write` | Reorder DDNS task |
+| GET | `/api/ddns/tasks/{key}/secrets` | `ddns:write` | View secrets in plain text |
 | POST | `/api/ddns/tasks/{key}/sync` | `ddns:write` | Sync a DDNS task immediately |
 | GET | `/api/ddns/providers` | `ddns:read` | List supported DNS providers and their required parameters |
 | GET | `/api/ddns/netinterfaces` | `ddns:read` | List network interfaces and addresses on this machine |
@@ -121,6 +122,7 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | DELETE | `/api/tailscale/logs` | `tailscale:write` | Clear module runtime logs |
 | GET | `/api/tailscale/settings` | `tailscale:read` | Read Tailscale settings |
 | PUT | `/api/tailscale/settings` | `tailscale:write` | Save Tailscale settings |
+| GET | `/api/tailscale/secrets` | `tailscale:write` | View secrets in plain text |
 | GET | `/api/tailscale/status` | `tailscale:read` | View Tailscale connection status |
 | POST | `/api/tailscale/restart` | `tailscale:write` | Restart Tailscale |
 | POST | `/api/tailscale/logout` | `tailscale:write` | Sign out of Tailscale |
@@ -167,6 +169,7 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | DELETE | `/api/cloudflared/tunnels/{key}` | `cloudflared:write` | Delete Cloudflare Tunnel |
 | PUT | `/api/cloudflared/tunnels/{key}/enable` | `cloudflared:write` | Enable or disable Cloudflare Tunnel |
 | PUT | `/api/cloudflared/tunnels-order` | `cloudflared:write` | Reorder Cloudflare Tunnel |
+| GET | `/api/cloudflared/tunnels/{key}/secrets` | `cloudflared:write` | View secrets in plain text |
 | POST | `/api/cloudflared/tunnels/{key}/restart` | `cloudflared:write` | Restart a Cloudflare Tunnel |
 | GET | `/api/cloudflared/settings` | `cloudflared:read` | Read Cloudflare Tunnel settings |
 | PUT | `/api/cloudflared/settings` | `cloudflared:write` | Save Cloudflare Tunnel settings |
@@ -189,6 +192,7 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | DELETE | `/api/ssl/certs/{key}` | `ssl:write` | Delete Certificate |
 | PUT | `/api/ssl/certs/{key}/enable` | `ssl:write` | Enable or disable Certificate |
 | PUT | `/api/ssl/certs-order` | `ssl:write` | Reorder Certificate |
+| GET | `/api/ssl/certs/{key}/secrets` | `ssl:write` | View secrets in plain text |
 | POST | `/api/ssl/certs/{key}/renew` | `ssl:write` | Issue or renew a certificate immediately |
 | GET | `/api/ssl/certs/{key}/download` | `ssl:write` | Download certificate and private key |
 | POST | `/api/ssl/certs/{key}/deploy` | `ssl:write` | Deploy a certificate now |
@@ -233,6 +237,8 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | POST | `/api/webservice/iplists/{key}/refresh` | `webservice:write` | Refresh a subscribed IP list now |
 | POST | `/api/webservice/import/nginx` | `webservice:write` | Import nginx config |
 | GET | `/api/webservice/settings` | `webservice:read` | Read Web service global settings |
+| GET | `/api/webservice/settings/secrets/totp` | `webservice:write` | View the TOTP secrets of shared users in plain text (indexed by username) |
+| GET | `/api/webservice/settings/secrets/oauth` | `webservice:write` | View the Client Secrets of third-party logins in plain text (indexed by login method ID) |
 | POST | `/api/webservice/totp-secret` | `webservice:write` | Generate a new TOTP key for a shared user (not saved; takes effect after saving settings) |
 | PUT | `/api/webservice/settings` | `webservice:write` | Save Web service global settings |
 | GET | `/api/webservice/stats` | `webservice:read` | Per-minute site statistics (?listener=&site=&minutes=) |
@@ -294,6 +300,7 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | DELETE | `/api/webterminal/connections/{key}` | `webterminal:write` | Delete Terminal connection |
 | PUT | `/api/webterminal/connections/{key}/enable` | `webterminal:write` | Enable or disable Terminal connection |
 | PUT | `/api/webterminal/connections-order` | `webterminal:write` | Reorder Terminal connection |
+| GET | `/api/webterminal/connections/{key}/secrets` | `webterminal:write` | View secrets in plain text |
 | DELETE | `/api/webterminal/connections/{key}/hostkey` | `webterminal:write` | Clear the recorded host key |
 | POST | `/api/webterminal/connections/{key}/test` | `webterminal:write` | Test a saved connection |
 | POST | `/api/webterminal/connections/test` | `webterminal:write` | Test temporary connection parameters |
@@ -304,6 +311,7 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | DELETE | `/api/webterminal/credentials/{key}` | `webterminal:write` | Delete Entry |
 | PUT | `/api/webterminal/credentials/{key}/enable` | `webterminal:write` | Enable or disable Entry |
 | PUT | `/api/webterminal/credentials-order` | `webterminal:write` | Reorder Entry |
+| GET | `/api/webterminal/credentials/{key}/secrets` | `webterminal:write` | View secrets in plain text |
 | GET | `/api/webterminal/connections/{key}/ws` | `webterminal:write` | Open a terminal session (WebSocket) |
 | GET | `/api/webterminal/sessions/{id}/ws` | `webterminal:write` | Attach to an existing terminal session (WebSocket) |
 | GET | `/api/webterminal/sessions` | `webterminal:read` | List terminal sessions |
@@ -398,6 +406,7 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | POST | `/api/docker/prune` | `docker:write` | Clean up unused Docker resources |
 | GET | `/api/docker/settings` | `docker:read` | Read Docker module settings |
 | PUT | `/api/docker/settings` | `docker:write` | Save Docker module settings |
+| GET | `/api/docker/settings/secrets` | `docker:write` | View registry passwords in plain text (keys are registry:<registry address>) |
 | GET | `/api/docker/containers` | `docker:read` | List containers |
 | POST | `/api/docker/containers` | `docker:write` | Create a container |
 | POST | `/api/docker/containers/check-all` | `docker:write` | Check all containers for image updates |
@@ -431,6 +440,7 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | GET | `/api/webdav/logs` | `webdav:read` | View module runtime logs |
 | DELETE | `/api/webdav/logs` | `webdav:write` | Clear module runtime logs |
 | GET | `/api/webdav/settings` | `webdav:read` | Read WebDAV settings |
+| GET | `/api/webdav/settings/secrets` | `webdav:write` | View local user passwords in plain text |
 | GET | `/api/webdav/shared-users` | `webdav:read` | Get file service shared users (legacy endpoint) |
 | PUT | `/api/webdav/shared-users` | `webdav:write,ftp:write,smb:write` | Save file service shared users (legacy endpoint) |
 | PUT | `/api/webdav/settings` | `webdav:write` | Save WebDAV settings |
@@ -442,6 +452,7 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | GET | `/api/ftp/logs` | `ftp:read` | View module runtime logs |
 | DELETE | `/api/ftp/logs` | `ftp:write` | Clear module runtime logs |
 | GET | `/api/ftp/settings` | `ftp:read` | Read FTP settings |
+| GET | `/api/ftp/settings/secrets` | `ftp:write` | View local user passwords in plain text |
 | GET | `/api/ftp/shared-users` | `ftp:read` | Get file service shared users (legacy endpoint) |
 | PUT | `/api/ftp/shared-users` | `webdav:write,ftp:write,smb:write` | Save file service shared users (legacy endpoint) |
 | PUT | `/api/ftp/settings` | `ftp:write` | Save FTP settings |
@@ -453,6 +464,7 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | GET | `/api/smb/logs` | `smb:read` | View module runtime logs |
 | DELETE | `/api/smb/logs` | `smb:write` | Clear module runtime logs |
 | GET | `/api/smb/settings` | `smb:read` | Get SMB settings |
+| GET | `/api/smb/settings/secrets` | `smb:write` | View local user passwords in plain text |
 | GET | `/api/smb/shared-users` | `smb:read` | Get file service shared users (legacy endpoint) |
 | PUT | `/api/smb/shared-users` | `webdav:write,ftp:write,smb:write` | Save file service shared users (legacy endpoint) |
 | PUT | `/api/smb/settings` | `smb:write` | Save SMB settings |
@@ -469,6 +481,7 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | DELETE | `/api/filebrowser/instances/{key}` | `filebrowser:write` | Delete File Browser instance |
 | PUT | `/api/filebrowser/instances/{key}/enable` | `filebrowser:write` | Enable or disable File Browser instance |
 | PUT | `/api/filebrowser/instances-order` | `filebrowser:write` | Reorder File Browser instance |
+| GET | `/api/filebrowser/instances/{key}/secrets` | `filebrowser:write` | View secrets in plain text |
 | POST | `/api/filebrowser/instances/{key}/restart` | `filebrowser:write` | Restart a File Browser instance |
 | GET | `/api/filebrowser/settings` | `filebrowser:read` | Read File Browser program settings |
 | PUT | `/api/filebrowser/settings` | `filebrowser:write` | Save File Browser program settings |
@@ -491,6 +504,7 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | DELETE | `/api/storage/mounts/{key}` | `storage:write` | Delete Entry |
 | PUT | `/api/storage/mounts/{key}/enable` | `storage:write` | Enable or disable Entry |
 | PUT | `/api/storage/mounts-order` | `storage:write` | Reorder Entry |
+| GET | `/api/storage/mounts/{key}/secrets` | `storage:write` | View secrets in plain text |
 | GET | `/api/storage/files/{key}/list` | `storage:read` | List a storage directory |
 | GET | `/api/storage/files/{key}/download` | `storage:write` | Download a storage file |
 | POST | `/api/storage/files/{key}/upload` | `storage:write` | Upload a file to storage |
@@ -510,6 +524,7 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | DELETE | `/api/notify/channels/{key}` | `notify:write` | Delete Notification channel |
 | PUT | `/api/notify/channels/{key}/enable` | `notify:write` | Enable or disable Notification channel |
 | PUT | `/api/notify/channels-order` | `notify:write` | Reorder Notification channel |
+| GET | `/api/notify/channels/{key}/secrets` | `notify:write` | View secrets in plain text |
 | GET | `/api/notify/rules` | `notify:read` | List Notification rule |
 | POST | `/api/notify/rules` | `notify:write` | Create Notification rule |
 | PUT | `/api/notify/rules/{key}` | `notify:write` | Update Notification rule |
@@ -548,6 +563,7 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | PUT | `/api/backup/targets-order` | `backup:write` | Reorder Backup destinations |
 | GET | `/api/backup/settings` | `backup:read` | Backup settings |
 | PUT | `/api/backup/settings` | `backup:write` | Modify backup settings (send the placeholder for the passphrase to keep it unchanged) |
+| GET | `/api/backup/secrets` | `backup:write` | View secrets in plain text |
 | POST | `/api/backup/run` | `backup:write` | Run a backup now |
 | GET | `/api/backup/status` | `backup:read` | Latest backup result and next run time |
 | GET | `/api/backup/mounts` | `backup:read` | Storage mount points that can serve as backup destinations |
@@ -560,6 +576,7 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | --- | --- | --- | --- |
 | GET | `/api/fileusers` | `fileusers:read` | Get file service shared users |
 | PUT | `/api/fileusers` | `fileusers:write` | Save file service shared users |
+| GET | `/api/fileusers/secrets` | `fileusers:write` | View shared user passwords in plain text |
 
 ## System
 
@@ -570,6 +587,7 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | GET | `/api/logs` | `logs:read` | View system logs |
 | GET | `/api/system/settings` | Login sessions only | Read global settings |
 | PUT | `/api/system/settings` | Login sessions only | Save global settings |
+| GET | `/api/system/settings/secrets` | Login sessions only | View third-party login Client Secrets in plain text |
 | GET | `/api/system/info` | `status:read` | View system information |
 | GET | `/api/system/update` | `status:read` | Check for a new version |
 | POST | `/api/system/upgrade` | Login sessions only | Upgrade online to the latest version |

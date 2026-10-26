@@ -367,6 +367,10 @@ func (m *Module) Routes(r module.Router) {
 	targets.Register(r, "/targets")
 	r.HandleFunc("GET /settings", m.handleGetSettings)
 	r.HandleFunc("PUT /settings", m.handlePutSettings)
+	// 查看被脱敏的备份加密口令明文
+	r.HandleFunc("GET /secrets", crud.SecretsHandler(&m.mu, func() map[string]string {
+		return map[string]string{"password": m.cfg.Settings.Password}
+	}))
 	r.HandleFunc("POST /run", m.handleRun)
 	r.HandleFunc("GET /status", m.handleStatus)
 	r.HandleFunc("GET /mounts", m.handleMounts)
@@ -374,6 +378,7 @@ func (m *Module) Routes(r module.Router) {
 	r.HandleFunc("GET /local/{name}", m.handleLocalDownload)
 	module.DocOf(r, "GET /settings", module.Doc{Summary: "备份设置", Resp: &settingsView{}})
 	module.DocOf(r, "PUT /settings", module.Doc{Summary: "修改备份设置（口令传占位符表示保持不变）", Req: &Settings{}, Resp: &settingsView{}})
+	module.DocOf(r, "GET /secrets", module.Doc{Summary: "查看密钥明文", Resp: map[string]string{}})
 	module.DocOf(r, "POST /run", module.Doc{Summary: "立即备份一次", Resp: &Status{}})
 	module.DocOf(r, "GET /status", module.Doc{Summary: "最近一次备份结果与下次执行时间", Resp: &Status{}})
 	module.DocOf(r, "GET /mounts", module.Doc{Summary: "可作为备份目的地的存储挂载点", Resp: []storage.MountInfo{}})

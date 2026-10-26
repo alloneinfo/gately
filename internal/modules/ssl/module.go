@@ -693,7 +693,11 @@ func (m *Module) Routes(r module.Router) {
 			}
 			keepDeployRecords(old, updated)
 		},
-		View:    m.viewLocked,
+		View: m.viewLocked,
+		// 查看被脱敏的 DNS 凭据密钥与 EAB HMAC 明文；私钥可通过下载接口取得，此处不返回
+		Secrets: func(c *Cert) map[string]string {
+			return map[string]string{"secret": c.ACME.Credentials.Secret, "eabHmac": c.ACME.EABHMAC}
+		},
 		Changed: m.changedLocked,
 		Removed: func(key string) {
 			delete(m.states, key)

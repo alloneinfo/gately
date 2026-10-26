@@ -63,7 +63,7 @@
           </el-radio-group>
         </el-form-item>
         <el-form-item v-if="editing.mode === 'token'" :label="t('cloudflared.token')">
-          <el-input v-model="editing.token" type="password" show-password placeholder="eyJh…" />
+          <SecretInput v-model="editing.token" placeholder="eyJh…" :reveal="secretOf(editing.key && `/api/cloudflared/tunnels/${editing.key}/secrets`, 'token')" />
           <div class="form-help">{{ t('cloudflared.tokenHelp') }}</div>
         </el-form-item>
         <el-form-item v-else :label="t('cloudflared.localService')">
@@ -101,6 +101,8 @@ import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { Cloud, Download, Pencil, Plus, RefreshCw, Save, Terminal, Trash2 } from 'lucide-vue-next'
 import { api } from '../api'
+import SecretInput from '../components/SecretInput.vue'
+import { secretOf } from '../secrets'
 import PageHeader from '../components/PageHeader.vue'
 import EntityCard from '../components/EntityCard.vue'
 import Field from '../components/Field.vue'

@@ -331,7 +331,7 @@
           <el-input v-if="settings" v-model="settings.oauthCallbackBase" :placeholder="t('web.callbackPlaceholder')" />
           <div class="form-help">{{ t('web.callbackHelp', { url: (settings?.oauthCallbackBase || 'https://...').replace(/\/$/, '') + '/__gately_auth/oauth/callback' }) }}</div>
         </el-form-item>
-        <OAuthProviders v-if="settings" v-model="settings.oauthProviders" />
+        <OAuthProviders v-if="settings" v-model="settings.oauthProviders" secrets-url="/api/webservice/settings/secrets/oauth" />
         <el-divider content-position="left">{{ t('web.sharedUsersDivider') }}</el-divider>
         <el-form-item :label="t('web.sharedUsers')">
           <SharedUsers v-if="settings" v-model="settings.authUsers" />

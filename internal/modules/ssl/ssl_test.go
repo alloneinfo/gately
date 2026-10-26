@@ -18,6 +18,7 @@ import (
 	"math/big"
 	"net"
 	"net/http"
+	"net/http/httptest"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -488,3 +489,30 @@ func TestValidateHTTPChallenge(t *testing.T) {
 		t.Fatal("默认 DNS 验证仍需要受支持的服务商")
 	}
 }
+
+// TestCertSecrets 验证查看证书密钥明文接口返回 DNS 凭据密钥与 EAB HMAC，证书不存在时返回 404。
+func TestCertSecrets(t *testing.T) {
+	m := newTestModule(t)
+	c := Cert{Key: "k", Source: SourceACME}
+	c.ACME.Credentials.Secret = "dns-secret"
+	c.ACME.EABHMAC = "hmac"
+	m.cfg.Certs = []Cert{c}
+	mux := http.NewServeMux()
+	m.Routes(secretsRouter{mux})
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, httptest.NewRequest("GET", "/certs/k/secrets", nil))
+	var got map[string]string
+	_ = json.Unmarshal(rec.Body.Bytes(), &got)
+	if rec.Code != 200 || got["secret"] != "dns-secret" || got["eabHmac"] != "hmac" {
+		t.Fatalf("应返回密钥明文: %d %s", rec.Code, rec.Body.String())
+	}
+	rec = httptest.NewRecorder()
+	mux.ServeHTTP(rec, httptest.NewRequest("GET", "/certs/missing/secrets", nil))
+	if rec.Code != 404 {
+		t.Fatalf("证书不存在应返回 404，实际 %d", rec.Code)
+	}
+}
+
+type secretsRouter struct{ mux *http.ServeMux }
+
+func (r secretsRouter) HandleFunc(pattern string, h http.HandlerFunc) { r.mux.HandleFunc(pattern, h) }

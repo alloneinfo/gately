@@ -161,7 +161,9 @@ func (m *Module) Routes(r module.Router) {
 		Merge: func(old, updated *Task) {
 			crud.KeepSecret(old.Credentials.Secret, &updated.Credentials.Secret)
 		},
-		View:    m.viewLocked,
+		View: m.viewLocked,
+		// 查看被脱敏的 DNS 服务商凭据密钥明文
+		Secrets: func(t *Task) map[string]string { return map[string]string{"secret": t.Credentials.Secret} },
 		Changed: m.restartLocked,
 		Removed: m.stopLocked,
 	}
