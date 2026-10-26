@@ -22,7 +22,7 @@
   "sourceAcme": "ACME (automatisch)",
   "sourceUpload": "Zertifikat hochladen",
   "sourceFile": "Aus Datei einlesen",
-  "domainsPlaceholder": "Eine pro Zeile; Platzhalter wie *.example.com werden unterstützt",
+  "domainsPlaceholder": "Einer pro Zeile; Wildcards wie *.example.com und öffentliche IP-Adressen werden unterstützt",
   "email": "Konto-E-Mail",
   "emailPlaceholder": "Leer lassen, um die Standard-E-Mail aus den Erneuerungseinstellungen zu verwenden",
   "ca": "Zertifizierungsstelle",
@@ -114,5 +114,15 @@
   "challengeHttp": "HTTP-01 (kein DNS-Anbieter nötig)",
   "httpTip": "Die CA verbindet sich aus dem Internet mit Port 80 jeder Domain. Wildcard-Domains werden nicht unterstützt. Lauscht ein Webdienst auf Port 80, beantwortet er die Validierung automatisch; andernfalls lauscht Gately vorübergehend auf dem unten angegebenen Port.",
   "httpPort": "Temporärer Port",
-  "httpPortHelp": "0 bedeutet 80. Nutzen, wenn der Router den öffentlichen Port 80 auf einen anderen lokalen Port weiterleitet."
+  "httpPortHelp": "0 bedeutet 80. Nutzen, wenn der Router den öffentlichen Port 80 auf einen anderen lokalen Port weiterleitet.",
+  "profile": "Zertifikatsprofil",
+  "profileDefault": "Standard (legt die CA fest, meist 90 Tage)",
+  "profileShortLived": "Kurzlebig (IP-Zertifikat)",
+  "profileHelp": "Das ACME-Profil; Sie können auch einen anderen von der CA unterstützten Profilnamen eingeben",
+  "profileShortLivedHelp": "Etwa 6 Tage gültig und wird {hours} Stunden vor Ablauf automatisch erneuert; Let's Encrypt stellt IP-Adress-Zertifikate nur mit diesem Profil aus",
+  "ipCertTip": "IP-Adress-Zertifikate benötigen das kurzlebige Profil von Let's Encrypt und HTTP-01-Validierung (die CA verbindet sich mit Port 80 der IP)",
+  "ipCertApply": "Automatisch einrichten",
+  "shortLivedTag": "Kurzlebig",
+  "hoursLeft": "Noch {hours} Stunden",
+  "renewFailedShort": "Erneuerung fehlgeschlagen"
 }

@@ -22,7 +22,7 @@
   "sourceAcme": "ACME (automatique)",
   "sourceUpload": "Téléverser un certificat",
   "sourceFile": "Lire depuis un fichier",
-  "domainsPlaceholder": "Un par ligne ; les jokers comme *.example.com sont pris en charge",
+  "domainsPlaceholder": "Un par ligne ; les jokers comme *.example.com et les adresses IP publiques sont pris en charge",
   "email": "E-mail du compte",
   "emailPlaceholder": "Laisser vide pour utiliser l'e-mail par défaut des paramètres de renouvellement",
   "ca": "Autorité de certification",
@@ -114,5 +114,15 @@
   "challengeHttp": "HTTP-01 (sans fournisseur DNS)",
   "httpTip": "L'AC se connecte au port 80 de chaque domaine depuis Internet. Les domaines génériques ne sont pas pris en charge. Si un service Web écoute sur le port 80, il répond automatiquement ; sinon Gately écoute temporairement sur le port ci-dessous.",
   "httpPort": "Port temporaire",
-  "httpPortHelp": "0 signifie 80. À utiliser si le routeur redirige le port public 80 vers un autre port local."
+  "httpPortHelp": "0 signifie 80. À utiliser si le routeur redirige le port public 80 vers un autre port local.",
+  "profile": "Profil de certificat",
+  "profileDefault": "Par défaut (choisi par l'AC, généralement 90 jours)",
+  "profileShortLived": "Courte durée (certificat IP)",
+  "profileHelp": "Le profil ACME ; vous pouvez aussi saisir un autre nom de profil pris en charge par l'AC",
+  "profileShortLivedHelp": "Valide environ 6 jours et renouvelé automatiquement {hours} heures avant l'expiration ; Let's Encrypt n'émet des certificats d'adresse IP qu'avec ce profil",
+  "ipCertTip": "Les certificats d'adresse IP nécessitent le profil courte durée de Let's Encrypt et la validation HTTP-01 (l'AC se connecte au port 80 de l'IP)",
+  "ipCertApply": "Configurer automatiquement",
+  "shortLivedTag": "Courte durée",
+  "hoursLeft": "{hours} heures restantes",
+  "renewFailedShort": "échec du renouvellement"
 }

@@ -1070,6 +1070,7 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | `email` | string |
 | `httpPort` | integer |
 | `keyType` | string |
+| `profile` | string |
 | `propagationTimeout` | integer |
 | `provider` | string |
 | `resolvers` | Array de string |
@@ -1085,6 +1086,7 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | `certPem` | string |
 | `deploys` | Array de `ssl.Deploy` |
 | `enable` | boolean |
+| `issuedProfile` | string |
 | `issuerPem` | string |
 | `key` | string |
 | `keyFile` | string |

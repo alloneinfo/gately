@@ -8,6 +8,7 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
+	"net/netip"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -39,6 +40,12 @@ const (
 
 var validKeyTypes = map[string]bool{"P256": true, "P384": true, "2048": true, "4096": true}
 
+// ProfileShortLived 是 Let's Encrypt 的短期证书配置（约 6 天有效期），也是其签发 IP 地址证书的唯一配置。
+const ProfileShortLived = "shortlived"
+
+// ACME 证书配置名（draft-ietf-acme-profiles）只允许常见的标识字符
+var reProfile = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$`)
+
 // ACMEConfig 是 ACME 自动签发参数，验证方式为 DNS-01 或 HTTP-01。
 type ACMEConfig struct {
 	Domains []string `json:"domains"`
@@ -50,6 +57,8 @@ type ACMEConfig struct {
 	EABKid  string `json:"eabKid"`
 	EABHMAC string `json:"eabHmac"`
 	KeyType string `json:"keyType"`
+	// Profile 为 ACME 证书配置（profile），留空使用 CA 默认配置；shortlived 为短期证书，IP 地址证书需要它
+	Profile string `json:"profile"`
 	// Challenge 为验证方式：dns（默认，支持通配符）或 http（HTTP-01，无需 DNS 服务商，要求 80 端口可从公网访问）
 	Challenge string `json:"challenge"`
 	// HTTPPort 为 HTTP-01 临时监听端口，默认 80（80 端口已被 Web 服务占用时由 Web 服务应答）
@@ -99,6 +108,8 @@ type Cert struct {
 	Deploys []Deploy `json:"deploys"`
 	// UpdatedAt 为证书内容最近一次变化时间
 	UpdatedAt time.Time `json:"updatedAt,omitzero"`
+	// IssuedProfile 为当前证书签发时使用的 ACME 证书配置，与 ACME.Profile 不同时重新签发
+	IssuedProfile string `json:"issuedProfile,omitempty"`
 }
 
 // Account 是缓存的 ACME 账户，按 CA 地址与邮箱区分。
@@ -202,9 +213,20 @@ func (c *Cert) Validate(settings Settings) error {
 func (a *ACMEConfig) validate(settings Settings) error {
 	var domains []string
 	seen := map[string]bool{}
+	var ips []netip.Addr
 	for _, d := range a.Domains {
 		d = strings.ToLower(strings.Trim(strings.TrimSpace(d), "."))
-		if d == "" || seen[d] {
+		if d == "" {
+			continue
+		}
+		// IP 地址统一成规范写法（IPv6 去掉方括号并压缩），与证书中的 IP SAN 一致
+		if ip, ok := parseIPIdentifier(d); ok {
+			d = ip.String()
+			if !seen[d] {
+				ips = append(ips, ip)
+			}
+		}
+		if seen[d] {
 			continue
 		}
 		if strings.Count(d, "*") > 1 || (strings.Contains(d, "*") && !strings.HasPrefix(d, "*.")) {
@@ -244,6 +266,13 @@ func (a *ACMEConfig) validate(settings Settings) error {
 	if !validKeyTypes[a.KeyType] {
 		return fmt.Errorf("不支持的密钥类型 %q", a.KeyType)
 	}
+	a.Profile = strings.TrimSpace(a.Profile)
+	if a.Profile != "" && !reProfile.MatchString(a.Profile) {
+		return fmt.Errorf("证书配置名 %q 格式错误", a.Profile)
+	}
+	if err := a.validateIPs(ips); err != nil {
+		return err
+	}
 	switch a.Challenge {
 	case "", ChallengeDNS:
 		a.Challenge = ChallengeDNS
@@ -264,6 +293,56 @@ func (a *ACMEConfig) validate(settings Settings) error {
 	}
 	if a.PropagationTimeout <= 0 {
 		a.PropagationTimeout = 300
+	}
+	return nil
+}
+
+// parseIPIdentifier 判断标识是否为 IP 地址（IPv6 可带方括号），返回规范化后的地址。
+func parseIPIdentifier(s string) (netip.Addr, bool) {
+	s = strings.TrimSuffix(strings.TrimPrefix(s, "["), "]")
+	ip, err := netip.ParseAddr(s)
+	if err != nil || ip.Zone() != "" {
+		return netip.Addr{}, false
+	}
+	return ip.Unmap(), true
+}
+
+// hasIPIdentifier 判断域名列表中是否包含 IP 地址。
+func hasIPIdentifier(domains []string) bool {
+	for _, d := range domains {
+		if _, ok := parseIPIdentifier(d); ok {
+			return true
+		}
+	}
+	return false
+}
+
+// cgnat 为运营商级 NAT 与 Tailscale 使用的共享地址段，公网无法访问
+var cgnat = netip.MustParsePrefix("100.64.0.0/10")
+
+// validateIPs 校验 IP 地址证书的限制：只能用 HTTP-01 验证，公共 CA 只为公网地址签发，
+// Let's Encrypt 只在短期证书配置下签发 IP 地址证书。
+func (a *ACMEConfig) validateIPs(ips []netip.Addr) error {
+	if len(ips) == 0 {
+		return nil
+	}
+	if a.Challenge != ChallengeHTTP {
+		return errors.New("IP 地址证书只能使用 HTTP-01 验证")
+	}
+	switch a.CA {
+	case "custom":
+		// 自建 CA（如内网 step-ca）可能为内网地址签发，这里不做限制
+		return nil
+	case "zerossl", "google":
+		return errors.New("该 CA 不支持通过 ACME 签发 IP 地址证书，请改用 Let's Encrypt")
+	}
+	for _, ip := range ips {
+		if !ip.IsGlobalUnicast() || ip.IsPrivate() || cgnat.Contains(ip) {
+			return fmt.Errorf("%s 不是公网 IP 地址，公共 CA 无法验证", ip)
+		}
+	}
+	if a.Profile != ProfileShortLived {
+		return errors.New("Let's Encrypt 只为短期证书签发 IP 地址证书，请把证书配置选为短期证书（shortlived）")
 	}
 	return nil
 }
@@ -298,7 +377,13 @@ func certInfo(certPEM string) (*CertInfo, error) {
 		return nil, err
 	}
 	sum := sha256.Sum256(leaf.Raw)
-	domains := leaf.DNSNames
+	domains := append([]string{}, leaf.DNSNames...)
+	// IP 地址证书的标识在 IP SAN 中
+	for _, ip := range leaf.IPAddresses {
+		if addr, ok := netip.AddrFromSlice(ip); ok {
+			domains = append(domains, addr.Unmap().String())
+		}
+	}
 	if len(domains) == 0 && leaf.Subject.CommonName != "" {
 		domains = []string{leaf.Subject.CommonName}
 	}

@@ -1121,6 +1121,9 @@
           "keyType": {
             "type": "string"
           },
+          "profile": {
+            "type": "string"
+          },
           "propagationTimeout": {
             "type": "integer"
           },
@@ -1161,6 +1164,9 @@
           },
           "enable": {
             "type": "boolean"
+          },
+          "issuedProfile": {
+            "type": "string"
           },
           "issuerPem": {
             "type": "string"

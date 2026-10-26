@@ -1070,6 +1070,7 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | `email` | string |
 | `httpPort` | integer |
 | `keyType` | string |
+| `profile` | string |
 | `propagationTimeout` | integer |
 | `provider` | string |
 | `resolvers` | Tableau de string |
@@ -1085,6 +1086,7 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | `certPem` | string |
 | `deploys` | Tableau de `ssl.Deploy` |
 | `enable` | boolean |
+| `issuedProfile` | string |
 | `issuerPem` | string |
 | `key` | string |
 | `keyFile` | string |

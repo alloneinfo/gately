@@ -22,7 +22,7 @@
   "sourceAcme": "ACME 자동 발급",
   "sourceUpload": "인증서 업로드",
   "sourceFile": "파일에서 읽기",
-  "domainsPlaceholder": "한 줄에 하나씩, 와일드카드 *.example.com 지원",
+  "domainsPlaceholder": "한 줄에 하나씩 입력하며 와일드카드 *.example.com 과 공인 IP 주소를 지원합니다",
   "email": "계정 이메일",
   "emailPlaceholder": "비워 두면 갱신 설정의 기본 이메일 사용",
   "ca": "인증 기관",
@@ -114,5 +114,15 @@
   "challengeHttp": "HTTP-01 (DNS 서비스 불필요)",
   "httpTip": "CA가 인터넷에서 각 도메인의 80번 포트로 접속해 검증합니다. 와일드카드 도메인은 지원하지 않습니다. 웹 서비스가 80번 포트를 사용 중이면 자동으로 응답하고, 그렇지 않으면 Gately가 아래 포트에서 임시로 대기합니다.",
   "httpPort": "임시 대기 포트",
-  "httpPortHelp": "0은 80을 의미합니다. 공유기가 공용 80번 포트를 다른 로컬 포트로 전달할 때 지정하세요."
+  "httpPortHelp": "0은 80을 의미합니다. 공유기가 공용 80번 포트를 다른 로컬 포트로 전달할 때 지정하세요.",
+  "profile": "인증서 프로필",
+  "profileDefault": "기본값 (CA가 결정, 보통 90일)",
+  "profileShortLived": "단기 인증서 (IP 인증서)",
+  "profileHelp": "ACME profile 입니다. CA가 지원하는 다른 프로필 이름도 입력할 수 있습니다",
+  "profileShortLivedHelp": "유효 기간은 약 6일이며 만료 {hours}시간 전에 자동 갱신합니다. Let's Encrypt는 단기 인증서로만 IP 주소 인증서를 발급합니다",
+  "ipCertTip": "IP 주소 인증서는 Let's Encrypt 단기 인증서와 HTTP-01 검증이 필요합니다 (CA가 해당 IP의 80번 포트로 접속합니다)",
+  "ipCertApply": "자동 설정",
+  "shortLivedTag": "단기",
+  "hoursLeft": "{hours}시간 남음",
+  "renewFailedShort": "갱신 실패"
 }

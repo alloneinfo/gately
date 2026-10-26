@@ -1070,6 +1070,7 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | `email` | string |
 | `httpPort` | integer |
 | `keyType` | string |
+| `profile` | string |
 | `propagationTimeout` | integer |
 | `provider` | string |
 | `resolvers` | Lista de string |
@@ -1085,6 +1086,7 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | `certPem` | string |
 | `deploys` | Lista de `ssl.Deploy` |
 | `enable` | boolean |
+| `issuedProfile` | string |
 | `issuerPem` | string |
 | `key` | string |
 | `keyFile` | string |

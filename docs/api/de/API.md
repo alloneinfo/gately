@@ -1070,6 +1070,7 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | `email` | string |
 | `httpPort` | integer |
 | `keyType` | string |
+| `profile` | string |
 | `propagationTimeout` | integer |
 | `provider` | string |
 | `resolvers` | Array von string |
@@ -1085,6 +1086,7 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | `certPem` | string |
 | `deploys` | Array von `ssl.Deploy` |
 | `enable` | boolean |
+| `issuedProfile` | string |
 | `issuerPem` | string |
 | `key` | string |
 | `keyFile` | string |

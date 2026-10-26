@@ -7,6 +7,7 @@ Issue and renew certificates automatically for use by [Web Services](/en/docs/mo
 - **ACME DNS-01** automatic issuance and renewal, reusing the DNS providers from [Dynamic DNS](/en/docs/modules/ddns), with no need to open ports 80 / 443;
 - **ACME HTTP-01**: needs no DNS provider, but port 80 of each domain must be reachable from the internet; wildcards are not supported;
 - Wildcard certificates and EAB (for example ZeroSSL);
+- **Short-lived and IP address certificates**: choose the Let's Encrypt short-lived profile (valid for about 6 days) to issue certificates for public IP addresses;
 - Upload an existing certificate, or read it from files;
 - Map to a directory: after a certificate changes, the files are written to the specified directory and a script runs, so other services can reload;
 - Auto deploy: after a certificate changes, copy it to several local directories, push it to other hosts over SSH and run a command, or restart the Docker containers that use it.
@@ -20,6 +21,24 @@ Choose HTTP-01 as the certificate's "Method". During issuance, the CA requests `
 - If your router forwards public port 80 to another local port, enter that port in "Temporary port".
 
 Many residential ISPs (for example in mainland China) block inbound port 80; use DNS-01 in that case.
+
+## Short-lived and IP address certificates
+
+"Certificate profile" corresponds to the ACME profile:
+
+- **Default**: chosen by the CA; 90 days for Let's Encrypt;
+- **Short-lived (IP certificate)**: the Let's Encrypt `shortlived` profile, valid for about 6 days. Gately renews it automatically before expiry according to "Short-lived certificate lead hours" in "Renewal settings" (24 hours by default), and retries every hour after a failure;
+- You can also enter another profile name supported by the CA.
+
+Enter a public IP address (IPv4 or IPv6, for example `203.0.113.10` or `2001:db8::1`) in the domains to request an IP address certificate; IP addresses and domains can share one certificate. Requirements:
+
+- Use Let's Encrypt, choose the short-lived profile and choose HTTP-01 as the "Method". The CA requests `http://<IP>/.well-known/acme-challenge/<token>`, so port 80 of that IP must be reachable from the internet. The editor shows a hint once you enter an IP; click "Set up automatically" to apply these settings;
+- Private addresses, loopback addresses and `100.64.0.0/10` cannot pass validation by a public CA; a custom CA (such as a self-hosted ACME server on your LAN) has none of these restrictions;
+- ZeroSSL and Google Trust Services do not issue IP address certificates over ACME.
+
+When HTTPS is accessed by IP address, the browser sends no domain name (SNI), so Gately picks the IP certificate that matches the local address of the connection; behind NAT or port forwarding, where the local address differs from the public IP in the certificate, the first IP certificate is used.
+
+After you switch the profile of an issued certificate between default and short-lived, it is reissued right away with the new profile. For short-lived certificates, an expiry reminder is sent only when the remaining time drops below half the lead hours, which means renewal has failed several times.
 
 ## Certificate mapping
 

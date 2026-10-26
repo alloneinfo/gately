@@ -22,7 +22,7 @@
   "sourceAcme": "ACME (automatic)",
   "sourceUpload": "Upload certificate",
   "sourceFile": "Read from file",
-  "domainsPlaceholder": "One per line; wildcards such as *.example.com are supported",
+  "domainsPlaceholder": "One per line; wildcards such as *.example.com and public IP addresses are supported",
   "email": "Account email",
   "emailPlaceholder": "Leave empty to use the default email from renewal settings",
   "ca": "Certificate authority",
@@ -114,5 +114,15 @@
   "challengeHttp": "HTTP-01 (no DNS provider needed)",
   "httpTip": "The CA connects to port 80 of each domain from the public internet. Wildcard domains are not supported. If a Web Service listens on port 80, it answers the validation automatically; otherwise Gately temporarily listens on the port below.",
   "httpPort": "Temporary port",
-  "httpPortHelp": "0 means 80. Use this when your router forwards public port 80 to another local port."
+  "httpPortHelp": "0 means 80. Use this when your router forwards public port 80 to another local port.",
+  "profile": "Certificate profile",
+  "profileDefault": "Default (chosen by the CA, usually 90 days)",
+  "profileShortLived": "Short-lived (IP certificate)",
+  "profileHelp": "The ACME profile; you can also type another profile name the CA supports",
+  "profileShortLivedHelp": "Valid for about 6 days and renewed automatically {hours} hours before expiry; Let's Encrypt issues IP address certificates only with this profile",
+  "ipCertTip": "IP address certificates need the Let's Encrypt short-lived profile and HTTP-01 validation (the CA connects to port 80 of the IP)",
+  "ipCertApply": "Set up automatically",
+  "shortLivedTag": "Short-lived",
+  "hoursLeft": "{hours} hours left",
+  "renewFailedShort": "renewal failed"
 }

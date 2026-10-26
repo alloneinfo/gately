@@ -24,12 +24,13 @@
         <template #title>
           <span>{{ c.remark || t('ssl.unnamed') }}</span>
           <el-tag size="small" effect="plain">{{ sourceText(c.source) }}</el-tag>
+          <el-tag v-if="isShortLived(c)" size="small" effect="plain" type="warning">{{ t('ssl.shortLivedTag') }}</el-tag>
         </template>
         <template #status>
           <StatusBadge v-bind="certStatus(c)" />
         </template>
         <Field :label="t('ssl.domain')" mono wide>{{ domainsOf(c).join(', ') || '-' }}</Field>
-        <Field :label="t('ssl.validUntil')">{{ c.info ? new Date(c.info.notAfter).toLocaleDateString() : '-' }}</Field>
+        <Field :label="t('ssl.validUntil')">{{ validUntil(c) }}</Field>
         <Field :label="t('ssl.issuer')">{{ c.info?.issuer || '-' }}</Field>
         <Field :label="t('ssl.updatedAt')">{{ c.updatedAt ? new Date(c.updatedAt).toLocaleString() : '-' }}</Field>
         <template v-if="c.enable && (c.state.lastError || c.state.mappingNote || c.state.nextRetry || enabledDeploys(c).length)" #extra>
@@ -84,6 +85,9 @@
           <el-form-item :label="t('ssl.domain')" required>
             <el-input v-model="domainsText" type="textarea" :rows="2" :placeholder="t('ssl.domainsPlaceholder')" class="mono" />
           </el-form-item>
+          <el-alert v-if="ipNeedsSetup" type="warning" :closable="false" show-icon class="http-tip" :title="t('ssl.ipCertTip')">
+            <el-button size="small" type="primary" link @click="applyIPCert">{{ t('ssl.ipCertApply') }}</el-button>
+          </el-alert>
           <el-form-item :label="t('ssl.email')"><el-input v-model="editing.acme.email" :placeholder="t('ssl.emailPlaceholder')" /></el-form-item>
           <el-form-item :label="t('ssl.ca')">
             <el-select v-model="editing.acme.ca" class="w-260">
@@ -108,6 +112,14 @@
               <el-option label="RSA 2048" value="2048" />
               <el-option label="RSA 4096" value="4096" />
             </el-select>
+          </el-form-item>
+          <el-form-item :label="t('ssl.profile')">
+            <!-- 空字符串表示 CA 默认配置，需作为有效值显示对应选项；也可输入 CA 支持的其他配置名 -->
+            <el-select v-model="editing.acme.profile" class="w-260" filterable allow-create default-first-option :empty-values="[null, undefined]">
+              <el-option :label="t('ssl.profileDefault')" value="" />
+              <el-option :label="t('ssl.profileShortLived')" value="shortlived" />
+            </el-select>
+            <span class="help">{{ editing.acme.profile === 'shortlived' ? t('ssl.profileShortLivedHelp', { hours: renewHours }) : t('ssl.profileHelp') }}</span>
           </el-form-item>
           <el-divider content-position="left">{{ t('ssl.verifyMethod') }}</el-divider>
           <el-form-item :label="t('ssl.challenge')">
@@ -284,6 +296,8 @@ interface Cert {
     eabKid: string
     eabHmac: string
     keyType: string
+    // profile 为 ACME 证书配置，空为 CA 默认；shortlived 为短期证书（IP 证书需要）
+    profile: string
     challenge: string
     httpPort: number
     provider: string
@@ -302,6 +316,8 @@ interface Cert {
   mapping: { enable: boolean; dir: string; script: string }
   deploys: Deploy[]
   updatedAt?: string
+  // issuedProfile 为当前证书签发时的证书配置，由后端维护
+  issuedProfile?: string
 }
 
 // Deploy 是证书变化后自动执行的部署目标：复制到本机目录、经 SSH 上传到远程主机，或重启本机容器
@@ -367,6 +383,32 @@ const polling = usePolling(load, 5000)
 
 const currentProvider = computed(() => providers.value.find((p) => p.name === editing.value.acme.provider))
 // 输入框保留原始文本，回车、逗号可正常输入（见 useListText）
+// isIPAddress 判断是否为 IP 地址（IPv6 可带方括号），域名中不会出现冒号
+function isIPAddress(s: string) {
+  const v = s.trim().replace(/^\[|\]$/g, '')
+  return /^\d{1,3}(\.\d{1,3}){3}$/.test(v) || v.includes(':')
+}
+// 短期证书续签提前小时数，用于提示与状态判断
+const renewHours = computed(() => renewSettings.value?.shortLivedRenewHours ?? 24)
+// ipNeedsSetup 在填写了 IP 地址、但验证方式或证书配置不满足 IP 证书要求时提示一键设置（自建 CA 不限制）
+const ipNeedsSetup = computed(() => {
+  const a = editing.value.acme
+  if (!(a.domains ?? []).some(isIPAddress) || a.ca === 'custom') {
+    return false
+  }
+  return a.challenge !== 'http' || a.profile !== 'shortlived' || ['zerossl', 'google'].includes(a.ca)
+})
+
+// applyIPCert 按 IP 证书要求设置：Let's Encrypt、短期证书、HTTP-01 验证
+function applyIPCert() {
+  const a = editing.value.acme
+  if (a.ca !== 'letsencrypt-staging') {
+    a.ca = 'letsencrypt'
+  }
+  a.profile = 'shortlived'
+  a.challenge = 'http'
+}
+
 const domainsText = useListText(() => editing.value.acme.domains, (v) => (editing.value.acme.domains = v), { split: splitLinesOrCommas })
 const resolversText = useListText(() => editing.value.acme.resolvers, (v) => (editing.value.acme.resolvers = v), {
   split: splitLinesOrCommas,
@@ -386,6 +428,7 @@ function emptyCert(): Cert {
       eabKid: '',
       eabHmac: '',
       keyType: 'P256',
+      profile: '',
       challenge: 'dns',
       httpPort: 0,
       provider: 'alidns',
@@ -484,6 +527,23 @@ function sourceText(s: string) {
   return ({ acme: 'ACME', upload: t('ssl.sourceUploadShort'), file: t('ssl.sourceFileShort') } as Record<string, string>)[s] ?? s
 }
 
+// isShortLived 判断是否为短期证书：配置为短期证书，或已签发证书总有效期不足 10 天（与后端一致）
+function isShortLived(c: CertView) {
+  if (c.source === 'acme' && c.acme.profile === 'shortlived') {
+    return true
+  }
+  return !!c.info && new Date(c.info.notAfter).getTime() - new Date(c.info.notBefore).getTime() < 10 * 86400000
+}
+
+// validUntil 显示到期时间，短期证书精确到时分
+function validUntil(c: CertView) {
+  if (!c.info) {
+    return '-'
+  }
+  const d = new Date(c.info.notAfter)
+  return isShortLived(c) ? d.toLocaleString() : d.toLocaleDateString()
+}
+
 function domainsOf(c: CertView) {
   return c.info?.domains ?? c.acme.domains ?? []
 }
@@ -497,9 +557,19 @@ function certStatus(c: CertView): { type: StatusType; text: string; title?: stri
     return { type: 'pending', text: t('ssl.issuing') }
   }
   if (c.info) {
-    const d = Math.floor((new Date(c.info.notAfter).getTime() - Date.now()) / 86400000)
-    if (d < 0) {
+    const left = new Date(c.info.notAfter).getTime() - Date.now()
+    const d = Math.floor(left / 86400000)
+    if (left < 0) {
       return { type: 'error', text: t('ssl.expired') }
+    }
+    if (isShortLived(c)) {
+      // 短期证书剩余不足 2 天时按小时显示；剩余不到续签提前量的一半说明续签未成功
+      const h = Math.floor(left / 3600000)
+      const text = d < 2 ? t('ssl.hoursLeft', { hours: h }) : t('ssl.daysLeft', { days: d })
+      if (c.state.lastError) {
+        return { type: 'warn', text: `${text} · ${t('ssl.renewFailedShort')}`, title: c.state.lastError }
+      }
+      return { type: h < renewHours.value / 2 ? 'warn' : 'ok', text }
     }
     if (c.state.lastError) {
       return { type: 'warn', text: t('ssl.daysLeftRenewFailed', { days: d }), title: c.state.lastError }
@@ -526,6 +596,7 @@ function openEditor(row?: CertView) {
     editing.value = JSON.parse(JSON.stringify(cert))
     // 旧配置没有验证方式字段，视为 DNS 验证
     editing.value.acme.challenge ||= 'dns'
+    editing.value.acme.profile ??= ''
     editing.value.deploys = (editing.value.deploys ?? []).map((d) => ({ ...d, certName: d.certName ?? '', keyName: d.keyName ?? '', containers: d.containers ?? [] }))
   } else {
     editing.value = emptyCert()

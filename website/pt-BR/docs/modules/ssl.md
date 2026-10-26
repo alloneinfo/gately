@@ -7,6 +7,7 @@ Emita e renove certificados automaticamente para uso pelos [Serviços Web](/pt-B
 - Emissão e renovação automáticas via **ACME DNS-01**, reaproveitando os provedores de DNS do [DNS dinâmico](/pt-BR/docs/modules/ddns), sem precisar abrir as portas 80 / 443;
 - **ACME HTTP-01**: dispensa provedor de DNS, mas exige que a porta 80 de cada domínio seja acessível pela internet; não suporta wildcard;
 - Certificados wildcard e EAB (por exemplo, ZeroSSL);
+- **Certificados de curta duração e de endereço IP**: com o perfil de curta duração do Let's Encrypt (validade de cerca de 6 dias), é possível emitir certificados para endereços IP públicos;
 - Upload de um certificado existente ou leitura a partir de arquivos;
 - Mapeamento para um diretório: quando um certificado muda, os arquivos são gravados no diretório indicado e um script é executado, para que outros serviços possam recarregar;
 - Implantação automática: quando um certificado muda, ele é copiado para vários diretórios locais, enviado por SSH a outros hosts com a execução de um comando, ou os contêineres Docker que o usam são reiniciados.
@@ -20,6 +21,24 @@ Escolha HTTP-01 em "Método de validação" do certificado. Na emissão, a CA ac
 - Se o roteador redireciona a porta 80 pública para outra porta deste host, informe essa porta em "Porta temporária".
 
 Muitos provedores de banda larga residencial bloqueiam a entrada na porta 80; nesse caso, use DNS-01.
+
+## Certificados de curta duração e de endereço IP
+
+"Perfil do certificado" corresponde ao profile do ACME:
+
+- **Padrão**: definido pela CA; no Let's Encrypt são 90 dias;
+- **Curta duração (certificado IP)**: o perfil `shortlived` do Let's Encrypt, com validade de cerca de 6 dias. O Gately o renova automaticamente antes do vencimento conforme "Antecedência para certificados de curta duração (horas)" em "Configurações de renovação" (24 horas por padrão) e, em caso de falha, tenta de novo a cada hora;
+- Também é possível informar outro nome de perfil suportado pela CA.
+
+Para solicitar um certificado de endereço IP, informe um endereço IP público (IPv4 ou IPv6, por exemplo `203.0.113.10` ou `2001:db8::1`) nos domínios; IPs e domínios podem ficar no mesmo certificado. Requisitos:
+
+- Usar o Let's Encrypt e escolher o perfil de curta duração e HTTP-01 em "Método de validação". A CA acessa `http://<IP>/.well-known/acme-challenge/<token>`, por isso a porta 80 desse IP precisa ser acessível pela internet. Ao informar um IP, o editor mostra um aviso; basta clicar em "Configurar automaticamente";
+- Endereços privados, de loopback e `100.64.0.0/10` não passam na validação de uma CA pública; uma CA personalizada (como um servidor ACME próprio na rede local) não tem essas restrições;
+- ZeroSSL e Google Trust Services não emitem certificados de endereço IP via ACME.
+
+Ao acessar HTTPS por endereço IP, o navegador não envia nome de domínio (SNI), então o Gately escolhe o certificado IP correspondente ao endereço local da conexão; atrás de NAT ou redirecionamento de portas, quando o endereço local difere do IP público do certificado, é usado o primeiro certificado IP.
+
+Ao alternar o perfil de um certificado já emitido entre padrão e curta duração, ele é reemitido imediatamente com o novo perfil. Nos certificados de curta duração, o lembrete de vencimento só é enviado quando o tempo restante fica abaixo da metade da antecedência, o que indica que a renovação falhou várias vezes.
 
 ## Mapeamento de certificados
 

@@ -99,6 +99,7 @@ func convertLuckyCerts(raw json.RawMessage, settings Settings) ([]Cert, []string
 				EABKid:                    extStr(e, "acmeKid"),
 				EABHMAC:                   extStr(e, "acmeHMAC"),
 				KeyType:                   extStr(e, "acmeKeyType"),
+				Profile:                   extStr(e, "acmeProfile"),
 				Provider:                  extStr(e, "acmeDNSServer"),
 				Credentials:               dnsprovider.Credentials{ID: extStr(e, "acmeDNSID"), Secret: extStr(e, "acmeDNSSecret")},
 				SkipPropagationCheck:      extBool(e, "acmeIgnorePropagationChecErrors"),
@@ -106,6 +107,18 @@ func convertLuckyCerts(raw json.RawMessage, settings Settings) ([]Cert, []string
 			}
 			if c.ACME.CA == "custom" {
 				c.ACME.DirectoryURL = dir
+			}
+			// Lucky 把 HTTP 验证当作一种“DNS 服务商”（http / https），IP 证书只能用它
+			switch c.ACME.Provider {
+			case "http":
+				c.ACME.Challenge, c.ACME.Provider = ChallengeHTTP, ""
+			case "https":
+				c.ACME.Challenge, c.ACME.Provider = ChallengeHTTP, ""
+				warn("Lucky 的 HTTPS 验证按 HTTP-01 导入，需要 80 端口可从公网访问")
+			}
+			// 证书本身来自 Lucky，按导入时的证书配置记录，避免启用后立即重新签发
+			if c.CertPEM != "" {
+				c.IssuedProfile = c.ACME.Profile
 			}
 			if v, ok := e["acmePropagationTimeout"].(float64); ok {
 				c.ACME.PropagationTimeout = int(v)

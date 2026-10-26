@@ -22,7 +22,7 @@
   "sourceAcme": "ACME (automático)",
   "sourceUpload": "Subir certificado",
   "sourceFile": "Leer desde archivo",
-  "domainsPlaceholder": "Uno por línea; se admiten comodines como *.example.com",
+  "domainsPlaceholder": "Uno por línea; se admiten comodines como *.example.com y direcciones IP públicas",
   "email": "Correo de la cuenta",
   "emailPlaceholder": "Déjalo vacío para usar el correo por defecto de los ajustes de renovación",
   "ca": "Autoridad de certificación",
@@ -114,5 +114,15 @@
   "challengeHttp": "HTTP-01 (sin proveedor DNS)",
   "httpTip": "La CA se conecta al puerto 80 de cada dominio desde Internet. No se admiten dominios comodín. Si un servicio web escucha en el puerto 80, responde automáticamente; si no, Gately escucha temporalmente en el puerto indicado abajo.",
   "httpPort": "Puerto temporal",
-  "httpPortHelp": "0 equivale a 80. Úsalo si el router reenvía el puerto público 80 a otro puerto local."
+  "httpPortHelp": "0 equivale a 80. Úsalo si el router reenvía el puerto público 80 a otro puerto local.",
+  "profile": "Perfil de certificado",
+  "profileDefault": "Predeterminado (lo decide la CA, normalmente 90 días)",
+  "profileShortLived": "Corta duración (certificado IP)",
+  "profileHelp": "El perfil ACME; también puede escribir otro nombre de perfil que admita la CA",
+  "profileShortLivedHelp": "Válido unos 6 días y se renueva automáticamente {hours} horas antes de caducar; Let's Encrypt solo emite certificados de dirección IP con este perfil",
+  "ipCertTip": "Los certificados de dirección IP requieren el perfil de corta duración de Let's Encrypt y validación HTTP-01 (la CA se conecta al puerto 80 de la IP)",
+  "ipCertApply": "Configurar automáticamente",
+  "shortLivedTag": "Corta duración",
+  "hoursLeft": "Quedan {hours} horas",
+  "renewFailedShort": "renovación fallida"
 }

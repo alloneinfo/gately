@@ -133,6 +133,8 @@ func obtain(cfg ACMEConfig, acc *Account, log *logbuf.Logger) (*obtainResult, er
 	lc := lego.NewConfig(user)
 	lc.CADirURL = dirURL
 	lc.Certificate.KeyType = certcrypto.KeyType(cfg.KeyType)
+	// IP 地址不能作为 CommonName（Let's Encrypt 的 IP 证书不带 CN），含 IP 时只用 SAN
+	lc.Certificate.DisableCommonName = hasIPIdentifier(cfg.Domains)
 	lc.UserAgent = "Gately"
 	if acmeHTTPClient != nil {
 		lc.HTTPClient = acmeHTTPClient()
@@ -179,8 +181,12 @@ func obtain(cfg ACMEConfig, acc *Account, log *logbuf.Logger) (*obtainResult, er
 		return nil, err
 	}
 
-	log.Infof("申请证书 %s（CA: %s）", strings.Join(cfg.Domains, ", "), dirURL)
-	cert, err := client.Certificate.Obtain(certificate.ObtainRequest{Domains: cfg.Domains, Bundle: true})
+	if cfg.Profile != "" {
+		log.Infof("申请证书 %s（CA: %s，证书配置: %s）", strings.Join(cfg.Domains, ", "), dirURL, cfg.Profile)
+	} else {
+		log.Infof("申请证书 %s（CA: %s）", strings.Join(cfg.Domains, ", "), dirURL)
+	}
+	cert, err := client.Certificate.Obtain(certificate.ObtainRequest{Domains: cfg.Domains, Bundle: true, Profile: cfg.Profile})
 	if err != nil {
 		return nil, fmt.Errorf("签发失败: %w", err)
 	}

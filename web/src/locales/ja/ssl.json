@@ -22,7 +22,7 @@
   "sourceAcme": "ACME で自動取得",
   "sourceUpload": "証明書をアップロード",
   "sourceFile": "ファイルから読み込み",
-  "domainsPlaceholder": "1 行に 1 つ。ワイルドカード *.example.com も使用できます",
+  "domainsPlaceholder": "1 行に 1 つ。ワイルドカード *.example.com とパブリック IP アドレスも使用できます",
   "email": "アカウントのメールアドレス",
   "emailPlaceholder": "空欄で更新設定のデフォルトメールアドレスを使用",
   "ca": "認証局",
@@ -114,5 +114,15 @@
   "challengeHttp": "HTTP-01（DNS プロバイダー不要）",
   "httpTip": "CA はインターネットから各ドメインの 80 番ポートへ接続して検証します。ワイルドカードドメインは使用できません。Web サービスが 80 番ポートで待ち受けている場合は自動で応答し、そうでなければ Gately が下記のポートで一時的に待ち受けます。",
   "httpPort": "一時待ち受けポート",
-  "httpPortHelp": "0 は 80 を意味します。ルーターが公開 80 番ポートを別のローカルポートへ転送している場合に指定します。"
+  "httpPortHelp": "0 は 80 を意味します。ルーターが公開 80 番ポートを別のローカルポートへ転送している場合に指定します。",
+  "profile": "証明書プロファイル",
+  "profileDefault": "デフォルト（CA が決定、通常 90 日）",
+  "profileShortLived": "短期証明書（IP 証明書）",
+  "profileHelp": "ACME の profile です。CA が対応する他のプロファイル名も入力できます",
+  "profileShortLivedHelp": "有効期間は約 6 日で、期限の {hours} 時間前に自動更新します。Let's Encrypt は短期証明書でのみ IP アドレス証明書を発行します",
+  "ipCertTip": "IP アドレス証明書には Let's Encrypt の短期証明書と HTTP-01 検証が必要です（CA がその IP の 80 番ポートに接続します）",
+  "ipCertApply": "自動設定",
+  "shortLivedTag": "短期",
+  "hoursLeft": "残り {hours} 時間",
+  "renewFailedShort": "更新失敗"
 }

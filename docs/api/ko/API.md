@@ -1070,6 +1070,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `email` | string |
 | `httpPort` | integer |
 | `keyType` | string |
+| `profile` | string |
 | `propagationTimeout` | integer |
 | `provider` | string |
 | `resolvers` | Array of string |
@@ -1085,6 +1086,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `certPem` | string |
 | `deploys` | Array of `ssl.Deploy` |
 | `enable` | boolean |
+| `issuedProfile` | string |
 | `issuerPem` | string |
 | `key` | string |
 | `keyFile` | string |

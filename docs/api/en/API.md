@@ -1070,6 +1070,7 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | `email` | string |
 | `httpPort` | integer |
 | `keyType` | string |
+| `profile` | string |
 | `propagationTimeout` | integer |
 | `provider` | string |
 | `resolvers` | Array of string |
@@ -1085,6 +1086,7 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | `certPem` | string |
 | `deploys` | Array of `ssl.Deploy` |
 | `enable` | boolean |
+| `issuedProfile` | string |
 | `issuerPem` | string |
 | `key` | string |
 | `keyFile` | string |

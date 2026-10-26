@@ -22,7 +22,7 @@
   "sourceAcme": "ACME 自動申請",
   "sourceUpload": "上傳憑證",
   "sourceFile": "讀取檔案",
-  "domainsPlaceholder": "每行一個，支援萬用字元 *.example.com",
+  "domainsPlaceholder": "每行一個，支援萬用字元 *.example.com 與公網 IP 位址",
   "email": "帳戶電子郵件",
   "emailPlaceholder": "留空使用續簽設定中的預設電子郵件",
   "ca": "憑證授權單位",
@@ -114,5 +114,15 @@
   "challengeHttp": "HTTP-01（不需要 DNS 服務商）",
   "httpTip": "CA 會從公網存取各網域的 80 埠完成驗證，不支援萬用字元網域。Web 服務已監聽 80 埠時由它自動回應，否則 Gately 會在下方埠臨時監聽。",
   "httpPort": "臨時監聽埠",
-  "httpPortHelp": "0 表示 80。路由器把公網 80 埠轉發到本機其他埠時請填寫該埠。"
+  "httpPortHelp": "0 表示 80。路由器把公網 80 埠轉發到本機其他埠時請填寫該埠。",
+  "profile": "憑證設定檔",
+  "profileDefault": "預設（由 CA 決定，通常 90 天）",
+  "profileShortLived": "短期憑證（IP 憑證）",
+  "profileHelp": "對應 ACME 的 profile，也可輸入 CA 支援的其他設定檔名稱",
+  "profileShortLivedHelp": "有效期約 6 天，到期前 {hours} 小時自動續簽；Let's Encrypt 只為短期憑證簽發 IP 位址憑證",
+  "ipCertTip": "IP 位址憑證需使用 Let's Encrypt 的短期憑證，並透過 HTTP-01 驗證（CA 會存取該 IP 的 80 埠）",
+  "ipCertApply": "一鍵設定",
+  "shortLivedTag": "短期",
+  "hoursLeft": "剩餘 {hours} 小時",
+  "renewFailedShort": "續簽失敗"
 }

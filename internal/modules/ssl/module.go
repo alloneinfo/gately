@@ -11,6 +11,7 @@ import (
 	"github.com/wangwanjie/gately/internal/events"
 	stdlog "log"
 	"net/http"
+	"net/netip"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -37,7 +38,12 @@ var (
 	checkInterval  = 30 * time.Minute
 	firstCheck     = 30 * time.Second
 	failureBackoff = 6 * time.Hour
+	// shortLivedBackoff 是短期证书签发失败后的重试间隔：有效期只有几天，6 小时的退避会错过续签窗口
+	shortLivedBackoff = time.Hour
 )
+
+// shortLivedLife 是短期证书的判断标准：总有效期不足 10 天
+const shortLivedLife = 10 * 24 * time.Hour
 
 // CertState 是证书的运行状态（不持久化）。
 type CertState struct {
@@ -69,6 +75,8 @@ type Module struct {
 	tlsMu    sync.RWMutex
 	tlsIndex map[string]*tls.Certificate
 	wildcard map[string]*tls.Certificate
+	// ipDefault 为第一张 IP 地址证书，用于没有 SNI 且按本机地址找不到证书的连接
+	ipDefault *tls.Certificate
 
 	// deployers 由主程序注入的部署能力（SSH 推送、重启容器）
 	deployers Deployers
@@ -194,9 +202,12 @@ func (m *Module) needsRenewal(c *Cert, now time.Time) (bool, string) {
 	if !sameDomains(info.Domains, c.ACME.Domains) {
 		return true, "域名列表已变化"
 	}
+	if c.ACME.Profile != c.IssuedProfile {
+		return true, "证书配置已变化"
+	}
 	life := info.NotAfter.Sub(info.NotBefore)
 	left := info.NotAfter.Sub(now)
-	if life < 10*24*time.Hour {
+	if life < shortLivedLife {
 		if left < time.Duration(m.cfg.Settings.ShortLivedRenewHours)*time.Hour {
 			return true, fmt.Sprintf("短期证书剩余 %.0f 小时", left.Hours())
 		}
@@ -206,6 +217,18 @@ func (m *Module) needsRenewal(c *Cert, now time.Time) (bool, string) {
 		return true, fmt.Sprintf("剩余 %.0f 天", left.Hours()/24)
 	}
 	return false, ""
+}
+
+// isShortLived 判断证书是否按短期证书处理：配置为短期证书，或当前证书总有效期不足 10 天。
+func isShortLived(c *Cert) bool {
+	if c.ACME.Profile == ProfileShortLived {
+		return true
+	}
+	if c.CertPEM == "" {
+		return false
+	}
+	info, err := certInfo(c.CertPEM)
+	return err == nil && info.NotAfter.Sub(info.NotBefore) < shortLivedLife
 }
 
 func sameDomains(a, b []string) bool {
@@ -334,7 +357,11 @@ func (m *Module) obtainNow(key string) {
 	}
 	if err != nil {
 		st.LastError = err.Error()
-		st.NextRetry = time.Now().Add(failureBackoff)
+		backoff := failureBackoff
+		if isShortLived(&snapshot) {
+			backoff = shortLivedBackoff
+		}
+		st.NextRetry = time.Now().Add(backoff)
 		log.Errorf("%v", err)
 		events.Publish(events.Event{
 			Type:    events.SSLRenewFailed,
@@ -355,6 +382,7 @@ func (m *Module) obtainNow(key string) {
 		return
 	}
 	c.CertPEM, c.KeyPEM, c.IssuerPEM = res.CertPEM, res.KeyPEM, res.IssuerPEM
+	c.IssuedProfile = cfg.Profile
 	c.UpdatedAt = time.Now()
 	st.LastError = ""
 	st.NextRetry = time.Time{}
@@ -505,6 +533,7 @@ func writeFileAtomic(path string, data []byte, mode os.FileMode) error {
 func (m *Module) rebuildTLSLocked() {
 	exact := map[string]*tls.Certificate{}
 	wild := map[string]*tls.Certificate{}
+	var ipDefault *tls.Certificate
 	for i := range m.cfg.Certs {
 		c := &m.cfg.Certs[i]
 		if !c.Enable || c.CertPEM == "" || c.KeyPEM == "" {
@@ -525,6 +554,9 @@ func (m *Module) rebuildTLSLocked() {
 		cert := pair
 		for _, d := range info.Domains {
 			d = strings.ToLower(d)
+			if _, ok := parseIPIdentifier(d); ok && ipDefault == nil {
+				ipDefault = &cert
+			}
 			if strings.HasPrefix(d, "*.") {
 				if _, ok := wild[d[2:]]; !ok {
 					wild[d[2:]] = &cert
@@ -535,13 +567,17 @@ func (m *Module) rebuildTLSLocked() {
 		}
 	}
 	m.tlsMu.Lock()
-	m.tlsIndex, m.wildcard = exact, wild
+	m.tlsIndex, m.wildcard, m.ipDefault = exact, wild, ipDefault
 	m.tlsMu.Unlock()
 }
 
 // GetCertificate 按 SNI 选择证书，供 Web 服务模块的 tls.Config 使用。
 func (m *Module) GetCertificate(hello *tls.ClientHelloInfo) (*tls.Certificate, error) {
 	name := strings.ToLower(strings.TrimSuffix(hello.ServerName, "."))
+	// 个别客户端会把 IP 地址放进 SNI，统一成证书索引中的规范写法
+	if ip, ok := parseIPIdentifier(name); ok {
+		name = ip.String()
+	}
 	m.tlsMu.RLock()
 	defer m.tlsMu.RUnlock()
 	if c, ok := m.tlsIndex[name]; ok {
@@ -550,6 +586,20 @@ func (m *Module) GetCertificate(hello *tls.ClientHelloInfo) (*tls.Certificate, e
 	if i := strings.IndexByte(name, '.'); i > 0 {
 		if c, ok := m.wildcard[name[i+1:]]; ok {
 			return c, nil
+		}
+	}
+	if name == "" {
+		// 按 IP 地址访问时客户端不发送 SNI：先按连接的本机地址选择 IP 证书，
+		// 找不到时（经 NAT 或端口转发，本机地址不是证书中的公网 IP）使用第一张 IP 证书
+		if hello.Conn != nil {
+			if ap, err := netip.ParseAddrPort(hello.Conn.LocalAddr().String()); err == nil {
+				if c, ok := m.tlsIndex[ap.Addr().Unmap().WithZone("").String()]; ok {
+					return c, nil
+				}
+			}
+		}
+		if m.ipDefault != nil {
+			return m.ipDefault, nil
 		}
 	}
 	return nil, fmt.Errorf("没有匹配 %q 的证书", name)
@@ -635,6 +685,7 @@ func (m *Module) Routes(r module.Router) {
 			// ACME 证书内容由系统维护，编辑配置时保留已签发的证书
 			if updated.Source == SourceACME && old.Source == SourceACME {
 				updated.CertPEM, updated.KeyPEM, updated.IssuerPEM, updated.UpdatedAt = old.CertPEM, old.KeyPEM, old.IssuerPEM, old.UpdatedAt
+				updated.IssuedProfile = old.IssuedProfile
 			}
 			keepDeployRecords(old, updated)
 		},
@@ -749,8 +800,16 @@ func (m *Module) warnExpiringLocked(c *Cert, now time.Time) {
 	if err != nil {
 		return
 	}
-	days := int(info.NotAfter.Sub(now).Hours() / 24)
-	if days >= expiryWarnDays {
+	left := info.NotAfter.Sub(now)
+	days := int(left.Hours() / 24)
+	shortLived := info.NotAfter.Sub(info.NotBefore) < shortLivedLife
+	if shortLived {
+		// 短期证书的总有效期不足 7 天，按天数判断会一直提醒；
+		// 剩余时间不到续签提前量的一半，说明续签已经多次失败
+		if left >= time.Duration(m.cfg.Settings.ShortLivedRenewHours)*time.Hour/2 {
+			return
+		}
+	} else if days >= expiryWarnDays {
 		return
 	}
 	st := m.stateLocked(c.Key)
@@ -763,6 +822,14 @@ func (m *Module) warnExpiringLocked(c *Cert, now time.Time) {
 		Source:  label(c),
 		Level:   events.LevelWarn,
 		Title:   "证书即将到期：" + label(c),
-		Message: fmt.Sprintf("剩余 %d 天（到期时间 %s）", days, info.NotAfter.Format("2006-01-02")),
+		Message: expiryMessage(info, left, shortLived),
 	})
+}
+
+// expiryMessage 返回到期提醒的说明，短期证书按小时显示剩余时间。
+func expiryMessage(info *CertInfo, left time.Duration, shortLived bool) string {
+	if shortLived {
+		return fmt.Sprintf("剩余 %d 小时（到期时间 %s）", int(left.Hours()), info.NotAfter.Local().Format("2006-01-02 15:04"))
+	}
+	return fmt.Sprintf("剩余 %d 天（到期时间 %s）", int(left.Hours()/24), info.NotAfter.Format("2006-01-02"))
 }
