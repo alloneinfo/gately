@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"sync"
 
+	"github.com/wangwanjie/gately/internal/binstall"
 	"github.com/wangwanjie/gately/internal/config"
 	"github.com/wangwanjie/gately/internal/crud"
 	"github.com/wangwanjie/gately/internal/fsperm"
@@ -41,10 +42,22 @@ type Module struct {
 	client  *role
 	server  *role
 	started bool
+	// httpClient 返回下载程序使用的 HTTP 客户端，由框架按“更新代理”设置注入
+	httpClient func() *http.Client
+	install    *binstall.Installer
 }
 
 // New 创建模块。
-func New() *Module { return &Module{} }
+func New() *Module {
+	return &Module{httpClient: func() *http.Client { return http.DefaultClient }}
+}
+
+// SetHTTPClient 实现 module.HTTPClientAware。
+func (m *Module) SetHTTPClient(fn func() *http.Client) {
+	if fn != nil {
+		m.httpClient = fn
+	}
+}
 
 // ID 实现 module.Module。
 func (m *Module) ID() string { return ID }
@@ -57,19 +70,25 @@ func (m *Module) Init(env module.Env) error {
 	m.store, m.logs = env.Store, env.Logs
 	m.client = &role{name: "frpc", sup: proc.New(m.logs.Logger("frpc"))}
 	m.server = &role{name: "frps", sup: proc.New(m.logs.Logger("frps"))}
+	m.install = m.newInstaller()
 	if _, err := m.store.Load(ID, &m.cfg); err != nil {
 		return err
 	}
-	if m.cfg.Client.ServerPort == 0 {
-		m.cfg.Client.ServerPort = 7000
-	}
-	if m.cfg.Server.BindPort == 0 {
-		m.cfg.Server.BindPort = 7000
-	}
-	if m.cfg.Server.DashboardAddr == "" {
-		m.cfg.Server.DashboardAddr = "127.0.0.1"
-	}
+	m.cfg.fillDefaults()
 	return nil
+}
+
+// fillDefaults 补齐未设置的默认值。
+func (c *fileConfig) fillDefaults() {
+	if c.Client.ServerPort == 0 {
+		c.Client.ServerPort = 7000
+	}
+	if c.Server.BindPort == 0 {
+		c.Server.BindPort = 7000
+	}
+	if c.Server.DashboardAddr == "" {
+		c.Server.DashboardAddr = "127.0.0.1"
+	}
 }
 
 // Start 实现 module.Module。
@@ -207,6 +226,16 @@ func (m *Module) Routes(r module.Router) {
 	}
 	proxies.Register(r, "/proxies")
 	m.registerImport(r)
+	m.install.Register(r)
+	r.HandleFunc("POST /reset", func(w http.ResponseWriter, req *http.Request) {
+		m.mu.Lock()
+		defer m.mu.Unlock()
+		if err := m.resetLocked(); err != nil {
+			httpx.Error(w, http.StatusInternalServerError, "%v", err)
+			return
+		}
+		httpx.OK(w, map[string]bool{"ok": true})
+	})
 
 	r.HandleFunc("GET /client", func(w http.ResponseWriter, req *http.Request) {
 		m.mu.Lock()
@@ -305,4 +334,26 @@ func roleSummary(label string, r *role) module.SummaryItem {
 	default:
 		return module.SummaryItem{Label: label, Value: "未运行", Level: "warn"}
 	}
+}
+
+// resetLocked 恢复默认配置：停止 frpc 与 frps，清空连接、代理与安装设置，删除生成的配置文件。
+// 旧配置留在配置历史中，可以恢复；安装的程序不受影响。调用方持有 mu。
+func (m *Module) resetLocked() error {
+	var cfg fileConfig
+	cfg.fillDefaults()
+	old := m.cfg
+	m.cfg = cfg
+	if err := m.saveLocked(); err != nil {
+		m.cfg = old
+		return fmt.Errorf("保存失败: %v", err)
+	}
+	// 新配置均未启用，apply 会停止进程
+	m.applyClientLocked()
+	m.applyServerLocked()
+	m.client.err, m.server.err = "", ""
+	if err := os.RemoveAll(filepath.Join(m.store.Dir(), "frp")); err != nil {
+		return fmt.Errorf("删除生成的配置文件失败: %v", err)
+	}
+	m.logs.Logger("frp").Infof("已恢复默认配置")
+	return nil
 }

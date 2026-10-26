@@ -1,6 +1,7 @@
 <template>
   <div>
     <PageHeader :title="t('frp.title')" :desc="t('frp.desc')" :icon="Waypoints">
+      <ResetConfigButton base="/api/frp" :desc="t('components.resetConfig.frp')" @done="onReset" />
       <el-button :icon="FileUp" @click="openImport">{{ t('frp.importConfig') }}</el-button>
     </PageHeader>
 
@@ -116,6 +117,8 @@
       </el-tab-pane>
     </el-tabs>
 
+    <ProgramInstall :key="resetCount" base="/api/frp" :active-paths="[client?.binary, server?.binary]" @changed="refresh" />
+
     <LogCard url="/api/frp/logs" clearable />
 
     <el-dialog v-model="importVisible" :title="tab === 'client' ? t('frp.importFrpc') : t('frp.importFrps')" width="640px" :fullscreen="isMobile">
@@ -208,6 +211,8 @@ import EntityCard from '../components/EntityCard.vue'
 import Field from '../components/Field.vue'
 import StatusBadge, { type StatusType } from '../components/StatusBadge.vue'
 import LogCard from '../components/LogCard.vue'
+import ProgramInstall from '../components/ProgramInstall.vue'
+import ResetConfigButton from '../components/ResetConfigButton.vue'
 import { useFormLayout } from '../composables/useIsMobile'
 import { useListText, splitCommasOrSpaces } from '../composables/useListText'
 import { usePolling } from '../composables/usePolling'
@@ -329,6 +334,14 @@ async function refresh() {
   } catch {
     // 轮询失败时保留上一次的状态
   }
+}
+
+// resetCount 在恢复默认配置后递增，让在线安装卡片重新读取下载代理
+const resetCount = ref(0)
+
+async function onReset() {
+  resetCount.value++
+  await load()
 }
 
 async function load() {

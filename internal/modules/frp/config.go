@@ -6,6 +6,8 @@ import (
 	"net"
 	"strconv"
 	"strings"
+
+	"github.com/wangwanjie/gately/internal/binstall"
 )
 
 // 代理类型。
@@ -25,7 +27,7 @@ var protocols = map[string]bool{"": true, "tcp": true, "kcp": true, "quic": true
 // ClientSettings 是 frpc（客户端）配置。
 type ClientSettings struct {
 	Enable bool `json:"enable"`
-	// BinPath 为空时依次在 PATH 与配置目录 bin 下查找 frpc
+	// BinPath 为空时依次在配置目录 bin 与 PATH 下查找 frpc
 	BinPath    string `json:"binPath"`
 	ServerAddr string `json:"serverAddr"`
 	ServerPort int    `json:"serverPort"`
@@ -80,9 +82,11 @@ type Proxy struct {
 }
 
 type fileConfig struct {
-	Client  ClientSettings `json:"client"`
-	Server  ServerSettings `json:"server"`
-	Proxies []Proxy        `json:"proxies"`
+	Client ClientSettings `json:"client"`
+	Server ServerSettings `json:"server"`
+	// Install 为在线安装设置
+	Install binstall.Config `json:"install"`
+	Proxies []Proxy         `json:"proxies"`
 }
 
 func validPort(p int) bool { return p >= 1 && p <= 65535 }

@@ -186,12 +186,27 @@ func TestModuleRunsFakeFrpc(t *testing.T) {
 	if !found {
 		t.Errorf("未采集到进程输出: %+v", logs.Since(0))
 	}
-	// 停用后进程应被停止
+	// 恢复默认配置：停止进程、清空配置与生成的文件，保留程序
 	m.mu.Lock()
-	m.cfg.Client.Enable = false
-	m.applyClientLocked()
+	err = m.resetLocked()
 	m.mu.Unlock()
+	if err != nil {
+		t.Fatal(err)
+	}
 	if m.client.sup.State().Running {
-		t.Error("停用后 frpc 仍在运行")
+		t.Error("恢复默认配置后 frpc 仍在运行")
+	}
+	if m.cfg.Client.Enable || m.cfg.Client.BinPath != "" || len(m.cfg.Proxies) != 0 || m.cfg.Server.BindPort != 7000 {
+		t.Errorf("配置未恢复默认: %+v", m.cfg)
+	}
+	if _, err := os.Stat(filepath.Join(dir, "frp")); !os.IsNotExist(err) {
+		t.Errorf("生成的配置文件应被删除: %v", err)
+	}
+	var saved fileConfig
+	if _, err := store.Load(ID, &saved); err != nil || saved.Client.ServerAddr != "" || len(saved.Proxies) != 0 {
+		t.Errorf("保存的配置未恢复默认: %v %+v", err, saved)
+	}
+	if _, err := os.Stat(bin); err != nil {
+		t.Errorf("程序应保留: %v", err)
 	}
 }
