@@ -102,10 +102,18 @@ func (a *App) buildDoc() docModel {
 	return docModel{Endpoints: eps, Schemas: schemas.defs, Tags: tags, Domains: a.scopeDomains()}
 }
 
+// genericPaths 是各模块共用的接口（模块日志、托管程序的在线安装与恢复默认配置），路径相对模块前缀。
+var genericPaths = []string{"/logs", "/install", "/install/rollback", "/install/backups/{id}", "/reset"}
+
 // genericKey 把模块日志等通用接口映射到目录中的通用条目。
 func genericKey(r routeInfo) string {
-	if r.Module != "" && strings.HasSuffix(r.Path, "/"+"logs") && r.Path == "/api/"+r.Module+"/logs" {
-		return r.Method + " /api/{module}/logs"
+	if r.Module == "" {
+		return ""
+	}
+	for _, p := range genericPaths {
+		if r.Path == "/api/"+r.Module+p {
+			return r.Method + " /api/{module}" + p
+		}
 	}
 	return ""
 }

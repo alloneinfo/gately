@@ -2,6 +2,8 @@ package proc
 
 import (
 	"context"
+	"os"
+	"path/filepath"
 	"runtime"
 	"strings"
 	"sync/atomic"
@@ -143,5 +145,19 @@ func TestResolve(t *testing.T) {
 	}
 	if p, err := Resolve("", t.TempDir(), "sh"); err != nil || p == "" {
 		t.Errorf("应在 PATH 中找到 sh: %v", err)
+	}
+	// 配置目录 bin 下在线安装的程序优先于 PATH 中的同名程序
+	if runtime.GOOS != "windows" {
+		dir := t.TempDir()
+		local := filepath.Join(dir, "bin", "sh")
+		if err := os.MkdirAll(filepath.Dir(local), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(local, []byte("#!/bin/sh\n"), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		if p, err := Resolve("", dir, "sh"); err != nil || p != local {
+			t.Errorf("应优先使用配置目录 bin 下的程序: %q %v", p, err)
+		}
 	}
 }

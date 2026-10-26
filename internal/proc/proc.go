@@ -29,7 +29,8 @@ const (
 	stableRun = 30 * time.Second
 )
 
-// Resolve 查找可执行文件：优先使用配置的路径，其次 PATH，最后是配置目录下的 bin 子目录。
+// Resolve 查找可执行文件：优先使用配置的路径，其次是配置目录下的 bin 子目录，最后是 PATH。
+// bin 放在 PATH 之前：界面中在线安装、更新或回滚的程序都在 bin 下，应当优先生效。
 func Resolve(configured, configDir string, names ...string) (string, error) {
 	configured = strings.TrimSpace(configured)
 	if configured != "" {
@@ -46,9 +47,6 @@ func Resolve(configured, configDir string, names ...string) (string, error) {
 		return p, nil
 	}
 	for _, n := range names {
-		if p, err := exec.LookPath(n); err == nil {
-			return p, nil
-		}
 		local := filepath.Join(configDir, "bin", n)
 		if runtime.GOOS == "windows" {
 			local += ".exe"
@@ -56,8 +54,11 @@ func Resolve(configured, configDir string, names ...string) (string, error) {
 		if st, err := os.Stat(local); err == nil && !st.IsDir() {
 			return local, nil
 		}
+		if p, err := exec.LookPath(n); err == nil {
+			return p, nil
+		}
 	}
-	return "", fmt.Errorf("未找到 %s，请先安装，或在设置中填写可执行文件路径", names[0])
+	return "", fmt.Errorf("未找到 %s，请点击“下载安装”，或在设置中填写可执行文件路径", names[0])
 }
 
 // Version 返回 `<path> <args...>` 输出的第一行，失败时返回空串。
