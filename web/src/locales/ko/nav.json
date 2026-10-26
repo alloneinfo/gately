@@ -68,6 +68,10 @@
       "title": "SMB 서비스",
       "desc": "SMB 파일 공유 서비스"
     },
+    "fileusers": {
+      "title": "파일 공유 사용자",
+      "desc": "WebDAV, FTP, SMB가 함께 쓰는 사용자"
+    },
     "wol": {
       "title": "Wake-on-LAN",
       "desc": "LAN 기기를 원격으로 깨우기"

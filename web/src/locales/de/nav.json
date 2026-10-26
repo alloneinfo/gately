@@ -68,6 +68,10 @@
       "title": "SMB-Dienst",
       "desc": "SMB-Dateifreigabedienst"
     },
+    "fileusers": {
+      "title": "Gemeinsame Dateibenutzer",
+      "desc": "Benutzer, die WebDAV, FTP und SMB gemeinsam nutzen"
+    },
     "wol": {
       "title": "Wake-on-LAN",
       "desc": "Geräte im LAN aus der Ferne aufwecken"

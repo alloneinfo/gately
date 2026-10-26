@@ -34,13 +34,14 @@ curl -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/status
 
 ### Области прав
 
-Права записываются как `<область>:read` или `<область>:write`, право записи включает право чтения. Область — это ID функционального модуля (например, `ddns`, `portforward`, `notify`, `backup`) плюс три встроенные области:
+Права записываются как `<область>:read` или `<область>:write`, право записи включает право чтения. Область — это ID функционального модуля (например, `ddns`, `portforward`, `notify`, `backup`) плюс четыре встроенные области:
 
 | Область | Название | Доступные права | Интерфейсы |
 | --- | --- | --- | --- |
 | `status` | Состояние системы | `status:read` | `/api/status`, `/api/system/info`, `/api/system/update` |
 | `logs` | Системные журналы | `logs:read` | `/api/logs` |
 | `import` | Импорт конфигурации Lucky | `import:write` | `/api/import/lucky` |
+| `fileusers` | Общие пользователи файловых служб | `fileusers:read`, `fileusers:write` | `/api/fileusers` |
 
 Шаблоны:
 

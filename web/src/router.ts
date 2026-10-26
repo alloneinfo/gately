@@ -31,6 +31,7 @@ const router = createRouter({
         { path: 'storage', name: 'storage', component: () => import('./views/Storage.vue'), meta: { titleKey: 'nav.items.storage.title' } },
         { path: 'ftp', name: 'ftp', component: () => import('./views/FTP.vue'), meta: { titleKey: 'nav.items.ftp.title' } },
         { path: 'smb', name: 'smb', component: () => import('./views/SMB.vue'), meta: { titleKey: 'nav.items.smb.title' } },
+        { path: 'fileusers', name: 'fileusers', component: () => import('./views/FileServiceUsers.vue'), meta: { titleKey: 'nav.items.fileusers.title' } },
         { path: 'cron', name: 'cron', component: () => import('./views/Cron.vue'), meta: { titleKey: 'nav.items.cron.title' } },
         { path: 'nettools', name: 'nettools', component: () => import('./views/NetTools.vue'), meta: { titleKey: 'nav.items.nettools.title' } },
         { path: 'notify', name: 'notify', component: () => import('./views/Notify.vue'), meta: { titleKey: 'nav.items.notify.title' } },

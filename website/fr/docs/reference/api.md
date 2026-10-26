@@ -34,13 +34,14 @@ Le corps des requêtes utilise `Content-Type: application/json`, et les erreurs 
 
 ### Portée des permissions
 
-Le format d'une permission est `<domaine>:read` ou `<domaine>:write`, la permission d'écriture incluant la lecture. Le domaine est l'ID d'un module fonctionnel (p. ex. `ddns`, `portforward`, `notify`, `backup`) plus trois domaines intégrés :
+Le format d'une permission est `<domaine>:read` ou `<domaine>:write`, la permission d'écriture incluant la lecture. Le domaine est l'ID d'un module fonctionnel (p. ex. `ddns`, `portforward`, `notify`, `backup`) plus quatre domaines intégrés :
 
 | Domaine | Nom | Permissions disponibles | API correspondantes |
 | --- | --- | --- | --- |
 | `status` | État du système | `status:read` | `/api/status`, `/api/system/info`, `/api/system/update` |
 | `logs` | Journaux système | `logs:read` | `/api/logs` |
 | `import` | Import de configuration Lucky | `import:write` | `/api/import/lucky` |
+| `fileusers` | Utilisateurs partagés des services de fichiers | `fileusers:read`, `fileusers:write` | `/api/fileusers` |
 
 Notations génériques :
 

@@ -28,6 +28,7 @@ import {
   ShieldCheck,
   ShieldHalf,
   SquareTerminal,
+  UsersRound,
   Waypoints,
 } from 'lucide-vue-next'
 
@@ -38,6 +39,8 @@ export interface NavItem {
   icon: Component
   // 对应后端模块 ID（/api/status 中的 modules[].id）
   moduleId?: string
+  // 不属于单个模块、由多个模块共用的页面：其中任一模块开启时显示
+  anyModule?: string[]
   // 总览页卡片上的一句话说明
   descKey?: string
 }
@@ -85,6 +88,7 @@ export const navGroups: NavGroup[] = [
       { path: '/webdav', titleKey: 'nav.items.webdav.title', icon: FolderSync, moduleId: 'webdav', descKey: 'nav.items.webdav.desc' },
       { path: '/ftp', titleKey: 'nav.items.ftp.title', icon: Server, moduleId: 'ftp', descKey: 'nav.items.ftp.desc' },
       { path: '/smb', titleKey: 'nav.items.smb.title', icon: FolderTree, moduleId: 'smb', descKey: 'nav.items.smb.desc' },
+      { path: '/fileusers', titleKey: 'nav.items.fileusers.title', icon: UsersRound, anyModule: ['webdav', 'ftp', 'smb'] },
     ],
   },
   {
@@ -122,14 +126,23 @@ export function moduleEnabled(id?: string): boolean {
   return !id || !disabledModules.value.includes(id)
 }
 
+// itemEnabled 判断导航项是否显示：所属模块开启，多个模块共用的页面只要其中一个开启。
+function itemEnabled(i: NavItem): boolean {
+  if (i.anyModule) {
+    return i.anyModule.some((id) => moduleEnabled(id))
+  }
+  return moduleEnabled(i.moduleId)
+}
+
 // visibleNavGroups 为去掉已关闭模块后的导航分组，空分组一并隐藏。
 export const visibleNavGroups = computed(() =>
-  navGroups.map((g) => ({ ...g, items: g.items.filter((i) => moduleEnabled(i.moduleId)) })).filter((g) => g.items.length > 0),
+  navGroups.map((g) => ({ ...g, items: g.items.filter(itemEnabled) })).filter((g) => g.items.length > 0),
 )
 
 // pathEnabled 判断路由所属模块是否开启。
 export function pathEnabled(path: string): boolean {
-  return moduleEnabled(navByPath(path)?.moduleId)
+  const item = navByPath(path)
+  return !item || itemEnabled(item)
 }
 
 // navByModule 按模块 ID 查找导航项。

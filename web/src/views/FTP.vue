@@ -40,7 +40,13 @@
     </div>
 
     <FileUsers v-if="settings" v-model="settings.users" />
-    <SharedFileUsers v-if="settings" v-model="shared.users.value" v-model:enabled="settings.sharedUsers" :load-error="shared.loadError.value" :local-names="settings.users.map((u) => u.name)" />
+    <SharedFileUsers
+      v-if="settings && shared.loaded.value"
+      v-model:enabled="settings.sharedUsers"
+      :users="shared.savedUsers.value"
+      :local-names="settings.users.map((u) => u.name)"
+      :load-error="shared.loadError.value"
+    />
 
     <LogCard url="/api/ftp/logs" clearable />
   </div>
@@ -77,8 +83,8 @@ interface Settings {
 }
 
 const { t } = useI18n()
-// 文件服务共享用户：WebDAV、FTP、SMB 共用同一份列表
-const shared = useSharedFileUsers('/api/ftp')
+// 文件服务共享用户：WebDAV、FTP、SMB 共用同一份列表，在共享用户页面维护，这里只显示摘要
+const shared = useSharedFileUsers()
 const { labelPosition } = useFormLayout()
 const settings = ref<Settings>()
 // savedEnable 为已保存的启用状态，状态徽标以它为准
@@ -111,9 +117,7 @@ async function load() {
 async function save() {
   saving.value = true
   try {
-    // 共享用户与服务设置的保存顺序见 saveWith
-    const s = settings.value!
-    const r = await shared.saveWith(s, () => api.put<{ running: boolean; error: string }>('/api/ftp/settings', s))
+    const r = await api.put<{ running: boolean; error: string }>('/api/ftp/settings', settings.value)
     running.value = r.running
     error.value = r.error
     ElMessage.success(t('common.saved'))

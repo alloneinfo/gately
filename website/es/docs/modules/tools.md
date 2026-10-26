@@ -67,18 +67,18 @@ Para diagnosticar clientes que no conectan o fallan al autenticarse, define la v
 
 ## Usuarios compartidos {#shared-users}
 
-WebDAV, FTP y SMB comparten una lista de «usuarios compartidos» con los mismos campos que los usuarios locales de cada servicio (nombre, contraseña, `root` y `readOnly`, o `mounts`), guardada en `fileusers.json` del directorio de configuración. Editarla en la tarjeta «Usuarios compartidos» de cualquiera de estas páginas se aplica a los tres servicios; los usuarios locales de cada servicio no cambian.
+WebDAV, FTP y SMB comparten una lista de «usuarios compartidos» con los mismos campos que los usuarios locales de cada servicio (nombre, contraseña, `root` y `readOnly`, o `mounts`), guardada en `fileusers.json` en el directorio de configuración. Se gestionan en la página «Usuarios compartidos de archivos» del grupo «Servicios de archivos» de la barra lateral y, al guardar, se aplican a los tres servicios; los usuarios locales de cada servicio no cambian. La parte superior de la página muestra si cada servicio permite usuarios compartidos y los usuarios compartidos con el mismo nombre que un usuario local o que SMB no puede usar.
 
-- Cada servicio decide si acepta usuarios compartidos: activa «Usar en este servicio» arriba a la derecha de la tarjeta (campo `sharedUsers`) y guarda, y los usuarios compartidos podrán iniciar sesión en ese servicio;
+- Cada servicio decide por su cuenta si acepta usuarios compartidos: active «Permitir usuarios compartidos» en la tarjeta «Usuarios compartidos» de la página del servicio (campo `sharedUsers`) y guarde, y los usuarios compartidos podrán iniciar sesión en ese servicio; la tarjeta también muestra los usuarios compartidos guardados y «Gestionar usuarios compartidos» abre la página «Usuarios compartidos de archivos»;
 - Si un usuario local tiene el mismo nombre, solo se comprueba el usuario local (sin distinguir mayúsculas en SMB);
 - Los nombres de usuarios compartidos no se pueden repetir aunque cambien las mayúsculas y no pueden contener dos puntos;
 - Los cambios se aplican al momento: WebDAV usa la nueva configuración en la siguiente petición, FTP y SMB se reinician y los clientes conectados deben volver a conectarse;
 - Con el interruptor activado y al menos un usuario compartido, el servicio se puede activar sin usuarios locales;
 - Un servicio activado solo con usuarios compartidos debe conservar tras el cambio un usuario compartido que pueda iniciar sesión (en SMB, uno que SMB pueda usar); si no, el cambio se rechaza;
 - Si `fileusers.json` se estropea a mano (por ejemplo, una contraseña vacía o un directorio que no es ruta absoluta), ningún usuario compartido puede iniciar sesión y la página lo avisa; corríjalo y guarde para restaurarlos;
-- SMB solo acepta contraseñas en claro y los nombres de usuario y de recurso deben cumplir sus reglas de caracteres; los usuarios compartidos que no las cumplen se indican en la página de SMB y en el registro y se omiten, pero WebDAV y FTP pueden seguir usándolos.
+- SMB solo acepta contraseñas en texto plano y los nombres de usuario y de recurso deben cumplir las reglas de caracteres de SMB; los usuarios compartidos que no las cumplen se indican en la página «Usuarios compartidos de archivos», en la página de SMB y en el registro de ejecución y se omiten, mientras que WebDAV y FTP pueden seguir usándolos.
 
-La API es `GET` / `PUT /api/<servicio>/shared-users` de cada servicio (por ejemplo `/api/webdav/shared-users`); todas leen y escriben la misma lista. La lectura usa el permiso de lectura de ese servicio; un cambio afecta a las cuentas de los tres servicios, así que un token de API necesita `webdav:write`, `ftp:write` y `smb:write` a la vez.
+La API es `GET` / `PUT /api/fileusers`, que requiere el permiso `fileusers:read` / `fileusers:write` para los tokens de API; `services` en la respuesta muestra cómo los usa cada servicio. Los anteriores `GET` / `PUT /api/<servicio>/shared-users` de cada servicio están obsoletos pero siguen funcionando y leen y escriben la misma lista: la lectura usa el permiso de lectura de ese servicio y un cambio necesita `webdav:write`, `ftp:write` y `smb:write` a la vez.
 
 ## Montajes de almacenamiento
 

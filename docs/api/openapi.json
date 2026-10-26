@@ -10575,6 +10575,115 @@
         "x-token-allowed": true
       }
     },
+    "/api/fileusers": {
+      "get": {
+        "description": "返回 WebDAV、FTP、SMB 共用的文件服务共享用户，密码脱敏。`services` 列出各文件服务的使用情况：`enable` 服务是否启用，`sharedUsers` 是否允许共享用户登录，`localUsers` 本地用户名（同名的共享用户在该服务中只按本地用户校验），`caseInsensitive` 为 true 时按不区分大小写比较用户名（SMB），`issues` 为无法用于该服务的共享用户及原因：`name`（用户名含 SMB 不允许的字符）、`bcrypt`（密码是 bcrypt 哈希）、`share`（目录名称不能作为共享名或重复）。已关闭的模块不列出。fileusers.json 未通过校验时返回 `error`，此时共享用户都不能登录，保存一份有效的列表后恢复。\n\n所需权限：`fileusers:read`。",
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "请求参数错误"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌无效、已过期或未登录"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌缺少所需权限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "读取文件服务共享用户",
+        "tags": [
+          "文件服务共享用户"
+        ],
+        "x-required-scope": "fileusers:read",
+        "x-token-allowed": true
+      },
+      "put": {
+        "description": "保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不修改。只靠共享用户启用的服务在修改后必须仍有可登录的共享用户，否则拒绝保存。各服务是否允许共享用户登录在各服务的设置中修改（字段 `sharedUsers`）。\n\n所需权限：`fileusers:write`。",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "请求参数错误"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌无效、已过期或未登录"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "令牌缺少所需权限"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "保存文件服务共享用户",
+        "tags": [
+          "文件服务共享用户"
+        ],
+        "x-required-scope": "fileusers:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/frp/client": {
       "get": {
         "description": "所需权限：`frp:read`。",
@@ -11743,7 +11852,7 @@
     },
     "/api/ftp/shared-users": {
       "get": {
-        "description": "返回 WebDAV、FTP、SMB 共用的文件服务共享用户，密码脱敏。fileusers.json 未通过校验时返回 `error`，此时共享用户都不能登录，保存一份有效的列表后恢复。\n\n所需权限：`ftp:read`。",
+        "description": "已弃用，请改用 `GET /api/fileusers`，本接口保留兼容。返回 WebDAV、FTP、SMB 共用的文件服务共享用户，密码脱敏。fileusers.json 未通过校验时返回 `error`，此时共享用户都不能登录，保存一份有效的列表后恢复。\n\n所需权限：`ftp:read`。",
         "responses": {
           "200": {
             "description": "成功"
@@ -11784,7 +11893,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "读取文件服务共享用户",
+        "summary": "读取文件服务共享用户（旧接口）",
         "tags": [
           "FTP 服务"
         ],
@@ -11792,7 +11901,7 @@
         "x-token-allowed": true
       },
       "put": {
-        "description": "保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不修改。API 令牌需要同时具备 `webdav:write`、`ftp:write`、`smb:write`。只靠共享用户启用的服务在修改后必须仍有可登录的共享用户，否则拒绝保存。\n\n所需权限：`webdav:write,ftp:write,smb:write`。",
+        "description": "已弃用，请改用 `PUT /api/fileusers`，本接口保留兼容。保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不修改。API 令牌需要同时具备 `webdav:write`、`ftp:write`、`smb:write`。只靠共享用户启用的服务在修改后必须仍有可登录的共享用户，否则拒绝保存。\n\n所需权限：`webdav:write,ftp:write,smb:write`。",
         "requestBody": {
           "content": {
             "application/json": {
@@ -11842,7 +11951,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "保存文件服务共享用户",
+        "summary": "保存文件服务共享用户（旧接口）",
         "tags": [
           "FTP 服务"
         ],
@@ -16256,7 +16365,7 @@
     },
     "/api/smb/shared-users": {
       "get": {
-        "description": "返回 WebDAV、FTP、SMB 共用的文件服务共享用户，密码脱敏。fileusers.json 未通过校验时返回 `error`，此时共享用户都不能登录，保存一份有效的列表后恢复。`issues` 列出无法用于 SMB 的共享用户及原因：`name`（用户名含 SMB 不允许的字符）、`bcrypt`（密码是 bcrypt 哈希）、`share`（目录名称不能作为共享名或重复）。\n\n所需权限：`smb:read`。",
+        "description": "已弃用，请改用 `GET /api/fileusers`，本接口保留兼容。返回 WebDAV、FTP、SMB 共用的文件服务共享用户，密码脱敏。fileusers.json 未通过校验时返回 `error`，此时共享用户都不能登录，保存一份有效的列表后恢复。`issues` 列出无法用于 SMB 的共享用户及原因：`name`（用户名含 SMB 不允许的字符）、`bcrypt`（密码是 bcrypt 哈希）、`share`（目录名称不能作为共享名或重复）。\n\n所需权限：`smb:read`。",
         "responses": {
           "200": {
             "description": "成功"
@@ -16297,7 +16406,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "读取文件服务共享用户",
+        "summary": "读取文件服务共享用户（旧接口）",
         "tags": [
           "SMB 服务"
         ],
@@ -16305,7 +16414,7 @@
         "x-token-allowed": true
       },
       "put": {
-        "description": "保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不修改。API 令牌需要同时具备 `webdav:write`、`ftp:write`、`smb:write`。只靠共享用户启用的服务在修改后必须仍有可登录的共享用户，否则拒绝保存。\n\n所需权限：`webdav:write,ftp:write,smb:write`。",
+        "description": "已弃用，请改用 `PUT /api/fileusers`，本接口保留兼容。保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不修改。API 令牌需要同时具备 `webdav:write`、`ftp:write`、`smb:write`。只靠共享用户启用的服务在修改后必须仍有可登录的共享用户，否则拒绝保存。\n\n所需权限：`webdav:write,ftp:write,smb:write`。",
         "requestBody": {
           "content": {
             "application/json": {
@@ -16355,7 +16464,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "保存文件服务共享用户",
+        "summary": "保存文件服务共享用户（旧接口）",
         "tags": [
           "SMB 服务"
         ],
@@ -21633,7 +21742,7 @@
     },
     "/api/webdav/shared-users": {
       "get": {
-        "description": "返回 WebDAV、FTP、SMB 共用的文件服务共享用户，密码脱敏。fileusers.json 未通过校验时返回 `error`，此时共享用户都不能登录，保存一份有效的列表后恢复。\n\n所需权限：`webdav:read`。",
+        "description": "已弃用，请改用 `GET /api/fileusers`，本接口保留兼容。返回 WebDAV、FTP、SMB 共用的文件服务共享用户，密码脱敏。fileusers.json 未通过校验时返回 `error`，此时共享用户都不能登录，保存一份有效的列表后恢复。\n\n所需权限：`webdav:read`。",
         "responses": {
           "200": {
             "description": "成功"
@@ -21674,7 +21783,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "读取文件服务共享用户",
+        "summary": "读取文件服务共享用户（旧接口）",
         "tags": [
           "WebDAV 服务"
         ],
@@ -21682,7 +21791,7 @@
         "x-token-allowed": true
       },
       "put": {
-        "description": "保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不修改。API 令牌需要同时具备 `webdav:write`、`ftp:write`、`smb:write`。只靠共享用户启用的服务在修改后必须仍有可登录的共享用户，否则拒绝保存。\n\n所需权限：`webdav:write,ftp:write,smb:write`。",
+        "description": "已弃用，请改用 `PUT /api/fileusers`，本接口保留兼容。保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不修改。API 令牌需要同时具备 `webdav:write`、`ftp:write`、`smb:write`。只靠共享用户启用的服务在修改后必须仍有可登录的共享用户，否则拒绝保存。\n\n所需权限：`webdav:write,ftp:write,smb:write`。",
         "requestBody": {
           "content": {
             "application/json": {
@@ -21732,7 +21841,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "保存文件服务共享用户",
+        "summary": "保存文件服务共享用户（旧接口）",
         "tags": [
           "WebDAV 服务"
         ],
@@ -27602,6 +27711,9 @@
       "name": "配置备份"
     },
     {
+      "name": "文件服务共享用户"
+    },
+    {
       "name": "系统"
     },
     {
@@ -27639,6 +27751,7 @@
     "status",
     "logs",
     "metrics",
-    "import"
+    "import",
+    "fileusers"
   ]
 }

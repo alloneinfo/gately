@@ -121,6 +121,8 @@ func docTag(r routeInfo, titles map[string]string) string {
 		return "账号"
 	case r.Path == "/api/import/lucky":
 		return "配置导入"
+	case r.Path == "/api/fileusers":
+		return "文件服务共享用户"
 	}
 	return "系统"
 }
@@ -128,6 +130,8 @@ func docTag(r routeInfo, titles map[string]string) string {
 // tagRank 让系统类接口排在功能模块之后，功能模块保持注册顺序。
 func tagRank(tag string) int {
 	switch tag {
+	case "文件服务共享用户":
+		return 999
 	case "系统":
 		return 1000
 	case "配置导入":

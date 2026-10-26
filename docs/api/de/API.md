@@ -56,6 +56,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `logs` | Systemprotokolle | `logs:read` |
 | `metrics` | Metriken (Prometheus) | `metrics:read` |
 | `import` | Lucky-Konfigurationsimport | `import:write` |
+| `fileusers` | Gemeinsame Benutzer der Dateidienste | `fileusers:read`、`fileusers:write` |
 
 Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` oder `*` bedeutet Lese- und Schreibzugriff auf alle Module.
 
@@ -411,8 +412,8 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | GET | `/api/webdav/logs` | `webdav:read` | Laufzeitprotokolle eines Moduls anzeigen |
 | DELETE | `/api/webdav/logs` | `webdav:write` | Modulprotokolle leeren |
 | GET | `/api/webdav/settings` | `webdav:read` | WebDAV-Einstellungen lesen |
-| GET | `/api/webdav/shared-users` | `webdav:read` | Gemeinsame Benutzer der Dateidienste lesen |
-| PUT | `/api/webdav/shared-users` | `webdav:write,ftp:write,smb:write` | Gemeinsame Benutzer der Dateidienste speichern |
+| GET | `/api/webdav/shared-users` | `webdav:read` | Gemeinsame Benutzer der Dateidienste lesen (alter Endpunkt) |
+| PUT | `/api/webdav/shared-users` | `webdav:write,ftp:write,smb:write` | Gemeinsame Benutzer der Dateidienste speichern (alter Endpunkt) |
 | PUT | `/api/webdav/settings` | `webdav:write` | WebDAV-Einstellungen speichern |
 
 ## FTP-Dienst
@@ -422,8 +423,8 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | GET | `/api/ftp/logs` | `ftp:read` | Laufzeitprotokolle eines Moduls anzeigen |
 | DELETE | `/api/ftp/logs` | `ftp:write` | Modulprotokolle leeren |
 | GET | `/api/ftp/settings` | `ftp:read` | FTP-Einstellungen lesen |
-| GET | `/api/ftp/shared-users` | `ftp:read` | Gemeinsame Benutzer der Dateidienste lesen |
-| PUT | `/api/ftp/shared-users` | `webdav:write,ftp:write,smb:write` | Gemeinsame Benutzer der Dateidienste speichern |
+| GET | `/api/ftp/shared-users` | `ftp:read` | Gemeinsame Benutzer der Dateidienste lesen (alter Endpunkt) |
+| PUT | `/api/ftp/shared-users` | `webdav:write,ftp:write,smb:write` | Gemeinsame Benutzer der Dateidienste speichern (alter Endpunkt) |
 | PUT | `/api/ftp/settings` | `ftp:write` | FTP-Einstellungen speichern |
 
 ## SMB-Dienst
@@ -433,8 +434,8 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | GET | `/api/smb/logs` | `smb:read` | Laufzeitprotokolle eines Moduls anzeigen |
 | DELETE | `/api/smb/logs` | `smb:write` | Modulprotokolle leeren |
 | GET | `/api/smb/settings` | `smb:read` | SMB-Einstellungen abrufen |
-| GET | `/api/smb/shared-users` | `smb:read` | Gemeinsame Benutzer der Dateidienste lesen |
-| PUT | `/api/smb/shared-users` | `webdav:write,ftp:write,smb:write` | Gemeinsame Benutzer der Dateidienste speichern |
+| GET | `/api/smb/shared-users` | `smb:read` | Gemeinsame Benutzer der Dateidienste lesen (alter Endpunkt) |
+| PUT | `/api/smb/shared-users` | `webdav:write,ftp:write,smb:write` | Gemeinsame Benutzer der Dateidienste speichern (alter Endpunkt) |
 | PUT | `/api/smb/settings` | `smb:write` | SMB-Einstellungen speichern |
 
 ## Speicher-Einbindungen
@@ -511,6 +512,13 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | GET | `/api/backup/mounts` | `backup:read` | Speicher-Mountpunkte, die als Backup-Ziel dienen können |
 | GET | `/api/backup/local` | Nur Anmeldesitzung | Liste lokaler Backup-Dateien |
 | GET | `/api/backup/local/{name}` | Nur Anmeldesitzung | Lokale Backup-Datei herunterladen |
+
+## Gemeinsame Benutzer der Dateidienste
+
+| Methode | Pfad | Erforderliche Berechtigung | Beschreibung |
+| --- | --- | --- | --- |
+| GET | `/api/fileusers` | `fileusers:read` | Gemeinsame Benutzer der Dateidienste lesen |
+| PUT | `/api/fileusers` | `fileusers:write` | Gemeinsame Benutzer der Dateidienste speichern |
 
 ## System
 

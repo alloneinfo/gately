@@ -34,13 +34,14 @@ Los cuerpos de las peticiones usan `Content-Type: application/json`, y los error
 
 ### Alcances
 
-Un permiso tiene la forma `<alcance>:read` o `<alcance>:write`, y write incluye read. Un alcance es el ID de un módulo (como `ddns`, `portforward`, `notify`, `backup`) o uno de los tres alcances integrados:
+Un permiso tiene la forma `<alcance>:read` o `<alcance>:write`, y write incluye read. Un alcance es el ID de un módulo (como `ddns`, `portforward`, `notify`, `backup`) o uno de los cuatro alcances integrados:
 
 | Alcance | Nombre | Permisos disponibles | Endpoints |
 | --- | --- | --- | --- |
 | `status` | Estado del sistema | `status:read` | `/api/status`, `/api/system/info`, `/api/system/update` |
 | `logs` | Registros del sistema | `logs:read` | `/api/logs` |
 | `import` | Importación de configuración de Lucky | `import:write` | `/api/import/lucky` |
+| `fileusers` | Usuarios compartidos de los servicios de archivos | `fileusers:read`, `fileusers:write` | `/api/fileusers` |
 
 Comodines:
 

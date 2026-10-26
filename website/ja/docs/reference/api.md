@@ -34,13 +34,14 @@ curl -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/status
 
 ### 権限のスコープ
 
-権限の形式は `<スコープ>:read` または `<スコープ>:write` で、write には read が含まれます。スコープは機能モジュールの ID（`ddns`、`portforward`、`notify`、`backup` など）に、組み込みの 3 つのスコープを加えたものです。
+権限の形式は `<スコープ>:read` または `<スコープ>:write` で、write には read が含まれます。スコープは機能モジュールの ID（`ddns`、`portforward`、`notify`、`backup` など）に、組み込みの 4 つのスコープを加えたものです。
 
 | スコープ | 名前 | 利用できる権限 | 対応する API |
 | --- | --- | --- | --- |
 | `status` | システム状態 | `status:read` | `/api/status`、`/api/system/info`、`/api/system/update` |
 | `logs` | システムログ | `logs:read` | `/api/logs` |
 | `import` | Lucky 設定のインポート | `import:write` | `/api/import/lucky` |
+| `fileusers` | ファイルサービスの共有ユーザー | `fileusers:read`、`fileusers:write` | `/api/fileusers` |
 
 ワイルドカードの書き方：
 

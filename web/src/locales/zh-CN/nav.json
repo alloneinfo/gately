@@ -68,6 +68,10 @@
       "title": "SMB 服务",
       "desc": "SMB 文件共享服务"
     },
+    "fileusers": {
+      "title": "文件共享用户",
+      "desc": "WebDAV、FTP、SMB 共用的用户"
+    },
     "wol": {
       "title": "网络唤醒",
       "desc": "远程唤醒局域网设备"

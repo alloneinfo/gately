@@ -10575,6 +10575,115 @@
         "x-token-allowed": true
       }
     },
+    "/api/fileusers": {
+      "get": {
+        "description": "Renvoie les utilisateurs partagés des services de fichiers communs à WebDAV, FTP et SMB, mots de passe masqués. Si `services` indique comment chaque service de fichiers les utilise : `enable` si le service est activé, `sharedUsers` si les utilisateurs partagés peuvent se connecter, `localUsers` les noms des utilisateurs locaux (un utilisateur partagé du même nom n’est vérifié que comme utilisateur local dans ce service), `caseInsensitive` vrai quand les noms sont comparés sans tenir compte de la casse (SMB), `issues` les utilisateurs partagés inutilisables par ce service et la raison : `name` (le nom contient des caractères refusés par SMB), `bcrypt` (le mot de passe est un hachage bcrypt), `share` (un nom de répertoire ne peut pas servir de nom de partage ou est en double). Les modules désactivés ne sont pas listés. fileusers.json ne passe pas la validation, `error` est renvoyé et aucun utilisateur partagé ne peut se connecter tant qu'une liste valide n'est pas enregistrée.\n\nPermission requise : `fileusers:read`.",
+        "responses": {
+          "200": {
+            "description": "Succès"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Paramètres de requête incorrects"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Jeton invalide, expiré ou non connecté"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Il manque au jeton la permission requise"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Lire les utilisateurs partagés des services de fichiers",
+        "tags": [
+          "Utilisateurs partagés des services de fichiers"
+        ],
+        "x-required-scope": "fileusers:read",
+        "x-token-allowed": true
+      },
+      "put": {
+        "description": "保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不Modifier 。只靠共享用户启用的服务在Modifier 后必须仍有可登录的共享用户，否则拒绝保存。各服务是否允许共享用户登录在各服务的设置中Modifier （字段 `sharedUsers`）。\n\nPermission requise : `fileusers:write`.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Succès"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Paramètres de requête incorrects"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Jeton invalide, expiré ou non connecté"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Il manque au jeton la permission requise"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Enregistrer les utilisateurs partagés des services de fichiers",
+        "tags": [
+          "Utilisateurs partagés des services de fichiers"
+        ],
+        "x-required-scope": "fileusers:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/frp/client": {
       "get": {
         "description": "Permission requise : `frp:read`.",
@@ -11743,7 +11852,7 @@
     },
     "/api/ftp/shared-users": {
       "get": {
-        "description": "Renvoie les utilisateurs partagés des services de fichiers communs à WebDAV, FTP et SMB, mots de passe masqués. Si fileusers.json ne passe pas la validation, `error` est renvoyé et aucun utilisateur partagé ne peut se connecter tant qu'une liste valide n'est pas enregistrée.\n\nPermission requise : `ftp:read`.",
+        "description": "Obsolète, utilisez `GET /api/fileusers` ; ce point d’accès est conservé pour compatibilité. Renvoie les utilisateurs partagés des services de fichiers communs à WebDAV, FTP et SMB, mots de passe masqués. Si fileusers.json ne passe pas la validation, `error` est renvoyé et aucun utilisateur partagé ne peut se connecter tant qu'une liste valide n'est pas enregistrée.\n\nPermission requise : `ftp:read`.",
         "responses": {
           "200": {
             "description": "Succès"
@@ -11784,7 +11893,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Lire les utilisateurs partagés des services de fichiers",
+        "summary": "Lire les utilisateurs partagés des services de fichiers (ancien point d’accès)",
         "tags": [
           "Service FTP"
         ],
@@ -11792,7 +11901,7 @@
         "x-token-allowed": true
       },
       "put": {
-        "description": "保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不Modifier 。Jeton API需要同时具备 `webdav:write`、`ftp:write`、`smb:write`。只靠共享用户启用的服务在Modifier 后必须仍有可登录的共享用户，否则拒绝保存。\n\nPermission requise : `webdav:write,ftp:write,smb:write`.",
+        "description": "已弃用，请改用 `PUT /api/fileusers`，本接口保留兼容。保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不Modifier 。Jeton API需要同时具备 `webdav:write`、`ftp:write`、`smb:write`。只靠共享用户启用的服务在Modifier 后必须仍有可登录的共享用户，否则拒绝保存。\n\nPermission requise : `webdav:write,ftp:write,smb:write`.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -11842,7 +11951,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Enregistrer les utilisateurs partagés des services de fichiers",
+        "summary": "Enregistrer les utilisateurs partagés des services de fichiers (ancien point d’accès)",
         "tags": [
           "Service FTP"
         ],
@@ -16256,7 +16365,7 @@
     },
     "/api/smb/shared-users": {
       "get": {
-        "description": "Renvoie les utilisateurs partagés des services de fichiers communs à WebDAV, FTP et SMB, mots de passe masqués. Si fileusers.json ne passe pas la validation, `error` est renvoyé et aucun utilisateur partagé ne peut se connecter tant qu'une liste valide n'est pas enregistrée. `issues` liste les utilisateurs partagés inutilisables pour SMB et la raison : `name` (le nom contient des caractères refusés par SMB), `bcrypt` (le mot de passe est un hachage bcrypt), `share` (un nom de répertoire ne peut pas servir de nom de partage ou est en double).\n\nPermission requise : `smb:read`.",
+        "description": "Obsolète, utilisez `GET /api/fileusers` ; ce point d’accès est conservé pour compatibilité. Renvoie les utilisateurs partagés des services de fichiers communs à WebDAV, FTP et SMB, mots de passe masqués. Si fileusers.json ne passe pas la validation, `error` est renvoyé et aucun utilisateur partagé ne peut se connecter tant qu'une liste valide n'est pas enregistrée. `issues` liste les utilisateurs partagés inutilisables pour SMB et la raison : `name` (le nom contient des caractères refusés par SMB), `bcrypt` (le mot de passe est un hachage bcrypt), `share` (un nom de répertoire ne peut pas servir de nom de partage ou est en double).\n\nPermission requise : `smb:read`.",
         "responses": {
           "200": {
             "description": "Succès"
@@ -16297,7 +16406,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Lire les utilisateurs partagés des services de fichiers",
+        "summary": "Lire les utilisateurs partagés des services de fichiers (ancien point d’accès)",
         "tags": [
           "Service SMB"
         ],
@@ -16305,7 +16414,7 @@
         "x-token-allowed": true
       },
       "put": {
-        "description": "保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不Modifier 。Jeton API需要同时具备 `webdav:write`、`ftp:write`、`smb:write`。只靠共享用户启用的服务在Modifier 后必须仍有可登录的共享用户，否则拒绝保存。\n\nPermission requise : `webdav:write,ftp:write,smb:write`.",
+        "description": "已弃用，请改用 `PUT /api/fileusers`，本接口保留兼容。保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不Modifier 。Jeton API需要同时具备 `webdav:write`、`ftp:write`、`smb:write`。只靠共享用户启用的服务在Modifier 后必须仍有可登录的共享用户，否则拒绝保存。\n\nPermission requise : `webdav:write,ftp:write,smb:write`.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -16355,7 +16464,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Enregistrer les utilisateurs partagés des services de fichiers",
+        "summary": "Enregistrer les utilisateurs partagés des services de fichiers (ancien point d’accès)",
         "tags": [
           "Service SMB"
         ],
@@ -21633,7 +21742,7 @@
     },
     "/api/webdav/shared-users": {
       "get": {
-        "description": "Renvoie les utilisateurs partagés des services de fichiers communs à WebDAV, FTP et SMB, mots de passe masqués. Si fileusers.json ne passe pas la validation, `error` est renvoyé et aucun utilisateur partagé ne peut se connecter tant qu'une liste valide n'est pas enregistrée.\n\nPermission requise : `webdav:read`.",
+        "description": "Obsolète, utilisez `GET /api/fileusers` ; ce point d’accès est conservé pour compatibilité. Renvoie les utilisateurs partagés des services de fichiers communs à WebDAV, FTP et SMB, mots de passe masqués. Si fileusers.json ne passe pas la validation, `error` est renvoyé et aucun utilisateur partagé ne peut se connecter tant qu'une liste valide n'est pas enregistrée.\n\nPermission requise : `webdav:read`.",
         "responses": {
           "200": {
             "description": "Succès"
@@ -21674,7 +21783,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Lire les utilisateurs partagés des services de fichiers",
+        "summary": "Lire les utilisateurs partagés des services de fichiers (ancien point d’accès)",
         "tags": [
           "Service WebDAV"
         ],
@@ -21682,7 +21791,7 @@
         "x-token-allowed": true
       },
       "put": {
-        "description": "保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不Modifier 。Jeton API需要同时具备 `webdav:write`、`ftp:write`、`smb:write`。只靠共享用户启用的服务在Modifier 后必须仍有可登录的共享用户，否则拒绝保存。\n\nPermission requise : `webdav:write,ftp:write,smb:write`.",
+        "description": "已弃用，请改用 `PUT /api/fileusers`，本接口保留兼容。保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不Modifier 。Jeton API需要同时具备 `webdav:write`、`ftp:write`、`smb:write`。只靠共享用户启用的服务在Modifier 后必须仍有可登录的共享用户，否则拒绝保存。\n\nPermission requise : `webdav:write,ftp:write,smb:write`.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -21732,7 +21841,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Enregistrer les utilisateurs partagés des services de fichiers",
+        "summary": "Enregistrer les utilisateurs partagés des services de fichiers (ancien point d’accès)",
         "tags": [
           "Service WebDAV"
         ],
@@ -27602,6 +27711,9 @@
       "name": "Sauvegarde de configuration"
     },
     {
+      "name": "Utilisateurs partagés des services de fichiers"
+    },
+    {
       "name": "Système"
     },
     {
@@ -27639,6 +27751,7 @@
     "status",
     "logs",
     "metrics",
-    "import"
+    "import",
+    "fileusers"
   ]
 }

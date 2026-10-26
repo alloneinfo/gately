@@ -1,15 +1,30 @@
 {
   "title": "Gemeinsame Benutzer",
-  "desc": "Von WebDAV, FTP und SMB gemeinsam genutzte Benutzer; Änderungen auf einer Dienstseite gelten für alle",
-  "enable": "In diesem Dienst verwenden",
-  "help": "Gemeinsame Benutzer haben wie lokale Benutzer ein Passwort und Verzeichnisse und werden an einer Stelle gepflegt. Ist der Schalter an, können sie sich bei diesem Dienst anmelden; hat ein lokaler Benutzer denselben Namen, wird nur der lokale Benutzer geprüft.",
-  "helpSmb": "Gemeinsame Benutzer haben wie lokale Benutzer ein Passwort und Verzeichnisse und werden an einer Stelle gepflegt. Ist der Schalter an, können sie sich bei diesem Dienst anmelden; hat ein lokaler Benutzer denselben Namen (ohne Groß-/Kleinschreibung), wird nur der lokale Benutzer geprüft. SMB braucht Klartextpasswörter, und Benutzer- und Freigabenamen dürfen keine Zeichen wie \" / \\ [ ] : ; {'|'} = , + * ? < > enthalten.",
-  "off": "Gemeinsame Benutzer sind für diesen Dienst aus, die Benutzer unten können sich hier nicht anmelden",
+  "cardDesc": "Gemeinsam für WebDAV, FTP und SMB, verwaltet auf der Seite Gemeinsame Dateibenutzer",
+  "usersDesc": "Speichern gilt sofort für WebDAV, FTP und SMB",
+  "enable": "Gemeinsame Benutzer erlauben",
+  "count": "{count} gemeinsame Benutzer",
+  "none": "Noch keine gemeinsamen Benutzer",
+  "off": "Gemeinsame Benutzer können sich bei diesem Dienst nicht anmelden",
+  "manage": "Gemeinsame Benutzer verwalten",
+  "help": "Gemeinsame Benutzer haben wie die lokalen Benutzer jedes Dienstes ein Passwort und Verzeichnisse und werden an einer Stelle gepflegt. Hat ein Dienst einen lokalen Benutzer mit demselben Namen, wird in diesem Dienst nur der lokale Benutzer geprüft (bei SMB ohne Beachtung der Groß-/Kleinschreibung). SMB braucht Klartext-Passwörter, Benutzer- und Verzeichnisnamen dürfen keine Zeichen wie \" / \\ [ ] : ; {'|'} = , + * ? < > enthalten, und bei mehreren Verzeichnissen ist jeder Verzeichnisname der SMB-Freigabename.",
   "loadError": "Die Konfiguration der gemeinsamen Benutzer ist ungültig, sie können sich nicht anmelden; korrigieren und speichern, um sie wiederherzustellen: {error}",
   "shadowed": "Gleicher Name wie ein lokaler Benutzer, der lokale Benutzer wird geprüft: {names}",
   "issue": {
     "name": "{name}: der Benutzername kann nicht für SMB verwendet werden",
     "bcrypt": "{name}: das Passwort ist ein bcrypt-Hash; SMB braucht das Klartextpasswort, bitte neu setzen",
     "share": "{name}: ein Verzeichnisname ist als SMB-Freigabename ungültig oder doppelt"
+  },
+  "page": {
+    "title": "Gemeinsame Dateibenutzer",
+    "desc": "Benutzer, die WebDAV, FTP und SMB gemeinsam nutzen, zentral verwaltet"
+  },
+  "services": {
+    "title": "Dienste",
+    "desc": "Ob gemeinsame Benutzer sich anmelden dürfen, wird auf der Seite des jeweiligen Dienstes eingestellt",
+    "on": "Gemeinsame Benutzer erlaubt",
+    "off": "Gemeinsame Benutzer nicht erlaubt",
+    "disabled": "Dienst deaktiviert",
+    "none": "Die Module WebDAV, FTP und SMB sind alle ausgeschaltet"
   }
 }

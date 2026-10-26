@@ -68,6 +68,10 @@
       "title": "Serviço SMB",
       "desc": "Serviço de compartilhamento de arquivos SMB"
     },
+    "fileusers": {
+      "title": "Usuários compartilhados de arquivos",
+      "desc": "Usuários compartilhados por WebDAV, FTP e SMB"
+    },
     "wol": {
       "title": "Wake-on-LAN",
       "desc": "Ligue remotamente dispositivos da sua rede local"

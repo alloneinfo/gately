@@ -56,6 +56,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `logs` | Registros del sistema | `logs:read` |
 | `metrics` | Métricas (Prometheus) | `metrics:read` |
 | `import` | Importación de configuración de Lucky | `import:write` |
+| `fileusers` | Usuarios compartidos de los servicios de archivos | `fileusers:read`、`fileusers:write` |
 
 Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `*` equivale a lectura y escritura en todos los módulos.
 
@@ -411,8 +412,8 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | GET | `/api/webdav/logs` | `webdav:read` | Ver los registros de ejecución del módulo |
 | DELETE | `/api/webdav/logs` | `webdav:write` | Vaciar los registros de ejecución del módulo |
 | GET | `/api/webdav/settings` | `webdav:read` | Leer los ajustes de WebDAV |
-| GET | `/api/webdav/shared-users` | `webdav:read` | Leer los usuarios compartidos de los servicios de archivos |
-| PUT | `/api/webdav/shared-users` | `webdav:write,ftp:write,smb:write` | Guardar los usuarios compartidos de los servicios de archivos |
+| GET | `/api/webdav/shared-users` | `webdav:read` | Leer los usuarios compartidos de los servicios de archivos (endpoint antiguo) |
+| PUT | `/api/webdav/shared-users` | `webdav:write,ftp:write,smb:write` | Guardar los usuarios compartidos de los servicios de archivos (endpoint antiguo) |
 | PUT | `/api/webdav/settings` | `webdav:write` | Guardar los ajustes de WebDAV |
 
 ## Servicio FTP
@@ -422,8 +423,8 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | GET | `/api/ftp/logs` | `ftp:read` | Ver los registros de ejecución del módulo |
 | DELETE | `/api/ftp/logs` | `ftp:write` | Vaciar los registros de ejecución del módulo |
 | GET | `/api/ftp/settings` | `ftp:read` | Leer los ajustes de FTP |
-| GET | `/api/ftp/shared-users` | `ftp:read` | Leer los usuarios compartidos de los servicios de archivos |
-| PUT | `/api/ftp/shared-users` | `webdav:write,ftp:write,smb:write` | Guardar los usuarios compartidos de los servicios de archivos |
+| GET | `/api/ftp/shared-users` | `ftp:read` | Leer los usuarios compartidos de los servicios de archivos (endpoint antiguo) |
+| PUT | `/api/ftp/shared-users` | `webdav:write,ftp:write,smb:write` | Guardar los usuarios compartidos de los servicios de archivos (endpoint antiguo) |
 | PUT | `/api/ftp/settings` | `ftp:write` | Guardar los ajustes de FTP |
 
 ## Servicio SMB
@@ -433,8 +434,8 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | GET | `/api/smb/logs` | `smb:read` | Ver los registros de ejecución del módulo |
 | DELETE | `/api/smb/logs` | `smb:write` | Vaciar los registros de ejecución del módulo |
 | GET | `/api/smb/settings` | `smb:read` | Obtener la configuración de SMB |
-| GET | `/api/smb/shared-users` | `smb:read` | Leer los usuarios compartidos de los servicios de archivos |
-| PUT | `/api/smb/shared-users` | `webdav:write,ftp:write,smb:write` | Guardar los usuarios compartidos de los servicios de archivos |
+| GET | `/api/smb/shared-users` | `smb:read` | Leer los usuarios compartidos de los servicios de archivos (endpoint antiguo) |
+| PUT | `/api/smb/shared-users` | `webdav:write,ftp:write,smb:write` | Guardar los usuarios compartidos de los servicios de archivos (endpoint antiguo) |
 | PUT | `/api/smb/settings` | `smb:write` | Guardar la configuración de SMB |
 
 ## Montajes de almacenamiento
@@ -511,6 +512,13 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | GET | `/api/backup/mounts` | `backup:read` | Puntos de montaje de almacenamiento que pueden usarse como destino de copia de seguridad |
 | GET | `/api/backup/local` | Solo sesión iniciada | Lista de archivos de copia de seguridad locales |
 | GET | `/api/backup/local/{name}` | Solo sesión iniciada | Descargar un archivo de copia de seguridad local |
+
+## Usuarios compartidos de los servicios de archivos
+
+| Método | Ruta | Permiso requerido | Descripción |
+| --- | --- | --- | --- |
+| GET | `/api/fileusers` | `fileusers:read` | Leer los usuarios compartidos de los servicios de archivos |
+| PUT | `/api/fileusers` | `fileusers:write` | Guardar los usuarios compartidos de los servicios de archivos |
 
 ## Sistema
 

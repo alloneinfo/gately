@@ -56,6 +56,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `logs` | Journaux système | `logs:read` |
 | `metrics` | Métriques (Prometheus) | `metrics:read` |
 | `import` | Import de configuration Lucky | `import:write` |
+| `fileusers` | Utilisateurs partagés des services de fichiers | `fileusers:read`、`fileusers:write` |
 
 Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `*:write` ou `*` la lecture et l'écriture sur tous les modules.
 
@@ -411,8 +412,8 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | GET | `/api/webdav/logs` | `webdav:read` | Consulter les journaux d'exécution d'un module |
 | DELETE | `/api/webdav/logs` | `webdav:write` | Vider les journaux d'exécution d'un module |
 | GET | `/api/webdav/settings` | `webdav:read` | Lire les paramètres WebDAV |
-| GET | `/api/webdav/shared-users` | `webdav:read` | Lire les utilisateurs partagés des services de fichiers |
-| PUT | `/api/webdav/shared-users` | `webdav:write,ftp:write,smb:write` | Enregistrer les utilisateurs partagés des services de fichiers |
+| GET | `/api/webdav/shared-users` | `webdav:read` | Lire les utilisateurs partagés des services de fichiers (ancien point d’accès) |
+| PUT | `/api/webdav/shared-users` | `webdav:write,ftp:write,smb:write` | Enregistrer les utilisateurs partagés des services de fichiers (ancien point d’accès) |
 | PUT | `/api/webdav/settings` | `webdav:write` | Enregistrer les paramètres WebDAV |
 
 ## Service FTP
@@ -422,8 +423,8 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | GET | `/api/ftp/logs` | `ftp:read` | Consulter les journaux d'exécution d'un module |
 | DELETE | `/api/ftp/logs` | `ftp:write` | Vider les journaux d'exécution d'un module |
 | GET | `/api/ftp/settings` | `ftp:read` | Lire les paramètres FTP |
-| GET | `/api/ftp/shared-users` | `ftp:read` | Lire les utilisateurs partagés des services de fichiers |
-| PUT | `/api/ftp/shared-users` | `webdav:write,ftp:write,smb:write` | Enregistrer les utilisateurs partagés des services de fichiers |
+| GET | `/api/ftp/shared-users` | `ftp:read` | Lire les utilisateurs partagés des services de fichiers (ancien point d’accès) |
+| PUT | `/api/ftp/shared-users` | `webdav:write,ftp:write,smb:write` | Enregistrer les utilisateurs partagés des services de fichiers (ancien point d’accès) |
 | PUT | `/api/ftp/settings` | `ftp:write` | Enregistrer les paramètres FTP |
 
 ## Service SMB
@@ -433,8 +434,8 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | GET | `/api/smb/logs` | `smb:read` | Consulter les journaux d'exécution d'un module |
 | DELETE | `/api/smb/logs` | `smb:write` | Vider les journaux d'exécution d'un module |
 | GET | `/api/smb/settings` | `smb:read` | Lire les paramètres SMB |
-| GET | `/api/smb/shared-users` | `smb:read` | Lire les utilisateurs partagés des services de fichiers |
-| PUT | `/api/smb/shared-users` | `webdav:write,ftp:write,smb:write` | Enregistrer les utilisateurs partagés des services de fichiers |
+| GET | `/api/smb/shared-users` | `smb:read` | Lire les utilisateurs partagés des services de fichiers (ancien point d’accès) |
+| PUT | `/api/smb/shared-users` | `webdav:write,ftp:write,smb:write` | Enregistrer les utilisateurs partagés des services de fichiers (ancien point d’accès) |
 | PUT | `/api/smb/settings` | `smb:write` | Enregistrer les paramètres SMB |
 
 ## Montages de stockage
@@ -511,6 +512,13 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | GET | `/api/backup/mounts` | `backup:read` | Points de montage de stockage utilisables comme destinations de sauvegarde |
 | GET | `/api/backup/local` | Session connectée uniquement | Liste des fichiers de sauvegarde locaux |
 | GET | `/api/backup/local/{name}` | Session connectée uniquement | Télécharger un fichier de sauvegarde local |
+
+## Utilisateurs partagés des services de fichiers
+
+| Méthode | Chemin | Permission requise | Description |
+| --- | --- | --- | --- |
+| GET | `/api/fileusers` | `fileusers:read` | Lire les utilisateurs partagés des services de fichiers |
+| PUT | `/api/fileusers` | `fileusers:write` | Enregistrer les utilisateurs partagés des services de fichiers |
 
 ## Système
 

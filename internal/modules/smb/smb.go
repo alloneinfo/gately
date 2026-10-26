@@ -185,6 +185,20 @@ func (m *Module) Init(env module.Env) error {
 	}
 	// SMB 服务只在启动时读取账号，共享用户修改后按需重启
 	fileusers.Default.Subscribe(m.reloadShared)
+	// 共享用户页面展示本服务的启用状态、开关、本地用户与无法用于 SMB 的共享用户
+	fileusers.Default.AddService(ID, func() fileusers.Service {
+		m.mu.Lock()
+		s := m.settings
+		m.mu.Unlock()
+		sv := fileusers.Service{Enable: s.Enable, SharedUsers: s.SharedUsers, CaseInsensitive: true}
+		for _, u := range s.Users {
+			sv.LocalUsers = append(sv.LocalUsers, u.Name)
+		}
+		// 不论开关是否打开都按打开计算，便于在打开之前看到哪些共享用户不能用于 SMB
+		s.SharedUsers = true
+		_, sv.Issues = buildAccounts(s, fileusers.Default.List())
+		return sv
+	})
 	// 只靠共享用户启用时，修改后至少要有一个能用于 SMB 的共享用户
 	fileusers.Default.AddCheck(func(users []fileusers.User) error {
 		m.mu.Lock()
@@ -265,7 +279,7 @@ func (m *Module) restartLocked() {
 	}
 	accounts, issues := buildAccounts(m.settings, fileusers.Default.List())
 	for _, is := range issues {
-		m.logs.Add(logbuf.LevelWarn, "", is.logText())
+		m.logs.Add(logbuf.LevelWarn, "", issueLogText(is))
 	}
 	srv, err := startServer(m.settings, accounts, m.logs)
 	if err != nil {

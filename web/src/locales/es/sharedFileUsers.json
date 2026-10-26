@@ -1,15 +1,30 @@
 {
   "title": "Usuarios compartidos",
-  "desc": "Usuarios comunes a WebDAV, FTP y SMB; los cambios en cualquier página de servicio se aplican a todos",
-  "enable": "Usar en este servicio",
-  "help": "Los usuarios compartidos tienen contraseña y directorios igual que los usuarios locales y se mantienen en un solo lugar. Con el interruptor activado pueden iniciar sesión en este servicio; si un usuario local tiene el mismo nombre, solo se comprueba el usuario local.",
-  "helpSmb": "Los usuarios compartidos tienen contraseña y directorios igual que los usuarios locales y se mantienen en un solo lugar. Con el interruptor activado pueden iniciar sesión en este servicio; si un usuario local tiene el mismo nombre (sin distinguir mayúsculas), solo se comprueba el usuario local. SMB necesita contraseñas en claro, y los nombres de usuario y de recurso no pueden contener caracteres como \" / \\ [ ] : ; {'|'} = , + * ? < >.",
-  "off": "Los usuarios compartidos están desactivados en este servicio; los usuarios de abajo no pueden iniciar sesión en él",
+  "cardDesc": "Compartidos por WebDAV, FTP y SMB y gestionados en la página Usuarios compartidos de archivos",
+  "usersDesc": "Al guardar se aplica a WebDAV, FTP y SMB a la vez",
+  "enable": "Permitir usuarios compartidos",
+  "count": "{count} usuarios compartidos",
+  "none": "Aún no hay usuarios compartidos",
+  "off": "Los usuarios compartidos no pueden iniciar sesión en este servicio",
+  "manage": "Gestionar usuarios compartidos",
+  "help": "Los usuarios compartidos tienen contraseña y directorios igual que los usuarios locales de cada servicio y se mantienen en un solo lugar. Si un servicio tiene un usuario local con el mismo nombre, en ese servicio solo se comprueba el usuario local (sin distinguir mayúsculas en SMB). SMB necesita contraseñas en texto plano, los nombres de usuario y de directorio no pueden contener caracteres como \" / \\ [ ] : ; {'|'} = , + * ? < >, y con varios directorios cada nombre de directorio es el nombre del recurso SMB.",
   "loadError": "La configuración de usuarios compartidos no es válida y no pueden iniciar sesión; corríjala y guarde para restaurarlos: {error}",
   "shadowed": "Mismo nombre que un usuario local, se comprueba el usuario local: {names}",
   "issue": {
     "name": "{name}: el nombre de usuario no se puede usar en SMB",
     "bcrypt": "{name}: la contraseña es un hash bcrypt; SMB necesita la contraseña en claro, vuelve a establecerla",
     "share": "{name}: un nombre de directorio no se puede usar como recurso SMB o está duplicado"
+  },
+  "page": {
+    "title": "Usuarios compartidos de archivos",
+    "desc": "Usuarios compartidos por WebDAV, FTP y SMB, gestionados en un solo lugar"
+  },
+  "services": {
+    "title": "Servicios",
+    "desc": "Si los usuarios compartidos pueden iniciar sesión se configura en la página de cada servicio",
+    "on": "Usuarios compartidos permitidos",
+    "off": "Usuarios compartidos no permitidos",
+    "disabled": "Servicio desactivado",
+    "none": "Los módulos WebDAV, FTP y SMB están desactivados"
   }
 }

@@ -34,13 +34,14 @@ Os corpos das requisições usam `Content-Type: application/json`, e os erros s�
 
 ### Escopos
 
-Uma permissão tem o formato `<scope>:read` ou `<scope>:write`, e write inclui read. Um escopo é o ID de um módulo (como `ddns`, `portforward`, `notify`, `backup`) ou um dos três escopos embutidos:
+Uma permissão tem o formato `<scope>:read` ou `<scope>:write`, e write inclui read. Um escopo é o ID de um módulo (como `ddns`, `portforward`, `notify`, `backup`) ou um dos quatro escopos embutidos:
 
 | Escopo | Nome | Permissões disponíveis | Endpoints |
 | --- | --- | --- | --- |
 | `status` | Status do sistema | `status:read` | `/api/status`, `/api/system/info`, `/api/system/update` |
 | `logs` | Logs do sistema | `logs:read` | `/api/logs` |
 | `import` | Importação de configuração do Lucky | `import:write` | `/api/import/lucky` |
+| `fileusers` | Usuários compartilhados dos serviços de arquivos | `fileusers:read`, `fileusers:write` | `/api/fileusers` |
 
 Curingas:
 

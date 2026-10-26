@@ -171,3 +171,32 @@ func TestAddCheck(t *testing.T) {
 		t.Fatalf("换配置目录后旧的检查与订阅应清空: %v %d", err, notified)
 	}
 }
+
+// TestServices 验证各服务的使用情况按侧边栏顺序返回、可按 ID 过滤，换配置目录时清空。
+func TestServices(t *testing.T) {
+	st, _ := config.Open(t.TempDir())
+	r := New()
+	if err := r.Init(st); err != nil {
+		t.Fatal(err)
+	}
+	r.AddService("smb", func() Service { return Service{Enable: true, CaseInsensitive: true} })
+	r.AddService("webdav", func() Service { return Service{SharedUsers: true, LocalUsers: []string{"a"}} })
+	r.AddService("ftp", func() Service { return Service{} })
+	got := r.Services(nil)
+	if len(got) != 3 || got[0].ID != "webdav" || got[1].ID != "ftp" || got[2].ID != "smb" {
+		t.Fatalf("顺序不符: %+v", got)
+	}
+	if got[1].LocalUsers == nil || !got[0].SharedUsers || !got[2].CaseInsensitive {
+		t.Fatalf("内容不符: %+v", got)
+	}
+	if got := r.Services(func(id string) bool { return id != "ftp" }); len(got) != 2 || got[1].ID != "smb" {
+		t.Fatalf("过滤结果不符: %+v", got)
+	}
+	other, _ := config.Open(t.TempDir())
+	if err := r.Init(other); err != nil {
+		t.Fatal(err)
+	}
+	if got := r.Services(nil); len(got) != 0 {
+		t.Fatalf("换配置目录后应清空: %+v", got)
+	}
+}

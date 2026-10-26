@@ -56,6 +56,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `logs` | 시스템 로그 | `logs:read` |
 | `metrics` | 모니터링 지표 (Prometheus) | `metrics:read` |
 | `import` | Lucky 설정 가져오기 | `import:write` |
+| `fileusers` | 파일 서비스 공유 사용자 | `fileusers:read`、`fileusers:write` |
 
 와일드카드: `*:read`는 모든 모듈 읽기 전용, `*:write` 또는 `*`는 모든 모듈 읽기/쓰기를 의미합니다.
 
@@ -411,8 +412,8 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | GET | `/api/webdav/logs` | `webdav:read` | 모듈 실행 로그 보기 |
 | DELETE | `/api/webdav/logs` | `webdav:write` | 모듈 실행 로그 비우기 |
 | GET | `/api/webdav/settings` | `webdav:read` | WebDAV 설정 읽기 |
-| GET | `/api/webdav/shared-users` | `webdav:read` | 파일 서비스 공유 사용자 조회 |
-| PUT | `/api/webdav/shared-users` | `webdav:write,ftp:write,smb:write` | 파일 서비스 공유 사용자 저장 |
+| GET | `/api/webdav/shared-users` | `webdav:read` | 파일 서비스 공유 사용자 조회 (이전 엔드포인트) |
+| PUT | `/api/webdav/shared-users` | `webdav:write,ftp:write,smb:write` | 파일 서비스 공유 사용자 저장 (이전 엔드포인트) |
 | PUT | `/api/webdav/settings` | `webdav:write` | WebDAV 설정 저장 |
 
 ## FTP 서비스
@@ -422,8 +423,8 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | GET | `/api/ftp/logs` | `ftp:read` | 모듈 실행 로그 보기 |
 | DELETE | `/api/ftp/logs` | `ftp:write` | 모듈 실행 로그 비우기 |
 | GET | `/api/ftp/settings` | `ftp:read` | FTP 설정 읽기 |
-| GET | `/api/ftp/shared-users` | `ftp:read` | 파일 서비스 공유 사용자 조회 |
-| PUT | `/api/ftp/shared-users` | `webdav:write,ftp:write,smb:write` | 파일 서비스 공유 사용자 저장 |
+| GET | `/api/ftp/shared-users` | `ftp:read` | 파일 서비스 공유 사용자 조회 (이전 엔드포인트) |
+| PUT | `/api/ftp/shared-users` | `webdav:write,ftp:write,smb:write` | 파일 서비스 공유 사용자 저장 (이전 엔드포인트) |
 | PUT | `/api/ftp/settings` | `ftp:write` | FTP 설정 저장 |
 
 ## SMB 서비스
@@ -433,8 +434,8 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | GET | `/api/smb/logs` | `smb:read` | 모듈 실행 로그 보기 |
 | DELETE | `/api/smb/logs` | `smb:write` | 모듈 실행 로그 비우기 |
 | GET | `/api/smb/settings` | `smb:read` | SMB 설정 조회 |
-| GET | `/api/smb/shared-users` | `smb:read` | 파일 서비스 공유 사용자 조회 |
-| PUT | `/api/smb/shared-users` | `webdav:write,ftp:write,smb:write` | 파일 서비스 공유 사용자 저장 |
+| GET | `/api/smb/shared-users` | `smb:read` | 파일 서비스 공유 사용자 조회 (이전 엔드포인트) |
+| PUT | `/api/smb/shared-users` | `webdav:write,ftp:write,smb:write` | 파일 서비스 공유 사용자 저장 (이전 엔드포인트) |
 | PUT | `/api/smb/settings` | `smb:write` | SMB 설정 저장 |
 
 ## 스토리지 마운트
@@ -511,6 +512,13 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | GET | `/api/backup/mounts` | `backup:read` | 백업 대상으로 사용할 수 있는 스토리지 마운트 지점 |
 | GET | `/api/backup/local` | 로그인 세션 전용 | 로컬 백업 파일 목록 |
 | GET | `/api/backup/local/{name}` | 로그인 세션 전용 | 로컬 백업 파일 다운로드 |
+
+## 파일 서비스 공유 사용자
+
+| 메서드 | 경로 | 필요 권한 | 설명 |
+| --- | --- | --- | --- |
+| GET | `/api/fileusers` | `fileusers:read` | 파일 서비스 공유 사용자 조회 |
+| PUT | `/api/fileusers` | `fileusers:write` | 파일 서비스 공유 사용자 저장 |
 
 ## 시스템
 

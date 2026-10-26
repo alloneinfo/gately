@@ -1,15 +1,30 @@
 {
   "title": "Usuários compartilhados",
-  "desc": "Usuários comuns a WebDAV, FTP e SMB; alterações em qualquer página de serviço valem para todos",
-  "enable": "Usar neste serviço",
-  "help": "Usuários compartilhados têm senha e diretórios como os usuários locais e ficam em um só lugar. Com a chave ligada eles podem entrar neste serviço; se um usuário local tiver o mesmo nome, só o usuário local é verificado.",
-  "helpSmb": "Usuários compartilhados têm senha e diretórios como os usuários locais e ficam em um só lugar. Com a chave ligada eles podem entrar neste serviço; se um usuário local tiver o mesmo nome (sem diferenciar maiúsculas), só o usuário local é verificado. O SMB precisa de senhas em texto puro, e nomes de usuário e de compartilhamento não podem conter caracteres como \" / \\ [ ] : ; {'|'} = , + * ? < >.",
-  "off": "Os usuários compartilhados estão desligados neste serviço; os usuários abaixo não podem entrar nele",
+  "cardDesc": "Compartilhados por WebDAV, FTP e SMB e gerenciados na página Usuários compartilhados de arquivos",
+  "usersDesc": "Ao salvar, vale para WebDAV, FTP e SMB ao mesmo tempo",
+  "enable": "Permitir usuários compartilhados",
+  "count": "{count} usuários compartilhados",
+  "none": "Ainda não há usuários compartilhados",
+  "off": "Usuários compartilhados não podem entrar neste serviço",
+  "manage": "Gerenciar usuários compartilhados",
+  "help": "Usuários compartilhados têm senha e diretórios como os usuários locais de cada serviço e ficam em um só lugar. Se um serviço tiver um usuário local com o mesmo nome, nesse serviço só o usuário local é verificado (sem diferenciar maiúsculas no SMB). O SMB precisa de senhas em texto puro, nomes de usuário e de diretório não podem conter caracteres como \" / \\ [ ] : ; {'|'} = , + * ? < >, e com vários diretórios cada nome de diretório é o nome do compartilhamento SMB.",
   "loadError": "A configuração de usuários compartilhados é inválida e eles não conseguem entrar; corrija e salve para restaurá-los: {error}",
   "shadowed": "Mesmo nome de um usuário local, o usuário local é verificado: {names}",
   "issue": {
     "name": "{name}: o nome de usuário não pode ser usado no SMB",
     "bcrypt": "{name}: a senha é um hash bcrypt; o SMB precisa da senha em texto puro, defina-a novamente",
     "share": "{name}: um nome de diretório não pode ser usado como compartilhamento SMB ou está duplicado"
+  },
+  "page": {
+    "title": "Usuários compartilhados de arquivos",
+    "desc": "Usuários compartilhados por WebDAV, FTP e SMB, gerenciados em um só lugar"
+  },
+  "services": {
+    "title": "Serviços",
+    "desc": "Se usuários compartilhados podem entrar é definido na página de cada serviço",
+    "on": "Usuários compartilhados permitidos",
+    "off": "Usuários compartilhados não permitidos",
+    "disabled": "Serviço desativado",
+    "none": "Os módulos WebDAV, FTP e SMB estão todos desligados"
   }
 }

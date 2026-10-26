@@ -34,13 +34,14 @@ curl -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/status
 
 ### 權限範圍
 
-權限格式為 `<權限域>:read` 或 `<權限域>:write`，寫入權限包含讀取權限。權限域是功能模組的 ID（如 `ddns`、`portforward`、`notify`、`backup`）加上三個內建域：
+權限格式為 `<權限域>:read` 或 `<權限域>:write`，寫入權限包含讀取權限。權限域是功能模組的 ID（如 `ddns`、`portforward`、`notify`、`backup`）加上四個內建域：
 
 | 權限域 | 名稱 | 可用權限 | 對應介面 |
 | --- | --- | --- | --- |
 | `status` | 系統狀態 | `status:read` | `/api/status`、`/api/system/info`、`/api/system/update` |
 | `logs` | 系統日誌 | `logs:read` | `/api/logs` |
 | `import` | Lucky 設定匯入 | `import:write` | `/api/import/lucky` |
+| `fileusers` | 檔案服務共用使用者 | `fileusers:read`、`fileusers:write` | `/api/fileusers` |
 
 萬用寫法：
 

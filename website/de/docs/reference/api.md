@@ -34,13 +34,14 @@ Anfragekörper verwenden `Content-Type: application/json`, und Fehler werden ein
 
 ### Scopes
 
-Eine Berechtigung hat die Form `<scope>:read` oder `<scope>:write`, wobei write read einschließt. Ein Scope ist eine Modul-ID (etwa `ddns`, `portforward`, `notify`, `backup`) oder einer von drei eingebauten Scopes:
+Eine Berechtigung hat die Form `<scope>:read` oder `<scope>:write`, wobei write read einschließt. Ein Scope ist eine Modul-ID (etwa `ddns`, `portforward`, `notify`, `backup`) oder einer von vier eingebauten Scopes:
 
 | Scope | Name | Verfügbare Berechtigungen | Endpunkte |
 | --- | --- | --- | --- |
 | `status` | Systemstatus | `status:read` | `/api/status`, `/api/system/info`, `/api/system/update` |
 | `logs` | Systemprotokolle | `logs:read` | `/api/logs` |
 | `import` | Import der Lucky-Konfiguration | `import:write` | `/api/import/lucky` |
+| `fileusers` | Gemeinsame Benutzer der Dateidienste | `fileusers:read`, `fileusers:write` | `/api/fileusers` |
 
 Platzhalter:
 

@@ -34,13 +34,14 @@ Request bodies use `Content-Type: application/json`, and errors are returned uni
 
 ### Scopes
 
-A permission has the form `<scope>:read` or `<scope>:write`, and write includes read. A scope is a module ID (such as `ddns`, `portforward`, `notify`, `backup`) or one of three built-in scopes:
+A permission has the form `<scope>:read` or `<scope>:write`, and write includes read. A scope is a module ID (such as `ddns`, `portforward`, `notify`, `backup`) or one of four built-in scopes:
 
 | Scope | Name | Available permissions | Endpoints |
 | --- | --- | --- | --- |
 | `status` | System status | `status:read` | `/api/status`, `/api/system/info`, `/api/system/update` |
 | `logs` | System logs | `logs:read` | `/api/logs` |
 | `import` | Lucky config import | `import:write` | `/api/import/lucky` |
+| `fileusers` | File service shared users | `fileusers:read`, `fileusers:write` | `/api/fileusers` |
 
 Wildcards:
 

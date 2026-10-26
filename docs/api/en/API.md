@@ -56,6 +56,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `logs` | System logs | `logs:read` |
 | `metrics` | Metrics (Prometheus) | `metrics:read` |
 | `import` | Lucky configuration import | `import:write` |
+| `fileusers` | File service shared users | `fileusers:read`、`fileusers:write` |
 
 Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` means read-write access to all modules.
 
@@ -411,8 +412,8 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | GET | `/api/webdav/logs` | `webdav:read` | View module runtime logs |
 | DELETE | `/api/webdav/logs` | `webdav:write` | Clear module runtime logs |
 | GET | `/api/webdav/settings` | `webdav:read` | Read WebDAV settings |
-| GET | `/api/webdav/shared-users` | `webdav:read` | Get file service shared users |
-| PUT | `/api/webdav/shared-users` | `webdav:write,ftp:write,smb:write` | Save file service shared users |
+| GET | `/api/webdav/shared-users` | `webdav:read` | Get file service shared users (legacy endpoint) |
+| PUT | `/api/webdav/shared-users` | `webdav:write,ftp:write,smb:write` | Save file service shared users (legacy endpoint) |
 | PUT | `/api/webdav/settings` | `webdav:write` | Save WebDAV settings |
 
 ## FTP service
@@ -422,8 +423,8 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | GET | `/api/ftp/logs` | `ftp:read` | View module runtime logs |
 | DELETE | `/api/ftp/logs` | `ftp:write` | Clear module runtime logs |
 | GET | `/api/ftp/settings` | `ftp:read` | Read FTP settings |
-| GET | `/api/ftp/shared-users` | `ftp:read` | Get file service shared users |
-| PUT | `/api/ftp/shared-users` | `webdav:write,ftp:write,smb:write` | Save file service shared users |
+| GET | `/api/ftp/shared-users` | `ftp:read` | Get file service shared users (legacy endpoint) |
+| PUT | `/api/ftp/shared-users` | `webdav:write,ftp:write,smb:write` | Save file service shared users (legacy endpoint) |
 | PUT | `/api/ftp/settings` | `ftp:write` | Save FTP settings |
 
 ## SMB Service
@@ -433,8 +434,8 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | GET | `/api/smb/logs` | `smb:read` | View module runtime logs |
 | DELETE | `/api/smb/logs` | `smb:write` | Clear module runtime logs |
 | GET | `/api/smb/settings` | `smb:read` | Get SMB settings |
-| GET | `/api/smb/shared-users` | `smb:read` | Get file service shared users |
-| PUT | `/api/smb/shared-users` | `webdav:write,ftp:write,smb:write` | Save file service shared users |
+| GET | `/api/smb/shared-users` | `smb:read` | Get file service shared users (legacy endpoint) |
+| PUT | `/api/smb/shared-users` | `webdav:write,ftp:write,smb:write` | Save file service shared users (legacy endpoint) |
 | PUT | `/api/smb/settings` | `smb:write` | Save SMB settings |
 
 ## Storage Mounts
@@ -511,6 +512,13 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | GET | `/api/backup/mounts` | `backup:read` | Storage mount points that can serve as backup destinations |
 | GET | `/api/backup/local` | Login sessions only | List of local backup files |
 | GET | `/api/backup/local/{name}` | Login sessions only | Download a local backup file |
+
+## File service shared users
+
+| Method | Path | Required permission | Description |
+| --- | --- | --- | --- |
+| GET | `/api/fileusers` | `fileusers:read` | Get file service shared users |
+| PUT | `/api/fileusers` | `fileusers:write` | Save file service shared users |
 
 ## System
 

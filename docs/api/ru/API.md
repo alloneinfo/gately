@@ -56,6 +56,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `logs` | Системный журнал | `logs:read` |
 | `metrics` | Метрики (Prometheus) | `metrics:read` |
 | `import` | Импорт конфигурации Lucky | `import:write` |
+| `fileusers` | Общие пользователи файловых служб | `fileusers:read`、`fileusers:write` |
 
 Шаблоны: `*:read` означает доступ только на чтение ко всем модулям, `*:write` или `*` означает чтение и запись для всех модулей.
 
@@ -411,8 +412,8 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | GET | `/api/webdav/logs` | `webdav:read` | Просмотр журнала работы модуля |
 | DELETE | `/api/webdav/logs` | `webdav:write` | Очистить журнал работы модуля |
 | GET | `/api/webdav/settings` | `webdav:read` | Чтение настроек WebDAV |
-| GET | `/api/webdav/shared-users` | `webdav:read` | Получить общих пользователей файловых служб |
-| PUT | `/api/webdav/shared-users` | `webdav:write,ftp:write,smb:write` | Сохранить общих пользователей файловых служб |
+| GET | `/api/webdav/shared-users` | `webdav:read` | Получить общих пользователей файловых служб (старый метод) |
+| PUT | `/api/webdav/shared-users` | `webdav:write,ftp:write,smb:write` | Сохранить общих пользователей файловых служб (старый метод) |
 | PUT | `/api/webdav/settings` | `webdav:write` | Сохранить настройки WebDAV |
 
 ## Служба FTP
@@ -422,8 +423,8 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | GET | `/api/ftp/logs` | `ftp:read` | Просмотр журнала работы модуля |
 | DELETE | `/api/ftp/logs` | `ftp:write` | Очистить журнал работы модуля |
 | GET | `/api/ftp/settings` | `ftp:read` | Чтение настроек FTP |
-| GET | `/api/ftp/shared-users` | `ftp:read` | Получить общих пользователей файловых служб |
-| PUT | `/api/ftp/shared-users` | `webdav:write,ftp:write,smb:write` | Сохранить общих пользователей файловых служб |
+| GET | `/api/ftp/shared-users` | `ftp:read` | Получить общих пользователей файловых служб (старый метод) |
+| PUT | `/api/ftp/shared-users` | `webdav:write,ftp:write,smb:write` | Сохранить общих пользователей файловых служб (старый метод) |
 | PUT | `/api/ftp/settings` | `ftp:write` | Сохранить настройки FTP |
 
 ## Служба SMB
@@ -433,8 +434,8 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | GET | `/api/smb/logs` | `smb:read` | Просмотр журнала работы модуля |
 | DELETE | `/api/smb/logs` | `smb:write` | Очистить журнал работы модуля |
 | GET | `/api/smb/settings` | `smb:read` | Получить настройки SMB |
-| GET | `/api/smb/shared-users` | `smb:read` | Получить общих пользователей файловых служб |
-| PUT | `/api/smb/shared-users` | `webdav:write,ftp:write,smb:write` | Сохранить общих пользователей файловых служб |
+| GET | `/api/smb/shared-users` | `smb:read` | Получить общих пользователей файловых служб (старый метод) |
+| PUT | `/api/smb/shared-users` | `webdav:write,ftp:write,smb:write` | Сохранить общих пользователей файловых служб (старый метод) |
 | PUT | `/api/smb/settings` | `smb:write` | Сохранить настройки SMB |
 
 ## Монтирование хранилищ
@@ -511,6 +512,13 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | GET | `/api/backup/mounts` | `backup:read` | Точки монтирования хранилищ, доступные как назначение резервных копий |
 | GET | `/api/backup/local` | Только сессия входа | Список локальных файлов резервных копий |
 | GET | `/api/backup/local/{name}` | Только сессия входа | Скачать локальный файл резервной копии |
+
+## Общие пользователи файловых служб
+
+| Метод | Путь | Необходимое право | Описание |
+| --- | --- | --- | --- |
+| GET | `/api/fileusers` | `fileusers:read` | Получить общих пользователей файловых служб |
+| PUT | `/api/fileusers` | `fileusers:write` | Сохранить общих пользователей файловых служб |
 
 ## Система
 

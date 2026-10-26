@@ -1,15 +1,30 @@
 {
   "title": "Shared users",
-  "desc": "Users shared by WebDAV, FTP and SMB; changes on any service page apply to all of them",
-  "enable": "Use in this service",
-  "help": "Shared users have a password and directories just like local users and are kept in one place. With the switch on they can sign in to this service; when a local user has the same name, only the local user is checked.",
-  "helpSmb": "Shared users have a password and directories just like local users and are kept in one place. With the switch on they can sign in to this service; when a local user has the same name (case-insensitive), only the local user is checked. SMB needs plain passwords, and user and share names cannot contain characters such as \" / \\ [ ] : ; {'|'} = , + * ? < >.",
-  "off": "Shared users are off for this service, the users below cannot sign in to it",
+  "cardDesc": "Shared by WebDAV, FTP and SMB and managed on the File shared users page",
+  "usersDesc": "Saving applies to WebDAV, FTP and SMB at once",
+  "enable": "Allow shared users",
+  "count": "{count} shared users",
+  "none": "No shared users yet",
+  "off": "Shared users cannot sign in to this service",
+  "manage": "Manage shared users",
+  "help": "Shared users have a password and directories just like the local users of each service and are kept in one place. When a service has a local user with the same name, only the local user is checked in that service (case-insensitive for SMB). SMB needs plain passwords, user and directory names cannot contain characters such as \" / \\ [ ] : ; {'|'} = , + * ? < >, and with several directories each directory name is the SMB share name.",
   "loadError": "The shared user configuration is invalid and shared users cannot sign in; fix it and save to restore them: {error}",
   "shadowed": "Same name as a local user, the local user is checked: {names}",
   "issue": {
     "name": "{name}: the user name cannot be used for SMB",
     "bcrypt": "{name}: the password is a bcrypt hash; SMB needs the plain password, please set it again",
     "share": "{name}: a directory name cannot be used as an SMB share name or is duplicated"
+  },
+  "page": {
+    "title": "File shared users",
+    "desc": "Users shared by WebDAV, FTP and SMB, managed in one place"
+  },
+  "services": {
+    "title": "Services",
+    "desc": "Whether shared users may sign in is set on each service page",
+    "on": "Shared users allowed",
+    "off": "Shared users not allowed",
+    "disabled": "Service disabled",
+    "none": "The WebDAV, FTP and SMB modules are all turned off"
   }
 }

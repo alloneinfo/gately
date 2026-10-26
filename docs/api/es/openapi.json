@@ -10575,6 +10575,115 @@
         "x-token-allowed": true
       }
     },
+    "/api/fileusers": {
+      "get": {
+        "description": "Devuelve los usuarios compartidos de los servicios de archivos que usan WebDAV, FTP y SMB, con las contraseñas enmascaradas. Si `services` indica cómo los usa cada servicio de archivos: `enable` si el servicio está activado, `sharedUsers` si los usuarios compartidos pueden iniciar sesión, `localUsers` los nombres de los usuarios locales (un usuario compartido con el mismo nombre solo se comprueba como usuario local en ese servicio), `caseInsensitive` true cuando los nombres se comparan sin distinguir mayúsculas (SMB), `issues` los usuarios compartidos que ese servicio no puede usar y el motivo: `name` (el nombre tiene caracteres que SMB no permite), `bcrypt` (la contraseña es un hash bcrypt), `share` (un nombre de directorio no sirve como nombre de recurso o está duplicado). Los módulos desactivados no aparecen. fileusers.json no supera la validación se devuelve `error` y ningún usuario compartido puede iniciar sesión hasta guardar una lista válida.\n\nPermiso necesario: `fileusers:read`.",
+        "responses": {
+          "200": {
+            "description": "Correcto"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parámetros de solicitud incorrectos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token no válido, caducado o sin sesión iniciada"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Al token le falta el permiso necesario"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Leer los usuarios compartidos de los servicios de archivos",
+        "tags": [
+          "Usuarios compartidos de los servicios de archivos"
+        ],
+        "x-required-scope": "fileusers:read",
+        "x-token-allowed": true
+      },
+      "put": {
+        "description": "保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不Modificar 。只靠共享用户启用的服务在Modificar 后必须仍有可登录的共享用户，否则拒绝保存。各服务是否允许共享用户登录在各服务的设置中Modificar （字段 `sharedUsers`）。\n\nPermiso necesario: `fileusers:write`.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Correcto"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parámetros de solicitud incorrectos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token no válido, caducado o sin sesión iniciada"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Al token le falta el permiso necesario"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Guardar los usuarios compartidos de los servicios de archivos",
+        "tags": [
+          "Usuarios compartidos de los servicios de archivos"
+        ],
+        "x-required-scope": "fileusers:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/frp/client": {
       "get": {
         "description": "Permiso necesario: `frp:read`.",
@@ -11743,7 +11852,7 @@
     },
     "/api/ftp/shared-users": {
       "get": {
-        "description": "Devuelve los usuarios compartidos de los servicios de archivos que usan WebDAV, FTP y SMB, con las contraseñas enmascaradas. Si fileusers.json no supera la validación se devuelve `error` y ningún usuario compartido puede iniciar sesión hasta guardar una lista válida.\n\nPermiso necesario: `ftp:read`.",
+        "description": "Obsoleto, use `GET /api/fileusers`; este endpoint se mantiene por compatibilidad. Devuelve los usuarios compartidos de los servicios de archivos que usan WebDAV, FTP y SMB, con las contraseñas enmascaradas. Si fileusers.json no supera la validación se devuelve `error` y ningún usuario compartido puede iniciar sesión hasta guardar una lista válida.\n\nPermiso necesario: `ftp:read`.",
         "responses": {
           "200": {
             "description": "Correcto"
@@ -11784,7 +11893,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Leer los usuarios compartidos de los servicios de archivos",
+        "summary": "Leer los usuarios compartidos de los servicios de archivos (endpoint antiguo)",
         "tags": [
           "Servicio FTP"
         ],
@@ -11792,7 +11901,7 @@
         "x-token-allowed": true
       },
       "put": {
-        "description": "保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不Modificar 。Token de API需要同时具备 `webdav:write`、`ftp:write`、`smb:write`。只靠共享用户启用的服务在Modificar 后必须仍有可登录的共享用户，否则拒绝保存。\n\nPermiso necesario: `webdav:write,ftp:write,smb:write`.",
+        "description": "已弃用，请改用 `PUT /api/fileusers`，本接口保留兼容。保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不Modificar 。Token de API需要同时具备 `webdav:write`、`ftp:write`、`smb:write`。只靠共享用户启用的服务在Modificar 后必须仍有可登录的共享用户，否则拒绝保存。\n\nPermiso necesario: `webdav:write,ftp:write,smb:write`.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -11842,7 +11951,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Guardar los usuarios compartidos de los servicios de archivos",
+        "summary": "Guardar los usuarios compartidos de los servicios de archivos (endpoint antiguo)",
         "tags": [
           "Servicio FTP"
         ],
@@ -16256,7 +16365,7 @@
     },
     "/api/smb/shared-users": {
       "get": {
-        "description": "Devuelve los usuarios compartidos de los servicios de archivos que usan WebDAV, FTP y SMB, con las contraseñas enmascaradas. Si fileusers.json no supera la validación se devuelve `error` y ningún usuario compartido puede iniciar sesión hasta guardar una lista válida. `issues` enumera los usuarios compartidos que no se pueden usar en SMB y el motivo: `name` (el nombre tiene caracteres que SMB no admite), `bcrypt` (la contraseña es un hash bcrypt), `share` (un nombre de directorio no sirve como recurso o está duplicado).\n\nPermiso necesario: `smb:read`.",
+        "description": "Obsoleto, use `GET /api/fileusers`; este endpoint se mantiene por compatibilidad. Devuelve los usuarios compartidos de los servicios de archivos que usan WebDAV, FTP y SMB, con las contraseñas enmascaradas. Si fileusers.json no supera la validación se devuelve `error` y ningún usuario compartido puede iniciar sesión hasta guardar una lista válida. `issues` enumera los usuarios compartidos que no se pueden usar en SMB y el motivo: `name` (el nombre tiene caracteres que SMB no admite), `bcrypt` (la contraseña es un hash bcrypt), `share` (un nombre de directorio no sirve como recurso o está duplicado).\n\nPermiso necesario: `smb:read`.",
         "responses": {
           "200": {
             "description": "Correcto"
@@ -16297,7 +16406,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Leer los usuarios compartidos de los servicios de archivos",
+        "summary": "Leer los usuarios compartidos de los servicios de archivos (endpoint antiguo)",
         "tags": [
           "Servicio SMB"
         ],
@@ -16305,7 +16414,7 @@
         "x-token-allowed": true
       },
       "put": {
-        "description": "保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不Modificar 。Token de API需要同时具备 `webdav:write`、`ftp:write`、`smb:write`。只靠共享用户启用的服务在Modificar 后必须仍有可登录的共享用户，否则拒绝保存。\n\nPermiso necesario: `webdav:write,ftp:write,smb:write`.",
+        "description": "已弃用，请改用 `PUT /api/fileusers`，本接口保留兼容。保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不Modificar 。Token de API需要同时具备 `webdav:write`、`ftp:write`、`smb:write`。只靠共享用户启用的服务在Modificar 后必须仍有可登录的共享用户，否则拒绝保存。\n\nPermiso necesario: `webdav:write,ftp:write,smb:write`.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -16355,7 +16464,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Guardar los usuarios compartidos de los servicios de archivos",
+        "summary": "Guardar los usuarios compartidos de los servicios de archivos (endpoint antiguo)",
         "tags": [
           "Servicio SMB"
         ],
@@ -21633,7 +21742,7 @@
     },
     "/api/webdav/shared-users": {
       "get": {
-        "description": "Devuelve los usuarios compartidos de los servicios de archivos que usan WebDAV, FTP y SMB, con las contraseñas enmascaradas. Si fileusers.json no supera la validación se devuelve `error` y ningún usuario compartido puede iniciar sesión hasta guardar una lista válida.\n\nPermiso necesario: `webdav:read`.",
+        "description": "Obsoleto, use `GET /api/fileusers`; este endpoint se mantiene por compatibilidad. Devuelve los usuarios compartidos de los servicios de archivos que usan WebDAV, FTP y SMB, con las contraseñas enmascaradas. Si fileusers.json no supera la validación se devuelve `error` y ningún usuario compartido puede iniciar sesión hasta guardar una lista válida.\n\nPermiso necesario: `webdav:read`.",
         "responses": {
           "200": {
             "description": "Correcto"
@@ -21674,7 +21783,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Leer los usuarios compartidos de los servicios de archivos",
+        "summary": "Leer los usuarios compartidos de los servicios de archivos (endpoint antiguo)",
         "tags": [
           "Servicio WebDAV"
         ],
@@ -21682,7 +21791,7 @@
         "x-token-allowed": true
       },
       "put": {
-        "description": "保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不Modificar 。Token de API需要同时具备 `webdav:write`、`ftp:write`、`smb:write`。只靠共享用户启用的服务在Modificar 后必须仍有可登录的共享用户，否则拒绝保存。\n\nPermiso necesario: `webdav:write,ftp:write,smb:write`.",
+        "description": "已弃用，请改用 `PUT /api/fileusers`，本接口保留兼容。保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不Modificar 。Token de API需要同时具备 `webdav:write`、`ftp:write`、`smb:write`。只靠共享用户启用的服务在Modificar 后必须仍有可登录的共享用户，否则拒绝保存。\n\nPermiso necesario: `webdav:write,ftp:write,smb:write`.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -21732,7 +21841,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Guardar los usuarios compartidos de los servicios de archivos",
+        "summary": "Guardar los usuarios compartidos de los servicios de archivos (endpoint antiguo)",
         "tags": [
           "Servicio WebDAV"
         ],
@@ -27602,6 +27711,9 @@
       "name": "Copia de seguridad de la configuración"
     },
     {
+      "name": "Usuarios compartidos de los servicios de archivos"
+    },
+    {
       "name": "Sistema"
     },
     {
@@ -27639,6 +27751,7 @@
     "status",
     "logs",
     "metrics",
-    "import"
+    "import",
+    "fileusers"
   ]
 }

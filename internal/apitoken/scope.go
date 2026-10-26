@@ -21,6 +21,8 @@ const (
 	DomainImport = "import"
 	// DomainMetrics 对应全局 Prometheus 指标接口 /api/metrics
 	DomainMetrics = "metrics"
+	// DomainFileUsers 对应 WebDAV、FTP、SMB 共用的文件服务共享用户接口 /api/fileusers
+	DomainFileUsers = "fileusers"
 )
 
 // Denied 表示接口永远禁止令牌访问，只能使用登录会话。
@@ -61,8 +63,9 @@ var sensitiveGetSegments = map[string]bool{
 	"preview-archive": true, // 读取压缩包内文件
 }
 
-// sharedFileUserScope 是修改文件服务共享用户所需的权限：WebDAV、FTP、SMB 共用同一份共享用户，
-// 修改会改变三个服务的登录账号，因此三个服务的写权限缺一不可。
+// sharedFileUserScope 是通过旧接口 /api/<服务>/shared-users 修改文件服务共享用户所需的权限：
+// WebDAV、FTP、SMB 共用同一份共享用户，修改会改变三个服务的登录账号，因此三个服务的写权限缺一不可。
+// 新接口 /api/fileusers 使用单独的 fileusers 权限。
 const sharedFileUserScope = "webdav:write,ftp:write,smb:write"
 
 // Required 返回访问 method+path 所需的权限（如 "ddns:read"），需要多个权限时以逗号分隔、须全部具备。

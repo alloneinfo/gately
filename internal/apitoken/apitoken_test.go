@@ -43,6 +43,8 @@ func TestRequiredAndMatch(t *testing.T) {
 		{"GET", "/api/ftp/shared-users", "ftp:read"},
 		{"PUT", "/api/webdav/shared-users", "webdav:write,ftp:write,smb:write"},
 		{"PUT", "/api/smb/shared-users", "webdav:write,ftp:write,smb:write"},
+		{"GET", "/api/fileusers", "fileusers:read"},
+		{"PUT", "/api/fileusers", "fileusers:write"},
 		// 账号与系统级接口永远拒绝令牌
 		{"GET", "/api/tokens", Denied},
 		{"POST", "/api/tokens/abc/regenerate", Denied},

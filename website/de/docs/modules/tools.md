@@ -67,18 +67,18 @@ Wenn Clients keine Verbindung bekommen oder die Anmeldung scheitert, die Umgebun
 
 ## Gemeinsame Benutzer {#shared-users}
 
-WebDAV, FTP und SMB teilen sich eine Liste „gemeinsamer Benutzer“ mit denselben Feldern wie die lokalen Benutzer der Dienste (Name, Passwort, `root` und `readOnly` oder `mounts`), gespeichert in `fileusers.json` im Konfigurationsverzeichnis. Änderungen in der Karte „Gemeinsame Benutzer“ auf einer dieser Seiten gelten für alle drei Dienste; die lokalen Benutzer der Dienste bleiben unverändert.
+WebDAV, FTP und SMB teilen sich eine Liste „gemeinsamer Benutzer“ mit denselben Feldern wie die lokalen Benutzer jedes Dienstes (Name, Passwort, `root` und `readOnly` oder `mounts`), gespeichert in `fileusers.json` im Konfigurationsverzeichnis. Sie werden auf der Seite „Gemeinsame Dateibenutzer“ in der Gruppe „Dateidienste“ der Seitenleiste verwaltet, und Speichern gilt für alle drei Dienste; die lokalen Benutzer jedes Dienstes bleiben unverändert. Oben auf der Seite steht, ob jeder Dienst gemeinsame Benutzer erlaubt, und welche gemeinsamen Benutzer denselben Namen wie ein lokaler Benutzer haben oder für SMB nicht nutzbar sind.
 
-- Jeder Dienst entscheidet selbst, ob er gemeinsame Benutzer annimmt: „In diesem Dienst verwenden“ oben rechts in der Karte (Feld `sharedUsers`) einschalten und speichern, dann können sie sich anmelden;
+- Jeder Dienst entscheidet selbst, ob er gemeinsame Benutzer akzeptiert: „Gemeinsame Benutzer erlauben“ in der Karte „Gemeinsame Benutzer“ der Dienstseite einschalten (Feld `sharedUsers`) und speichern, dann können sich gemeinsame Benutzer bei diesem Dienst anmelden; die Karte listet auch die gespeicherten gemeinsamen Benutzer, und „Gemeinsame Benutzer verwalten“ öffnet die Seite „Gemeinsame Dateibenutzer“;
 - Hat ein lokaler Benutzer denselben Namen, wird nur der lokale Benutzer geprüft (bei SMB ohne Groß-/Kleinschreibung);
 - Namen gemeinsamer Benutzer müssen unabhängig von Groß-/Kleinschreibung eindeutig sein und dürfen keinen Doppelpunkt enthalten;
 - Änderungen gelten sofort: WebDAV prüft ab der nächsten Anfrage mit den neuen Einstellungen, FTP und SMB starten neu, und verbundene Clients müssen sich neu verbinden;
 - Mit eingeschaltetem Schalter und mindestens einem gemeinsamen Benutzer lässt sich der Dienst ohne lokale Benutzer aktivieren;
 - Ein Dienst, der nur mit gemeinsamen Benutzern aktiviert ist, muss nach einer Änderung noch einen gemeinsamen Benutzer haben, der sich anmelden kann (bei SMB einen für SMB nutzbaren), sonst wird die Änderung abgelehnt;
 - Wird `fileusers.json` von Hand beschädigt (etwa ein leeres Passwort oder ein Verzeichnis ohne absoluten Pfad), kann sich kein gemeinsamer Benutzer anmelden und die Seite zeigt einen Hinweis; korrigieren und speichern stellt sie wieder her;
-- SMB akzeptiert nur Klartextpasswörter, und Benutzer- und Freigabenamen müssen den SMB-Zeichenregeln folgen; gemeinsame Benutzer, die das nicht tun, werden auf der SMB-Seite und im Laufzeitprotokoll gemeldet und übersprungen, WebDAV und FTP können sie weiter nutzen.
+- SMB akzeptiert nur Klartext-Passwörter, und Benutzer- und Freigabenamen müssen die Zeichenregeln von SMB einhalten; gemeinsame Benutzer, die das nicht tun, werden auf der Seite „Gemeinsame Dateibenutzer“, der SMB-Seite und im Laufzeitprotokoll gemeldet und übersprungen, WebDAV und FTP können sie weiterhin nutzen.
 
-Die API ist `GET` / `PUT /api/<Dienst>/shared-users` des jeweiligen Dienstes (z. B. `/api/webdav/shared-users`); alle lesen und schreiben dieselbe Liste. Lesen nutzt die Leseberechtigung des Dienstes; eine Änderung betrifft die Anmeldekonten aller drei Dienste, daher braucht ein API-Token `webdav:write`, `ftp:write` und `smb:write` zusammen.
+Die API ist `GET` / `PUT /api/fileusers`, für API-Token mit der Berechtigung `fileusers:read` / `fileusers:write`; `services` in der Antwort zeigt, wie jeder Dienst sie nutzt. Die bisherigen `GET` / `PUT /api/<Dienst>/shared-users` der einzelnen Dienste sind veraltet, funktionieren aber weiter und lesen und schreiben dieselbe Liste: Lesen nutzt die Leseberechtigung des Dienstes, eine Änderung braucht `webdav:write`, `ftp:write` und `smb:write` zusammen.
 
 ## Speicher-Einbindungen
 

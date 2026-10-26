@@ -10575,6 +10575,115 @@
         "x-token-allowed": true
       }
     },
+    "/api/fileusers": {
+      "get": {
+        "description": "Returns the file service shared users used by WebDAV, FTP and SMB, with passwords masked. If `services` lists how each file service uses them: `enable` whether the service is enabled, `sharedUsers` whether shared users may sign in, `localUsers` the local user names (a shared user with the same name is only checked as the local user in that service), `caseInsensitive` true when user names are compared case-insensitively (SMB), `issues` the shared users that cannot be used by that service and why: `name` (the user name has characters SMB does not allow), `bcrypt` (the password is a bcrypt hash), `share` (a directory name cannot be used as a share name or is duplicated). Modules that are turned off are not listed. fileusers.json fails validation, `error` is returned and no shared user can sign in until a valid list is saved.\n\nRequired permission: `fileusers:read`.",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Invalid request parameters"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token is invalid, expired or not signed in"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token lacks the required permission"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get file service shared users",
+        "tags": [
+          "File service shared users"
+        ],
+        "x-required-scope": "fileusers:read",
+        "x-token-allowed": true
+      },
+      "put": {
+        "description": "保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不Update 。只靠共享用户启用的服务在Update 后必须仍有可登录的共享用户，否则拒绝保存。各服务是否允许共享用户登录在各服务的设置中Update （字段 `sharedUsers`）。\n\nRequired permission: `fileusers:write`.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Invalid request parameters"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token is invalid, expired or not signed in"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token lacks the required permission"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Save file service shared users",
+        "tags": [
+          "File service shared users"
+        ],
+        "x-required-scope": "fileusers:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/frp/client": {
       "get": {
         "description": "Required permission: `frp:read`.",
@@ -11743,7 +11852,7 @@
     },
     "/api/ftp/shared-users": {
       "get": {
-        "description": "Returns the file service shared users used by WebDAV, FTP and SMB, with passwords masked. If fileusers.json fails validation, `error` is returned and no shared user can sign in until a valid list is saved.\n\nRequired permission: `ftp:read`.",
+        "description": "Deprecated, use `GET /api/fileusers` instead; this endpoint is kept for compatibility. Returns the file service shared users used by WebDAV, FTP and SMB, with passwords masked. If fileusers.json fails validation, `error` is returned and no shared user can sign in until a valid list is saved.\n\nRequired permission: `ftp:read`.",
         "responses": {
           "200": {
             "description": "Success"
@@ -11784,7 +11893,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Get file service shared users",
+        "summary": "Get file service shared users (legacy endpoint)",
         "tags": [
           "FTP service"
         ],
@@ -11792,7 +11901,7 @@
         "x-token-allowed": true
       },
       "put": {
-        "description": "保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不Update 。API token需要同时具备 `webdav:write`、`ftp:write`、`smb:write`。只靠共享用户启用的服务在Update 后必须仍有可登录的共享用户，否则拒绝保存。\n\nRequired permission: `webdav:write,ftp:write,smb:write`.",
+        "description": "已弃用，请改用 `PUT /api/fileusers`，本接口保留兼容。保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不Update 。API token需要同时具备 `webdav:write`、`ftp:write`、`smb:write`。只靠共享用户启用的服务在Update 后必须仍有可登录的共享用户，否则拒绝保存。\n\nRequired permission: `webdav:write,ftp:write,smb:write`.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -11842,7 +11951,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Save file service shared users",
+        "summary": "Save file service shared users (legacy endpoint)",
         "tags": [
           "FTP service"
         ],
@@ -16256,7 +16365,7 @@
     },
     "/api/smb/shared-users": {
       "get": {
-        "description": "Returns the file service shared users used by WebDAV, FTP and SMB, with passwords masked. If fileusers.json fails validation, `error` is returned and no shared user can sign in until a valid list is saved. `issues` lists shared users that cannot be used for SMB and why: `name` (the user name has characters SMB does not allow), `bcrypt` (the password is a bcrypt hash), `share` (a directory name cannot be a share name or is duplicated).\n\nRequired permission: `smb:read`.",
+        "description": "Deprecated, use `GET /api/fileusers` instead; this endpoint is kept for compatibility. Returns the file service shared users used by WebDAV, FTP and SMB, with passwords masked. If fileusers.json fails validation, `error` is returned and no shared user can sign in until a valid list is saved. `issues` lists shared users that cannot be used for SMB and why: `name` (the user name has characters SMB does not allow), `bcrypt` (the password is a bcrypt hash), `share` (a directory name cannot be a share name or is duplicated).\n\nRequired permission: `smb:read`.",
         "responses": {
           "200": {
             "description": "Success"
@@ -16297,7 +16406,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Get file service shared users",
+        "summary": "Get file service shared users (legacy endpoint)",
         "tags": [
           "SMB Service"
         ],
@@ -16305,7 +16414,7 @@
         "x-token-allowed": true
       },
       "put": {
-        "description": "保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不Update 。API token需要同时具备 `webdav:write`、`ftp:write`、`smb:write`。只靠共享用户启用的服务在Update 后必须仍有可登录的共享用户，否则拒绝保存。\n\nRequired permission: `webdav:write,ftp:write,smb:write`.",
+        "description": "已弃用，请改用 `PUT /api/fileusers`，本接口保留兼容。保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不Update 。API token需要同时具备 `webdav:write`、`ftp:write`、`smb:write`。只靠共享用户启用的服务在Update 后必须仍有可登录的共享用户，否则拒绝保存。\n\nRequired permission: `webdav:write,ftp:write,smb:write`.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -16355,7 +16464,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Save file service shared users",
+        "summary": "Save file service shared users (legacy endpoint)",
         "tags": [
           "SMB Service"
         ],
@@ -21633,7 +21742,7 @@
     },
     "/api/webdav/shared-users": {
       "get": {
-        "description": "Returns the file service shared users used by WebDAV, FTP and SMB, with passwords masked. If fileusers.json fails validation, `error` is returned and no shared user can sign in until a valid list is saved.\n\nRequired permission: `webdav:read`.",
+        "description": "Deprecated, use `GET /api/fileusers` instead; this endpoint is kept for compatibility. Returns the file service shared users used by WebDAV, FTP and SMB, with passwords masked. If fileusers.json fails validation, `error` is returned and no shared user can sign in until a valid list is saved.\n\nRequired permission: `webdav:read`.",
         "responses": {
           "200": {
             "description": "Success"
@@ -21674,7 +21783,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Get file service shared users",
+        "summary": "Get file service shared users (legacy endpoint)",
         "tags": [
           "WebDAV Service"
         ],
@@ -21682,7 +21791,7 @@
         "x-token-allowed": true
       },
       "put": {
-        "description": "保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不Update 。API token需要同时具备 `webdav:write`、`ftp:write`、`smb:write`。只靠共享用户启用的服务在Update 后必须仍有可登录的共享用户，否则拒绝保存。\n\nRequired permission: `webdav:write,ftp:write,smb:write`.",
+        "description": "已弃用，请改用 `PUT /api/fileusers`，本接口保留兼容。保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不Update 。API token需要同时具备 `webdav:write`、`ftp:write`、`smb:write`。只靠共享用户启用的服务在Update 后必须仍有可登录的共享用户，否则拒绝保存。\n\nRequired permission: `webdav:write,ftp:write,smb:write`.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -21732,7 +21841,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Save file service shared users",
+        "summary": "Save file service shared users (legacy endpoint)",
         "tags": [
           "WebDAV Service"
         ],
@@ -27602,6 +27711,9 @@
       "name": "Configuration backup"
     },
     {
+      "name": "File service shared users"
+    },
+    {
       "name": "System"
     },
     {
@@ -27639,6 +27751,7 @@
     "status",
     "logs",
     "metrics",
-    "import"
+    "import",
+    "fileusers"
   ]
 }

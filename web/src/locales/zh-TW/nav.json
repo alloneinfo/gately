@@ -68,6 +68,10 @@
       "title": "SMB 服務",
       "desc": "SMB 檔案分享服務"
     },
+    "fileusers": {
+      "title": "檔案共用使用者",
+      "desc": "WebDAV、FTP、SMB 共用的使用者"
+    },
     "wol": {
       "title": "網路喚醒",
       "desc": "遠端喚醒區域網路裝置"

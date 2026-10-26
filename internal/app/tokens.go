@@ -19,6 +19,7 @@ var builtinDomains = []scopeDomain{
 	{ID: apitoken.DomainLogs, Title: "系统日志", Builtin: true, ReadOnly: true},
 	{ID: apitoken.DomainMetrics, Title: "监控指标（Prometheus）", Builtin: true, ReadOnly: true},
 	{ID: apitoken.DomainImport, Title: "Lucky 配置导入", Builtin: true, WriteOnly: true},
+	{ID: apitoken.DomainFileUsers, Title: "文件服务共享用户", Builtin: true},
 }
 
 // scopeDomain 是一个可授权的权限域（模块或内置域）。

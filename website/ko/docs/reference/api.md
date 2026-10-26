@@ -34,13 +34,14 @@ curl -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/status
 
 ### 권한 범위
 
-권한 형식은 `<권한 도메인>:read` 또는 `<권한 도메인>:write`이며 쓰기 권한은 읽기 권한을 포함합니다. 권한 도메인은 기능 모듈의 ID(`ddns`, `portforward`, `notify`, `backup` 등)에 내장 도메인 세 개를 더한 것입니다.
+권한 형식은 `<권한 도메인>:read` 또는 `<권한 도메인>:write`이며 쓰기 권한은 읽기 권한을 포함합니다. 권한 도메인은 기능 모듈의 ID(`ddns`, `portforward`, `notify`, `backup` 등)에 내장 도메인 네 개를 더한 것입니다.
 
 | 권한 도메인 | 이름 | 사용 가능한 권한 | 해당 엔드포인트 |
 | --- | --- | --- | --- |
 | `status` | 시스템 상태 | `status:read` | `/api/status`, `/api/system/info`, `/api/system/update` |
 | `logs` | 시스템 로그 | `logs:read` | `/api/logs` |
 | `import` | Lucky 설정 가져오기 | `import:write` | `/api/import/lucky` |
+| `fileusers` | 파일 서비스 공유 사용자 | `fileusers:read`, `fileusers:write` | `/api/fileusers` |
 
 와일드카드 표기:
 

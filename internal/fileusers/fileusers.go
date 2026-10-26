@@ -1,7 +1,8 @@
 // Package fileusers 保存 WebDAV、FTP、SMB 共用的文件服务共享用户。
 // 共享用户与各服务自己的本地用户结构一致（用户名、密码、目录或多个目录），只定义一次，
 // 在服务中打开「使用共享用户」后即可登录；与本地用户同名时只按本地用户校验。
-// 列表保存在配置目录的 fileusers.json，可在任一文件服务的接口中读取和修改。
+// 列表保存在配置目录的 fileusers.json，通过 /api/fileusers 读取和修改；
+// 各服务下的 /api/<服务>/shared-users 为旧接口，保留兼容。
 package fileusers
 
 import (
@@ -37,6 +38,29 @@ type User struct {
 	// Mounts 为多个目录，每个目录可单独设为只读
 	Mounts []mountfs.Mount `json:"mounts,omitempty"`
 }
+
+// Issue 是无法在某个服务中使用的共享用户及原因代码，目前只有 SMB 会报告。
+type Issue struct {
+	Name   string `json:"name"`
+	Reason string `json:"reason"`
+}
+
+// Service 是一个文件服务对共享用户的使用情况，供共享用户页面展示。
+type Service struct {
+	ID string `json:"id"`
+	// Enable 为服务是否启用，SharedUsers 为是否允许共享用户登录（均为已保存的设置）
+	Enable      bool `json:"enable"`
+	SharedUsers bool `json:"sharedUsers"`
+	// LocalUsers 为服务的本地用户名，与之同名的共享用户在该服务中只按本地用户校验
+	LocalUsers []string `json:"localUsers"`
+	// CaseInsensitive 为 true 时服务按不区分大小写的方式匹配用户名（SMB）
+	CaseInsensitive bool `json:"caseInsensitive,omitempty"`
+	// Issues 为已保存的共享用户中无法用于该服务的用户
+	Issues []Issue `json:"issues,omitempty"`
+}
+
+// serviceOrder 为接口返回各服务的顺序，与侧边栏一致。
+var serviceOrder = []string{"webdav", "ftp", "smb"}
 
 // file 是 fileusers.json 的结构，外面包一层便于以后增加字段。
 type file struct {
@@ -102,17 +126,21 @@ type Registry struct {
 	subMu  sync.Mutex
 	subs   map[int]func()
 	checks map[int]func([]User) error
-	nextID int
+	// services 为各文件服务登记的使用情况查询，按服务 ID 保存
+	services map[string]func() Service
+	nextID   int
 }
 
 // New 创建空的注册表。
-func New() *Registry { return &Registry{subs: map[int]func(){}, checks: map[int]func([]User) error{}} }
+func New() *Registry {
+	return &Registry{subs: map[int]func(){}, checks: map[int]func([]User) error{}, services: map[string]func() Service{}}
+}
 
 // Default 是进程内唯一的注册表，由各文件服务在 Init 时以同一个配置目录初始化。
 var Default = New()
 
 // Init 从配置目录读取共享用户。多个模块以同一个配置目录调用时只读取一次；
-// 换了配置目录（测试中）时重新读取，并清空旧模块注册的订阅与检查，避免它们按旧配置拦截新的保存。
+// 换了配置目录（测试中）时重新读取，并清空旧模块注册的订阅、检查与服务查询，避免它们按旧配置拦截新的保存。
 // 文件可能被手工修改、从备份恢复或回滚到历史版本，按保存时的规则在副本上校验：
 // 失败时保留原列表供界面展示与修改，但共享用户全部不能登录（见 List、Lookup），错误见 LoadErr。
 func (r *Registry) Init(store *config.Store) error {
@@ -132,7 +160,7 @@ func (r *Registry) Init(store *config.Store) error {
 	}
 	r.store, r.users = store, f.Users
 	r.subMu.Lock()
-	r.subs, r.checks = map[int]func(){}, map[int]func([]User) error{}
+	r.subs, r.checks, r.services = map[int]func(){}, map[int]func([]User) error{}, map[string]func() Service{}
 	r.subMu.Unlock()
 	return nil
 }
@@ -228,6 +256,53 @@ func (r *Registry) AddCheck(fn func([]User) error) (cancel func()) {
 	}
 }
 
+// AddService 登记文件服务 id 对共享用户的使用情况查询，同一 id 再次登记时替换；查询在接口请求中执行，不能持有调用方的锁。
+func (r *Registry) AddService(id string, fn func() Service) {
+	r.subMu.Lock()
+	r.services[id] = fn
+	r.subMu.Unlock()
+}
+
+// Services 按侧边栏顺序返回已登记的文件服务的使用情况；keep 不为空时只返回 keep 返回 true 的服务。
+func (r *Registry) Services(keep func(id string) bool) []Service {
+	r.subMu.Lock()
+	fns := make(map[string]func() Service, len(r.services))
+	for id, fn := range r.services {
+		fns[id] = fn
+	}
+	r.subMu.Unlock()
+	ids := make([]string, 0, len(fns))
+	for id := range fns {
+		ids = append(ids, id)
+	}
+	slices.SortFunc(ids, func(a, b string) int {
+		ia, ib := slices.Index(serviceOrder, a), slices.Index(serviceOrder, b)
+		if ia < 0 {
+			ia = len(serviceOrder)
+		}
+		if ib < 0 {
+			ib = len(serviceOrder)
+		}
+		if ia != ib {
+			return ia - ib
+		}
+		return strings.Compare(a, b)
+	})
+	out := []Service{}
+	for _, id := range ids {
+		if keep != nil && !keep(id) {
+			continue
+		}
+		sv := fns[id]()
+		sv.ID = id
+		if sv.LocalUsers == nil {
+			sv.LocalUsers = []string{}
+		}
+		out = append(out, sv)
+	}
+	return out
+}
+
 func (r *Registry) check(users []User) error {
 	r.subMu.Lock()
 	checks := make([]func([]User) error, 0, len(r.checks))
@@ -266,22 +341,16 @@ func (r *Registry) Masked() []User {
 	return users
 }
 
-// Routes 注册读取与修改共享用户的接口；extra 为各服务附加在读取结果中的信息（如 SMB 无法使用的用户），可为空。
-func (r *Registry) Routes(rt module.Router, extra func(map[string]any)) {
-	reply := func(w http.ResponseWriter) {
-		out := map[string]any{"users": r.Masked()}
-		if err := r.LoadErr(); err != nil {
-			out["error"] = err.Error()
-		}
-		if extra != nil {
-			extra(out)
-		}
-		httpx.OK(w, out)
+// HandleGet 返回读取共享用户的处理函数；extra 为附加在结果中的信息（如各服务的使用情况），可为空。
+func (r *Registry) HandleGet(extra func(map[string]any)) http.HandlerFunc {
+	return func(w http.ResponseWriter, _ *http.Request) {
+		r.reply(w, extra)
 	}
-	rt.HandleFunc("GET /shared-users", func(w http.ResponseWriter, _ *http.Request) {
-		reply(w)
-	})
-	rt.HandleFunc("PUT /shared-users", func(w http.ResponseWriter, req *http.Request) {
+}
+
+// HandlePut 返回保存共享用户的处理函数，保存成功后与 HandleGet 返回相同的内容。
+func (r *Registry) HandlePut(extra func(map[string]any)) http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
 		var body struct {
 			Users []User `json:"users"`
 		}
@@ -293,8 +362,26 @@ func (r *Registry) Routes(rt module.Router, extra func(map[string]any)) {
 			httpx.Error(w, http.StatusBadRequest, "%v", err)
 			return
 		}
-		reply(w)
-	})
+		r.reply(w, extra)
+	}
+}
+
+func (r *Registry) reply(w http.ResponseWriter, extra func(map[string]any)) {
+	out := map[string]any{"users": r.Masked()}
+	if err := r.LoadErr(); err != nil {
+		out["error"] = err.Error()
+	}
+	if extra != nil {
+		extra(out)
+	}
+	httpx.OK(w, out)
+}
+
+// Routes 在服务的接口前缀下注册旧的共享用户接口（/api/<服务>/shared-users），保留兼容，新接口为 /api/fileusers；
+// extra 为各服务附加在读取结果中的信息（如 SMB 无法使用的用户），可为空。
+func (r *Registry) Routes(rt module.Router, extra func(map[string]any)) {
+	rt.HandleFunc("GET /shared-users", r.HandleGet(extra))
+	rt.HandleFunc("PUT /shared-users", r.HandlePut(extra))
 }
 
 func clone(users []User) []User {

@@ -56,6 +56,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `logs` | システムログ | `logs:read` |
 | `metrics` | 監視メトリクス（Prometheus） | `metrics:read` |
 | `import` | Lucky 設定のインポート | `import:write` |
+| `fileusers` | ファイルサービス共有ユーザー | `fileusers:read`、`fileusers:write` |
 
 ワイルドカード：`*:read` は全モジュールの読み取り専用、`*:write` または `*` は全モジュールの読み書きを表します。
 
@@ -411,8 +412,8 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | GET | `/api/webdav/logs` | `webdav:read` | モジュールの実行ログを表示 |
 | DELETE | `/api/webdav/logs` | `webdav:write` | モジュールの実行ログを消去 |
 | GET | `/api/webdav/settings` | `webdav:read` | WebDAV 設定を読み取り |
-| GET | `/api/webdav/shared-users` | `webdav:read` | ファイルサービスの共有ユーザーを取得 |
-| PUT | `/api/webdav/shared-users` | `webdav:write,ftp:write,smb:write` | ファイルサービスの共有ユーザーを保存 |
+| GET | `/api/webdav/shared-users` | `webdav:read` | ファイルサービスの共有ユーザーを取得（旧エンドポイント） |
+| PUT | `/api/webdav/shared-users` | `webdav:write,ftp:write,smb:write` | ファイルサービスの共有ユーザーを保存（旧エンドポイント） |
 | PUT | `/api/webdav/settings` | `webdav:write` | WebDAV 設定を保存 |
 
 ## FTP サービス
@@ -422,8 +423,8 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | GET | `/api/ftp/logs` | `ftp:read` | モジュールの実行ログを表示 |
 | DELETE | `/api/ftp/logs` | `ftp:write` | モジュールの実行ログを消去 |
 | GET | `/api/ftp/settings` | `ftp:read` | FTP 設定を読み取り |
-| GET | `/api/ftp/shared-users` | `ftp:read` | ファイルサービスの共有ユーザーを取得 |
-| PUT | `/api/ftp/shared-users` | `webdav:write,ftp:write,smb:write` | ファイルサービスの共有ユーザーを保存 |
+| GET | `/api/ftp/shared-users` | `ftp:read` | ファイルサービスの共有ユーザーを取得（旧エンドポイント） |
+| PUT | `/api/ftp/shared-users` | `webdav:write,ftp:write,smb:write` | ファイルサービスの共有ユーザーを保存（旧エンドポイント） |
 | PUT | `/api/ftp/settings` | `ftp:write` | FTP 設定を保存 |
 
 ## SMB サービス
@@ -433,8 +434,8 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | GET | `/api/smb/logs` | `smb:read` | モジュールの実行ログを表示 |
 | DELETE | `/api/smb/logs` | `smb:write` | モジュールの実行ログを消去 |
 | GET | `/api/smb/settings` | `smb:read` | SMB 設定を取得 |
-| GET | `/api/smb/shared-users` | `smb:read` | ファイルサービスの共有ユーザーを取得 |
-| PUT | `/api/smb/shared-users` | `webdav:write,ftp:write,smb:write` | ファイルサービスの共有ユーザーを保存 |
+| GET | `/api/smb/shared-users` | `smb:read` | ファイルサービスの共有ユーザーを取得（旧エンドポイント） |
+| PUT | `/api/smb/shared-users` | `webdav:write,ftp:write,smb:write` | ファイルサービスの共有ユーザーを保存（旧エンドポイント） |
 | PUT | `/api/smb/settings` | `smb:write` | SMB 設定を保存 |
 
 ## ストレージマウント
@@ -511,6 +512,13 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | GET | `/api/backup/mounts` | `backup:read` | バックアップ先として使用できるストレージのマウントポイント |
 | GET | `/api/backup/local` | ログインセッションのみ | ローカルバックアップファイル一覧 |
 | GET | `/api/backup/local/{name}` | ログインセッションのみ | ローカルバックアップファイルをダウンロード |
+
+## ファイルサービス共有ユーザー
+
+| メソッド | パス | 必要な権限 | 説明 |
+| --- | --- | --- | --- |
+| GET | `/api/fileusers` | `fileusers:read` | ファイルサービスの共有ユーザーを取得 |
+| PUT | `/api/fileusers` | `fileusers:write` | ファイルサービスの共有ユーザーを保存 |
 
 ## システム
 

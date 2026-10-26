@@ -142,6 +142,16 @@ func (m *Module) Init(env module.Env) error {
 		m.shared = map[string]*userHandler{}
 		m.mu.Unlock()
 	})
+	// 共享用户页面展示本服务的启用状态、开关与本地用户
+	fileusers.Default.AddService(ID, func() fileusers.Service {
+		m.mu.Lock()
+		defer m.mu.Unlock()
+		sv := fileusers.Service{Enable: m.settings.Enable, SharedUsers: m.settings.SharedUsers}
+		for _, u := range m.settings.Users {
+			sv.LocalUsers = append(sv.LocalUsers, u.Name)
+		}
+		return sv
+	})
 	// 只靠共享用户启用时，不允许把共享用户删光
 	fileusers.Default.AddCheck(func(users []fileusers.User) error {
 		m.mu.Lock()

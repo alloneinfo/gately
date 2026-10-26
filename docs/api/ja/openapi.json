@@ -10575,6 +10575,115 @@
         "x-token-allowed": true
       }
     },
+    "/api/fileusers": {
+      "get": {
+        "description": "WebDAV、FTP、SMB で共通のファイルサービス共有ユーザーを返します。パスワードはマスクされます。`services` は各ファイルサービスの利用状況です：`enable` サービスが有効か、`sharedUsers` 共有ユーザーのログインを許可しているか、`localUsers` ローカルユーザー名（同名の共有ユーザーはそのサービスではローカルユーザーとして認証）、`caseInsensitive` が true のときユーザー名を大文字小文字を区別せず比較（SMB）、`issues` そのサービスで使えない共有ユーザーと理由：`name`（SMB で使えない文字を含むユーザー名）、`bcrypt`（パスワードが bcrypt ハッシュ）、`share`（ディレクトリ名が共有名として使えないか重複）。オフのモジュールは含まれません。fileusers.json が検証に失敗した場合は `error` を返し、有効な一覧を保存するまで共有ユーザーは誰もログインできません。\n\n必要な権限: `fileusers:read`。",
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "リクエストパラメーターが不正です"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンが無効、期限切れ、または未ログインです"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンに必要な権限がありません"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "ファイルサービスの共有ユーザーを取得",
+        "tags": [
+          "ファイルサービス共有ユーザー"
+        ],
+        "x-required-scope": "fileusers:read",
+        "x-token-allowed": true
+      },
+      "put": {
+        "description": "保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不。只靠共享用户启用的服务在后必须仍有可登录的共享用户，否则拒绝保存。各服务是否允许共享用户登录在各服务的设置中（字段 `sharedUsers`）。\n\n必要な権限: `fileusers:write`。 を更新 を更新 を更新",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "リクエストパラメーターが不正です"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンが無効、期限切れ、または未ログインです"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "トークンに必要な権限がありません"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "ファイルサービスの共有ユーザーを保存",
+        "tags": [
+          "ファイルサービス共有ユーザー"
+        ],
+        "x-required-scope": "fileusers:write",
+        "x-token-allowed": true
+      }
+    },
     "/api/frp/client": {
       "get": {
         "description": "必要な権限: `frp:read`。",
@@ -11743,7 +11852,7 @@
     },
     "/api/ftp/shared-users": {
       "get": {
-        "description": "WebDAV、FTP、SMB で共通のファイルサービス共有ユーザーを返します。パスワードはマスクされます。fileusers.json が検証に失敗した場合は `error` を返し、有効な一覧を保存するまで共有ユーザーは誰もログインできません。\n\n必要な権限: `ftp:read`。",
+        "description": "非推奨です。代わりに `GET /api/fileusers` を使ってください（互換のため残しています）。WebDAV、FTP、SMB で共通のファイルサービス共有ユーザーを返します。パスワードはマスクされます。fileusers.json が検証に失敗した場合は `error` を返し、有効な一覧を保存するまで共有ユーザーは誰もログインできません。\n\n必要な権限: `ftp:read`。",
         "responses": {
           "200": {
             "description": "成功"
@@ -11784,7 +11893,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "ファイルサービスの共有ユーザーを取得",
+        "summary": "ファイルサービスの共有ユーザーを取得（旧エンドポイント）",
         "tags": [
           "FTP サービス"
         ],
@@ -11792,7 +11901,7 @@
         "x-token-allowed": true
       },
       "put": {
-        "description": "保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不。API トークン需要同时具备 `webdav:write`、`ftp:write`、`smb:write`。只靠共享用户启用的服务在后必须仍有可登录的共享用户，否则拒绝保存。\n\n必要な権限: `webdav:write,ftp:write,smb:write`。 を更新 を更新",
+        "description": "已弃用，请改用 `PUT /api/fileusers`，本接口保留兼容。保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不。API トークン需要同时具备 `webdav:write`、`ftp:write`、`smb:write`。只靠共享用户启用的服务在后必须仍有可登录的共享用户，否则拒绝保存。\n\n必要な権限: `webdav:write,ftp:write,smb:write`。 を更新 を更新",
         "requestBody": {
           "content": {
             "application/json": {
@@ -11842,7 +11951,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "ファイルサービスの共有ユーザーを保存",
+        "summary": "ファイルサービスの共有ユーザーを保存（旧エンドポイント）",
         "tags": [
           "FTP サービス"
         ],
@@ -16256,7 +16365,7 @@
     },
     "/api/smb/shared-users": {
       "get": {
-        "description": "WebDAV、FTP、SMB で共通のファイルサービス共有ユーザーを返します。パスワードはマスクされます。fileusers.json が検証に失敗した場合は `error` を返し、有効な一覧を保存するまで共有ユーザーは誰もログインできません。`issues` は SMB で使えない共有ユーザーとその理由を示します：`name`（ユーザー名に SMB で使えない文字がある）、`bcrypt`（パスワードが bcrypt ハッシュ）、`share`（ディレクトリ名が共有名として使えないか重複）。\n\n必要な権限: `smb:read`。",
+        "description": "非推奨です。代わりに `GET /api/fileusers` を使ってください（互換のため残しています）。WebDAV、FTP、SMB で共通のファイルサービス共有ユーザーを返します。パスワードはマスクされます。fileusers.json が検証に失敗した場合は `error` を返し、有効な一覧を保存するまで共有ユーザーは誰もログインできません。`issues` は SMB で使えない共有ユーザーとその理由を示します：`name`（ユーザー名に SMB で使えない文字がある）、`bcrypt`（パスワードが bcrypt ハッシュ）、`share`（ディレクトリ名が共有名として使えないか重複）。\n\n必要な権限: `smb:read`。",
         "responses": {
           "200": {
             "description": "成功"
@@ -16297,7 +16406,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "ファイルサービスの共有ユーザーを取得",
+        "summary": "ファイルサービスの共有ユーザーを取得（旧エンドポイント）",
         "tags": [
           "SMB サービス"
         ],
@@ -16305,7 +16414,7 @@
         "x-token-allowed": true
       },
       "put": {
-        "description": "保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不。API トークン需要同时具备 `webdav:write`、`ftp:write`、`smb:write`。只靠共享用户启用的服务在后必须仍有可登录的共享用户，否则拒绝保存。\n\n必要な権限: `webdav:write,ftp:write,smb:write`。 を更新 を更新",
+        "description": "已弃用，请改用 `PUT /api/fileusers`，本接口保留兼容。保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不。API トークン需要同时具备 `webdav:write`、`ftp:write`、`smb:write`。只靠共享用户启用的服务在后必须仍有可登录的共享用户，否则拒绝保存。\n\n必要な権限: `webdav:write,ftp:write,smb:write`。 を更新 を更新",
         "requestBody": {
           "content": {
             "application/json": {
@@ -16355,7 +16464,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "ファイルサービスの共有ユーザーを保存",
+        "summary": "ファイルサービスの共有ユーザーを保存（旧エンドポイント）",
         "tags": [
           "SMB サービス"
         ],
@@ -21633,7 +21742,7 @@
     },
     "/api/webdav/shared-users": {
       "get": {
-        "description": "WebDAV、FTP、SMB で共通のファイルサービス共有ユーザーを返します。パスワードはマスクされます。fileusers.json が検証に失敗した場合は `error` を返し、有効な一覧を保存するまで共有ユーザーは誰もログインできません。\n\n必要な権限: `webdav:read`。",
+        "description": "非推奨です。代わりに `GET /api/fileusers` を使ってください（互換のため残しています）。WebDAV、FTP、SMB で共通のファイルサービス共有ユーザーを返します。パスワードはマスクされます。fileusers.json が検証に失敗した場合は `error` を返し、有効な一覧を保存するまで共有ユーザーは誰もログインできません。\n\n必要な権限: `webdav:read`。",
         "responses": {
           "200": {
             "description": "成功"
@@ -21674,7 +21783,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "ファイルサービスの共有ユーザーを取得",
+        "summary": "ファイルサービスの共有ユーザーを取得（旧エンドポイント）",
         "tags": [
           "WebDAV サービス"
         ],
@@ -21682,7 +21791,7 @@
         "x-token-allowed": true
       },
       "put": {
-        "description": "保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不。API トークン需要同时具备 `webdav:write`、`ftp:write`、`smb:write`。只靠共享用户启用的服务在后必须仍有可登录的共享用户，否则拒绝保存。\n\n必要な権限: `webdav:write,ftp:write,smb:write`。 を更新 を更新",
+        "description": "已弃用，请改用 `PUT /api/fileusers`，本接口保留兼容。保存后 WebDAV、FTP、SMB 同时生效；密码提交脱敏占位符表示不。API トークン需要同时具备 `webdav:write`、`ftp:write`、`smb:write`。只靠共享用户启用的服务在后必须仍有可登录的共享用户，否则拒绝保存。\n\n必要な権限: `webdav:write,ftp:write,smb:write`。 を更新 を更新",
         "requestBody": {
           "content": {
             "application/json": {
@@ -21732,7 +21841,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "ファイルサービスの共有ユーザーを保存",
+        "summary": "ファイルサービスの共有ユーザーを保存（旧エンドポイント）",
         "tags": [
           "WebDAV サービス"
         ],
@@ -27602,6 +27711,9 @@
       "name": "設定バックアップ"
     },
     {
+      "name": "ファイルサービス共有ユーザー"
+    },
+    {
       "name": "システム"
     },
     {
@@ -27639,6 +27751,7 @@
     "status",
     "logs",
     "metrics",
-    "import"
+    "import",
+    "fileusers"
   ]
 }

@@ -22,14 +22,11 @@ const (
 	IssueShare  = "share"  // 某个目录的名称不能作为共享名或重复
 )
 
-// Issue 是一个无法登录 SMB 的共享用户及原因代码，显示在 SMB 页面与运行日志中。
-type Issue struct {
-	Name   string `json:"name"`
-	Reason string `json:"reason"`
-}
+// Issue 是一个无法登录 SMB 的共享用户及原因代码，显示在共享用户页面、SMB 页面与运行日志中。
+type Issue = fileusers.Issue
 
-// logText 返回写入运行日志的说明。
-func (i Issue) logText() string {
+// issueLogText 返回写入运行日志的说明。
+func issueLogText(i Issue) string {
 	switch i.Reason {
 	case IssueName:
 		return fmt.Sprintf("共享用户 %s 的用户名不能用于 SMB，已跳过", i.Name)

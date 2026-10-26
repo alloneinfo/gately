@@ -25,6 +25,7 @@ import (
 	"github.com/wangwanjie/gately/internal/auth"
 	"github.com/wangwanjie/gately/internal/config"
 	"github.com/wangwanjie/gately/internal/events"
+	"github.com/wangwanjie/gately/internal/fileusers"
 	"github.com/wangwanjie/gately/internal/httpcompress"
 	"github.com/wangwanjie/gately/internal/httpx"
 	"github.com/wangwanjie/gately/internal/i18n"
@@ -183,6 +184,10 @@ func New(opts Options) (*App, error) {
 	// 服务未运行期间通过命令行提交的重置请求，在启动时应用
 	a.applyAccountReset()
 
+	// 文件服务共享用户由 WebDAV、FTP、SMB 共用，接口 /api/fileusers 属于应用本身，三个模块都关闭时也能读写
+	if err := fileusers.Default.Init(store); err != nil {
+		return nil, fmt.Errorf("加载文件服务共享用户失败: %w", err)
+	}
 	seen := map[string]bool{}
 	for _, m := range opts.Modules {
 		if seen[m.ID()] || m.ID() == settingsName || m.ID() == accountName {
@@ -272,6 +277,8 @@ func (a *App) Handler() http.Handler {
 		}, e.mod.ID())
 		e.mod.Routes(prefixRouter{rec: rec, prefix: prefix, module: e.mod.ID()})
 	}
+	rec.add("GET /api/fileusers", fileusers.Default.HandleGet(a.fileUsersExtra), "")
+	rec.add("PUT /api/fileusers", fileusers.Default.HandlePut(a.fileUsersExtra), "")
 	rec.add("GET /api/tokens", a.handleTokenList, "")
 	rec.add("GET /api/tokens/scopes", a.handleTokenScopes, "")
 	rec.add("POST /api/tokens", a.handleTokenCreate, "")

@@ -67,18 +67,18 @@ To troubleshoot clients that cannot connect or fail to authenticate, set the env
 
 ## Shared users {#shared-users}
 
-WebDAV, FTP and SMB share one list of "shared users" with the same fields as each service's local users (name, password, `root` and `readOnly`, or `mounts`), stored in `fileusers.json` in the configuration directory. Editing them in the "Shared users" card of any of these service pages applies to all three; the local users of each service are unchanged.
+WebDAV, FTP and SMB share one list of "shared users" with the same fields as each service's local users (name, password, `root` and `readOnly`, or `mounts`), stored in `fileusers.json` in the configuration directory. They are managed on the "File shared users" page in the "File Services" group of the sidebar, and saving applies to all three services; the local users of each service are unchanged. The top of the page shows whether each service allows shared users and lists shared users that have the same name as a local user or cannot be used by SMB.
 
-- Each service decides on its own whether to accept shared users: turn on "Use in this service" at the top right of the card (field `sharedUsers`) and save, and shared users can sign in to that service;
+- Each service decides on its own whether to accept shared users: turn on "Allow shared users" in the "Shared users" card of the service page (field `sharedUsers`) and save, and shared users can sign in to that service; the card also lists the saved shared users, and "Manage shared users" opens the "File shared users" page;
 - When a local user has the same name, only the local user is checked (case-insensitive for SMB);
 - Shared user names must be unique regardless of case and cannot contain a colon;
 - Changes to shared users take effect at once: WebDAV checks the new settings on the next request, FTP and SMB restart, and connected clients need to reconnect;
 - With the switch on and at least one shared user, the service can be enabled without any local user;
 - A service enabled with shared users only must still have a shared user that can sign in after a change (for SMB, one usable by SMB), otherwise the change is rejected;
 - If `fileusers.json` is broken by hand (for example an empty password or a directory that is not an absolute path), no shared user can sign in and the page shows a warning; fix it and save to restore them;
-- SMB only accepts plain passwords, and user and share names must follow SMB's character rules; shared users that do not are reported on the SMB page and in the runtime log and skipped, while WebDAV and FTP can still use them.
+- SMB only accepts plain passwords, and user and share names must follow SMB's character rules; shared users that do not are reported on the "File shared users" page, the SMB page and in the runtime log and skipped, while WebDAV and FTP can still use them.
 
-The API is `GET` / `PUT /api/<service>/shared-users` of each service (for example `/api/webdav/shared-users`); they read and write the same list. Reading uses the read permission of that service; a change affects the sign-in accounts of all three services, so an API token needs `webdav:write`, `ftp:write` and `smb:write` together.
+The API is `GET` / `PUT /api/fileusers`, which needs the `fileusers:read` / `fileusers:write` permission for API tokens; `services` in the response shows how each service uses them. The former `GET` / `PUT /api/<service>/shared-users` of each service are deprecated but still work and read and write the same list: reading uses the read permission of that service, and a change needs `webdav:write`, `ftp:write` and `smb:write` together.
 
 ## Storage Mounts
 
