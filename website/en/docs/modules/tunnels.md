@@ -27,7 +27,7 @@ Tailscale has no ready-to-run packages for macOS and Windows; use the official i
 
 | Module | What is cleared |
 | --- | --- |
-| frp | Client, server and all proxy settings, plus the config files generated under `frp/` |
+| frp | All frpc / frps instances, proxies and program settings, plus the config files generated under `frp/` |
 | Cloudflare Tunnel | All tunnels and program settings |
 | Tailscale | All settings and the login state in the default state directory; a running Gately-managed tailscaled logs out first. Custom state directories and an existing system tailscaled are left alone |
 | File Browser | All instances and program settings, plus each instance's users, share links and caches; files in the shared directories stay untouched |
@@ -57,10 +57,11 @@ Tokens and keys are stored with 0600 permissions. The cloudflared token is passe
 
 ## frp
 
-- **frpc client**: tcp / udp / http / https / stcp / xtcp proxies; adding or removing one takes effect immediately;
-- **frps server**: port allowlist, subdomains, dashboard;
+- **frpc client**: add as many frpc instances as you need; each connects to one frps and runs, starts, stops and restarts on its own. Proxies belong to an instance and support tcp / udp / http / https / stcp / xtcp; changing a proxy restarts only its instance;
+- **frps server**: add several frps instances on different ports, each with a port allowlist, subdomains and a dashboard;
+- **Upgrading from older versions**: the single frpc / frps settings of 0.5.9 and earlier are migrated automatically to instances named `frpc` / `frps`; existing proxies belong to that frpc instance, and the program paths move to the "Programs" card at the bottom of the page;
 - **frps listen addresses**: "Bind address" sets where the frpc connection port listens, and "Proxy bind address" sets where the HTTP / HTTPS ports and the remote ports of tcp / udp proxies listen; leave either empty to listen on all addresses. To put frps behind a reverse proxy such as Gately, set the bind address to `127.0.0.1`, reverse proxy a site in Web Service to `127.0.0.1:<bind port>`, and set the frpc transport protocol to websocket or wss pointing at that site; leave the proxy bind address empty so the remote ports of tcp proxies stay reachable from outside. When importing a frps config without `proxyBindAddr`, it follows `bindAddr`, just like frps does;
-- **Import existing config**: "Import config" in the page header supports legacy `frpc.ini` / `frps.ini` (including the `[common]` section) and frp 0.52+ `toml`. You can choose a file or paste the content. Preview the parsed result and the ignored fields first, then confirm the import. For the client you can choose to append (proxies with the same name stay unchanged) or replace all proxies. Importing does not change the enabled state, and it can also be called through the API at `POST /api/frp/import`.
+- **Import existing config**: "Import config" in the page header supports legacy `frpc.ini` / `frps.ini` (including the `[common]` section) and frp 0.52+ `toml`. You can choose a file or paste the content, and import into an existing instance or a new one. Preview the parsed result and the ignored fields first, then confirm the import. When importing into an existing frpc instance you can append (proxies with the same name stay unchanged) or replace all proxies of that instance. Importing into an existing instance keeps its enabled state, and new instances are created disabled. It can also be called through the API at `POST /api/frp/import`. When migrating from Lucky, every frpc / frps instance in Lucky is imported as a Gately instance.
 
 ## Cloudflare Tunnel
 

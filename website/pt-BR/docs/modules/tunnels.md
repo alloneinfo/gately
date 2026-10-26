@@ -27,7 +27,7 @@ O botão "Restaurar padrões" no cabeçalho da página é separado da desinstala
 
 | Módulo | O que é apagado |
 | --- | --- |
-| frp | Configurações do cliente, do servidor e de todos os proxies, os arquivos de configuração gerados em `frp/` |
+| frp | Todas as instâncias de frpc / frps, os proxies e as configurações dos programas, os arquivos de configuração gerados em `frp/` |
 | Cloudflare Tunnel | Todos os túneis e as configurações do programa |
 | Tailscale | Todas as configurações e o estado de login no diretório de estado padrão; se um tailscaled gerenciado pelo Gately estiver rodando, ele faz logout antes. Diretórios de estado personalizados e um tailscaled já existente no sistema ficam intactos |
 | File Browser | Todas as instâncias e as configurações do programa, os usuários, links de compartilhamento e caches de cada instância; os arquivos nos diretórios compartilhados ficam intactos |
@@ -57,10 +57,11 @@ Tokens e chaves são armazenados com permissão 0600. O token do cloudflared é 
 
 ## frp
 
-- **Cliente frpc**: proxies tcp / udp / http / https / stcp / xtcp; adicionar ou remover um tem efeito imediato;
-- **Servidor frps**: lista de portas permitidas, subdomínios, painel;
+- **Cliente frpc**: adicione quantas instâncias do frpc precisar; cada uma se conecta a um frps e roda, ativa, para e reinicia de forma independente. Os proxies pertencem a uma instância e suportam tcp / udp / http / https / stcp / xtcp; alterar um proxy reinicia apenas a instância dele;
+- **Servidor frps**: adicione várias instâncias do frps em portas diferentes, cada uma com lista de portas permitidas, subdomínios e painel;
+- **Atualização de versões anteriores**: as configurações únicas de frpc / frps da 0.5.9 e anteriores são migradas automaticamente para instâncias chamadas `frpc` / `frps`; os proxies existentes pertencem a essa instância do frpc e os caminhos dos programas vão para o cartão "Programas" no fim da página;
 - **Endereços de escuta do frps**: "Endereço de escuta" define onde a porta de conexão do frpc escuta, e "Endereço de escuta de proxies", onde escutam as portas HTTP / HTTPS e as portas remotas dos proxies tcp / udp; vazios, escutam em todos os endereços. Para colocar o frps atrás de um proxy reverso como o Gately, use `127.0.0.1` como endereço de escuta, crie no Serviço Web um site com proxy reverso para `127.0.0.1:<porta de bind>` e escolha websocket ou wss como protocolo de transporte do frpc apontando para esse site; deixe o endereço de escuta de proxies vazio para que as portas remotas dos proxies tcp continuem acessíveis de fora. Ao importar uma configuração do frps sem `proxyBindAddr`, vale o `bindAddr`, como no próprio frps;
-- **Importar configuração existente**: "Importar configuração", no cabeçalho da página, aceita `frpc.ini` / `frps.ini` antigos (incluindo a seção `[common]`) e `toml` do frp 0.52+. Você pode escolher um arquivo ou colar o conteúdo. Veja primeiro a prévia do resultado e dos campos ignorados e depois confirme a importação. No cliente, é possível acrescentar (proxies com o mesmo nome permanecem inalterados) ou substituir todos os proxies. A importação não altera o estado de ativação e também pode ser chamada pela API em `POST /api/frp/import`.
+- **Importar configuração existente**: "Importar configuração", no cabeçalho da página, suporta `frpc.ini` / `frps.ini` antigos (com a seção `[common]`) e `toml` do frp 0.52+. Escolha um arquivo ou cole o conteúdo e importe para uma instância existente ou nova. Primeiro você vê o resultado e os campos ignorados e depois confirma a importação. Ao importar para uma instância do frpc existente, é possível acrescentar (proxies com o mesmo nome não mudam) ou substituir todos os proxies dessa instância. Instâncias existentes mantêm o estado e novas instâncias são criadas desativadas. Também pode ser chamado pela API `POST /api/frp/import`. Ao migrar do Lucky, cada instância de frpc / frps do Lucky é importada como uma instância do Gately.
 
 ## Cloudflare Tunnel
 

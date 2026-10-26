@@ -40,7 +40,7 @@ Gately 完全开源，用户和社区可以直接审阅源码与配置。对于�
 | 端口转发 | TCP/UDP、IPv4/IPv6、端口段、多目标故障转移、连接数限制、流量统计、PROXY 协议（v1/v2）；SNI 分流，让多个服务共用 443 等同一个端口（按域名 TLS 透传、默认目标、每条路由单独设置 PROXY 协议） |
 | SSL 证书 | ACME 自动签发与续期，支持 DNS-01（通配符）与 HTTP-01（无需 DNS 服务商）、短期证书与公网 IP 地址证书（Let's Encrypt shortlived 配置）、EAB、上传、读取文件、映射到目录并执行脚本；证书更新后经 SSH 推送到其他主机并执行命令，或重启使用证书的 Docker 容器 |
 | Tailscale | 托管 tailscaled（用户态网络，容器友好）或接入系统已有守护进程；认证密钥/登录链接、Headscale、子网路由、出口节点、节点列表与 SOCKS5 代理、固定端口、tailscaled 额外参数与环境变量；Linux 上可在线安装、更新、回滚与卸载，可恢复默认配置 |
-| frp | frpc 客户端（tcp/udp/http/https/stcp/xtcp 代理，增删即生效）与 frps 服务端（端口白名单、子域名、控制台），可一键导入旧版 ini / 新版 toml 配置；在线安装、更新、回滚与卸载，可恢复默认配置 |
+| frp | 可同时运行多个 frpc 与 frps 实例；frpc 客户端（tcp/udp/http/https/stcp/xtcp 代理，增删即生效）与 frps 服务端（端口白名单、子域名、控制台），可一键导入旧版 ini / 新版 toml 配置；在线安装、更新、回滚与卸载，可恢复默认配置 |
 | Cloudflare 隧道 | cloudflared 令牌隧道与 trycloudflare 临时隧道，多隧道、自动重启、公网地址展示；在线安装、更新、回滚与卸载，可恢复默认配置 |
 | Web 服务 | 按域名反向代理/重定向/静态文件/固定文本/断开连接（相当于 nginx return 444）；HTTPS 与 HTTP/3（QUIC）；HTTP 与 HTTPS 共用同一端口（跳转或直接服务）；WebSocket；PROXY 协议收发；基本认证、网页认证、GitHub/Google/QQ/OIDC 登录、带 TOTP 二次验证并可跨子域名单点登录的共享用户、内置 OIDC 身份提供方（让 Gitea、Grafana 等应用用共享用户登录）、转发认证到 Authelia 等外部服务；IP 黑白名单与定时刷新的订阅 IP 列表（如省市 IP 段）、路径规则、临时分享链接、认证失败自动封禁、GeoIP 国家过滤；按路径分流后端、HTTPS 后端按访问域名发送 SNI、后端权重/备用/负载均衡策略、主动与被动健康检查、压缩、限流、响应缓存、路径重写；静态站点支持无扩展名地址与自定义 404 页；修改站点不会断开已有连接；分钟级访问统计与 Prometheus 指标 |
 | WAF 防火墙 | Coraza + OWASP CRS v4，可按文件启用规则、自定义 SecLang、拦截/仅检测；请求体检查上限可调，超限时只检查前段或按路径跳过，网盘、WebDAV 等上传站点也能挂 WAF |
