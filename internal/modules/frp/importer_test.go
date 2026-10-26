@@ -1,6 +1,7 @@
 package frp
 
 import (
+	"errors"
 	"slices"
 	"strings"
 	"testing"
@@ -271,39 +272,76 @@ func TestApplyImport(t *testing.T) {
 	if err := m.Init(module.Env{Store: store, Logs: logbuf.New(100, nil)}); err != nil {
 		t.Fatal(err)
 	}
-	m.cfg.Client = ClientSettings{Enable: false, BinPath: "/opt/frpc", ServerAddr: "old"}
-	m.cfg.Proxies = []Proxy{{Key: "k1", Name: "pve-ssh", Type: TypeTCP, Enable: false, LocalIP: "1.1.1.1", LocalPort: 1, RemotePort: 1}}
+	m.cfg.Clients = []Client{{Key: "c1", Name: "家里", Enable: false, ClientSettings: ClientSettings{ServerAddr: "old", ServerPort: 7000}}}
+	m.cfg.Proxies = []Proxy{
+		{Key: "k1", Client: "c1", Name: "pve-ssh", Type: TypeTCP, Enable: false, LocalIP: "1.1.1.1", LocalPort: 1, RemotePort: 1},
+		{Key: "k2", Client: "other", Name: "keep", Type: TypeTCP, LocalIP: "1.1.1.1", LocalPort: 1, RemotePort: 1},
+	}
 
 	res, err := ParseImport(RoleClient, legacyClient)
 	if err != nil {
 		t.Fatal(err)
 	}
-	out := &ImportResponse{Warnings: res.Warnings}
-	m.mu.Lock()
-	err = m.applyImportLocked(res, ProxyAppend, out)
-	m.mu.Unlock()
+	apply := func(in ImportRequest) (*ImportResponse, error) {
+		out := &ImportResponse{Warnings: res.Warnings}
+		m.mu.Lock()
+		defer m.mu.Unlock()
+		return out, m.applyImportLocked(res, in, out)
+	}
+	// 追加到已有实例：同名代理保持原样，其余 3 条新增；沿用实例的名称与启用状态
+	out, err := apply(ImportRequest{Target: "c1", ProxyMode: ProxyAppend})
 	if err != nil {
 		t.Fatal(err)
 	}
-	// 追加：同名代理保持原样，其余 3 条新增
-	if out.Added != 3 || len(m.cfg.Proxies) != 4 || m.cfg.Proxies[0].LocalIP != "1.1.1.1" {
+	if out.Key != "c1" || out.Added != 3 || len(m.cfg.Proxies) != 5 || m.cfg.Proxies[0].LocalIP != "1.1.1.1" {
 		t.Errorf("追加结果错误: added=%d %+v", out.Added, m.cfg.Proxies)
 	}
-	if m.cfg.Client.ServerAddr != "203.0.113.10" || m.cfg.Client.BinPath != "/opt/frpc" || m.cfg.Client.Enable {
-		t.Errorf("应覆盖连接参数并沿用启用状态与路径: %+v", m.cfg.Client)
+	if c := m.cfg.Clients[0]; c.ServerAddr != "203.0.113.10" || c.Name != "家里" || c.Enable {
+		t.Errorf("应覆盖连接参数并沿用名称与启用状态: %+v", c)
 	}
-	for _, p := range m.cfg.Proxies[1:] {
-		if p.Key == "" {
-			t.Errorf("新增代理缺少 key: %+v", p)
+	for _, p := range m.cfg.Proxies[2:] {
+		if p.Key == "" || p.Client != "c1" {
+			t.Errorf("新增代理缺少 key 或未归属实例: %+v", p)
 		}
 	}
 
-	// 替换：全部以导入为准
-	out = &ImportResponse{}
-	m.mu.Lock()
-	err = m.applyImportLocked(res, ProxyReplace, out)
-	m.mu.Unlock()
-	if err != nil || out.Added != 4 || len(m.cfg.Proxies) != 4 || m.cfg.Proxies[0].LocalIP != "192.168.18.18" {
+	// 替换：该实例的代理全部以导入为准，其他实例的代理不受影响
+	out, err = apply(ImportRequest{Target: "c1", ProxyMode: ProxyReplace})
+	if err != nil || out.Added != 4 || len(m.cfg.Proxies) != 5 || m.cfg.Proxies[0].Name != "keep" || m.cfg.Proxies[1].LocalIP != "192.168.18.18" {
 		t.Errorf("替换结果错误: %v added=%d %+v", err, out.Added, m.cfg.Proxies)
+	}
+
+	// 新建实例：默认停用，名称取请求中的名称
+	out, err = apply(ImportRequest{Name: "公司"})
+	if err != nil || len(m.cfg.Clients) != 2 || out.Key == "" || out.Added != 4 {
+		t.Fatalf("新建实例失败: %v %+v", err, out)
+	}
+	if c := m.cfg.Clients[1]; c.Key != out.Key || c.Name != "公司" || c.Enable || c.ServerAddr != "203.0.113.10" {
+		t.Errorf("新建实例错误: %+v", c)
+	}
+	if n := len(m.clientProxies(out.Key)); n != 4 {
+		t.Errorf("新实例应有 4 个代理，实际 %d", n)
+	}
+
+	// 目标实例不存在时报错且配置不变
+	before := len(m.cfg.Proxies)
+	if _, err := apply(ImportRequest{Target: "nope"}); !errors.Is(err, errTargetNotFound) || len(m.cfg.Proxies) != before {
+		t.Errorf("目标不存在应报错: %v", err)
+	}
+
+	// frps：新建实例与覆盖已有实例
+	sres, err := ParseImport(RoleServer, "bindPort = 7100\nauth.token = \"s\"\n")
+	if err != nil {
+		t.Fatal(err)
+	}
+	res = sres
+	out, err = apply(ImportRequest{})
+	if err != nil || len(m.cfg.Servers) != 1 || m.cfg.Servers[0].Name != "frps" || m.cfg.Servers[0].BindPort != 7100 || m.cfg.Servers[0].Enable {
+		t.Fatalf("新建 frps 实例错误: %v %+v", err, m.cfg.Servers)
+	}
+	m.cfg.Servers[0].Name, m.cfg.Servers[0].Enable = "主服务", true
+	sres.Server.BindPort = 7200
+	if _, err := apply(ImportRequest{Target: out.Key}); err != nil || m.cfg.Servers[0].BindPort != 7200 || m.cfg.Servers[0].Name != "主服务" || !m.cfg.Servers[0].Enable {
+		t.Fatalf("覆盖 frps 实例错误: %v %+v", err, m.cfg.Servers)
 	}
 }

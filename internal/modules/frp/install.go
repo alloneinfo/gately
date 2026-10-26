@@ -103,9 +103,10 @@ func (m *Module) newInstaller() *binstall.Installer {
 			m.mu.Lock()
 			defer m.mu.Unlock()
 			// 文件路径不变，清空版本缓存以重新探测
-			m.client.versionPath, m.server.versionPath = "", ""
-			m.applyClientLocked()
-			m.applyServerLocked()
+			for _, b := range m.bins {
+				b.versionPath = ""
+			}
+			m.syncLocked(true)
 		},
 	})
 }

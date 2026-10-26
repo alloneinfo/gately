@@ -424,14 +424,54 @@
         },
         "type": "object"
       },
-      "frp.ClientSettings": {
+      "frp.BinaryView": {
         "properties": {
-          "binPath": {
+          "binary": {
             "type": "string"
           },
+          "error": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "frp.Client": {
+        "properties": {
           "enable": {
             "type": "boolean"
           },
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "protocol": {
+            "type": "string"
+          },
+          "remark": {
+            "type": "string"
+          },
+          "serverAddr": {
+            "type": "string"
+          },
+          "serverPort": {
+            "type": "integer"
+          },
+          "token": {
+            "type": "string"
+          },
+          "user": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "frp.ClientSettings": {
+        "properties": {
           "protocol": {
             "type": "string"
           },
@@ -458,10 +498,16 @@
           "content": {
             "type": "string"
           },
+          "name": {
+            "type": "string"
+          },
           "proxyMode": {
             "type": "string"
           },
           "role": {
+            "type": "string"
+          },
+          "target": {
             "type": "string"
           }
         },
@@ -477,6 +523,9 @@
           },
           "client": {
             "$ref": "#/components/schemas/frp.ClientSettings"
+          },
+          "key": {
+            "type": "string"
           },
           "proxies": {
             "items": {
@@ -501,6 +550,9 @@
       },
       "frp.Proxy": {
         "properties": {
+          "client": {
+            "type": "string"
+          },
           "customDomains": {
             "items": {
               "type": "string"
@@ -540,12 +592,9 @@
         },
         "type": "object"
       },
-      "frp.ServerSettings": {
+      "frp.Server": {
         "properties": {
           "allowPorts": {
-            "type": "string"
-          },
-          "binPath": {
             "type": "string"
           },
           "bindAddr": {
@@ -569,6 +618,56 @@
           "enable": {
             "type": "boolean"
           },
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "proxyBindAddr": {
+            "type": "string"
+          },
+          "remark": {
+            "type": "string"
+          },
+          "subdomainHost": {
+            "type": "string"
+          },
+          "token": {
+            "type": "string"
+          },
+          "vhostHttpPort": {
+            "type": "integer"
+          },
+          "vhostHttpsPort": {
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "frp.ServerSettings": {
+        "properties": {
+          "allowPorts": {
+            "type": "string"
+          },
+          "bindAddr": {
+            "type": "string"
+          },
+          "bindPort": {
+            "type": "integer"
+          },
+          "dashboardAddr": {
+            "type": "string"
+          },
+          "dashboardPort": {
+            "type": "integer"
+          },
+          "dashboardPwd": {
+            "type": "string"
+          },
+          "dashboardUser": {
+            "type": "string"
+          },
           "proxyBindAddr": {
             "type": "string"
           },
@@ -583,6 +682,31 @@
           },
           "vhostHttpsPort": {
             "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "frp.Settings": {
+        "properties": {
+          "frpcPath": {
+            "type": "string"
+          },
+          "frpsPath": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "frp.SettingsView": {
+        "properties": {
+          "frpc": {
+            "$ref": "#/components/schemas/frp.BinaryView"
+          },
+          "frps": {
+            "$ref": "#/components/schemas/frp.BinaryView"
+          },
+          "settings": {
+            "$ref": "#/components/schemas/frp.Settings"
           }
         },
         "type": "object"
@@ -12577,11 +12701,21 @@
         "x-token-allowed": true
       }
     },
-    "/api/frp/client": {
+    "/api/frp/clients": {
       "get": {
         "description": "Permiso necesario: `frp:read`.",
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/frp.Client"
+                  },
+                  "type": "array"
+                }
+              }
+            },
             "description": "Correcto"
           },
           "400": {
@@ -12620,20 +12754,87 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Leer la configuración del cliente frp",
+        "summary": "Listar Cliente frp",
         "tags": [
           "Traversal de red interna frp"
         ],
         "x-required-scope": "frp:read",
         "x-token-allowed": true
       },
+      "post": {
+        "description": "Permiso necesario: `frp:write`.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/frp.Client"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/frp.Client"
+                }
+              }
+            },
+            "description": "Correcto"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parámetros de solicitud incorrectos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token no válido, caducado o sin sesión iniciada"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Al token le falta el permiso necesario"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Añadir Cliente frp",
+        "tags": [
+          "Traversal de red interna frp"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/frp/clients-order": {
       "put": {
         "description": "Permiso necesario: `frp:write`.",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "type": "object"
+                "$ref": "#/components/schemas/crud.orderRequest"
               }
             }
           }
@@ -12678,7 +12879,345 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Guardar la configuración del cliente frp",
+        "summary": "Reordenar Cliente frp",
+        "tags": [
+          "Traversal de red interna frp"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/frp/clients/{key}": {
+      "delete": {
+        "description": "Permiso necesario: `frp:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Correcto"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parámetros de solicitud incorrectos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token no válido, caducado o sin sesión iniciada"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Al token le falta el permiso necesario"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Eliminar Cliente frp",
+        "tags": [
+          "Traversal de red interna frp"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      },
+      "put": {
+        "description": "Permiso necesario: `frp:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/frp.Client"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/frp.Client"
+                }
+              }
+            },
+            "description": "Correcto"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parámetros de solicitud incorrectos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token no válido, caducado o sin sesión iniciada"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Al token le falta el permiso necesario"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Modificar Cliente frp",
+        "tags": [
+          "Traversal de red interna frp"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/frp/clients/{key}/enable": {
+      "put": {
+        "description": "Permiso necesario: `frp:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/crud.enableRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Correcto"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parámetros de solicitud incorrectos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token no válido, caducado o sin sesión iniciada"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Al token le falta el permiso necesario"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Activar o desactivar Cliente frp",
+        "tags": [
+          "Traversal de red interna frp"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/frp/clients/{key}/restart": {
+      "post": {
+        "description": "Permiso necesario: `frp:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Correcto"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parámetros de solicitud incorrectos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token no válido, caducado o sin sesión iniciada"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Al token le falta el permiso necesario"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Reiniciar instancia de frpc",
+        "tags": [
+          "Traversal de red interna frp"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/frp/clients/{key}/secrets": {
+      "get": {
+        "description": "Permiso necesario: `frp:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Correcto"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parámetros de solicitud incorrectos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token no válido, caducado o sin sesión iniciada"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Al token le falta el permiso necesario"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Ver secretos en texto plano",
         "tags": [
           "Traversal de red interna frp"
         ],
@@ -13275,7 +13814,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Listar Entrada",
+        "summary": "Listar proxies de frp",
         "tags": [
           "Traversal de red interna frp"
         ],
@@ -13340,7 +13879,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Añadir Entrada",
+        "summary": "Añadir proxies de frp",
         "tags": [
           "Traversal de red interna frp"
         ],
@@ -13400,7 +13939,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Reordenar Entrada",
+        "summary": "Reordenar proxies de frp",
         "tags": [
           "Traversal de red interna frp"
         ],
@@ -13461,7 +14000,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Eliminar Entrada",
+        "summary": "Eliminar proxies de frp",
         "tags": [
           "Traversal de red interna frp"
         ],
@@ -13536,7 +14075,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Modificar Entrada",
+        "summary": "Modificar proxies de frp",
         "tags": [
           "Traversal de red interna frp"
         ],
@@ -13606,7 +14145,78 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Activar o desactivar Entrada",
+        "summary": "Activar o desactivar proxies de frp",
+        "tags": [
+          "Traversal de red interna frp"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/frp/proxies/{key}/secrets": {
+      "get": {
+        "description": "Permiso necesario: `frp:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Correcto"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parámetros de solicitud incorrectos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token no válido, caducado o sin sesión iniciada"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Al token le falta el permiso necesario"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Ver secretos en texto plano",
         "tags": [
           "Traversal de red interna frp"
         ],
@@ -13665,11 +14275,21 @@
         "x-token-allowed": true
       }
     },
-    "/api/frp/server": {
+    "/api/frp/servers": {
       "get": {
         "description": "Permiso necesario: `frp:read`.",
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/frp.Server"
+                  },
+                  "type": "array"
+                }
+              }
+            },
             "description": "Correcto"
           },
           "400": {
@@ -13708,20 +14328,87 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Leer la configuración del servidor frp",
+        "summary": "Listar Servidor frp",
         "tags": [
           "Traversal de red interna frp"
         ],
         "x-required-scope": "frp:read",
         "x-token-allowed": true
       },
+      "post": {
+        "description": "Permiso necesario: `frp:write`.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/frp.Server"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/frp.Server"
+                }
+              }
+            },
+            "description": "Correcto"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parámetros de solicitud incorrectos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token no válido, caducado o sin sesión iniciada"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Al token le falta el permiso necesario"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Añadir Servidor frp",
+        "tags": [
+          "Traversal de red interna frp"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/frp/servers-order": {
       "put": {
         "description": "Permiso necesario: `frp:write`.",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "type": "object"
+                "$ref": "#/components/schemas/crud.orderRequest"
               }
             }
           }
@@ -13766,7 +14453,461 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Guardar la configuración del servidor frp",
+        "summary": "Reordenar Servidor frp",
+        "tags": [
+          "Traversal de red interna frp"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/frp/servers/{key}": {
+      "delete": {
+        "description": "Permiso necesario: `frp:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Correcto"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parámetros de solicitud incorrectos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token no válido, caducado o sin sesión iniciada"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Al token le falta el permiso necesario"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Eliminar Servidor frp",
+        "tags": [
+          "Traversal de red interna frp"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      },
+      "put": {
+        "description": "Permiso necesario: `frp:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/frp.Server"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/frp.Server"
+                }
+              }
+            },
+            "description": "Correcto"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parámetros de solicitud incorrectos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token no válido, caducado o sin sesión iniciada"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Al token le falta el permiso necesario"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Modificar Servidor frp",
+        "tags": [
+          "Traversal de red interna frp"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/frp/servers/{key}/enable": {
+      "put": {
+        "description": "Permiso necesario: `frp:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/crud.enableRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Correcto"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parámetros de solicitud incorrectos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token no válido, caducado o sin sesión iniciada"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Al token le falta el permiso necesario"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Activar o desactivar Servidor frp",
+        "tags": [
+          "Traversal de red interna frp"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/frp/servers/{key}/restart": {
+      "post": {
+        "description": "Permiso necesario: `frp:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Correcto"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parámetros de solicitud incorrectos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token no válido, caducado o sin sesión iniciada"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Al token le falta el permiso necesario"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Reiniciar instancia de frps",
+        "tags": [
+          "Traversal de red interna frp"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/frp/servers/{key}/secrets": {
+      "get": {
+        "description": "Permiso necesario: `frp:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Correcto"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parámetros de solicitud incorrectos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token no válido, caducado o sin sesión iniciada"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Al token le falta el permiso necesario"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Ver secretos en texto plano",
+        "tags": [
+          "Traversal de red interna frp"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/frp/settings": {
+      "get": {
+        "description": "Permiso necesario: `frp:read`.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/frp.SettingsView"
+                }
+              }
+            },
+            "description": "Correcto"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parámetros de solicitud incorrectos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token no válido, caducado o sin sesión iniciada"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Al token le falta el permiso necesario"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Obtener rutas y versiones de los programas",
+        "tags": [
+          "Traversal de red interna frp"
+        ],
+        "x-required-scope": "frp:read",
+        "x-token-allowed": true
+      },
+      "put": {
+        "description": "Permiso necesario: `frp:write`.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/frp.Settings"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Correcto"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Parámetros de solicitud incorrectos"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token no válido, caducado o sin sesión iniciada"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Al token le falta el permiso necesario"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Guardar rutas de los programas",
         "tags": [
           "Traversal de red interna frp"
         ],

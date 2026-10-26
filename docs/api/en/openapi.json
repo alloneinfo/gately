@@ -424,14 +424,54 @@
         },
         "type": "object"
       },
-      "frp.ClientSettings": {
+      "frp.BinaryView": {
         "properties": {
-          "binPath": {
+          "binary": {
             "type": "string"
           },
+          "error": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "frp.Client": {
+        "properties": {
           "enable": {
             "type": "boolean"
           },
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "protocol": {
+            "type": "string"
+          },
+          "remark": {
+            "type": "string"
+          },
+          "serverAddr": {
+            "type": "string"
+          },
+          "serverPort": {
+            "type": "integer"
+          },
+          "token": {
+            "type": "string"
+          },
+          "user": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "frp.ClientSettings": {
+        "properties": {
           "protocol": {
             "type": "string"
           },
@@ -458,10 +498,16 @@
           "content": {
             "type": "string"
           },
+          "name": {
+            "type": "string"
+          },
           "proxyMode": {
             "type": "string"
           },
           "role": {
+            "type": "string"
+          },
+          "target": {
             "type": "string"
           }
         },
@@ -477,6 +523,9 @@
           },
           "client": {
             "$ref": "#/components/schemas/frp.ClientSettings"
+          },
+          "key": {
+            "type": "string"
           },
           "proxies": {
             "items": {
@@ -501,6 +550,9 @@
       },
       "frp.Proxy": {
         "properties": {
+          "client": {
+            "type": "string"
+          },
           "customDomains": {
             "items": {
               "type": "string"
@@ -540,12 +592,9 @@
         },
         "type": "object"
       },
-      "frp.ServerSettings": {
+      "frp.Server": {
         "properties": {
           "allowPorts": {
-            "type": "string"
-          },
-          "binPath": {
             "type": "string"
           },
           "bindAddr": {
@@ -569,6 +618,56 @@
           "enable": {
             "type": "boolean"
           },
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "proxyBindAddr": {
+            "type": "string"
+          },
+          "remark": {
+            "type": "string"
+          },
+          "subdomainHost": {
+            "type": "string"
+          },
+          "token": {
+            "type": "string"
+          },
+          "vhostHttpPort": {
+            "type": "integer"
+          },
+          "vhostHttpsPort": {
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "frp.ServerSettings": {
+        "properties": {
+          "allowPorts": {
+            "type": "string"
+          },
+          "bindAddr": {
+            "type": "string"
+          },
+          "bindPort": {
+            "type": "integer"
+          },
+          "dashboardAddr": {
+            "type": "string"
+          },
+          "dashboardPort": {
+            "type": "integer"
+          },
+          "dashboardPwd": {
+            "type": "string"
+          },
+          "dashboardUser": {
+            "type": "string"
+          },
           "proxyBindAddr": {
             "type": "string"
           },
@@ -583,6 +682,31 @@
           },
           "vhostHttpsPort": {
             "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "frp.Settings": {
+        "properties": {
+          "frpcPath": {
+            "type": "string"
+          },
+          "frpsPath": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "frp.SettingsView": {
+        "properties": {
+          "frpc": {
+            "$ref": "#/components/schemas/frp.BinaryView"
+          },
+          "frps": {
+            "$ref": "#/components/schemas/frp.BinaryView"
+          },
+          "settings": {
+            "$ref": "#/components/schemas/frp.Settings"
           }
         },
         "type": "object"
@@ -12577,11 +12701,21 @@
         "x-token-allowed": true
       }
     },
-    "/api/frp/client": {
+    "/api/frp/clients": {
       "get": {
         "description": "Required permission: `frp:read`.",
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/frp.Client"
+                  },
+                  "type": "array"
+                }
+              }
+            },
             "description": "Success"
           },
           "400": {
@@ -12620,20 +12754,87 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Read frp client configuration",
+        "summary": "List frp client",
         "tags": [
           "frp tunneling"
         ],
         "x-required-scope": "frp:read",
         "x-token-allowed": true
       },
+      "post": {
+        "description": "Required permission: `frp:write`.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/frp.Client"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/frp.Client"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Invalid request parameters"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token is invalid, expired or not signed in"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token lacks the required permission"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Create frp client",
+        "tags": [
+          "frp tunneling"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/frp/clients-order": {
       "put": {
         "description": "Required permission: `frp:write`.",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "type": "object"
+                "$ref": "#/components/schemas/crud.orderRequest"
               }
             }
           }
@@ -12678,7 +12879,345 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Save frp client configuration",
+        "summary": "Reorder frp client",
+        "tags": [
+          "frp tunneling"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/frp/clients/{key}": {
+      "delete": {
+        "description": "Required permission: `frp:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Invalid request parameters"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token is invalid, expired or not signed in"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token lacks the required permission"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Delete frp client",
+        "tags": [
+          "frp tunneling"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      },
+      "put": {
+        "description": "Required permission: `frp:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/frp.Client"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/frp.Client"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Invalid request parameters"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token is invalid, expired or not signed in"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token lacks the required permission"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Update frp client",
+        "tags": [
+          "frp tunneling"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/frp/clients/{key}/enable": {
+      "put": {
+        "description": "Required permission: `frp:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/crud.enableRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Invalid request parameters"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token is invalid, expired or not signed in"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token lacks the required permission"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Enable or disable frp client",
+        "tags": [
+          "frp tunneling"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/frp/clients/{key}/restart": {
+      "post": {
+        "description": "Required permission: `frp:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Invalid request parameters"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token is invalid, expired or not signed in"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token lacks the required permission"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Restart frpc instance",
+        "tags": [
+          "frp tunneling"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/frp/clients/{key}/secrets": {
+      "get": {
+        "description": "Required permission: `frp:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Invalid request parameters"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token is invalid, expired or not signed in"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token lacks the required permission"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "View secrets in plain text",
         "tags": [
           "frp tunneling"
         ],
@@ -13275,7 +13814,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "List Entry",
+        "summary": "List frp proxies",
         "tags": [
           "frp tunneling"
         ],
@@ -13340,7 +13879,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Create Entry",
+        "summary": "Create frp proxies",
         "tags": [
           "frp tunneling"
         ],
@@ -13400,7 +13939,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Reorder Entry",
+        "summary": "Reorder frp proxies",
         "tags": [
           "frp tunneling"
         ],
@@ -13461,7 +14000,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Delete Entry",
+        "summary": "Delete frp proxies",
         "tags": [
           "frp tunneling"
         ],
@@ -13536,7 +14075,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Update Entry",
+        "summary": "Update frp proxies",
         "tags": [
           "frp tunneling"
         ],
@@ -13606,7 +14145,78 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Enable or disable Entry",
+        "summary": "Enable or disable frp proxies",
+        "tags": [
+          "frp tunneling"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/frp/proxies/{key}/secrets": {
+      "get": {
+        "description": "Required permission: `frp:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Invalid request parameters"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token is invalid, expired or not signed in"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token lacks the required permission"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "View secrets in plain text",
         "tags": [
           "frp tunneling"
         ],
@@ -13665,11 +14275,21 @@
         "x-token-allowed": true
       }
     },
-    "/api/frp/server": {
+    "/api/frp/servers": {
       "get": {
         "description": "Required permission: `frp:read`.",
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/frp.Server"
+                  },
+                  "type": "array"
+                }
+              }
+            },
             "description": "Success"
           },
           "400": {
@@ -13708,20 +14328,87 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Read frp server configuration",
+        "summary": "List frp server",
         "tags": [
           "frp tunneling"
         ],
         "x-required-scope": "frp:read",
         "x-token-allowed": true
       },
+      "post": {
+        "description": "Required permission: `frp:write`.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/frp.Server"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/frp.Server"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Invalid request parameters"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token is invalid, expired or not signed in"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token lacks the required permission"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Create frp server",
+        "tags": [
+          "frp tunneling"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/frp/servers-order": {
       "put": {
         "description": "Required permission: `frp:write`.",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "type": "object"
+                "$ref": "#/components/schemas/crud.orderRequest"
               }
             }
           }
@@ -13766,7 +14453,461 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Save frp server configuration",
+        "summary": "Reorder frp server",
+        "tags": [
+          "frp tunneling"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/frp/servers/{key}": {
+      "delete": {
+        "description": "Required permission: `frp:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Invalid request parameters"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token is invalid, expired or not signed in"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token lacks the required permission"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Delete frp server",
+        "tags": [
+          "frp tunneling"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      },
+      "put": {
+        "description": "Required permission: `frp:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/frp.Server"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/frp.Server"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Invalid request parameters"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token is invalid, expired or not signed in"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token lacks the required permission"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Update frp server",
+        "tags": [
+          "frp tunneling"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/frp/servers/{key}/enable": {
+      "put": {
+        "description": "Required permission: `frp:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/crud.enableRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Invalid request parameters"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token is invalid, expired or not signed in"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token lacks the required permission"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Enable or disable frp server",
+        "tags": [
+          "frp tunneling"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/frp/servers/{key}/restart": {
+      "post": {
+        "description": "Required permission: `frp:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Invalid request parameters"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token is invalid, expired or not signed in"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token lacks the required permission"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Restart frps instance",
+        "tags": [
+          "frp tunneling"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/frp/servers/{key}/secrets": {
+      "get": {
+        "description": "Required permission: `frp:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Invalid request parameters"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token is invalid, expired or not signed in"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token lacks the required permission"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "View secrets in plain text",
+        "tags": [
+          "frp tunneling"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/frp/settings": {
+      "get": {
+        "description": "Required permission: `frp:read`.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/frp.SettingsView"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Invalid request parameters"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token is invalid, expired or not signed in"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token lacks the required permission"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get program paths and versions",
+        "tags": [
+          "frp tunneling"
+        ],
+        "x-required-scope": "frp:read",
+        "x-token-allowed": true
+      },
+      "put": {
+        "description": "Required permission: `frp:write`.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/frp.Settings"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Invalid request parameters"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token is invalid, expired or not signed in"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Token lacks the required permission"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Save program paths",
         "tags": [
           "frp tunneling"
         ],

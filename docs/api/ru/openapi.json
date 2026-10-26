@@ -424,14 +424,54 @@
         },
         "type": "object"
       },
-      "frp.ClientSettings": {
+      "frp.BinaryView": {
         "properties": {
-          "binPath": {
+          "binary": {
             "type": "string"
           },
+          "error": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "frp.Client": {
+        "properties": {
           "enable": {
             "type": "boolean"
           },
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "protocol": {
+            "type": "string"
+          },
+          "remark": {
+            "type": "string"
+          },
+          "serverAddr": {
+            "type": "string"
+          },
+          "serverPort": {
+            "type": "integer"
+          },
+          "token": {
+            "type": "string"
+          },
+          "user": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "frp.ClientSettings": {
+        "properties": {
           "protocol": {
             "type": "string"
           },
@@ -458,10 +498,16 @@
           "content": {
             "type": "string"
           },
+          "name": {
+            "type": "string"
+          },
           "proxyMode": {
             "type": "string"
           },
           "role": {
+            "type": "string"
+          },
+          "target": {
             "type": "string"
           }
         },
@@ -477,6 +523,9 @@
           },
           "client": {
             "$ref": "#/components/schemas/frp.ClientSettings"
+          },
+          "key": {
+            "type": "string"
           },
           "proxies": {
             "items": {
@@ -501,6 +550,9 @@
       },
       "frp.Proxy": {
         "properties": {
+          "client": {
+            "type": "string"
+          },
           "customDomains": {
             "items": {
               "type": "string"
@@ -540,12 +592,9 @@
         },
         "type": "object"
       },
-      "frp.ServerSettings": {
+      "frp.Server": {
         "properties": {
           "allowPorts": {
-            "type": "string"
-          },
-          "binPath": {
             "type": "string"
           },
           "bindAddr": {
@@ -569,6 +618,56 @@
           "enable": {
             "type": "boolean"
           },
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "proxyBindAddr": {
+            "type": "string"
+          },
+          "remark": {
+            "type": "string"
+          },
+          "subdomainHost": {
+            "type": "string"
+          },
+          "token": {
+            "type": "string"
+          },
+          "vhostHttpPort": {
+            "type": "integer"
+          },
+          "vhostHttpsPort": {
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "frp.ServerSettings": {
+        "properties": {
+          "allowPorts": {
+            "type": "string"
+          },
+          "bindAddr": {
+            "type": "string"
+          },
+          "bindPort": {
+            "type": "integer"
+          },
+          "dashboardAddr": {
+            "type": "string"
+          },
+          "dashboardPort": {
+            "type": "integer"
+          },
+          "dashboardPwd": {
+            "type": "string"
+          },
+          "dashboardUser": {
+            "type": "string"
+          },
           "proxyBindAddr": {
             "type": "string"
           },
@@ -583,6 +682,31 @@
           },
           "vhostHttpsPort": {
             "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "frp.Settings": {
+        "properties": {
+          "frpcPath": {
+            "type": "string"
+          },
+          "frpsPath": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "frp.SettingsView": {
+        "properties": {
+          "frpc": {
+            "$ref": "#/components/schemas/frp.BinaryView"
+          },
+          "frps": {
+            "$ref": "#/components/schemas/frp.BinaryView"
+          },
+          "settings": {
+            "$ref": "#/components/schemas/frp.Settings"
           }
         },
         "type": "object"
@@ -12577,11 +12701,21 @@
         "x-token-allowed": true
       }
     },
-    "/api/frp/client": {
+    "/api/frp/clients": {
       "get": {
         "description": "Требуемое разрешение: `frp:read`.",
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/frp.Client"
+                  },
+                  "type": "array"
+                }
+              }
+            },
             "description": "Успешно"
           },
           "400": {
@@ -12620,20 +12754,87 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Чтение конфигурации клиента frp",
+        "summary": "Список: Клиент frp",
         "tags": [
           "Проброс внутренней сети frp"
         ],
         "x-required-scope": "frp:read",
         "x-token-allowed": true
       },
+      "post": {
+        "description": "Требуемое разрешение: `frp:write`.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/frp.Client"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/frp.Client"
+                }
+              }
+            },
+            "description": "Успешно"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка параметров запроса"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Токен недействителен, истёк или вход не выполнен"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "У токена нет необходимого права"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Добавить: Клиент frp",
+        "tags": [
+          "Проброс внутренней сети frp"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/frp/clients-order": {
       "put": {
         "description": "Требуемое разрешение: `frp:write`.",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "type": "object"
+                "$ref": "#/components/schemas/crud.orderRequest"
               }
             }
           }
@@ -12678,7 +12879,345 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Сохранить конфигурацию клиента frp",
+        "summary": "Изменить порядок: Клиент frp",
+        "tags": [
+          "Проброс внутренней сети frp"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/frp/clients/{key}": {
+      "delete": {
+        "description": "Требуемое разрешение: `frp:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Успешно"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка параметров запроса"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Токен недействителен, истёк или вход не выполнен"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "У токена нет необходимого права"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Удалить: Клиент frp",
+        "tags": [
+          "Проброс внутренней сети frp"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      },
+      "put": {
+        "description": "Требуемое разрешение: `frp:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/frp.Client"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/frp.Client"
+                }
+              }
+            },
+            "description": "Успешно"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка параметров запроса"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Токен недействителен, истёк или вход не выполнен"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "У токена нет необходимого права"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Изменить: Клиент frp",
+        "tags": [
+          "Проброс внутренней сети frp"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/frp/clients/{key}/enable": {
+      "put": {
+        "description": "Требуемое разрешение: `frp:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/crud.enableRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Успешно"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка параметров запроса"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Токен недействителен, истёк или вход не выполнен"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "У токена нет необходимого права"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Включить или отключить: Клиент frp",
+        "tags": [
+          "Проброс внутренней сети frp"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/frp/clients/{key}/restart": {
+      "post": {
+        "description": "Требуемое разрешение: `frp:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Успешно"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка параметров запроса"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Токен недействителен, истёк или вход не выполнен"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "У токена нет необходимого права"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Перезапустить экземпляр frpc",
+        "tags": [
+          "Проброс внутренней сети frp"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/frp/clients/{key}/secrets": {
+      "get": {
+        "description": "Требуемое разрешение: `frp:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Успешно"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка параметров запроса"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Токен недействителен, истёк или вход не выполнен"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "У токена нет необходимого права"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Показать секреты открытым текстом",
         "tags": [
           "Проброс внутренней сети frp"
         ],
@@ -13275,7 +13814,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Список: Элемент",
+        "summary": "Список: прокси frp",
         "tags": [
           "Проброс внутренней сети frp"
         ],
@@ -13340,7 +13879,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Добавить: Элемент",
+        "summary": "Добавить: прокси frp",
         "tags": [
           "Проброс внутренней сети frp"
         ],
@@ -13400,7 +13939,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Изменить порядок: Элемент",
+        "summary": "Изменить порядок: прокси frp",
         "tags": [
           "Проброс внутренней сети frp"
         ],
@@ -13461,7 +14000,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Удалить: Элемент",
+        "summary": "Удалить: прокси frp",
         "tags": [
           "Проброс внутренней сети frp"
         ],
@@ -13536,7 +14075,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Изменить: Элемент",
+        "summary": "Изменить: прокси frp",
         "tags": [
           "Проброс внутренней сети frp"
         ],
@@ -13606,7 +14145,78 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Включить или отключить: Элемент",
+        "summary": "Включить или отключить: прокси frp",
+        "tags": [
+          "Проброс внутренней сети frp"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/frp/proxies/{key}/secrets": {
+      "get": {
+        "description": "Требуемое разрешение: `frp:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Успешно"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка параметров запроса"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Токен недействителен, истёк или вход не выполнен"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "У токена нет необходимого права"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Показать секреты открытым текстом",
         "tags": [
           "Проброс внутренней сети frp"
         ],
@@ -13665,11 +14275,21 @@
         "x-token-allowed": true
       }
     },
-    "/api/frp/server": {
+    "/api/frp/servers": {
       "get": {
         "description": "Требуемое разрешение: `frp:read`.",
         "responses": {
           "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/frp.Server"
+                  },
+                  "type": "array"
+                }
+              }
+            },
             "description": "Успешно"
           },
           "400": {
@@ -13708,20 +14328,87 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Чтение конфигурации сервера frp",
+        "summary": "Список: Сервер frp",
         "tags": [
           "Проброс внутренней сети frp"
         ],
         "x-required-scope": "frp:read",
         "x-token-allowed": true
       },
+      "post": {
+        "description": "Требуемое разрешение: `frp:write`.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/frp.Server"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/frp.Server"
+                }
+              }
+            },
+            "description": "Успешно"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка параметров запроса"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Токен недействителен, истёк или вход не выполнен"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "У токена нет необходимого права"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Добавить: Сервер frp",
+        "tags": [
+          "Проброс внутренней сети frp"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/frp/servers-order": {
       "put": {
         "description": "Требуемое разрешение: `frp:write`.",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "type": "object"
+                "$ref": "#/components/schemas/crud.orderRequest"
               }
             }
           }
@@ -13766,7 +14453,461 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Сохранить конфигурацию сервера frp",
+        "summary": "Изменить порядок: Сервер frp",
+        "tags": [
+          "Проброс внутренней сети frp"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/frp/servers/{key}": {
+      "delete": {
+        "description": "Требуемое разрешение: `frp:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Успешно"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка параметров запроса"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Токен недействителен, истёк или вход не выполнен"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "У токена нет необходимого права"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Удалить: Сервер frp",
+        "tags": [
+          "Проброс внутренней сети frp"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      },
+      "put": {
+        "description": "Требуемое разрешение: `frp:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/frp.Server"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/frp.Server"
+                }
+              }
+            },
+            "description": "Успешно"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка параметров запроса"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Токен недействителен, истёк или вход не выполнен"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "У токена нет необходимого права"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Изменить: Сервер frp",
+        "tags": [
+          "Проброс внутренней сети frp"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/frp/servers/{key}/enable": {
+      "put": {
+        "description": "Требуемое разрешение: `frp:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/crud.enableRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Успешно"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка параметров запроса"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Токен недействителен, истёк или вход не выполнен"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "У токена нет необходимого права"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Включить или отключить: Сервер frp",
+        "tags": [
+          "Проброс внутренней сети frp"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/frp/servers/{key}/restart": {
+      "post": {
+        "description": "Требуемое разрешение: `frp:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Успешно"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка параметров запроса"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Токен недействителен, истёк или вход не выполнен"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "У токена нет необходимого права"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Перезапустить экземпляр frps",
+        "tags": [
+          "Проброс внутренней сети frp"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/frp/servers/{key}/secrets": {
+      "get": {
+        "description": "Требуемое разрешение: `frp:write`.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Успешно"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка параметров запроса"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Токен недействителен, истёк или вход не выполнен"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "У токена нет необходимого права"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Показать секреты открытым текстом",
+        "tags": [
+          "Проброс внутренней сети frp"
+        ],
+        "x-required-scope": "frp:write",
+        "x-token-allowed": true
+      }
+    },
+    "/api/frp/settings": {
+      "get": {
+        "description": "Требуемое разрешение: `frp:read`.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/frp.SettingsView"
+                }
+              }
+            },
+            "description": "Успешно"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка параметров запроса"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Токен недействителен, истёк или вход не выполнен"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "У токена нет необходимого права"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Получить пути и версии программ",
+        "tags": [
+          "Проброс внутренней сети frp"
+        ],
+        "x-required-scope": "frp:read",
+        "x-token-allowed": true
+      },
+      "put": {
+        "description": "Требуемое разрешение: `frp:write`.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/frp.Settings"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Успешно"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка параметров запроса"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Токен недействителен, истёк или вход не выполнен"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "У токена нет необходимого права"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Сохранить пути к программам",
         "tags": [
           "Проброс внутренней сети frp"
         ],

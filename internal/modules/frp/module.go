@@ -1,5 +1,5 @@
 // Package frp 托管 frpc（内网穿透客户端）与 frps（服务端）：
-// 在界面中维护连接与代理列表，生成配置文件并守护外部 frp 进程。
+// 在界面中维护多个 frpc / frps 实例与代理列表，生成配置文件并守护外部 frp 进程。
 package frp
 
 import (
@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 
 	"github.com/wangwanjie/gately/internal/binstall"
@@ -23,14 +24,24 @@ import (
 // ID 是模块标识。
 const ID = "frp"
 
-// role 描述 frp 的一个角色（客户端或服务端）及其托管进程。
-type role struct {
-	name string // frpc 或 frps
-	sup  *proc.Supervisor
-	err  string
-	// version 缓存已探测的二进制版本，避免界面轮询时反复执行
+// 两种角色的可执行文件名，也是生成的配置文件名前缀与日志来源前缀。
+const (
+	binClient = "frpc"
+	binServer = "frps"
+)
+
+// binInfo 缓存一种可执行文件已探测的版本，避免界面轮询时反复执行。
+type binInfo struct {
 	version     string
 	versionPath string
+}
+
+// instRuntime 是一个 frpc / frps 实例的运行时信息。
+type instRuntime struct {
+	sup *proc.Supervisor
+	err string
+	// content 是最近一次按配置应用的配置文件内容，实例停用时为空；内容不变时不重启进程
+	content string
 }
 
 // Module 是 frp 模块。
@@ -39,8 +50,9 @@ type Module struct {
 	store   *config.Store
 	logs    *logbuf.Buffer
 	cfg     fileConfig
-	client  *role
-	server  *role
+	clients map[string]*instRuntime
+	servers map[string]*instRuntime
+	bins    map[string]*binInfo
 	started bool
 	// httpClient 返回下载程序使用的 HTTP 客户端，由框架按“更新代理”设置注入
 	httpClient func() *http.Client
@@ -49,7 +61,12 @@ type Module struct {
 
 // New 创建模块。
 func New() *Module {
-	return &Module{httpClient: func() *http.Client { return http.DefaultClient }}
+	return &Module{
+		clients:    map[string]*instRuntime{},
+		servers:    map[string]*instRuntime{},
+		bins:       map[string]*binInfo{binClient: {}, binServer: {}},
+		httpClient: func() *http.Client { return http.DefaultClient },
+	}
 }
 
 // SetHTTPClient 实现 module.HTTPClientAware。
@@ -68,26 +85,77 @@ func (m *Module) Title() string { return "frp 内网穿透" }
 // Init 实现 module.Module。
 func (m *Module) Init(env module.Env) error {
 	m.store, m.logs = env.Store, env.Logs
-	m.client = &role{name: "frpc", sup: proc.New(m.logs.Logger("frpc"))}
-	m.server = &role{name: "frps", sup: proc.New(m.logs.Logger("frps"))}
 	m.install = m.newInstaller()
 	if _, err := m.store.Load(ID, &m.cfg); err != nil {
 		return err
+	}
+	if m.cfg.migrateLegacy() {
+		// 立即保存迁移结果，避免每次启动都生成新的实例 key
+		if err := m.saveLocked(); err != nil {
+			return err
+		}
+		m.logs.Logger("frp").Infof("已把旧版单个 frpc / frps 配置迁移为实例")
 	}
 	m.cfg.fillDefaults()
 	return nil
 }
 
+// migrateLegacy 把旧版单实例配置（client / server 字段）迁移为实例列表，返回是否有改动。
+// 已配置过的 frpc 迁移为名为 frpc 的实例，原有代理全部归属该实例；frps 只在启用或改过默认设置时迁移。
+func (c *fileConfig) migrateLegacy() bool {
+	changed := false
+	if lc := c.LegacyClient; lc != nil {
+		if c.Settings.FrpcPath == "" {
+			c.Settings.FrpcPath = strings.TrimSpace(lc.BinPath)
+		}
+		if len(c.Clients) == 0 && (lc.Enable || lc.ServerAddr != "" || len(c.Proxies) > 0) {
+			cl := Client{Key: crud.NewKey(), Name: binClient, Enable: lc.Enable, ClientSettings: lc.ClientSettings}
+			c.Clients = append(c.Clients, cl)
+			for i := range c.Proxies {
+				if c.Proxies[i].Client == "" {
+					c.Proxies[i].Client = cl.Key
+				}
+			}
+		}
+		c.LegacyClient = nil
+		changed = true
+	}
+	if ls := c.LegacyServer; ls != nil {
+		if c.Settings.FrpsPath == "" {
+			c.Settings.FrpsPath = strings.TrimSpace(ls.BinPath)
+		}
+		def := ServerSettings{BindPort: 7000, DashboardAddr: "127.0.0.1"}
+		cur := ls.ServerSettings
+		if cur.BindPort == 0 {
+			cur.BindPort = def.BindPort
+		}
+		if cur.DashboardAddr == "" {
+			cur.DashboardAddr = def.DashboardAddr
+		}
+		if len(c.Servers) == 0 && (ls.Enable || cur != def) {
+			c.Servers = append(c.Servers, Server{Key: crud.NewKey(), Name: binServer, Enable: ls.Enable, ServerSettings: cur})
+		}
+		c.LegacyServer = nil
+		changed = true
+	}
+	return changed
+}
+
 // fillDefaults 补齐未设置的默认值。
 func (c *fileConfig) fillDefaults() {
-	if c.Client.ServerPort == 0 {
-		c.Client.ServerPort = 7000
+	for i := range c.Clients {
+		if c.Clients[i].ServerPort == 0 {
+			c.Clients[i].ServerPort = 7000
+		}
 	}
-	if c.Server.BindPort == 0 {
-		c.Server.BindPort = 7000
-	}
-	if c.Server.DashboardAddr == "" {
-		c.Server.DashboardAddr = "127.0.0.1"
+	for i := range c.Servers {
+		s := &c.Servers[i]
+		if s.BindPort == 0 {
+			s.BindPort = 7000
+		}
+		if s.DashboardAddr == "" {
+			s.DashboardAddr = "127.0.0.1"
+		}
 	}
 }
 
@@ -96,8 +164,7 @@ func (m *Module) Start(context.Context) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	m.started = true
-	m.applyClientLocked()
-	m.applyServerLocked()
+	m.syncLocked(true)
 	return nil
 }
 
@@ -105,113 +172,343 @@ func (m *Module) Start(context.Context) error {
 func (m *Module) Stop() error {
 	m.mu.Lock()
 	m.started = false
+	runs := make([]*instRuntime, 0, len(m.clients)+len(m.servers))
+	for _, rt := range m.clients {
+		runs = append(runs, rt)
+	}
+	for _, rt := range m.servers {
+		runs = append(runs, rt)
+	}
+	m.clients, m.servers = map[string]*instRuntime{}, map[string]*instRuntime{}
 	m.mu.Unlock()
-	m.client.sup.Stop()
-	m.server.sup.Stop()
+	for _, rt := range runs {
+		rt.sup.Stop()
+	}
 	return nil
 }
 
 func (m *Module) saveLocked() error { return m.store.Save(ID, m.cfg) }
 
-// writeConfig 把配置写入 <配置目录>/frp/<file>，文件含令牌，权限 0600。
-func (m *Module) writeConfig(file, content string) (string, error) {
-	dir := filepath.Join(m.store.Dir(), "frp")
-	if err := fsperm.MkdirAll(dir, 0o700); err != nil {
-		return "", err
+func (m *Module) findClient(key string) *Client {
+	for i := range m.cfg.Clients {
+		if m.cfg.Clients[i].Key == key {
+			return &m.cfg.Clients[i]
+		}
 	}
-	path := filepath.Join(dir, file)
+	return nil
+}
+
+func (m *Module) findServer(key string) *Server {
+	for i := range m.cfg.Servers {
+		if m.cfg.Servers[i].Key == key {
+			return &m.cfg.Servers[i]
+		}
+	}
+	return nil
+}
+
+// clientProxies 返回归属 frpc 实例 key 的代理。
+func (m *Module) clientProxies(key string) []Proxy {
+	var out []Proxy
+	for _, p := range m.cfg.Proxies {
+		if p.Client == key {
+			out = append(out, p)
+		}
+	}
+	return out
+}
+
+// logSource 返回实例的日志来源，例如 frpc:家里。
+func logSource(bin, name string) string { return bin + ":" + name }
+
+// configFile 返回实例生成的配置文件路径：<配置目录>/frp/<frpc|frps>-<key>.toml。
+func (m *Module) configFile(bin, key string) string {
+	return filepath.Join(m.store.Dir(), "frp", bin+"-"+key+".toml")
+}
+
+// writeConfig 把配置写入 path，文件含令牌，权限 0600。
+func (m *Module) writeConfig(path, content string) error {
+	if err := fsperm.MkdirAll(filepath.Dir(path), 0o700); err != nil {
+		return err
+	}
 	tmp := path + ".tmp"
 	if err := fsperm.WriteFile(tmp, []byte(content), 0o600); err != nil {
-		return "", err
+		return err
 	}
-	return path, os.Rename(tmp, path)
+	return os.Rename(tmp, path)
 }
 
-// launch 解析二进制、写配置并启动进程；调用方持有 mu。
-func (m *Module) launch(r *role, binPath, file, content string) {
-	r.sup.Stop()
-	r.err = ""
-	bin, err := proc.Resolve(binPath, m.store.Dir(), r.name)
-	if err != nil {
-		r.err = err.Error()
-		m.logs.Logger(r.name).Errorf("%v", err)
-		return
+// binPath 返回角色配置的可执行文件路径。
+func (m *Module) binPath(bin string) string {
+	if bin == binClient {
+		return m.cfg.Settings.FrpcPath
 	}
-	cfgPath, err := m.writeConfig(file, content)
-	if err != nil {
-		r.err = "写入配置文件失败: " + err.Error()
-		m.logs.Logger(r.name).Errorf("%s", r.err)
-		return
-	}
-	r.sup.Start(proc.Spec{Path: bin, Args: []string{"-c", cfgPath}})
+	return m.cfg.Settings.FrpsPath
 }
 
-func (m *Module) applyClientLocked() {
-	if !m.started {
+// runInstance 按期望的配置内容启停一个实例；content 为空表示应停止。force 为 false 且内容未变时保持现状。
+// 调用方持有 mu。
+func (m *Module) runInstance(runs map[string]*instRuntime, bin, key, name, content string, force bool) {
+	rt := runs[key]
+	if rt == nil {
+		rt = &instRuntime{sup: proc.New(m.logs.Logger(logSource(bin, name)))}
+		runs[key] = rt
+	}
+	if !force && rt.content == content {
 		return
 	}
-	if !m.cfg.Client.Enable {
-		m.client.sup.Stop()
-		m.client.err = ""
+	rt.sup.Stop()
+	rt.err, rt.content = "", content
+	if content == "" {
 		return
 	}
-	// frpc 不允许代理重名，重名的后续条目会被忽略并提示
+	log := m.logs.Logger(logSource(bin, name))
+	exe, err := proc.Resolve(m.binPath(bin), m.store.Dir(), bin)
+	if err != nil {
+		rt.err = err.Error()
+		log.Errorf("%v", err)
+		return
+	}
+	path := m.configFile(bin, key)
+	if err := m.writeConfig(path, content); err != nil {
+		rt.err = "写入配置文件失败: " + err.Error()
+		log.Errorf("%s", rt.err)
+		return
+	}
+	// 名称可能被修改，重建托管器以使用新的日志来源
+	rt.sup = proc.New(log)
+	rt.sup.Start(proc.Spec{Path: exe, Args: []string{"-c", path}})
+}
+
+// clientContent 返回 frpc 实例应运行的配置内容，停用或模块未启动时为空。
+func (m *Module) clientContent(c *Client) string {
+	if !m.started || !c.Enable {
+		return ""
+	}
+	return ClientTOML(c.ClientSettings, m.clientProxies(c.Key))
+}
+
+// serverContent 返回 frps 实例应运行的配置内容，停用或模块未启动时为空。
+func (m *Module) serverContent(s *Server) string {
+	if !m.started || !s.Enable {
+		return ""
+	}
+	return ServerTOML(s.ServerSettings)
+}
+
+// applyClientLocked 重启指定 frpc 实例；实例已删除时停止并清理。调用方持有 mu。
+func (m *Module) applyClientLocked(key string) {
+	c := m.findClient(key)
+	if c == nil {
+		m.dropLocked(m.clients, binClient, key)
+		return
+	}
+	m.warnDuplicates(c)
+	m.runInstance(m.clients, binClient, key, c.Name, m.clientContent(c), true)
+}
+
+// applyServerLocked 重启指定 frps 实例；实例已删除时停止并清理。调用方持有 mu。
+func (m *Module) applyServerLocked(key string) {
+	s := m.findServer(key)
+	if s == nil {
+		m.dropLocked(m.servers, binServer, key)
+		return
+	}
+	m.runInstance(m.servers, binServer, key, s.Name, m.serverContent(s), true)
+}
+
+// syncLocked 让全部实例与配置一致：force 为 true 时全部重启，否则只重启配置内容有变化的实例，
+// 并清理已删除实例的进程与配置文件。代理增删改时用它只重启受影响的 frpc。调用方持有 mu。
+func (m *Module) syncLocked(force bool) {
+	keep := map[string]bool{}
+	for i := range m.cfg.Clients {
+		c := &m.cfg.Clients[i]
+		keep[c.Key] = true
+		content := m.clientContent(c)
+		if rt := m.clients[c.Key]; force || rt == nil || rt.content != content {
+			m.warnDuplicates(c)
+		}
+		m.runInstance(m.clients, binClient, c.Key, c.Name, content, force)
+	}
+	for key := range m.clients {
+		if !keep[key] {
+			m.dropLocked(m.clients, binClient, key)
+		}
+	}
+	keep = map[string]bool{}
+	for i := range m.cfg.Servers {
+		s := &m.cfg.Servers[i]
+		keep[s.Key] = true
+		m.runInstance(m.servers, binServer, s.Key, s.Name, m.serverContent(s), force)
+	}
+	for key := range m.servers {
+		if !keep[key] {
+			m.dropLocked(m.servers, binServer, key)
+		}
+	}
+}
+
+// warnDuplicates 提示同一 frpc 实例中重名的已启用代理：frpc 不允许重名，后面的同名代理不写入配置。
+func (m *Module) warnDuplicates(c *Client) {
+	if !m.started || !c.Enable {
+		return
+	}
 	seen := map[string]bool{}
 	for _, p := range m.cfg.Proxies {
-		if !p.Enable {
+		if p.Client != c.Key || !p.Enable {
 			continue
 		}
 		if seen[p.Name] {
-			m.logs.Logger("frpc").Warnf("代理名称 %q 重复，已忽略后面的同名代理", p.Name)
+			m.logs.Logger(logSource(binClient, c.Name)).Warnf("代理名称 %q 重复，已忽略后面的同名代理", p.Name)
 		}
 		seen[p.Name] = true
 	}
-	m.launch(m.client, m.cfg.Client.BinPath, "frpc.toml", ClientTOML(m.cfg.Client, m.cfg.Proxies))
 }
 
-func (m *Module) applyServerLocked() {
-	if !m.started {
+// dropLocked 停止并移除实例的运行时，删除生成的配置文件；调用方持有 mu。
+func (m *Module) dropLocked(runs map[string]*instRuntime, bin, key string) {
+	if rt := runs[key]; rt != nil {
+		rt.sup.Stop()
+		delete(runs, key)
+	}
+	if key == "" || strings.ContainsAny(key, `/\.`) {
 		return
 	}
-	if !m.cfg.Server.Enable {
-		m.server.sup.Stop()
-		m.server.err = ""
-		return
+	if err := os.Remove(m.configFile(bin, key)); err != nil && !os.IsNotExist(err) {
+		m.logs.Logger("frp").Warnf("删除配置文件失败: %v", err)
 	}
-	m.launch(m.server, m.cfg.Server.BinPath, "frps.toml", ServerTOML(m.cfg.Server))
 }
 
-// roleView 是界面展示的角色状态。
-type roleView struct {
-	Settings any        `json:"settings"`
-	State    proc.State `json:"state"`
-	Binary   string     `json:"binary"`
-	Version  string     `json:"version"`
-	Error    string     `json:"error"`
-}
-
-func (m *Module) viewLocked(r *role, binPath string, settings any) roleView {
-	v := roleView{Settings: settings, State: r.sup.State(), Error: r.err}
-	bin, err := proc.Resolve(binPath, m.store.Dir(), r.name)
-	if err != nil {
-		if v.Error == "" {
-			v.Error = err.Error()
+// removeClientLocked 在 frpc 实例删除后停止进程，并删除归属它的代理。调用方持有 mu。
+func (m *Module) removeClientLocked(key string) {
+	m.dropLocked(m.clients, binClient, key)
+	kept := make([]Proxy, 0, len(m.cfg.Proxies))
+	for _, p := range m.cfg.Proxies {
+		if p.Client != key {
+			kept = append(kept, p)
 		}
+	}
+	if len(kept) == len(m.cfg.Proxies) {
+		return
+	}
+	old := m.cfg.Proxies
+	m.cfg.Proxies = kept
+	if err := m.saveLocked(); err != nil {
+		// 实例已删除，残留的代理不会写入任何配置，下次保存时再清理
+		m.cfg.Proxies = old
+		m.logs.Logger("frp").Warnf("删除实例的代理失败: %v", err)
+	}
+}
+
+// InstanceState 是实例的运行状态。
+type InstanceState struct {
+	State proc.State `json:"state"`
+	Error string     `json:"error"`
+}
+
+// ClientView 是界面展示的 frpc 实例，令牌已脱敏。
+type ClientView struct {
+	Client
+	InstanceState
+}
+
+// ServerView 是界面展示的 frps 实例，令牌与控制台密码已脱敏。
+type ServerView struct {
+	Server
+	InstanceState
+}
+
+func stateOf(runs map[string]*instRuntime, key string) InstanceState {
+	var v InstanceState
+	if rt := runs[key]; rt != nil {
+		v.State = rt.sup.State()
+		v.Error = rt.err
+		if v.Error == "" {
+			v.Error = v.State.Error
+		}
+	}
+	return v
+}
+
+func (m *Module) clientView(c *Client) ClientView {
+	v := ClientView{Client: *c, InstanceState: stateOf(m.clients, c.Key)}
+	v.Token = crud.Mask(v.Token)
+	return v
+}
+
+func (m *Module) serverView(s *Server) ServerView {
+	v := ServerView{Server: *s, InstanceState: stateOf(m.servers, s.Key)}
+	v.Token, v.DashboardPwd = crud.Mask(v.Token), crud.Mask(v.DashboardPwd)
+	return v
+}
+
+// BinaryView 是一种可执行文件的查找结果。
+type BinaryView struct {
+	// Binary 为实际使用的可执行文件路径
+	Binary  string `json:"binary"`
+	Version string `json:"version"`
+	Error   string `json:"error"`
+}
+
+// SettingsView 是 GET /settings 的返回内容。
+type SettingsView struct {
+	Settings Settings   `json:"settings"`
+	Frpc     BinaryView `json:"frpc"`
+	Frps     BinaryView `json:"frps"`
+}
+
+// binaryView 查找可执行文件并探测版本；调用方持有 mu。
+func (m *Module) binaryView(bin string) BinaryView {
+	var v BinaryView
+	exe, err := proc.Resolve(m.binPath(bin), m.store.Dir(), bin)
+	if err != nil {
+		v.Error = err.Error()
 		return v
 	}
-	v.Binary = bin
-	if r.versionPath != bin {
-		r.versionPath, r.version = bin, proc.Version(bin, "--version")
+	v.Binary = exe
+	info := m.bins[bin]
+	if info.versionPath != exe {
+		info.versionPath, info.version = exe, proc.Version(exe, "--version")
 	}
-	v.Version = r.version
-	if v.State.Error != "" {
-		v.Error = v.State.Error
-	}
+	v.Version = info.version
 	return v
 }
 
 // Routes 实现 module.Module。
 func (m *Module) Routes(r module.Router) {
+	clients := &crud.Collection[Client]{
+		Mu:       &m.mu,
+		Items:    &m.cfg.Clients,
+		Save:     m.saveLocked,
+		Key:      func(c *Client) *string { return &c.Key },
+		Enabled:  func(c *Client) *bool { return &c.Enable },
+		Validate: func(c *Client) error { return c.Validate() },
+		Merge:    func(old, updated *Client) { crud.KeepSecret(old.Token, &updated.Token) },
+		View:     func(c *Client) any { return m.clientView(c) },
+		Secrets:  func(c *Client) map[string]string { return map[string]string{"token": c.Token} },
+		Changed:  m.applyClientLocked,
+		Removed:  m.removeClientLocked,
+	}
+	clients.Register(r, "/clients")
+	servers := &crud.Collection[Server]{
+		Mu:       &m.mu,
+		Items:    &m.cfg.Servers,
+		Save:     m.saveLocked,
+		Key:      func(s *Server) *string { return &s.Key },
+		Enabled:  func(s *Server) *bool { return &s.Enable },
+		Validate: func(s *Server) error { return s.Validate() },
+		Merge: func(old, updated *Server) {
+			crud.KeepSecret(old.Token, &updated.Token)
+			crud.KeepSecret(old.DashboardPwd, &updated.DashboardPwd)
+		},
+		View: func(s *Server) any { return m.serverView(s) },
+		Secrets: func(s *Server) map[string]string {
+			return map[string]string{"token": s.Token, "dashboardPwd": s.DashboardPwd}
+		},
+		Changed: m.applyServerLocked,
+		Removed: func(key string) { m.dropLocked(m.servers, binServer, key) },
+	}
+	servers.Register(r, "/servers")
 	proxies := &crud.Collection[Proxy]{
 		Mu:       &m.mu,
 		Items:    &m.cfg.Proxies,
@@ -219,14 +516,78 @@ func (m *Module) Routes(r module.Router) {
 		Key:      func(p *Proxy) *string { return &p.Key },
 		Enabled:  func(p *Proxy) *bool { return &p.Enable },
 		Validate: func(p *Proxy) error { return p.Validate() },
-		Merge:    func(old, updated *Proxy) { crud.KeepSecret(old.SecretKey, &updated.SecretKey) },
-		View:     func(p *Proxy) any { v := *p; v.SecretKey = crud.Mask(v.SecretKey); return v },
-		Changed:  func(string) { m.applyClientLocked() },
-		Removed:  func(string) { m.applyClientLocked() },
+		Check: func(p *Proxy) error {
+			if m.findClient(p.Client) == nil {
+				return fmt.Errorf("代理所属的 frpc 实例不存在")
+			}
+			return nil
+		},
+		Merge:   func(old, updated *Proxy) { crud.KeepSecret(old.SecretKey, &updated.SecretKey) },
+		View:    func(p *Proxy) any { v := *p; v.SecretKey = crud.Mask(v.SecretKey); return v },
+		Secrets: func(p *Proxy) map[string]string { return map[string]string{"secretKey": p.SecretKey} },
+		// 代理可能换了所属实例，按内容比对只重启受影响的 frpc
+		Changed: func(string) { m.syncLocked(false) },
+		Removed: func(string) { m.syncLocked(false) },
 	}
 	proxies.Register(r, "/proxies")
 	m.registerImport(r)
 	m.install.Register(r)
+
+	restart := func(exists func(string) bool, apply func(string)) http.HandlerFunc {
+		return func(w http.ResponseWriter, req *http.Request) {
+			m.mu.Lock()
+			defer m.mu.Unlock()
+			key := req.PathValue("key")
+			if !exists(key) {
+				httpx.Error(w, http.StatusNotFound, "实例不存在")
+				return
+			}
+			apply(key)
+			httpx.OK(w, map[string]bool{"ok": true})
+		}
+	}
+	r.HandleFunc("POST /clients/{key}/restart", restart(func(k string) bool { return m.findClient(k) != nil }, m.applyClientLocked))
+	r.HandleFunc("POST /servers/{key}/restart", restart(func(k string) bool { return m.findServer(k) != nil }, m.applyServerLocked))
+	module.DocOf(r, "POST /clients/{key}/restart", module.Doc{Summary: "重启 frpc 实例"})
+	module.DocOf(r, "POST /servers/{key}/restart", module.Doc{Summary: "重启 frps 实例"})
+
+	r.HandleFunc("GET /settings", func(w http.ResponseWriter, req *http.Request) {
+		m.mu.Lock()
+		defer m.mu.Unlock()
+		httpx.OK(w, SettingsView{Settings: m.cfg.Settings, Frpc: m.binaryView(binClient), Frps: m.binaryView(binServer)})
+	})
+	r.HandleFunc("PUT /settings", func(w http.ResponseWriter, req *http.Request) {
+		var s Settings
+		if err := httpx.ReadJSON(req, &s); err != nil {
+			httpx.Error(w, http.StatusBadRequest, "%v", err)
+			return
+		}
+		s.FrpcPath, s.FrpsPath = strings.TrimSpace(s.FrpcPath), strings.TrimSpace(s.FrpsPath)
+		m.mu.Lock()
+		defer m.mu.Unlock()
+		old := m.cfg.Settings
+		m.cfg.Settings = s
+		if err := m.saveLocked(); err != nil {
+			m.cfg.Settings = old
+			httpx.Error(w, http.StatusInternalServerError, "保存失败: %v", err)
+			return
+		}
+		// 程序路径变化后重启使用该程序的实例
+		if s.FrpcPath != old.FrpcPath {
+			for i := range m.cfg.Clients {
+				m.applyClientLocked(m.cfg.Clients[i].Key)
+			}
+		}
+		if s.FrpsPath != old.FrpsPath {
+			for i := range m.cfg.Servers {
+				m.applyServerLocked(m.cfg.Servers[i].Key)
+			}
+		}
+		httpx.OK(w, map[string]bool{"ok": true})
+	})
+	module.DocOf(r, "GET /settings", module.Doc{Summary: "读取程序路径与版本", Resp: &SettingsView{}})
+	module.DocOf(r, "PUT /settings", module.Doc{Summary: "保存程序路径", Req: &Settings{}})
+
 	r.HandleFunc("POST /reset", func(w http.ResponseWriter, req *http.Request) {
 		m.mu.Lock()
 		defer m.mu.Unlock()
@@ -236,68 +597,6 @@ func (m *Module) Routes(r module.Router) {
 		}
 		httpx.OK(w, map[string]bool{"ok": true})
 	})
-
-	r.HandleFunc("GET /client", func(w http.ResponseWriter, req *http.Request) {
-		m.mu.Lock()
-		defer m.mu.Unlock()
-		s := m.cfg.Client
-		s.Token = crud.Mask(s.Token)
-		httpx.OK(w, m.viewLocked(m.client, m.cfg.Client.BinPath, s))
-	})
-	r.HandleFunc("PUT /client", func(w http.ResponseWriter, req *http.Request) {
-		var s ClientSettings
-		if err := httpx.ReadJSON(req, &s); err != nil {
-			httpx.Error(w, http.StatusBadRequest, "%v", err)
-			return
-		}
-		m.mu.Lock()
-		defer m.mu.Unlock()
-		crud.KeepSecret(m.cfg.Client.Token, &s.Token)
-		if err := s.Validate(); err != nil {
-			httpx.Error(w, http.StatusBadRequest, "%v", err)
-			return
-		}
-		old := m.cfg.Client
-		m.cfg.Client = s
-		if err := m.saveLocked(); err != nil {
-			m.cfg.Client = old
-			httpx.Error(w, http.StatusInternalServerError, "保存失败: %v", err)
-			return
-		}
-		m.applyClientLocked()
-		httpx.OK(w, map[string]bool{"ok": true})
-	})
-	r.HandleFunc("GET /server", func(w http.ResponseWriter, req *http.Request) {
-		m.mu.Lock()
-		defer m.mu.Unlock()
-		s := m.cfg.Server
-		s.Token, s.DashboardPwd = crud.Mask(s.Token), crud.Mask(s.DashboardPwd)
-		httpx.OK(w, m.viewLocked(m.server, m.cfg.Server.BinPath, s))
-	})
-	r.HandleFunc("PUT /server", func(w http.ResponseWriter, req *http.Request) {
-		var s ServerSettings
-		if err := httpx.ReadJSON(req, &s); err != nil {
-			httpx.Error(w, http.StatusBadRequest, "%v", err)
-			return
-		}
-		m.mu.Lock()
-		defer m.mu.Unlock()
-		crud.KeepSecret(m.cfg.Server.Token, &s.Token)
-		crud.KeepSecret(m.cfg.Server.DashboardPwd, &s.DashboardPwd)
-		if err := s.Validate(); err != nil {
-			httpx.Error(w, http.StatusBadRequest, "%v", err)
-			return
-		}
-		old := m.cfg.Server
-		m.cfg.Server = s
-		if err := m.saveLocked(); err != nil {
-			m.cfg.Server = old
-			httpx.Error(w, http.StatusInternalServerError, "保存失败: %v", err)
-			return
-		}
-		m.applyServerLocked()
-		httpx.OK(w, map[string]bool{"ok": true})
-	})
 }
 
 // Summary 实现 module.Summarizer。
@@ -305,18 +604,37 @@ func (m *Module) Summary() []module.SummaryItem {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	var out []module.SummaryItem
-	if m.cfg.Client.Enable {
-		out = append(out, roleSummary("客户端", m.client))
-		enabled := 0
+	var clientKeys []string
+	for _, c := range m.cfg.Clients {
+		if c.Enable {
+			clientKeys = append(clientKeys, c.Key)
+		}
+	}
+	if len(clientKeys) > 0 {
+		out = append(out, rolesSummary("客户端", m.clients, clientKeys))
+		enabled, total := 0, 0
+		on := map[string]bool{}
+		for _, k := range clientKeys {
+			on[k] = true
+		}
 		for _, p := range m.cfg.Proxies {
-			if p.Enable {
-				enabled++
+			if on[p.Client] {
+				total++
+				if p.Enable {
+					enabled++
+				}
 			}
 		}
-		out = append(out, module.SummaryItem{Label: "代理", Value: fmt.Sprintf("%d / %d", enabled, len(m.cfg.Proxies))})
+		out = append(out, module.SummaryItem{Label: "代理", Value: fmt.Sprintf("%d / %d", enabled, total)})
 	}
-	if m.cfg.Server.Enable {
-		out = append(out, roleSummary("服务端", m.server))
+	var serverKeys []string
+	for _, s := range m.cfg.Servers {
+		if s.Enable {
+			serverKeys = append(serverKeys, s.Key)
+		}
+	}
+	if len(serverKeys) > 0 {
+		out = append(out, rolesSummary("服务端", m.servers, serverKeys))
 	}
 	if len(out) == 0 {
 		out = append(out, module.SummaryItem{Label: "状态", Value: "未启用", Level: "info"})
@@ -324,33 +642,47 @@ func (m *Module) Summary() []module.SummaryItem {
 	return out
 }
 
-func roleSummary(label string, r *role) module.SummaryItem {
-	st := r.sup.State()
-	switch {
-	case st.Running:
-		return module.SummaryItem{Label: label, Value: "运行中", Level: "ok"}
-	case r.err != "" || st.Error != "":
-		return module.SummaryItem{Label: label, Value: "启动失败", Level: "error"}
-	default:
-		return module.SummaryItem{Label: label, Value: "未运行", Level: "warn"}
+// rolesSummary 汇总已启用实例的状态：只有一个实例时显示其状态，多个实例时显示“运行数 / 启用数”。
+func rolesSummary(label string, runs map[string]*instRuntime, keys []string) module.SummaryItem {
+	running, failed := 0, 0
+	for _, k := range keys {
+		rt := runs[k]
+		if rt == nil {
+			continue
+		}
+		st := rt.sup.State()
+		switch {
+		case st.Running:
+			running++
+		case rt.err != "" || st.Error != "":
+			failed++
+		}
 	}
+	level := "warn"
+	value := "未运行"
+	switch {
+	case failed > 0:
+		level, value = "error", "启动失败"
+	case running == len(keys):
+		level, value = "ok", "运行中"
+	}
+	if len(keys) > 1 {
+		value = fmt.Sprintf("%d / %d", running, len(keys))
+	}
+	return module.SummaryItem{Label: label, Value: value, Level: level}
 }
 
-// resetLocked 恢复默认配置：停止 frpc 与 frps，清空连接、代理与安装设置，删除生成的配置文件。
+// resetLocked 恢复默认配置：停止全部 frpc 与 frps，清空实例、代理、程序路径与安装设置，删除生成的配置文件。
 // 旧配置留在配置历史中，可以恢复；安装的程序不受影响。调用方持有 mu。
 func (m *Module) resetLocked() error {
-	var cfg fileConfig
-	cfg.fillDefaults()
 	old := m.cfg
-	m.cfg = cfg
+	m.cfg = fileConfig{}
 	if err := m.saveLocked(); err != nil {
 		m.cfg = old
 		return fmt.Errorf("保存失败: %v", err)
 	}
-	// 新配置均未启用，apply 会停止进程
-	m.applyClientLocked()
-	m.applyServerLocked()
-	m.client.err, m.server.err = "", ""
+	// 实例已全部删除，sync 会停止进程
+	m.syncLocked(false)
 	if err := os.RemoveAll(filepath.Join(m.store.Dir(), "frp")); err != nil {
 		return fmt.Errorf("删除生成的配置文件失败: %v", err)
 	}

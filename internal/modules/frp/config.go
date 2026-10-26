@@ -24,11 +24,8 @@ var proxyTypes = map[string]bool{TypeTCP: true, TypeUDP: true, TypeHTTP: true, T
 
 var protocols = map[string]bool{"": true, "tcp": true, "kcp": true, "quic": true, "websocket": true, "wss": true}
 
-// ClientSettings 是 frpc（客户端）配置。
+// ClientSettings 是 frpc（客户端）与 frps 之间的连接参数。
 type ClientSettings struct {
-	Enable bool `json:"enable"`
-	// BinPath 为空时依次在配置目录 bin 与 PATH 下查找 frpc
-	BinPath    string `json:"binPath"`
 	ServerAddr string `json:"serverAddr"`
 	ServerPort int    `json:"serverPort"`
 	Token      string `json:"token"`
@@ -37,10 +34,8 @@ type ClientSettings struct {
 	Protocol string `json:"protocol"`
 }
 
-// ServerSettings 是 frps（服务端）配置。
+// ServerSettings 是 frps（服务端）的监听与认证参数。
 type ServerSettings struct {
-	Enable  bool   `json:"enable"`
-	BinPath string `json:"binPath"`
 	// BindAddr 是 frpc 连接端口的监听地址，留空监听所有地址；
 	// 填 127.0.0.1 时可放在反向代理之后，让 frpc 用 websocket / wss 连接
 	BindAddr string `json:"bindAddr"`
@@ -63,6 +58,31 @@ type ServerSettings struct {
 	DashboardPwd  string `json:"dashboardPwd"`
 }
 
+// Client 是一个 frpc 实例：连接一台 frps，运行一个独立的 frpc 进程，代理通过 Proxy.Client 归属到实例。
+type Client struct {
+	Key    string `json:"key"`
+	Name   string `json:"name"`
+	Enable bool   `json:"enable"`
+	ClientSettings
+	Remark string `json:"remark"`
+}
+
+// Server 是一个 frps 实例，运行一个独立的 frps 进程。
+type Server struct {
+	Key    string `json:"key"`
+	Name   string `json:"name"`
+	Enable bool   `json:"enable"`
+	ServerSettings
+	Remark string `json:"remark"`
+}
+
+// Settings 是模块级设置。
+type Settings struct {
+	// FrpcPath、FrpsPath 为空时依次在配置目录 bin 与 PATH 下查找 frpc、frps
+	FrpcPath string `json:"frpcPath"`
+	FrpsPath string `json:"frpsPath"`
+}
+
 // Proxy 是一条 frpc 代理，把本地服务暴露到 frps。
 type Proxy struct {
 	Key       string `json:"key"`
@@ -79,21 +99,40 @@ type Proxy struct {
 	// SecretKey 用于 stcp 与 xtcp，访问端需使用相同密钥
 	SecretKey string `json:"secretKey"`
 	Remark    string `json:"remark"`
+	// Client 是代理所属 frpc 实例的 key
+	Client string `json:"client"`
 }
 
 type fileConfig struct {
-	Client ClientSettings `json:"client"`
-	Server ServerSettings `json:"server"`
+	Settings Settings `json:"settings"`
 	// Install 为在线安装设置
 	Install binstall.Config `json:"install"`
+	Clients []Client        `json:"clients"`
+	Servers []Server        `json:"servers"`
 	Proxies []Proxy         `json:"proxies"`
+	// LegacyClient、LegacyServer 是 0.5.9 及更早版本的单实例配置，仅在加载时读取并迁移为实例
+	LegacyClient *v1Client `json:"client,omitempty"`
+	LegacyServer *v1Server `json:"server,omitempty"`
+}
+
+// v1Client 是旧版单实例 frpc 配置。
+type v1Client struct {
+	Enable  bool   `json:"enable"`
+	BinPath string `json:"binPath"`
+	ClientSettings
+}
+
+// v1Server 是旧版单实例 frps 配置。
+type v1Server struct {
+	Enable  bool   `json:"enable"`
+	BinPath string `json:"binPath"`
+	ServerSettings
 }
 
 func validPort(p int) bool { return p >= 1 && p <= 65535 }
 
-// Validate 校验并规范化客户端配置。
+// Validate 校验并规范化连接参数；服务端地址是否必填由 Client.Validate 按启用状态判断。
 func (c *ClientSettings) Validate() error {
-	c.BinPath = strings.TrimSpace(c.BinPath)
 	c.ServerAddr = strings.TrimSpace(c.ServerAddr)
 	c.User = strings.TrimSpace(c.User)
 	if c.ServerPort == 0 {
@@ -105,15 +144,35 @@ func (c *ClientSettings) Validate() error {
 	if !protocols[c.Protocol] {
 		return fmt.Errorf("不支持的传输协议 %q", c.Protocol)
 	}
+	return nil
+}
+
+// Validate 校验并规范化 frpc 实例。
+func (c *Client) Validate() error {
+	c.Name = strings.TrimSpace(c.Name)
+	if c.Name == "" {
+		return errors.New("名称不能为空")
+	}
+	if err := c.ClientSettings.Validate(); err != nil {
+		return err
+	}
 	if c.Enable && c.ServerAddr == "" {
 		return errors.New("启用 frpc 时需要填写服务端地址")
 	}
 	return nil
 }
 
+// Validate 校验并规范化 frps 实例。
+func (s *Server) Validate() error {
+	s.Name = strings.TrimSpace(s.Name)
+	if s.Name == "" {
+		return errors.New("名称不能为空")
+	}
+	return s.ServerSettings.Validate()
+}
+
 // Validate 校验并规范化服务端配置。
 func (s *ServerSettings) Validate() error {
-	s.BinPath = strings.TrimSpace(s.BinPath)
 	s.BindAddr = strings.TrimSpace(s.BindAddr)
 	s.ProxyBindAddr = strings.TrimSpace(s.ProxyBindAddr)
 	s.SubdomainHost = strings.TrimSpace(s.SubdomainHost)
@@ -185,6 +244,7 @@ func (p *Proxy) Validate() error {
 	if p.Name == "" {
 		return errors.New("代理名称不能为空")
 	}
+
 	if !proxyTypes[p.Type] {
 		return fmt.Errorf("不支持的代理类型 %q", p.Type)
 	}

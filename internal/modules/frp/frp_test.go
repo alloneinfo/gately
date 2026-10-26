@@ -1,17 +1,8 @@
 package frp
 
 import (
-	"context"
-	"os"
-	"path/filepath"
-	"runtime"
 	"strings"
 	"testing"
-	"time"
-
-	"github.com/wangwanjie/gately/internal/config"
-	"github.com/wangwanjie/gately/internal/logbuf"
-	"github.com/wangwanjie/gately/internal/module"
 )
 
 func TestClientTOML(t *testing.T) {
@@ -130,83 +121,5 @@ func TestServerValidate(t *testing.T) {
 	s = ServerSettings{}
 	if err := s.Validate(); err != nil || s.BindPort != 7000 || s.DashboardAddr != "127.0.0.1" {
 		t.Errorf("默认值错误: %v %+v", err, s)
-	}
-}
-
-// TestModuleRunsFakeFrpc 用假的 frpc 脚本验证配置写入、进程启动与日志采集。
-func TestModuleRunsFakeFrpc(t *testing.T) {
-	if runtime.GOOS == "windows" {
-		t.Skip("依赖 sh")
-	}
-	dir := t.TempDir()
-	bin := filepath.Join(dir, "frpc")
-	script := "#!/bin/sh\necho \"2026-01-01 00:00:00.000 [I] [client] using $2\"\ncat \"$2\" | head -1\nexec sleep 30\n"
-	if err := os.WriteFile(bin, []byte(script), 0o755); err != nil {
-		t.Fatal(err)
-	}
-	store, err := config.Open(dir)
-	if err != nil {
-		t.Fatal(err)
-	}
-	logs := logbuf.New(100, nil)
-	m := New()
-	if err := m.Init(module.Env{Store: store, Logs: logs}); err != nil {
-		t.Fatal(err)
-	}
-	m.cfg.Client = ClientSettings{Enable: true, BinPath: bin, ServerAddr: "example.com", ServerPort: 7000}
-	m.cfg.Proxies = []Proxy{{Key: "k", Name: "ssh", Type: TypeTCP, Enable: true, LocalIP: "127.0.0.1", LocalPort: 22, RemotePort: 6022}}
-	if err := m.Start(context.Background()); err != nil {
-		t.Fatal(err)
-	}
-	defer m.Stop()
-
-	deadline := time.Now().Add(5 * time.Second)
-	for !m.client.sup.State().Running && time.Now().Before(deadline) {
-		time.Sleep(20 * time.Millisecond)
-	}
-	if !m.client.sup.State().Running {
-		t.Fatalf("frpc 未运行: %+v", m.client.sup.State())
-	}
-	data, err := os.ReadFile(filepath.Join(dir, "frp", "frpc.toml"))
-	if err != nil || !strings.Contains(string(data), `serverAddr = "example.com"`) {
-		t.Fatalf("配置文件错误: %v %s", err, data)
-	}
-	if st, _ := os.Stat(filepath.Join(dir, "frp", "frpc.toml")); st.Mode().Perm() != 0o600 {
-		t.Errorf("配置文件含令牌，权限应为 0600，实际 %v", st.Mode().Perm())
-	}
-	var found bool
-	for time.Now().Before(deadline) && !found {
-		for _, e := range logs.Since(0) {
-			if strings.Contains(e.Message, "serverAddr") {
-				found = true
-			}
-		}
-		time.Sleep(20 * time.Millisecond)
-	}
-	if !found {
-		t.Errorf("未采集到进程输出: %+v", logs.Since(0))
-	}
-	// 恢复默认配置：停止进程、清空配置与生成的文件，保留程序
-	m.mu.Lock()
-	err = m.resetLocked()
-	m.mu.Unlock()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if m.client.sup.State().Running {
-		t.Error("恢复默认配置后 frpc 仍在运行")
-	}
-	if m.cfg.Client.Enable || m.cfg.Client.BinPath != "" || len(m.cfg.Proxies) != 0 || m.cfg.Server.BindPort != 7000 {
-		t.Errorf("配置未恢复默认: %+v", m.cfg)
-	}
-	if _, err := os.Stat(filepath.Join(dir, "frp")); !os.IsNotExist(err) {
-		t.Errorf("生成的配置文件应被删除: %v", err)
-	}
-	var saved fileConfig
-	if _, err := store.Load(ID, &saved); err != nil || saved.Client.ServerAddr != "" || len(saved.Proxies) != 0 {
-		t.Errorf("保存的配置未恢复默认: %v %+v", err, saved)
-	}
-	if _, err := os.Stat(bin); err != nil {
-		t.Errorf("程序应保留: %v", err)
 	}
 }

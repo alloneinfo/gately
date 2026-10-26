@@ -139,23 +139,38 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | --- | --- | --- | --- |
 | GET | `/api/frp/logs` | `frp:read` | Просмотр журнала работы модуля |
 | DELETE | `/api/frp/logs` | `frp:write` | Очистить журнал работы модуля |
-| GET | `/api/frp/proxies` | `frp:read` | Список: Элемент |
-| POST | `/api/frp/proxies` | `frp:write` | Добавить: Элемент |
-| PUT | `/api/frp/proxies/{key}` | `frp:write` | Изменить: Элемент |
-| DELETE | `/api/frp/proxies/{key}` | `frp:write` | Удалить: Элемент |
-| PUT | `/api/frp/proxies/{key}/enable` | `frp:write` | Включить или отключить: Элемент |
-| PUT | `/api/frp/proxies-order` | `frp:write` | Изменить порядок: Элемент |
+| GET | `/api/frp/clients` | `frp:read` | Список: Клиент frp |
+| POST | `/api/frp/clients` | `frp:write` | Добавить: Клиент frp |
+| PUT | `/api/frp/clients/{key}` | `frp:write` | Изменить: Клиент frp |
+| DELETE | `/api/frp/clients/{key}` | `frp:write` | Удалить: Клиент frp |
+| PUT | `/api/frp/clients/{key}/enable` | `frp:write` | Включить или отключить: Клиент frp |
+| PUT | `/api/frp/clients-order` | `frp:write` | Изменить порядок: Клиент frp |
+| GET | `/api/frp/clients/{key}/secrets` | `frp:write` | Показать секреты открытым текстом |
+| GET | `/api/frp/servers` | `frp:read` | Список: Сервер frp |
+| POST | `/api/frp/servers` | `frp:write` | Добавить: Сервер frp |
+| PUT | `/api/frp/servers/{key}` | `frp:write` | Изменить: Сервер frp |
+| DELETE | `/api/frp/servers/{key}` | `frp:write` | Удалить: Сервер frp |
+| PUT | `/api/frp/servers/{key}/enable` | `frp:write` | Включить или отключить: Сервер frp |
+| PUT | `/api/frp/servers-order` | `frp:write` | Изменить порядок: Сервер frp |
+| GET | `/api/frp/servers/{key}/secrets` | `frp:write` | Показать секреты открытым текстом |
+| GET | `/api/frp/proxies` | `frp:read` | Список: прокси frp |
+| POST | `/api/frp/proxies` | `frp:write` | Добавить: прокси frp |
+| PUT | `/api/frp/proxies/{key}` | `frp:write` | Изменить: прокси frp |
+| DELETE | `/api/frp/proxies/{key}` | `frp:write` | Удалить: прокси frp |
+| PUT | `/api/frp/proxies/{key}/enable` | `frp:write` | Включить или отключить: прокси frp |
+| PUT | `/api/frp/proxies-order` | `frp:write` | Изменить порядок: прокси frp |
+| GET | `/api/frp/proxies/{key}/secrets` | `frp:write` | Показать секреты открытым текстом |
 | POST | `/api/frp/import` | `frp:write` | Импорт существующей конфигурации frpc / frps (поддерживаются старый ini и новый toml); если apply равен false, выполняется только предпросмотр |
 | GET | `/api/frp/install` | `frp:read` | Просмотр сведений об установке и хода установки управляемой программы |
 | POST | `/api/frp/install` | `frp:write` | Установить или обновить управляемую программу онлайн |
 | POST | `/api/frp/install/rollback` | `frp:write` | Переключиться на сохранённую предыдущую версию |
 | DELETE | `/api/frp/install` | `frp:write` | Удалить управляемую программу |
 | DELETE | `/api/frp/install/backups/{id}` | `frp:write` | Удалить сохранённую предыдущую версию |
+| POST | `/api/frp/clients/{key}/restart` | `frp:write` | Перезапустить экземпляр frpc |
+| POST | `/api/frp/servers/{key}/restart` | `frp:write` | Перезапустить экземпляр frps |
+| GET | `/api/frp/settings` | `frp:read` | Получить пути и версии программ |
+| PUT | `/api/frp/settings` | `frp:write` | Сохранить пути к программам |
 | POST | `/api/frp/reset` | `frp:write` | Сбросить настройки модуля по умолчанию |
-| GET | `/api/frp/client` | `frp:read` | Чтение конфигурации клиента frp |
-| PUT | `/api/frp/client` | `frp:write` | Сохранить конфигурацию клиента frp |
-| GET | `/api/frp/server` | `frp:read` | Чтение конфигурации сервера frp |
-| PUT | `/api/frp/server` | `frp:write` | Сохранить конфигурацию сервера frp |
 
 ## Туннель Cloudflare
 
@@ -832,12 +847,32 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `path` | string |
 | `readOnly` | boolean |
 
+### frp.BinaryView
+
+| Поле | Тип |
+| --- | --- |
+| `binary` | string |
+| `error` | string |
+| `version` | string |
+
+### frp.Client
+
+| Поле | Тип |
+| --- | --- |
+| `enable` | boolean |
+| `key` | string |
+| `name` | string |
+| `protocol` | string |
+| `remark` | string |
+| `serverAddr` | string |
+| `serverPort` | integer |
+| `token` | string |
+| `user` | string |
+
 ### frp.ClientSettings
 
 | Поле | Тип |
 | --- | --- |
-| `binPath` | string |
-| `enable` | boolean |
 | `protocol` | string |
 | `serverAddr` | string |
 | `serverPort` | integer |
@@ -850,8 +885,10 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | --- | --- |
 | `apply` | boolean |
 | `content` | string |
+| `name` | string |
 | `proxyMode` | string |
 | `role` | string |
+| `target` | string |
 
 ### frp.ImportResponse
 
@@ -860,6 +897,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `added` | integer |
 | `applied` | boolean |
 | `client` | `frp.ClientSettings` |
+| `key` | string |
 | `proxies` | Массив из `frp.Proxy` |
 | `role` | string |
 | `server` | `frp.ServerSettings` |
@@ -869,6 +907,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 
 | Поле | Тип |
 | --- | --- |
+| `client` | string |
 | `customDomains` | Массив из string |
 | `enable` | boolean |
 | `key` | string |
@@ -881,12 +920,11 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `subdomain` | string |
 | `type` | string |
 
-### frp.ServerSettings
+### frp.Server
 
 | Поле | Тип |
 | --- | --- |
 | `allowPorts` | string |
-| `binPath` | string |
 | `bindAddr` | string |
 | `bindPort` | integer |
 | `dashboardAddr` | string |
@@ -894,11 +932,46 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `dashboardPwd` | string |
 | `dashboardUser` | string |
 | `enable` | boolean |
+| `key` | string |
+| `name` | string |
+| `proxyBindAddr` | string |
+| `remark` | string |
+| `subdomainHost` | string |
+| `token` | string |
+| `vhostHttpPort` | integer |
+| `vhostHttpsPort` | integer |
+
+### frp.ServerSettings
+
+| Поле | Тип |
+| --- | --- |
+| `allowPorts` | string |
+| `bindAddr` | string |
+| `bindPort` | integer |
+| `dashboardAddr` | string |
+| `dashboardPort` | integer |
+| `dashboardPwd` | string |
+| `dashboardUser` | string |
 | `proxyBindAddr` | string |
 | `subdomainHost` | string |
 | `token` | string |
 | `vhostHttpPort` | integer |
 | `vhostHttpsPort` | integer |
+
+### frp.Settings
+
+| Поле | Тип |
+| --- | --- |
+| `frpcPath` | string |
+| `frpsPath` | string |
+
+### frp.SettingsView
+
+| Поле | Тип |
+| --- | --- |
+| `frpc` | `frp.BinaryView` |
+| `frps` | `frp.BinaryView` |
+| `settings` | `frp.Settings` |
 
 ### geoip.Info
 

@@ -139,23 +139,38 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | --- | --- | --- | --- |
 | GET | `/api/frp/logs` | `frp:read` | Consulter les journaux d'exécution d'un module |
 | DELETE | `/api/frp/logs` | `frp:write` | Vider les journaux d'exécution d'un module |
-| GET | `/api/frp/proxies` | `frp:read` | Lister Entrée |
-| POST | `/api/frp/proxies` | `frp:write` | Ajouter Entrée |
-| PUT | `/api/frp/proxies/{key}` | `frp:write` | Modifier Entrée |
-| DELETE | `/api/frp/proxies/{key}` | `frp:write` | Supprimer Entrée |
-| PUT | `/api/frp/proxies/{key}/enable` | `frp:write` | Activer ou désactiver Entrée |
-| PUT | `/api/frp/proxies-order` | `frp:write` | Réordonner Entrée |
+| GET | `/api/frp/clients` | `frp:read` | Lister Client frp |
+| POST | `/api/frp/clients` | `frp:write` | Ajouter Client frp |
+| PUT | `/api/frp/clients/{key}` | `frp:write` | Modifier Client frp |
+| DELETE | `/api/frp/clients/{key}` | `frp:write` | Supprimer Client frp |
+| PUT | `/api/frp/clients/{key}/enable` | `frp:write` | Activer ou désactiver Client frp |
+| PUT | `/api/frp/clients-order` | `frp:write` | Réordonner Client frp |
+| GET | `/api/frp/clients/{key}/secrets` | `frp:write` | Afficher les secrets en clair |
+| GET | `/api/frp/servers` | `frp:read` | Lister Serveur frp |
+| POST | `/api/frp/servers` | `frp:write` | Ajouter Serveur frp |
+| PUT | `/api/frp/servers/{key}` | `frp:write` | Modifier Serveur frp |
+| DELETE | `/api/frp/servers/{key}` | `frp:write` | Supprimer Serveur frp |
+| PUT | `/api/frp/servers/{key}/enable` | `frp:write` | Activer ou désactiver Serveur frp |
+| PUT | `/api/frp/servers-order` | `frp:write` | Réordonner Serveur frp |
+| GET | `/api/frp/servers/{key}/secrets` | `frp:write` | Afficher les secrets en clair |
+| GET | `/api/frp/proxies` | `frp:read` | Lister proxys frp |
+| POST | `/api/frp/proxies` | `frp:write` | Ajouter proxys frp |
+| PUT | `/api/frp/proxies/{key}` | `frp:write` | Modifier proxys frp |
+| DELETE | `/api/frp/proxies/{key}` | `frp:write` | Supprimer proxys frp |
+| PUT | `/api/frp/proxies/{key}/enable` | `frp:write` | Activer ou désactiver proxys frp |
+| PUT | `/api/frp/proxies-order` | `frp:write` | Réordonner proxys frp |
+| GET | `/api/frp/proxies/{key}/secrets` | `frp:write` | Afficher les secrets en clair |
 | POST | `/api/frp/import` | `frp:write` | Importer une configuration frpc / frps existante (anciens ini et nouveaux toml pris en charge) ; aperçu uniquement si apply vaut false |
 | GET | `/api/frp/install` | `frp:read` | Voir les informations d'installation et la progression d'un programme géré |
 | POST | `/api/frp/install` | `frp:write` | Installer ou mettre à jour en ligne un programme géré |
 | POST | `/api/frp/install/rollback` | `frp:write` | Revenir à une version précédente conservée |
 | DELETE | `/api/frp/install` | `frp:write` | Désinstaller un programme géré |
 | DELETE | `/api/frp/install/backups/{id}` | `frp:write` | Supprimer une version précédente conservée |
+| POST | `/api/frp/clients/{key}/restart` | `frp:write` | Redémarrer l'instance frpc |
+| POST | `/api/frp/servers/{key}/restart` | `frp:write` | Redémarrer l'instance frps |
+| GET | `/api/frp/settings` | `frp:read` | Lire les chemins et versions des programmes |
+| PUT | `/api/frp/settings` | `frp:write` | Enregistrer les chemins des programmes |
 | POST | `/api/frp/reset` | `frp:write` | Rétablir les paramètres par défaut du module |
-| GET | `/api/frp/client` | `frp:read` | Lire la configuration du client frp |
-| PUT | `/api/frp/client` | `frp:write` | Enregistrer la configuration du client frp |
-| GET | `/api/frp/server` | `frp:read` | Lire la configuration du serveur frp |
-| PUT | `/api/frp/server` | `frp:write` | Enregistrer la configuration du serveur frp |
 
 ## Tunnel Cloudflare
 
@@ -832,12 +847,32 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | `path` | string |
 | `readOnly` | boolean |
 
+### frp.BinaryView
+
+| Champ | Type |
+| --- | --- |
+| `binary` | string |
+| `error` | string |
+| `version` | string |
+
+### frp.Client
+
+| Champ | Type |
+| --- | --- |
+| `enable` | boolean |
+| `key` | string |
+| `name` | string |
+| `protocol` | string |
+| `remark` | string |
+| `serverAddr` | string |
+| `serverPort` | integer |
+| `token` | string |
+| `user` | string |
+
 ### frp.ClientSettings
 
 | Champ | Type |
 | --- | --- |
-| `binPath` | string |
-| `enable` | boolean |
 | `protocol` | string |
 | `serverAddr` | string |
 | `serverPort` | integer |
@@ -850,8 +885,10 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | --- | --- |
 | `apply` | boolean |
 | `content` | string |
+| `name` | string |
 | `proxyMode` | string |
 | `role` | string |
+| `target` | string |
 
 ### frp.ImportResponse
 
@@ -860,6 +897,7 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | `added` | integer |
 | `applied` | boolean |
 | `client` | `frp.ClientSettings` |
+| `key` | string |
 | `proxies` | Tableau de `frp.Proxy` |
 | `role` | string |
 | `server` | `frp.ServerSettings` |
@@ -869,6 +907,7 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 
 | Champ | Type |
 | --- | --- |
+| `client` | string |
 | `customDomains` | Tableau de string |
 | `enable` | boolean |
 | `key` | string |
@@ -881,12 +920,11 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | `subdomain` | string |
 | `type` | string |
 
-### frp.ServerSettings
+### frp.Server
 
 | Champ | Type |
 | --- | --- |
 | `allowPorts` | string |
-| `binPath` | string |
 | `bindAddr` | string |
 | `bindPort` | integer |
 | `dashboardAddr` | string |
@@ -894,11 +932,46 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | `dashboardPwd` | string |
 | `dashboardUser` | string |
 | `enable` | boolean |
+| `key` | string |
+| `name` | string |
+| `proxyBindAddr` | string |
+| `remark` | string |
+| `subdomainHost` | string |
+| `token` | string |
+| `vhostHttpPort` | integer |
+| `vhostHttpsPort` | integer |
+
+### frp.ServerSettings
+
+| Champ | Type |
+| --- | --- |
+| `allowPorts` | string |
+| `bindAddr` | string |
+| `bindPort` | integer |
+| `dashboardAddr` | string |
+| `dashboardPort` | integer |
+| `dashboardPwd` | string |
+| `dashboardUser` | string |
 | `proxyBindAddr` | string |
 | `subdomainHost` | string |
 | `token` | string |
 | `vhostHttpPort` | integer |
 | `vhostHttpsPort` | integer |
+
+### frp.Settings
+
+| Champ | Type |
+| --- | --- |
+| `frpcPath` | string |
+| `frpsPath` | string |
+
+### frp.SettingsView
+
+| Champ | Type |
+| --- | --- |
+| `frpc` | `frp.BinaryView` |
+| `frps` | `frp.BinaryView` |
+| `settings` | `frp.Settings` |
 
 ### geoip.Info
 

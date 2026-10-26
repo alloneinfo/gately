@@ -34,6 +34,8 @@ type Collection[T any] struct {
 	Enabled func(*T) *bool
 	// Validate 校验并规范化输入
 	Validate func(*T) error
+	// Check 在持锁状态下做依赖其他配置的校验，例如引用的条目是否存在；在 Validate 之后调用，可为 nil
+	Check func(*T) error
 	// Merge 在修改时合并旧值，例如保留被脱敏的密钥；可为 nil
 	Merge func(old, updated *T)
 	// View 把条目转换为输出结构（附加运行状态、脱敏）；可为 nil
@@ -132,6 +134,12 @@ func (c *Collection[T]) create(w http.ResponseWriter, r *http.Request) {
 	}
 	c.Mu.Lock()
 	defer c.Mu.Unlock()
+	if c.Check != nil {
+		if err := c.Check(&it); err != nil {
+			httpx.Error(w, http.StatusBadRequest, "%v", err)
+			return
+		}
+	}
 	key := NewKey()
 	*c.Key(&it) = key
 	*c.Items = append(*c.Items, it)
@@ -167,6 +175,12 @@ func (c *Collection[T]) update(w http.ResponseWriter, r *http.Request) {
 	if err := c.Validate(&it); err != nil {
 		httpx.Error(w, http.StatusBadRequest, "%v", err)
 		return
+	}
+	if c.Check != nil {
+		if err := c.Check(&it); err != nil {
+			httpx.Error(w, http.StatusBadRequest, "%v", err)
+			return
+		}
 	}
 	*c.Key(&it) = key
 	(*c.Items)[i] = it

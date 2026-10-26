@@ -43,12 +43,21 @@ func TestImportLuckyFRP(t *testing.T) {
 	if err != nil || rep == nil {
 		t.Fatalf("导入失败: %v %v", rep, err)
 	}
-	if rep.Found != 3 || rep.Imported != 2 {
-		t.Fatalf("统计错误: %+v", rep)
+	// 每个客户端、服务端实例都导入：两个 frpc 与一个 frps
+	if rep.Found != 3 || rep.Imported != 3 || len(m.cfg.Clients) != 2 || len(m.cfg.Servers) != 1 {
+		t.Fatalf("统计错误: %+v %+v", rep, m.cfg)
 	}
-	c := m.cfg.Client
-	if c.Enable || c.ServerAddr != "frp.example.com" || c.ServerPort != 7001 || c.Token != "t0k" || c.User != "me" || c.Protocol != "" {
+	c := m.cfg.Clients[0]
+	if c.Enable || c.Name != "home" || c.ServerAddr != "frp.example.com" || c.ServerPort != 7001 || c.Token != "t0k" || c.User != "me" || c.Protocol != "" {
 		t.Fatalf("客户端映射错误: %+v", c)
+	}
+	if c2 := m.cfg.Clients[1]; c2.Name != "second" || c2.ServerAddr != "b.example.com" || c2.ServerPort != 7000 {
+		t.Fatalf("第二个客户端映射错误: %+v", c2)
+	}
+	for _, p := range m.cfg.Proxies {
+		if p.Client != c.Key {
+			t.Fatalf("代理应归属第一个客户端: %+v", p)
+		}
 	}
 	if len(m.cfg.Proxies) != 3 {
 		t.Fatalf("应导入 3 个代理（插件代理跳过），实际 %+v", m.cfg.Proxies)
@@ -59,12 +68,12 @@ func TestImportLuckyFRP(t *testing.T) {
 	if m.cfg.Proxies[2].Enable {
 		t.Fatal("disabled 代理应保持停用")
 	}
-	s := m.cfg.Server
-	if s.Enable || s.BindPort != 7100 || s.Token != "st" || s.VhostHTTPPort != 8080 || s.SubdomainHost != "example.com" || s.AllowPorts != "6000-6100,7000" || s.DashboardPort != 0 || s.BindAddr != "" || s.ProxyBindAddr != "" {
+	s := m.cfg.Servers[0]
+	if s.Enable || s.Name != "srv" || s.BindPort != 7100 || s.Token != "st" || s.VhostHTTPPort != 8080 || s.SubdomainHost != "example.com" || s.AllowPorts != "6000-6100,7000" || s.DashboardPort != 0 || s.BindAddr != "" || s.ProxyBindAddr != "" {
 		t.Fatalf("服务端映射错误: %+v", s)
 	}
 	joined := strings.Join(rep.Warnings, "\n")
-	for _, want := range []string{"second: 跳过", "virtual_net", "useCompression（1 个代理）", "访问者", "控制台未迁移"} {
+	for _, want := range []string{"virtual_net", "useCompression（1 个代理）", "访问者", "控制台未迁移"} {
 		if !strings.Contains(joined, want) {
 			t.Errorf("缺少提示 %q:\n%s", want, joined)
 		}
@@ -73,12 +82,16 @@ func TestImportLuckyFRP(t *testing.T) {
 		t.Errorf("空值字段不应提示:\n%s", joined)
 	}
 
-	// 再次导入：同名代理跳过，不产生重复
-	if _, err := m.ImportLucky(doc, luckyimport.Options{}); err != nil {
+	// 再次导入：连接同一服务端的客户端追加到已有实例、同名代理跳过，同端口的服务端跳过，不产生重复
+	rep, err = m.ImportLucky(doc, luckyimport.Options{})
+	if err != nil {
 		t.Fatal(err)
 	}
-	if len(m.cfg.Proxies) != 3 {
-		t.Fatalf("重复导入不应产生重复代理: %d", len(m.cfg.Proxies))
+	if len(m.cfg.Proxies) != 3 || len(m.cfg.Clients) != 2 || len(m.cfg.Servers) != 1 {
+		t.Fatalf("重复导入不应产生重复: %+v", m.cfg)
+	}
+	if joined := strings.Join(rep.Warnings, "\n"); !strings.Contains(joined, "代理追加到该实例") || !strings.Contains(joined, "已使用端口 7100") {
+		t.Errorf("缺少重复导入提示:\n%s", joined)
 	}
 	// 其他模块的 List 配置不应被认领
 	other := luckyimport.Document{"List": json.RawMessage(`[{"Type":"tunnel"}]`)}
@@ -112,7 +125,10 @@ func TestImportLuckyFRPBindAddr(t *testing.T) {
 		if err != nil || rep == nil {
 			t.Fatalf("%s: 导入失败: %v %v", c.in, rep, err)
 		}
-		s := m.cfg.Server
+		if len(m.cfg.Servers) != 1 {
+			t.Fatalf("%s: 应导入一个 frps 实例: %+v %v", c.in, m.cfg.Servers, rep.Warnings)
+		}
+		s := m.cfg.Servers[0]
 		if s.BindPort != 7100 || s.BindAddr != c.want || s.ProxyBindAddr != c.want {
 			t.Errorf("%s: 监听地址应为 %q: %+v %v", c.in, c.want, s, rep.Warnings)
 		}

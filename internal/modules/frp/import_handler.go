@@ -1,6 +1,7 @@
 package frp
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -24,8 +25,12 @@ type ImportRequest struct {
 	Role    string `json:"role"`
 	Content string `json:"content"`
 	Apply   bool   `json:"apply"`
-	// ProxyMode 为 append 或 replace，仅客户端有效，留空等同 append
+	// ProxyMode 为 append 或 replace，仅导入到已有 frpc 实例时有效，留空等同 append
 	ProxyMode string `json:"proxyMode"`
+	// Target 为导入到的已有实例 key，留空时新建一个停用的实例
+	Target string `json:"target"`
+	// Name 为新建实例的名称，留空时使用服务端地址（frpc）或 frps
+	Name string `json:"name"`
 }
 
 // ImportResponse 是导入响应，密钥均已脱敏。
@@ -38,6 +43,8 @@ type ImportResponse struct {
 	Warnings []string        `json:"warnings"`
 	// Added 为实际新增的代理数量
 	Added int `json:"added"`
+	// Key 为导入到的实例 key，仅 Applied 为 true 时有值
+	Key string `json:"key,omitempty"`
 }
 
 func (m *Module) registerImport(r module.Router) {
@@ -65,8 +72,12 @@ func (m *Module) registerImport(r module.Router) {
 		m.mu.Lock()
 		defer m.mu.Unlock()
 		if in.Apply {
-			if err := m.applyImportLocked(res, in.ProxyMode, out); err != nil {
-				httpx.Error(w, http.StatusInternalServerError, "保存失败: %v", err)
+			if err := m.applyImportLocked(res, in, out); err != nil {
+				code := http.StatusInternalServerError
+				if errors.Is(err, errTargetNotFound) {
+					code = http.StatusBadRequest
+				}
+				httpx.Error(w, code, "%v", err)
 				return
 			}
 			out.Applied = true
@@ -91,51 +102,93 @@ func (m *Module) registerImport(r module.Router) {
 	})
 }
 
-// applyImportLocked 保存导入结果并重启对应进程；调用方持有 mu。
-// 启用状态与二进制路径沿用现有设置，导入不会自动启动进程，避免与正在运行的同名连接冲突。
-func (m *Module) applyImportLocked(res *ImportResult, mode string, out *ImportResponse) error {
+// applyImportLocked 保存导入结果并重启对应实例；调用方持有 mu。
+// 导入到已有实例时沿用其名称与启用状态；新建的实例默认停用，避免与正在运行的同名连接冲突。
+func (m *Module) applyImportLocked(res *ImportResult, in ImportRequest, out *ImportResponse) error {
 	oldCfg := m.cfg
+	// 复制切片再修改，保存失败时 oldCfg 不受影响
+	m.cfg.Clients = append([]Client(nil), m.cfg.Clients...)
+	m.cfg.Servers = append([]Server(nil), m.cfg.Servers...)
+	m.cfg.Proxies = append([]Proxy(nil), m.cfg.Proxies...)
+	name := strings.TrimSpace(in.Name)
 	switch res.Role {
 	case RoleClient:
-		c := *res.Client
-		c.Enable, c.BinPath = m.cfg.Client.Enable, m.cfg.Client.BinPath
-		m.cfg.Client = c
-		if mode == ProxyReplace {
-			m.cfg.Proxies = nil
+		var c *Client
+		if in.Target != "" {
+			if c = m.findClient(in.Target); c == nil {
+				m.cfg = oldCfg
+				return errTargetNotFound
+			}
+			c.ClientSettings = *res.Client
+			if in.ProxyMode == ProxyReplace {
+				kept := m.cfg.Proxies[:0]
+				for _, p := range m.cfg.Proxies {
+					if p.Client != c.Key {
+						kept = append(kept, p)
+					}
+				}
+				m.cfg.Proxies = kept
+			}
+		} else {
+			if name == "" {
+				name = res.Client.ServerAddr
+			}
+			if name == "" {
+				name = binClient
+			}
+			m.cfg.Clients = append(m.cfg.Clients, Client{Key: crud.NewKey(), Name: name, ClientSettings: *res.Client})
+			c = &m.cfg.Clients[len(m.cfg.Clients)-1]
 		}
+		out.Key = c.Key
 		exists := map[string]bool{}
 		for _, p := range m.cfg.Proxies {
-			exists[p.Name] = true
+			if p.Client == c.Key {
+				exists[p.Name] = true
+			}
 		}
 		var skipped []string
-		// 复制一份再追加，保存失败时 oldCfg 中的切片不受影响
-		items := append([]Proxy(nil), m.cfg.Proxies...)
 		for _, p := range res.Proxies {
 			if exists[p.Name] {
 				skipped = append(skipped, p.Name)
 				continue
 			}
-			p.Key = crud.NewKey()
-			items = append(items, p)
+			exists[p.Name] = true
+			p.Key, p.Client = crud.NewKey(), c.Key
+			m.cfg.Proxies = append(m.cfg.Proxies, p)
 			out.Added++
 		}
-		m.cfg.Proxies = items
 		if len(skipped) > 0 {
 			out.Warnings = append(out.Warnings, fmt.Sprintf("已存在同名代理，保持原样：%s", strings.Join(skipped, "、")))
 		}
 	case RoleServer:
-		s := *res.Server
-		s.Enable, s.BinPath = m.cfg.Server.Enable, m.cfg.Server.BinPath
-		m.cfg.Server = s
+		if in.Target != "" {
+			s := m.findServer(in.Target)
+			if s == nil {
+				m.cfg = oldCfg
+				return errTargetNotFound
+			}
+			s.ServerSettings = *res.Server
+			out.Key = s.Key
+		} else {
+			if name == "" {
+				name = binServer
+			}
+			s := Server{Key: crud.NewKey(), Name: name, ServerSettings: *res.Server}
+			m.cfg.Servers = append(m.cfg.Servers, s)
+			out.Key = s.Key
+		}
 	}
 	if err := m.saveLocked(); err != nil {
 		m.cfg = oldCfg
-		return err
+		return fmt.Errorf("保存失败: %v", err)
 	}
 	if res.Role == RoleClient {
-		m.applyClientLocked()
+		m.applyClientLocked(out.Key)
 	} else {
-		m.applyServerLocked()
+		m.applyServerLocked(out.Key)
 	}
 	return nil
 }
+
+// errTargetNotFound 表示导入目标实例不存在。
+var errTargetNotFound = errors.New("要导入到的实例不存在")

@@ -146,7 +146,7 @@
     "title": "Standardeinstellungen wiederherstellen",
     "common": "Installierte Programme bleiben erhalten, die alten Einstellungen lassen sich aus dem Konfigurationsverlauf wiederherstellen.",
     "done": "Standardeinstellungen wiederhergestellt",
-    "frp": "frpc und frps werden gestoppt, Client, Server, alle Proxys und der Download-Proxy werden geleert und die erzeugten Konfigurationsdateien gelöscht.",
+    "frp": "Stoppt alle frpc- und frps-Instanzen, leert Instanzen, Proxys, Programmpfade und den Download-Proxy und löscht die erzeugten Konfigurationsdateien.",
     "cloudflared": "Alle Tunnel werden gestoppt und gelöscht, Programmpfad und Download-Proxy werden geleert.",
     "tailscale": "Tailscale wird gestoppt (das von Gately verwaltete tailscaled meldet sich zuerst ab), die Standardeinstellungen werden wiederhergestellt und der Anmeldestatus im Standard-Statusverzeichnis wird gelöscht.",
     "filebrowser": "Alle Instanzen werden gestoppt und mit ihren Benutzern, Freigabelinks und Caches gelöscht (Dateien in den freigegebenen Verzeichnissen bleiben unberührt); Programmpfad und Download-Proxy werden geleert."

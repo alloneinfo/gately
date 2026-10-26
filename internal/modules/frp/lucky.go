@@ -55,8 +55,7 @@ var luckyProxyKeys = map[string]bool{
 	"customDomains": true, "subdomain": true, "secretKey": true, "disabled": true, "enabled": true,
 }
 
-// ImportLucky 实现 luckyimport.Importer。Gately 只有一个 frpc 与一个 frps：
-// 各取 Lucky 中的第一个客户端与服务端实例，其余实例在报告中列出。
+// ImportLucky 实现 luckyimport.Importer。Lucky 中的每个客户端、服务端实例分别导入为 Gately 的 frpc、frps 实例。
 func (m *Module) ImportLucky(doc luckyimport.Document, opts luckyimport.Options) (*luckyimport.Report, error) {
 	// cloudflared 与存储管理同样使用 List 字段，按实例类型识别
 	if !luckyimport.AllTypes(luckyimport.ListTypes(doc), RoleClient, RoleServer) {
@@ -67,45 +66,33 @@ func (m *Module) ImportLucky(doc luckyimport.Document, opts luckyimport.Options)
 		return nil, err
 	}
 	rep := &luckyimport.Report{Module: ID, Title: m.Title(), Found: len(src)}
-	var client, server *luckyInstance
-	for i := range src {
-		li := &src[i]
-		switch {
-		case li.Type == RoleClient && client == nil:
-			client = li
-		case li.Type == RoleServer && server == nil:
-			server = li
-		default:
-			rep.Warnings = append(rep.Warnings, instanceName(li)+": 跳过，Gately 每种角色只支持一个实例")
-		}
-	}
 
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	cfg := m.cfg
+	cfg.Clients = append([]Client(nil), m.cfg.Clients...)
+	cfg.Servers = append([]Server(nil), m.cfg.Servers...)
 	cfg.Proxies = append([]Proxy(nil), m.cfg.Proxies...)
-	changedClient, changedServer := false, false
-	if client != nil {
-		ok, err := importLuckyClient(&cfg, client, opts, rep)
+	changed := false
+	for i := range src {
+		li := &src[i]
+		var ok bool
+		var err error
+		switch li.Type {
+		case RoleClient:
+			ok, err = importLuckyClient(&cfg, li, opts, rep)
+		case RoleServer:
+			ok, err = importLuckyServer(&cfg, li, opts, rep)
+		}
 		if err != nil {
 			return nil, err
 		}
 		if ok {
-			changedClient = true
+			changed = true
 			rep.Imported++
 		}
 	}
-	if server != nil {
-		ok, err := importLuckyServer(&cfg, server, opts, rep)
-		if err != nil {
-			return nil, err
-		}
-		if ok {
-			changedServer = true
-			rep.Imported++
-		}
-	}
-	if opts.DryRun || (!changedClient && !changedServer) {
+	if opts.DryRun || !changed {
 		return rep, nil
 	}
 	old := m.cfg
@@ -114,12 +101,8 @@ func (m *Module) ImportLucky(doc luckyimport.Document, opts luckyimport.Options)
 		m.cfg = old
 		return nil, err
 	}
-	if changedClient {
-		m.applyClientLocked()
-	}
-	if changedServer {
-		m.applyServerLocked()
-	}
+	// 只启动新建的实例、重启追加了代理的实例
+	m.syncLocked(false)
 	return rep, nil
 }
 
@@ -130,7 +113,8 @@ func instanceName(li *luckyInstance) string {
 	return li.Key
 }
 
-// importLuckyClient 把客户端实例合并到 cfg。Gately 已配置了其他服务端的 frpc 时跳过，避免覆盖现有连接。
+// importLuckyClient 把客户端实例导入 cfg：Gately 中已有连接同一服务端（地址、端口与用户相同）的 frpc 实例时，
+// 保留该实例的设置只追加代理，否则新建实例。
 func importLuckyClient(cfg *fileConfig, li *luckyInstance, opts luckyimport.Options, rep *luckyimport.Report) (bool, error) {
 	name := instanceName(li)
 	var p luckyClientParams
@@ -139,14 +123,16 @@ func importLuckyClient(cfg *fileConfig, li *luckyInstance, opts luckyimport.Opti
 			return false, fmt.Errorf("%s: %w", name, err)
 		}
 	}
-	c := ClientSettings{
-		Enable:     li.Enable && opts.KeepEnabled,
-		BinPath:    cfg.Client.BinPath,
-		ServerAddr: p.ServerAddr,
-		ServerPort: p.ServerPort,
-		User:       p.User,
-		Token:      p.Token,
-		Protocol:   p.Protocol,
+	c := Client{
+		Name:   name,
+		Enable: li.Enable && opts.KeepEnabled,
+		ClientSettings: ClientSettings{
+			ServerAddr: p.ServerAddr,
+			ServerPort: p.ServerPort,
+			User:       p.User,
+			Token:      p.Token,
+			Protocol:   p.Protocol,
+		},
 	}
 	if c.Protocol == "tcp" {
 		c.Protocol = ""
@@ -171,20 +157,26 @@ func importLuckyClient(cfg *fileConfig, li *luckyInstance, opts luckyimport.Opti
 		rep.Warnings = append(rep.Warnings, fmt.Sprintf("%s: 跳过，%v", name, err))
 		return false, nil
 	}
-	cur := cfg.Client
-	if cur.ServerAddr != "" && (cur.ServerAddr != c.ServerAddr || cur.ServerPort != c.ServerPort) {
-		rep.Warnings = append(rep.Warnings, fmt.Sprintf("%s: 跳过，Gately 中的 frpc 已连接 %s:%d", name, cur.ServerAddr, cur.ServerPort))
-		return false, nil
+	target := ""
+	for _, cur := range cfg.Clients {
+		if cur.ServerAddr != "" && cur.ServerAddr == c.ServerAddr && cur.ServerPort == c.ServerPort && cur.User == c.User {
+			// 服务端相同：保留现有实例的设置与启用状态，只追加代理
+			target = cur.Key
+			rep.Warnings = append(rep.Warnings, fmt.Sprintf("%s: Gately 中的 frpc 实例 %s 已连接 %s:%d，代理追加到该实例", name, cur.Name, c.ServerAddr, c.ServerPort))
+			break
+		}
 	}
-	if cur.ServerAddr != "" {
-		// 服务端相同：保留现有连接设置与启用状态，只追加代理
-		c = cur
+	if target == "" {
+		c.Key = crud.NewKey()
+		cfg.Clients = append(cfg.Clients, c)
+		target = c.Key
 	}
-	cfg.Client = c
 
 	existing := map[string]bool{}
 	for _, px := range cfg.Proxies {
-		existing[px.Name] = true
+		if px.Client == target {
+			existing[px.Name] = true
+		}
 	}
 	unsupported := map[string]int{}
 	added := 0
@@ -199,7 +191,7 @@ func importLuckyClient(cfg *fileConfig, li *luckyInstance, opts luckyimport.Opti
 			continue
 		}
 		existing[px.Name] = true
-		px.Key = crud.NewKey()
+		px.Key, px.Client = crud.NewKey(), target
 		cfg.Proxies = append(cfg.Proxies, px)
 		added++
 	}
@@ -217,7 +209,7 @@ func importLuckyClient(cfg *fileConfig, li *luckyInstance, opts luckyimport.Opti
 	if len(li.Visitors) > 0 {
 		rep.Warnings = append(rep.Warnings, fmt.Sprintf("%s: %d 个访问者（visitor）暂不支持，已跳过", name, len(li.Visitors)))
 	}
-	rep.Warnings = append(rep.Warnings, fmt.Sprintf("frpc %s:%d，导入 %d 个代理", c.ServerAddr, c.ServerPort, added))
+	rep.Warnings = append(rep.Warnings, fmt.Sprintf("%s: frpc %s:%d，导入 %d 个代理", name, c.ServerAddr, c.ServerPort, added))
 	return true, nil
 }
 
@@ -297,28 +289,26 @@ func isZero(v any) bool {
 	return false
 }
 
-// importLuckyServer 把服务端实例写入 cfg。Gately 中的 frps 已启用时跳过，避免覆盖正在运行的服务。
+// importLuckyServer 把服务端实例作为新的 frps 实例写入 cfg。Gately 中已有相同连接端口的 frps 实例时跳过，避免端口冲突。
 func importLuckyServer(cfg *fileConfig, li *luckyInstance, opts luckyimport.Options, rep *luckyimport.Report) (bool, error) {
 	name := instanceName(li)
-	if cfg.Server.Enable {
-		rep.Warnings = append(rep.Warnings, name+": 跳过，Gately 中的 frps 已启用")
-		return false, nil
-	}
 	var p luckyServerParams
 	if len(li.Params) > 0 {
 		if err := json.Unmarshal(li.Params, &p); err != nil {
 			return false, fmt.Errorf("%s: %w", name, err)
 		}
 	}
-	s := ServerSettings{
-		Enable:         li.Enable && opts.KeepEnabled,
-		BinPath:        cfg.Server.BinPath,
-		BindPort:       p.BindPort,
-		Token:          p.Token,
-		VhostHTTPPort:  p.VhostHTTPPort,
-		VhostHTTPSPort: p.VhostHTTPSPort,
-		SubdomainHost:  p.SubDomainHost,
-		AllowPorts:     strings.ReplaceAll(strings.TrimSpace(p.AllowPorts), " ", ""),
+	s := Server{
+		Name:   name,
+		Enable: li.Enable && opts.KeepEnabled,
+		ServerSettings: ServerSettings{
+			BindPort:       p.BindPort,
+			Token:          p.Token,
+			VhostHTTPPort:  p.VhostHTTPPort,
+			VhostHTTPSPort: p.VhostHTTPSPort,
+			SubdomainHost:  p.SubDomainHost,
+			AllowPorts:     strings.ReplaceAll(strings.TrimSpace(p.AllowPorts), " ", ""),
+		},
 	}
 	if _, err := ParseAllowPorts(s.AllowPorts); err != nil {
 		rep.Warnings = append(rep.Warnings, fmt.Sprintf("%s: %v，已改为不限制", name, err))
@@ -347,7 +337,14 @@ func importLuckyServer(cfg *fileConfig, li *luckyInstance, opts luckyimport.Opti
 		rep.Warnings = append(rep.Warnings, fmt.Sprintf("%s: 跳过，%v", name, err))
 		return false, nil
 	}
-	cfg.Server = s
-	rep.Warnings = append(rep.Warnings, fmt.Sprintf("frps 监听端口 %d", s.BindPort))
+	for _, cur := range cfg.Servers {
+		if cur.BindPort == s.BindPort {
+			rep.Warnings = append(rep.Warnings, fmt.Sprintf("%s: 跳过，Gately 中的 frps 实例 %s 已使用端口 %d", name, cur.Name, s.BindPort))
+			return false, nil
+		}
+	}
+	s.Key = crud.NewKey()
+	cfg.Servers = append(cfg.Servers, s)
+	rep.Warnings = append(rep.Warnings, fmt.Sprintf("%s: frps 监听端口 %d", name, s.BindPort))
 	return true, nil
 }

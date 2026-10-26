@@ -139,23 +139,38 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | --- | --- | --- | --- |
 | GET | `/api/frp/logs` | `frp:read` | モジュールの実行ログを表示 |
 | DELETE | `/api/frp/logs` | `frp:write` | モジュールの実行ログを消去 |
-| GET | `/api/frp/proxies` | `frp:read` | エントリ の一覧を取得 |
-| POST | `/api/frp/proxies` | `frp:write` | エントリ を追加 |
-| PUT | `/api/frp/proxies/{key}` | `frp:write` | エントリ を更新 |
-| DELETE | `/api/frp/proxies/{key}` | `frp:write` | エントリ を削除 |
-| PUT | `/api/frp/proxies/{key}/enable` | `frp:write` | エントリ の有効/無効を切り替え |
-| PUT | `/api/frp/proxies-order` | `frp:write` | エントリ の並び順を変更 |
+| GET | `/api/frp/clients` | `frp:read` | frp クライアント の一覧を取得 |
+| POST | `/api/frp/clients` | `frp:write` | frp クライアント を追加 |
+| PUT | `/api/frp/clients/{key}` | `frp:write` | frp クライアント を更新 |
+| DELETE | `/api/frp/clients/{key}` | `frp:write` | frp クライアント を削除 |
+| PUT | `/api/frp/clients/{key}/enable` | `frp:write` | frp クライアント の有効/無効を切り替え |
+| PUT | `/api/frp/clients-order` | `frp:write` | frp クライアント の並び順を変更 |
+| GET | `/api/frp/clients/{key}/secrets` | `frp:write` | シークレットを平文で表示 |
+| GET | `/api/frp/servers` | `frp:read` | frp サーバー の一覧を取得 |
+| POST | `/api/frp/servers` | `frp:write` | frp サーバー を追加 |
+| PUT | `/api/frp/servers/{key}` | `frp:write` | frp サーバー を更新 |
+| DELETE | `/api/frp/servers/{key}` | `frp:write` | frp サーバー を削除 |
+| PUT | `/api/frp/servers/{key}/enable` | `frp:write` | frp サーバー の有効/無効を切り替え |
+| PUT | `/api/frp/servers-order` | `frp:write` | frp サーバー の並び順を変更 |
+| GET | `/api/frp/servers/{key}/secrets` | `frp:write` | シークレットを平文で表示 |
+| GET | `/api/frp/proxies` | `frp:read` | frp プロキシ の一覧を取得 |
+| POST | `/api/frp/proxies` | `frp:write` | frp プロキシ を追加 |
+| PUT | `/api/frp/proxies/{key}` | `frp:write` | frp プロキシ を更新 |
+| DELETE | `/api/frp/proxies/{key}` | `frp:write` | frp プロキシ を削除 |
+| PUT | `/api/frp/proxies/{key}/enable` | `frp:write` | frp プロキシ の有効/無効を切り替え |
+| PUT | `/api/frp/proxies-order` | `frp:write` | frp プロキシ の並び順を変更 |
+| GET | `/api/frp/proxies/{key}/secrets` | `frp:write` | シークレットを平文で表示 |
 | POST | `/api/frp/import` | `frp:write` | 既存の frpc / frps 設定をインポート（旧形式 ini と新形式 toml に対応）。apply が false の場合はプレビューのみ |
 | GET | `/api/frp/install` | `frp:read` | 管理プログラムのインストール情報と進捗を表示 |
 | POST | `/api/frp/install` | `frp:write` | 管理プログラムをオンラインでインストールまたは更新 |
 | POST | `/api/frp/install/rollback` | `frp:write` | 保存された旧バージョンに切り替え |
 | DELETE | `/api/frp/install` | `frp:write` | 管理プログラムをアンインストール |
 | DELETE | `/api/frp/install/backups/{id}` | `frp:write` | 保存された旧バージョンを削除 |
+| POST | `/api/frp/clients/{key}/restart` | `frp:write` | frpc インスタンスを再起動 |
+| POST | `/api/frp/servers/{key}/restart` | `frp:write` | frps インスタンスを再起動 |
+| GET | `/api/frp/settings` | `frp:read` | プログラムのパスとバージョンを取得 |
+| PUT | `/api/frp/settings` | `frp:write` | プログラムのパスを保存 |
 | POST | `/api/frp/reset` | `frp:write` | モジュールのデフォルト設定に戻す |
-| GET | `/api/frp/client` | `frp:read` | frp クライアント設定を読み取り |
-| PUT | `/api/frp/client` | `frp:write` | frp クライアント設定を保存 |
-| GET | `/api/frp/server` | `frp:read` | frp サーバー設定を読み取り |
-| PUT | `/api/frp/server` | `frp:write` | frp サーバー設定を保存 |
 
 ## Cloudflare トンネル
 
@@ -832,12 +847,32 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `path` | string |
 | `readOnly` | boolean |
 
+### frp.BinaryView
+
+| フィールド | 型 |
+| --- | --- |
+| `binary` | string |
+| `error` | string |
+| `version` | string |
+
+### frp.Client
+
+| フィールド | 型 |
+| --- | --- |
+| `enable` | boolean |
+| `key` | string |
+| `name` | string |
+| `protocol` | string |
+| `remark` | string |
+| `serverAddr` | string |
+| `serverPort` | integer |
+| `token` | string |
+| `user` | string |
+
 ### frp.ClientSettings
 
 | フィールド | 型 |
 | --- | --- |
-| `binPath` | string |
-| `enable` | boolean |
 | `protocol` | string |
 | `serverAddr` | string |
 | `serverPort` | integer |
@@ -850,8 +885,10 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | --- | --- |
 | `apply` | boolean |
 | `content` | string |
+| `name` | string |
 | `proxyMode` | string |
 | `role` | string |
+| `target` | string |
 
 ### frp.ImportResponse
 
@@ -860,6 +897,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `added` | integer |
 | `applied` | boolean |
 | `client` | `frp.ClientSettings` |
+| `key` | string |
 | `proxies` | 配列 of `frp.Proxy` |
 | `role` | string |
 | `server` | `frp.ServerSettings` |
@@ -869,6 +907,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 
 | フィールド | 型 |
 | --- | --- |
+| `client` | string |
 | `customDomains` | 配列 of string |
 | `enable` | boolean |
 | `key` | string |
@@ -881,12 +920,11 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `subdomain` | string |
 | `type` | string |
 
-### frp.ServerSettings
+### frp.Server
 
 | フィールド | 型 |
 | --- | --- |
 | `allowPorts` | string |
-| `binPath` | string |
 | `bindAddr` | string |
 | `bindPort` | integer |
 | `dashboardAddr` | string |
@@ -894,11 +932,46 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `dashboardPwd` | string |
 | `dashboardUser` | string |
 | `enable` | boolean |
+| `key` | string |
+| `name` | string |
+| `proxyBindAddr` | string |
+| `remark` | string |
+| `subdomainHost` | string |
+| `token` | string |
+| `vhostHttpPort` | integer |
+| `vhostHttpsPort` | integer |
+
+### frp.ServerSettings
+
+| フィールド | 型 |
+| --- | --- |
+| `allowPorts` | string |
+| `bindAddr` | string |
+| `bindPort` | integer |
+| `dashboardAddr` | string |
+| `dashboardPort` | integer |
+| `dashboardPwd` | string |
+| `dashboardUser` | string |
 | `proxyBindAddr` | string |
 | `subdomainHost` | string |
 | `token` | string |
 | `vhostHttpPort` | integer |
 | `vhostHttpsPort` | integer |
+
+### frp.Settings
+
+| フィールド | 型 |
+| --- | --- |
+| `frpcPath` | string |
+| `frpsPath` | string |
+
+### frp.SettingsView
+
+| フィールド | 型 |
+| --- | --- |
+| `frpc` | `frp.BinaryView` |
+| `frps` | `frp.BinaryView` |
+| `settings` | `frp.Settings` |
 
 ### geoip.Info
 

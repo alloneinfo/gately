@@ -29,31 +29,42 @@ var conflictKeywords = []string{"router config conflict", "port already used", "
 // 多台设备复制同一份 frpc 配置连到同一个 frps 时，后连上的设备会注册失败，对应的网站表现为超时，很难直接看出原因。
 func (m *Module) SelfCheck(_ context.Context, _ module.CheckEnv) []module.CheckResult {
 	m.mu.Lock()
-	clientOn, serverOn := m.cfg.Client.Enable, m.cfg.Server.Enable
-	names := map[string]int{}
+	var dup []string
+	clientOn, serverOn := false, false
 	enabled := 0
-	for _, p := range m.cfg.Proxies {
-		if p.Enable {
-			names[p.Name]++
-			enabled++
+	for _, c := range m.cfg.Clients {
+		if !c.Enable {
+			continue
 		}
+		clientOn = true
+		// frpc 不允许同一实例内代理重名；不同实例连接不同服务端，可以重名
+		names := map[string]int{}
+		for _, p := range m.cfg.Proxies {
+			if p.Client == c.Key && p.Enable {
+				names[p.Name]++
+				enabled++
+			}
+		}
+		for n, cnt := range names {
+			if cnt > 1 {
+				if len(m.cfg.Clients) > 1 {
+					n = c.Name + " / " + n
+				}
+				dup = append(dup, n)
+			}
+		}
+	}
+	for _, s := range m.cfg.Servers {
+		serverOn = serverOn || s.Enable
 	}
 	m.mu.Unlock()
 	if !clientOn && !serverOn {
 		return nil
 	}
 	var out []module.CheckResult
-	if clientOn {
-		var dup []string
-		for n, c := range names {
-			if c > 1 {
-				dup = append(dup, n)
-			}
-		}
-		sort.Strings(dup)
-		for _, n := range dup {
-			out = append(out, module.CheckResult{ID: "frp.duplicate", Status: module.CheckWarn, Params: map[string]string{"proxy": n}})
-		}
+	sort.Strings(dup)
+	for _, n := range dup {
+		out = append(out, module.CheckResult{ID: "frp.duplicate", Status: module.CheckWarn, Params: map[string]string{"proxy": n}})
 	}
 	conflicts := m.recentConflicts(time.Now().Add(-conflictWindow))
 	for _, c := range conflicts {
@@ -80,15 +91,17 @@ func (m *Module) recentConflicts(since time.Time) []frpConflict {
 		}
 	}
 	for _, e := range m.logs.Since(0) {
-		if e.Time.Before(since) || (e.Source != "frpc" && e.Source != "frps") {
+		// 日志来源为 frpc:<实例名> / frps:<实例名>，旧版本为 frpc / frps
+		role, _, _ := strings.Cut(e.Source, ":")
+		if e.Time.Before(since) || (role != binClient && role != binServer) {
 			continue
 		}
 		if mm := reProxyExists.FindStringSubmatch(e.Message); mm != nil {
-			add(e.Source, mm[1], "proxy already exists")
+			add(role, mm[1], "proxy already exists")
 			continue
 		}
 		mm := reStartError.FindStringSubmatch(e.Message)
-		if e.Source == "frps" {
+		if role == binServer {
 			// Gately 作为 frps 时，两台远程设备之间的端口、域名冲突只出现在 frps 日志里
 			mm = reNewProxyError.FindStringSubmatch(e.Message)
 		}
@@ -96,7 +109,7 @@ func (m *Module) recentConflicts(since time.Time) []frpConflict {
 			reason := strings.TrimSpace(mm[2])
 			for _, k := range conflictKeywords {
 				if strings.Contains(reason, k) {
-					add(e.Source, mm[1], reason)
+					add(role, mm[1], reason)
 					break
 				}
 			}
