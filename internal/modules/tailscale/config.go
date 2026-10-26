@@ -43,6 +43,8 @@ type Settings struct {
 	DaemonExtraArgs string `json:"daemonExtraArgs"`
 	// DaemonEnv 是传给 tailscaled 的环境变量，每行一个 KEY=VALUE，例如 TS_DEBUG_FIREWALL_MODE=nftables
 	DaemonEnv string `json:"daemonEnv"`
+	// InstallProxy 为在线安装使用的下载代理，空表示沿用全局“更新代理”；只通过安装接口修改
+	InstallProxy string `json:"installProxy"`
 }
 
 // DefaultSettings 是首次使用的默认配置：托管 tailscaled 并使用用户态网络。

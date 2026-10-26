@@ -6,13 +6,16 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
+	"os"
 	"sort"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/wangwanjie/gately/internal/binstall"
 	"github.com/wangwanjie/gately/internal/config"
 	"github.com/wangwanjie/gately/internal/crud"
 	"github.com/wangwanjie/gately/internal/fsperm"
@@ -51,10 +54,22 @@ type Module struct {
 	upDone   chan struct{}
 	// version 缓存各二进制版本
 	versions map[string]string
+	// httpClient 返回下载程序使用的 HTTP 客户端，由框架按“更新代理”设置注入
+	httpClient func() *http.Client
+	install    *binstall.Installer
 }
 
 // New 创建模块。
-func New() *Module { return &Module{versions: map[string]string{}} }
+func New() *Module {
+	return &Module{versions: map[string]string{}, httpClient: func() *http.Client { return http.DefaultClient }}
+}
+
+// SetHTTPClient 实现 module.HTTPClientAware。
+func (m *Module) SetHTTPClient(fn func() *http.Client) {
+	if fn != nil {
+		m.httpClient = fn
+	}
+}
 
 // ID 实现 module.Module。
 func (m *Module) ID() string { return ID }
@@ -67,6 +82,7 @@ func (m *Module) Init(env module.Env) error {
 	m.store, m.logs = env.Store, env.Logs
 	m.daemon = proc.New(m.logs.Logger("tailscaled"))
 	m.settings = DefaultSettings()
+	m.install = m.newInstaller()
 	_, err := m.store.Load(ID, &m.settings)
 	return err
 }
@@ -370,6 +386,8 @@ func (m *Module) Routes(r module.Router) {
 		m.mu.Lock()
 		defer m.mu.Unlock()
 		crud.KeepSecret(m.settings.AuthKey, &s.AuthKey)
+		// 下载代理只由安装接口修改
+		s.InstallProxy = m.settings.InstallProxy
 		if err := s.Validate(); err != nil {
 			httpx.Error(w, http.StatusBadRequest, "%v", err)
 			return
@@ -411,6 +429,49 @@ func (m *Module) Routes(r module.Router) {
 		m.logs.Logger("tailscale").Infof("已退出 tailnet 登录")
 		httpx.OK(w, map[string]bool{"ok": true})
 	})
+	m.install.Register(r)
+	r.HandleFunc("POST /reset", func(w http.ResponseWriter, req *http.Request) {
+		m.mu.Lock()
+		defer m.mu.Unlock()
+		if err := m.resetLocked(); err != nil {
+			httpx.Error(w, http.StatusInternalServerError, "%v", err)
+			return
+		}
+		httpx.OK(w, map[string]bool{"ok": true})
+	})
+}
+
+// resetLocked 恢复默认配置：Gately 托管的 tailscaled 正在运行时先退出 tailnet 登录（尽力而为），
+// 再停止守护进程、恢复默认设置并删除默认状态目录中的登录状态。自定义的状态目录与系统已有的 tailscaled
+// 不会被删除或登出；安装的程序不受影响。调用方持有 mu。
+func (m *Module) resetLocked() error {
+	old := m.settings
+	dir := m.store.Dir()
+	log := m.logs.Logger("tailscale")
+	if old.ManageDaemon && m.daemon.State().Running {
+		if cli, err := proc.Resolve(old.TailscalePath, dir, "tailscale"); err == nil {
+			if out, err := proc.Output(15*time.Second, cli, append(old.CLIArgs(dir), "logout"), nil); err != nil {
+				log.Warnf("退出 tailnet 登录失败: %s", strings.TrimSpace(string(out)))
+			}
+		}
+	}
+	s := DefaultSettings()
+	if err := m.store.Save(ID, s); err != nil {
+		return fmt.Errorf("保存失败: %v", err)
+	}
+	m.settings = s
+	// 新配置未启用，apply 只会停止守护进程
+	m.applyLocked()
+	m.versions = map[string]string{}
+	if old.StateDir == "" {
+		if err := os.RemoveAll(old.stateDir(dir)); err != nil {
+			return fmt.Errorf("删除状态目录失败: %v", err)
+		}
+	} else {
+		log.Warnf("自定义状态目录 %s 未删除，如不再需要请手动删除", old.StateDir)
+	}
+	log.Infof("已恢复默认配置")
+	return nil
 }
 
 // Summary 实现 module.Summarizer。

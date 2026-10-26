@@ -1,6 +1,7 @@
 <template>
   <div>
     <PageHeader title="Tailscale" :desc="t('tailscale.desc')" :icon="Network">
+      <ResetConfigButton base="/api/tailscale" :desc="t('components.resetConfig.tailscale')" @done="onReset" />
       <el-button :icon="RefreshCw" :loading="restarting" @click="restart">{{ t('common.restart') }}</el-button>
       <el-button type="primary" :icon="Save" :loading="saving" @click="save">{{ t('common.save') }}</el-button>
     </PageHeader>
@@ -123,6 +124,8 @@
       </div>
     </div>
 
+    <ProgramInstall :key="resetCount" base="/api/tailscale" :active-paths="[status?.cli]" @changed="loadStatus" />
+
     <LogCard url="/api/tailscale/logs" clearable />
   </div>
 </template>
@@ -137,6 +140,8 @@ import PageHeader from '../components/PageHeader.vue'
 import Field from '../components/Field.vue'
 import StatusBadge, { type StatusType } from '../components/StatusBadge.vue'
 import LogCard from '../components/LogCard.vue'
+import ProgramInstall from '../components/ProgramInstall.vue'
+import ResetConfigButton from '../components/ResetConfigButton.vue'
 import { useFormLayout } from '../composables/useIsMobile'
 import { useListText, splitCommasOrSpaces } from '../composables/useListText'
 import { usePolling } from '../composables/usePolling'
@@ -173,6 +178,8 @@ interface Peer {
 }
 interface Status {
   daemon: { running: boolean }
+  // cli 为实际使用的 tailscale 命令路径
+  cli?: string
   version: string
   error: string
   backendState: string
@@ -283,6 +290,15 @@ async function restart() {
   } finally {
     restarting.value = false
   }
+}
+
+// resetCount 在恢复默认配置后递增，让在线安装卡片重新读取下载代理
+const resetCount = ref(0)
+
+// onReset 在恢复默认配置后重新读取设置与状态
+async function onReset() {
+  resetCount.value++
+  await Promise.all([loadSettings(), loadStatus()])
 }
 
 onMounted(() => {
