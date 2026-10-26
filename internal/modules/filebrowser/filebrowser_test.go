@@ -18,6 +18,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/wangwanjie/gately/internal/binstall"
 	"github.com/wangwanjie/gately/internal/config"
 	"github.com/wangwanjie/gately/internal/crud"
 	"github.com/wangwanjie/gately/internal/logbuf"
@@ -154,22 +155,22 @@ func TestEnv(t *testing.T) {
 }
 
 func TestAssetName(t *testing.T) {
-	cases := map[[3]string]string{
-		{"linux", "amd64", ""}:   "linux-amd64-filebrowser",
-		{"linux", "arm64", ""}:   "linux-arm64-filebrowser",
-		{"linux", "arm", "7"}:    "linux-armv7-filebrowser",
-		{"linux", "arm", "6"}:    "linux-armv6-filebrowser",
-		{"linux", "riscv64", ""}: "linux-riscv64-filebrowser",
-		{"darwin", "arm64", ""}:  "darwin-arm64-filebrowser",
-		{"windows", "amd64", ""}: "filebrowser.exe",
+	cases := map[binstall.Platform]string{
+		{OS: "linux", Arch: "amd64"}:         "linux-amd64-filebrowser",
+		{OS: "linux", Arch: "arm64"}:         "linux-arm64-filebrowser",
+		{OS: "linux", Arch: "arm", ARM: "7"}: "linux-armv7-filebrowser",
+		{OS: "linux", Arch: "arm", ARM: "6"}: "linux-armv6-filebrowser",
+		{OS: "linux", Arch: "riscv64"}:       "linux-riscv64-filebrowser",
+		{OS: "darwin", Arch: "arm64"}:        "darwin-arm64-filebrowser",
+		{OS: "windows", Arch: "amd64"}:       "filebrowser.exe",
 	}
 	for in, want := range cases {
-		if got, err := assetName(in[0], in[1], in[2]); err != nil || got != want {
+		if got, err := assetName(in); err != nil || got != want {
 			t.Errorf("%v: %q %v，期望 %q", in, got, err, want)
 		}
 	}
-	for _, in := range [][3]string{{"linux", "arm", "5"}, {"linux", "mipsle", ""}, {"linux", "386", ""}, {"windows", "arm64", ""}} {
-		if _, err := assetName(in[0], in[1], in[2]); err == nil {
+	for _, in := range []binstall.Platform{{OS: "linux", Arch: "arm", ARM: "5"}, {OS: "linux", Arch: "mipsle"}, {OS: "linux", Arch: "386"}, {OS: "windows", Arch: "arm64"}} {
+		if _, err := assetName(in); err == nil {
 			t.Errorf("%v 上游没有提供，应报错", in)
 		}
 	}
@@ -384,12 +385,12 @@ func TestResolvePrefersInstalled(t *testing.T) {
 	}
 }
 
-// TestInstall 用本地 HTTP 服务模拟 GitHub 发布，验证下载、SHA-256 校验与安装。
+// TestInstall 用本地 HTTP 服务模拟 GitHub 发布，验证经模块接口下载、校验、安装并重新探测版本。
 func TestInstall(t *testing.T) {
 	if runtime.GOOS == "windows" {
 		t.Skip("依赖 sh")
 	}
-	name, err := assetName(runtime.GOOS, runtime.GOARCH, goarm())
+	name, err := assetName(binstall.CurrentPlatform())
 	if err != nil {
 		t.Skip(err)
 	}
@@ -401,8 +402,8 @@ func TestInstall(t *testing.T) {
 	var gh *httptest.Server
 	gh = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
-		case "/latest":
-			_ = json.NewEncoder(w).Encode(release{TagName: "v2.0.2-stable", Assets: []releaseAsset{
+		case "/repos/" + releaseRepo + "/releases/latest":
+			_ = json.NewEncoder(w).Encode(binstall.GitHubRelease{TagName: "v2.0.2-stable", Assets: []binstall.GitHubAsset{
 				{Name: "other", URL: gh.URL + "/other"},
 				{Name: name, URL: gh.URL + "/bin", Size: int64(len(payload)), Digest: digest.Load().(string)},
 			}})
@@ -413,48 +414,90 @@ func TestInstall(t *testing.T) {
 		}
 	}))
 	defer gh.Close()
+	old := binstall.GitHubAPI
+	binstall.GitHubAPI = gh.URL
+	defer func() { binstall.GitHubAPI = old }()
 
-	run := func(m *Module, srv *httptest.Server) installState {
+	run := func(srv *httptest.Server) binstall.State {
 		t.Helper()
-		var st installState
-		doJSON(t, http.MethodPost, srv.URL+"/api/filebrowser/install", nil, &st)
+		var v binstall.View
+		doJSON(t, http.MethodPost, srv.URL+"/api/filebrowser/install", map[string]string{}, &v)
 		waitFor(t, "安装结束", func() bool {
-			doJSON(t, http.MethodGet, srv.URL+"/api/filebrowser/install", nil, &st)
-			return !st.Running
+			doJSON(t, http.MethodGet, srv.URL+"/api/filebrowser/install", nil, &v)
+			return !v.State.Running
 		})
-		return st
+		return v.State
 	}
 
 	m, srv := newTestModule(t, t.TempDir())
-	m.releaseAPI = gh.URL + "/latest"
-	st := run(m, srv)
-	if st.Stage != stageDone || st.Version != "v2.0.2-stable" || st.Error != "" || st.Downloaded != int64(len(payload)) {
+	st := run(srv)
+	if st.Stage != binstall.StageDone || st.Version != "v2.0.2-stable" || st.Error != "" || st.Downloaded != int64(len(payload)) {
 		t.Fatalf("安装结果错误: %+v", st)
 	}
 	if got, err := os.ReadFile(m.localBin()); err != nil || string(got) != string(payload) {
 		t.Fatalf("程序未写入: %v", err)
 	}
-	if fi, _ := os.Stat(m.localBin()); fi.Mode().Perm()&0o100 == 0 {
-		t.Errorf("程序应可执行: %v", fi.Mode())
+	var sv settingsView
+	doJSON(t, http.MethodGet, srv.URL+"/api/filebrowser/settings", nil, &sv)
+	if sv.Binary != m.localBin() || !sv.Quantum || sv.Version != "v2.0.2-stable" {
+		t.Errorf("安装后应使用新程序: %+v", sv)
 	}
-	if _, err := os.Stat(m.localBin() + ".download"); !os.IsNotExist(err) {
-		t.Errorf("临时文件应被删除: %v", err)
+	// 已是最新版时不再下载
+	if st := run(srv); st.Stage != binstall.StageUpToDate {
+		t.Errorf("已是最新版应跳过: %+v", st)
 	}
 
 	// 摘要不符时中止，不留下程序
 	digest.Store("sha256:" + strings.Repeat("0", 64))
 	m2, srv2 := newTestModule(t, t.TempDir())
-	m2.releaseAPI = gh.URL + "/latest"
-	if st := run(m2, srv2); st.Stage != stageFailed || !strings.Contains(st.Error, "SHA-256") {
+	if st := run(srv2); st.Stage != binstall.StageFailed || !strings.Contains(st.Error, "SHA-256") {
 		t.Errorf("校验失败应报错: %+v", st)
 	}
 	if _, err := os.Stat(m2.localBin()); !os.IsNotExist(err) {
 		t.Errorf("校验失败不应安装: %v", err)
 	}
+}
 
-	// 缺少摘要时同样中止
-	digest.Store("")
-	if st := run(m2, srv2); st.Stage != stageFailed || !strings.Contains(st.Error, "SHA-256") {
-		t.Errorf("缺少校验值应报错: %+v", st)
+// TestReset 验证恢复默认配置会停止并删除实例、清除实例数据与程序设置，保留安装的程序。
+func TestReset(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("依赖 sh")
+	}
+	dir := t.TempDir()
+	bin := filepath.Join(dir, "bin", "filebrowser")
+	writeScript(t, bin, quantumVersionScript+"exec sleep 30\n")
+	m, srv := newTestModule(t, dir)
+	if err := m.Start(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	defer m.Stop()
+	inst := validInstance()
+	inst.Enable, inst.Sources = true, []Source{{Path: dir}}
+	var v InstanceView
+	doJSON(t, http.MethodPost, srv.URL+"/api/filebrowser/instances", inst, &v)
+	doJSON(t, http.MethodPut, srv.URL+"/api/filebrowser/settings", Settings{BinPath: bin}, nil)
+	waitFor(t, "实例启动", func() bool {
+		m.mu.Lock()
+		defer m.mu.Unlock()
+		rt := m.runs[v.Key]
+		return rt != nil && rt.sup.State().Running
+	})
+	if _, err := os.Stat(m.dataDir(v.Key)); err != nil {
+		t.Fatalf("实例数据目录应存在: %v", err)
+	}
+
+	if code := doJSON(t, http.MethodPost, srv.URL+"/api/filebrowser/reset", nil, nil); code != http.StatusOK {
+		t.Fatalf("恢复默认配置失败: %d", code)
+	}
+	var list []InstanceView
+	doJSON(t, http.MethodGet, srv.URL+"/api/filebrowser/instances", nil, &list)
+	if len(list) != 0 || len(m.runs) != 0 || m.cfg.Settings.BinPath != "" {
+		t.Errorf("实例与设置应被清空: %+v %+v", list, m.cfg.Settings)
+	}
+	if _, err := os.Stat(filepath.Join(dir, ID)); !os.IsNotExist(err) {
+		t.Errorf("实例数据应被删除: %v", err)
+	}
+	if _, err := os.Stat(bin); err != nil {
+		t.Errorf("安装的程序应保留: %v", err)
 	}
 }

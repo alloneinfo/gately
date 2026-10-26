@@ -14,11 +14,7 @@
   "program": "Programa FileBrowser Quantum",
   "binary": "Executável",
   "binaryPlaceholder": "Deixe vazio para procurar automaticamente (bin do diretório de configuração ou PATH)",
-  "binaryHelp": "Baixar e instalar obtém a versão estável mais recente do GitHub em {path}, usando o proxy de atualização das configurações",
-  "install": "Baixar e instalar",
-  "update": "Atualizar para a mais recente",
-  "installProgress": "Progresso da instalação",
-  "installed": "FileBrowser Quantum {version} instalado",
+  "binaryHelp": "Vazio: usa primeiro o programa instalado online em {path} (abaixo) e depois o do PATH",
   "listen": "Endereço de escuta",
   "listenPlaceholder": "Vazio para escutar em todos os endereços IPv4",
   "listenHelp": "Use 127.0.0.1 quando o acesso for apenas por um proxy reverso do Serviço Web",
@@ -44,12 +40,5 @@
   "tokenHours": "Duração da sessão (horas)",
   "deactivated": "Desativada",
   "startFailed": "Falha ao iniciar",
-  "notRunning": "Parada",
-  "stage": {
-    "checking": "Verificando a versão mais recente…",
-    "downloading": "Baixando…",
-    "verifying": "Verificando…",
-    "done": "Concluído",
-    "failed": "Falhou"
-  }
+  "notRunning": "Parada"
 }

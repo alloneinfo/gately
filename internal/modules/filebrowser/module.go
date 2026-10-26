@@ -13,6 +13,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/wangwanjie/gately/internal/binstall"
 	"github.com/wangwanjie/gately/internal/config"
 	"github.com/wangwanjie/gately/internal/crud"
 	"github.com/wangwanjie/gately/internal/fsperm"
@@ -35,8 +36,10 @@ type Settings struct {
 }
 
 type fileConfig struct {
-	Settings  Settings   `json:"settings"`
-	Instances []Instance `json:"instances"`
+	Settings Settings `json:"settings"`
+	// Install 为在线安装设置
+	Install   binstall.Config `json:"install"`
+	Instances []Instance      `json:"instances"`
 }
 
 // instRuntime 是实例的运行时信息。
@@ -58,19 +61,15 @@ type Module struct {
 	quantum     bool
 	versionPath string
 	// client 返回下载程序使用的 HTTP 客户端，由框架按“更新代理”设置注入
-	client func() *http.Client
-	// install 记录一键安装的进度
-	install installState
-	// releaseAPI 是查询最新稳定版的地址，测试时替换
-	releaseAPI string
+	client  func() *http.Client
+	install *binstall.Installer
 }
 
 // New 创建模块。
 func New() *Module {
 	return &Module{
-		runs:       map[string]*instRuntime{},
-		client:     func() *http.Client { return http.DefaultClient },
-		releaseAPI: defaultReleaseAPI,
+		runs:   map[string]*instRuntime{},
+		client: func() *http.Client { return http.DefaultClient },
 	}
 }
 
@@ -90,6 +89,7 @@ func (m *Module) SetHTTPClient(fn func() *http.Client) {
 // Init 实现 module.Module。
 func (m *Module) Init(env module.Env) error {
 	m.store, m.logs = env.Store, env.Logs
+	m.install = m.newInstaller()
 	_, err := m.store.Load(ID, &m.cfg)
 	return err
 }
@@ -131,23 +131,13 @@ func (m *Module) find(key string) *Instance {
 
 // localBin 返回一键安装的目标路径：<配置目录>/bin/filebrowser。
 func (m *Module) localBin() string {
-	return filepath.Join(m.store.Dir(), "bin", exeName(binName))
+	return m.install.MainPath()
 }
 
-// resolveBin 查找可执行文件：优先使用配置的路径，其次是一键安装到配置目录 bin 下的程序，最后才是 PATH。
-// 与 frp 等模块不同，这里把配置目录放在 PATH 之前：PATH 中的 filebrowser 很可能是已归档的原版，
-// 用户在界面里安装的 Quantum 应当优先生效。
+// resolveBin 查找可执行文件：优先使用配置的路径，其次是在线安装到配置目录 bin 下的程序，最后才是 PATH。
+// PATH 中的 filebrowser 很可能是已归档的原版，用户在界面里安装的 Quantum 应当优先生效。
 func (m *Module) resolveBin() (string, error) {
-	if strings.TrimSpace(m.cfg.Settings.BinPath) == "" {
-		if st, err := os.Stat(m.localBin()); err == nil && !st.IsDir() {
-			return m.localBin(), nil
-		}
-	}
-	bin, err := proc.Resolve(m.cfg.Settings.BinPath, m.store.Dir(), binName)
-	if err != nil && strings.TrimSpace(m.cfg.Settings.BinPath) == "" {
-		return "", fmt.Errorf("未找到 filebrowser，请点击“下载安装”，或在设置中填写可执行文件路径")
-	}
-	return bin, err
+	return proc.Resolve(m.cfg.Settings.BinPath, m.store.Dir(), binName)
 }
 
 // dataDir 返回实例的数据目录，保存生成的配置、数据库与缓存。
@@ -353,7 +343,36 @@ func (m *Module) Routes(r module.Router) {
 		m.restartAllLocked()
 		httpx.OK(w, map[string]bool{"ok": true})
 	})
-	m.registerInstall(r)
+	m.install.Register(r)
+	r.HandleFunc("POST /reset", func(w http.ResponseWriter, req *http.Request) {
+		m.mu.Lock()
+		defer m.mu.Unlock()
+		if err := m.resetLocked(); err != nil {
+			httpx.Error(w, http.StatusInternalServerError, "%v", err)
+			return
+		}
+		httpx.OK(w, map[string]bool{"ok": true})
+	})
+}
+
+// resetLocked 恢复默认配置：停止并删除全部实例，连同各实例的数据目录（File Browser 的用户、分享链接与缓存），
+// 清空程序路径与安装设置。共享目录中的文件与安装的程序不受影响。调用方持有 mu。
+func (m *Module) resetLocked() error {
+	old := m.cfg
+	m.cfg = fileConfig{}
+	if err := m.saveLocked(); err != nil {
+		m.cfg = old
+		return fmt.Errorf("保存失败: %v", err)
+	}
+	for key := range m.runs {
+		m.dropLocked(key)
+	}
+	m.versionPath = ""
+	if err := os.RemoveAll(filepath.Join(m.store.Dir(), ID)); err != nil {
+		return fmt.Errorf("删除实例数据失败: %v", err)
+	}
+	m.logs.Logger("filebrowser").Infof("已恢复默认配置")
+	return nil
 }
 
 // Summary 实现 module.Summarizer。

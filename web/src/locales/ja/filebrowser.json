@@ -14,11 +14,7 @@
   "program": "FileBrowser Quantum プログラム",
   "binary": "実行ファイル",
   "binaryPlaceholder": "空欄で自動検索（設定ディレクトリの bin または PATH）",
-  "binaryHelp": "「ダウンロードしてインストール」は GitHub から最新の安定版を {path} にダウンロードし、GitHub へのアクセスには設定の更新プロキシを使います",
-  "install": "ダウンロードしてインストール",
-  "update": "最新版に更新",
-  "installProgress": "インストールの進行状況",
-  "installed": "FileBrowser Quantum {version} をインストールしました",
+  "binaryHelp": "空欄の場合、下のオンラインインストールで {path} に入れたプログラムを優先し、次に PATH のプログラムを使います",
   "listen": "待ち受けアドレス",
   "listenPlaceholder": "空欄ですべての IPv4 アドレスで待ち受け",
   "listenHelp": "Web サービスのリバースプロキシ経由でのみアクセスする場合は 127.0.0.1 を指定できます",
@@ -44,12 +40,5 @@
   "tokenHours": "セッション有効期間（時間）",
   "deactivated": "無効",
   "startFailed": "起動に失敗",
-  "notRunning": "停止中",
-  "stage": {
-    "checking": "最新バージョンを確認中…",
-    "downloading": "ダウンロード中…",
-    "verifying": "検証中…",
-    "done": "完了",
-    "failed": "失敗"
-  }
+  "notRunning": "停止中"
 }

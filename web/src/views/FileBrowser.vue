@@ -1,11 +1,12 @@
 <template>
   <div>
     <PageHeader :title="t('filebrowser.title')" :desc="t('filebrowser.desc')" :icon="FolderOpen">
+      <ResetConfigButton base="/api/filebrowser" :desc="t('components.resetConfig.filebrowser')" @done="onReset" />
       <el-button type="primary" :icon="Plus" @click="openEditor()">{{ t('filebrowser.addInstance') }}</el-button>
     </PageHeader>
 
-    <el-alert v-if="binError && !installing" type="warning" :title="binError" :closable="false" show-icon class="block-gap">
-      <el-button size="small" type="primary" :icon="Download" @click="install">{{ t('filebrowser.install') }}</el-button>
+    <el-alert v-if="binError" type="warning" :title="binError" :closable="false" show-icon class="block-gap">
+      <el-button size="small" type="primary" :icon="Download" @click="installer?.install()">{{ t('components.programInstall.install') }}</el-button>
     </el-alert>
 
     <div class="card-grid">
@@ -39,10 +40,7 @@
     <div class="g-card">
       <div class="g-card-head">
         <div class="g-card-title"><Terminal :size="16" />{{ t('filebrowser.program') }} <span v-if="version" class="g-card-desc">{{ version }}</span></div>
-        <div class="head-actions">
-          <el-button size="small" :icon="Download" :loading="installing" @click="install">{{ binary && quantum ? t('filebrowser.update') : t('filebrowser.install') }}</el-button>
-          <el-button size="small" :icon="Save" @click="saveSettings">{{ t('common.save') }}</el-button>
-        </div>
+        <el-button size="small" :icon="Save" @click="saveSettings">{{ t('common.save') }}</el-button>
       </div>
       <div class="g-card-body">
         <el-form label-width="110px" :label-position="labelPosition" class="svc-form">
@@ -50,15 +48,11 @@
             <el-input v-model="binPath" :placeholder="binary || t('filebrowser.binaryPlaceholder')" class="mono" />
             <div class="form-help">{{ t('filebrowser.binaryHelp', { path: installPath }) }}</div>
           </el-form-item>
-          <el-form-item v-if="installState.running || installState.stage === 'failed'" :label="t('filebrowser.installProgress')">
-            <div class="install-box">
-              <el-progress v-if="installState.running" :percentage="installPercent" :indeterminate="!installState.total" :format="() => installText" />
-              <el-alert v-else type="error" :title="installState.error" :closable="false" show-icon />
-            </div>
-          </el-form-item>
         </el-form>
       </div>
     </div>
+
+    <ProgramInstall ref="installer" :key="resetCount" base="/api/filebrowser" :active-paths="[binary]" @changed="onInstalled" />
 
     <LogCard url="/api/filebrowser/logs" clearable />
 
@@ -137,7 +131,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { Download, FolderOpen, FolderPlus, Pencil, Plus, RefreshCw, Save, Terminal, Trash2, X } from 'lucide-vue-next'
@@ -147,6 +141,8 @@ import EntityCard from '../components/EntityCard.vue'
 import Field from '../components/Field.vue'
 import StatusBadge, { type StatusType } from '../components/StatusBadge.vue'
 import LogCard from '../components/LogCard.vue'
+import ProgramInstall from '../components/ProgramInstall.vue'
+import ResetConfigButton from '../components/ResetConfigButton.vue'
 import { useFormLayout } from '../composables/useIsMobile'
 import { usePolling } from '../composables/usePolling'
 
@@ -178,14 +174,6 @@ interface InstanceView extends Instance {
   state: { running: boolean }
   error: string
 }
-interface InstallState {
-  running: boolean
-  stage: string
-  version: string
-  downloaded: number
-  total: number
-  error: string
-}
 
 // FileBrowser Quantum 支持的界面语言（取与 Gately 相同的 10 种）
 const fbLocales = [
@@ -210,25 +198,11 @@ const version = ref('')
 const quantum = ref(false)
 const installPath = ref('')
 const binError = ref('')
-const installState = ref<InstallState>({ running: false, stage: '', version: '', downloaded: 0, total: 0, error: '' })
+const installer = ref<InstanceType<typeof ProgramInstall>>()
 const editorVisible = ref(false)
 const editing = ref<Instance>(empty())
 // 定时刷新，标签页在后台时暂停
 const polling = usePolling(loadInstances, 4000)
-let installTimer: ReturnType<typeof setInterval> | undefined
-
-const installing = computed(() => installState.value.running)
-const installPercent = computed(() => {
-  const s = installState.value
-  return s.total ? Math.min(100, Math.round((s.downloaded / s.total) * 100)) : 0
-})
-const installText = computed(() => {
-  const s = installState.value
-  if (s.stage === 'downloading' && s.total) {
-    return `${(s.downloaded / 1048576).toFixed(1)} / ${(s.total / 1048576).toFixed(1)} MB`
-  }
-  return t(`filebrowser.stage.${s.stage || 'checking'}`)
-})
 
 // uiLocale 把 Gately 的界面语言换成 FileBrowser Quantum 的语言代码，作为新实例的默认值
 function uiLocale(): string {
@@ -320,40 +294,17 @@ async function saveSettings() {
   }
 }
 
-function stopInstallPolling() {
-  if (installTimer) {
-    clearInterval(installTimer)
-    installTimer = undefined
-  }
+// onInstalled 在安装、回滚、卸载后刷新程序信息与实例状态
+// resetCount 在恢复默认配置后递增，让在线安装卡片重新读取下载代理
+const resetCount = ref(0)
+
+async function onReset() {
+  resetCount.value++
+  await onInstalled()
 }
 
-// pollInstall 每秒查询一次安装进度，结束后刷新程序信息与实例状态
-function pollInstall() {
-  stopInstallPolling()
-  installTimer = setInterval(async () => {
-    try {
-      installState.value = await api.get<InstallState>('/api/filebrowser/install')
-    } catch {
-      return
-    }
-    if (installState.value.running) {
-      return
-    }
-    stopInstallPolling()
-    if (installState.value.stage === 'done') {
-      ElMessage.success(t('filebrowser.installed', { version: installState.value.version }))
-    }
-    await Promise.all([loadSettings(), loadInstances()])
-  }, 1000)
-}
-
-async function install() {
-  try {
-    installState.value = await api.post<InstallState>('/api/filebrowser/install')
-    pollInstall()
-  } catch (e) {
-    ElMessage.error((e as Error).message)
-  }
+async function onInstalled() {
+  await Promise.all([loadSettings(), loadInstances()])
 }
 
 function openEditor(it?: Instance) {
@@ -414,22 +365,11 @@ async function remove(it: Instance) {
   }
 }
 
-onMounted(async () => {
+onMounted(() => {
   loadSettings()
   loadInstances()
   polling.start()
-  // 页面打开时如果安装仍在进行（例如刷新了页面），继续显示进度
-  try {
-    installState.value = await api.get<InstallState>('/api/filebrowser/install')
-    if (installState.value.running) {
-      pollInstall()
-    }
-  } catch {
-    // 忽略
-  }
 })
-
-onUnmounted(stopInstallPolling)
 </script>
 
 <style scoped>
@@ -444,13 +384,6 @@ onUnmounted(stopInstallPolling)
 }
 .svc-form .el-form-item:last-child {
   margin-bottom: 0;
-}
-.head-actions {
-  display: flex;
-  gap: 8px;
-}
-.install-box {
-  width: 100%;
 }
 .muted {
   color: var(--el-text-color-secondary);

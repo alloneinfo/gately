@@ -14,11 +14,7 @@
   "program": "FileBrowser Quantum 程式",
   "binary": "可執行檔",
   "binaryPlaceholder": "留空自動尋找（設定目錄 bin 或 PATH）",
-  "binaryHelp": "「下載安裝」從 GitHub 下載最新正式版到 {path}，存取 GitHub 時使用設定中的更新代理",
-  "install": "下載安裝",
-  "update": "更新到最新版",
-  "installProgress": "安裝進度",
-  "installed": "已安裝 FileBrowser Quantum {version}",
+  "binaryHelp": "留空時優先使用下方線上安裝到 {path} 的程式，其次是 PATH 中的程式",
   "listen": "監聽位址",
   "listenPlaceholder": "留空監聽全部 IPv4 位址",
   "listenHelp": "只透過 Web 服務反向代理存取時，可填 127.0.0.1",
@@ -44,12 +40,5 @@
   "tokenHours": "登入有效期（小時）",
   "deactivated": "已停用",
   "startFailed": "啟動失敗",
-  "notRunning": "未執行",
-  "stage": {
-    "checking": "查詢最新版本…",
-    "downloading": "下載中…",
-    "verifying": "校驗中…",
-    "done": "已完成",
-    "failed": "失敗"
-  }
+  "notRunning": "未執行"
 }
