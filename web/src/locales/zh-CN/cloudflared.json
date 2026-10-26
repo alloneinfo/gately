@@ -14,7 +14,7 @@
   "confirmDelete": "删除该隧道？",
   "program": "cloudflared 程序",
   "binary": "可执行文件",
-  "binaryPlaceholder": "留空自动查找（PATH 或配置目录 bin）",
+  "binaryPlaceholder": "留空自动查找（配置目录 bin 或 PATH）",
   "mode": "模式",
   "token": "隧道令牌",
   "tokenHelp": "在 Zero Trust 控制台创建隧道后复制令牌；公网主机名与回源服务也在控制台配置",

@@ -14,7 +14,7 @@
   "confirmDelete": "이 터널을 삭제하시겠습니까?",
   "program": "cloudflared 프로그램",
   "binary": "실행 파일",
-  "binaryPlaceholder": "비워 두면 자동 검색 (PATH 또는 설정 디렉터리의 bin)",
+  "binaryPlaceholder": "비워 두면 자동으로 찾습니다(설정 디렉터리 bin 또는 PATH)",
   "mode": "모드",
   "token": "터널 토큰",
   "tokenHelp": "Zero Trust 콘솔에서 터널을 만든 뒤 토큰을 복사하세요. 공개 호스트 이름과 원본 서비스도 콘솔에서 설정합니다",

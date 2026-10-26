@@ -14,7 +14,7 @@
   "confirmDelete": "Delete this tunnel?",
   "program": "cloudflared binary",
   "binary": "Executable",
-  "binaryPlaceholder": "Leave empty to auto-detect (PATH or the bin folder in the config directory)",
+  "binaryPlaceholder": "Leave empty to search automatically (config directory bin or PATH)",
   "mode": "Mode",
   "token": "Tunnel token",
   "tokenHelp": "Create a tunnel in the Zero Trust dashboard and copy its token; public hostnames and origin services are also configured there",

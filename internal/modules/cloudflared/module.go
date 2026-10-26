@@ -12,6 +12,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/wangwanjie/gately/internal/binstall"
 	"github.com/wangwanjie/gately/internal/config"
 	"github.com/wangwanjie/gately/internal/crud"
 	"github.com/wangwanjie/gately/internal/httpx"
@@ -33,7 +34,7 @@ const (
 
 // Settings 是模块级配置。
 type Settings struct {
-	// BinPath 为空时依次在 PATH 与配置目录 bin 下查找 cloudflared
+	// BinPath 为空时依次在配置目录 bin 与 PATH 下查找 cloudflared
 	BinPath string `json:"binPath"`
 }
 
@@ -56,7 +57,9 @@ type Tunnel struct {
 
 type fileConfig struct {
 	Settings Settings `json:"settings"`
-	Tunnels  []Tunnel `json:"tunnels"`
+	// Install 为在线安装设置
+	Install binstall.Config `json:"install"`
+	Tunnels []Tunnel        `json:"tunnels"`
 }
 
 // Validate 校验并规范化隧道配置。
@@ -155,10 +158,22 @@ type Module struct {
 	// version 缓存已探测的二进制版本
 	version     string
 	versionPath string
+	// httpClient 返回下载程序使用的 HTTP 客户端，由框架按“更新代理”设置注入
+	httpClient func() *http.Client
+	install    *binstall.Installer
 }
 
 // New 创建模块。
-func New() *Module { return &Module{runs: map[string]*runtime{}} }
+func New() *Module {
+	return &Module{runs: map[string]*runtime{}, httpClient: func() *http.Client { return http.DefaultClient }}
+}
+
+// SetHTTPClient 实现 module.HTTPClientAware。
+func (m *Module) SetHTTPClient(fn func() *http.Client) {
+	if fn != nil {
+		m.httpClient = fn
+	}
+}
 
 // ID 实现 module.Module。
 func (m *Module) ID() string { return ID }
@@ -169,6 +184,7 @@ func (m *Module) Title() string { return "Cloudflare 隧道" }
 // Init 实现 module.Module。
 func (m *Module) Init(env module.Env) error {
 	m.store, m.logs = env.Store, env.Logs
+	m.install = m.newInstaller()
 	_, err := m.store.Load(ID, &m.cfg)
 	return err
 }
@@ -330,13 +346,37 @@ func (m *Module) Routes(r module.Router) {
 			return
 		}
 		// 二进制路径变化后重启全部已启用的隧道
-		for i := range m.cfg.Tunnels {
-			if m.cfg.Tunnels[i].Enable {
-				m.applyLocked(m.cfg.Tunnels[i].Key)
-			}
-		}
+		m.restartAllLocked()
 		httpx.OK(w, map[string]bool{"ok": true})
 	})
+	m.install.Register(r)
+	r.HandleFunc("POST /reset", func(w http.ResponseWriter, req *http.Request) {
+		m.mu.Lock()
+		defer m.mu.Unlock()
+		old := m.cfg
+		m.cfg = fileConfig{}
+		if err := m.saveLocked(); err != nil {
+			m.cfg = old
+			httpx.Error(w, http.StatusInternalServerError, "保存失败: %v", err)
+			return
+		}
+		// 停止并移除全部隧道；旧配置留在配置历史中，安装的程序不受影响
+		for key := range m.runs {
+			m.dropLocked(key)
+		}
+		m.versionPath = ""
+		m.logs.Logger("").Infof("已恢复默认配置")
+		httpx.OK(w, map[string]bool{"ok": true})
+	})
+}
+
+// restartAllLocked 重启全部已启用的隧道；调用方持有 mu。
+func (m *Module) restartAllLocked() {
+	for i := range m.cfg.Tunnels {
+		if m.cfg.Tunnels[i].Enable {
+			m.applyLocked(m.cfg.Tunnels[i].Key)
+		}
+	}
 }
 
 // Summary 实现 module.Summarizer。

@@ -14,7 +14,7 @@
   "confirmDelete": "Supprimer ce tunnel ?",
   "program": "Binaire cloudflared",
   "binary": "Exécutable",
-  "binaryPlaceholder": "Laisser vide pour la détection automatique (PATH ou dossier bin du répertoire de configuration)",
+  "binaryPlaceholder": "Laisser vide pour une recherche automatique (bin du répertoire de configuration ou PATH)",
   "mode": "Mode",
   "token": "Jeton du tunnel",
   "tokenHelp": "Créez un tunnel dans le tableau de bord Zero Trust et copiez son jeton ; les noms d'hôte publics et les services d'origine y sont aussi configurés",

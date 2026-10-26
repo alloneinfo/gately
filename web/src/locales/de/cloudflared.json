@@ -14,7 +14,7 @@
   "confirmDelete": "Diesen Tunnel löschen?",
   "program": "cloudflared-Programm",
   "binary": "Ausführbare Datei",
-  "binaryPlaceholder": "Leer lassen für automatische Erkennung (PATH oder Ordner bin im Konfigurationsverzeichnis)",
+  "binaryPlaceholder": "Leer lassen für automatische Suche (bin im Konfigurationsverzeichnis oder PATH)",
   "mode": "Modus",
   "token": "Tunnel-Token",
   "tokenHelp": "Erstellen Sie im Zero-Trust-Dashboard einen Tunnel und kopieren Sie sein Token; öffentliche Hostnamen und Ursprungsdienste werden ebenfalls dort konfiguriert",

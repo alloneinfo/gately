@@ -14,7 +14,7 @@
   "confirmDelete": "刪除該通道？",
   "program": "cloudflared 程式",
   "binary": "可執行檔",
-  "binaryPlaceholder": "留空自動尋找（PATH 或設定目錄 bin）",
+  "binaryPlaceholder": "留空自動尋找（設定目錄 bin 或 PATH）",
   "mode": "模式",
   "token": "通道權杖",
   "tokenHelp": "在 Zero Trust 控制台建立通道後複製權杖；公網主機名稱與回源服務也在控制台設定",

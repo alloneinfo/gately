@@ -1,10 +1,13 @@
 <template>
   <div>
     <PageHeader :title="t('cloudflared.title')" :desc="t('cloudflared.desc')" :icon="Cloud">
+      <ResetConfigButton base="/api/cloudflared" :desc="t('components.resetConfig.cloudflared')" @done="onReset" />
       <el-button type="primary" :icon="Plus" @click="openEditor()">{{ t('cloudflared.addTunnel') }}</el-button>
     </PageHeader>
 
-    <el-alert v-if="binError" type="warning" :title="binError" :closable="false" show-icon class="block-gap" />
+    <el-alert v-if="binError" type="warning" :title="binError" :closable="false" show-icon class="block-gap">
+      <el-button size="small" type="primary" :icon="Download" @click="installer?.install()">{{ t('components.programInstall.install') }}</el-button>
+    </el-alert>
 
     <div class="card-grid">
       <el-empty v-if="!tunnels.length" :description="t('cloudflared.empty')" class="empty" />
@@ -45,6 +48,8 @@
         </el-form>
       </div>
     </div>
+
+    <ProgramInstall ref="installer" :key="resetCount" base="/api/cloudflared" :active-paths="[binary]" @changed="onInstalled" />
 
     <LogCard url="/api/cloudflared/logs" clearable />
 
@@ -94,13 +99,15 @@
 import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
-import { Cloud, Pencil, Plus, RefreshCw, Save, Terminal, Trash2 } from 'lucide-vue-next'
+import { Cloud, Download, Pencil, Plus, RefreshCw, Save, Terminal, Trash2 } from 'lucide-vue-next'
 import { api } from '../api'
 import PageHeader from '../components/PageHeader.vue'
 import EntityCard from '../components/EntityCard.vue'
 import Field from '../components/Field.vue'
 import StatusBadge, { type StatusType } from '../components/StatusBadge.vue'
 import LogCard from '../components/LogCard.vue'
+import ProgramInstall from '../components/ProgramInstall.vue'
+import ResetConfigButton from '../components/ResetConfigButton.vue'
 import { useFormLayout } from '../composables/useIsMobile'
 import { usePolling } from '../composables/usePolling'
 
@@ -130,6 +137,7 @@ const binPath = ref('')
 const binary = ref('')
 const version = ref('')
 const binError = ref('')
+const installer = ref<InstanceType<typeof ProgramInstall>>()
 const editorVisible = ref(false)
 const editing = ref<Tunnel>(empty())
 // 定时刷新，标签页在后台时暂停
@@ -169,6 +177,19 @@ async function loadSettings() {
   binary.value = r.binary
   version.value = r.version
   binError.value = r.error
+}
+
+// onInstalled 在安装、回滚、卸载后刷新程序信息与隧道状态
+// resetCount 在恢复默认配置后递增，让在线安装卡片重新读取下载代理
+const resetCount = ref(0)
+
+async function onReset() {
+  resetCount.value++
+  await onInstalled()
+}
+
+async function onInstalled() {
+  await Promise.all([loadSettings(), loadTunnels()])
 }
 
 async function saveSettings() {
@@ -238,6 +259,9 @@ onMounted(() => {
 <style scoped>
 .block-gap {
   margin-bottom: 16px;
+}
+.block-gap :deep(.el-alert__description) {
+  margin-top: 6px;
 }
 .svc-form {
   max-width: 640px;

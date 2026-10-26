@@ -14,7 +14,7 @@
   "confirmDelete": "¿Eliminar este túnel?",
   "program": "Binario de cloudflared",
   "binary": "Ejecutable",
-  "binaryPlaceholder": "Déjalo vacío para detectarlo automáticamente (PATH o la carpeta bin del directorio de configuración)",
+  "binaryPlaceholder": "Déjalo vacío para buscarlo automáticamente (bin del directorio de configuración o PATH)",
   "mode": "Modo",
   "token": "Token del túnel",
   "tokenHelp": "Crea un túnel en el panel de Zero Trust y copia su token; los nombres de host públicos y los servicios de origen también se configuran allí",

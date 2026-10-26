@@ -14,7 +14,7 @@
   "confirmDelete": "このトンネルを削除しますか？",
   "program": "cloudflared プログラム",
   "binary": "実行ファイル",
-  "binaryPlaceholder": "空欄で自動検索（PATH または設定ディレクトリの bin）",
+  "binaryPlaceholder": "空欄で自動検索（設定ディレクトリの bin または PATH）",
   "mode": "モード",
   "token": "トンネルトークン",
   "tokenHelp": "Zero Trust ダッシュボードでトンネルを作成してトークンをコピーします。公開ホスト名とオリジンサービスもダッシュボードで設定します",
