@@ -368,6 +368,7 @@ Conversión de ajustes de nginx:
 | `try_files $uri $uri.html $uri/index.html` y `error_page 404` | archivos estáticos con URL sin extensión y página 404 |
 | `add_header` | cabeceras de respuesta |
 | `return 444` | un sitio Cerrar conexión |
+| `error_page 497 https://$host:$server_port$request_uri` en un server HTTPS | «HTTP en el mismo puerto» de un listener nuevo en «Redirigir a HTTPS»; al fusionarse con un listener existente solo se muestra un aviso y su configuración no cambia |
 
 ## Consejo de despliegue
 

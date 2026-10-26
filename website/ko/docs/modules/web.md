@@ -368,6 +368,7 @@ nginx 설정을 옮기는 방법은 다음과 같습니다.
 | `try_files $uri $uri.html $uri/index.html`과 `error_page 404` | 확장자 없는 URL과 404 페이지를 설정한 정적 파일 |
 | `add_header` | 응답 헤더 |
 | `return 444` | 연결 끊기 사이트 |
+| HTTPS server의 `error_page 497 https://$host:$server_port$request_uri` | 새 리스너의 「같은 포트의 HTTP」를 「HTTPS로 리디렉션」으로 설정합니다. 기존 리스너에 병합할 때는 경고만 표시하고 설정은 바꾸지 않습니다 |
 
 ## 배포 팁
 

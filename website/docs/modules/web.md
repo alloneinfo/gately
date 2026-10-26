@@ -368,6 +368,7 @@ nginx 配置的对应关系：
 | `try_files $uri $uri.html $uri/index.html` 与 `error_page 404` | 静态文件的无扩展名地址与 404 页面 |
 | `add_header` | 响应头 |
 | `return 444` | 断开连接站点 |
+| HTTPS server 中的 `error_page 497 https://$host:$server_port$request_uri` | 新建监听的「同端口 HTTP」设为「跳转到 HTTPS」；合并到已有监听时只提示，不改动其设置 |
 
 ## 部署提示
 

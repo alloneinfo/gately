@@ -51,11 +51,13 @@ type NginxListenerPlan struct {
 	// ProxyProtocol 为 nginx 监听上的 proxy_protocol，对应“接收 PROXY 协议”
 	ProxyProtocol bool `json:"proxyProtocol"`
 	// Existing 为合并进去的已有监听名称，为空表示新建监听
-	Existing    string           `json:"existing,omitempty"`
-	ExistingKey string           `json:"existingKey,omitempty"`
-	Sites       []NginxSitePlan  `json:"sites"`
-	listener    *Listener        // 新建监听时的配置
-	sites       []nginxSiteDraft // 待导入的站点
+	Existing    string          `json:"existing,omitempty"`
+	ExistingKey string          `json:"existingKey,omitempty"`
+	Sites       []NginxSitePlan `json:"sites"`
+	// plainRedirect 为 HTTPS 监听上的 error_page 497：同端口收到明文 HTTP 时跳转到 HTTPS
+	plainRedirect bool
+	listener      *Listener        // 新建监听时的配置
+	sites         []nginxSiteDraft // 待导入的站点
 }
 
 // NginxSitePlan 是一个站点的转换结果。
@@ -81,6 +83,8 @@ type NginxSitePlan struct {
 type nginxSiteDraft struct {
 	plan *NginxSitePlan
 	site Site
+	// plainRedirect 为该 server 块配置了 error_page 497
+	plainRedirect bool
 }
 
 // nginxListen 是一条 listen 指令解析后的结果。
@@ -208,6 +212,10 @@ func importNginx(text string, existing []Listener, certs CertSource) (*NginxImpo
 			p.ProxyProtocol = p.ProxyProtocol || l.proxyProtocol
 			draft := convertNginxServer(srv, l, upstreams, httpGzip, mapDefaults)
 			draft.plan.Warnings = append(slices.Clone(lw), draft.plan.Warnings...)
+			if l.tls && hasNginxPlainRedirect(srv) {
+				p.plainRedirect = true
+				draft.plainRedirect = true
+			}
 			p.sites = append(p.sites, draft)
 		}
 	}
@@ -245,10 +253,17 @@ func importNginx(text string, existing []Listener, certs CertSource) (*NginxImpo
 			if p.TLS {
 				p.listener.MinTLS = "1.2"
 			}
+			if p.plainRedirect {
+				p.listener.PlainHTTP = PlainHTTPRedirect
+			}
 		}
 		for i := range p.sites {
 			d := &p.sites[i]
 			pl := d.plan
+			// 合并到已有监听时不改动其端口设置，提示用户自行开启
+			if d.plainRedirect && target != nil && target.PlainHTTP == "" {
+				pl.Warnings = append(pl.Warnings, "error_page 497 未导入：已有监听未开启「同端口 HTTP」，如需跳转请在监听设置中选择「跳转到 HTTPS」")
+			}
 			switch {
 			case pl.Skipped != "":
 			case pl.Default && hasDefault:
@@ -361,6 +376,17 @@ func parseNginxUpstream(d *ngDirective) *nginxUpstream {
 		}
 	}
 	return u
+}
+
+// hasNginxPlainRedirect 判断 server 块是否用 error_page 497 把同端口的明文 HTTP 请求跳转到 HTTPS，
+// 例如 error_page 497 https://$host:$server_port$request_uri; 对应监听的「同端口 HTTP：跳转到 HTTPS」。
+func hasNginxPlainRedirect(srv *ngDirective) bool {
+	for _, d := range srv.Block {
+		if d.Name == "error_page" && len(d.Args) >= 2 && slices.Contains(d.Args[:len(d.Args)-1], "497") {
+			return true
+		}
+	}
+	return false
 }
 
 // parseNginxListens 解析 server 块的 listen 指令；没有 listen 时与 nginx 一样视为 80 端口。

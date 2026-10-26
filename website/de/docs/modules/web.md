@@ -368,6 +368,7 @@ nginx-Einstellungen umsetzen:
 | `try_files $uri $uri.html $uri/index.html` und `error_page 404` | statische Dateien mit „URLs ohne Endung“ und „404-Seite“ |
 | `add_header` | Antwort-Header |
 | `return 444` | eine Site vom Typ Verbindung schließen |
+| `error_page 497 https://$host:$server_port$request_uri` in einem HTTPS-server | „HTTP auf demselben Port“ eines neuen Listeners auf „Auf HTTPS umleiten“; beim Zusammenführen mit einem vorhandenen Listener nur ein Hinweis, dessen Einstellungen bleiben unverändert |
 
 ## Hinweis zur Bereitstellung
 

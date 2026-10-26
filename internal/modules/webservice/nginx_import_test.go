@@ -339,3 +339,41 @@ func TestImportNginxAuthelia(t *testing.T) {
 		t.Fatalf("分路径后端错误: %+v", s.Locations)
 	}
 }
+
+// error_page 497 是 nginx 同端口明文 HTTP 跳转 HTTPS 的写法：新建监听时开启「跳转到 HTTPS」，合并到已有监听时只提示
+func TestImportNginxPlainRedirect(t *testing.T) {
+	conf := `server {
+	listen 8443 ssl;
+	server_name a.example.com;
+	error_page 497 https://$host:$server_port$request_uri;
+	return 200 "ok";
+}
+server {
+	listen 9443 ssl;
+	server_name b.example.com;
+	error_page 497 =301 https://$host:$server_port$request_uri;
+	return 200 "ok";
+}
+server {
+	listen 10443 ssl;
+	server_name c.example.com;
+	return 200 "ok";
+}`
+	existing := []Listener{{Key: "old", Port: 9443, TLS: true}}
+	rep, err := importNginx(conf, existing, nameCerts{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	p, _, _ := findSite(rep, "a.example.com")
+	if p == nil || p.listener == nil || p.listener.PlainHTTP != PlainHTTPRedirect {
+		t.Fatalf("新建监听应开启同端口 HTTP 跳转: %+v", p)
+	}
+	p, pl, _ := findSite(rep, "b.example.com")
+	if p == nil || p.ExistingKey != "old" || !strings.Contains(strings.Join(pl.Warnings, "\n"), "error_page 497") {
+		t.Fatalf("合并到已有监听时应提示: %+v %+v", p, pl)
+	}
+	p, _, _ = findSite(rep, "c.example.com")
+	if p == nil || p.listener == nil || p.listener.PlainHTTP != "" {
+		t.Fatalf("未配置 error_page 497 时不应开启: %+v", p)
+	}
+}

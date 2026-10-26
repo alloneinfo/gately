@@ -360,6 +360,7 @@
   "cron 表达式无效: %w": "Недопустимое выражение cron: %w",
   "deny all 拒绝了全部访问，已改为导入白名单为空的站点，请确认": "deny all запрещает любой доступ, поэтому сайт импортирован с пустым белым списком; проверьте",
   "dockerfile 与 gitUrl 必须二选一": "Необходимо указать ровно одно из значений: dockerfile или gitUrl",
+  "error_page 497 未导入：已有监听未开启「同端口 HTTP」，如需跳转请在监听设置中选择「跳转到 HTTPS」": "error_page 497 не импортирован: у существующего слушателя не включён «HTTP на том же порту»; для перенаправления выберите «Перенаправлять на HTTPS» в настройках слушателя",
   "export API docs (openapi.json and API.md) to the given directory and exit / 导出 API 文档到指定目录后退出": "export API docs (openapi.json and API.md) to the given directory and exit / экспортировать документацию API в указанный каталог и выйти",
   "from 不能晚于 to": "from не может быть позже to",
   "from 参数无效": "Недопустимый параметр from",

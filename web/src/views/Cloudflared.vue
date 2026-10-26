@@ -202,8 +202,14 @@ async function saveSettings() {
   }
 }
 
-function openEditor(tn?: Tunnel) {
-  editing.value = tn ? JSON.parse(JSON.stringify(tn)) : empty()
+function openEditor(tn?: TunnelView) {
+  if (tn) {
+    // 去掉运行状态、公网地址等只读字段，后端按未知字段拒绝请求
+    const { state: _s, error: _e, url: _u, connections: _c, ...tunnel } = tn
+    editing.value = JSON.parse(JSON.stringify(tunnel))
+  } else {
+    editing.value = empty()
+  }
   editorVisible.value = true
 }
 

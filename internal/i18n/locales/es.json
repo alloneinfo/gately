@@ -360,6 +360,7 @@
   "cron 表达式无效: %w": "Expresión cron no válida: %w",
   "deny all 拒绝了全部访问，已改为导入白名单为空的站点，请确认": "deny all bloquea todo el acceso, así que el sitio se importó con una lista blanca vacía; revísalo",
   "dockerfile 与 gitUrl 必须二选一": "Debe indicarse dockerfile o gitUrl, pero no ambos",
+  "error_page 497 未导入：已有监听未开启「同端口 HTTP」，如需跳转请在监听设置中选择「跳转到 HTTPS」": "error_page 497 no se importó: el listener existente no tiene activado «HTTP en el mismo puerto»; para redirigir, elija «Redirigir a HTTPS» en la configuración del listener",
   "export API docs (openapi.json and API.md) to the given directory and exit / 导出 API 文档到指定目录后退出": "export API docs (openapi.json and API.md) to the given directory and exit / exporta la documentación de la API al directorio indicado y termina",
   "from 不能晚于 to": "from no puede ser posterior a to",
   "from 参数无效": "Parámetro from no válido",

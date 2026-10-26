@@ -360,6 +360,7 @@
   "cron 表达式无效: %w": "cron 표현식이 유효하지 않음: %w",
   "deny all 拒绝了全部访问，已改为导入白名单为空的站点，请确认": "deny all 가 모든 접근을 거부하므로 빈 화이트리스트로 가져왔습니다. 확인하세요",
   "dockerfile 与 gitUrl 必须二选一": "dockerfile과 gitUrl 중 하나만 지정해야 함",
+  "error_page 497 未导入：已有监听未开启「同端口 HTTP」，如需跳转请在监听设置中选择「跳转到 HTTPS」": "error_page 497을 가져오지 않았습니다: 기존 리스너에서 「같은 포트의 HTTP」가 켜져 있지 않습니다. 리디렉션하려면 리스너 설정에서 「HTTPS로 리디렉션」을 선택하세요",
   "export API docs (openapi.json and API.md) to the given directory and exit / 导出 API 文档到指定目录后退出": "export API docs (openapi.json and API.md) to the given directory and exit / API 문서를 지정한 디렉터리로 내보낸 후 종료",
   "from 不能晚于 to": "from은 to보다 늦을 수 없습니다",
   "from 参数无效": "from 매개변수가 잘못되었습니다",

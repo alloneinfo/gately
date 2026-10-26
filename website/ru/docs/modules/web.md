@@ -368,6 +368,7 @@ curl -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/webservice/m
 | `try_files $uri $uri.html $uri/index.html` и `error_page 404` | статические файлы с «URL без расширения» и страницей 404 |
 | `add_header` | заголовки ответа |
 | `return 444` | сайт «Закрыть соединение» |
+| `error_page 497 https://$host:$server_port$request_uri` в HTTPS server | у нового слушателя «HTTP на том же порту» = «Перенаправлять на HTTPS»; при объединении с существующим слушателем выводится только предупреждение, его настройки не меняются |
 
 ## Рекомендации по развёртыванию
 

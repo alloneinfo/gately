@@ -368,6 +368,7 @@ Conversion des réglages nginx :
 | `try_files $uri $uri.html $uri/index.html` et `error_page 404` | fichiers statiques avec « URL sans extension » et « Page 404 » |
 | `add_header` | en-têtes de réponse |
 | `return 444` | un site Fermer la connexion |
+| `error_page 497 https://$host:$server_port$request_uri` dans un server HTTPS | « HTTP sur le même port » d'un nouvel écouteur réglé sur « Rediriger vers HTTPS » ; en cas de fusion avec un écouteur existant, seul un avertissement s'affiche et ses réglages restent inchangés |
 
 ## Conseil de déploiement
 

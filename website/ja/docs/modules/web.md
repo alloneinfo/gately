@@ -368,6 +368,7 @@ nginx の設定の置き換え方：
 | `try_files $uri $uri.html $uri/index.html` と `error_page 404` | 拡張子なし URL と 404 ページを設定した静的ファイル |
 | `add_header` | レスポンスヘッダー |
 | `return 444` | 「接続を切断」サイト |
+| HTTPS の server 内の `error_page 497 https://$host:$server_port$request_uri` | 新規リスナーの「同一ポートの HTTP」を「HTTPS へリダイレクト」に設定。既存リスナーに統合する場合は警告のみで、その設定は変更しません |
 
 ## デプロイのヒント
 

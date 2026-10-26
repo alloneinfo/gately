@@ -368,6 +368,7 @@ nginx 設定的對應關係：
 | `try_files $uri $uri.html $uri/index.html` 與 `error_page 404` | 靜態檔案的無副檔名網址與 404 頁面 |
 | `add_header` | 回應標頭 |
 | `return 444` | 中斷連線站台 |
+| HTTPS server 中的 `error_page 497 https://$host:$server_port$request_uri` | 新建監聽的「同埠 HTTP」設為「跳轉到 HTTPS」；合併到已有監聽時只提示，不改動其設定 |
 
 ## 部署提示
 

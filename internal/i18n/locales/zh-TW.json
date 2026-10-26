@@ -360,6 +360,7 @@
   "cron 表达式无效: %w": "cron 運算式無效: %w",
   "deny all 拒绝了全部访问，已改为导入白名单为空的站点，请确认": "deny all 拒絕了全部存取，已改為匯入白名單為空的站點，請確認",
   "dockerfile 与 gitUrl 必须二选一": "dockerfile 與 gitUrl 必須二選一",
+  "error_page 497 未导入：已有监听未开启「同端口 HTTP」，如需跳转请在监听设置中选择「跳转到 HTTPS」": "error_page 497 未匯入：已有監聽未開啟「同埠 HTTP」，如需跳轉請在監聽設定中選擇「跳轉到 HTTPS」",
   "export API docs (openapi.json and API.md) to the given directory and exit / 导出 API 文档到指定目录后退出": "export API docs (openapi.json and API.md) to the given directory and exit / 匯出 API 文件到指定目錄後結束",
   "from 不能晚于 to": "from 不能晚於 to",
   "from 参数无效": "from 參數無效",

@@ -368,6 +368,7 @@ Converting nginx settings:
 | `try_files $uri $uri.html $uri/index.html` and `error_page 404` | static files with clean URLs and a 404 page |
 | `add_header` | response headers |
 | `return 444` | a Close connection site |
+| `error_page 497 https://$host:$server_port$request_uri` in an HTTPS server | *Plain HTTP on same port* set to *Redirect to HTTPS* on a new listener; when merged into an existing listener, only a warning is shown and its settings stay unchanged |
 
 ## Deployment tip
 
