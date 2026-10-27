@@ -80,8 +80,8 @@
   "home": {
     "pill": "Código aberto · Auditável · Binário único",
     "announce": {
-      "text": "v0.5.9: File Browser, certificados IP e instalação online →",
-      "link": "/pt-BR/news/v0.5.9"
+      "text": "v0.6.0: várias instâncias de frp, roteamento por usuário e grupos de sites →",
+      "link": "/pt-BR/news/v0.6.0"
     },
     "titleLine1": "Um kit de gateway de rede",
     "titleLine2": "que você enxerga por dentro",

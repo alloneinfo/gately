@@ -7,6 +7,10 @@ description: Anuncios y notas de cada versión de Gately.
 
 A continuación se listan los anuncios de las versiones principales. Consulta [GitHub Releases](https://github.com/wangwanjie/gately/releases) para ver todos los cambios y las descargas de cada versión.
 
+## [v0.6.0](/es/news/v0.6.0)
+
+27 de octubre de 2026 · Varias instancias de frpc y frps; el Servicio web envía a los usuarios con sesión iniciada a sus propios backends, agrupa, ordena y busca sitios, y puede reenviar las cookies de inicio de sesión de Gately; los certificados detectan la zona DNS de los subdominios delegados; las contraseñas y claves guardadas pueden mostrarse a petición.
+
 ## [v0.5.9.1](/es/news/v0.5.9.1)
 
 26 de octubre de 2026 · Los listeners HTTPS del Servicio web pueden aceptar HTTP en el mismo puerto (redirigir o servir); las instancias de File Browser admiten URL de acceso; guardar una instancia de File Browser o un túnel de Cloudflare editados ya no falla.

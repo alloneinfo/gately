@@ -80,8 +80,8 @@
   "home": {
     "pill": "Open source · Auditable · Binaire unique",
     "announce": {
-      "text": "v0.5.9 : File Browser, certificats IP et installation en ligne →",
-      "link": "/fr/news/v0.5.9"
+      "text": "v0.6.0 : plusieurs instances frp, routage par utilisateur et groupes de sites →",
+      "link": "/fr/news/v0.6.0"
     },
     "titleLine1": "Une boîte à outils de passerelle réseau",
     "titleLine2": "où tout est visible",

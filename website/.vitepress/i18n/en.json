@@ -80,8 +80,8 @@
   "home": {
     "pill": "Open source · Auditable · Single binary",
     "announce": {
-      "text": "v0.5.9 is out: File Browser, IP certificates and online install →",
-      "link": "/en/news/v0.5.9"
+      "text": "v0.6.0 is out: several frp instances, per-user routing and site groups →",
+      "link": "/en/news/v0.6.0"
     },
     "titleLine1": "A network gateway toolkit",
     "titleLine2": "you can see through",

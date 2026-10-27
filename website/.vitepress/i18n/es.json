@@ -80,8 +80,8 @@
   "home": {
     "pill": "Código abierto · Auditable · Binario único",
     "announce": {
-      "text": "v0.5.9: File Browser, certificados IP e instalación en línea →",
-      "link": "/es/news/v0.5.9"
+      "text": "v0.6.0: varias instancias de frp, enrutamiento por usuario y grupos de sitios →",
+      "link": "/es/news/v0.6.0"
     },
     "titleLine1": "Una pasarela de red",
     "titleLine2": "que puedes ver por dentro",

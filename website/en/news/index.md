@@ -7,6 +7,10 @@ description: Release announcements and notes for each Gately version.
 
 Announcements for major releases are listed below. See [GitHub Releases](https://github.com/wangwanjie/gately/releases) for the full changes and downloads of every version.
 
+## [v0.6.0](/en/news/v0.6.0)
+
+October 27, 2026 · Several frpc and frps instances; the Web Service routes signed-in users to their own backends, groups, sorts and searches sites, and can forward Gately sign-in cookies; certificates detect the DNS zone of delegated subdomains; saved passwords and keys can be shown on request.
+
 ## [v0.5.9.1](/en/news/v0.5.9.1)
 
 October 26, 2026 · HTTPS listeners of the Web Service can accept HTTP on the same port (redirect or serve); File Browser instances can list their access URLs; saving an edited File Browser instance or Cloudflare tunnel no longer fails.

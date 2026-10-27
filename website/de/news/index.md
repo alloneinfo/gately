@@ -7,6 +7,10 @@ description: Release-Ankündigungen und Versionshinweise zu jeder Gately-Version
 
 Unten stehen die Ankündigungen zu wichtigen Releases. Alle Änderungen und Downloads jeder Version finden Sie unter [GitHub Releases](https://github.com/wangwanjie/gately/releases).
 
+## [v0.6.0](/de/news/v0.6.0)
+
+27. Oktober 2026 · Mehrere frpc- und frps-Instanzen; der Webdienst leitet angemeldete Benutzer an eigene Backends weiter, gruppiert, sortiert und durchsucht Sites und kann Gately-Anmelde-Cookies weiterreichen; Zertifikate erkennen die DNS-Zone delegierter Subdomains; gespeicherte Passwörter und Schlüssel lassen sich bei Bedarf anzeigen.
+
 ## [v0.5.9.1](/de/news/v0.5.9.1)
 
 26. Oktober 2026 · HTTPS-Listener des Webdienstes können HTTP auf demselben Port annehmen (umleiten oder ausliefern); File-Browser-Instanzen erhalten Zugriffs-URLs; das Speichern bearbeiteter File-Browser-Instanzen und Cloudflare-Tunnel schlägt nicht mehr fehl.

@@ -7,6 +7,10 @@ description: Gately 各版本的发布公告与更新说明。
 
 重要版本的发布公告如下，每个版本的完整变更与下载文件见 [GitHub Releases](https://github.com/wangwanjie/gately/releases)。
 
+## [v0.6.0](/news/v0.6.0)
+
+2026 年 10 月 27 日 · frp 可运行多个 frpc 与 frps 实例；Web 服务按登录用户分流到不同后端、站点分组排序与搜索、转发 Gately 登录 Cookie；证书自动识别委派子域名的 DNS 区域；已保存的密码与密钥可按需显示。
+
 ## [v0.5.9.1](/news/v0.5.9.1)
 
 2026 年 10 月 26 日 · Web 服务的 HTTPS 监听可在同一端口接受 HTTP（跳转或直接服务）；File Browser 实例可填写访问地址；修复编辑 File Browser 实例与 Cloudflare 隧道时保存失败。

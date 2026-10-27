@@ -80,8 +80,8 @@
   "home": {
     "pill": "开源 · 可审计 · 单文件部署",
     "announce": {
-      "text": "v0.5.9 发布：File Browser、IP 证书与在线安装 →",
-      "link": "/news/v0.5.9"
+      "text": "v0.6.0 发布：frp 多实例、按用户分流与站点分组 →",
+      "link": "/news/v0.6.0"
     },
     "titleLine1": "看得见的",
     "titleLine2": "网络网关工具集",
