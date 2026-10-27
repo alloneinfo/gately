@@ -58,7 +58,7 @@ func BuildTools(ops []Operation, opts MCPOptions) []Tool {
 	var tools []Tool
 	used := map[string]bool{}
 	for _, o := range ops {
-		if !opts.AllowWrite && !o.IsRead() {
+		if !opts.AllowWrite && !o.IsReadOnly() {
 			continue
 		}
 		name := toolName(o, used)
@@ -93,7 +93,7 @@ func BuildTools(ops []Operation, opts MCPOptions) []Tool {
 		desc += "）"
 		tools = append(tools, Tool{
 			Name: name, Description: desc, InputSchema: schema, op: o,
-			Annotations: map[string]any{"readOnlyHint": o.IsRead(), "destructiveHint": o.Method == "DELETE"},
+			Annotations: map[string]any{"readOnlyHint": o.IsReadOnly(), "destructiveHint": o.Method == "DELETE"},
 		})
 	}
 	return tools

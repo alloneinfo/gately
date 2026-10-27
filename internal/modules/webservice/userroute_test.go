@@ -165,3 +165,39 @@ func TestUserRouteCacheKey(t *testing.T) {
 		t.Fatal("未传递用户名时缓存键只按分流规则区分")
 	}
 }
+
+// TestUserRouteThirdPartyCase 覆盖第三方登录标识与允许名单一样不区分大小写，站点用户名区分大小写。
+func TestUserRouteThirdPartyCase(t *testing.T) {
+	users := map[string]bool{routeUserKey("GitHub:Alice"): true, routeUserKey("Bob"): true}
+	if !matchUserRoute(users, []string{"github:1001", "github:alice"}) {
+		t.Fatal("第三方标识应不区分大小写匹配")
+	}
+	if matchUserRoute(users, []string{"bob"}) || !matchUserRoute(users, []string{"Bob"}) {
+		t.Fatal("站点用户名应区分大小写")
+	}
+	s := Site{Domains: []string{"a.test"}, Targets: []string{"http://127.0.0.1:1"}, BasicAuth: true, Users: []string{"a:b"},
+		UserRoutes: []UserRoute{{Users: []string{"github:A"}, Targets: []string{"http://x"}}, {Users: []string{"GITHUB:a"}, Targets: []string{"http://y"}}}}
+	if err := s.validate(false); err == nil {
+		t.Fatal("仅大小写不同的第三方标识应视为重复")
+	}
+}
+
+// TestDelHeaderVariants 覆盖删除用户名请求头时一并删除下划线变体，其他请求头保留。
+func TestDelHeaderVariants(t *testing.T) {
+	h := http.Header{}
+	h.Set("X-Remote-User", "a")
+	h["X_remote_user"] = []string{"b"}
+	h["x_Remote-User"] = []string{"c"}
+	h.Set("X-Remote-Users", "keep")
+	delHeaderVariants(h, "X-Remote-User")
+	if len(h) != 1 || h.Get("X-Remote-Users") != "keep" {
+		t.Fatalf("删除结果错误: %v", h)
+	}
+	f := &forwardAuther{headers: []string{"Remote-User"}}
+	r := httptest.NewRequest("GET", "http://a.test/", nil)
+	r.Header["Remote_user"] = []string{"mallory"}
+	f.stripIdentity(r)
+	if len(r.Header) != 0 {
+		t.Fatalf("转发认证应删除伪造身份头的下划线变体: %v", r.Header)
+	}
+}

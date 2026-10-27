@@ -265,7 +265,7 @@ func sensitiveRead(path string) bool {
 	}
 	for _, seg := range strings.Split(path, "/") {
 		switch seg {
-		case "ws", "exec", "download", "export":
+		case "ws", "exec", "download", "export", "secrets":
 			return true
 		}
 	}

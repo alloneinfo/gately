@@ -80,10 +80,10 @@ func (s *Site) validateUserRoutes() error {
 			return fmt.Errorf("第 %d 条按用户分流规则需要填写后端", i+1)
 		}
 		for _, name := range u.Users {
-			if seen[name] {
+			if seen[routeUserKey(name)] {
 				return fmt.Errorf("用户 %s 出现在多条按用户分流规则中", name)
 			}
-			seen[name] = true
+			seen[routeUserKey(name)] = true
 		}
 		for _, t := range u.Targets {
 			if _, err := parseUpstream(t); err != nil {
@@ -121,7 +121,7 @@ func (h *siteHandler) buildUserRoutes() error {
 		}
 		users := map[string]bool{}
 		for _, u := range ur.Users {
-			users[u] = true
+			users[routeUserKey(u)] = true
 		}
 		h.userRoutes = append(h.userRoutes, &userRouteHandler{users: users, pool: p, handler: handler})
 	}
@@ -147,7 +147,18 @@ func (h *siteHandler) usesIdentity() bool {
 // stripUserHeader 删除访客自带的用户名请求头，防止伪造身份。无论路径是否需要认证都执行
 func (h *siteHandler) stripUserHeader(r *http.Request) {
 	if h.site.UserHeader != "" {
-		r.Header.Del(h.site.UserHeader)
+		delHeaderVariants(r.Header, h.site.UserHeader)
+	}
+}
+
+// delHeaderVariants 删除名称与 name 相同的请求头，包括用下划线代替连字符的变体（如 X_Remote_User）：
+// 部分后端（CGI、WSGI、PHP 等）把 - 与 _ 都映射为同一个变量，只删精确同名的头仍可被伪造。
+func delHeaderVariants(h http.Header, name string) {
+	want := strings.ReplaceAll(name, "_", "-")
+	for k := range h {
+		if strings.EqualFold(strings.ReplaceAll(k, "_", "-"), want) {
+			delete(h, k)
+		}
 	}
 }
 
@@ -170,9 +181,18 @@ func (h *siteHandler) withIdentity(r *http.Request, names []string) *http.Reques
 	return r.WithContext(context.WithValue(r.Context(), ctxKeyIdentity{}, id))
 }
 
+// routeUserKey 返回分流规则中用户的比较键：第三方登录标识（提供方:ID）与允许名单一样不区分大小写，
+// 站点用户与共享用户名区分大小写，保持原样。
+func routeUserKey(name string) string {
+	if strings.Contains(name, ":") {
+		return strings.ToLower(name)
+	}
+	return name
+}
+
 func matchUserRoute(users map[string]bool, names []string) bool {
 	for _, n := range names {
-		if users[n] {
+		if users[routeUserKey(n)] {
 			return true
 		}
 	}

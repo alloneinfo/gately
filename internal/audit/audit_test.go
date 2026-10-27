@@ -64,9 +64,10 @@ func TestMiddleware(t *testing.T) {
 	do("GET", "/api/system/backup") // 敏感读取
 	do("POST", "/api/nettools/run") // 被跳过
 	do("GET", "/api/webterminal/connections/x/ws")
+	do("GET", "/api/ddns/tasks/x/secrets") // 取回密码明文
 	res := l.Search(Query{})
-	if res.Total != 3 {
-		t.Fatalf("应记录 3 条，实际 %d: %+v", res.Total, res.Entries)
+	if res.Total != 4 {
+		t.Fatalf("应记录 4 条，实际 %d: %+v", res.Total, res.Entries)
 	}
 	e := l.Search(Query{Category: CategoryChange}).Entries[0]
 	if e.Actor != "tester" || e.IP != "9.9.9.9" || e.Module != "ddns" || e.Status != http.StatusCreated {

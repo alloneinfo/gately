@@ -367,6 +367,8 @@ func (m *Module) Routes(r module.Router) {
 		Merge:    mergeSecrets,
 		View:     m.viewLocked,
 		Secrets:  connectionSecrets,
+		// 明文密码可直接登录目标主机，与打开终端一样需要先接受协议并通过二次验证
+		SecretsGuard: m.requireAccess,
 		// 连接配置变更或删除后，丢弃该连接在池中的 SSH 连接
 		Changed: func(key string) { m.pool.drop(key) },
 		Removed: func(key string) { m.pool.drop(key) },

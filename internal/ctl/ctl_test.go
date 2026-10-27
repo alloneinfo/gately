@@ -240,3 +240,30 @@ func TestCLI(t *testing.T) {
 		t.Fatal("非法地址应返回 2")
 	}
 }
+
+// 需要写权限的 GET 接口（如取回密码明文的 secrets）在默认只读模式下不应暴露，
+// 开启 --write 后暴露但不标记为只读。
+func TestBuildToolsHidesSecretsWithoutWrite(t *testing.T) {
+	spec := `{"paths": {
+  "/api/ddns/tasks": {"get": {"summary": "任务列表", "x-required-scope": "ddns:read", "x-token-allowed": true}},
+  "/api/ddns/tasks/{key}/secrets": {"get": {"summary": "查看密钥", "x-required-scope": "ddns:write", "x-token-allowed": true}}
+}}`
+	ops, err := ParseOperations([]byte(spec))
+	if err != nil {
+		t.Fatal(err)
+	}
+	ro := BuildTools(ops, MCPOptions{})
+	if len(ro) != 1 || ro[0].op.Path != "/api/ddns/tasks" {
+		t.Fatalf("只读模式不应暴露 secrets 接口: %+v", ro)
+	}
+	all := BuildTools(ops, MCPOptions{AllowWrite: true})
+	if len(all) != 2 {
+		t.Fatalf("写模式应暴露 2 个工具: %d", len(all))
+	}
+	for _, tl := range all {
+		hint, _ := tl.Annotations["readOnlyHint"].(bool)
+		if tl.op.Path == "/api/ddns/tasks/{key}/secrets" && hint {
+			t.Fatal("secrets 接口不应标记为只读")
+		}
+	}
+}

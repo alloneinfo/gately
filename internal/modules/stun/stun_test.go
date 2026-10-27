@@ -242,6 +242,11 @@ func TestTCPTraversalEndToEnd(t *testing.T) {
 			if len(r.snapshot().History) != 2 {
 				t.Fatalf("历史记录应有 2 条: %+v", r.snapshot().History)
 			}
+			// 通知脚本在后台执行，等第二次写完再结束，否则 TempDir 清理时脚本可能仍在写文件
+			waitFor(t, "变化后脚本执行", func() bool {
+				b, _ := os.ReadFile(out)
+				return strings.Count(string(b), "\n") >= 2
+			})
 			_ = buf
 		})
 	}

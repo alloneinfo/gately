@@ -87,7 +87,7 @@ func newForwardAuther(cfg ForwardAuth) *forwardAuther {
 // stripIdentity 删除访客自带的身份头，防止伪造 Remote-User 等绕过后端的权限判断。
 func (f *forwardAuther) stripIdentity(r *http.Request) {
 	for _, h := range f.headers {
-		r.Header.Del(h)
+		delHeaderVariants(r.Header, h)
 	}
 }
 

@@ -49,6 +49,9 @@ type Collection[T any] struct {
 	// Secrets 返回条目中被脱敏字段的明文（字段名 → 值），供管理界面“显示密码”使用；可为 nil。
 	// 接口路径含 secrets 片段，按写权限鉴权，只读账号与只读令牌无法调用
 	Secrets func(it *T) map[string]string
+	// SecretsGuard 在查看密钥明文前调用（未持锁），返回 false 时已写入响应并拒绝，
+	// 例如 Web 终端要求先通过二次验证；可为 nil
+	SecretsGuard func(w http.ResponseWriter, r *http.Request) bool
 }
 
 // NewKey 生成随机 key。
@@ -102,6 +105,9 @@ func (c *Collection[T]) Register(r module.Router, path string) {
 }
 
 func (c *Collection[T]) secrets(w http.ResponseWriter, r *http.Request) {
+	if c.SecretsGuard != nil && !c.SecretsGuard(w, r) {
+		return
+	}
 	c.Mu.Lock()
 	defer c.Mu.Unlock()
 	it := c.Find(r.PathValue("key"))

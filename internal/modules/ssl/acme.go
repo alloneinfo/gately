@@ -15,6 +15,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/go-acme/lego/v4/certcrypto"
@@ -22,6 +23,8 @@ import (
 	"github.com/go-acme/lego/v4/challenge/dns01"
 	"github.com/go-acme/lego/v4/lego"
 	"github.com/go-acme/lego/v4/registration"
+	"github.com/miekg/dns"
+	"golang.org/x/net/publicsuffix"
 
 	"github.com/wangwanjie/gately/internal/acmehttp"
 	"github.com/wangwanjie/gately/internal/dnsprovider"
@@ -50,6 +53,8 @@ type dnsSolver struct {
 	zone    string
 	timeout time.Duration
 	log     *logbuf.Logger
+	// nameservers 是查询 SOA 使用的 DNS 服务器：证书设置了 DNS 服务器时用它，否则用系统设置
+	nameservers []string
 }
 
 // locate 计算验证记录所在的主域名与主机记录。
@@ -65,9 +70,14 @@ func (s *dnsSolver) locate(domain, keyAuth string) (zone, sub, value string, err
 	}
 	// 未指定主域名时先按 SOA 查询验证记录所在的权威区域，能正确处理单独托管的子域名（NS 委派）与多级后缀；
 	// 查询失败（例如域名尚未生效）时退回按域名段数推断
-	if z, err := findZone(fqdn); err == nil {
-		if sub, ok := dnsprovider.SubForZone(fqdn, z); ok && sub != "@" {
+	if z, err := findZone(fqdn, s.nameservers); err == nil {
+		// 本地 DNS 覆盖了上层域名时（如 dnsmasq 的 local=/example.com/），SOA 会一路查到 com 这类公共后缀；
+		// 比可注册域名还短的区域不可能是用户托管的区域，丢弃并改按域名推断
+		if sub, ok := dnsprovider.SubForZone(fqdn, z); ok && sub != "@" && zoneRegistrable(fqdn, z) {
 			return z, sub, info.Value, nil
+		}
+		if s.log != nil {
+			s.log.Warnf("%s 查到的权威区域 %s 不可用，按域名推断主域名", fqdn, z)
 		}
 	} else if s.log != nil {
 		s.log.Warnf("查询 %s 的权威区域失败，按域名推断主域名: %v", fqdn, err)
@@ -76,10 +86,20 @@ func (s *dnsSolver) locate(domain, keyAuth string) (zone, sub, value string, err
 	return zone, sub, info.Value, nil
 }
 
-// findZone 返回 fqdn 所在的权威区域（不带末尾的点），测试中可替换。
-// lego 会缓存 SOA 结果，同一次签发的添加与清理不会重复查询；查询使用设置的 DNS 服务器
-var findZone = func(fqdn string) (string, error) {
-	z, err := dns01.FindZoneByFqdn(dns01.ToFqdn(fqdn))
+// zoneRegistrable 判断区域 zone 是否等于 fqdn 的可注册域名（eTLD+1）或是它的子域。
+func zoneRegistrable(fqdn, zone string) bool {
+	etld1, err := publicsuffix.EffectiveTLDPlusOne(strings.ToLower(fqdn))
+	if err != nil {
+		return false
+	}
+	zone = strings.ToLower(zone)
+	return zone == etld1 || strings.HasSuffix(zone, "."+etld1)
+}
+
+// findZone 返回 fqdn 所在的权威区域（不带末尾的点），nameservers 为查询使用的 DNS 服务器，测试中可替换。
+// lego 会缓存 SOA 结果，同一次签发的添加与清理不会重复查询
+var findZone = func(fqdn string, nameservers []string) (string, error) {
+	z, err := dns01.FindZoneByFqdnCustom(dns01.ToFqdn(fqdn), nameservers)
 	if err != nil {
 		return "", err
 	}
@@ -218,6 +238,14 @@ func obtain(cfg ACMEConfig, acc *Account, log *logbuf.Logger) (*obtainResult, er
 	return res, nil
 }
 
+// systemNameservers 返回系统设置的 DNS 服务器（/etc/resolv.conf），读取失败时与 lego 一样使用公共 DNS。
+var systemNameservers = sync.OnceValue(func() []string {
+	if c, err := dns.ClientConfigFromFile("/etc/resolv.conf"); err == nil && len(c.Servers) > 0 {
+		return dns01.ParseNameservers(c.Servers)
+	}
+	return []string{"google-public-dns-a.google.com:53", "google-public-dns-b.google.com:53"}
+})
+
 // setupDNS01 为客户端配置 DNS-01 验证。
 func setupDNS01(client *lego.Client, cfg ACMEConfig, log *logbuf.Logger) error {
 	p, err := dnsprovider.New(cfg.Provider, cfg.Credentials, &http.Client{Timeout: 30 * time.Second})
@@ -228,11 +256,13 @@ func setupDNS01(client *lego.Client, cfg ACMEConfig, log *logbuf.Logger) error {
 	if err != nil {
 		return err
 	}
-	solver := &dnsSolver{txt: txt, zone: strings.Trim(cfg.Zone, "."), timeout: time.Duration(cfg.PropagationTimeout) * time.Second, log: log}
-	opts := []dns01.ChallengeOption{}
+	// lego 的递归 DNS 服务器是包级全局变量，每张证书都显式设置，避免沿用上一张证书设置的 DNS 服务器
+	ns := systemNameservers()
 	if len(cfg.Resolvers) > 0 {
-		opts = append(opts, dns01.AddRecursiveNameservers(dns01.ParseNameservers(cfg.Resolvers)))
+		ns = dns01.ParseNameservers(cfg.Resolvers)
 	}
+	solver := &dnsSolver{txt: txt, zone: strings.Trim(cfg.Zone, "."), timeout: time.Duration(cfg.PropagationTimeout) * time.Second, log: log, nameservers: ns}
+	opts := []dns01.ChallengeOption{dns01.AddRecursiveNameservers(ns)}
 	if cfg.DisableAuthoritativeCheck {
 		opts = append(opts, dns01.DisableAuthoritativeNssPropagationRequirement())
 	}

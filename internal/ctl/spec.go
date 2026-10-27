@@ -29,6 +29,12 @@ type Operation struct {
 // IsRead 判断是否为只读接口。
 func (o Operation) IsRead() bool { return o.Method == "GET" || o.Method == "HEAD" }
 
+// IsReadOnly 判断接口是否真正只读：GET 但需要写权限的接口（取回密码明文的 secrets、
+// 容器 exec、私钥下载等）不算只读，MCP 默认只读模式下不暴露。
+func (o Operation) IsReadOnly() bool {
+	return o.IsRead() && !strings.HasSuffix(o.Scope, ":write")
+}
+
 var pathParamRe = regexp.MustCompile(`\{([^}/]+)\}`)
 
 // FetchOperations 从实例读取 OpenAPI 文档，返回令牌可访问的接口。

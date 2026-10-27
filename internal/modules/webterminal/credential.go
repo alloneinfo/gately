@@ -88,6 +88,8 @@ func (m *Module) registerCredentials(r module.Router) {
 		Secrets: func(c *Credential) map[string]string {
 			return map[string]string{"password": c.Password, "passphrase": c.Passphrase}
 		},
+		// 与连接的密钥一样，需要先接受协议并通过二次验证
+		SecretsGuard: m.requireAccess,
 		// 预设变更后，丢弃引用该预设的连接在池中的 SSH 连接，下次使用新凭据重新认证
 		Changed: m.dropCredentialUsersLocked,
 		// 仍被连接引用的预设不允许删除，避免连接失去凭据

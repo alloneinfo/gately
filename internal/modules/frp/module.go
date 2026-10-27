@@ -90,13 +90,46 @@ func (m *Module) Init(env module.Env) error {
 		return err
 	}
 	if m.cfg.migrateLegacy() {
-		// 立即保存迁移结果，避免每次启动都生成新的实例 key
+		// 立即保存迁移结果，避免每次启动都生成新的实例 key；
+		// 保存失败（如配置目录只读）不影响其他模块启动，内存中照常使用迁移后的配置，下次启动会重新迁移
 		if err := m.saveLocked(); err != nil {
-			return err
+			m.logs.Logger("frp").Warnf("保存迁移后的 frp 配置失败: %v", err)
+		} else {
+			m.logs.Logger("frp").Infof("已把旧版单个 frpc / frps 配置迁移为实例")
 		}
-		m.logs.Logger("frp").Infof("已把旧版单个 frpc / frps 配置迁移为实例")
+	}
+	// 清理不属于任何 frpc 实例的代理（例如恢复了中间状态的配置历史），它们不会写入任何配置
+	if n := m.pruneOrphanProxiesLocked(); n > 0 {
+		m.logs.Logger("frp").Warnf("已忽略 %d 个所属 frpc 实例不存在的代理", n)
 	}
 	m.cfg.fillDefaults()
+	return nil
+}
+
+// pruneOrphanProxiesLocked 删除所属 frpc 实例不存在的代理，返回删除的数量。调用方持有 mu（或处于 Init）。
+func (m *Module) pruneOrphanProxiesLocked() int {
+	kept := make([]Proxy, 0, len(m.cfg.Proxies))
+	for _, p := range m.cfg.Proxies {
+		if m.findClient(p.Client) != nil {
+			kept = append(kept, p)
+		}
+	}
+	n := len(m.cfg.Proxies) - len(kept)
+	if n > 0 {
+		m.cfg.Proxies = kept
+	}
+	return n
+}
+
+// saveClientsLocked 保存 frpc 实例列表，并在同一次保存中删除已删除实例的代理；
+// 保存失败时恢复代理列表（实例列表由 crud 回滚），避免出现所属实例不存在的代理。调用方持有 mu。
+func (m *Module) saveClientsLocked() error {
+	old := m.cfg.Proxies
+	m.pruneOrphanProxiesLocked()
+	if err := m.saveLocked(); err != nil {
+		m.cfg.Proxies = old
+		return err
+	}
 	return nil
 }
 
@@ -165,6 +198,7 @@ func (m *Module) Start(context.Context) error {
 	defer m.mu.Unlock()
 	m.started = true
 	m.syncLocked(true)
+	m.cleanupConfigFilesLocked()
 	return nil
 }
 
@@ -260,6 +294,8 @@ func (m *Module) runInstance(runs map[string]*instRuntime, bin, key, name, conte
 	rt.sup.Stop()
 	rt.err, rt.content = "", content
 	if content == "" {
+		// 停用的实例不保留含令牌的配置文件
+		m.removeConfigFile(bin, key)
 		return
 	}
 	log := m.logs.Logger(logSource(bin, name))
@@ -371,6 +407,11 @@ func (m *Module) dropLocked(runs map[string]*instRuntime, bin, key string) {
 		rt.sup.Stop()
 		delete(runs, key)
 	}
+	m.removeConfigFile(bin, key)
+}
+
+// removeConfigFile 删除实例生成的配置文件，文件不存在时忽略。
+func (m *Module) removeConfigFile(bin, key string) {
 	if key == "" || strings.ContainsAny(key, `/\.`) {
 		return
 	}
@@ -379,25 +420,39 @@ func (m *Module) dropLocked(runs map[string]*instRuntime, bin, key string) {
 	}
 }
 
-// removeClientLocked 在 frpc 实例删除后停止进程，并删除归属它的代理。调用方持有 mu。
-func (m *Module) removeClientLocked(key string) {
-	m.dropLocked(m.clients, binClient, key)
-	kept := make([]Proxy, 0, len(m.cfg.Proxies))
-	for _, p := range m.cfg.Proxies {
-		if p.Client != key {
-			kept = append(kept, p)
-		}
-	}
-	if len(kept) == len(m.cfg.Proxies) {
+// cleanupConfigFilesLocked 删除 frp/ 目录下不属于当前任何实例的配置文件，包括旧版的 frpc.toml、frps.toml
+// 以及恢复配置历史后遗留的旧实例文件，这些文件含明文令牌。调用方持有 mu。
+func (m *Module) cleanupConfigFilesLocked() {
+	dir := filepath.Join(m.store.Dir(), "frp")
+	entries, err := os.ReadDir(dir)
+	if err != nil {
 		return
 	}
-	old := m.cfg.Proxies
-	m.cfg.Proxies = kept
-	if err := m.saveLocked(); err != nil {
-		// 实例已删除，残留的代理不会写入任何配置，下次保存时再清理
-		m.cfg.Proxies = old
-		m.logs.Logger("frp").Warnf("删除实例的代理失败: %v", err)
+	keep := map[string]bool{}
+	for i := range m.cfg.Clients {
+		keep[filepath.Base(m.configFile(binClient, m.cfg.Clients[i].Key))] = true
 	}
+	for i := range m.cfg.Servers {
+		keep[filepath.Base(m.configFile(binServer, m.cfg.Servers[i].Key))] = true
+	}
+	for _, e := range entries {
+		name := e.Name()
+		if e.IsDir() || keep[name] || !(strings.HasSuffix(name, ".toml") || strings.HasSuffix(name, ".toml.tmp")) {
+			continue
+		}
+		if !strings.HasPrefix(name, binClient) && !strings.HasPrefix(name, binServer) {
+			continue
+		}
+		if err := os.Remove(filepath.Join(dir, name)); err != nil && !os.IsNotExist(err) {
+			m.logs.Logger("frp").Warnf("删除残留配置文件失败: %v", err)
+		}
+	}
+}
+
+// removeClientLocked 在 frpc 实例删除后停止进程；归属它的代理已由 saveClientsLocked 在同一次保存中删除。
+// 调用方持有 mu。
+func (m *Module) removeClientLocked(key string) {
+	m.dropLocked(m.clients, binClient, key)
 }
 
 // InstanceState 是实例的运行状态。
@@ -479,7 +534,7 @@ func (m *Module) Routes(r module.Router) {
 	clients := &crud.Collection[Client]{
 		Mu:       &m.mu,
 		Items:    &m.cfg.Clients,
-		Save:     m.saveLocked,
+		Save:     m.saveClientsLocked,
 		Key:      func(c *Client) *string { return &c.Key },
 		Enabled:  func(c *Client) *bool { return &c.Enable },
 		Validate: func(c *Client) error { return c.Validate() },

@@ -74,7 +74,7 @@ func (m *Module) registerImport(r module.Router) {
 		if in.Apply {
 			if err := m.applyImportLocked(res, in, out); err != nil {
 				code := http.StatusInternalServerError
-				if errors.Is(err, errTargetNotFound) {
+				if errors.Is(err, errTargetNotFound) || errors.Is(err, errInvalidImport) {
 					code = http.StatusBadRequest
 				}
 				httpx.Error(w, code, "%v", err)
@@ -140,6 +140,11 @@ func (m *Module) applyImportLocked(res *ImportResult, in ImportRequest, out *Imp
 			c = &m.cfg.Clients[len(m.cfg.Clients)-1]
 		}
 		out.Key = c.Key
+		// 导入到已启用的实例时，导入的设置同样要通过校验（如缺少服务端地址），避免保存出编辑时无法通过校验的状态
+		if err := c.Validate(); err != nil {
+			m.cfg = oldCfg
+			return fmt.Errorf("%w: %v", errInvalidImport, err)
+		}
 		exists := map[string]bool{}
 		for _, p := range m.cfg.Proxies {
 			if p.Client == c.Key {
@@ -169,6 +174,10 @@ func (m *Module) applyImportLocked(res *ImportResult, in ImportRequest, out *Imp
 			}
 			s.ServerSettings = *res.Server
 			out.Key = s.Key
+			if err := s.Validate(); err != nil {
+				m.cfg = oldCfg
+				return fmt.Errorf("%w: %v", errInvalidImport, err)
+			}
 		} else {
 			if name == "" {
 				name = binServer
@@ -192,3 +201,6 @@ func (m *Module) applyImportLocked(res *ImportResult, in ImportRequest, out *Imp
 
 // errTargetNotFound 表示导入目标实例不存在。
 var errTargetNotFound = errors.New("要导入到的实例不存在")
+
+// errInvalidImport 表示导入后的实例设置未通过校验。
+var errInvalidImport = errors.New("导入的设置无效")

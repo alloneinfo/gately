@@ -6,6 +6,8 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+
+	"github.com/wangwanjie/gately/internal/auth"
 )
 
 // TestCredentialPreset 覆盖认证预设：脱敏输出、连接引用预设完成认证、默认用户名、被引用时拒绝删除。
@@ -93,5 +95,30 @@ func TestSecretsEndpoints(t *testing.T) {
 	}
 	if code, _ := call(t, srv, "GET", "/credentials/missing/secrets", nil); code != http.StatusNotFound {
 		t.Fatalf("认证预设不存在应返回 404，实际 %d", code)
+	}
+}
+
+// TestSecretsRequireTwoFA 验证开启终端二次验证后，未验证的会话不能取回连接与预设的密码明文，验证后可以。
+func TestSecretsRequireTwoFA(t *testing.T) {
+	m, srv := newModule(t)
+	m.mu.Lock()
+	m.cfg.Connections = []Connection{{Key: "c", Name: "nas", Type: "ssh"}}
+	m.cfg.Connections[0].SSH.Password = "sp"
+	m.cfg.Credentials = []Credential{{Key: "k", Name: "cred", AuthType: "password", Password: "cp"}}
+	m.cfg.Security.TwoFAEnable = true
+	m.cfg.Security.TwoFAKey = auth.NewTOTPSecret()
+	m.mu.Unlock()
+
+	for _, p := range []string{"/connections/c/secrets", "/credentials/k/secrets"} {
+		code, out := call(t, srv, "GET", p, nil)
+		if code != http.StatusForbidden || out["need2fa"] != true {
+			t.Fatalf("%s 未通过二次验证应返回 403: %d %v", p, code, out)
+		}
+	}
+	if code, _ := call(t, srv, "POST", "/security/verify2fa", map[string]string{"code": totpNow(m.cfg.Security.TwoFAKey)}); code != http.StatusOK {
+		t.Fatalf("二次验证失败: %d", code)
+	}
+	if code, out := call(t, srv, "GET", "/connections/c/secrets", nil); code != http.StatusOK || out["ssh.password"] != "sp" {
+		t.Fatalf("通过二次验证后应返回明文: %d %v", code, out)
 	}
 }
