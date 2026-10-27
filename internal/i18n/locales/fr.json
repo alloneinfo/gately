@@ -695,6 +695,7 @@
   "分享链接用于绕过认证，请先启用基本认证、网页认证或转发认证": "Les liens de partage contournent l'authentification ; activez d'abord l'authentification basique, web ou déléguée",
   "分享链接用于绕过认证，请先启用基本认证或网页认证": "Les liens de partage servent à contourner l'authentification, activez d'abord l'authentification de base ou l'authentification Web",
   "分享链接路径 %q 需以 / 开头": "Le chemin du lien de partage %q doit commencer par /",
+  "分组名称不能超过 %d 个字符": "Le nom du groupe ne peut pas dépasser %d caractères",
   "分路径后端仅适用于反向代理站点": "Les backends par chemin ne s'appliquent qu'aux sites en proxy inverse",
   "切换到保存的旧版本": "Revenir à une version précédente conservée",
   "列出 API 令牌": "Lister les jetons API",

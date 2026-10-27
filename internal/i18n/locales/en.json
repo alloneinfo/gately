@@ -695,6 +695,7 @@
   "分享链接用于绕过认证，请先启用基本认证、网页认证或转发认证": "Share links bypass authentication; enable basic auth, web auth or forward auth first",
   "分享链接用于绕过认证，请先启用基本认证或网页认证": "Share links bypass authentication; enable basic authentication or web authentication first",
   "分享链接路径 %q 需以 / 开头": "Share link path %q must start with /",
+  "分组名称不能超过 %d 个字符": "The group name cannot exceed %d characters",
   "分路径后端仅适用于反向代理站点": "Path backends only apply to reverse proxy sites",
   "切换到保存的旧版本": "Switch to a saved previous version",
   "列出 API 令牌": "List API tokens",

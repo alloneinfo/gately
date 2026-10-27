@@ -2228,6 +2228,9 @@
           "forwardedHeaders": {
             "type": "boolean"
           },
+          "group": {
+            "type": "string"
+          },
           "health": {
             "$ref": "#/components/schemas/webservice.HealthCheck"
           },

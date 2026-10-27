@@ -1602,6 +1602,7 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | `enable` | boolean |
 | `forwardAuth` | `webservice.ForwardAuth` |
 | `forwardedHeaders` | boolean |
+| `group` | string |
 | `health` | `webservice.HealthCheck` |
 | `insecureSkipVerify` | boolean |
 | `ipList` | Lista de string |

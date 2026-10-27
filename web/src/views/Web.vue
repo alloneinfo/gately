@@ -4,7 +4,19 @@
       <el-button v-if="listeners.length" :icon="allListenersCollapsed ? ChevronsUpDown : ChevronsDownUp" @click="setAll(listeners.map((l) => l.key), !allListenersCollapsed)">
         {{ allListenersCollapsed ? t('common.expandAll') : t('common.collapseAll') }}
       </el-button>
+      <el-input
+        v-if="hasSites"
+        v-model="filterText"
+        class="site-filter"
+        clearable
+        :disabled="sortMode"
+        :prefix-icon="Search"
+        :placeholder="t('web.filterPlaceholder')"
+      />
       <CompactToggle v-model="compact" />
+      <el-button v-if="canSort" :type="sortMode ? 'primary' : 'default'" :icon="ArrowUpDown" @click="toggleSortMode">
+        {{ sortMode ? t('web.sortDone') : t('web.sort') }}
+      </el-button>
       <el-button :icon="FileInput" @click="nginxImport?.open()">{{ t('web.importNginx') }}</el-button>
       <el-button :icon="SlidersHorizontal" @click="openSettings">{{ t('web.globalSettings') }}</el-button>
       <el-button type="primary" :icon="Plus" @click="openListener()">{{ t('web.addListener') }}</el-button>
@@ -15,7 +27,7 @@
     <div v-loading="loading" class="card-list">
       <el-empty v-if="!loading && !listeners.length" :description="t('web.empty')" />
       <EntityCard
-        v-for="l in listeners"
+        v-for="(l, li) in listeners"
         :key="l.key"
         :off="!l.enable || moduleOff"
         collapsible
@@ -40,60 +52,95 @@
           <StatusBadge v-bind="listenerStatus(l)" />
         </template>
         <template #extra>
-          <div class="sites" :class="{ 'is-compact': compact }">
-            <div v-for="row in siteRows(l)" :key="row.isDefault ? '__default' : row.index" class="site" :class="{ 'is-off': !row.site.enable }">
+          <div class="sites" :class="{ 'is-compact': compact, 'is-sorting': sortMode }">
+            <template v-for="item in displayItems(l)" :key="item.id">
+            <div v-if="item.kind === 'group'" class="site-group" :class="{ 'is-sorting': sortMode }" @click="!sortMode && toggleGroup(l, item.name)">
+              <ChevronRight v-if="!sortMode" :size="14" class="group-arrow" :class="{ open: !item.collapsed }" />
+              <Folder :size="14" class="group-icon" />
+              <span class="group-name">{{ item.name || t('web.ungrouped') }}</span>
+              <span class="meta">{{ t('web.groupCount', { count: item.count }) }}</span>
+              <span v-if="sortMode && item.name" class="group-ops" @click.stop>
+                <el-button text size="small" :icon="ChevronUp" :disabled="!item.canUp" :aria-label="t('web.moveGroupUp')" :title="t('web.moveGroupUp')" @click="moveGroup(l, item.index, -1)" />
+                <el-button text size="small" :icon="ChevronDown" :disabled="!item.canDown" :aria-label="t('web.moveGroupDown')" :title="t('web.moveGroupDown')" @click="moveGroup(l, item.index, 1)" />
+              </span>
+            </div>
+            <div
+              v-else
+              class="site"
+              :class="{ 'is-off': !item.row.site.enable, 'is-grouped': item.grouped, dragging: dragId === dragKeyOf(l, item.row), over: overId === dragKeyOf(l, item.row) && dragId !== overId }"
+              :draggable="sortMode && !isMobile && !item.row.isDefault"
+              @dragstart="onDragStart(l, item.row, $event)"
+              @dragover.prevent="onDragOver(l, item.row)"
+              @dragleave="overId === dragKeyOf(l, item.row) && (overId = '')"
+              @drop.prevent="onDrop(l, item.row)"
+              @dragend="dragId = ''; overId = ''"
+            >
               <div class="site-switch">
-                <el-switch :model-value="row.site.enable" size="small" @change="(v: string | number | boolean) => toggleSite(l, row, Boolean(v))" />
+                <el-switch :model-value="item.row.site.enable" size="small" @change="(v: string | number | boolean) => toggleSite(l, item.row, Boolean(v))" />
               </div>
               <div class="site-main">
-                <div v-if="row.isDefault" class="site-domains"><el-tag size="small" type="warning">{{ t('web.defaultSite') }}</el-tag> <span class="meta">{{ t('web.unmatchedDomains') }}</span></div>
-                <div v-else class="site-domains mono">{{ row.site.domains.join(', ') }}</div>
-                <div v-if="row.site.name" class="meta">{{ row.site.name }}</div>
+                <div v-if="item.row.isDefault" class="site-domains"><el-tag size="small" type="warning">{{ t('web.defaultSite') }}</el-tag> <span class="meta">{{ t('web.unmatchedDomains') }}</span></div>
+                <div v-else class="site-domains mono">{{ item.row.site.domains.join(', ') }}</div>
+                <div v-if="item.row.site.name" class="meta">{{ item.row.site.name }}</div>
               </div>
               <div class="site-target">
-                <el-tag size="small" effect="plain">{{ typeText(row.site.type) }}</el-tag>
-                <span class="mono target">{{ summary(row.site) }}</span>
+                <el-tag size="small" effect="plain">{{ typeText(item.row.site.type) }}</el-tag>
+                <span class="mono target">{{ summary(item.row.site) }}</span>
               </div>
               <div class="site-opts">
-                <StatusBadge v-if="!row.site.enable" type="off" :text="t('web.statusOff')" />
-                <el-tag v-if="row.site.webAuth" size="small" type="warning">{{ t('web.webAuthTag') }}</el-tag>
-                <el-tag v-else-if="row.site.basicAuth" size="small" type="warning">{{ t('web.basicAuthTag') }}</el-tag>
-                <el-tag v-else-if="row.site.forwardAuth?.url" size="small" type="warning">{{ t('web.forwardAuthTag') }}</el-tag>
-                <el-tag v-if="row.site.locations?.length" size="small" type="info">{{ t('web.locationsTag', { count: row.site.locations.length }) }}</el-tag>
-                <el-tag v-if="row.site.ipMode" size="small" type="info">{{ row.site.ipMode === 'whitelist' ? t('web.whitelist') : t('web.blacklist') }}</el-tag>
-                <el-tag v-if="row.site.sendProxyProtocol" size="small" type="info">PROXY v2</el-tag>
-                <el-tag v-if="downCount(l, row) > 0" size="small" type="danger">{{ t('web.upstreamsDown', { count: downCount(l, row) }) }}</el-tag>
-                <el-tag v-if="row.site.insecureSkipVerify" size="small" type="info">{{ t('web.skipVerifyTag') }}</el-tag>
-                <el-tag v-if="row.site.waf" size="small" :type="wafInstances.some((w) => w.key === row.site.waf) ? 'danger' : 'info'">
-                  WAF{{ wafInstances.some((w) => w.key === row.site.waf) ? '' : t('web.wafMissingSuffix') }}
+                <StatusBadge v-if="!item.row.site.enable" type="off" :text="t('web.statusOff')" />
+                <el-tag v-if="item.row.site.webAuth" size="small" type="warning">{{ t('web.webAuthTag') }}</el-tag>
+                <el-tag v-else-if="item.row.site.basicAuth" size="small" type="warning">{{ t('web.basicAuthTag') }}</el-tag>
+                <el-tag v-else-if="item.row.site.forwardAuth?.url" size="small" type="warning">{{ t('web.forwardAuthTag') }}</el-tag>
+                <el-tag v-if="item.row.site.locations?.length" size="small" type="info">{{ t('web.locationsTag', { count: item.row.site.locations.length }) }}</el-tag>
+                <el-tag v-if="item.row.site.ipMode" size="small" type="info">{{ item.row.site.ipMode === 'whitelist' ? t('web.whitelist') : t('web.blacklist') }}</el-tag>
+                <el-tag v-if="item.row.site.sendProxyProtocol" size="small" type="info">PROXY v2</el-tag>
+                <el-tag v-if="downCount(l, item.row) > 0" size="small" type="danger">{{ t('web.upstreamsDown', { count: downCount(l, item.row) }) }}</el-tag>
+                <el-tag v-if="item.row.site.insecureSkipVerify" size="small" type="info">{{ t('web.skipVerifyTag') }}</el-tag>
+                <el-tag v-if="item.row.site.waf" size="small" :type="wafInstances.some((w) => w.key === item.row.site.waf) ? 'danger' : 'info'">
+                  WAF{{ wafInstances.some((w) => w.key === item.row.site.waf) ? '' : t('web.wafMissingSuffix') }}
                 </el-tag>
               </div>
               <div class="site-stats">
-                <template v-if="row.site.key && l.stats?.[row.site.key]">
-                  <span>{{ t('web.requestsCount', { count: l.stats[row.site.key].requests }) }}</span>
-                  <span v-if="l.stats[row.site.key].errors" class="text-danger"> · {{ t('web.errorsCount', { count: l.stats[row.site.key].errors }) }}</span>
+                <template v-if="item.row.site.key && l.stats?.[item.row.site.key]">
+                  <span>{{ t('web.requestsCount', { count: l.stats[item.row.site.key].requests }) }}</span>
+                  <span v-if="l.stats[item.row.site.key].errors" class="text-danger"> · {{ t('web.errorsCount', { count: l.stats[item.row.site.key].errors }) }}</span>
                 </template>
                 <span v-else class="muted">-</span>
               </div>
-              <div class="site-actions">
-                <el-button v-if="l.running" text size="small" :icon="BarChart3" @click="openStats(l, row)">{{ t('web.stats') }}</el-button>
-                <el-button text size="small" :icon="Pencil" @click="openSite(l, row)">{{ t('common.edit') }}</el-button>
-                <el-popconfirm v-if="row.isDefault" :title="t('web.resetDefaultConfirm')" width="260" @confirm="resetDefaultSite(l)">
+              <div v-if="sortMode" class="site-actions">
+                <template v-if="!item.row.isDefault">
+                  <GripVertical v-if="!isMobile" :size="16" class="grip" />
+                  <el-button text size="small" :icon="ChevronUp" :disabled="!item.canUp" :aria-label="t('web.moveUp')" :title="t('web.moveUp')" @click="moveSite(l, item.row, -1)" />
+                  <el-button text size="small" :icon="ChevronDown" :disabled="!item.canDown" :aria-label="t('web.moveDown')" :title="t('web.moveDown')" @click="moveSite(l, item.row, 1)" />
+                </template>
+                <span v-else class="meta">{{ t('web.defaultSiteLast') }}</span>
+              </div>
+              <div v-else class="site-actions">
+                <el-button v-if="l.running" text size="small" :icon="BarChart3" @click="openStats(l, item.row)">{{ t('web.stats') }}</el-button>
+                <el-button text size="small" :icon="Pencil" @click="openSite(l, item.row)">{{ t('common.edit') }}</el-button>
+                <el-popconfirm v-if="item.row.isDefault" :title="t('web.resetDefaultConfirm')" width="260" @confirm="resetDefaultSite(l)">
                   <template #reference>
                     <el-button text size="small" type="danger" :icon="Trash2" :aria-label="t('common.reset')" />
                   </template>
                 </el-popconfirm>
-                <el-popconfirm v-else :title="t('web.deleteSiteConfirm')" @confirm="removeSite(l, row)">
+                <el-popconfirm v-else :title="t('web.deleteSiteConfirm')" @confirm="removeSite(l, item.row)">
                   <template #reference>
                     <el-button text size="small" type="danger" :icon="Trash2" :aria-label="t('web.deleteSite')" />
                   </template>
                 </el-popconfirm>
               </div>
             </div>
+            </template>
             <div v-if="!siteRows(l).length" class="meta empty-sites">{{ t('web.noSites') }}</div>
+            <div v-else-if="!displayItems(l).length" class="meta empty-sites">{{ t('web.noMatchedSites') }}</div>
           </div>
         </template>
-        <template #actions>
+        <template v-if="sortMode" #actions>
+          <el-button text size="small" :icon="ChevronUp" :disabled="li === 0" @click="moveListener(li, -1)">{{ t('web.moveUp') }}</el-button>
+          <el-button text size="small" :icon="ChevronDown" :disabled="li === listeners.length - 1" @click="moveListener(li, 1)">{{ t('web.moveDown') }}</el-button>
+        </template>
+        <template v-else #actions>
           <el-button text size="small" type="primary" :icon="Plus" @click="openSite(l)">{{ t('web.addSite') }}</el-button>
           <el-button text size="small" :icon="Pencil" @click="openListener(l)">{{ t('web.editListener') }}</el-button>
           <el-popconfirm :title="t('web.deleteListenerConfirm')" width="240" @confirm="removeListener(l)">
@@ -164,6 +211,9 @@
               <el-input v-model="domainsText" type="textarea" :rows="2" class="mono" :placeholder="t('web.domainsPlaceholder')" />
             </el-form-item>
             <el-form-item :label="t('common.name')"><el-input v-model="site.name" /></el-form-item>
+            <el-form-item v-if="!siteIsDefault" :label="t('web.group')">
+              <el-autocomplete v-model="site.group" class="w-260" clearable :maxlength="64" :fetch-suggestions="groupSuggestions" :placeholder="t('web.groupPlaceholder')" />
+            </el-form-item>
             <el-form-item :label="t('web.type')">
               <el-radio-group v-model="site.type">
                 <el-radio-button value="proxy">{{ t('web.typeProxy') }}</el-radio-button>
@@ -363,7 +413,24 @@
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
-import { BarChart3, ChevronsDownUp, ChevronsUpDown, FileInput, Pencil, Plus, Server, SlidersHorizontal, Trash2 } from 'lucide-vue-next'
+import {
+  ArrowUpDown,
+  BarChart3,
+  ChevronDown,
+  ChevronRight,
+  ChevronsDownUp,
+  ChevronsUpDown,
+  ChevronUp,
+  FileInput,
+  Folder,
+  GripVertical,
+  Pencil,
+  Plus,
+  Search,
+  Server,
+  SlidersHorizontal,
+  Trash2,
+} from 'lucide-vue-next'
 import { api, type OAuthProvider } from '../api'
 import PageHeader from '../components/PageHeader.vue'
 import ModuleBanner from '../components/ModuleBanner.vue'
@@ -396,6 +463,8 @@ interface Site {
   key?: string
   name: string
   enable: boolean
+  // group 为列表中的分组名称，只影响展示，留空为未分组
+  group?: string
   domains: string[]
   type: string
   targets: string[] | null
@@ -577,6 +646,7 @@ function emptySite(): Site {
   return {
     name: '',
     enable: true,
+    group: '',
     domains: [],
     type: 'proxy',
     targets: [],
@@ -697,6 +767,202 @@ function siteRows(l: ListenerView): SiteRow[] {
     rows.push({ site: l.default, index: -1, isDefault: true })
   }
   return rows
+}
+
+// 列表的筛选、排序与分组 ----
+
+// filterText 按域名、名称、分组、后端与备注筛选站点（排序模式下不筛选，避免只调整到部分站点的顺序）
+const filterText = ref('')
+const sortMode = ref(false)
+// 分组的收起状态按 监听key/分组名 持久化，与监听器的收起状态分开存放
+const groupFold = useCollapsed('web.groups')
+const hasSites = computed(() => listeners.value.some((l) => siteRows(l).length > 0))
+const canSort = computed(() => listeners.value.length > 1 || listeners.value.some((l) => (l.sites ?? []).length > 1))
+
+interface SiteSection {
+  name: string
+  rows: SiteRow[]
+}
+
+type DisplayItem =
+  | { kind: 'group'; id: string; name: string; count: number; collapsed: boolean; index: number; canUp: boolean; canDown: boolean }
+  | { kind: 'site'; id: string; row: SiteRow; grouped: boolean; canUp: boolean; canDown: boolean }
+
+// siteSections 把普通站点按分组归类：分组按首次出现的顺序排列，未分组的站点放在最后；默认站点不参与
+function siteSections(l: ListenerView): SiteSection[] {
+  const map = new Map<string, SiteRow[]>()
+  ;(l.sites ?? []).forEach((s, i) => {
+    const g = s.group ?? ''
+    if (!map.has(g)) {
+      map.set(g, [])
+    }
+    map.get(g)!.push({ site: s, index: i, isDefault: false })
+  })
+  const named = [...map.entries()].filter(([g]) => g).map(([name, rows]) => ({ name, rows }))
+  const ungrouped = map.get('') ?? []
+  return ungrouped.length ? [...named, { name: '', rows: ungrouped }] : named
+}
+
+function siteMatches(s: Site, q: string) {
+  return [s.name, s.group ?? '', s.remark, ...(s.domains ?? []), summary(s)].join('\n').toLowerCase().includes(q)
+}
+
+function groupCollapsed(l: ListenerView, name: string) {
+  return groupFold.isCollapsed(`${l.key}/${name}`)
+}
+
+function toggleGroup(l: ListenerView, name: string) {
+  groupFold.setCollapsed(`${l.key}/${name}`, !groupCollapsed(l, name))
+}
+
+// displayItems 生成监听器下依次显示的分组标题与站点行；没有任何分组时不显示标题，默认站点固定在最后
+function displayItems(l: ListenerView): DisplayItem[] {
+  const q = sortMode.value ? '' : filterText.value.trim().toLowerCase()
+  const sections = siteSections(l)
+  const grouped = sections.some((sec) => sec.name)
+  const namedCount = sections.filter((sec) => sec.name).length
+  const items: DisplayItem[] = []
+  sections.forEach((sec, si) => {
+    const rows = q ? sec.rows.filter((r) => siteMatches(r.site, q)) : sec.rows
+    if (!rows.length) {
+      return
+    }
+    // 筛选与排序时展开全部分组，便于看到结果与调整顺序
+    const collapsed = grouped && !q && !sortMode.value && groupCollapsed(l, sec.name)
+    if (grouped) {
+      items.push({ kind: 'group', id: `g:${sec.name}`, name: sec.name, count: rows.length, collapsed, index: si, canUp: !!sec.name && si > 0, canDown: !!sec.name && si < namedCount - 1 })
+    }
+    if (collapsed) {
+      return
+    }
+    rows.forEach((row, ri) => items.push({ kind: 'site', id: `s:${row.index}`, row, grouped, canUp: ri > 0, canDown: ri < rows.length - 1 }))
+  })
+  const deflt = siteRows(l).find((r) => r.isDefault)
+  if (deflt && (!q || siteMatches(deflt.site, q))) {
+    items.push({ kind: 'site', id: '__default', row: deflt, grouped: false, canUp: false, canDown: false })
+  }
+  return items
+}
+
+function toggleSortMode() {
+  sortMode.value = !sortMode.value
+  dragId.value = ''
+  overId.value = ''
+}
+
+// saveSiteOrder 按分组展示顺序重排站点并保存；站点匹配与顺序无关，只改变列表中的显示顺序
+async function saveSiteOrder(lv: ListenerView, sections: SiteSection[]) {
+  const l = plain(lv)
+  const sites = l.sites ?? []
+  l.sites = sections.flatMap((sec) => sec.rows.map((r) => sites[r.index]))
+  try {
+    await putListener(l)
+  } catch (e) {
+    ElMessage.error((e as Error).message)
+  }
+  await load()
+}
+
+function swap<T>(list: T[], i: number, j: number) {
+  const tmp = list[i]
+  list[i] = list[j]
+  list[j] = tmp
+}
+
+// moveSite 在站点所在分组内上移或下移一位
+function moveSite(l: ListenerView, row: SiteRow, d: number) {
+  const sections = siteSections(l)
+  const sec = sections.find((x) => x.name === (row.site.group ?? ''))
+  if (!sec) {
+    return
+  }
+  const i = sec.rows.findIndex((r) => r.index === row.index)
+  const j = i + d
+  if (i < 0 || j < 0 || j >= sec.rows.length) {
+    return
+  }
+  swap(sec.rows, i, j)
+  saveSiteOrder(l, sections)
+}
+
+// moveGroup 整体移动一个分组；未分组的站点始终在最后
+function moveGroup(l: ListenerView, index: number, d: number) {
+  const sections = siteSections(l)
+  const j = index + d
+  if (j < 0 || j >= sections.length || !sections[index]?.name || !sections[j].name) {
+    return
+  }
+  swap(sections, index, j)
+  saveSiteOrder(l, sections)
+}
+
+async function moveListener(i: number, d: number) {
+  const keys = listeners.value.map((l) => l.key ?? '')
+  const j = i + d
+  if (j < 0 || j >= keys.length) {
+    return
+  }
+  swap(keys, i, j)
+  try {
+    await api.put('/api/webservice/listeners-order', { keys })
+  } catch (e) {
+    ElMessage.error((e as Error).message)
+  }
+  await load()
+}
+
+// 拖动排序：只在同一监听器的同一分组内生效
+const dragId = ref('')
+const overId = ref('')
+
+function dragKeyOf(l: ListenerView, row: SiteRow) {
+  return row.isDefault ? '' : `${l.key}/${row.index}`
+}
+
+function onDragStart(l: ListenerView, row: SiteRow, e: DragEvent) {
+  dragId.value = dragKeyOf(l, row)
+  e.dataTransfer?.setData('text/plain', dragId.value)
+}
+
+function onDragOver(l: ListenerView, row: SiteRow) {
+  if (dragId.value) {
+    overId.value = dragKeyOf(l, row)
+  }
+}
+
+function onDrop(l: ListenerView, target: SiteRow) {
+  const from = dragId.value
+  dragId.value = ''
+  overId.value = ''
+  const to = dragKeyOf(l, target)
+  if (!from || !to || from === to || !from.startsWith(`${l.key}/`)) {
+    return
+  }
+  const fromIndex = Number(from.slice(from.lastIndexOf('/') + 1))
+  const sections = siteSections(l)
+  const sec = sections.find((x) => x.rows.some((r) => r.index === fromIndex))
+  if (!sec || !sec.rows.some((r) => r.index === target.index)) {
+    return
+  }
+  const moving = sec.rows.find((r) => r.index === fromIndex)!
+  const rest = sec.rows.filter((r) => r.index !== fromIndex)
+  rest.splice(rest.findIndex((r) => r.index === target.index), 0, moving)
+  sec.rows.splice(0, sec.rows.length, ...rest)
+  saveSiteOrder(l, sections)
+}
+
+// groupSuggestions 为分组输入框提供所有监听器下已有的分组名称
+function groupSuggestions(query: string, cb: (items: { value: string }[]) => void) {
+  const q = query.trim().toLowerCase()
+  const names = new Set<string>()
+  for (const l of listeners.value) {
+    for (const s of l.sites ?? []) {
+      if (s.group && (!q || s.group.toLowerCase().includes(q))) {
+        names.add(s.group)
+      }
+    }
+  }
+  cb([...names].map((value) => ({ value })))
 }
 
 // 去掉运行状态字段，得到可提交的监听配置
@@ -980,8 +1246,57 @@ onMounted(async () => {
   padding: 9px 8px 9px 12px;
   font-size: 13px;
 }
-.site + .site {
+.site + .site,
+.site-group + .site,
+.site + .site-group {
   border-top: 1px solid var(--g-border);
+}
+.site-filter {
+  width: 220px;
+}
+/* 分组标题行：点击收起或展开该分组 */
+.site-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--el-fill-color-light);
+  cursor: pointer;
+  user-select: none;
+}
+.site-group.is-sorting {
+  cursor: default;
+}
+.group-arrow {
+  transition: transform 0.15s;
+}
+.group-arrow.open {
+  transform: rotate(90deg);
+}
+.group-icon {
+  color: var(--el-text-color-secondary);
+}
+.group-ops {
+  display: flex;
+  margin-left: auto;
+}
+.group-ops :deep(.el-button + .el-button) {
+  margin-left: 0;
+}
+.grip {
+  color: var(--el-text-color-secondary);
+  cursor: grab;
+}
+.sites.is-sorting .site[draggable='true'] {
+  cursor: grab;
+}
+.site.dragging {
+  opacity: 0.4;
+}
+.site.over {
+  box-shadow: inset 0 2px 0 var(--el-color-primary);
 }
 .site.is-off .site-main,
 .site.is-off .site-target,
@@ -1011,6 +1326,7 @@ onMounted(async () => {
 }
 .site-actions {
   display: flex;
+  align-items: center;
   justify-content: flex-end;
 }
 .site-actions :deep(.el-button + .el-button) {
@@ -1081,6 +1397,9 @@ onMounted(async () => {
   }
 }
 @media (max-width: 767.98px) {
+  .site-filter {
+    width: 160px;
+  }
   .site {
     grid-template-columns: auto minmax(0, 1fr) auto;
     padding: 10px;

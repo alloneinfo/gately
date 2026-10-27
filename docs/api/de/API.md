@@ -1602,6 +1602,7 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | `enable` | boolean |
 | `forwardAuth` | `webservice.ForwardAuth` |
 | `forwardedHeaders` | boolean |
+| `group` | string |
 | `health` | `webservice.HealthCheck` |
 | `insecureSkipVerify` | boolean |
 | `ipList` | Array von string |

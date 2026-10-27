@@ -1602,6 +1602,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `enable` | boolean |
 | `forwardAuth` | `webservice.ForwardAuth` |
 | `forwardedHeaders` | boolean |
+| `group` | string |
 | `health` | `webservice.HealthCheck` |
 | `insecureSkipVerify` | boolean |
 | `ipList` | 数组 of string |

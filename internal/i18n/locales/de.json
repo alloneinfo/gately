@@ -695,6 +695,7 @@
   "分享链接用于绕过认证，请先启用基本认证、网页认证或转发认证": "Freigabelinks umgehen die Authentifizierung; zuerst Basic-, Web- oder Forward-Auth aktivieren",
   "分享链接用于绕过认证，请先启用基本认证或网页认证": "Freigabelinks dienen zur Umgehung der Authentifizierung, aktivieren Sie zuerst Basisauthentifizierung oder Webauthentifizierung",
   "分享链接路径 %q 需以 / 开头": "Der Pfad %q des Freigabelinks muss mit / beginnen",
+  "分组名称不能超过 %d 个字符": "Der Gruppenname darf höchstens %d Zeichen lang sein",
   "分路径后端仅适用于反向代理站点": "Backends pro Pfad gelten nur für Reverse-Proxy-Sites",
   "切换到保存的旧版本": "Zu einer gespeicherten früheren Version wechseln",
   "列出 API 令牌": "API-Tokens auflisten",

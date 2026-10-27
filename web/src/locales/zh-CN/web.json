@@ -147,5 +147,18 @@
   "oidcIntro": "把上面的共享用户提供给 Gitea、OpenList、Grafana 等支持 OpenID Connect 的应用登录，应用能区分不同用户，可替代 Authelia 的 OIDC 功能。",
   "sharedUsersSite": "共享用户",
   "sharedUsersSiteLabel": "使用共享用户（支持 TOTP 与单点登录）",
-  "sharedUsersSiteHelp": "在 Web 服务全局设置中管理共享用户；与下方站点自有用户可同时使用"
+  "sharedUsersSiteHelp": "在 Web 服务全局设置中管理共享用户；与下方站点自有用户可同时使用",
+  "filterPlaceholder": "搜索域名、名称、分组或后端",
+  "sort": "排序",
+  "sortDone": "完成排序",
+  "group": "分组",
+  "groupPlaceholder": "留空为未分组，可选择已有分组",
+  "ungrouped": "未分组",
+  "groupCount": "{count} 个站点",
+  "moveUp": "上移",
+  "moveDown": "下移",
+  "moveGroupUp": "分组上移",
+  "moveGroupDown": "分组下移",
+  "defaultSiteLast": "默认站点固定在最后",
+  "noMatchedSites": "没有符合筛选条件的站点"
 }

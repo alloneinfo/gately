@@ -1602,6 +1602,7 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | `enable` | boolean |
 | `forwardAuth` | `webservice.ForwardAuth` |
 | `forwardedHeaders` | boolean |
+| `group` | string |
 | `health` | `webservice.HealthCheck` |
 | `insecureSkipVerify` | boolean |
 | `ipList` | Array of string |

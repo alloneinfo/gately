@@ -147,5 +147,18 @@
   "oidcIntro": "Permet à Gitea, OpenList, Grafana et aux autres applications OpenID Connect de connecter les utilisateurs partagés ci-dessus ; chaque application sait qui est connecté. Peut remplacer le fournisseur OIDC d'Authelia.",
   "sharedUsersSite": "Utilisateurs partagés",
   "sharedUsersSiteLabel": "Utiliser les utilisateurs partagés (TOTP et authentification unique)",
-  "sharedUsersSiteHelp": "Gérez-les dans les paramètres globaux du service web ; ils s'ajoutent aux utilisateurs propres au site"
+  "sharedUsersSiteHelp": "Gérez-les dans les paramètres globaux du service web ; ils s'ajoutent aux utilisateurs propres au site",
+  "filterPlaceholder": "Rechercher un domaine, un nom, un groupe ou un backend",
+  "sort": "Trier",
+  "sortDone": "Terminer le tri",
+  "group": "Groupe",
+  "groupPlaceholder": "Laisser vide pour aucun groupe, ou choisir un groupe existant",
+  "ungrouped": "Sans groupe",
+  "groupCount": "{count} sites",
+  "moveUp": "Monter",
+  "moveDown": "Descendre",
+  "moveGroupUp": "Monter le groupe",
+  "moveGroupDown": "Descendre le groupe",
+  "defaultSiteLast": "Le site par défaut reste toujours en dernier",
+  "noMatchedSites": "Aucun site ne correspond au filtre"
 }

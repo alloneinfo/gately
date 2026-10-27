@@ -1602,6 +1602,7 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | `enable` | boolean |
 | `forwardAuth` | `webservice.ForwardAuth` |
 | `forwardedHeaders` | boolean |
+| `group` | string |
 | `health` | `webservice.HealthCheck` |
 | `insecureSkipVerify` | boolean |
 | `ipList` | Array de string |

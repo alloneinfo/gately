@@ -804,3 +804,21 @@ func TestSettingsSecrets(t *testing.T) {
 		t.Fatalf("设置接口不应返回密钥明文: %s", body)
 	}
 }
+
+// TestSiteGroup 覆盖站点分组名称的整理、长度限制与默认站点不分组。
+func TestSiteGroup(t *testing.T) {
+	l := Listener{Port: 8080,
+		Sites:   []Site{{Group: "  家庭  ", Domains: []string{"a.com"}, Targets: []string{"http://127.0.0.1:1"}}},
+		Default: Site{Group: "x", Targets: []string{"http://127.0.0.1:1"}},
+	}
+	if err := l.Validate(); err != nil {
+		t.Fatal(err)
+	}
+	if l.Sites[0].Group != "家庭" || l.Default.Group != "" {
+		t.Fatalf("分组整理错误: %q / %q", l.Sites[0].Group, l.Default.Group)
+	}
+	l.Sites[0].Group = strings.Repeat("组", maxGroupLen+1)
+	if err := l.Validate(); err == nil {
+		t.Fatal("超长分组名称应报错")
+	}
+}

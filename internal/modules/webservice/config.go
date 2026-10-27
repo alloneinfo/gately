@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"path/filepath"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/wangwanjie/gately/internal/thirdauth"
 	"golang.org/x/net/http/httpguts"
@@ -33,11 +34,16 @@ const (
 	IPModeBlacklist = "blacklist"
 )
 
+// maxGroupLen 为站点分组名称的最大字符数
+const maxGroupLen = 64
+
 // Site 是监听器下按域名匹配的一个站点。
 type Site struct {
 	Key    string `json:"key"`
 	Name   string `json:"name"`
 	Enable bool   `json:"enable"`
+	// Group 为列表中的分组名称，只影响管理界面的展示，留空为未分组；默认站点不分组
+	Group string `json:"group"`
 	// Domains 支持精确域名、*.example.com 通配（匹配任意级子域名）与 *（匹配所有）
 	Domains []string `json:"domains"`
 	Type    string   `json:"type"`
@@ -307,11 +313,20 @@ func (l *Listener) Validate() error {
 		}
 	}
 	l.Default.Key = "default"
+	// 默认站点固定排在最后，不参与分组（停用时不经过 validate，这里单独清空）
+	l.Default.Group = ""
 	return nil
 }
 
 func (s *Site) validate(isDefault bool) error {
 	s.Name = strings.TrimSpace(s.Name)
+	s.Group = strings.TrimSpace(s.Group)
+	if isDefault {
+		s.Group = ""
+	}
+	if utf8.RuneCountInString(s.Group) > maxGroupLen {
+		return fmt.Errorf("分组名称不能超过 %d 个字符", maxGroupLen)
+	}
 	var domains []string
 	for _, d := range s.Domains {
 		d = strings.ToLower(strings.Trim(strings.TrimSpace(d), "."))
