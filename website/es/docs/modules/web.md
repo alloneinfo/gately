@@ -12,6 +12,8 @@ La configuración tiene tres niveles:
 
 Al guardar un cambio en un sitio o en el sitio por defecto, la lista de sitios se sustituye en caliente: el listener sigue funcionando, las conexiones abiertas (incluido WebSocket) se mantienen y cada sitio conserva sus estadísticas. Si la nueva configuración no es válida, los sitios anteriores siguen sirviendo. Cambiar los ajustes propios del listener (red, dirección, puerto, HTTPS, TLS mínimo, HTTP/3, protocolo PROXY) reinicia ese listener.
 
+Un sitio puede tener un «Grupo» (hasta 64 caracteres; el sitio por defecto no se puede agrupar). Bajo cada listener, la lista muestra los grupos como secciones plegables: los grupos aparecen en el orden en que se encuentran por primera vez, los sitios sin grupo van a continuación y el sitio por defecto queda siempre al final. El estado plegado de cada grupo se guarda en el navegador. Pulsa «Ordenar» para entrar en el modo de ordenación, donde puedes subir y bajar sitios, arrastrarlos dentro de su grupo, mover grupos enteros y reordenar los listeners. El orden solo afecta a la lista: la coincidencia de dominios sigue la prioridad anterior sea cual sea el orden de los sitios, y al guardar el nuevo orden la lista de sitios se sustituye en caliente sin cortar conexiones. El cuadro de búsqueda de la parte superior de la página filtra los sitios por dominio, nombre, grupo, backend o nota.
+
 ## Tipos de sitio
 
 | Tipo | Descripción |
@@ -213,6 +215,25 @@ Para un sitio de proxy inverso, envía las peticiones bajo un prefijo de ruta a 
 - Los demás ajustes del sitio, como la opción de Host, las comprobaciones de certificado, las cabeceras reenviadas, el protocolo PROXY, la política de balanceo de carga y las comprobaciones de estado, se aplican a todos los backends por ruta;
 - La compresión, el límite de peticiones, la caché y las reescrituras se aplican a todo el sitio.
 
+## Repartir por usuario {#user-routes}
+
+Para un sitio de proxy inverso, envía las peticiones de cada usuario con sesión iniciada a sus propios backends, como `map $remote_user $backend` de nginx. Primero el sitio necesita autenticación básica, autenticación web o autenticación delegada. Después añade reglas en «Repartir por usuario», en la página «Seguridad» del editor del sitio: cada regla indica un conjunto de usuarios y los backends de esos usuarios, escritos como los backends del sitio.
+
+Los usuarios se reconocen por estos identificadores:
+
+- El nombre de un usuario del sitio o de un [usuario compartido](#shared-users);
+- En el inicio de sesión de terceros, `proveedor-key:identificador`, por ejemplo `github:octocat`; los demás identificadores de esa identidad también coinciden;
+- En la autenticación delegada, el `Remote-User` copiado de la respuesta del servicio de autenticación.
+
+Reparto:
+
+- Los usuarios no listados, y los visitantes sin sesión en rutas públicas (rutas que no requieren autenticación), usan los backends del sitio. En las rutas públicas, un visitante que ya inició sesión con la autenticación web también se reparte según su identidad, de modo que las páginas de una misma aplicación llegan al mismo backend;
+- Los backends por ruta con backends propios (consulta la sección anterior) tienen prioridad; los que solo añaden cabeceras usan los backends del usuario;
+- Cuando «Pasar nombre de usuario» contiene un nombre de cabecera como `X-Remote-User`, el nombre del usuario con sesión iniciada se envía al backend en esa cabecera. La misma cabecera enviada por los visitantes se elimina siempre, así que no se puede falsificar;
+- Con la caché de respuestas en memoria activada, la clave de caché incluye la regla de usuario elegida, y también el nombre de usuario cuando «Pasar nombre de usuario» está activo, de modo que las respuestas de backends distintos o para usuarios distintos se mantienen separadas.
+
+Al guardar se comprueba que el sitio tiene la autenticación activada, que cada regla tiene al menos un usuario y backends válidos, que ningún usuario aparece en dos reglas y que el nombre de cabecera es válido y no es una de las cabeceras que afectan al reenvío o a la autenticación, como `Host`, `Cookie`, `Authorization` o `X-Forwarded-For`. En la lista de sitios, un sitio con reglas por usuario muestra una etiqueta con el número de reglas.
+
 ## Mejoras del proxy inverso
 
 Estas opciones están en la página «Tráfico» del editor del sitio.
@@ -292,7 +313,7 @@ Reglas de caché:
 - Se respeta primero `s-maxage` y después `max-age`;
 - Una entrada individual está limitada a 4 MB y también a un máximo de una cuarta parte de la capacidad total;
 - Un acierto devuelve las cabeceras `X-Cache: HIT` y `Age`, y un fallo devuelve `X-Cache: MISS`;
-- La clave de caché incluye el Host, la URI completa de la petición y `Accept-Encoding`.
+- La clave de caché incluye el Host, la URI completa de la petición y `Accept-Encoding`; con el [reparto por usuario](#user-routes), incluye también la regla de usuario elegida, y el nombre de usuario cuando «Pasar nombre de usuario» está activo.
 
 ### Reescritura y redirección de rutas
 

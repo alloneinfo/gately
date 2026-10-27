@@ -12,6 +12,12 @@ Issue and renew certificates automatically for use by [Web Services](/en/docs/mo
 - Map to a directory: after a certificate changes, the files are written to the specified directory and a script runs, so other services can reload;
 - Auto deploy: after a certificate changes, copy it to several local directories, push it to other hosts over SSH and run a command, or restart the Docker containers that use it.
 
+## DNS-01 validation
+
+Choose DNS-01 as the certificate's "Method" and pick a DNS provider. During issuance, Gately adds the `_acme-challenge` TXT record through the provider's API and deletes it after validation.
+
+"Root domain" is the DNS zone that holds the record. When it is left empty, Gately looks up the authoritative zone of the validation record with an SOA query, so a subdomain delegated to another DNS provider (for example `web.example.com` hosted apart from `example.com`) and multi-level suffixes such as `example.com.cn` are detected correctly. If the lookup fails, the zone is inferred from the domain name and the reason is logged. You can also fill in the root domain yourself, for example `web.example.com`.
+
 ## HTTP-01 validation
 
 Choose HTTP-01 as the certificate's "Method". During issuance, the CA requests `http://<domain>/.well-known/acme-challenge/<token>`:

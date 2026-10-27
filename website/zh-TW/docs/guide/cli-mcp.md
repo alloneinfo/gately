@@ -107,7 +107,7 @@ GATELY_URL=https://gw.example.com GATELY_TOKEN=gtl_xxxx gately ctl get /api/stat
 
 ### 預設唯讀
 
-不帶 `--write` 時只公開 GET 與 HEAD 工具。需要讓 AI 修改設定時加上 `--write`。即使開啟寫入，權杖自身的權限依然生效，因此更穩妥的做法是為 MCP 建立專用權杖，只授予需要的權限。
+不帶 `--write` 時只公開 GET 與 HEAD 工具，也不提供 `.../secrets` 這類取回明文密碼的介面，加上 `--write` 後才會提供。需要讓 AI 修改設定時加上 `--write`。即使開啟寫入，權杖自身的權限依然生效，因此更穩妥的做法是為 MCP 建立專用權杖，只授予需要的權限。
 
 ::: warning 注意
 `--write` 允許 AI 用戶端呼叫權杖權限範圍內的全部寫入介面，包括刪除。請先用唯讀權杖驗證流程，再視需要授予寫入權限。

@@ -44,11 +44,11 @@ Gately 完全开源，用户和社区可以直接审阅源码与配置。对于�
 | 动态域名 | 阿里云、Cloudflare、腾讯云、DNSPod、华为云、GoDaddy、Porkbun、dynv6、DuckDNS、Amazon Route 53、OVHcloud、Gandi、NS1、Bunny DNS、Namecheap、DynDNS2（No-IP、Dynu 等）、自定义回调；URL/网卡/命令取 IP；IPv4/IPv6；Webhook |
 | STUN 穿透 | TCP/UDP、保活、UPnP/NAT-PMP、内置转发、地址变化时触发 Webhook 与脚本 |
 | 端口转发 | TCP/UDP、IPv4/IPv6、端口段、多目标故障转移、连接数限制、流量统计、PROXY 协议（v1/v2）；SNI 分流，让多个服务共用 443 等同一个端口（按域名 TLS 透传、默认目标、每条路由单独设置 PROXY 协议） |
-| SSL 证书 | ACME 自动签发与续期，支持 DNS-01（通配符）与 HTTP-01（无需 DNS 服务商）、短期证书与公网 IP 地址证书（Let's Encrypt shortlived 配置）、EAB、上传、读取文件、映射到目录并执行脚本；证书更新后经 SSH 推送到其他主机并执行命令，或重启使用证书的 Docker 容器 |
+| SSL 证书 | ACME 自动签发与续期，支持 DNS-01（通配符；委派子域名按 SOA 自动识别 DNS 区域）与 HTTP-01（无需 DNS 服务商）、短期证书与公网 IP 地址证书（Let's Encrypt shortlived 配置）、EAB、上传、读取文件、映射到目录并执行脚本；证书更新后经 SSH 推送到其他主机并执行命令，或重启使用证书的 Docker 容器 |
 | Tailscale | 托管 tailscaled（用户态网络，容器友好）或接入系统已有守护进程；认证密钥/登录链接、Headscale、子网路由、出口节点、节点列表与 SOCKS5 代理、固定端口、tailscaled 额外参数与环境变量；Linux 上可在线安装、更新、回滚与卸载，可恢复默认配置 |
 | frp | 可同时运行多个 frpc 与 frps 实例；frpc 客户端（tcp/udp/http/https/stcp/xtcp 代理，增删即生效）与 frps 服务端（端口白名单、子域名、控制台），可一键导入旧版 ini / 新版 toml 配置；在线安装、更新、回滚与卸载，可恢复默认配置 |
 | Cloudflare 隧道 | cloudflared 令牌隧道与 trycloudflare 临时隧道，多隧道、自动重启、公网地址展示；在线安装、更新、回滚与卸载，可恢复默认配置 |
-| Web 服务 | 按域名反向代理/重定向/静态文件/固定文本/断开连接（相当于 nginx return 444）；HTTPS 与 HTTP/3（QUIC）；HTTP 与 HTTPS 共用同一端口（跳转或直接服务）；WebSocket；PROXY 协议收发；基本认证、网页认证、GitHub/Google/QQ/OIDC 登录、带 TOTP 二次验证并可跨子域名单点登录的共享用户、内置 OIDC 身份提供方（让 Gitea、Grafana 等应用用共享用户登录）、转发认证到 Authelia 等外部服务；IP 黑白名单与定时刷新的订阅 IP 列表（如省市 IP 段）、路径规则、临时分享链接、认证失败自动封禁、GeoIP 国家过滤；按路径分流后端、HTTPS 后端按访问域名发送 SNI、后端权重/备用/负载均衡策略、主动与被动健康检查、压缩、限流、响应缓存、路径重写；静态站点支持无扩展名地址与自定义 404 页；修改站点不会断开已有连接；分钟级访问统计与 Prometheus 指标 |
+| Web 服务 | 按域名反向代理/重定向/静态文件/固定文本/断开连接（相当于 nginx return 444）；HTTPS 与 HTTP/3（QUIC）；HTTP 与 HTTPS 共用同一端口（跳转或直接服务）；WebSocket；PROXY 协议收发；基本认证、网页认证、GitHub/Google/QQ/OIDC 登录、带 TOTP 二次验证并可跨子域名单点登录的共享用户、内置 OIDC 身份提供方（让 Gitea、Grafana 等应用用共享用户登录）、转发认证到 Authelia 等外部服务、公网 Gately 可把登录 Cookie 转发给内网 Gately；IP 黑白名单与定时刷新的订阅 IP 列表（如省市 IP 段）、路径规则、临时分享链接、认证失败自动封禁、GeoIP 国家过滤；按路径分流后端、按登录用户分流到不同后端（类似 nginx map $remote_user）、HTTPS 后端按访问域名发送 SNI、后端权重/备用/负载均衡策略、主动与被动健康检查、压缩、限流、响应缓存、路径重写；静态站点支持无扩展名地址与自定义 404 页；修改站点不会断开已有连接；站点分组、排序与搜索；分钟级访问统计与 Prometheus 指标 |
 | WAF 防火墙 | Coraza + OWASP CRS v4，可按文件启用规则、自定义 SecLang、拦截/仅检测；请求体检查上限可调，超限时只检查前段或按路径跳过，网盘、WebDAV 等上传站点也能挂 WAF |
 | 入侵防护 | 类 fail2ban 的日志规则（日志文件、systemd 日志、命令输出、Docker 容器日志、管理后台登录失败、WAF 拦截），内置 SSH、Nginx、Vaultwarden 等模板；诱饵端口与端口扫描检测；统一封禁表，支持手动网段与永久封禁、递增时长与白名单；封禁同步到系统防火墙（nftables）在内核层丢弃，没有 nftables 的平台对 Gately 自身的服务生效 |
 | Docker 管理 | 容器创建与编辑、日志与终端、Compose、镜像更新检查与一键升级（失败自动回滚）、网络与卷 |
@@ -64,7 +64,7 @@ Gately 完全开源，用户和社区可以直接审阅源码与配置。对于�
 | File Browser | 托管 FileBrowser Quantum 网页文件管理器：多实例、多个共享目录与只读、账号密码或反向代理认证；在线安装、更新、回滚与卸载，可恢复默认配置 |
 | 存储挂载 | 本地目录、远程 WebDAV 与 SMB 共享挂载，在线文件管理 |
 | 计划任务 | cron 表达式，命令或 HTTP 请求，执行记录 |
-| 安全与设置 | Passkey（WebAuthn）登录、两步验证（TOTP）、只读账号、登录失败限流、安全入口、仅内网访问、管理界面 HTTPS、多 API 令牌（按模块读写授权）、自定义 DNS（支持 DoH）、时区、配置备份与恢复、信任本机反向代理传来的真实客户端地址、按需开关功能模块（关闭的模块不启动服务、不提供接口） |
+| 安全与设置 | Passkey（WebAuthn）登录、两步验证（TOTP）、只读账号、登录失败限流、安全入口、仅内网访问、管理界面 HTTPS、多 API 令牌（按模块读写授权）、已保存的密码与密钥可按需显示（需写权限）、自定义 DNS（支持 DoH）、时区、配置备份与恢复、信任本机反向代理传来的真实客户端地址、按需开关功能模块（关闭的模块不启动服务、不提供接口） |
 | 飞牛原生应用 | 离线 `.fpk` 安装包（x86 / ARM）；接入飞牛统一网关，从飞牛桌面图标打开，远程域名同样可用；飞牛管理员可凭飞牛登录态直接登录（默认关闭）；以 root 运行，可监听 80/443 并管理 Docker |
 | 审计与历史 | 操作审计日志：登录、配置变更、访问敏感内容（不记录请求体与任何密钥）；每次覆盖配置文件前保留旧版本，可对比差异并一键回滚；声明式配置目录（`-apply`），便于 GitOps |
 | 监控与自检 | 全局 Prometheus 指标 `/api/metrics`（证书、DDNS、STUN、端口转发、Web 服务），附 Grafana 面板；一键网络自检（公网 IP、运营商 NAT、系统时间、80/443 端口、DDNS 解析、证书到期、HTTPS 站点缺少证书、frp 代理冲突） |

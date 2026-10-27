@@ -12,6 +12,12 @@ Stellen Sie Zertifikate automatisch aus und erneuern Sie sie, damit die [Web-Die
 - In ein Verzeichnis abbilden: Nach einer Änderung des Zertifikats werden die Dateien in das angegebene Verzeichnis geschrieben und ein Skript ausgeführt, sodass andere Dienste neu laden können;
 - Automatische Bereitstellung: Nach einer Änderung wird das Zertifikat in mehrere lokale Verzeichnisse kopiert, per SSH auf andere Hosts übertragen und dort ein Befehl ausgeführt, oder die Docker-Container, die es nutzen, werden neu gestartet.
 
+## DNS-01-Validierung
+
+Wählen Sie im Zertifikat unter „Validierungsmethode“ DNS-01 und einen DNS-Anbieter. Bei der Ausstellung legt Gately den TXT-Eintrag `_acme-challenge` über die API des Anbieters an und löscht ihn nach der Validierung wieder.
+
+„Hauptdomain“ ist die DNS-Zone, in der der Eintrag liegt. Bleibt das Feld leer, ermittelt Gately die autoritative Zone des Validierungseintrags per SOA-Abfrage. Dadurch werden auch Subdomains, die an einen anderen DNS-Anbieter delegiert sind (zum Beispiel `web.example.com` getrennt von `example.com` gehostet), und mehrstufige Endungen wie `example.com.cn` korrekt erkannt. Schlägt die Abfrage fehl, wird die Zone aus dem Domainnamen abgeleitet und der Grund protokolliert. Sie können die Hauptdomain auch selbst eintragen, zum Beispiel `web.example.com`.
+
 ## HTTP-01-Validierung
 
 Wählen Sie im Zertifikat unter „Validierungsmethode“ HTTP-01. Bei der Ausstellung ruft die CA `http://<Domain>/.well-known/acme-challenge/<token>` auf:

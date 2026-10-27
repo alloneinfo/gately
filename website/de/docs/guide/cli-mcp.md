@@ -107,7 +107,7 @@ Die Quellen der Verbindungsdaten entsprechen denen von `gately ctl` (Konfigurati
 
 ### Standardmäßig schreibgeschützt
 
-Ohne `--write` werden nur GET- und HEAD-Tools bereitgestellt. Fügen Sie `--write` hinzu, wenn die KI Konfiguration ändern soll. Auch bei aktiviertem Schreiben gelten weiterhin die Berechtigungen des Tokens selbst; sicherer ist es daher, für MCP ein eigenes Token anzulegen und nur die nötigen Berechtigungen zu vergeben.
+Ohne `--write` werden nur GET- und HEAD-Tools bereitgestellt, und Endpunkte wie `.../secrets`, die Passwörter im Klartext liefern, fehlen; sie stehen erst mit `--write` zur Verfügung. Fügen Sie `--write` hinzu, wenn die KI Konfiguration ändern soll. Auch bei aktiviertem Schreiben gelten weiterhin die Berechtigungen des Tokens selbst; sicherer ist es daher, für MCP ein eigenes Token anzulegen und nur die nötigen Berechtigungen zu vergeben.
 
 ::: warning Hinweis
 `--write` erlaubt dem KI-Client alle Schreibschnittstellen im Berechtigungsumfang des Tokens, einschließlich Löschen. Prüfen Sie den Ablauf zuerst mit einem schreibgeschützten Token und vergeben Sie Schreibrechte erst bei Bedarf.

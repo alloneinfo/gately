@@ -12,6 +12,8 @@ Die Konfiguration hat drei Ebenen:
 
 Wird eine Site oder die Standard-Site gespeichert, wird die Site-Liste an Ort und Stelle ausgetauscht: Der Listener läuft weiter, offene Verbindungen (auch WebSocket) bleiben bestehen, und jede Site behält ihre Statistik. Ist die neue Konfiguration ungültig, bedienen weiterhin die bisherigen Sites. Eine Änderung der Einstellungen des Listeners selbst (Netzwerk, Adresse, Port, HTTPS, minimale TLS-Version, HTTP/3, PROXY-Protokoll) startet diesen Listener neu.
 
+Eine Site kann eine „Gruppe“ erhalten (bis zu 64 Zeichen; die Standard-Site lässt sich keiner Gruppe zuordnen). Unter jedem Listener zeigt die Liste die Gruppen als einklappbare Abschnitte: Gruppen erscheinen in der Reihenfolge ihres ersten Auftretens, Sites ohne Gruppe folgen danach, und die Standard-Site steht immer am Ende. Der Klappzustand jeder Gruppe wird im Browser gespeichert. Mit „Sortieren“ wechseln Sie in den Sortiermodus: Dort verschieben Sie Sites nach oben und unten, ziehen sie innerhalb ihrer Gruppe, verschieben ganze Gruppen und ändern die Reihenfolge der Listener. Die Reihenfolge wirkt sich nur auf die Liste aus; die Domain-Zuordnung folgt unabhängig davon der oben genannten Priorität, und auch das Speichern der Reihenfolge tauscht die Site-Liste an Ort und Stelle aus, ohne Verbindungen zu trennen. Das Suchfeld oben auf der Seite filtert Sites nach Domain, Name, Gruppe, Backend oder Bemerkung.
+
 ## Site-Typen
 
 | Typ | Beschreibung |
@@ -213,6 +215,25 @@ Leiten Sie bei einer Reverse-Proxy-Site Anfragen unter einem Pfadpräfix an ande
 - Die übrigen Einstellungen der Site, etwa die Host-Option, Zertifikatsprüfung, Forwarded-Header, das PROXY-Protokoll, die Lastverteilungsstrategie und Health-Checks, gelten für jedes Pfad-Backend;
 - Kompression, Ratenbegrenzung, Cache und Umschreibungen gelten für die ganze Site.
 
+## Nach Benutzer verteilen {#user-routes}
+
+Leiten Sie bei einer Reverse-Proxy-Site die Anfragen jedes angemeldeten Benutzers an eigene Backends weiter, wie nginx `map $remote_user $backend`. Die Site braucht dafür zuerst Basic-Authentifizierung, Web-Authentifizierung oder Forward-Auth. Fügen Sie dann unter „Nach Benutzer verteilen“ auf der Seite „Sicherheit“ des Site-Editors Regeln hinzu: Jede Regel nennt eine Gruppe von Benutzern und deren Backends, in derselben Schreibweise wie die Backends der Site.
+
+Benutzer werden über diese Kennungen zugeordnet:
+
+- den Benutzernamen eines Site-Benutzers oder [gemeinsamen Benutzers](#shared-users);
+- bei Anmeldung über Drittanbieter `Anbieter-key:ID`, zum Beispiel `github:octocat`; auch die anderen Kennungen dieser Identität passen;
+- bei Forward-Auth den `Remote-User`, der aus der Antwort des Authentifizierungsdienstes übernommen wird.
+
+Verteilung:
+
+- Nicht aufgeführte Benutzer sowie nicht angemeldete Besucher auf öffentlichen Pfaden (Pfaden ohne Authentifizierung) nutzen die Backends der Site. Ein bereits per Web-Authentifizierung angemeldeter Besucher wird auch auf öffentlichen Pfaden nach seiner Identität verteilt, sodass die Seiten derselben Anwendung beim selben Backend landen;
+- Backends pro Pfad mit eigenen Backends (siehe vorigen Abschnitt) haben Vorrang; Pfadregeln, die nur Header hinzufügen, nutzen die Backends des Benutzers;
+- Ist unter „Benutzernamen weitergeben“ ein Header-Name wie `X-Remote-User` eingetragen, wird der angemeldete Benutzername in diesem Header an das Backend übergeben. Derselbe Header vom Besucher wird immer entfernt und lässt sich daher nicht fälschen;
+- Bei aktiviertem In-Memory-Antwort-Cache enthält der Cache-Schlüssel die gewählte Benutzerroute und bei eingeschaltetem „Benutzernamen weitergeben“ zusätzlich den Benutzernamen, sodass Antworten verschiedener Backends und verschiedener Benutzer getrennt bleiben.
+
+Beim Speichern wird geprüft, dass die Site eine Authentifizierung aktiviert hat, jede Regel mindestens einen Benutzer und gültige Backends enthält, kein Benutzer in zwei Regeln vorkommt und der Header-Name gültig ist und keinen Header betrifft, der Weiterleitung oder Authentifizierung beeinflusst, etwa `Host`, `Cookie`, `Authorization` oder `X-Forwarded-For`. In der Site-Liste zeigt eine Site mit Benutzerrouten ein Tag mit der Anzahl der Regeln.
+
 ## Erweiterungen für den Reverse Proxy
 
 Diese Optionen finden Sie auf der Seite „Traffic“ des Site-Editors.
@@ -292,7 +313,7 @@ Cache-Regeln:
 - `s-maxage` wird zuerst berücksichtigt, danach `max-age`;
 - Ein einzelner Eintrag ist auf 4 MB und zugleich auf höchstens ein Viertel der Gesamtkapazität begrenzt;
 - Ein Treffer liefert die Header `X-Cache: HIT` und `Age`, ein Fehlschlag liefert `X-Cache: MISS`;
-- Der Cache-Schlüssel enthält Host, die vollständige Anfrage-URI und `Accept-Encoding`.
+- Der Cache-Schlüssel enthält Host, die vollständige Anfrage-URI und `Accept-Encoding`; mit [Verteilung nach Benutzer](#user-routes) zusätzlich die gewählte Benutzerroute und bei eingeschaltetem „Benutzernamen weitergeben“ auch den Benutzernamen.
 
 ### Pfad umschreiben und weiterleiten
 

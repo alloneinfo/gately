@@ -12,6 +12,12 @@
 - 對應到目錄：憑證變動後寫入指定目錄並執行指令碼，方便其他服務重新載入；
 - 自動部署：憑證變動後複製到多個本機目錄、經 SSH 推送到其他主機並執行指令，或重新啟動使用該憑證的 Docker 容器。
 
+## DNS-01 驗證
+
+在憑證的「驗證方式」中選擇 DNS-01，並選擇一個 DNS 服務商。簽發時 Gately 透過服務商的 API 新增 `_acme-challenge` TXT 記錄，驗證完成後刪除。
+
+「主網域」即記錄所在的 DNS 區域（zone）。留空時，Gately 以 SOA 查詢找出驗證記錄的權威區域，因此子網域單獨委派給另一家 DNS 服務商（例如 `web.example.com` 與 `example.com` 分開託管）以及 `example.com.cn` 這類多層後綴都能正確識別；查詢失敗時依網域名稱推斷主網域，並在日誌中記錄原因。也可以手動填寫主網域，例如 `web.example.com`。
+
 ## HTTP-01 驗證
 
 在憑證的「驗證方式」中選擇 HTTP-01。簽發時 CA 會存取 `http://<網域>/.well-known/acme-challenge/<token>`：

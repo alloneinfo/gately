@@ -12,6 +12,12 @@ Emite y renueva certificados automáticamente para que los usen los [Servicios w
 - Exportación a un directorio: cuando cambia un certificado, los archivos se escriben en el directorio indicado y se ejecuta un script, para que otros servicios puedan recargarlo;
 - Despliegue automático: cuando cambia un certificado, se copia a varios directorios locales, se envía por SSH a otros hosts y se ejecuta un comando, o se reinician los contenedores Docker que lo usan.
 
+## Validación DNS-01
+
+Elige DNS-01 en el «Método» del certificado y selecciona un proveedor de DNS. Durante la emisión, Gately añade el registro TXT `_acme-challenge` mediante la API del proveedor y lo elimina al terminar la validación.
+
+El «Dominio raíz» es la zona DNS que contiene el registro. Si se deja vacío, Gately busca la zona autoritativa del registro de validación con una consulta SOA, de modo que se detectan correctamente un subdominio delegado a otro proveedor de DNS (por ejemplo, `web.example.com` alojado aparte de `example.com`) y los sufijos de varios niveles como `example.com.cn`. Si la consulta falla, la zona se deduce del nombre de dominio y el motivo queda registrado en el log. También puedes indicar el dominio raíz manualmente, por ejemplo `web.example.com`.
+
 ## Validación HTTP-01
 
 Elige HTTP-01 en el «Método» del certificado. Durante la emisión, la CA accede a `http://<dominio>/.well-known/acme-challenge/<token>`:

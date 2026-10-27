@@ -107,7 +107,7 @@ GATELY_URL=https://gw.example.com GATELY_TOKEN=gtl_xxxx gately ctl get /api/stat
 
 ### 默认只读
 
-不带 `--write` 时只暴露 GET 与 HEAD 工具。需要让 AI 修改配置时加上 `--write`。即使开启写入，令牌自身的权限依然生效，所以更稳妥的做法是为 MCP 创建专用令牌，只授予需要的权限。
+不带 `--write` 时只暴露 GET 与 HEAD 工具，也不提供 `.../secrets` 这类取回明文密码的接口，加上 `--write` 后才会提供。需要让 AI 修改配置时加上 `--write`。即使开启写入，令牌自身的权限依然生效，所以更稳妥的做法是为 MCP 创建专用令牌，只授予需要的权限。
 
 ::: warning 注意
 `--write` 允许 AI 客户端调用令牌权限范围内的全部写接口，包括删除。先用只读令牌验证流程，再按需授予写权限。

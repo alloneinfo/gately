@@ -12,6 +12,8 @@ A configuração tem três camadas:
 
 Ao salvar uma alteração em um site ou no site padrão, a lista de sites é trocada em tempo real: o listener continua em execução, as conexões abertas (inclusive WebSocket) permanecem ativas e cada site mantém suas estatísticas. Se a nova configuração for inválida, os sites anteriores continuam atendendo. Alterar as configurações do próprio listener (rede, endereço, porta, HTTPS, TLS mínimo, HTTP/3, protocolo PROXY) reinicia esse listener.
 
+Um site pode ter um "Grupo" (até 64 caracteres; o site padrão não pode ser agrupado). Em cada listener, a lista mostra os grupos como seções recolhíveis: os grupos aparecem na ordem em que surgem pela primeira vez, os sites sem grupo vêm depois deles e o site padrão fica sempre por último. O estado recolhido de cada grupo fica guardado no navegador. Clique em "Ordenar" para entrar no modo de ordenação, em que é possível mover sites para cima e para baixo, arrastá-los dentro do grupo, mover grupos inteiros e reordenar os listeners. A ordem afeta apenas a lista: a correspondência de domínios segue a prioridade acima, independentemente da ordem dos sites, e salvar a nova ordem troca a lista de sites em tempo real, sem derrubar conexões. A caixa de busca no topo da página filtra os sites por domínio, nome, grupo, backend ou observação.
+
 ## Tipos de site
 
 | Tipo | Descrição |
@@ -213,6 +215,25 @@ Para um site de proxy reverso, envie as requisições sob um prefixo de caminho 
 - As demais configurações do site, como a opção de Host, as verificações de certificado, os cabeçalhos encaminhados, o protocolo PROXY, a política de balanceamento de carga e as verificações de integridade, valem para todos os backends por caminho;
 - Compressão, limitação de taxa, cache e reescritas valem para o site inteiro.
 
+## Distribuir por usuário {#user-routes}
+
+Em um site de proxy reverso, envie as requisições de cada usuário autenticado para os backends dele, como o `map $remote_user $backend` do nginx. O site precisa ter antes autenticação básica, autenticação web ou autenticação delegada. Depois, adicione regras em "Distribuir por usuário", na página "Segurança" do editor do site: cada regra lista um conjunto de usuários e os backends desses usuários, escritos como os backends do site.
+
+Os usuários são identificados por:
+
+- O nome de usuário de um usuário do site ou de um [usuário compartilhado](#shared-users);
+- No login de terceiros, `provider:id`, por exemplo `github:octocat`; os outros identificadores da mesma identidade também correspondem;
+- Na autenticação delegada, o `Remote-User` copiado da resposta do serviço de autenticação.
+
+Encaminhamento:
+
+- Usuários fora das regras e visitantes sem login em caminhos públicos (caminhos que dispensam autenticação) usam os backends do site. Um visitante que já entrou pela autenticação web também é distribuído pela identidade nos caminhos públicos, para que as páginas do mesmo aplicativo cheguem ao mesmo backend;
+- Os backends por caminho com backends próprios (veja a seção anterior) têm prioridade; os backends por caminho que só adicionam cabeçalhos usam os backends do usuário;
+- Quando "Passar nome de usuário" recebe um nome de cabeçalho, como `X-Remote-User`, o nome do usuário autenticado é enviado ao backend nesse cabeçalho. O mesmo cabeçalho enviado por visitantes é sempre removido, para que não possa ser forjado;
+- Com o cache de respostas em memória ativado, a chave do cache inclui a regra de usuário escolhida e, quando "Passar nome de usuário" está ativo, também o nome do usuário, de modo que respostas de backends diferentes ou de usuários diferentes ficam separadas.
+
+Ao salvar, verifica-se que o site tem autenticação ativada, que cada regra tem pelo menos um usuário e backends válidos, que nenhum usuário aparece em duas regras e que o nome do cabeçalho é válido e não é um cabeçalho que afete o encaminhamento ou a autenticação, como `Host`, `Cookie`, `Authorization` ou `X-Forwarded-For`. Na lista de sites, um site com regras por usuário mostra uma etiqueta com o número de regras.
+
 ## Melhorias do proxy reverso
 
 Essas opções ficam na página "Tráfego" do editor do site.
@@ -292,7 +313,7 @@ Regras de cache:
 - O `s-maxage` é respeitado primeiro, depois o `max-age`;
 - Uma única entrada é limitada a 4 MB e também a no máximo um quarto da capacidade total;
 - Um acerto retorna os cabeçalhos `X-Cache: HIT` e `Age`, e uma falha retorna `X-Cache: MISS`;
-- A chave do cache inclui o Host, a URI completa da requisição e o `Accept-Encoding`.
+- A chave do cache inclui o Host, a URI completa da requisição e o `Accept-Encoding`; com a [distribuição por usuário](#user-routes), inclui também a regra de usuário escolhida e, quando "Passar nome de usuário" está ativo, o nome do usuário.
 
 ### Reescrita e redirecionamento de caminho
 

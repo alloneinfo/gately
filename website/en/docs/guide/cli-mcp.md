@@ -107,7 +107,7 @@ Connection details come from the same sources as `gately ctl` (config file, `GAT
 
 ### Read-only by default
 
-Without `--write`, only GET and HEAD tools are exposed. Add `--write` when you want the AI to modify configuration. Even with writing enabled, the token's own permissions still apply, so the safer approach is to create a dedicated token for MCP and grant only the permissions it needs.
+Without `--write`, only GET and HEAD tools are exposed, and endpoints such as `.../secrets` that return plain-text passwords are left out; they are provided only with `--write`. Add `--write` when you want the AI to modify configuration. Even with writing enabled, the token's own permissions still apply, so the safer approach is to create a dedicated token for MCP and grant only the permissions it needs.
 
 ::: warning Note
 `--write` lets the AI client call every write endpoint within the token's permissions, including deletion. Validate your workflow with a read-only token first, then grant write permission as needed.

@@ -12,6 +12,8 @@ La configuration comporte trois niveaux :
 
 Enregistrer une modification d'un site ou du site par défaut remplace la liste des sites sur place : l'écouteur continue de tourner, les connexions ouvertes (WebSocket compris) restent actives et chaque site conserve ses statistiques. Si la nouvelle configuration est invalide, les sites précédents continuent de servir. Modifier les paramètres de l'écouteur lui-même (réseau, adresse, port, HTTPS, TLS minimal, HTTP/3, protocole PROXY) redémarre cet écouteur.
 
+Un site peut recevoir un « Groupe » (64 caractères au maximum ; le site par défaut ne peut pas être groupé). Sous chaque écouteur, la liste affiche les groupes sous forme de sections repliables : les groupes apparaissent dans l'ordre de leur première occurrence, les sites sans groupe viennent ensuite et le site par défaut reste toujours en dernier. L'état replié de chaque groupe est conservé dans le navigateur. Cliquez sur « Trier » pour passer en mode tri : vous pouvez monter et descendre les sites, les faire glisser au sein de leur groupe, déplacer des groupes entiers et réordonner les écouteurs. L'ordre concerne uniquement l'affichage de la liste : la correspondance des domaines suit la priorité ci-dessus quel que soit l'ordre des sites, et l'enregistrement du nouvel ordre remplace la liste des sites sur place sans couper les connexions. Le champ de recherche en haut de la page filtre les sites par domaine, nom, groupe, backend ou remarque.
+
 ## Types de sites
 
 | Type | Description |
@@ -213,6 +215,25 @@ Pour un site en proxy inverse, envoyez les requêtes sous un préfixe de chemin 
 - Les autres réglages du site, comme l'option Host, la vérification du certificat, les en-têtes transmis, le protocole PROXY, la politique de répartition de charge et les vérifications d'état, s'appliquent à chaque backend par chemin ;
 - La compression, la limitation de débit, le cache et les réécritures s'appliquent à l'ensemble du site.
 
+## Répartir par utilisateur {#user-routes}
+
+Pour un site en proxy inverse, envoyez les requêtes de chaque utilisateur connecté vers ses propres backends, comme `map $remote_user $backend` de nginx. Le site doit d'abord avoir l'authentification Basic, l'authentification web ou l'authentification déléguée activée. Ajoutez ensuite des règles sous « Répartir par utilisateur » dans la page « Sécurité » de l'éditeur de site : chaque règle indique un ensemble d'utilisateurs et les backends de ces utilisateurs, écrits comme les backends du site.
+
+Les utilisateurs sont reconnus par ces identifiants :
+
+- Le nom d'un utilisateur du site ou d'un [utilisateur partagé](#shared-users) ;
+- Pour une connexion tierce, `fournisseur-key:identifiant`, par exemple `github:octocat` ; les autres identifiants de cette identité correspondent aussi ;
+- Pour l'authentification déléguée, le `Remote-User` copié depuis la réponse du service d'authentification.
+
+Répartition :
+
+- Les utilisateurs non listés, ainsi que les visiteurs non connectés sur les chemins publics (chemins qui ne demandent aucune authentification), utilisent les backends du site. Sur les chemins publics, un visiteur déjà connecté par l'authentification web est lui aussi réparti selon son identité, si bien que les pages d'une même application arrivent sur le même backend ;
+- Les backends par chemin qui ont leurs propres backends (voir la section précédente) sont prioritaires ; ceux qui ajoutent seulement des en-têtes utilisent les backends de l'utilisateur ;
+- Lorsque « Transmettre le nom d’utilisateur » contient un nom d'en-tête comme `X-Remote-User`, le nom de l'utilisateur connecté est placé dans cet en-tête pour le backend. Le même en-tête envoyé par les visiteurs est toujours supprimé, il ne peut donc pas être falsifié ;
+- Avec le cache de réponses en mémoire activé, la clé de cache inclut la règle utilisateur choisie, ainsi que le nom d'utilisateur lorsque « Transmettre le nom d’utilisateur » est actif ; les réponses de backends différents ou destinées à des utilisateurs différents restent ainsi séparées.
+
+L'enregistrement vérifie que l'authentification est activée sur le site, que chaque règle comporte au moins un utilisateur et des backends valides, qu'aucun utilisateur ne figure dans deux règles, et que le nom d'en-tête est valide et ne fait pas partie des en-têtes qui influent sur la transmission ou l'authentification, comme `Host`, `Cookie`, `Authorization` ou `X-Forwarded-For`. Dans la liste des sites, un site doté de règles par utilisateur affiche une étiquette avec le nombre de règles.
+
 ## Améliorations du proxy inverse
 
 Ces options se trouvent dans la page « Trafic » de l'éditeur de site.
@@ -292,7 +313,7 @@ Règles de mise en cache :
 - `s-maxage` est respecté en priorité, puis `max-age` ;
 - Une entrée unique est limitée à 4 Mo et à au plus un quart de la capacité totale ;
 - Un succès (hit) renvoie les en-têtes `X-Cache: HIT` et `Age`, et un échec (miss) renvoie `X-Cache: MISS` ;
-- La clé de cache inclut Host, l'URI complète de la requête et `Accept-Encoding`.
+- La clé de cache inclut Host, l'URI complète de la requête et `Accept-Encoding` ; avec la [répartition par utilisateur](#user-routes), elle inclut aussi la règle utilisateur choisie, ainsi que le nom d'utilisateur lorsque « Transmettre le nom d’utilisateur » est actif.
 
 ### Réécriture et redirection de chemin
 

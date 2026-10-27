@@ -107,7 +107,7 @@ Les informations de connexion proviennent des mêmes sources que pour `gately ct
 
 ### Lecture seule par défaut
 
-Sans `--write`, seuls les outils GET et HEAD sont exposés. Ajoutez `--write` pour que l'IA puisse modifier la configuration. Même avec l'écriture activée, les permissions du jeton restent en vigueur : le plus prudent est donc de créer un jeton dédié à MCP, avec uniquement les permissions nécessaires.
+Sans `--write`, seuls les outils GET et HEAD sont exposés, et les API comme `.../secrets` qui renvoient des mots de passe en clair sont laissées de côté ; elles ne sont fournies qu'avec `--write`. Ajoutez `--write` pour que l'IA puisse modifier la configuration. Même avec l'écriture activée, les permissions du jeton restent en vigueur : le plus prudent est donc de créer un jeton dédié à MCP, avec uniquement les permissions nécessaires.
 
 ::: warning Attention
 `--write` autorise le client IA à appeler toutes les API d'écriture permises par le jeton, suppression comprise. Validez d'abord le déroulement avec un jeton en lecture seule, puis accordez l'écriture selon les besoins.

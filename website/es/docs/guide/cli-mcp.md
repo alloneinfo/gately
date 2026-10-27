@@ -107,7 +107,7 @@ El origen de los datos de conexión es el mismo que en `gately ctl` (archivo de 
 
 ### Solo lectura por defecto
 
-Sin `--write` solo se exponen las herramientas GET y HEAD. Añade `--write` cuando quieras que la IA pueda modificar la configuración. Aunque actives la escritura, los permisos del propio token siguen vigentes, así que lo más seguro es crear un token exclusivo para MCP con solo los permisos necesarios.
+Sin `--write` solo se exponen las herramientas GET y HEAD, y quedan fuera los endpoints como `.../secrets` que devuelven contraseñas en texto plano; solo se ofrecen con `--write`. Añade `--write` cuando quieras que la IA pueda modificar la configuración. Aunque actives la escritura, los permisos del propio token siguen vigentes, así que lo más seguro es crear un token exclusivo para MCP con solo los permisos necesarios.
 
 ::: warning Atención
 `--write` permite al cliente de IA llamar a todos los endpoints de escritura dentro del alcance de los permisos del token, incluido el borrado. Valida primero el flujo con un token de solo lectura y concede permisos de escritura solo cuando haga falta.

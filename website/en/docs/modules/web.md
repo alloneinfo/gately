@@ -12,6 +12,8 @@ The configuration has three layers:
 
 Saving a change to a site or to the default site swaps the site list in place: the listener keeps running, open connections (WebSocket included) stay up, and each site keeps its statistics. If the new configuration is invalid, the previous sites keep serving. Changing the listener's own settings (network, address, port, HTTPS, minimum TLS, HTTP/3, PROXY protocol) restarts that listener.
 
+A site can have a "Group" (up to 64 characters; the default site cannot be grouped). Under each listener, the list shows groups as collapsible sections: groups appear in the order they first occur, ungrouped sites come after them, and the default site always comes last. The collapsed state of each group is kept in the browser. Click "Sort" to enter sort mode, where you can move sites up and down, drag them within their group, move whole groups and reorder listeners. Order only affects the list: domain matching follows the priority above regardless of site order, and saving the new order swaps the site list in place without dropping connections. The search box at the top of the page filters sites by domain, name, group, backend or remark.
+
 ## Site types
 
 | Type | Description |
@@ -213,6 +215,25 @@ For a reverse proxy site, send requests under a path prefix to other backends, l
 - Other settings of the site, such as the Host option, certificate checks, forwarded headers, the PROXY protocol, the load-balancing policy and health checks, apply to every path backend;
 - Compression, rate limiting, caching and rewrites apply to the whole site.
 
+## Route by user {#user-routes}
+
+For a reverse proxy site, send each signed-in user's requests to their own backends, like nginx `map $remote_user $backend`. The site needs basic auth, web auth or forward auth first. Then add rules under "Route by user" on the "Security" page of the site editor: each rule lists a set of users and the backends for those users, written like the site's backends.
+
+Users are matched by these identifiers:
+
+- The user name of a site user or a [shared user](#shared-users);
+- For third-party sign-in, `provider-key:id`, for example `github:octocat`; the identity's other identifiers match too;
+- For forward auth, the `Remote-User` copied from the auth service's response.
+
+Routing:
+
+- Users not listed, and visitors who are not signed in on public paths (paths that need no authentication), use the site's backends. A visitor already signed in through web auth is routed by identity on public paths too, so pages of the same app reach the same backend;
+- Path backends with their own backends (see the previous section) take priority; path backends that only add headers use the user's backends;
+- When "Pass user name" is set to a header name such as `X-Remote-User`, the signed-in user name is put in that header for the backend. The same header sent by visitors is always removed, so it cannot be forged;
+- With the in-memory response cache enabled, the cache key includes the chosen user route, and also the user name when "Pass user name" is on, so responses from different backends or for different users are kept apart.
+
+Saving checks that the site has authentication enabled, that each rule has at least one user and valid backends, that no user appears in two rules, and that the header name is valid and is not one that affects forwarding or authentication, such as `Host`, `Cookie`, `Authorization` or `X-Forwarded-For`. In the site list, a site with user routes shows a tag with the number of rules.
+
 ## Reverse proxy enhancements
 
 These options are on the "Traffic" page of the site editor.
@@ -292,7 +313,7 @@ Caching rules:
 - `s-maxage` is honored first, then `max-age`;
 - A single entry is limited to 4 MB and also to at most a quarter of the total capacity;
 - A hit returns the `X-Cache: HIT` and `Age` headers, and a miss returns `X-Cache: MISS`;
-- The cache key includes Host, the full request URI and `Accept-Encoding`.
+- The cache key includes Host, the full request URI and `Accept-Encoding`; with [route by user](#user-routes), it also includes the chosen user route, and the user name when "Pass user name" is on.
 
 ### Path rewrite and redirect
 

@@ -12,6 +12,12 @@
 - 映射到目录：证书变化后写入指定目录并执行脚本，方便其他服务重载；
 - 自动部署：证书变化后复制到多个本机目录、经 SSH 推送到其他主机并执行命令，或重启使用该证书的 Docker 容器。
 
+## DNS-01 验证
+
+在证书的「验证方式」中选择 DNS-01，并选择一个 DNS 服务商。签发时 Gately 通过服务商的 API 添加 `_acme-challenge` TXT 记录，验证完成后删除。
+
+「主域名」即记录所在的 DNS 区域（zone）。留空时，Gately 用 SOA 查询找出验证记录的权威区域，因此子域名单独委派给另一个 DNS 服务商（例如 `web.example.com` 与 `example.com` 分开托管）以及 `example.com.cn` 这类多级后缀都能正确识别；查询失败时按域名推断主域名，并在日志中记录原因。也可以手动填写主域名，例如 `web.example.com`。
+
 ## HTTP-01 验证
 
 在证书的「验证方式」中选择 HTTP-01。签发时 CA 会访问 `http://<域名>/.well-known/acme-challenge/<token>`：

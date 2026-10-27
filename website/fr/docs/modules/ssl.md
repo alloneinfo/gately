@@ -12,6 +12,12 @@
 - Mappage vers un répertoire : après un changement de certificat, les fichiers sont écrits dans le répertoire indiqué et un script est exécuté, afin que les autres services puissent se recharger ;
 - Déploiement automatique : après un changement de certificat, il est copié vers plusieurs répertoires locaux, envoyé par SSH vers d'autres hôtes avec exécution d'une commande, ou les conteneurs Docker qui l'utilisent sont redémarrés.
 
+## Validation DNS-01
+
+Choisissez DNS-01 dans la « Méthode » du certificat, puis sélectionnez un fournisseur DNS. Lors de l'émission, Gately ajoute l'enregistrement TXT `_acme-challenge` via l'API du fournisseur et le supprime une fois la validation terminée.
+
+Le « Domaine racine » est la zone DNS qui contient l'enregistrement. S'il est laissé vide, Gately recherche la zone faisant autorité pour l'enregistrement de validation au moyen d'une requête SOA : un sous-domaine délégué à un autre fournisseur DNS (par exemple `web.example.com` hébergé séparément de `example.com`) et les suffixes à plusieurs niveaux comme `example.com.cn` sont ainsi correctement détectés. Si la recherche échoue, la zone est déduite du nom de domaine et la raison est consignée dans le journal. Vous pouvez aussi saisir vous-même le domaine racine, par exemple `web.example.com`.
+
 ## Validation HTTP-01
 
 Choisissez HTTP-01 dans la « Méthode » du certificat. Lors de l'émission, l'AC accède à `http://<domaine>/.well-known/acme-challenge/<token>` :
