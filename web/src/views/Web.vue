@@ -189,7 +189,10 @@
                 <el-checkbox v-model="site.forwardedHeaders">{{ t('web.optForwarded') }}</el-checkbox>
                 <el-checkbox v-model="site.sendProxyProtocol">{{ t('web.optSendProxy') }}</el-checkbox>
                 <el-checkbox v-model="site.upstreamSniFromHost">{{ t('web.optSniFromHost') }}</el-checkbox>
+                <!-- 认证交给后端 Gately 时才能转发登录 Cookie，本站点开了认证就不可勾选 -->
+                <el-checkbox v-model="site.passAuthCookies" :disabled="localAuthOn && !site.passAuthCookies">{{ t('web.optPassAuthCookies') }}</el-checkbox>
                 <div class="form-help">{{ t('web.optSniFromHostHelp') }}</div>
+                <div v-if="site.passAuthCookies" class="form-help">{{ t('web.optPassAuthCookiesHelp') }}</div>
               </el-form-item>
               <el-form-item :label="t('web.locations')">
                 <div class="locations">
@@ -403,6 +406,8 @@ interface Site {
   forwardedHeaders: boolean
   // 连接 HTTPS 后端时使用访客域名作为 SNI（后端按 SNI 分流时需要）
   upstreamSniFromHost: boolean
+  // 后端是负责认证的另一台 Gately 时，把 Gately 登录 Cookie 原样转发给它
+  passAuthCookies: boolean
   locations: Location[]
   redirectTo: string
   redirectCode: number
@@ -557,6 +562,8 @@ const fwdHeadersText = useListText(() => site.value.forwardAuth?.copyHeaders, (v
 })
 // 转发认证以地址非空表示启用，勾选框单独记录，取消勾选时保存为空地址
 const forwardAuthOn = ref(false)
+// 本站点是否启用了任一认证方式，启用时不能转发 Gately 登录 Cookie
+const localAuthOn = computed(() => site.value.webAuth || site.value.basicAuth || forwardAuthOn.value)
 const trustedText = bind(
   () => settings.value?.trustedProxies,
   (v) => {
@@ -579,6 +586,7 @@ function emptySite(): Site {
     sendProxyProtocol: false,
     forwardedHeaders: true,
     upstreamSniFromHost: false,
+    passAuthCookies: false,
     locations: [],
     redirectTo: '',
     redirectCode: 302,

@@ -1615,6 +1615,7 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | `name` | string |
 | `notFoundPage` | string |
 | `oauthUsers` | Array de string |
+| `passAuthCookies` | boolean |
 | `rateLimit` | `webservice.RateLimit` |
 | `redirectCode` | integer |
 | `redirectTo` | string |

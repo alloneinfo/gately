@@ -2075,6 +2075,7 @@
   "跳过，": "Omitido, ",
   "身份已记录；站点与管理后台引用的身份会在导入反向代理与基础设置时迁移，登录前需自行配置 OAuth 应用": "Identidad registrada; las identidades referenciadas por sitios y por el panel de administración se migrarán al importar el proxy inverso y los ajustes básicos; antes de iniciar sesión debe configurar usted mismo una aplicación OAuth",
   "身份提供方拒绝登录: ": "El proveedor de identidad rechazó el inicio de sesión: ",
+  "转发 Gately 登录 Cookie 时本站点不能启用认证，认证由后端 Gately 负责": "Este sitio no puede activar la autenticación mientras reenvía las cookies de inicio de sesión de Gately; la autenticación la gestiona el Gately del backend",
   "转发认证不能与基本认证、网页认证同时启用": "La autenticación delegada no se puede combinar con la básica o la web",
   "转发认证地址需为完整的 http(s) 地址": "La URL de autenticación delegada debe ser una URL http(s) completa",
   "转换结果无效：%v": "El sitio convertido no es válido: %v",

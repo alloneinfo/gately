@@ -119,6 +119,8 @@
   "plainHttpServeTag": "HTTP + HTTPS",
   "optSniFromHost": "Aufgerufene Domain als SNI verwenden",
   "optSniFromHostHelp": "Nur HTTPS-Backends: sendet die Domain des Besuchers im Handshake und prüft das Zertifikat dagegen. Nötig, wenn das Backend nach SNI routet (z. B. frp vhost_https); entspricht nginx proxy_ssl_server_name on",
+  "optPassAuthCookies": "Gately-Anmelde-Cookies weiterleiten",
+  "optPassAuthCookiesHelp": "Die Anmeldung übernimmt das Backend-Gately: Diese Site authentifiziert nicht selbst und reicht die vom Backend-Gately ausgestellten Single-Sign-on- und Sitzungs-Cookies unverändert durch. Nur aktivieren, wenn das Backend Ihr eigenes Gately ist",
   "locations": "Backends pro Pfad",
   "locationTargetsPlaceholder": "Backend-Adressen, durch Komma getrennt; leer = Backends der Site",
   "locationHeadersPlaceholder": "Zusätzliche Request-Header, ein Key: Value pro Zeile",

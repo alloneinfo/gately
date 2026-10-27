@@ -1615,6 +1615,7 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | `name` | string |
 | `notFoundPage` | string |
 | `oauthUsers` | Array von string |
+| `passAuthCookies` | boolean |
 | `rateLimit` | `webservice.RateLimit` |
 | `redirectCode` | integer |
 | `redirectTo` | string |

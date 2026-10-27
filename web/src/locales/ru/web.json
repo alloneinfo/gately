@@ -119,6 +119,8 @@
   "plainHttpServeTag": "HTTP + HTTPS",
   "optSniFromHost": "Использовать посещаемый домен как SNI",
   "optSniFromHostHelp": "Только для HTTPS-бэкендов: передаёт домен посетителя в рукопожатии и проверяет сертификат по нему. Нужно, если бэкенд маршрутизирует по SNI (например, frp vhost_https); аналог proxy_ssl_server_name on в nginx",
+  "optPassAuthCookies": "Пересылать cookie входа Gately",
+  "optPassAuthCookiesHelp": "Вход выполняет Gately на бэкенде: этот сайт не проверяет подлинность и передаёт без изменений cookie единого входа и сеанса, выданные тем Gately. Включайте, только если бэкенд — ваш собственный Gately",
   "locations": "Бэкенды по путям",
   "locationTargetsPlaceholder": "Адреса бэкендов через запятую; пусто — бэкенды сайта",
   "locationHeadersPlaceholder": "Дополнительные заголовки, по одному Key: Value в строке",

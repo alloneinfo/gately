@@ -1615,6 +1615,7 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | `name` | string |
 | `notFoundPage` | string |
 | `oauthUsers` | Lista de string |
+| `passAuthCookies` | boolean |
 | `rateLimit` | `webservice.RateLimit` |
 | `redirectCode` | integer |
 | `redirectTo` | string |

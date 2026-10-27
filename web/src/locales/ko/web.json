@@ -119,6 +119,8 @@
   "plainHttpServeTag": "HTTP + HTTPS",
   "optSniFromHost": "접속 도메인을 SNI로 사용",
   "optSniFromHostHelp": "HTTPS 백엔드 전용: 핸드셰이크에 방문자 도메인을 보내고 그 도메인으로 인증서를 검증합니다. 백엔드가 SNI로 라우팅할 때(frp vhost_https 등) 필요하며 nginx의 proxy_ssl_server_name on과 같습니다",
+  "optPassAuthCookies": "Gately 로그인 쿠키 전달",
+  "optPassAuthCookiesHelp": "로그인은 백엔드 Gately가 담당합니다. 이 사이트는 인증을 하지 않고, 백엔드 Gately가 발급한 싱글 사인온·세션 쿠키를 그대로 넘깁니다. 백엔드가 직접 운영하는 Gately일 때만 켜세요",
   "locations": "경로별 백엔드",
   "locationTargetsPlaceholder": "백엔드 주소, 쉼표로 구분; 비우면 사이트 백엔드 사용",
   "locationHeadersPlaceholder": "추가 요청 헤더, 한 줄에 Key: Value 하나",

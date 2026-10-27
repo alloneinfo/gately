@@ -2075,6 +2075,7 @@
   "跳过，": "übersprungen, ",
   "身份已记录；站点与管理后台引用的身份会在导入反向代理与基础设置时迁移，登录前需自行配置 OAuth 应用": "Identität erfasst; von Sites und der Verwaltungsoberfläche referenzierte Identitäten werden beim Import von Reverse-Proxy und Grundeinstellungen migriert, vor der Anmeldung muss die OAuth-Anwendung selbst konfiguriert werden",
   "身份提供方拒绝登录: ": "Der Identitätsanbieter hat die Anmeldung abgelehnt: ",
+  "转发 Gately 登录 Cookie 时本站点不能启用认证，认证由后端 Gately 负责": "Diese Site kann keine Authentifizierung aktivieren, während sie Gately-Anmelde-Cookies weiterleitet; die Authentifizierung übernimmt das Backend-Gately",
   "转发认证不能与基本认证、网页认证同时启用": "Forward-Auth kann nicht mit Basic- oder Web-Auth kombiniert werden",
   "转发认证地址需为完整的 http(s) 地址": "Die Forward-Auth-URL muss eine vollständige http(s)-URL sein",
   "转换结果无效：%v": "Die umgewandelte Site ist ungültig: %v",

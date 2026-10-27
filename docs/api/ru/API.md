@@ -1615,6 +1615,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `name` | string |
 | `notFoundPage` | string |
 | `oauthUsers` | Массив из string |
+| `passAuthCookies` | boolean |
 | `rateLimit` | `webservice.RateLimit` |
 | `redirectCode` | integer |
 | `redirectTo` | string |

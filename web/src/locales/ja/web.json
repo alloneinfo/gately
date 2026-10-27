@@ -119,6 +119,8 @@
   "plainHttpServeTag": "HTTP + HTTPS",
   "optSniFromHost": "アクセス先ドメインを SNI に使う",
   "optSniFromHostHelp": "HTTPS バックエンドのみ：ハンドシェイクで訪問者のドメインを送り、そのドメインで証明書を検証します。バックエンドが SNI で振り分ける場合（frp の vhost_https など）に必要で、nginx の proxy_ssl_server_name on に相当します",
+  "optPassAuthCookies": "Gately のログイン Cookie を転送",
+  "optPassAuthCookiesHelp": "ログインはバックエンドの Gately が担当します。このサイトでは認証を行わず、バックエンドの Gately が発行したシングルサインオンとセッションの Cookie をそのまま渡します。バックエンドが自分の Gately の場合のみ有効にしてください",
   "locations": "パス別バックエンド",
   "locationTargetsPlaceholder": "バックエンドアドレス（カンマ区切り）。空ならサイトのバックエンドを使用",
   "locationHeadersPlaceholder": "追加リクエストヘッダー（1 行に 1 つ Key: Value）",

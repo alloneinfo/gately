@@ -38,6 +38,7 @@ These are the "Options" on the "Basic" tab of the site editor. The question mark
 | Add X-Forwarded-* | Writes `X-Forwarded-For` / `X-Forwarded-Proto` / `X-Forwarded-Host` / `X-Forwarded-Port` and `X-Real-IP`, telling the backend the visitor's real IP, original protocol, domain and port | The backend logs real IPs or must know the outside is HTTPS to build correct links (otherwise it may bounce back to http or loop after login). Recommended for most apps |
 | Send PROXY v2 to the backend | Prepends a PROXY protocol v2 header to the TCP connection to pass the real client IP. When on, every request opens a new connection and HTTP/2 to the backend is not used. If the backend is Gately, turn on accepting the PROXY protocol on its listener and add this host to its trusted PROXY sources. | The backend does not read HTTP headers but supports the PROXY protocol, such as another Gately, haproxy or nginx with `proxy_protocol`. If the backend is not configured to accept it, every request fails, so leave it off if unsure |
 | Use the visited domain as SNI | HTTPS backends only: sends the domain the visitor used during the handshake and verifies the certificate against it, like nginx `proxy_ssl_server_name on; proxy_ssl_name $host` | The backend selects certificates or routes by domain on one port, such as frp `vhost_https` or an nginx hosting several HTTPS sites. Every backend has its own connection pool, so connections are never reused across domains |
+| Forward Gately sign-in cookies | Passes Gately's own sign-in cookies (single sign-on `gately_sso`, site session, third-party sign-in nonce) to the backend unchanged; when off (default) these cookies are not sent to the backend so sign-in credentials do not leak | The backend is another Gately that handles authentication and this site has none. For example a public Gately that only does WAF and access control and proxies to a LAN Gately, which handles web authentication and single sign-on. Not available while this site has authentication enabled; only use it when the backend is your own Gately |
 
 Common combinations:
 
@@ -45,6 +46,7 @@ Common combinations:
 - The backend is an https address with a self-signed certificate: also turn on "Skip backend certificate verification";
 - Proxying a public website or third-party service: turn on "Use backend address as Host";
 - Another service in front of the backend routes by SNI (e.g. frp `vhost_https`): turn on "Use the visited domain as SNI".
+- Public Gately only for WAF, LAN Gately handles sign-in: no authentication on the public site, turn on "Forward Gately sign-in cookies", and for real client IPs also "Send PROXY v2 to the backend", with the LAN Gately accepting the PROXY protocol and trusting the public Gately.
 
 ### Request and response headers {#headers}
 

@@ -1615,6 +1615,7 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | `name` | string |
 | `notFoundPage` | string |
 | `oauthUsers` | Tableau de string |
+| `passAuthCookies` | boolean |
 | `rateLimit` | `webservice.RateLimit` |
 | `redirectCode` | integer |
 | `redirectTo` | string |

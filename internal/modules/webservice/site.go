@@ -311,8 +311,10 @@ func (h *siteHandler) newProxy(s Site, p *pool) http.Handler {
 					pr.Out.Header.Set("X-Forwarded-Port", port)
 				}
 			}
-			// 站点会话 Cookie 只用于 Gately 自身认证，不转发给后端
-			stripCookie(pr.Out, cookieName(s), oauthNonceCookie, ssoCookie)
+			// 站点会话 Cookie 只用于 Gately 自身认证，不转发给后端；后端是负责认证的另一台 Gately 时按站点设置原样转发
+			if !s.PassAuthCookies {
+				stripCookie(pr.Out, cookieName(s), oauthNonceCookie, ssoCookie)
+			}
 			applyHeaders(pr.Out.Header, s.RequestHeaders)
 		},
 		ModifyResponse: func(resp *http.Response) error {

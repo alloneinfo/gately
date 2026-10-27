@@ -2075,6 +2075,7 @@
   "跳过，": "skipped, ",
   "身份已记录；站点与管理后台引用的身份会在导入反向代理与基础设置时迁移，登录前需自行配置 OAuth 应用": "Identities recorded; identities referenced by sites and the admin console are migrated when the reverse proxy and basic settings are imported. Configure your OAuth app yourself before signing in",
   "身份提供方拒绝登录: ": "The identity provider denied sign-in: ",
+  "转发 Gately 登录 Cookie 时本站点不能启用认证，认证由后端 Gately 负责": "This site cannot enable authentication while forwarding Gately sign-in cookies; the backend Gately handles authentication",
   "转发认证不能与基本认证、网页认证同时启用": "Forward auth cannot be combined with basic auth or web auth",
   "转发认证地址需为完整的 http(s) 地址": "The forward auth URL must be a full http(s) URL",
   "转换结果无效：%v": "The converted site is invalid: %v",

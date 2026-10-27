@@ -119,6 +119,8 @@
   "plainHttpServeTag": "HTTP + HTTPS",
   "optSniFromHost": "Usar o domínio acessado como SNI",
   "optSniFromHostHelp": "Só backends HTTPS: envia o domínio do visitante no handshake e valida o certificado com ele. Necessário quando o backend roteia por SNI (ex.: frp vhost_https); equivale a proxy_ssl_server_name on do nginx",
+  "optPassAuthCookies": "Encaminhar cookies de login do Gately",
+  "optPassAuthCookiesHelp": "O login fica a cargo do Gately do backend: este site não aplica autenticação e repassa sem alterações os cookies de login único e de sessão emitidos por esse Gately. Ative somente se o backend for o seu próprio Gately",
   "locations": "Backends por caminho",
   "locationTargetsPlaceholder": "Endereços do backend separados por vírgula; vazio usa os do site",
   "locationHeadersPlaceholder": "Cabeçalhos extras, um Key: Value por linha",

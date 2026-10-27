@@ -2279,6 +2279,9 @@
             },
             "type": "array"
           },
+          "passAuthCookies": {
+            "type": "boolean"
+          },
           "rateLimit": {
             "$ref": "#/components/schemas/webservice.RateLimit"
           },

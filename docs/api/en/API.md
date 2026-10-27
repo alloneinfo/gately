@@ -1615,6 +1615,7 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | `name` | string |
 | `notFoundPage` | string |
 | `oauthUsers` | Array of string |
+| `passAuthCookies` | boolean |
 | `rateLimit` | `webservice.RateLimit` |
 | `redirectCode` | integer |
 | `redirectTo` | string |

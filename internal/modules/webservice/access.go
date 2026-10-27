@@ -152,6 +152,10 @@ func (s *Site) validateAccess() error {
 		}
 	}
 	hasAuth := s.BasicAuth || s.WebAuth || strings.TrimSpace(s.ForwardAuth.URL) != ""
+	// 转发登录 Cookie 时认证交给后端 Gately，本站点再开认证会把本机签发的凭据交给后端
+	if s.PassAuthCookies && hasAuth {
+		return errors.New("转发 Gately 登录 Cookie 时本站点不能启用认证，认证由后端 Gately 负责")
+	}
 	if s.AuthOptional && !hasAuth {
 		return errors.New("仅对指定路径认证需要先启用基本认证、网页认证或转发认证")
 	}
