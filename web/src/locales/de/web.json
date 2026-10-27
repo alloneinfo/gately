@@ -160,5 +160,13 @@
   "moveGroupUp": "Gruppe nach oben",
   "moveGroupDown": "Gruppe nach unten",
   "defaultSiteLast": "Die Standard-Site steht immer am Ende",
-  "noMatchedSites": "Keine Sites entsprechen dem Filter"
+  "noMatchedSites": "Keine Sites entsprechen dem Filter",
+  "userRoutes": "Nach Benutzer verteilen",
+  "userRouteUsersPlaceholder": "Benutzer, durch Kommas getrennt",
+  "userRouteTargetsPlaceholder": "Backends für diese Benutzer, durch Kommas getrennt",
+  "addUserRoute": "Regel hinzufügen",
+  "userRoutesHelp": "Nach der Anmeldung wird jeder Benutzer an ein eigenes Backend geleitet. Nicht aufgeführte Benutzer und nicht angemeldete Besucher auf öffentlichen Pfaden nutzen die Backends der Site. Verwenden Sie den Namen des Site- oder gemeinsamen Benutzers, Anbieter-key:ID für Drittanbieter-Anmeldung oder den von der Weiterleitungsauthentifizierung gelieferten Remote-User. Pfadregeln mit eigenen Backends haben Vorrang; Pfadregeln, die nur Header hinzufügen, nutzen die Backends des Benutzers. Entspricht nginx map $remote_user $backend",
+  "userHeader": "Benutzernamen weitergeben",
+  "userHeaderHelp": "Nach der Anmeldung wird der Benutzername in diesem Request-Header an das Backend übergeben; derselbe Header vom Besucher wird entfernt. Leer lassen, um ihn nicht weiterzugeben",
+  "userRoutesTag": "{count} Benutzerregeln"
 }

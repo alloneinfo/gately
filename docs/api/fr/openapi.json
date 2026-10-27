@@ -2357,6 +2357,15 @@
           "useTargetHost": {
             "type": "boolean"
           },
+          "userHeader": {
+            "type": "string"
+          },
+          "userRoutes": {
+            "items": {
+              "$ref": "#/components/schemas/webservice.UserRoute"
+            },
+            "type": "array"
+          },
           "users": {
             "items": {
               "type": "string"
@@ -2437,6 +2446,23 @@
           },
           "weight": {
             "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "webservice.UserRoute": {
+        "properties": {
+          "targets": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "users": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
           }
         },
         "type": "object"

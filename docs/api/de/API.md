@@ -1635,6 +1635,8 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | `type` | string |
 | `upstreamSniFromHost` | boolean |
 | `useTargetHost` | boolean |
+| `userHeader` | string |
+| `userRoutes` | Array von `webservice.UserRoute` |
 | `users` | Array von string |
 | `waf` | string |
 | `webAuth` | boolean |
@@ -1666,6 +1668,13 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | `healthy` | boolean |
 | `url` | string |
 | `weight` | integer |
+
+### webservice.UserRoute
+
+| Feld | Typ |
+| --- | --- |
+| `targets` | Array von string |
+| `users` | Array von string |
 
 ### webservice.banRequest
 

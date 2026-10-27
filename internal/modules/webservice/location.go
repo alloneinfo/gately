@@ -21,7 +21,10 @@ type Location struct {
 
 // locationHandler 是编译后的分路径规则。
 type locationHandler struct {
-	prefix  string
+	prefix string
+	// headers 为该路径追加的请求头，按用户分流时为沿用站点后端的路径重建处理器
+	headers []string
+	// pool 为该路径自己的后端，沿用站点后端时为 nil
 	pool    *pool
 	handler http.Handler
 }
@@ -77,7 +80,7 @@ func (h *siteHandler) buildLocations() error {
 			}
 			p.site = siteLabel(h.site) + " " + loc.Prefix
 		}
-		lh := &locationHandler{prefix: loc.Prefix, handler: h.newProxy(s, p)}
+		lh := &locationHandler{prefix: loc.Prefix, headers: loc.RequestHeaders, handler: h.newProxy(s, p)}
 		if p != h.pool {
 			lh.pool = p
 		}
@@ -88,11 +91,11 @@ func (h *siteHandler) buildLocations() error {
 	return nil
 }
 
-// dispatchLocations 按路径前缀选择后端，未命中时交给站点默认的反向代理。
-func (h *siteHandler) dispatchLocations(fallback http.Handler) http.Handler {
+// dispatchLocations 按路径前缀在 locs 中选择后端，未命中时交给 fallback。
+func (h *siteHandler) dispatchLocations(locs []*locationHandler, fallback http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		p := cleanReqPath(r.URL.Path)
-		for _, l := range h.locations {
+		for _, l := range locs {
 			if prefixMatch(l.prefix, p) {
 				l.handler.ServeHTTP(w, r)
 				return

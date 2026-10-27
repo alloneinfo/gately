@@ -160,5 +160,13 @@
   "moveGroupUp": "分组上移",
   "moveGroupDown": "分组下移",
   "defaultSiteLast": "默认站点固定在最后",
-  "noMatchedSites": "没有符合筛选条件的站点"
+  "noMatchedSites": "没有符合筛选条件的站点",
+  "userRoutes": "按用户分流",
+  "userRouteUsersPlaceholder": "用户，多个用逗号分隔",
+  "userRouteTargetsPlaceholder": "这些用户的后端，多个用逗号分隔",
+  "addUserRoute": "添加分流规则",
+  "userRoutesHelp": "认证通过后按用户把请求分到不同后端，未列出的用户和公开路径上的未登录访客使用站点后端；用户名为站点用户或共享用户的用户名，第三方登录写 提供方key:标识，转发认证按认证服务返回的 Remote-User 匹配。填写了后端的分路径规则优先，只追加请求头的分路径规则改用该用户的后端。相当于 nginx 的 map $remote_user $backend",
+  "userHeader": "传递用户名",
+  "userHeaderHelp": "认证通过后把用户名写入该请求头传给后端，访客自带的同名请求头会被删除；留空不传递",
+  "userRoutesTag": "按用户分流 {count} 条"
 }

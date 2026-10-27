@@ -1635,6 +1635,8 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | `type` | string |
 | `upstreamSniFromHost` | boolean |
 | `useTargetHost` | boolean |
+| `userHeader` | string |
+| `userRoutes` | Array de `webservice.UserRoute` |
 | `users` | Array de string |
 | `waf` | string |
 | `webAuth` | boolean |
@@ -1666,6 +1668,13 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | `healthy` | boolean |
 | `url` | string |
 | `weight` | integer |
+
+### webservice.UserRoute
+
+| Campo | Tipo |
+| --- | --- |
+| `targets` | Array de string |
+| `users` | Array de string |
 
 ### webservice.banRequest
 

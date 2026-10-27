@@ -50,6 +50,8 @@ type siteHandler struct {
 	pool     *pool
 	// locations 为按路径前缀分流的子后端（最长前缀在前）
 	locations []*locationHandler
+	// userRoutes 为按认证用户分流的后端，顺序与配置一致
+	userRoutes []*userRouteHandler
 	// fwd 为外部转发认证，未启用时为 nil
 	fwd *forwardAuther
 	// idleClosers 关闭各反向代理的空闲后端连接，站点被替换时调用
@@ -128,7 +130,13 @@ func newSiteHandler(s Site, log *logbuf.Logger, auth *authenticator, waf WAFProv
 			if err := h.buildLocations(); err != nil {
 				return nil, err
 			}
-			h.handler = h.dispatchLocations(h.handler)
+			h.handler = h.dispatchLocations(h.locations, h.handler)
+		}
+		if len(s.UserRoutes) > 0 {
+			if err := h.buildUserRoutes(); err != nil {
+				return nil, err
+			}
+			h.handler = h.dispatchUserRoutes(h.handler)
 		}
 		if s.Cache.Enable {
 			h.cache = newRespCache(s.Cache)
@@ -185,6 +193,9 @@ func (h *siteHandler) startBackground(ctx context.Context) {
 		if l.pool != nil {
 			l.pool.startChecks(ctx)
 		}
+	}
+	for _, u := range h.userRoutes {
+		u.pool.startChecks(ctx)
 	}
 }
 
@@ -583,10 +594,13 @@ func (h *siteHandler) serveInner(rec http.ResponseWriter, r *http.Request) {
 		// 无论该路径是否需要认证，都不允许访客自带身份头
 		h.fwd.stripIdentity(r)
 	}
+	h.stripUserHeader(r)
 	// 跳转类重写不返回任何内容，先于认证执行，与 nginx 中 location = / { return 302 ...; } 不经认证的行为一致
 	if len(h.rewrites) > 0 && h.redirectBeforeAuth(rec, r) {
 		return
 	}
+	// names 为认证识别出的访客身份，用于按用户分流与传递用户名
+	var names []string
 	if h.needAuth(h.matchRule(r.URL.Path)) {
 		handled, allowed := h.tryShare(rec, r)
 		if handled {
@@ -597,10 +611,20 @@ func (h *siteHandler) serveInner(rec http.ResponseWriter, r *http.Request) {
 				if !h.fwd.check(rec, r, h) {
 					return
 				}
-			} else if !h.auth.check(rec, r, h.site) {
-				return
+				names = h.fwd.forwardIdentity(r)
+			} else {
+				var ok bool
+				if names, ok = h.auth.checkUser(rec, r, h.site); !ok {
+					return
+				}
 			}
 		}
+	} else if h.usesIdentity() && h.fwd == nil {
+		// 无需认证的路径上，已网页登录的访客仍按身份分流，同一应用的页面不会落到不同后端
+		names = h.auth.sessionIdentity(r, h.site)
+	}
+	if h.usesIdentity() {
+		r = h.withIdentity(r, names)
 	}
 	if len(h.rewrites) > 0 && h.applyRewrite(rec, r) {
 		return

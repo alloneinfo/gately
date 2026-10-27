@@ -1635,6 +1635,8 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | `type` | string |
 | `upstreamSniFromHost` | boolean |
 | `useTargetHost` | boolean |
+| `userHeader` | string |
+| `userRoutes` | Array of `webservice.UserRoute` |
 | `users` | Array of string |
 | `waf` | string |
 | `webAuth` | boolean |
@@ -1666,6 +1668,13 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | `healthy` | boolean |
 | `url` | string |
 | `weight` | integer |
+
+### webservice.UserRoute
+
+| Field | Type |
+| --- | --- |
+| `targets` | Array of string |
+| `users` | Array of string |
 
 ### webservice.banRequest
 

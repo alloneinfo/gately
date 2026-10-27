@@ -91,7 +91,12 @@ func requestCacheable(r *http.Request) bool {
 }
 
 func cacheKey(r *http.Request) string {
-	return r.Host + "|" + r.URL.RequestURI() + "|" + httpcompress.Negotiate(r.Header.Get("Accept-Encoding")) + "|" + r.Header.Get("Accept-Encoding")
+	key := r.Host + "|" + r.URL.RequestURI() + "|" + httpcompress.Negotiate(r.Header.Get("Accept-Encoding")) + "|" + r.Header.Get("Accept-Encoding")
+	// 按用户分流或传递用户名时，不同后端、不同用户的响应分开缓存
+	if id, ok := r.Context().Value(ctxKeyIdentity{}).(requestIdentity); ok {
+		key += "|" + id.cacheTag
+	}
+	return key
 }
 
 // freshness 根据响应头计算可缓存时长。ok 为 false 表示不可缓存。

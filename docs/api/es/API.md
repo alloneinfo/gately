@@ -1635,6 +1635,8 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | `type` | string |
 | `upstreamSniFromHost` | boolean |
 | `useTargetHost` | boolean |
+| `userHeader` | string |
+| `userRoutes` | Lista de `webservice.UserRoute` |
 | `users` | Lista de string |
 | `waf` | string |
 | `webAuth` | boolean |
@@ -1666,6 +1668,13 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | `healthy` | boolean |
 | `url` | string |
 | `weight` | integer |
+
+### webservice.UserRoute
+
+| Campo | Tipo |
+| --- | --- |
+| `targets` | Lista de string |
+| `users` | Lista de string |
 
 ### webservice.banRequest
 

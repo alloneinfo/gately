@@ -93,6 +93,7 @@
                 <el-tag v-else-if="item.row.site.basicAuth" size="small" type="warning">{{ t('web.basicAuthTag') }}</el-tag>
                 <el-tag v-else-if="item.row.site.forwardAuth?.url" size="small" type="warning">{{ t('web.forwardAuthTag') }}</el-tag>
                 <el-tag v-if="item.row.site.locations?.length" size="small" type="info">{{ t('web.locationsTag', { count: item.row.site.locations.length }) }}</el-tag>
+                <el-tag v-if="item.row.site.userRoutes?.length" size="small" type="info">{{ t('web.userRoutesTag', { count: item.row.site.userRoutes.length }) }}</el-tag>
                 <el-tag v-if="item.row.site.ipMode" size="small" type="info">{{ item.row.site.ipMode === 'whitelist' ? t('web.whitelist') : t('web.blacklist') }}</el-tag>
                 <el-tag v-if="item.row.site.sendProxyProtocol" size="small" type="info">PROXY v2</el-tag>
                 <el-tag v-if="downCount(l, item.row) > 0" size="small" type="danger">{{ t('web.upstreamsDown', { count: downCount(l, item.row) }) }}</el-tag>
@@ -326,6 +327,26 @@
               <el-input v-model="oauthUsersText" type="textarea" :rows="2" class="mono" :placeholder="t('web.oauthUsersPlaceholder')" />
               <div class="form-help">{{ t('web.providerHelp') }}</div>
             </el-form-item>
+            <!-- 按用户分流与传递用户名依赖认证结果，只在反向代理站点启用认证后显示 -->
+            <template v-if="site.type === 'proxy' && localAuthOn">
+              <el-form-item :label="t('web.userRoutes')">
+                <div class="locations">
+                  <div v-for="(ur, i) in site.userRoutes" :key="locKey(ur)" class="location">
+                    <div class="location-row">
+                      <ListInput v-model="ur.users" :split="splitCsv" separator=", " class="mono user-route-users" :placeholder="t('web.userRouteUsersPlaceholder')" />
+                      <ListInput v-model="ur.targets" :split="splitCsv" separator=", " class="mono location-targets" :placeholder="t('web.userRouteTargetsPlaceholder')" />
+                      <el-button text type="danger" :icon="Trash2" :aria-label="t('common.delete')" @click="site.userRoutes.splice(i, 1)" />
+                    </div>
+                  </div>
+                  <el-button size="small" :icon="Plus" @click="site.userRoutes.push({ users: [], targets: [] })">{{ t('web.addUserRoute') }}</el-button>
+                  <div class="form-help">{{ t('web.userRoutesHelp') }}</div>
+                </div>
+              </el-form-item>
+              <el-form-item :label="t('web.userHeader')">
+                <el-input v-model="site.userHeader" class="mono w-260" placeholder="X-Remote-User" />
+                <div class="form-help">{{ t('web.userHeaderHelp') }}</div>
+              </el-form-item>
+            </template>
             <el-form-item :label="t('web.ipAccess')">
               <el-radio-group v-model="site.ipMode">
                 <el-radio-button value="">{{ t('web.off') }}</el-radio-button>
@@ -478,6 +499,8 @@ interface Site {
   // 后端是负责认证的另一台 Gately 时，把 Gately 登录 Cookie 原样转发给它
   passAuthCookies: boolean
   locations: Location[]
+  userRoutes: UserRoute[]
+  userHeader: string
   redirectTo: string
   redirectCode: number
   keepPath: boolean
@@ -523,6 +546,12 @@ interface Location {
   prefix: string
   targets: string[] | null
   requestHeaders: string[] | null
+}
+
+// UserRoute 把列出的认证用户分到另一组后端
+interface UserRoute {
+  users: string[] | null
+  targets: string[] | null
 }
 
 interface Listener {
@@ -658,6 +687,8 @@ function emptySite(): Site {
     upstreamSniFromHost: false,
     passAuthCookies: false,
     locations: [],
+    userRoutes: [],
+    userHeader: '',
     redirectTo: '',
     redirectCode: 302,
     keepPath: true,
@@ -1054,6 +1085,8 @@ function openSite(l: ListenerView, row?: SiteRow) {
   draft.countries = draft.countries ?? []
   draft.rewrites = draft.rewrites ?? []
   draft.locations = draft.locations ?? []
+  draft.userRoutes = draft.userRoutes ?? []
+  draft.userHeader = draft.userHeader ?? ''
   draft.forwardAuth = Object.assign({ url: '', loginUrl: '', copyHeaders: [] }, draft.forwardAuth)
   forwardAuthOn.value = !!draft.forwardAuth.url
   // 旧配置没有这些对象，补全默认值后可直接编辑
@@ -1072,6 +1105,11 @@ async function saveSite() {
   }
   if (!forwardAuthOn.value) {
     site.value.forwardAuth = { url: '', loginUrl: '', copyHeaders: [] }
+  }
+  // 关闭认证或改为其他类型后，按用户分流不再显示，也不再生效，一并清空，避免保存时被隐藏的设置拦住
+  if (site.value.type !== 'proxy' || !localAuthOn.value) {
+    site.value.userRoutes = []
+    site.value.userHeader = ''
   }
   const l = plain(siteOwner)
   l.sites = l.sites ?? []
@@ -1227,6 +1265,10 @@ onMounted(async () => {
 }
 .location-prefix {
   width: 120px;
+  flex: none;
+}
+.user-route-users {
+  width: 200px;
   flex: none;
 }
 .location-targets {
@@ -1399,6 +1441,9 @@ onMounted(async () => {
 @media (max-width: 767.98px) {
   .site-filter {
     width: 160px;
+  }
+  .user-route-users {
+    width: 120px;
   }
   .site {
     grid-template-columns: auto minmax(0, 1fr) auto;

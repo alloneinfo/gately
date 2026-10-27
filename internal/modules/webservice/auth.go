@@ -215,30 +215,63 @@ func (a *authenticator) issueSession(w http.ResponseWriter, r *http.Request, s S
 
 // validCookie 校验会话 Cookie；用户被删除或密码修改后会话立即失效。
 func (a *authenticator) validCookie(r *http.Request, s Site) bool {
+	_, ok := a.cookieSession(r, s)
+	return ok
+}
+
+// cookieSession 返回站点会话 Cookie 中通过校验的会话。
+func (a *authenticator) cookieSession(r *http.Request, s Site) (*siteSession, bool) {
 	c, err := r.Cookie(cookieName(s))
 	if err != nil {
-		return false
+		return nil, false
 	}
 	var sess siteSession
 	if err := a.verifyBlob("session", c.Value, &sess); err != nil {
-		return false
+		return nil, false
 	}
 	if sess.Shared {
-		return s.SharedUsers && a.validShared(r, s, &sess)
+		return &sess, s.SharedUsers && a.validShared(r, s, &sess)
 	}
 	if sess.Host != hostOnly(r.Host) || sess.Scope != s.scope {
-		return false
+		return nil, false
 	}
 	for _, u := range s.Users {
 		if name, _, _ := strings.Cut(u, ":"); name == sess.User {
-			return sess.Cred != "" && hmac.Equal([]byte(sess.Cred), []byte(a.credVersion(s.Users, sess.User)))
+			return &sess, sess.Cred != "" && hmac.Equal([]byte(sess.Cred), []byte(a.credVersion(s.Users, sess.User)))
 		}
 	}
 	// 第三方登录的会话用户为 提供方:标识，允许列表变化后立即失效
 	if provider, id, ok := strings.Cut(sess.User, ":"); ok && sess.Cred == "" {
-		return identityAllowed(s, thirdauth.Identity{Provider: provider, Primary: id, Aliases: sess.Aliases})
+		return &sess, identityAllowed(s, thirdauth.Identity{Provider: provider, Primary: id, Aliases: sess.Aliases})
 	}
-	return false
+	return nil, false
+}
+
+// sessionNames 返回会话对应的身份标识：第一项为主标识（用户名或 提供方:标识），第三方登录另附 提供方:其他标识
+func sessionNames(sess *siteSession) []string {
+	names := []string{sess.User}
+	if provider, _, ok := strings.Cut(sess.User, ":"); ok && !sess.Shared && sess.Cred == "" {
+		for _, alias := range sess.Aliases {
+			names = append(names, provider+":"+alias)
+		}
+	}
+	return names
+}
+
+// sessionIdentity 只读取已登录的会话（站点 Cookie 或单点登录 Cookie），不要求登录，用于无需认证的路径识别用户
+func (a *authenticator) sessionIdentity(r *http.Request, s Site) []string {
+	if !s.WebAuth {
+		return nil
+	}
+	if sess, ok := a.cookieSession(r, s); ok {
+		return sessionNames(sess)
+	}
+	if s.SharedUsers {
+		if sess, ok := a.ssoSession(r, s); ok {
+			return sessionNames(sess)
+		}
+	}
+	return nil
 }
 
 // isBrowser 粗略判断是否为浏览器访问，非浏览器回退到基本认证（与 Lucky 行为一致）。
@@ -249,39 +282,50 @@ func isBrowser(r *http.Request) bool {
 
 // check 执行认证，返回 true 表示放行；否则已写出响应。
 func (a *authenticator) check(w http.ResponseWriter, r *http.Request, s Site) bool {
+	_, ok := a.checkUser(w, r, s)
+	return ok
+}
+
+// checkUser 与 check 相同，放行时同时返回访客的身份标识（见 sessionNames），基本认证为用户名。
+func (a *authenticator) checkUser(w http.ResponseWriter, r *http.Request, s Site) ([]string, bool) {
 	ip := clientAddr(r).Addr().String()
 	if s.WebAuth {
 		switch r.URL.Path {
 		case oauthStart:
 			a.handleOAuthStart(w, r, s, a.oauthEnv())
-			return false
+			return nil, false
 		case oauthFinish:
 			a.handleOAuthFinish(w, r, s)
-			return false
+			return nil, false
 		}
 		if strings.HasPrefix(r.URL.Path, authPath) {
 			a.handleLogin(w, r, s, ip)
-			return false
+			return nil, false
 		}
-		if a.validCookie(r, s) || (s.SharedUsers && a.validSSOCookie(r, s)) {
-			return true
+		if sess, ok := a.cookieSession(r, s); ok {
+			return sessionNames(sess), true
+		}
+		if s.SharedUsers {
+			if sess, ok := a.ssoSession(r, s); ok {
+				return sessionNames(sess), true
+			}
 		}
 		if isBrowser(r) {
 			target := authPath + "/login?next=" + url.QueryEscape(r.URL.RequestURI())
 			http.Redirect(w, r, target, http.StatusFound)
-			return false
+			return nil, false
 		}
 	}
 	// 基本认证（网页认证对非浏览器的回退）；只配置了第三方身份时非浏览器无法登录
 	if len(s.Users) == 0 && !s.SharedUsers {
 		http.Error(w, "401 Unauthorized", http.StatusUnauthorized)
-		return false
+		return nil, false
 	}
 	if name, pass, ok := r.BasicAuth(); ok {
 		key := limitKey(ip)
 		if !a.reserve(key) {
 			http.Error(w, "429 Too Many Requests", http.StatusTooManyRequests)
-			return false
+			return nil, false
 		}
 		valid := verifyUser(s.Users, name, pass)
 		if !valid && s.SharedUsers {
@@ -292,12 +336,12 @@ func (a *authenticator) check(w http.ResponseWriter, r *http.Request, s Site) bo
 		}
 		a.release(key, valid)
 		if valid {
-			return true
+			return []string{name}, true
 		}
 	}
 	w.Header().Set("WWW-Authenticate", `Basic realm="Gately", charset="UTF-8"`)
 	http.Error(w, "401 Unauthorized", http.StatusUnauthorized)
-	return false
+	return nil, false
 }
 
 // loginSrc 是网页认证登录页的主体（外壳与样式见 webpage 包）。设置了 Pending 时在登录卡片上弹出动态验证码对话框。

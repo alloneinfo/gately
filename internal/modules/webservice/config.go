@@ -67,6 +67,10 @@ type Site struct {
 	PassAuthCookies bool `json:"passAuthCookies"`
 	// Locations 为按路径前缀分到不同后端的规则，最长前缀优先，未命中时使用站点后端
 	Locations []Location `json:"locations"`
+	// UserRoutes 为按认证用户分到不同后端的规则，需启用认证，见 UserRoute
+	UserRoutes []UserRoute `json:"userRoutes"`
+	// UserHeader 非空时把认证用户名写入该请求头传给后端（如 X-Remote-User），访客自带的同名头会被删除
+	UserHeader string `json:"userHeader"`
 
 	// 重定向：RedirectTo 为目标地址前缀，可用 {host} 代表访客请求的域名；KeepPath 时附加原路径与查询串
 	RedirectTo   string `json:"redirectTo"`
@@ -410,6 +414,9 @@ func (s *Site) validate(isDefault bool) error {
 		return errors.New("转发认证不能与基本认证、网页认证同时启用")
 	}
 	if err := s.validateLocations(); err != nil {
+		return err
+	}
+	if err := s.validateUserRoutes(); err != nil {
 		return err
 	}
 	for _, u := range s.Users {

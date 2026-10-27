@@ -160,5 +160,13 @@
   "moveGroupUp": "Monter le groupe",
   "moveGroupDown": "Descendre le groupe",
   "defaultSiteLast": "Le site par défaut reste toujours en dernier",
-  "noMatchedSites": "Aucun site ne correspond au filtre"
+  "noMatchedSites": "Aucun site ne correspond au filtre",
+  "userRoutes": "Répartir par utilisateur",
+  "userRouteUsersPlaceholder": "Utilisateurs, séparés par des virgules",
+  "userRouteTargetsPlaceholder": "Backends de ces utilisateurs, séparés par des virgules",
+  "addUserRoute": "Ajouter une règle",
+  "userRoutesHelp": "Après connexion, chaque utilisateur est envoyé vers son propre backend. Les utilisateurs non listés et les visiteurs non connectés sur les chemins publics utilisent les backends du site. Indiquez le nom de l’utilisateur du site ou partagé, fournisseur-key:identifiant pour une connexion tierce, ou le Remote-User renvoyé par l’authentification déléguée. Les règles de chemin ayant leurs propres backends sont prioritaires ; celles qui ajoutent seulement des en-têtes utilisent les backends de l’utilisateur. Équivaut à map $remote_user $backend de nginx",
+  "userHeader": "Transmettre le nom d’utilisateur",
+  "userHeaderHelp": "Après connexion, le nom d’utilisateur est placé dans cet en-tête de requête pour le backend ; le même en-tête envoyé par le visiteur est supprimé. Laisser vide pour ne pas le transmettre",
+  "userRoutesTag": "{count} règles par utilisateur"
 }

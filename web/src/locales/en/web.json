@@ -160,5 +160,13 @@
   "moveGroupUp": "Move group up",
   "moveGroupDown": "Move group down",
   "defaultSiteLast": "The default site always comes last",
-  "noMatchedSites": "No sites match the filter"
+  "noMatchedSites": "No sites match the filter",
+  "userRoutes": "Route by user",
+  "userRouteUsersPlaceholder": "Users, separated by commas",
+  "userRouteTargetsPlaceholder": "Backends for these users, separated by commas",
+  "addUserRoute": "Add rule",
+  "userRoutesHelp": "After sign-in, send each user to a different backend. Users not listed, and visitors who are not signed in on public paths, use the site backends. Use the site user or shared user name, provider-key:id for third-party sign-in, or the Remote-User returned by forward auth. Path rules with their own backends take priority; path rules that only add headers use the user's backends. Like nginx map $remote_user $backend",
+  "userHeader": "Pass user name",
+  "userHeaderHelp": "After sign-in, put the user name in this request header for the backend; the same header sent by visitors is removed. Leave empty to not pass it",
+  "userRoutesTag": "{count} user routes"
 }

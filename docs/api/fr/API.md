@@ -1635,6 +1635,8 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | `type` | string |
 | `upstreamSniFromHost` | boolean |
 | `useTargetHost` | boolean |
+| `userHeader` | string |
+| `userRoutes` | Tableau de `webservice.UserRoute` |
 | `users` | Tableau de string |
 | `waf` | string |
 | `webAuth` | boolean |
@@ -1666,6 +1668,13 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | `healthy` | boolean |
 | `url` | string |
 | `weight` | integer |
+
+### webservice.UserRoute
+
+| Champ | Type |
+| --- | --- |
+| `targets` | Tableau de string |
+| `users` | Tableau de string |
 
 ### webservice.banRequest
 

@@ -219,15 +219,21 @@ func (a *authenticator) validShared(r *http.Request, s Site, sess *siteSession) 
 
 // validSSOCookie 检查单点登录 Cookie（站点开启共享用户时）。
 func (a *authenticator) validSSOCookie(r *http.Request, s Site) bool {
+	_, ok := a.ssoSession(r, s)
+	return ok
+}
+
+// ssoSession 返回单点登录 Cookie 中通过校验的共享用户会话。
+func (a *authenticator) ssoSession(r *http.Request, s Site) (*siteSession, bool) {
 	c, err := r.Cookie(ssoCookie)
 	if err != nil {
-		return false
+		return nil, false
 	}
 	var sess siteSession
 	if err := a.verifyBlob("session", c.Value, &sess); err != nil || !sess.Shared {
-		return false
+		return nil, false
 	}
-	return a.validShared(r, s, &sess)
+	return &sess, a.validShared(r, s, &sess)
 }
 
 // normalizeAuthUsers 校验共享用户并处理密码与 TOTP：明文密码哈希保存，脱敏占位符恢复旧值。

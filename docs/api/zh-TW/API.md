@@ -1635,6 +1635,8 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `type` | string |
 | `upstreamSniFromHost` | boolean |
 | `useTargetHost` | boolean |
+| `userHeader` | string |
+| `userRoutes` | 陣列 of `webservice.UserRoute` |
 | `users` | 陣列 of string |
 | `waf` | string |
 | `webAuth` | boolean |
@@ -1666,6 +1668,13 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | `healthy` | boolean |
 | `url` | string |
 | `weight` | integer |
+
+### webservice.UserRoute
+
+| 欄位 | 類型 |
+| --- | --- |
+| `targets` | 陣列 of string |
+| `users` | 陣列 of string |
 
 ### webservice.banRequest
 
