@@ -421,7 +421,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | POST | `/api/docker/prune` | `docker:write` | 사용하지 않는 Docker 리소스 정리 |
 | GET | `/api/docker/settings` | `docker:read` | Docker 모듈 설정 읽기 |
 | PUT | `/api/docker/settings` | `docker:write` | Docker 모듈 설정 저장 |
-| GET | `/api/docker/settings/secrets` | `docker:write` | 레지스트리 비밀번호 평문 보기(키는 registry:<레지스트리 주소>) |
+| GET | `/api/docker/settings/secrets` | `docker:write` | 레지스트리 비밀번호 평문 보기(키는 `registry:<레지스트리 주소>`) |
 | GET | `/api/docker/containers` | `docker:read` | 컨테이너 목록 조회 |
 | POST | `/api/docker/containers` | `docker:write` | 컨테이너 생성 |
 | POST | `/api/docker/containers/check-all` | `docker:write` | 모든 컨테이너 이미지 업데이트 확인 |

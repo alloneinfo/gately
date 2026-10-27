@@ -10949,7 +10949,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "레지스트리 비밀번호 평문 보기(키는 registry:\u003c레지스트리 주소\u003e)",
+        "summary": "레지스트리 비밀번호 평문 보기(키는 `registry:\u003c레지스트리 주소\u003e`)",
         "tags": [
           "Docker 관리"
         ],

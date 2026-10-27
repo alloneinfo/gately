@@ -421,7 +421,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | POST | `/api/docker/prune` | `docker:write` | Очистить неиспользуемые ресурсы Docker |
 | GET | `/api/docker/settings` | `docker:read` | Чтение настроек модуля Docker |
 | PUT | `/api/docker/settings` | `docker:write` | Сохранить настройки модуля Docker |
-| GET | `/api/docker/settings/secrets` | `docker:write` | Показать пароли реестров открытым текстом (ключи registry:<адрес реестра>) |
+| GET | `/api/docker/settings/secrets` | `docker:write` | Показать пароли реестров открытым текстом (ключи `registry:<адрес реестра>`) |
 | GET | `/api/docker/containers` | `docker:read` | Список контейнеров |
 | POST | `/api/docker/containers` | `docker:write` | Создать контейнер |
 | POST | `/api/docker/containers/check-all` | `docker:write` | Проверить обновления образов всех контейнеров |

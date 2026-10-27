@@ -10949,7 +10949,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Registry-Passwörter im Klartext anzeigen (Schlüssel registry:\u003cRegistry-Adresse\u003e)",
+        "summary": "Registry-Passwörter im Klartext anzeigen (Schlüssel `registry:\u003cRegistry-Adresse\u003e`)",
         "tags": [
           "Docker-Verwaltung"
         ],

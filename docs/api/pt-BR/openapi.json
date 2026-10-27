@@ -10949,7 +10949,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Ver senhas dos registros em texto puro (chaves registry:\u003cendereço do registro\u003e)",
+        "summary": "Ver senhas dos registros em texto puro (chaves `registry:\u003cendereço do registro\u003e`)",
         "tags": [
           "Gerenciamento do Docker"
         ],

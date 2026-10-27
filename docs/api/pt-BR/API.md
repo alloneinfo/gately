@@ -421,7 +421,7 @@ Curingas: `*:read` significa somente leitura em todos os módulos; `*:write` ou 
 | POST | `/api/docker/prune` | `docker:write` | Limpar recursos Docker não utilizados |
 | GET | `/api/docker/settings` | `docker:read` | Ler configurações do módulo Docker |
 | PUT | `/api/docker/settings` | `docker:write` | Salvar configurações do módulo Docker |
-| GET | `/api/docker/settings/secrets` | `docker:write` | Ver senhas dos registros em texto puro (chaves registry:<endereço do registro>) |
+| GET | `/api/docker/settings/secrets` | `docker:write` | Ver senhas dos registros em texto puro (chaves `registry:<endereço do registro>`) |
 | GET | `/api/docker/containers` | `docker:read` | Listar contêineres |
 | POST | `/api/docker/containers` | `docker:write` | Criar contêiner |
 | POST | `/api/docker/containers/check-all` | `docker:write` | Verificar atualizações de todas as imagens de contêineres |

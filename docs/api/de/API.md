@@ -421,7 +421,7 @@ Wildcard-Schreibweise: `*:read` bedeutet Lesezugriff auf alle Module, `*:write` 
 | POST | `/api/docker/prune` | `docker:write` | Ungenutzte Docker-Ressourcen bereinigen |
 | GET | `/api/docker/settings` | `docker:read` | Docker-Moduleinstellungen lesen |
 | PUT | `/api/docker/settings` | `docker:write` | Docker-Moduleinstellungen speichern |
-| GET | `/api/docker/settings/secrets` | `docker:write` | Registry-Passwörter im Klartext anzeigen (Schlüssel registry:<Registry-Adresse>) |
+| GET | `/api/docker/settings/secrets` | `docker:write` | Registry-Passwörter im Klartext anzeigen (Schlüssel `registry:<Registry-Adresse>`) |
 | GET | `/api/docker/containers` | `docker:read` | Container auflisten |
 | POST | `/api/docker/containers` | `docker:write` | Container erstellen |
 | POST | `/api/docker/containers/check-all` | `docker:write` | Alle Container-Images auf Updates prüfen |

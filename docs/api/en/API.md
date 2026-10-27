@@ -421,7 +421,7 @@ Wildcards: `*:read` means read-only access to all modules; `*:write` or `*` mean
 | POST | `/api/docker/prune` | `docker:write` | Clean up unused Docker resources |
 | GET | `/api/docker/settings` | `docker:read` | Read Docker module settings |
 | PUT | `/api/docker/settings` | `docker:write` | Save Docker module settings |
-| GET | `/api/docker/settings/secrets` | `docker:write` | View registry passwords in plain text (keys are registry:<registry address>) |
+| GET | `/api/docker/settings/secrets` | `docker:write` | View registry passwords in plain text (keys are `registry:<registry address>`) |
 | GET | `/api/docker/containers` | `docker:read` | List containers |
 | POST | `/api/docker/containers` | `docker:write` | Create a container |
 | POST | `/api/docker/containers/check-all` | `docker:write` | Check all containers for image updates |

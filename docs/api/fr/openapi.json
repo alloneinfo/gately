@@ -10949,7 +10949,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Afficher en clair les mots de passe des registres (clés registry:\u003cadresse du registre\u003e)",
+        "summary": "Afficher en clair les mots de passe des registres (clés `registry:\u003cadresse du registre\u003e`)",
         "tags": [
           "Gestion Docker"
         ],

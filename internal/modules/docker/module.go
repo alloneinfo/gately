@@ -147,7 +147,7 @@ func (m *Module) Routes(r module.Router) {
 	m.registerTaskRoutes(r.HandleFunc)
 	m.registerResourceRoutes(r.HandleFunc)
 	m.registerSystemRoutes(r.HandleFunc)
-	module.DocOf(r, "GET /settings/secrets", module.Doc{Summary: "查看仓库密码明文（键为 registry:<仓库地址>）", Resp: map[string]string{}})
+	module.DocOf(r, "GET /settings/secrets", module.Doc{Summary: "查看仓库密码明文（键为 `registry:<仓库地址>`）", Resp: map[string]string{}})
 	m.registerContainerRoutes(r.HandleFunc)
 	m.registerContainerFileRoutes(r.HandleFunc)
 	m.registerExecRoutes(r.HandleFunc)

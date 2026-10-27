@@ -10949,7 +10949,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "查看仓库密码明文（键为 registry:\u003c仓库地址\u003e）",
+        "summary": "查看仓库密码明文（键为 `registry:\u003c仓库地址\u003e`）",
         "tags": [
           "Docker 管理"
         ],

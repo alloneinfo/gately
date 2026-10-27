@@ -421,7 +421,7 @@ Comodines: `*:read` equivale a solo lectura en todos los módulos; `*:write` o `
 | POST | `/api/docker/prune` | `docker:write` | Limpiar recursos de Docker sin uso |
 | GET | `/api/docker/settings` | `docker:read` | Leer los ajustes del módulo Docker |
 | PUT | `/api/docker/settings` | `docker:write` | Guardar los ajustes del módulo Docker |
-| GET | `/api/docker/settings/secrets` | `docker:write` | Ver en texto plano las contraseñas de los registros (claves registry:<dirección del registro>) |
+| GET | `/api/docker/settings/secrets` | `docker:write` | Ver en texto plano las contraseñas de los registros (claves `registry:<dirección del registro>`) |
 | GET | `/api/docker/containers` | `docker:read` | Listar contenedores |
 | POST | `/api/docker/containers` | `docker:write` | Crear un contenedor |
 | POST | `/api/docker/containers/check-all` | `docker:write` | Comprobar actualizaciones de las imágenes de todos los contenedores |

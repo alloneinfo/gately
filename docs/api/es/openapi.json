@@ -10949,7 +10949,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Ver en texto plano las contraseñas de los registros (claves registry:\u003cdirección del registro\u003e)",
+        "summary": "Ver en texto plano las contraseñas de los registros (claves `registry:\u003cdirección del registro\u003e`)",
         "tags": [
           "Administración de Docker"
         ],

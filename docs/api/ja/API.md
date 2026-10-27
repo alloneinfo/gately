@@ -421,7 +421,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | POST | `/api/docker/prune` | `docker:write` | 不要な Docker リソースをクリーンアップ |
 | GET | `/api/docker/settings` | `docker:read` | Docker モジュール設定を読み取り |
 | PUT | `/api/docker/settings` | `docker:write` | Docker モジュールの設定を保存 |
-| GET | `/api/docker/settings/secrets` | `docker:write` | レジストリのパスワードを平文で表示（キーは registry:<レジストリアドレス>） |
+| GET | `/api/docker/settings/secrets` | `docker:write` | レジストリのパスワードを平文で表示（キーは `registry:<レジストリアドレス>`） |
 | GET | `/api/docker/containers` | `docker:read` | コンテナを一覧表示 |
 | POST | `/api/docker/containers` | `docker:write` | コンテナを作成 |
 | POST | `/api/docker/containers/check-all` | `docker:write` | すべてのコンテナイメージの更新を確認 |

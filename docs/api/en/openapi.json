@@ -10949,7 +10949,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "View registry passwords in plain text (keys are registry:\u003cregistry address\u003e)",
+        "summary": "View registry passwords in plain text (keys are `registry:\u003cregistry address\u003e`)",
         "tags": [
           "Docker management"
         ],

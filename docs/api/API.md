@@ -421,7 +421,7 @@ curl -X POST -H "Authorization: Bearer gtl_xxxx" http://localhost:16680/api/ddns
 | POST | `/api/docker/prune` | `docker:write` | 清理无用的 Docker 资源 |
 | GET | `/api/docker/settings` | `docker:read` | 读取 Docker 模块设置 |
 | PUT | `/api/docker/settings` | `docker:write` | 保存 Docker 模块设置 |
-| GET | `/api/docker/settings/secrets` | `docker:write` | 查看仓库密码明文（键为 registry:<仓库地址>） |
+| GET | `/api/docker/settings/secrets` | `docker:write` | 查看仓库密码明文（键为 `registry:<仓库地址>`） |
 | GET | `/api/docker/containers` | `docker:read` | 列出容器 |
 | POST | `/api/docker/containers` | `docker:write` | 创建容器 |
 | POST | `/api/docker/containers/check-all` | `docker:write` | 检查全部容器镜像更新 |

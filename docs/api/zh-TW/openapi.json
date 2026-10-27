@@ -10949,7 +10949,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "查看倉庫密碼明文（鍵為 registry:\u003c倉庫位址\u003e）",
+        "summary": "查看倉庫密碼明文（鍵為 `registry:\u003c倉庫位址\u003e`）",
         "tags": [
           "Docker 管理"
         ],

@@ -1440,7 +1440,7 @@
   "查看 File Browser 下载安装进度": "Ver o progresso da instalação do File Browser",
   "查看 Tailscale 连接状态": "Ver o estado da conexão do Tailscale",
   "查看两步验证状态": "Ver o estado da verificação em duas etapas",
-  "查看仓库密码明文（键为 registry:\u003c仓库地址\u003e）": "Ver senhas dos registros em texto puro (chaves registry:\u003cendereço do registro\u003e)",
+  "查看仓库密码明文（键为 `registry:\u003c仓库地址\u003e`）": "Ver senhas dos registros em texto puro (chaves `registry:\u003cendereço do registro\u003e`)",
   "查看共享用户密码明文": "Ver senhas dos usuários compartilhados em texto puro",
   "查看共享用户的 TOTP 密钥明文（按用户名索引）": "Ver segredos TOTP dos usuários compartilhados em texto puro (por nome de usuário)",
   "查看后台任务进度与输出": "Ver progresso e saída das tarefas em segundo plano",

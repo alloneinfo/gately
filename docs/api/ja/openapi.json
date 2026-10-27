@@ -10949,7 +10949,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "レジストリのパスワードを平文で表示（キーは registry:\u003cレジストリアドレス\u003e）",
+        "summary": "レジストリのパスワードを平文で表示（キーは `registry:\u003cレジストリアドレス\u003e`）",
         "tags": [
           "Docker 管理"
         ],

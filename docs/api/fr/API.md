@@ -421,7 +421,7 @@ Syntaxe générique : `*:read` désigne la lecture seule sur tous les modules, `
 | POST | `/api/docker/prune` | `docker:write` | Nettoyer les ressources Docker inutiles |
 | GET | `/api/docker/settings` | `docker:read` | Lire les paramètres du module Docker |
 | PUT | `/api/docker/settings` | `docker:write` | Enregistrer les paramètres du module Docker |
-| GET | `/api/docker/settings/secrets` | `docker:write` | Afficher en clair les mots de passe des registres (clés registry:<adresse du registre>) |
+| GET | `/api/docker/settings/secrets` | `docker:write` | Afficher en clair les mots de passe des registres (clés `registry:<adresse du registre>`) |
 | GET | `/api/docker/containers` | `docker:read` | Lister les conteneurs |
 | POST | `/api/docker/containers` | `docker:write` | Créer un conteneur |
 | POST | `/api/docker/containers/check-all` | `docker:write` | Vérifier les mises à jour de toutes les images de conteneurs |
