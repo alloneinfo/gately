@@ -34,7 +34,7 @@
   "dnsProvider": "Proveedor de DNS",
   "secretPlaceholder": "Un secreto guardado se muestra como ********",
   "zone": "Dominio raíz",
-  "zonePlaceholder": "Déjalo vacío para detectarlo automáticamente; rellénalo si se detecta mal un sufijo de varios niveles, p. ej. example.com.cn",
+  "zonePlaceholder": "Déjalo vacío para buscar por DNS la zona del registro de validación; un subdominio alojado en otro proveedor se detecta automáticamente, o indícala, p. ej. web.example.com",
   "resolvers": "DNS para comprobaciones",
   "resolversPlaceholder": "Opcional, p. ej. 223.5.5.5:53, 1.1.1.1:53",
   "propagationTimeout": "Espera de propagación (s)",

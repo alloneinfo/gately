@@ -63,8 +63,27 @@ func (s *dnsSolver) locate(domain, keyAuth string) (zone, sub, value string, err
 		}
 		return s.zone, sub, info.Value, nil
 	}
+	// 未指定主域名时先按 SOA 查询验证记录所在的权威区域，能正确处理单独托管的子域名（NS 委派）与多级后缀；
+	// 查询失败（例如域名尚未生效）时退回按域名段数推断
+	if z, err := findZone(fqdn); err == nil {
+		if sub, ok := dnsprovider.SubForZone(fqdn, z); ok && sub != "@" {
+			return z, sub, info.Value, nil
+		}
+	} else if s.log != nil {
+		s.log.Warnf("查询 %s 的权威区域失败，按域名推断主域名: %v", fqdn, err)
+	}
 	sub, zone = dnsprovider.SplitFQDN(fqdn)
 	return zone, sub, info.Value, nil
+}
+
+// findZone 返回 fqdn 所在的权威区域（不带末尾的点），测试中可替换。
+// lego 会缓存 SOA 结果，同一次签发的添加与清理不会重复查询；查询使用设置的 DNS 服务器
+var findZone = func(fqdn string) (string, error) {
+	z, err := dns01.FindZoneByFqdn(dns01.ToFqdn(fqdn))
+	if err != nil {
+		return "", err
+	}
+	return strings.ToLower(strings.TrimSuffix(z, ".")), nil
 }
 
 func (s *dnsSolver) Present(domain, _, keyAuth string) error {

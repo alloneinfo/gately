@@ -34,7 +34,7 @@
   "dnsProvider": "DNS-Anbieter",
   "secretPlaceholder": "Ein gespeichertes Geheimnis wird als ******** angezeigt",
   "zone": "Hauptdomain",
-  "zonePlaceholder": "Leer lassen für automatische Erkennung; ausfüllen, wenn ein mehrstufiges Suffix falsch erkannt wird, z. B. example.com.cn",
+  "zonePlaceholder": "Leer lassen, um die Zone des Prüfeintrags per DNS zu ermitteln; eine bei einem anderen Anbieter gehostete Subdomain wird automatisch erkannt, oder hier eintragen, z. B. web.example.com",
   "resolvers": "DNS für Prüfungen",
   "resolversPlaceholder": "Optional, z. B. 223.5.5.5:53, 1.1.1.1:53",
   "propagationTimeout": "Wartezeit für Verbreitung (s)",

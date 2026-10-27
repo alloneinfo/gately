@@ -1456,6 +1456,7 @@
   "查看设备在线状态": "Consulter l'état en ligne des appareils",
   "查看镜像详情": "Consulter les détails d'une image",
   "查询 %s %s（经 %s）": "Interrogation de %s %s (via %s)",
+  "查询 %s 的权威区域失败，按域名推断主域名: %v": "Échec de la recherche de la zone faisant autorité pour %s, zone déduite du nom de domaine : %v",
   "查询操作审计日志": "Consulter le journal d'audit",
   "校验终端两步验证码": "Vérifier le code d'authentification à deux facteurs du terminal",
   "根目录已存在": "La racine existe déjà",

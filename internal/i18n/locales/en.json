@@ -1456,6 +1456,7 @@
   "查看设备在线状态": "View device online status",
   "查看镜像详情": "View image details",
   "查询 %s %s（经 %s）": "Query %s %s (via %s)",
+  "查询 %s 的权威区域失败，按域名推断主域名: %v": "Failed to look up the authoritative zone of %s, inferring the zone from the domain name: %v",
   "查询操作审计日志": "Query the audit log",
   "校验终端两步验证码": "Verify a terminal two-factor code",
   "根目录已存在": "Root directory already exists",

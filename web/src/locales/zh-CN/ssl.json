@@ -34,7 +34,7 @@
   "dnsProvider": "DNS 服务商",
   "secretPlaceholder": "已保存的密钥显示为 ********",
   "zone": "主域名",
-  "zonePlaceholder": "留空自动推断；多级后缀推断错误时填写，例如 example.com.cn",
+  "zonePlaceholder": "留空时按 DNS 查询验证记录所在的区域；子域名单独托管在另一个服务商时会自动识别，也可直接填写，例如 web.example.com",
   "resolvers": "检查用 DNS",
   "resolversPlaceholder": "可选，例如 223.5.5.5:53, 1.1.1.1:53",
   "propagationTimeout": "生效等待(秒)",

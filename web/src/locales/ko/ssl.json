@@ -34,7 +34,7 @@
   "dnsProvider": "DNS 제공업체",
   "secretPlaceholder": "저장된 키는 ********로 표시됩니다",
   "zone": "기본 도메인",
-  "zonePlaceholder": "비워 두면 자동 추정합니다. 다단계 접미사를 잘못 추정하면 직접 입력하세요. 예: example.com.cn",
+  "zonePlaceholder": "비워 두면 검증 레코드가 속한 영역을 DNS로 조회합니다. 하위 도메인을 다른 제공업체에서 호스팅해도 자동으로 인식하며, 직접 입력할 수도 있습니다. 예: web.example.com",
   "resolvers": "확인용 DNS",
   "resolversPlaceholder": "선택 사항. 예: 223.5.5.5:53, 1.1.1.1:53",
   "propagationTimeout": "전파 대기(초)",

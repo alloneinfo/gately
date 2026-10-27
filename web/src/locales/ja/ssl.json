@@ -34,7 +34,7 @@
   "dnsProvider": "DNS プロバイダー",
   "secretPlaceholder": "保存済みのシークレットは ******** と表示されます",
   "zone": "ドメイン",
-  "zonePlaceholder": "空欄で自動推定。マルチレベルのサフィックスで推定が誤る場合に入力（例: example.com.cn）",
+  "zonePlaceholder": "空欄の場合は検証レコードが属するゾーンを DNS で調べます。サブドメインを別のプロバイダーで管理している場合も自動で判別します。直接入力も可（例: web.example.com）",
   "resolvers": "確認用 DNS",
   "resolversPlaceholder": "任意。例: 223.5.5.5:53, 1.1.1.1:53",
   "propagationTimeout": "反映待ち時間(秒)",

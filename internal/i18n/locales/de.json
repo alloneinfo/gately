@@ -1456,6 +1456,7 @@
   "查看设备在线状态": "Online-Status eines Geräts anzeigen",
   "查看镜像详情": "Image-Details anzeigen",
   "查询 %s %s（经 %s）": "Abfrage %s %s (über %s)",
+  "查询 %s 的权威区域失败，按域名推断主域名: %v": "Autoritative Zone von %s konnte nicht ermittelt werden, Zone wird aus dem Domainnamen abgeleitet: %v",
   "查询操作审计日志": "Audit-Protokoll abfragen",
   "校验终端两步验证码": "Code der Zwei-Faktor-Authentifizierung des Terminals prüfen",
   "根目录已存在": "Stammverzeichnis existiert bereits",

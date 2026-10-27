@@ -34,7 +34,7 @@
   "dnsProvider": "DNS provider",
   "secretPlaceholder": "A saved secret is shown as ********",
   "zone": "Root domain",
-  "zonePlaceholder": "Leave empty to detect automatically; fill in if a multi-level suffix is detected wrongly, e.g. example.com.cn",
+  "zonePlaceholder": "Leave empty to look up the zone of the validation record in DNS; a subdomain hosted at another provider is detected automatically, or fill it in, e.g. web.example.com",
   "resolvers": "DNS for checks",
   "resolversPlaceholder": "Optional, e.g. 223.5.5.5:53, 1.1.1.1:53",
   "propagationTimeout": "Propagation wait (s)",

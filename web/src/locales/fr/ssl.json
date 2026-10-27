@@ -34,7 +34,7 @@
   "dnsProvider": "Fournisseur DNS",
   "secretPlaceholder": "Un secret enregistré s'affiche sous la forme ********",
   "zone": "Domaine racine",
-  "zonePlaceholder": "Laisser vide pour la détection automatique ; à renseigner si un suffixe à plusieurs niveaux est mal détecté, p. ex. example.com.cn",
+  "zonePlaceholder": "Laisser vide pour rechercher la zone de l’enregistrement de validation via DNS ; un sous-domaine hébergé chez un autre fournisseur est détecté automatiquement, ou indiquez-la, p. ex. web.example.com",
   "resolvers": "DNS de vérification",
   "resolversPlaceholder": "Facultatif, p. ex. 223.5.5.5:53, 1.1.1.1:53",
   "propagationTimeout": "Attente de propagation (s)",

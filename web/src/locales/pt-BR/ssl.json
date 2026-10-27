@@ -34,7 +34,7 @@
   "dnsProvider": "Provedor DNS",
   "secretPlaceholder": "Um segredo salvo aparece como ********",
   "zone": "Domínio raiz",
-  "zonePlaceholder": "Deixe em branco para detectar automaticamente; preencha se um sufixo de vários níveis for detectado incorretamente, ex.: example.com.cn",
+  "zonePlaceholder": "Deixe em branco para consultar por DNS a zona do registro de validação; um subdomínio hospedado em outro provedor é detectado automaticamente, ou preencha, ex.: web.example.com",
   "resolvers": "DNS para verificações",
   "resolversPlaceholder": "Opcional, ex.: 223.5.5.5:53, 1.1.1.1:53",
   "propagationTimeout": "Espera de propagação (s)",
